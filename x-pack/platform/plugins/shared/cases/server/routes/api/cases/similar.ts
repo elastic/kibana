@@ -10,10 +10,12 @@ import { INTERNAL_CASE_SIMILAR_CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const similarCaseRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_CASE_SIMILAR_CASES_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

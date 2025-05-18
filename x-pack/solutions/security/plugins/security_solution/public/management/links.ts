@@ -24,7 +24,7 @@ import {
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
   SecurityPageName,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
@@ -42,7 +42,6 @@ import {
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
-import { cloudDefendLink } from '../cloud_defend/links';
 import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
@@ -58,7 +57,7 @@ import { IconAssetCriticality } from '../common/icons/asset_criticality';
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
-      defaultMessage: 'Entity Analytics',
+      defaultMessage: 'Entity analytics',
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
@@ -80,12 +79,6 @@ const categories = [
     ],
   },
   {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
-      defaultMessage: 'Cloud Security',
-    }),
-    linkIds: [SecurityPageName.cloudDefendPolicies],
-  },
-  {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
       defaultMessage: 'Investigations',
     }),
@@ -99,8 +92,8 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 11,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  globalNavPosition: 12,
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
@@ -183,13 +176,13 @@ export const links: LinkItem = {
       id: SecurityPageName.entityAnalyticsManagement,
       title: ENTITY_ANALYTICS_RISK_SCORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: 'Monitor user and host risk scores, and track anomalies.',
+        defaultMessage: "Monitor entities' risk scores, and track anomalies.",
       }),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
@@ -197,13 +190,13 @@ export const links: LinkItem = {
       id: SecurityPageName.entityAnalyticsEntityStoreManagement,
       title: ENTITY_STORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
-        defaultMessage: 'Store host and user entities observed in events.',
+        defaultMessage: 'Store data for entities observed in events.',
       }),
       landingIcon: IconAssetCriticality,
       path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -216,7 +209,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
-    cloudDefendLink,
     notesLink,
   ],
 };
@@ -261,7 +253,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
-    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadActionsLogManagement) {

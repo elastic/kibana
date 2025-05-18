@@ -25,7 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { CodeEditor, CssLang } from '@kbn/code-editor';
+import { CodeEditor, CSS_LANG_ID } from '@kbn/code-editor';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
@@ -260,7 +260,7 @@ export class MarkdownPanelConfig extends Component<
             <EuiSpacer size="s" />
             <CodeEditor
               height="500px"
-              languageId={CssLang}
+              languageId={CSS_LANG_ID}
               options={{ fontSize: 14 }}
               value={model.markdown_css ?? ''}
               onChange={this.handleCSSChange}

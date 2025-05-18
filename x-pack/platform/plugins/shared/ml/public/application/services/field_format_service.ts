@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import type { MlJobService } from './job_service';
 import type { MlIndexUtils } from '../util/index_service';
 import type { MlApi } from './ml_api_service';
 
-type FormatsByJobId = Record<string, any>;
+type FormatsByJobId = Record<string, FieldFormat[]>;
 type IndexPatternIdsByJob = Record<string, any>;
 
 // Service for accessing FieldFormat objects configured for a Kibana data view
@@ -71,7 +72,7 @@ export class FieldFormatService {
       return this.formatsByJob;
     } catch (error) {
       console.log('Error populating field formats:', error); // eslint-disable-line no-console
-      return { formats: {}, error };
+      return { formats: {} as FieldFormat[], error };
     }
   }
 
@@ -83,7 +84,7 @@ export class FieldFormatService {
     }
   }
 
-  async getFormatsForJob(jobId: string): Promise<any[]> {
+  async getFormatsForJob(jobId: string): Promise<FieldFormat[]> {
     let jobObj;
     if (this.mlApi) {
       const { jobs } = await this.mlApi.getJobs({ jobId });
@@ -92,7 +93,7 @@ export class FieldFormatService {
       jobObj = this.mlJobService.getJob(jobId);
     }
     const detectors = jobObj.analysis_config.detectors || [];
-    const formatsByDetector: any[] = [];
+    const formatsByDetector: FieldFormat[] = [];
 
     const dataViewId = this.indexPatternIdsByJob[jobId];
     if (dataViewId !== undefined) {

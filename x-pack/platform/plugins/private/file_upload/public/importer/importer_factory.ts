@@ -8,7 +8,7 @@
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
 import { TikaImporter } from './tika_importer';
-import { ImportFactoryOptions } from './types';
+import type { ImportFactoryOptions } from './types';
 import { FILE_FORMATS } from '../../common/constants';
 
 export function importerFactory(format: string, options: ImportFactoryOptions) {

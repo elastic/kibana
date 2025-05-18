@@ -6,12 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getSystemActionKibanaPrivileges } from '../connector_adapters/get_system_action_kibana_privileges';
 import { bulkValidateConnectorAdapterActionParams } from '../connector_adapters/validate_rule_action_params';
-import { NormalizedSystemAction } from '../rules_client';
-import { RuleSystemAction } from '../types';
+import type { NormalizedSystemAction } from '../rules_client';
+import type { RuleSystemAction } from '../types';
 interface Params {
   actionsClient: ActionsClient;
   actionsAuthorization: ActionsAuthorization;

@@ -6,7 +6,7 @@
  */
 
 import { applyBulkEditOperation } from './apply_bulk_edit_operation';
-import { Rule } from '../../types';
+import type { Rule } from '../../types';
 
 describe('applyBulkEditOperation', () => {
   describe('tags operations', () => {

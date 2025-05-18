@@ -42,10 +42,8 @@ export async function validateDatafeedPreview(
   try {
     const body = (await mlClient.previewDatafeed(
       {
-        body: {
-          job_config: tempJob,
-          datafeed_config: datafeed,
-        },
+        job_config: tempJob,
+        datafeed_config: datafeed,
         start,
         end,
       },

@@ -12,14 +12,23 @@ Object {
     },
     "filter": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "test.category": "test",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "test.category": "test",
+                  },
+                },
+              ],
             },
           },
         ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
       },
     },
   },
@@ -94,14 +103,23 @@ Object {
   "_A": Object {
     "filter": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "test.category": "test",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "test.category": "test",
+                  },
+                },
+              ],
             },
           },
         ],
+        "must": Array [],
+        "must_not": Array [],
+        "should": Array [],
       },
     },
   },

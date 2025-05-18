@@ -20,14 +20,12 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';
-import { getVizColorForIndex } from '../../../../common/viz_colors';
 import type { APMConfig } from '../../..';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface TransactionBreakdownResponse {
   timeseries: Array<{
     title: string;
-    color: string;
     type: string;
     data: Array<{ x: number; y: number | null }>;
     hideLegend: boolean;
@@ -109,24 +107,22 @@ export async function getTransactionBreakdown({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: filters,
       },
-      aggs: {
-        ...subAggs,
-        by_date: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs: subAggs,
-        },
+    },
+    aggs: {
+      ...subAggs,
+      by_date: {
+        date_histogram: getMetricsDateHistogramParams({
+          start,
+          end,
+          metricsInterval: config.metricsInterval,
+        }),
+        aggs: subAggs,
       },
     },
   };
@@ -176,7 +172,6 @@ export async function getTransactionBreakdown({
     const { lowerCaseName, ...rest } = kpi;
     return {
       ...rest,
-      color: getVizColorForIndex(index),
     };
   });
 
@@ -232,7 +227,6 @@ export async function getTransactionBreakdown({
 
   const timeseries = kpis.map((kpi) => ({
     title: kpi.name,
-    color: kpi.color,
     type: 'areaStacked',
     data: timeseriesPerSubtype[kpi.name],
     hideLegend: false,

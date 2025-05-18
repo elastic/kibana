@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// @ts-check
 const path = require('path');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
+
+/**
+ * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
+ */
 
 const getWorkerEntry = (language) => {
   switch (language) {
@@ -16,21 +22,30 @@ const getWorkerEntry = (language) => {
     case 'json':
       return 'monaco-editor/esm/vs/language/json/json.worker.js';
     default:
-      return path.resolve(__dirname, 'src', language, 'worker', `${language}.worker.ts`);
+      return path.resolve(
+        __dirname,
+        'src',
+        'languages',
+        language,
+        'worker',
+        `${language}.worker.ts`
+      );
   }
 };
 
 /**
- * @param {string[]} languages - list of supported languages to build workers for
+ * @param {WorkerType} languages
  * @returns {import('webpack').Configuration}
  */
 const workerConfig = (languages) => ({
+  // @ts-expect-error we are unable to type NODE_ENV
   mode: process.env.NODE_ENV || 'development',
   entry: languages.reduce((entries, language) => {
     entries[language] = getWorkerEntry(language);
     return entries;
   }, {}),
-  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
+  target: 'web',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
     filename: ({ chunk }) => `${chunk.name}.editor.worker.js`,
@@ -42,6 +57,7 @@ const workerConfig = (languages) => ({
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
     },
   },
+  plugins: [new NodeLibsBrowserPlugin()],
   stats: 'errors-only',
   module: {
     rules: [
@@ -88,4 +104,4 @@ const workerConfig = (languages) => ({
   },
 });
 
-module.exports = workerConfig(['default', 'json', 'painless', 'xjson', 'esql', 'yaml', 'console']);
+module.exports = workerConfig(['default', 'json', 'xjson', 'painless', 'yaml', 'console']);

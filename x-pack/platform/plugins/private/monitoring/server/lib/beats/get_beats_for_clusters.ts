@@ -51,15 +51,13 @@ export function getBeatsForClusters(req: LegacyRequest, clusters: Cluster[], ccs
         size: 0,
         ignore_unavailable: true,
         filter_path: beatsAggFilterPath,
-        body: {
-          query: createBeatsQuery({
-            start,
-            end,
-            clusterUuid,
-            metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
-          }),
-          aggs: beatsUuidsAgg(maxBucketSize),
-        },
+        query: createBeatsQuery({
+          start,
+          end,
+          clusterUuid,
+          metric: BeatsClusterMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+        }),
+        aggs: beatsUuidsAgg(maxBucketSize),
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

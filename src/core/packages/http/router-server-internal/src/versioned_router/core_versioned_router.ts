@@ -14,20 +14,24 @@ import type {
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { omit } from 'lodash';
+import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method } from './types';
-import { getRouteFullPath, type Router } from '../router';
+import type { Router } from '../router';
+import { getRouteFullPath } from '../util';
 
 /** @internal */
 export interface VersionedRouterArgs {
   router: Router;
+  log: Logger;
   /**
    * Which route resolution algo to use.
    * @note default to "oldest", but when running in dev default to "none"
    */
   defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
   /** Whether Kibana is running in a dev environment */
-  isDev?: boolean;
+  env: Env;
   /**
    * List of internal paths that should use the default handler resolution strategy. By default this
    * is no routes ([]) because ONLY Elastic clients are intended to call internal routes.
@@ -52,21 +56,24 @@ export class CoreVersionedRouter implements VersionedRouter {
   public pluginId?: symbol;
   public static from({
     router,
+    log,
     defaultHandlerResolutionStrategy,
-    isDev,
+    env,
     useVersionResolutionStrategyForInternalPaths,
   }: VersionedRouterArgs) {
     return new CoreVersionedRouter(
       router,
+      log,
       defaultHandlerResolutionStrategy,
-      isDev,
+      env,
       useVersionResolutionStrategyForInternalPaths
     );
   }
   private constructor(
     public readonly router: Router,
+    private readonly log: Logger,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
-    public readonly isDev: boolean = false,
+    public readonly env: Env,
     useVersionResolutionStrategyForInternalPaths: string[] = []
   ) {
     this.pluginId = this.router.pluginId;
@@ -80,6 +87,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
       const route = CoreVersionedRoute.from({
         router: this.router,
+        log: this.log,
         method: routeMethod,
         path: options.path,
         options: {
@@ -87,7 +95,7 @@ export class CoreVersionedRouter implements VersionedRouter {
           defaultHandlerResolutionStrategy: this.defaultHandlerResolutionStrategy,
           useVersionResolutionStrategyForInternalPaths:
             this.useVersionResolutionStrategyForInternalPaths,
-          isDev: this.isDev,
+          env: this.env,
         },
       });
       this.routes.add(route);

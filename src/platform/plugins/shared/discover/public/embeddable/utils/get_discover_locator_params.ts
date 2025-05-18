@@ -9,8 +9,8 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { PublishesSavedObjectId, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { DiscoverAppLocatorParams } from '../../../common';
-import { PublishesSavedSearch } from '../types';
+import type { DiscoverAppLocatorParams } from '../../../common';
+import type { PublishesSavedSearch } from '../types';
 
 export const getDiscoverLocatorParams = (
   api: PublishesSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>
@@ -18,7 +18,7 @@ export const getDiscoverLocatorParams = (
   const savedSearch = api.savedSearch$.getValue();
 
   const dataView = savedSearch?.searchSource.getField('index');
-  const savedObjectId = api.savedObjectId?.getValue();
+  const savedObjectId = api.savedObjectId$?.getValue();
   const locatorParams: DiscoverAppLocatorParams = savedObjectId
     ? { savedSearchId: savedObjectId }
     : {

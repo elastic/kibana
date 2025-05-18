@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash';
 import {
   ALERT_HOST_CRITICALITY,
+  ALERT_SERVICE_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../../common/field_maps/field_names';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
@@ -29,7 +30,10 @@ const getExtraFiltersForEnrichment = (field: string) => [
 
 const createEnrichmentFactoryFunction =
   (
-    alertField: typeof ALERT_HOST_CRITICALITY | typeof ALERT_USER_CRITICALITY
+    alertField:
+      | typeof ALERT_HOST_CRITICALITY
+      | typeof ALERT_USER_CRITICALITY
+      | typeof ALERT_SERVICE_CRITICALITY
   ): CreateEnrichmentFunction =>
   (enrichment) =>
   (event) => {
@@ -86,5 +90,27 @@ export const createUserAssetCriticalityEnrichments: CreateCriticalityEnrichment 
     enrichmentResponseFields,
     extraFilters: getExtraFiltersForEnrichment('user.name'),
     createEnrichmentFunction: createEnrichmentFactoryFunction(ALERT_USER_CRITICALITY),
+  });
+};
+
+export const createServiceAssetCriticalityEnrichments: CreateCriticalityEnrichment = async ({
+  services,
+  logger,
+  events,
+  spaceId,
+}) => {
+  return createSingleFieldMatchEnrichment({
+    name: 'Service Asset Criticality',
+    index: [getAssetCriticalityIndex(spaceId)],
+    services,
+    logger,
+    events,
+    mappingField: {
+      eventField: 'service.name',
+      enrichmentField: 'id_value',
+    },
+    enrichmentResponseFields,
+    extraFilters: getExtraFiltersForEnrichment('service.name'),
+    createEnrichmentFunction: createEnrichmentFactoryFunction(ALERT_SERVICE_CRITICALITY),
   });
 };

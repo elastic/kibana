@@ -17,6 +17,12 @@ export function setCollectionEnabledRoute(server: MonitoringCore) {
   server.route({
     method: 'put',
     path: '/api/monitoring/v1/elasticsearch_settings/set/collection_enabled',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {},
     options: {
       access: 'internal',

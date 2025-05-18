@@ -8,17 +8,17 @@
 import { Observable } from 'rxjs';
 import {
   DatasetQualityDetailsControllerStateService,
-  DegradedFieldsTableConfig,
+  QualityIssuesTableConfig,
   WithDefaultControllerState,
 } from '../../state_machines/dataset_quality_details_controller';
 
-type DegradedFieldTableSortOptions = Omit<DegradedFieldsTableConfig['table']['sort'], 'field'> & {
+type QuaityIssuesTableSortOptions = Omit<QualityIssuesTableConfig['table']['sort'], 'field'> & {
   field: string;
 };
 
-export type DatasetQualityDegradedFieldTableOptions = Partial<
-  Omit<DegradedFieldsTableConfig['table'], 'sort'> & {
-    sort?: DegradedFieldTableSortOptions;
+export type DatasetQualityIssuesTableOptions = Partial<
+  Omit<QualityIssuesTableConfig['table'], 'sort'> & {
+    sort?: QuaityIssuesTableSortOptions;
   }
 >;
 
@@ -30,13 +30,17 @@ export type DatasetQualityDetailsPublicState = WithDefaultControllerState;
 export type DatasetQualityDetailsPublicStateUpdate = Partial<
   Pick<
     WithDefaultControllerState,
-    'timeRange' | 'breakdownField' | 'expandedDegradedField' | 'showCurrentQualityIssues'
+    | 'timeRange'
+    | 'breakdownField'
+    | 'showCurrentQualityIssues'
+    | 'expandedQualityIssue'
+    | 'qualityIssuesChart'
   >
 > & {
   dataStream: string;
 } & {
-  degradedFields?: {
-    table?: DatasetQualityDegradedFieldTableOptions;
+  qualityIssues?: {
+    table?: DatasetQualityIssuesTableOptions;
   };
 };
 

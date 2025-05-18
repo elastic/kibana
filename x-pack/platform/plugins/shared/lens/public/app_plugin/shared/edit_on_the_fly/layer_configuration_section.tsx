@@ -15,6 +15,7 @@ import { useLensDispatch, updateIndexPatterns } from '../../../state_management'
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
 import { useLensSelector } from '../../../state_management';
+import { ConfigPanelWrapperProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
 
 export function LayerConfiguration({
   attributes,
@@ -28,6 +29,15 @@ export function LayerConfiguration({
   setIsInlineFlyoutVisible,
   getUserMessages,
   onlyAllowSwitchToSubtypes,
+  lensAdapters,
+  dataLoading$,
+  setCurrentAttributes,
+  updateSuggestion,
+  parentApi,
+  panelId,
+  closeFlyout,
+  canEditTextBasedQuery,
+  editorContainer,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -50,7 +60,10 @@ export function LayerConfiguration({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const layerPanelsProps = {
+  const layerPanelsProps: ConfigPanelWrapperProps = {
+    attributes,
+    lensAdapters,
+    dataLoading$,
     framePublicAPI,
     datasourceMap,
     visualizationMap,
@@ -63,6 +76,14 @@ export function LayerConfiguration({
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,
+    data: startDependencies.data,
+    setCurrentAttributes,
+    updateSuggestion,
+    parentApi,
+    panelId,
+    closeFlyout,
+    canEditTextBasedQuery,
+    editorContainer,
   };
   return (
     <div

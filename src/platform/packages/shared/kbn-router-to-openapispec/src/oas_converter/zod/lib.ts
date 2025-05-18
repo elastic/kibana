@@ -8,7 +8,7 @@
  */
 
 import { z, isZod } from '@kbn/zod';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import { isPassThroughAny } from '@kbn/zod-helpers';
 import zodToJsonSchema from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
@@ -48,16 +48,58 @@ const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid 
   );
 };
 
-const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return unwrapZodType(type.unwrap(), unwrapPreprocess);
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return unwrapZodType(type.removeDefault(), unwrapPreprocess);
-  }
+const unwrapZodLazy = (type: z.ZodTypeAny): z.ZodTypeAny => {
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodType(type._def.getter(), unwrapPreprocess);
+    return unwrapZodLazy(type._def.getter());
   }
+  return type;
+};
+
+const unwrapZodOptionalDefault = (
+  type: z.ZodTypeAny
+): {
+  description: z.ZodTypeAny['description'];
+  defaultValue: unknown;
+  isOptional: boolean;
+  innerType: z.ZodTypeAny;
+} => {
+  let description: z.ZodTypeAny['description']; // To track the outer description if exists
+  let defaultValue: unknown;
+  let isOptional = false;
+  let innerType = type;
+
+  while (
+    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional) ||
+    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)
+  ) {
+    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional)) {
+      isOptional = innerType.isOptional();
+      description = !description ? innerType.description : description;
+      innerType = innerType.unwrap();
+    }
+    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)) {
+      defaultValue = innerType._def.defaultValue();
+      description = !description ? innerType.description : description;
+      innerType = innerType.removeDefault();
+    }
+  }
+
+  return { description, defaultValue, isOptional, innerType };
+};
+
+const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
+    return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
+  }
+
+  if (
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional) ||
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)
+  ) {
+    const { innerType } = unwrapZodOptionalDefault(type);
+    return unwrapZodType(innerType, unwrapPreprocess);
+  }
+
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
     if (type._def.effect.type === 'refinement') {
       return unwrapZodType(type._def.schema, unwrapPreprocess);
@@ -89,37 +131,6 @@ type ZodTypeLikeString =
   | z.ZodEnum<[string, ...string[]]>
   | z.ZodNativeEnum<NativeEnumType>;
 
-const instanceofZodTypeLikeString = (_type: z.ZodTypeAny): _type is ZodTypeLikeString => {
-  const type = unwrapZodType(_type, false);
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'preprocess') {
-      return true;
-    }
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
-    return !type._def.options.some((option) => !instanceofZodTypeLikeString(option));
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
-    return instanceofZodTypeLikeString(type._def.type);
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
-    return (
-      instanceofZodTypeLikeString(type._def.left) && instanceofZodTypeLikeString(type._def.right)
-    );
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
-    return typeof type._def.value === 'string';
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
-    return true;
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
-    return !Object.values(type._def.values).some((value) => typeof value === 'number');
-  }
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
-};
-
 const zodSupportsCoerce = 'coerce' in z;
 
 type ZodTypeCoercible = z.ZodNumber | z.ZodBoolean | z.ZodBigInt | z.ZodDate;
@@ -134,18 +145,65 @@ const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoerci
   );
 };
 
+const instanceofZodTypeLikeString = (
+  _type: z.ZodTypeAny,
+  allowMixedUnion: boolean
+): _type is ZodTypeLikeString => {
+  const type = unwrapZodType(_type, false);
+
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
+    if (type._def.effect.type === 'preprocess') {
+      return true;
+    }
+  }
+
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
+    return !type._def.options.some(
+      (option) =>
+        !instanceofZodTypeLikeString(option, allowMixedUnion) &&
+        !(allowMixedUnion && instanceofZodTypeCoercible(option))
+    );
+  }
+
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
+    return instanceofZodTypeLikeString(type._def.type, allowMixedUnion);
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
+    return (
+      instanceofZodTypeLikeString(type._def.left, allowMixedUnion) &&
+      instanceofZodTypeLikeString(type._def.right, allowMixedUnion)
+    );
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
+    return typeof type._def.value === 'string';
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
+    return true;
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
+    return !Object.values(type._def.values).some((value) => typeof value === 'number');
+  }
+  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
+};
+
 const convertObjectMembersToParameterObjects = (
   shape: z.ZodRawShape,
-  isRequired: boolean,
   isPathParameter = false,
   knownParameters: KnownParameters = {}
 ): OpenAPIV3.ParameterObject[] => {
   return Object.entries(shape).map(([shapeKey, subShape]) => {
-    const isSubShapeRequired = !subShape.isOptional();
+    const typeWithoutLazy = unwrapZodLazy(subShape);
+    const {
+      description: outerDescription,
+      isOptional,
+      defaultValue,
+      innerType: typeWithoutOptionalDefault,
+    } = unwrapZodOptionalDefault(typeWithoutLazy);
 
-    if (!instanceofZodTypeLikeString(subShape)) {
+    // Except for path parameters, OpenAPI supports mixed unions with `anyOf` e.g. for query parameters
+    if (!instanceofZodTypeLikeString(typeWithoutOptionalDefault, !isPathParameter)) {
       if (zodSupportsCoerce) {
-        if (!instanceofZodTypeCoercible(subShape)) {
+        if (!instanceofZodTypeCoercible(typeWithoutOptionalDefault)) {
           throw createError(
             `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
           );
@@ -156,29 +214,49 @@ const convertObjectMembersToParameterObjects = (
     }
 
     const {
-      schema: { description, ...openApiSchemaObject },
-    } = convert(subShape);
+      schema: { description: schemaDescription, ...openApiSchemaObject },
+    } = convert(typeWithoutOptionalDefault);
+
+    if (typeof defaultValue !== 'undefined') {
+      openApiSchemaObject.default = defaultValue;
+    }
 
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !knownParameters[shapeKey]?.optional : isSubShapeRequired,
+      required: isPathParameter ? !knownParameters[shapeKey]?.optional : !isOptional,
       schema: openApiSchemaObject,
-      description,
+      description: outerDescription || schemaDescription,
     };
   });
+};
+
+// Returns a z.ZodRawShape to passes through all known parameters with z.any
+const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter = false) => {
+  const passThroughShape: z.ZodRawShape = {};
+  for (const [key, { optional }] of Object.entries(knownParameters)) {
+    passThroughShape[key] = optional && !isPathParameter ? z.string().optional() : z.string();
+  }
+  return passThroughShape;
 };
 
 export const convertQuery = (schema: unknown) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
+
+  if (isPassThroughAny(unwrappedSchema)) {
+    return {
+      query: convertObjectMembersToParameterObjects(getPassThroughShape({}, false), true),
+      shared: {},
+    };
+  }
+
   if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw createError('Query schema must be an _object_ schema validator!');
   }
   const shape = unwrappedSchema.shape;
-  const isRequired = !schema.isOptional();
   return {
-    query: convertObjectMembersToParameterObjects(shape, isRequired),
+    query: convertObjectMembersToParameterObjects(shape, false),
     shared: {},
   };
 };
@@ -188,18 +266,29 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   const unwrappedSchema = unwrapZodType(schema, true);
   const paramKeys = Object.keys(knownParameters);
   const paramsCount = paramKeys.length;
+
   if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
     return { params: [], shared: {} };
   }
+
+  if (isPassThroughAny(unwrappedSchema)) {
+    return {
+      params: convertObjectMembersToParameterObjects(
+        getPassThroughShape(knownParameters, true),
+        true
+      ),
+      shared: {},
+    };
+  }
+
   if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw createError('Parameters schema must be an _object_ schema validator!');
   }
   const shape = unwrappedSchema.shape;
   const schemaKeys = Object.keys(shape);
   validatePathParameters(paramKeys, schemaKeys);
-  const isRequired = !schema.isOptional();
   return {
-    params: convertObjectMembersToParameterObjects(shape, isRequired, true),
+    params: convertObjectMembersToParameterObjects(shape, true),
     shared: {},
   };
 };

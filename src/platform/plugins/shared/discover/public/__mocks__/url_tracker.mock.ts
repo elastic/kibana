@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UrlTracker } from '../build_services';
+import type { UrlTracker } from '../build_services';
 
-export const urlTrackerMock = {
-  setTrackedUrl: jest.fn(),
-  restorePreviousUrl: jest.fn(),
-  setTrackingEnabled: jest.fn(),
-} as UrlTracker;
+export const createUrlTrackerMock = () =>
+  ({
+    setTrackedUrl: jest.fn(),
+    restorePreviousUrl: jest.fn(),
+    setTrackingEnabled: jest.fn(),
+  } as UrlTracker);

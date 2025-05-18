@@ -14,5 +14,12 @@ jest.doMock('../kibana_services', () => ({
     addBasePath: (path: string) => `root${path}`,
     trackUiMetric: () => {},
     welcomeService: welcomeServiceMock.create(),
+    theme: {
+      getTheme: () => {
+        return {
+          theme$: jest.fn(),
+        };
+      },
+    },
   }),
 }));

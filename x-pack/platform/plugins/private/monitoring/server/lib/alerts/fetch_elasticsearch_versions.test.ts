@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -75,33 +75,31 @@ describe('fetchElasticsearchVersions', () => {
         'hits.hits._source.cluster_uuid',
         'hits.hits._source.elasticsearch.cluster.id',
       ],
-      body: {
-        size: 1,
-        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['cluster123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'cluster_stats' } },
-                    { term: { 'metricset.name': 'cluster_stats' } },
-                    {
-                      term: {
-                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
-                      },
+      size: 1,
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['cluster123'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'cluster_stats' } },
+                  { term: { 'metricset.name': 'cluster_stats' } },
+                  {
+                    term: {
+                      'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-2m' } } },
+          ],
         },
-        collapse: { field: 'cluster_uuid' },
       },
+      collapse: { field: 'cluster_uuid' },
     });
   });
   it('should call ES with correct query when ccs disabled', async () => {

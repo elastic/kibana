@@ -6,11 +6,4 @@
  */
 
 export { MockRouter } from './router.mock';
-export {
-  mockConfig,
-  mockLogger,
-  mockRequestHandler,
-  mockDependencies,
-} from './routerDependencies.mock';
-
-export { mockHttpAgent } from './http_agent.mock';
+export { mockConfig, mockLogger, mockDependencies } from './routerDependencies.mock';

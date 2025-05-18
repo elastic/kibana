@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type {
   RuleMigrationResourceData,
   RuleMigrationTaskStats,
@@ -94,6 +95,7 @@ const END = 10 as const;
 type SubStep = 1 | 2 | typeof END;
 export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps>(
   ({ migrationStats, missingLookups, onAllLookupsCreated }) => {
+    const { telemetry } = useKibana().services.siemMigrations.rules;
     const [subStep, setSubStep] = useState<SubStep>(1);
     const [uploadedLookups, setUploadedLookups] = useState<UploadedLookups>({});
 
@@ -114,7 +116,9 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-    }, []);
+      telemetry.reportSetupLookupNameCopied({ migrationId: migrationStats.id });
+    }, [telemetry, migrationStats.id]);
+
     const copyStep = useMissingLookupsListStep({
       status: getStatus(1, subStep),
       migrationStats,

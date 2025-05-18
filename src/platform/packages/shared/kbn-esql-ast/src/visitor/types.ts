@@ -53,6 +53,7 @@ export type VisitorOutput<
  */
 export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
   | VisitorInput<Methods, 'visitExpression'> &
+      VisitorInput<Methods, 'visitQuery'> &
       VisitorInput<Methods, 'visitColumnExpression'> &
       VisitorInput<Methods, 'visitSourceExpression'> &
       VisitorInput<Methods, 'visitFunctionCallExpression'> &
@@ -62,7 +63,9 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitInlineCastExpression'> &
       VisitorInput<Methods, 'visitRenameExpression'> &
       VisitorInput<Methods, 'visitOrderExpression'> &
-      VisitorInput<Methods, 'visitIdentifierExpression'>
+      VisitorInput<Methods, 'visitIdentifierExpression'> &
+      VisitorInput<Methods, 'visitMapExpression'> &
+      VisitorInput<Methods, 'visitMapEntryExpression'>
 >;
 
 /**
@@ -70,6 +73,7 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
  */
 export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitExpression'>
+  | VisitorOutput<Methods, 'visitQuery'>
   | VisitorOutput<Methods, 'visitColumnExpression'>
   | VisitorOutput<Methods, 'visitSourceExpression'>
   | VisitorOutput<Methods, 'visitFunctionCallExpression'>
@@ -79,7 +83,9 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
   | VisitorOutput<Methods, 'visitRenameExpression'>
   | VisitorOutput<Methods, 'visitOrderExpression'>
-  | VisitorOutput<Methods, 'visitIdentifierExpression'>;
+  | VisitorOutput<Methods, 'visitIdentifierExpression'>
+  | VisitorOutput<Methods, 'visitMapExpression'>
+  | VisitorOutput<Methods, 'visitMapEntryExpression'>;
 
 /**
  * Input that satisfies any command visitor input constraints.
@@ -90,7 +96,7 @@ export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitLimitCommand'> &
       VisitorInput<Methods, 'visitExplainCommand'> &
       VisitorInput<Methods, 'visitRowCommand'> &
-      VisitorInput<Methods, 'visitMetricsCommand'> &
+      VisitorInput<Methods, 'visitTimeseriesCommand'> &
       VisitorInput<Methods, 'visitShowCommand'> &
       VisitorInput<Methods, 'visitMetaCommand'> &
       VisitorInput<Methods, 'visitEvalCommand'> &
@@ -106,7 +112,8 @@ export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitGrokCommand'> &
       VisitorInput<Methods, 'visitEnrichCommand'> &
       VisitorInput<Methods, 'visitMvExpandCommand'> &
-      VisitorInput<Methods, 'visitJoinCommand'>
+      VisitorInput<Methods, 'visitJoinCommand'> &
+      VisitorInput<Methods, 'visitChangePointCommand'>
 >;
 
 /**
@@ -118,7 +125,7 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitLimitCommand'>
   | VisitorOutput<Methods, 'visitExplainCommand'>
   | VisitorOutput<Methods, 'visitRowCommand'>
-  | VisitorOutput<Methods, 'visitMetricsCommand'>
+  | VisitorOutput<Methods, 'visitTimeseriesCommand'>
   | VisitorOutput<Methods, 'visitShowCommand'>
   | VisitorOutput<Methods, 'visitMetaCommand'>
   | VisitorOutput<Methods, 'visitEvalCommand'>
@@ -134,7 +141,8 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitGrokCommand'>
   | VisitorOutput<Methods, 'visitEnrichCommand'>
   | VisitorOutput<Methods, 'visitMvExpandCommand'>
-  | VisitorOutput<Methods, 'visitJoinCommand'>;
+  | VisitorOutput<Methods, 'visitJoinCommand'>
+  | VisitorOutput<Methods, 'visitChangePointCommand'>;
 
 export interface VisitorMethods<
   Visitors extends VisitorMethods = any,
@@ -146,7 +154,11 @@ export interface VisitorMethods<
   visitLimitCommand?: Visitor<contexts.LimitCommandVisitorContext<Visitors, Data>, any, any>;
   visitExplainCommand?: Visitor<contexts.ExplainCommandVisitorContext<Visitors, Data>, any, any>;
   visitRowCommand?: Visitor<contexts.RowCommandVisitorContext<Visitors, Data>, any, any>;
-  visitMetricsCommand?: Visitor<contexts.MetricsCommandVisitorContext<Visitors, Data>, any, any>;
+  visitTimeseriesCommand?: Visitor<
+    contexts.TimeseriesCommandVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
   visitShowCommand?: Visitor<contexts.ShowCommandVisitorContext<Visitors, Data>, any, any>;
   visitMetaCommand?: Visitor<contexts.MetaCommandVisitorContext<Visitors, Data>, any, any>;
   visitEvalCommand?: Visitor<contexts.EvalCommandVisitorContext<Visitors, Data>, any, any>;
@@ -167,6 +179,12 @@ export interface VisitorMethods<
   visitEnrichCommand?: Visitor<contexts.EnrichCommandVisitorContext<Visitors, Data>, any, any>;
   visitMvExpandCommand?: Visitor<contexts.MvExpandCommandVisitorContext<Visitors, Data>, any, any>;
   visitJoinCommand?: Visitor<contexts.JoinCommandVisitorContext<Visitors, Data>, any, any>;
+  visitChangePointCommand?: Visitor<
+    contexts.ChangePointCommandVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
+  visitForkCommand?: Visitor<contexts.ForkCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
@@ -215,6 +233,12 @@ export interface VisitorMethods<
     any,
     any
   >;
+  visitMapExpression?: Visitor<contexts.MapExpressionVisitorContext<Visitors, Data>, any, any>;
+  visitMapEntryExpression?: Visitor<
+    contexts.MapEntryExpressionVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
 }
 
 /**
@@ -242,6 +266,10 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitInlineCastExpression'
   : Node extends ast.ESQLIdentifier
   ? 'visitIdentifierExpression'
+  : Node extends ast.ESQLMap
+  ? 'visitMapExpression'
+  : Node extends ast.ESQLMapEntry
+  ? 'visitMapEntryExpression'
   : never;
 
 /**

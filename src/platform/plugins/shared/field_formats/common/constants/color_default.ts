@@ -8,7 +8,7 @@
  */
 
 export const DEFAULT_CONVERTER_COLOR = {
-  range: `${Number.NEGATIVE_INFINITY}:${Number.POSITIVE_INFINITY}`,
+  range: `min:max`,
   regex: '<insert regex>',
   text: '#000000',
   background: '#ffffff',

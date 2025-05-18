@@ -5,17 +5,18 @@
  * 2.0.
  */
 import { useCallback } from 'react';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common/app_locator';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search_context';
-
 export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
   const { discoverDataview } = useUnifiedSearchContext();
   const { dataView } = discoverDataview;
-  const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const getDiscoverEntitiesRedirectUrl = useCallback(() => {
     const entityKqlFilter = entity
@@ -24,14 +25,14 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
         })
       : '';
 
-    return application.capabilities.discover?.show || !dataView
+    return application.capabilities.discover_v2?.show
       ? discoverLocator?.getRedirectUrl({
-          dataViewId: dataView?.id ?? '',
+          dataViewSpec: dataView?.toMinimalSpec?.(),
           query: { query: entityKqlFilter, language: 'kuery' },
         })
       : undefined;
   }, [
-    application.capabilities.discover?.show,
+    application.capabilities.discover_v2?.show,
     dataView,
     discoverLocator,
     entity,

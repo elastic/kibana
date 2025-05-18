@@ -50,9 +50,9 @@ export enum SORT_ORDERS {
   DESCENDING = 'desc',
 }
 
-export const DEFAULT_SEARCH_PAGE_SIZE: number = 10;
+export const DEFAULT_SEARCH_PAGE_SIZE = 10;
 
-export const DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE: number = 25;
+export const DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE = 25;
 
 export const DEFAULT_RULE_INTERVAL = '1m';
 

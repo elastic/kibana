@@ -7,13 +7,13 @@
 
 import { adHocRunStatus } from '../../../common/constants';
 import { parseDuration } from '../../../common';
-import { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
+import type { AdHocRunSchedule } from '../../data/ad_hoc_run/types';
 
-export function calculateSchedule(
+const getScheduleFromInterval = (
   start: string,
   interval: string,
   end?: string
-): AdHocRunSchedule[] {
+): AdHocRunSchedule[] => {
   const schedule: AdHocRunSchedule[] = [];
   const intervalInMs = parseDuration(interval);
 
@@ -27,4 +27,13 @@ export function calculateSchedule(
   } while (end && currentEnd && currentEnd.valueOf() < new Date(end).valueOf());
 
   return schedule;
+};
+
+export function calculateSchedule(
+  interval: string,
+  ranges: Array<{ start: string; end: string }>
+): AdHocRunSchedule[] {
+  return ranges.flatMap((range) => {
+    return getScheduleFromInterval(range.start, interval, range.end);
+  });
 }

@@ -10,12 +10,17 @@ import React from 'react';
 
 import { Summary } from '.';
 
+jest.mock('../../../../common/lib/kibana');
+
 describe('Summary', () => {
   const defaultProps = {
     alertsCount: 20,
     attackDiscoveriesCount: 5,
     lastUpdated: new Date(),
     onToggleShowAnonymized: jest.fn(),
+    selectedAttackDiscoveries: {},
+    selectedConnectorAttackDiscoveries: [],
+    setSelectedAttackDiscoveries: jest.fn(),
     showAnonymized: false,
   };
 

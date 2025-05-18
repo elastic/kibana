@@ -8,20 +8,14 @@
  */
 
 import React from 'react';
-import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
-import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { render, waitFor } from '@testing-library/react';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-import { AnalyticsNoDataPageKibanaProvider } from '@kbn/shared-ux-page-analytics-no-data';
 import { hasESData, hasUserDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
 jest.mock('@kbn/shared-ux-page-kibana-template', () => {
-  const MockedComponent: string = 'MockedKibanaPageTemplate';
+  const MockedComponent = () => 'MockedKibanaPageTemplate';
   const mockedModule = {
     ...jest.requireActual('@kbn/shared-ux-page-kibana-template'),
     KibanaPageTemplate: () => {
@@ -32,7 +26,7 @@ jest.mock('@kbn/shared-ux-page-kibana-template', () => {
 });
 
 jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
-  const MockedComponent: string = 'MockedAnalyticsNoDataPage';
+  const MockedComponent = () => 'MockedAnalyticsNoDataPage';
   return {
     ...jest.requireActual('@kbn/shared-ux-page-analytics-no-data'),
     AnalyticsNoDataPageKibanaProvider: () => {
@@ -150,15 +144,6 @@ const mockFeatures = [
   },
 ];
 
-const flushPromises = async () => await setTimeoutP(10);
-
-const updateComponent = async (component: ReactWrapper) => {
-  await act(async () => {
-    await flushPromises();
-    component.update();
-  });
-};
-
 describe('Overview', () => {
   beforeEach(() => {
     hasESData.mockResolvedValue(true);
@@ -168,7 +153,7 @@ describe('Overview', () => {
   afterAll(() => jest.clearAllMocks());
 
   test('renders correctly', async () => {
-    const component = mountWithIntl(
+    const { getByText } = render(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
@@ -176,37 +161,36 @@ describe('Overview', () => {
       />
     );
 
-    await updateComponent(component);
-
-    expect(component).toMatchSnapshot();
-    expect(component.find(KibanaPageTemplate).length).toBe(1);
+    await waitFor(() => {
+      expect(getByText('MockedKibanaPageTemplate')).toBeInTheDocument();
+    });
   });
 
   test('renders correctly without solutions', async () => {
-    const component = mountWithIntl(
+    const { getByText } = render(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
     );
 
-    await updateComponent(component);
-
-    expect(component).toMatchSnapshot();
+    await waitFor(() => {
+      expect(getByText('MockedKibanaPageTemplate')).toBeInTheDocument();
+    });
   });
 
   test('renders correctly without features', async () => {
-    const component = mountWithIntl(
+    const { getByText } = render(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
     );
 
-    await updateComponent(component);
-
-    expect(component).toMatchSnapshot();
+    await waitFor(() => {
+      expect(getByText('MockedKibanaPageTemplate')).toBeInTheDocument();
+    });
   });
 
   test('renders correctly when there is no user data view', async () => {
     hasESData.mockResolvedValue(true);
     hasUserDataView.mockResolvedValue(false);
 
-    const component = mountWithIntl(
+    const { getByText, queryByText, queryByLabelText } = render(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
@@ -214,19 +198,19 @@ describe('Overview', () => {
       />
     );
 
-    await updateComponent(component);
+    await waitFor(() => {
+      expect(getByText('MockedAnalyticsNoDataPage')).toBeInTheDocument();
+    });
 
-    expect(component).toMatchSnapshot();
-    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(1);
-    expect(component.find(KibanaPageTemplate).length).toBe(0);
-    expect(component.find(EuiLoadingSpinner).length).toBe(0);
+    expect(queryByText('MockedKibanaPageTemplate')).not.toBeInTheDocument();
+    expect(queryByLabelText('Loading')).not.toBeInTheDocument();
   });
 
   test('show loading spinner during loading', async () => {
     hasESData.mockImplementation(() => new Promise(() => {}));
     hasUserDataView.mockImplementation(() => new Promise(() => {}));
 
-    const component = mountWithIntl(
+    const { getByLabelText, queryByText } = render(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
@@ -234,11 +218,11 @@ describe('Overview', () => {
       />
     );
 
-    await updateComponent(component);
+    await waitFor(() => {
+      expect(getByLabelText('Loading')).toBeInTheDocument();
+    });
 
-    expect(component.render()).toMatchSnapshot();
-    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(0);
-    expect(component.find(KibanaPageTemplate).length).toBe(0);
-    expect(component.find(EuiLoadingSpinner).length).toBe(1);
+    expect(queryByText('MockedAnalyticsNoDataPage')).not.toBeInTheDocument();
+    expect(queryByText('MockedKibanaPageTemplate')).not.toBeInTheDocument();
   });
 });

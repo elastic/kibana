@@ -6,9 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import './index.scss';
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
@@ -117,3 +114,5 @@ export {
   parseExpression,
   createDefaultInspectorAdapters,
 } from '../common';
+
+export { isSourceParamsESQL } from '../common/expression_types';

@@ -16,7 +16,7 @@ import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { CodeEditor, HJsonLang } from '@kbn/code-editor';
+import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
@@ -56,7 +56,7 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
     try {
       JSON.parse(stateParams.spec);
     } catch {
-      specLang = HJsonLang;
+      specLang = HJSON_LANG_ID;
     }
     setLanguageId(specLang);
   });
@@ -88,7 +88,7 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
     });
 
     if (isValid) {
-      setSpec(value, HJsonLang);
+      setSpec(value, HJSON_LANG_ID);
     }
   }, [setSpec, stateParams.spec]);
 

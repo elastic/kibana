@@ -25,6 +25,13 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
+// Mock the usePerformanceContext hook
+jest.mock('@kbn/ebt-tools', () => ({
+  usePerformanceContext: () => ({
+    onPageReady: jest.fn(),
+  }),
+}));
+
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },

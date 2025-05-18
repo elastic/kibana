@@ -42,3 +42,13 @@ export function getRootIntegrations(
     (pkg) => pkg!.name
   ).map((pkg) => ({ name: pkg!.name, title: pkg!.title }));
 }
+
+const INSTALL_SERVERS_INPUTS = ['cloudbeat', 'apm', 'fleet-server'];
+
+export function hasInstallServersInputs(packagePolicies: PackagePolicy[]): boolean {
+  return packagePolicies.some((policy) =>
+    policy.inputs.some(
+      (input) => INSTALL_SERVERS_INPUTS.includes(input.type) || input.type.startsWith('cloudbeat')
+    )
+  );
+}

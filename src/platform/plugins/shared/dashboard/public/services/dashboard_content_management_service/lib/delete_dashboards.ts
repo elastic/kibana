@@ -8,7 +8,7 @@
  */
 
 import type { DeleteIn, DeleteResult } from '@kbn/content-management-plugin/common';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardContentManagementCache } from '..';
 import { contentManagementService } from '../../kibana_services';
 

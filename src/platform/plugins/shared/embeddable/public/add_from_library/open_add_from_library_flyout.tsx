@@ -11,6 +11,7 @@ import React, { Suspense } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { CanAddNewPanel } from '@kbn/presentation-containers';
@@ -34,7 +35,7 @@ export const openAddFromLibraryFlyout = ({
 
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
-      <Suspense fallback={<EuiLoadingSpinner />}>
+      <Suspense fallback={<EuiLoadingSpinner css={{ margin: euiThemeVars.euiSizeM }} />}>
         <LazyAddPanelFlyout container={container} modalTitleId={modalTitleId} />
       </Suspense>,
       core

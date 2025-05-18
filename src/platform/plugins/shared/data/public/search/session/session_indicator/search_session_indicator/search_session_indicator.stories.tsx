@@ -8,11 +8,14 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { SearchSessionIndicator } from './search_session_indicator';
 import { SearchSessionState } from '../../search_session_state';
 
-storiesOf('components/SearchSessionIndicator', module).add('default', () => {
+export default {
+  title: 'components/SearchSessionIndicator',
+};
+
+const DefaultComponent = () => {
   const [searchSessionName, setSearchSessionName] = React.useState('Discover session');
 
   const saveSearchSessionNameFn = (newName: string) =>
@@ -81,4 +84,9 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => {
       </div>
     </>
   );
-});
+};
+
+export const Default = {
+  name: 'default',
+  render: () => <DefaultComponent />,
+};

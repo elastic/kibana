@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/screenshotting-example-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": "@elastic/response-ops",
   "description": "An example integration with the screenshotting plugin.",
   "plugin": {
     "id": "screenshottingExample",

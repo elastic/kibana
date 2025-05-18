@@ -12,6 +12,8 @@ import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 import type { AxiosError } from 'axios';
+import { cloneDeep } from 'lodash';
+import { dump } from './utils';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
 import { getAllEndpointSecurityRoles } from './roles_users';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
@@ -71,7 +73,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  async load(name: keyof R): Promise<LoadedRoleAndUser> {
+  public async load(name: keyof R): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
 
     if (!role) {
@@ -85,7 +87,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     return this.create(role);
   }
 
-  async loadAll(): Promise<Record<keyof R, LoadedRoleAndUser>> {
+  public async loadAll(): Promise<Record<keyof R, LoadedRoleAndUser>> {
     const response = {} as Record<keyof R, LoadedRoleAndUser>;
 
     for (const [name, role] of Object.entries(this.roles)) {
@@ -108,10 +110,42 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
+  /**
+   * Deletes both the role and user by a given name.
+   * @param roleAndUserName
+   */
+  public async delete(roleAndUserName: string): Promise<void> {
+    const roleDeleteResponse = await this.kbnClient.request({
+      method: 'DELETE',
+      path: `/api/security/role/${roleAndUserName}`,
+      headers: { ...COMMON_API_HEADERS },
+    });
+
+    this.logger.info(`Deleted role ${roleAndUserName}`);
+    this.logger.verbose(dump(roleDeleteResponse));
+
+    const userDeleteResponse = await this.kbnClient.request({
+      method: 'DELETE',
+      path: `/internal/security/users/${roleAndUserName}`,
+      headers: { ...COMMON_API_HEADERS },
+    });
+
+    this.logger.info(`Deleted user ${roleAndUserName}`);
+    this.logger.verbose(dump(userDeleteResponse));
+  }
+
+  /**
+   * Get a copy of a predefined Role definition
+   * @param name
+   */
+  public getPreDefinedRole(name: keyof R): Role {
+    return cloneDeep(this.roles[name]);
+  }
+
   protected async createRole(role: Role): Promise<void> {
     const { name: roleName, ...roleDefinition } = role;
 
-    this.logger.debug(`creating role:`, roleDefinition);
+    this.logger.debug(`creating role [${roleName}]:`, dump(roleDefinition, 10));
 
     await this.kbnClient
       .request({
@@ -144,7 +178,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       email: '',
     };
 
-    this.logger.debug(`creating user:`, user);
+    this.logger.debug(`creating user:`, dump(user, 10));
 
     await this.kbnClient
       .request({

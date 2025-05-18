@@ -331,14 +331,12 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_cluster: undefined,
-                remote_indices: undefined,
-                run_as: [],
-                applications: [],
-              },
+              cluster: [],
+              indices: [],
+              remote_cluster: undefined,
+              remote_indices: undefined,
+              run_as: [],
+              applications: [],
             },
           ],
         },
@@ -366,19 +364,17 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                applications: [
-                  {
-                    application,
-                    privileges: ['all'],
-                    resources: [GLOBAL_RESOURCE],
-                  },
-                ],
-              },
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              applications: [
+                {
+                  application,
+                  privileges: ['all'],
+                  resources: [GLOBAL_RESOURCE],
+                },
+              ],
             },
           ],
         },
@@ -409,19 +405,17 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                applications: [
-                  {
-                    application,
-                    privileges: ['feature_foo.foo'],
-                    resources: [GLOBAL_RESOURCE],
-                  },
-                ],
-              },
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              applications: [
+                {
+                  application,
+                  privileges: ['feature_foo.foo'],
+                  resources: [GLOBAL_RESOURCE],
+                },
+              ],
             },
           ],
         },
@@ -450,19 +444,17 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                applications: [
-                  {
-                    application,
-                    privileges: ['all'],
-                    resources: [GLOBAL_RESOURCE],
-                  },
-                ],
-              },
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              applications: [
+                {
+                  application,
+                  privileges: ['all'],
+                  resources: [GLOBAL_RESOURCE],
+                },
+              ],
             },
           ],
         },
@@ -532,52 +524,50 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                applications: [
-                  {
-                    application,
-                    privileges: ['all', 'read'],
-                    resources: [GLOBAL_RESOURCE],
+              applications: [
+                {
+                  application,
+                  privileges: ['all', 'read'],
+                  resources: [GLOBAL_RESOURCE],
+                },
+                {
+                  application,
+                  privileges: ['space_all', 'space_read'],
+                  resources: ['space:test-space-1', 'space:test-space-2'],
+                },
+                {
+                  application,
+                  privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
+                  resources: ['space:test-space-3'],
+                },
+              ],
+              cluster: ['test-cluster-privilege'],
+              description: 'test description',
+              indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
                   },
-                  {
-                    application,
-                    privileges: ['space_all', 'space_read'],
-                    resources: ['space:test-space-1', 'space:test-space-2'],
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              remote_indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
                   },
-                  {
-                    application,
-                    privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
-                    resources: ['space:test-space-3'],
-                  },
-                ],
-                cluster: ['test-cluster-privilege'],
-                description: 'test description',
-                indices: [
-                  {
-                    field_security: {
-                      grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
-                    },
-                    names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-                    query: `{ "match": { "title": "foo" } }`,
-                  },
-                ],
-                remote_indices: [
-                  {
-                    field_security: {
-                      grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
-                    },
-                    clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
-                    names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-                    query: `{ "match": { "title": "foo" } }`,
-                  },
-                ],
-                metadata: { foo: 'test-metadata' },
-                run_as: ['test-run-as-1', 'test-run-as-2'],
-              },
+                  clusters: ['test-cluster-name-1', 'test-cluster-name-2'],
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              metadata: { foo: 'test-metadata' },
+              run_as: ['test-run-as-1', 'test-run-as-2'],
             },
           ],
         },
@@ -666,40 +656,38 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                applications: [
-                  {
-                    application,
-                    privileges: ['feature_foo.foo-privilege-1', 'feature_bar.bar-privilege-1'],
-                    resources: [GLOBAL_RESOURCE],
+              applications: [
+                {
+                  application,
+                  privileges: ['feature_foo.foo-privilege-1', 'feature_bar.bar-privilege-1'],
+                  resources: [GLOBAL_RESOURCE],
+                },
+                {
+                  application,
+                  privileges: ['space_all'],
+                  resources: ['space:test-space-1', 'space:test-space-2'],
+                },
+                {
+                  application,
+                  privileges: ['feature_bar.bar-privilege-2'],
+                  resources: ['space:test-space-3'],
+                },
+              ],
+              cluster: ['test-cluster-privilege'],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
+                    except: ['test-field-security-except-1', 'test-field-security-except-2'],
                   },
-                  {
-                    application,
-                    privileges: ['space_all'],
-                    resources: ['space:test-space-1', 'space:test-space-2'],
-                  },
-                  {
-                    application,
-                    privileges: ['feature_bar.bar-privilege-2'],
-                    resources: ['space:test-space-3'],
-                  },
-                ],
-                cluster: ['test-cluster-privilege'],
-                indices: [
-                  {
-                    field_security: {
-                      grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
-                    },
-                    names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-                    query: `{ "match": { "title": "foo" } }`,
-                  },
-                ],
-                remote_indices: undefined,
-                metadata: { foo: 'test-metadata' },
-                run_as: ['test-run-as-1', 'test-run-as-2'],
-              },
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  query: `{ "match": { "title": "foo" } }`,
+                },
+              ],
+              remote_indices: undefined,
+              metadata: { foo: 'test-metadata' },
+              run_as: ['test-run-as-1', 'test-run-as-2'],
             },
           ],
         },
@@ -775,35 +763,33 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                applications: [
-                  {
-                    application,
-                    privileges: ['all', 'read'],
-                    resources: [GLOBAL_RESOURCE],
-                  },
-                  {
-                    application: 'logstash-foo',
-                    privileges: ['logstash-privilege'],
-                    resources: ['logstash-resource'],
-                  },
-                  {
-                    application: 'beats-foo',
-                    privileges: ['beats-privilege'],
-                    resources: ['beats-resource'],
-                  },
-                ],
-                cluster: ['test-cluster-privilege'],
-                indices: [
-                  {
-                    names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
-                  },
-                ],
-                remote_indices: undefined,
-                metadata: { foo: 'test-metadata' },
-                run_as: ['test-run-as-1', 'test-run-as-2'],
-              },
+              applications: [
+                {
+                  application,
+                  privileges: ['all', 'read'],
+                  resources: [GLOBAL_RESOURCE],
+                },
+                {
+                  application: 'logstash-foo',
+                  privileges: ['logstash-privilege'],
+                  resources: ['logstash-resource'],
+                },
+                {
+                  application: 'beats-foo',
+                  privileges: ['beats-privilege'],
+                  resources: ['beats-resource'],
+                },
+              ],
+              cluster: ['test-cluster-privilege'],
+              indices: [
+                {
+                  names: ['test-index-name-1', 'test-index-name-2'],
+                  privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                },
+              ],
+              remote_indices: undefined,
+              metadata: { foo: 'test-metadata' },
+              run_as: ['test-run-as-1', 'test-run-as-2'],
             },
           ],
         },
@@ -835,20 +821,18 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                applications: [
-                  {
-                    application: 'kibana-.kibana',
-                    privileges: ['feature_feature_1.sub_feature_privilege_1'],
-                    resources: ['*'],
-                  },
-                ],
-                metadata: undefined,
-              },
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              applications: [
+                {
+                  application: 'kibana-.kibana',
+                  privileges: ['feature_feature_1.sub_feature_privilege_1'],
+                  resources: ['*'],
+                },
+              ],
+              metadata: undefined,
             },
           ],
         },
@@ -880,20 +864,18 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                applications: [
-                  {
-                    application: 'kibana-.kibana',
-                    privileges: ['feature_feature_1.unknown_sub_feature_privilege_1'],
-                    resources: ['*'],
-                  },
-                ],
-                metadata: undefined,
-              },
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              applications: [
+                {
+                  application: 'kibana-.kibana',
+                  privileges: ['feature_feature_1.unknown_sub_feature_privilege_1'],
+                  resources: ['*'],
+                },
+              ],
+              metadata: undefined,
             },
           ],
         },
@@ -925,20 +907,18 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role',
-              body: {
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                applications: [
-                  {
-                    application: 'kibana-.kibana',
-                    privileges: ['feature_unknown_feature.sub_feature_privilege_1'],
-                    resources: ['*'],
-                  },
-                ],
-                metadata: undefined,
-              },
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              applications: [
+                {
+                  application: 'kibana-.kibana',
+                  privileges: ['feature_unknown_feature.sub_feature_privilege_1'],
+                  resources: ['*'],
+                },
+              ],
+              metadata: undefined,
             },
           ],
         },
@@ -975,24 +955,22 @@ describe('PUT role', () => {
           put: [
             {
               name: 'foo-role-remote-cluster',
-              body: {
-                applications: [],
-                cluster: [],
-                indices: [],
-                remote_indices: undefined,
-                run_as: [],
-                remote_cluster: [
-                  {
-                    clusters: ['cluster1', 'cluster2'],
-                    privileges: ['monitor_enrich'],
-                  },
-                  {
-                    clusters: ['cluster3', 'cluster4'],
-                    privileges: ['monitor_enrich'],
-                  },
-                ],
-                metadata: undefined,
-              },
+              applications: [],
+              cluster: [],
+              indices: [],
+              remote_indices: undefined,
+              run_as: [],
+              remote_cluster: [
+                {
+                  clusters: ['cluster1', 'cluster2'],
+                  privileges: ['monitor_enrich'],
+                },
+                {
+                  clusters: ['cluster3', 'cluster4'],
+                  privileges: ['monitor_enrich'],
+                },
+              ],
+              metadata: undefined,
             },
           ],
         },

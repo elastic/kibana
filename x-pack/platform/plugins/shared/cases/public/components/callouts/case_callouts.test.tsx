@@ -6,27 +6,25 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { CaseCallouts } from './case_callouts';
 
 describe('CaseCallouts ', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const result = appMockRender.render(<CaseCallouts />);
-    expect(result.getByTestId('case-callouts')).toBeInTheDocument();
+    renderWithTestingProviders(<CaseCallouts />);
+    expect(screen.getByTestId('case-callouts')).toBeInTheDocument();
   });
 
   it('shows the platinum license callout if the user has less than platinum license', () => {
-    const result = appMockRender.render(<CaseCallouts />);
-    expect(result.getByTestId('case-callout-license-info')).toBeInTheDocument();
+    renderWithTestingProviders(<CaseCallouts />);
+    expect(screen.getByTestId('case-callout-license-info')).toBeInTheDocument();
   });
 
   it('does not show the platinum license callout if the user has platinum license', () => {
@@ -34,9 +32,8 @@ describe('CaseCallouts ', () => {
       license: { type: 'platinum' },
     });
 
-    appMockRender = createAppMockRenderer({ license });
-    const result = appMockRender.render(<CaseCallouts />);
+    renderWithTestingProviders(<CaseCallouts />, { wrapperProps: { license } });
 
-    expect(result.queryByTestId('case-callout-license-info')).toBeNull();
+    expect(screen.queryByTestId('case-callout-license-info')).toBeNull();
   });
 });

@@ -42,7 +42,7 @@ xpack.lists.listItemIndex: '.items-your-name'
 Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will
 get in the way of the CURL scripts written as is.
 
-Go to the scripts folder `cd kibana/x-pack/solutions/security/plugins/lists/server/scripts` and run:
+Go to the scripts folder `cd x-pack/solutions/security/plugins/lists/server/scripts` and run:
 
 ```sh
 ./hard_reset.sh

@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
-import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import { DataGridDensity } from '@kbn/unified-data-table';
 import { getServiceNameCell } from './service_name_cell';
-import { CellRenderersExtensionParams } from '../../../context_awareness';
+import type { CellRenderersExtensionParams } from '../../../context_awareness';
 
 const core = {
   application: {
@@ -44,7 +45,7 @@ const renderCell = (serviceNameField: string, record: DataTableRecord) => {
     },
     dataView: dataViewMock,
     density: DataGridDensity.COMPACT,
-    rowHeight: ROWS_HEIGHT_OPTIONS.single,
+    rowHeight: 1,
   };
   const ServiceNameCell = getServiceNameCell(serviceNameField, cellRenderersExtensionParamsMock);
   render(

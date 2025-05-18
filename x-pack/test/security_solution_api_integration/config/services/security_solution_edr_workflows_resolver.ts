@@ -57,11 +57,11 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       events: Event[],
       eventsIndex: string = processEventsIndex
     ): Promise<InsertedEvents> {
-      const body = events.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
+      const operations = events.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
       }, []);
-      const bulkResp = await client.bulk({ body, refresh: true });
+      const bulkResp = await client.bulk({ operations, refresh: true });
 
       const eventsInfo = events.map((event: Event, i: number) => {
         return { event, _id: bulkResp.items[i].create?._id };
@@ -81,7 +81,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       const numTrees = options.numTrees ?? 1;
       for (let j = 0; j < numTrees; j++) {
         const tree = generator.generateTree(options);
-        const body = tree.allEvents.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
+        const operations = tree.allEvents.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
           let index = eventsIndex;
           if (firstNonNullValue(doc.event?.kind) === 'alert') {
             index = alertsIndex;
@@ -93,7 +93,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
           return array;
         }, []);
         // force a refresh here otherwise the documents might not be available when the tests search for them
-        await client.bulk({ body, refresh: true });
+        await client.bulk({ operations, refresh: true });
         allTrees.push(tree);
       }
       return { trees: allTrees, indices: [eventsIndex, alertsIndex] };

@@ -626,7 +626,7 @@ export default function ({ getService }: FtrProviderContext) {
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          body: { query: { match: { doc_type: 'token' } } },
+          query: { match: { doc_type: 'token' } },
           refresh: true,
         });
         expect(esResponse).to.have.property('deleted').greaterThan(0);
@@ -711,7 +711,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             const esResponse = await getService('es').deleteByQuery({
               index: '.security-tokens',
-              body: { query: { match: { doc_type: 'token' } } },
+              query: { match: { doc_type: 'token' } },
               refresh: true,
             });
             expect(esResponse).to.have.property('deleted').greaterThan(0);

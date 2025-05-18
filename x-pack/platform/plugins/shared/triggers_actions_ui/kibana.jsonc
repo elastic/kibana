@@ -29,16 +29,19 @@
       "dashboard",
       "licensing",
       "expressions",
-      "lens",
       "controls",
-      "embeddable"
+      "embeddable",
+      "fieldsMetadata",
+      "uiActions"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
+      "lens",
       "spaces",
-      "serverless"
+      "serverless",
+      "share"
     ],
     "requiredBundles": [
       "alerting",

@@ -14,6 +14,10 @@ import type { Section } from '../../sections';
 import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
+
+import { ExperimentalFeaturesService } from '../../services';
+
 import { DefaultPageTitle } from './default_page_title';
 
 interface Props {
@@ -32,6 +36,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
+  const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
 
   const tabs = [
     {
@@ -56,6 +61,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       isSelected: section === 'agent_policies',
       href: getHref('policies_list'),
       'data-test-subj': 'fleet-agent-policies-tab',
+      id: 'fleet-agent-policies-tab',
     },
     {
       name: (
@@ -141,6 +147,9 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
         {children}
       </WithHeaderLayout>
+      {enableAutomaticAgentUpgrades ? (
+        <AutoUpgradeAgentsTour anchor="#fleet-agent-policies-tab" />
+      ) : null}
     </>
   );
 };

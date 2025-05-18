@@ -6,7 +6,7 @@
  */
 
 import {
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -16,7 +16,7 @@ import {
   CoreRequestHandlerContext,
 } from '@kbn/core/server';
 import chalk from 'chalk';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
@@ -125,10 +125,10 @@ export class SyntheticsEsClient {
     TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
     TDocument = unknown
   >(
-    requests: MsearchMultisearchBody[],
+    requests: SearchSearchRequestBody[],
     operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
-    const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
+    const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
       searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
       searches.push(request);

@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 

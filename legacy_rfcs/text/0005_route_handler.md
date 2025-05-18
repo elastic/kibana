@@ -33,7 +33,7 @@ type RequestHandler = (
 ```
 and accepts next Kibana specific parameters as arguments:
 - context: [Context](https://github.com/elastic/kibana/blob/main/rfcs/text/0003_handler_interface.md#handler-context). A handler context contains core service and plugin functionality already scoped to the incoming request.
-- request: [KibanaRequest](https://github.com/elastic/kibana/blob/main/src/core/server/http/router/request.ts). An immutable representation of the incoming request details, such as body, parameters, query, url and route information. Note: you **must** to specify route schema during route declaration to have access to `body, parameters, query` in the request object. You  cannot extend KibanaRequest with arbitrary data nor remove any properties from it.
+- request: [KibanaRequest](https://github.com/elastic/kibana/blob/main/src/core/packages/http/server/src/router/request.ts). An immutable representation of the incoming request details, such as body, parameters, query, url and route information. Note: you **must** to specify route schema during route declaration to have access to `body, parameters, query` in the request object. You  cannot extend KibanaRequest with arbitrary data nor remove any properties from it.
 ```typescript
 interface KibanaRequest {
   url: url.Url;
@@ -50,7 +50,7 @@ interface KibanaRequest {
   }
 }
 ```
--  t: [KibanaResponseToolkit](https://github.com/elastic/kibana/blob/main/src/core/server/http/router/response.ts#L27)
+-  t: [KibanaResponseToolkit](https://github.com/elastic/kibana/blob/main/src/core/packages/http/server/src/router/response.ts)
 Provides a set of pre-configured methods to respond to an incoming request. It is expected that handler **always** returns a result of one of `KibanaResponseToolkit` methods as an output:
 ```typescript
 interface KibanaResponseToolkit {

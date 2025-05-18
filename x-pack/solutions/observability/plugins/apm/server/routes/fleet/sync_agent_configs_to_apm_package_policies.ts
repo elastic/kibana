@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { TelemetryUsageCounter } from '../typings';
 import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';

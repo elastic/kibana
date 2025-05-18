@@ -21,7 +21,7 @@ const STORYBOOK_DIRECTORY =
     : (process.env.BUILDKITE_BRANCH ?? '').replace('/', '__');
 const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks';
 const STORYBOOK_BUCKET_URL = `https://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}`;
-const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}/${process.env.BUILDKITE_COMMIT}`;
+const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}`;
 
 const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
 
@@ -39,7 +39,11 @@ const build = () => {
   console.log('--- Building Storybooks');
 
   for (const storybook of Object.keys(storybookAliases)) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
+    exec(
+      `STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`,
+      `NODE_OPTIONS=--max-old-space-size=6144`,
+      `yarn storybook --site ${storybook}`
+    );
   }
 };
 
@@ -80,7 +84,7 @@ const upload = () => {
     );
     exec(`
       ${activateScript} gs://ci-artifacts.kibana.dev
-      gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
 

@@ -8,6 +8,10 @@ components:
   schemas:
     RuleExecutionSummary:
       type: object
+      description: |
+        Summary of the last execution of a rule.
+        > info
+        > This field is under development and its usage or schema may change
       properties:
         last_execution:
           type: object

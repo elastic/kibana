@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Interpolation, Theme } from '@emotion/react';
-import { textWithEditContainerCss, editIconCss } from './text_with_edit.styles';
+import { textWithEditContainerCss } from './text_with_edit.styles';
 interface TextWithEditProps {
   isReadonly: boolean;
   dataTestSubj?: string;
@@ -25,13 +25,13 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
   textCss,
 }) => {
   return (
-    <EuiFlexGroup css={textWithEditContainerCss}>
-      <EuiFlexItem grow={10}>
+    <EuiFlexGroup css={textWithEditContainerCss} gutterSize="xs" component="span">
+      <EuiFlexItem grow={10} component="span">
         <span css={textCss} data-test-subj={`${dataTestSubj || ''}Text`}>
           {text}
         </span>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={editIconCss}>
+      <EuiFlexItem grow={false} component="span">
         {isReadonly ? null : (
           <EuiButtonIcon
             data-test-subj={`${dataTestSubj || ''}EditIcon`}

@@ -8,6 +8,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
@@ -111,10 +113,14 @@ export const renderApp = ({
                 <Router history={history}>
                   <EuiThemeProvider darkMode={isDarkMode}>
                     <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
-                      <QueryClientProvider client={queryClient}>
-                        <App />
-                        <HideableReactQueryDevTools />
-                      </QueryClientProvider>
+                      <PerformanceContextProvider>
+                        <QueryClientProvider client={queryClient}>
+                          <InspectorContextProvider>
+                            <App />
+                            <HideableReactQueryDevTools />
+                          </InspectorContextProvider>
+                        </QueryClientProvider>
+                      </PerformanceContextProvider>
                     </RedirectAppLinks>
                   </EuiThemeProvider>
                 </Router>

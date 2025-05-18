@@ -10,6 +10,7 @@
 import v8, { HeapInfo } from 'v8';
 import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 import { ProcessMetricsCollector } from './process';
+import apm from 'elastic-apm-node';
 
 describe('ProcessMetricsCollector', () => {
   let collector: ProcessMetricsCollector;
@@ -101,6 +102,26 @@ describe('ProcessMetricsCollector', () => {
     it('resets event loop utilization', () => {
       collector.reset();
       expect(mockEventLoopUtilizationMonitor.reset).toBeCalledTimes(1);
+    });
+  });
+
+  describe('register metrics in apm', () => {
+    it('calls registerMetric in the constructor', () => {
+      const apmSpy = jest.spyOn(apm, 'registerMetric');
+
+      collector.registerMetrics();
+
+      expect(apmSpy).toHaveBeenCalledTimes(2);
+      expect(apmSpy).toHaveBeenNthCalledWith(
+        1,
+        'nodejs.memory.resident_set_size.bytes',
+        expect.any(Function)
+      );
+      expect(apmSpy).toHaveBeenNthCalledWith(
+        2,
+        'nodejs.heap.size_limit.bytes',
+        expect.any(Function)
+      );
     });
   });
 });

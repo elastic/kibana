@@ -21,6 +21,9 @@ paths:
                   type: string
                   format: binary
                   description: A `.ndjson` file containing the exception list
+                  example: |
+                    {"_version":"WzExNDU5LDFd","created_at":"2025-01-09T16:18:17.757Z","created_by":"elastic","description":"This is a sample detection type exception","id":"c86c2da0-2ab6-4343-b81c-216ef27e8d75","immutable":false,"list_id":"simple_list","name":"Sample Detection Exception List","namespace_type":"single","os_types":[],"tags":["user added string for a tag","malware"],"tie_breaker_id":"cf4a7b92-732d-47f0-a0d5-49a35a1736bf","type":"detection","updated_at":"2025-01-09T16:18:17.757Z","updated_by":"elastic","version":1}
+                    {"_version":"WzExNDYxLDFd","comments":[],"created_at":"2025-01-09T16:18:42.308Z","created_by":"elastic","description":"This is a sample endpoint type exception","entries":[{"type":"exists","field":"actingProcess.file.signer","operator":"excluded"},{"type":"match_any","field":"host.name","value":["some host","another host"],"operator":"included"}],"id":"f37597ce-eaa7-4b64-9100-4301118f6806","item_id":"simple_list_item","list_id":"simple_list","name":"Sample Endpoint Exception List","namespace_type":"single","os_types":["linux"],"tags":["user added string for a tag","malware"],"tie_breaker_id":"4ca3ef3e-9721-42c0-8107-cf47e094d40f","type":"simple","updated_at":"2025-01-09T16:18:42.308Z","updated_by":"elastic"}
       parameters:
         - name: overwrite
           in: query
@@ -31,18 +34,7 @@ paths:
           schema:
             type: boolean
             default: false
-        - name: overwrite_exceptions
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-        - name: overwrite_action_connectors
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
+            example: false
         - name: as_new_list
           in: query
           required: false
@@ -53,6 +45,7 @@ paths:
           schema:
             type: boolean
             default: false
+            example: false
       responses:
         200:
           description: Successful response
@@ -86,6 +79,34 @@ paths:
                   - success_count_exception_lists
                   - success_exception_list_items
                   - success_count_exception_list_items
+              examples:
+                withoutErrors:
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 2
+                    success_exception_lists: true,
+                    success_count_exception_lists: 1
+                    success_exception_list_items: true
+                    success_count_exception_list_items: 1
+                withErrors:
+                  value:
+                    errors:
+                      - error:
+                          status_code: 400
+                          message: 'Error found importing exception list: Invalid value \"4\" supplied to \"list_id\"'
+                        list_id: (unknown list_id)
+                      - error:
+                          status_code: 409
+                          message: 'Found that item_id: \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" already exists. Import of item_id: \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" skipped.'
+                        list_id: 7d7cccb8-db72-4667-b1f3-648efad7c1ee
+                        item_id: f7fd00bb-dba8-4c93-9d59-6cbd427b6330
+                    success: false,
+                    success_count: 0,
+                    success_exception_lists: false,
+                    success_count_exception_lists: 0,
+                    success_exception_list_items: false,
+                    success_count_exception_list_items: 0
         400:
           description: Invalid input data response
           content:
@@ -100,18 +121,35 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/exception_lists/_import] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

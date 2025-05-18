@@ -10,7 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { PercentageModeConfigWithMinMax } from '@kbn/visualizations-plugin/common';
 import {
-  convertToLensModule,
+  getConvertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
@@ -31,7 +31,7 @@ export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, time
   }
 
   const { getColumnsFromVis, getPalette, getPercentageModeConfig, createStaticValueColumn } =
-    await convertToLensModule;
+    await getConvertToLensModule();
 
   const percentageModeConfig = getPercentageModeConfig(vis.params.gauge, false);
 

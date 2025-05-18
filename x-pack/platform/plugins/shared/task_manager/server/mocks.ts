@@ -6,14 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
-import { ConcreteTaskInstance, TaskStatus } from './task';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
+import type { ConcreteTaskInstance } from './task';
+import { TaskStatus } from './task';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<TaskManagerSetupContract> = {
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
+    registerCanEncryptedSavedObjects: jest.fn(),
   };
   return mock;
 };
@@ -35,6 +37,7 @@ const createStartMock = () => {
     bulkEnable: jest.fn(),
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
+    registerEncryptedSavedObjectsClient: jest.fn(),
   };
   return mock;
 };

@@ -15,19 +15,12 @@ import {
 } from './helpers';
 import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, IndexEntry } from '@kbn/elastic-assistant-common';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { isString } from 'lodash';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
-jest.mock('@kbn/zod', () => ({
-  z: {
-    string: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    number: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    boolean: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    object: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-    any: jest.fn().mockReturnValue({ describe: (str: string) => str }),
-  },
-}));
 jest.mock('lodash');
 
 describe('isModelAlreadyExistsError', () => {
@@ -153,12 +146,14 @@ describe('getStructuredToolForIndexEntry', () => {
   const mockEsClient = {} as ElasticsearchClient;
 
   const mockIndexEntry = getCreateKnowledgeBaseEntrySchemaMock({ type: 'index' }) as IndexEntry;
+  const contentReferencesStore = newContentReferencesStoreMock();
 
   it('should return a DynamicStructuredTool with correct name and schema', () => {
     const tool = getStructuredToolForIndexEntry({
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore,
     });
 
     expect(tool).toBeInstanceOf(DynamicStructuredTool);
@@ -172,11 +167,15 @@ describe('getStructuredToolForIndexEntry', () => {
   });
 
   it('should execute func correctly and return expected results', async () => {
+    (isString as unknown as jest.Mock).mockReturnValue(true);
     const mockSearchResult = {
       hits: {
         hits: [
           {
+            _index: 'exampleIndex',
+            _id: 'exampleId',
             _source: {
+              '@timestamp': '2021-01-01T00:00:00.000Z',
               field1: 'value1',
               field2: 2,
             },
@@ -194,13 +193,32 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore,
     });
+
+    (contentReferencesStore.add as jest.Mock).mockImplementation(
+      (creator: Parameters<ContentReferencesStore['add']>[0]) => {
+        const reference = creator({ id: 'exampleContentReferenceId' });
+        expect(reference).toEqual(
+          expect.objectContaining({
+            id: 'exampleContentReferenceId',
+            type: 'EsqlQuery',
+            label: 'Index: exampleIndex',
+            query: 'FROM exampleIndex METADATA _id\n | WHERE _id == "exampleId"',
+            timerange: { from: '2021-01-01T00:00:00.000Z', to: '2021-01-01T00:00:00.000Z' },
+          })
+        );
+        return reference;
+      }
+    );
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
     const result = await tool.invoke(input, {});
 
     expect(result).toContain('Below are all relevant documents in JSON format');
-    expect(result).toContain('"text":"Inner text 1\\n --- \\nInner text 2"');
+    expect(result).toContain(
+      '"text":"Inner text 1\\n --- \\nInner text 2","citation":"{reference(exampleContentReferenceId)}"'
+    );
   });
 
   it('should log an error and return error message on Elasticsearch error', async () => {
@@ -211,6 +229,7 @@ describe('getStructuredToolForIndexEntry', () => {
       indexEntry: mockIndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore,
     });
 
     const input = { query: 'testQuery', field1: 'value1', field2: 2 };
@@ -230,6 +249,7 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore,
     });
 
     const nameRegex = /^[a-zA-Z0-9_-]+$/;
@@ -244,6 +264,7 @@ describe('getStructuredToolForIndexEntry', () => {
       }) as IndexEntry,
       esClient: mockEsClient,
       logger: mockLogger,
+      contentReferencesStore,
     });
 
     expect(tool.lc_kwargs.name).toMatch('testing');

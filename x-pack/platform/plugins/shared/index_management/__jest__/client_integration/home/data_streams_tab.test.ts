@@ -26,7 +26,11 @@ import {
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
 
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+
 const nonBreakingSpace = ' ';
+
+const getRedirectUrl = jest.fn(() => '/app/path');
 
 const urlServiceMock = {
   locators: {
@@ -37,6 +41,7 @@ const urlServiceMock = {
         state: {},
       }),
       getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      getRedirectUrl,
       navigate: async () => {},
       useUrl: () => '',
     }),
@@ -533,6 +538,30 @@ describe('Data Streams tab', () => {
         testBed.component.update();
       });
 
+      test('shows bulk edit callout for reduced data retention', async () => {
+        const {
+          actions: { selectDataStream, clickBulkEditDataRetentionButton },
+        } = testBed;
+
+        selectDataStream('dataStream1', true);
+        selectDataStream('dataStream2', true);
+
+        clickBulkEditDataRetentionButton();
+
+        // Decrease data retention value to 5d (it was 7d initially)
+        testBed.form.setInputValue('dataRetentionValue', '5');
+
+        // Verify that callout is displayed
+        expect(testBed.exists('reducedDataRetentionCallout')).toBeTruthy();
+
+        // Verify message in callout
+        const calloutText = testBed.find('reducedDataRetentionCallout').text();
+        expect(calloutText).toContain(
+          'The retention period will be reduced for 2 data streams. Data older than then new retention period will be permanently deleted.'
+        );
+        expect(calloutText).toContain('Affected data streams: dataStream1, dataStream2');
+      });
+
       test('can set data retention period for mutliple data streams', async () => {
         const {
           actions: { selectDataStream, clickBulkEditDataRetentionButton },
@@ -796,26 +825,48 @@ describe('Data Streams tab', () => {
             expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
           );
         });
+
+        test('shows single edit callout for reduced data retention', async () => {
+          const {
+            actions: { clickNameAt, clickEditDataRetentionButton },
+          } = testBed;
+
+          await clickNameAt(0);
+
+          clickEditDataRetentionButton();
+
+          // Decrease data retention value to 5d (it was 7d initially)
+          testBed.form.setInputValue('dataRetentionValue', '5');
+
+          // Verify that callout is displayed
+          expect(testBed.exists('reducedDataRetentionCallout')).toBeTruthy();
+
+          // Verify message in callout
+          const calloutText = testBed.find('reducedDataRetentionCallout').text();
+          expect(calloutText).toContain(
+            'The retention period will be reduced. Data older than then new retention period will be permanently deleted.'
+          );
+        });
       });
 
-      test('clicking index template name navigates to the index template details', async () => {
+      test('index template name navigates to the index template details', async () => {
         const {
-          actions: { clickNameAt, clickDetailPanelIndexTemplateLink },
+          actions: { clickNameAt },
           findDetailPanelIndexTemplateLink,
-          component,
-          find,
         } = testBed;
+
+        getRedirectUrl.mockClear();
 
         await clickNameAt(0);
 
         const indexTemplateLink = findDetailPanelIndexTemplateLink();
         expect(indexTemplateLink.text()).toBe('indexTemplate');
 
-        await clickDetailPanelIndexTemplateLink();
-
-        component.update();
-        expect(find('summaryTab').exists()).toBeTruthy();
-        expect(find('title').text().trim()).toBe('indexTemplate');
+        expect(indexTemplateLink.prop('href')).toBe('/app/path');
+        expect(getRedirectUrl).toHaveBeenCalledWith({
+          page: 'index_template',
+          indexTemplate: 'indexTemplate',
+        });
       });
 
       test('shows data retention detail when configured', async () => {

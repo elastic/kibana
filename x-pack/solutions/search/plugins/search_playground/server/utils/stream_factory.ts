@@ -107,7 +107,7 @@ export function streamFactory(logger: Logger, isCloud: boolean = false): StreamF
     );
 
     if (line === undefined) {
-      logger.error('Stream chunk must not be undefined.');
+      logDebugMessage('Stream chunk must not be undefined.');
       return;
     }
 

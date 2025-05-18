@@ -89,7 +89,7 @@ export const useLensButtonToggle = ({
     [value, lensNodeSelected]
   );
 
-  // Copied from https://github.com/elastic/eui/blob/master/src/components/markdown_editor/markdown_editor.tsx#L279
+  // Copied from https://github.com/elastic/eui/blob/main/packages/eui/src/components/markdown_editor/markdown_editor.tsx#L286
   useEffect(() => {
     if (
       editorRef?.current?.textarea == null ||

@@ -120,10 +120,17 @@ export const OPTIONALTEXT = i18n.translate(
   }
 );
 
+export const LEARN_MORE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.learnMoreText',
+  {
+    defaultMessage: 'Learn more.',
+  }
+);
+
 export const RE_ENTER_SECRETS = (label: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
     defaultMessage:
-      'You will need to reenter your ${label} each time you edit the inference endpoint',
+      'You will need to re-enter your {label} each time you edit the inference endpoint',
     values: { label },
   });
 };
@@ -132,5 +139,48 @@ export const GET_PROVIDERS_FAILED = i18n.translate(
   'xpack.inferenceEndpointUICommon.hooks.unableToFindProvidersQueryMessage',
   {
     defaultMessage: 'Unable to find providers',
+  }
+);
+
+export const ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.EndpointTitle',
+  {
+    defaultMessage: 'Inference Endpoint',
+  }
+);
+
+export const CANCEL = i18n.translate('xpack.inferenceEndpointUICommon.components.cancelBtnLabel', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE = i18n.translate('xpack.inferenceEndpointUICommon.components.saveBtnLabel', {
+  defaultMessage: 'Save',
+});
+
+export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointAddedSuccess',
+  {
+    defaultMessage: 'Inference endpoint added',
+  }
+);
+
+export const ENDPOINT_CREATION_FAILED = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointAddedFailure',
+  {
+    defaultMessage: 'Inference endpoint creation failed',
+  }
+);
+
+export const ENDPOINT_UPDATE_SUCCESS = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointUpdateSuccess',
+  {
+    defaultMessage: 'Inference endpoint updated successfully',
+  }
+);
+
+export const ENDPOINT_UPDATE_FAILED = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointUpdateFailure',
+  {
+    defaultMessage: 'Inference endpoint update failed',
   }
 );

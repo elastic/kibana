@@ -48,7 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector')).to.be(true);
+        expect(await testSubjects.exists('dropdown-connector-no-connector-label')).to.be(true);
       });
 
       it('opens and closes the connectors flyout correctly', async () => {

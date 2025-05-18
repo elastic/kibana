@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { Network } from './network';
 import { SourceDestinationWithArrows } from './source_destination_with_arrows';
@@ -26,6 +26,7 @@ EuiFlexItemMarginTop.displayName = 'EuiFlexItemMarginTop';
 export const SourceDestination = React.memo<SourceDestinationProps>(
   ({
     contextId,
+    scopeId,
     destinationBytes,
     destinationGeoContinentName,
     destinationGeoCountryName,
@@ -36,7 +37,6 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     destinationPackets,
     destinationPort,
     eventId,
-    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -56,13 +56,13 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     <EuiFlexGroup alignItems="center" direction="column" justifyContent="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <Network
+          scopeId={scopeId}
           bytes={networkBytes}
           packets={networkPackets}
           communityId={networkCommunityId}
           contextId={contextId}
           direction={networkDirection}
           eventId={eventId}
-          isDraggable={isDraggable}
           protocol={networkProtocol}
           transport={transport}
         />
@@ -71,6 +71,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
       <EuiFlexItemMarginTop grow={false}>
         <SourceDestinationWithArrows
           contextId={contextId}
+          scopeId={scopeId}
           destinationBytes={destinationBytes}
           destinationGeoContinentName={destinationGeoContinentName}
           destinationGeoCountryName={destinationGeoCountryName}
@@ -81,7 +82,6 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceBytes={sourceBytes}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}

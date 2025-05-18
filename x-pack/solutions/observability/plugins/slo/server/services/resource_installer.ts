@@ -10,26 +10,17 @@ import type {
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getSLOMappingsTemplate } from '../assets/component_templates/slo_mappings_template';
-import { getSLOSettingsTemplate } from '../assets/component_templates/slo_settings_template';
-import { getSLOSummaryMappingsTemplate } from '../assets/component_templates/slo_summary_mappings_template';
-import { getSLOSummarySettingsTemplate } from '../assets/component_templates/slo_summary_settings_template';
 import {
-  SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_DESTINATION_INDEX_NAME,
-  SLO_INDEX_TEMPLATE_NAME,
-  SLO_INDEX_TEMPLATE_PATTERN,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-  SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
+  SUMMARY_DESTINATION_INDEX_NAME,
+  SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
-import { getSLOIndexTemplate } from '../assets/index_templates/slo_index_templates';
-import { getSLOSummaryIndexTemplate } from '../assets/index_templates/slo_summary_index_templates';
-
+import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/sli_mappings_template';
+import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/sli_settings_template';
+import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
+import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
+import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
+import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
@@ -41,74 +32,42 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
     try {
-      this.logger.info('Installing SLO shared resources');
+      this.logger.debug('Installing SLO shared resources');
       await Promise.all([
-        this.createOrUpdateComponentTemplate(
-          getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSummaryMappingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSummarySettingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME)
-        ),
+        this.createOrUpdateComponentTemplate(SLI_MAPPINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(SUMMARY_MAPPINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(SUMMARY_SETTINGS_TEMPLATE),
       ]);
 
-      await this.createOrUpdateIndexTemplate(
-        getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, SLO_INDEX_TEMPLATE_PATTERN, [
-          SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-          SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-        ])
-      );
+      await this.createOrUpdateIndexTemplate(SLI_INDEX_TEMPLATE);
+      await this.createOrUpdateIndexTemplate(SUMMARY_INDEX_TEMPLATE);
 
-      await this.createOrUpdateIndexTemplate(
-        getSLOSummaryIndexTemplate(
-          SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-          SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
-          [
-            SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-            SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-          ]
-        )
-      );
-
-      await this.createIndex(SLO_DESTINATION_INDEX_NAME);
-      await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
-      await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
+      await this.createIndex(SLI_DESTINATION_INDEX_NAME);
+      await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
+      await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
     } catch (err) {
       this.logger.error(`Error while installing SLO shared resources: ${err}`);
-      throw err;
     }
   }
 
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {
-    const currentVersion = await fetchComponentTemplateVersion(
-      template.name,
-      this.logger,
-      this.esClient
-    );
+    const currentVersion = await this.fetchComponentTemplateVersion(template.name);
     if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO component template found with version [${template._meta.version}]`);
+      this.logger.debug(`SLO component template found with version [${template._meta.version}]`);
     } else {
-      this.logger.info(`Installing SLO component template [${template.name}]`);
+      this.logger.debug(`Installing SLO component template [${template.name}]`);
       return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
     }
   }
 
   private async createOrUpdateIndexTemplate(template: IndicesPutIndexTemplateRequest) {
-    const currentVersion = await fetchIndexTemplateVersion(
-      template.name,
-      this.logger,
-      this.esClient
-    );
+    const currentVersion = await this.fetchIndexTemplateVersion(template.name);
 
     if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO index template found with version [${template._meta.version}]`);
+      this.logger.debug(`SLO index template found with version [${template._meta.version}]`);
     } else {
-      this.logger.info(`Installing SLO index template [${template.name}]`);
+      this.logger.debug(`Installing SLO index template [${template.name}]`);
       return this.execute(() => this.esClient.indices.putIndexTemplate(template));
     }
   }
@@ -126,46 +85,20 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
     return await retryTransientEsErrors(esCall, { logger: this.logger });
   }
-}
 
-async function fetchComponentTemplateVersion(
-  name: string,
-  logger: Logger,
-  esClient: ElasticsearchClient
-) {
-  const getTemplateRes = await retryTransientEsErrors(
-    () =>
-      esClient.cluster.getComponentTemplate(
-        {
-          name,
-        },
-        {
-          ignore: [404],
-        }
-      ),
-    { logger }
-  );
+  private async fetchComponentTemplateVersion(name: string) {
+    const getTemplateRes = await this.execute(() =>
+      this.esClient.cluster.getComponentTemplate({ name }, { ignore: [404] })
+    );
 
-  return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version || null;
-}
+    return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version ?? null;
+  }
 
-async function fetchIndexTemplateVersion(
-  name: string,
-  logger: Logger,
-  esClient: ElasticsearchClient
-) {
-  const getTemplateRes = await retryTransientEsErrors(
-    () =>
-      esClient.indices.getIndexTemplate(
-        {
-          name,
-        },
-        {
-          ignore: [404],
-        }
-      ),
-    { logger }
-  );
+  private async fetchIndexTemplateVersion(name: string) {
+    const getTemplateRes = await this.execute(() =>
+      this.esClient.indices.getIndexTemplate({ name }, { ignore: [404] })
+    );
 
-  return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version || null;
+    return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version ?? null;
+  }
 }

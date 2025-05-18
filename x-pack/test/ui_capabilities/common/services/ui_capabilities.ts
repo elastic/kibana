@@ -39,6 +39,7 @@ export class UICapabilitiesService {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/ui_capabilities' },
       baseURL: url,
+      allowAbsoluteUrls: false,
       maxRedirects: 0,
       validateStatus: () => true, // we'll handle our own statusCodes and throw informative errors
     });

@@ -20,8 +20,8 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   SerializedTitles,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
+  PublishesWritableTitle,
+  PublishesTitle,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
@@ -41,8 +41,8 @@ export interface EmbeddableSloProps {
 export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
 
 export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle &
+  PublishesWritableTitle &
+  PublishesTitle &
   HasSloAlertsConfig &
   HasEditCapabilities;
 

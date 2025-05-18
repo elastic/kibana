@@ -333,6 +333,11 @@ export const searchResultsAttributesSchema = schema.object({
     defaultValue: false,
     meta: { description: 'Whether to restore time upon viewing this dashboard' },
   }),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
+    )
+  ),
 });
 
 export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
@@ -456,6 +461,14 @@ export const dashboardSearchOptionsSchema = schema.maybe(
       kuery: schema.maybe(schema.string()),
       cursor: schema.maybe(schema.number()),
       limit: schema.maybe(schema.number()),
+      spaces: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          meta: {
+            description:
+              'An array of spaces to search or "*" to search all spaces. Defaults to the current space if not specified.',
+          },
+        })
+      ),
     },
     { unknowns: 'forbid' }
   )
@@ -542,13 +555,6 @@ export const serviceDefinition: ServicesDefinition = {
     in: {
       options: {
         schema: dashboardSearchOptionsSchema,
-      },
-    },
-  },
-  mSearch: {
-    out: {
-      result: {
-        schema: dashboardItemSchema,
       },
     },
   },

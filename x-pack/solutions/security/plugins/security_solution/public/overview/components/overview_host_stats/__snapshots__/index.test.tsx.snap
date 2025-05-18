@@ -1,700 +1,1257 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
-<styled.div
+<div
+  class="css-yrm4o9-HostStatsContainer e9fdr4h4"
   data-test-subj="overview-hosts-stats"
 >
-  <EuiHorizontalRule
-    margin="xs"
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
   />
-  <EuiAccordionClass
-    buttonContent={
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText>
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Auditbeat"
-              id="xpack.securitySolution.overview.hostStatGroupAuditbeat"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          grow={false}
-        >
-          <Memo(StatValueComponent)
-            count={246351}
-            isGroupStat={true}
-            isLoading={false}
-            max={157258653}
-          />
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    }
-    buttonContentClassName="accordion-button"
-    id="host-stat-accordion-groupauditbeat"
+  <div
+    class="euiAccordion emotion-euiAccordion"
   >
-    <styled.div>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="auditbeatAuditd"
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupauditbeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
-          >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Audit"
-                id="xpack.securitySolution.overview.auditBeatAuditTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-auditbeatAuditd"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={73847}
-              isGroupStat={false}
-              isLoading={false}
-              max={246351}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="auditbeatFIM"
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupauditbeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
+        <span
+          class="euiAccordion__buttonContent accordion-button"
         >
-          <EuiText
-            color="subdued"
-            size="s"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="File Integrity Module"
-                id="xpack.securitySolution.overview.auditBeatFimTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-auditbeatFIM"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={107307}
-              isGroupStat={false}
-              isLoading={false}
-              max={246351}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="auditbeatLogin"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Auditbeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    246,351
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="246351"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupauditbeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
         >
-          <EuiText
-            color="subdued"
-            size="s"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Login"
-                id="xpack.securitySolution.overview.auditBeatLoginTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-auditbeatLogin"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={60015}
-              isGroupStat={false}
-              isLoading={false}
-              max={246351}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="auditbeatPackage"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Audit
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatAuditd"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      73,847
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="73847"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Package"
-                id="xpack.securitySolution.overview.auditBeatPackageTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-auditbeatPackage"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={2003}
-              isGroupStat={false}
-              isLoading={false}
-              max={246351}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="auditbeatProcess"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  File Integrity Module
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatFIM"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      107,307
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="107307"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Process"
-                id="xpack.securitySolution.overview.auditBeatProcessTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-auditbeatProcess"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={1200}
-              isGroupStat={false}
-              isLoading={false}
-              max={246351}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="auditbeatUser"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Login
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatLogin"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      60,015
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="60015"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="User"
-                id="xpack.securitySolution.overview.auditBeatUserTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-auditbeatUser"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={1979}
-              isGroupStat={false}
-              isLoading={false}
-              max={246351}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    </styled.div>
-  </EuiAccordionClass>
-  <EuiHorizontalRule
-    margin="xs"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Package
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatPackage"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      2,003
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="2003"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Process
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatProcess"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      1,200
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="1200"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  User
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatUser"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      1,979
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="1979"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
   />
-  <EuiAccordionClass
-    buttonContent={
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText>
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Endpoint Security"
-              id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          grow={false}
-        >
-          <Memo(StatValueComponent)
-            count={156714735}
-            isGroupStat={true}
-            isLoading={false}
-            max={157258653}
-          />
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    }
-    buttonContentClassName="accordion-button"
-    id="host-stat-accordion-groupendgame"
+  <div
+    class="euiAccordion emotion-euiAccordion"
   >
-    <styled.div>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameDns"
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupendgame"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
-          >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="DNS"
-                id="xpack.securitySolution.overview.endgameDnsTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameDns"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39123}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameFile"
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupendgame"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
+        <span
+          class="euiAccordion__buttonContent accordion-button"
         >
-          <EuiText
-            color="subdued"
-            size="s"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="File"
-                id="xpack.securitySolution.overview.endgameFileTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameFile"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39456}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameImageLoad"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Endpoint Security
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    156,714,735
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="156714735"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupendgame"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
         >
-          <EuiText
-            color="subdued"
-            size="s"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Image Load"
-                id="xpack.securitySolution.overview.endgameImageLoadTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameImageLoad"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39789}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameNetwork"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  DNS
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameDns"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,123
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39123"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Network"
-                id="xpack.securitySolution.overview.endgameNetworkTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameNetwork"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39101112}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameProcess"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  File
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameFile"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,456
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39456"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Process"
-                id="xpack.securitySolution.overview.endgameProcessTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameProcess"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39131415}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameRegistry"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Image Load
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameImageLoad"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,789
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39789"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Registry"
-                id="xpack.securitySolution.overview.endgameRegistryTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameRegistry"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39161718}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="endgameSecurity"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Network
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameNetwork"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,101,112
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39101112"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Security"
-                id="xpack.securitySolution.overview.endgameSecurityTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-endgameSecurity"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={39202122}
-              isGroupStat={false}
-              isLoading={false}
-              max={156714735}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    </styled.div>
-  </EuiAccordionClass>
-  <EuiHorizontalRule
-    margin="xs"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Process
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameProcess"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,131,415
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39131415"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Registry
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameRegistry"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,161,718
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39161718"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Security
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameSecurity"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,202,122
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39202122"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
   />
-  <EuiAccordionClass
-    buttonContent={
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText>
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Filebeat"
-              id="xpack.securitySolution.overview.hostStatGroupFilebeat"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          grow={false}
-        >
-          <Memo(StatValueComponent)
-            count={568}
-            isGroupStat={true}
-            isLoading={false}
-            max={157258653}
-          />
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    }
-    buttonContentClassName="accordion-button"
-    id="host-stat-accordion-groupfilebeat"
+  <div
+    class="euiAccordion emotion-euiAccordion"
   >
-    <styled.div>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="filebeatSystemModule"
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupfilebeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupfilebeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
         >
-          <EuiText
-            color="subdued"
-            size="s"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="System Module"
-                id="xpack.securitySolution.overview.filebeatSystemModuleTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-filebeatSystemModule"
-          grow={false}
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Filebeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    568
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="568"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupfilebeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
         >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={568}
-              isGroupStat={false}
-              isLoading={false}
-              max={568}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    </styled.div>
-  </EuiAccordionClass>
-  <EuiHorizontalRule
-    margin="xs"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  System Module
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-filebeatSystemModule"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      568
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="568"
+                        value="568"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
   />
-  <EuiAccordionClass
-    buttonContent={
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText>
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Winlogbeat"
-              id="xpack.securitySolution.overview.hostStatGroupWinlogbeat"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          grow={false}
-        >
-          <Memo(StatValueComponent)
-            count={296999}
-            isGroupStat={true}
-            isLoading={false}
-            max={157258653}
-          />
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    }
-    buttonContentClassName="accordion-button"
-    id="host-stat-accordion-groupwinlogbeat"
+  <div
+    class="euiAccordion emotion-euiAccordion"
   >
-    <styled.div>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="winlogbeatSecurity"
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupwinlogbeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiText
-            color="subdued"
-            size="s"
-          >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Security"
-                id="xpack.securitySolution.overview.winlogbeatSecurityTitle"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-winlogbeatSecurity"
-          grow={false}
-        >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={195929}
-              isGroupStat={false}
-              isLoading={false}
-              max={296999}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        key="winlogbeatMWSysmonOperational"
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupwinlogbeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
       >
-        <EuiFlexItem
-          grow={false}
+        <span
+          class="euiAccordion__buttonContent accordion-button"
         >
-          <EuiText
-            color="subdued"
-            size="s"
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
           >
-            <styled.div>
-              <MemoizedFormattedMessage
-                defaultMessage="Microsoft-Windows-Sysmon/Operational"
-                id="xpack.securitySolution.overview.winlogbeatMWSysmonOperational"
-              />
-            </styled.div>
-          </EuiText>
-        </EuiFlexItem>
-        <Styled(EuiFlexItem)
-          data-test-subj="host-stat-winlogbeatMWSysmonOperational"
-          grow={false}
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Winlogbeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    296,999
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="296999"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupwinlogbeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
         >
-          <styled.div>
-            <Memo(StatValueComponent)
-              count={101070}
-              isGroupStat={false}
-              isLoading={false}
-              max={296999}
-            />
-          </styled.div>
-        </Styled(EuiFlexItem)>
-      </EuiFlexGroup>
-    </styled.div>
-  </EuiAccordionClass>
-</styled.div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Security
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-winlogbeatSecurity"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      195,929
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="296999"
+                        value="195929"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Microsoft-Windows-Sysmon/Operational
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-winlogbeatMWSysmonOperational"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      101,070
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="296999"
+                        value="101070"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

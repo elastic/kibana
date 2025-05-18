@@ -7,7 +7,7 @@
 
 import type { Dispatch } from 'react';
 import { createContext, useContext } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 export interface TestTrainedModelsContextType {
   pipelineConfig?: estypes.IngestPipeline;

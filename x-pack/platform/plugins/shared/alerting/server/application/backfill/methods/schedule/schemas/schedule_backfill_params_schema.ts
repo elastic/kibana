@@ -12,12 +12,23 @@ import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../../common/consta
 export const scheduleBackfillParamSchema = schema.object(
   {
     ruleId: schema.string(),
-    start: schema.string(),
-    end: schema.maybe(schema.string()),
+    ranges: schema.arrayOf(
+      schema.object({
+        start: schema.string(),
+        end: schema.string(),
+      })
+    ),
+    runActions: schema.maybe(schema.boolean()),
   },
   {
-    validate({ start, end }) {
-      return validateBackfillSchedule(start, end);
+    validate({ ranges }) {
+      const errors = ranges
+        .map((range) => validateBackfillSchedule(range.start, range.end))
+        .filter(Boolean)
+        .join('\n');
+      if (errors.length > 0) {
+        return errors;
+      }
     },
   }
 );

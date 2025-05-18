@@ -9,8 +9,8 @@
 
 import { parseDuration } from './parse_duration';
 import { DEFAULT_RULE_INTERVAL } from '../constants';
-import { MinimumScheduleInterval, RuleTypeWithDescription } from '../common/types';
-import { RuleFormData } from '../types';
+import type { MinimumScheduleInterval, RuleTypeWithDescription } from '../common/types';
+import type { RuleFormData } from '../types';
 
 const getInitialInterval = (interval: string) => {
   if (parseDuration(interval) > parseDuration(DEFAULT_RULE_INTERVAL)) {

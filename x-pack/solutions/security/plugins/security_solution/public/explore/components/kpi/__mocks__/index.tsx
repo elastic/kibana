@@ -7,4 +7,4 @@
 
 import React from 'react';
 
-export const KpiBaseComponent = jest.fn().mockReturnValue(<div />);
+export const KpiBaseComponent = jest.fn(() => <div />);

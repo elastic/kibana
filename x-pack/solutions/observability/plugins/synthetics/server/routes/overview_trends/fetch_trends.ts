@@ -10,83 +10,81 @@ import { createEsParams } from '../../lib';
 
 export const getFetchTrendsQuery = (configId: string, locationIds: string[], interval: number) =>
   createEsParams({
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            SUMMARY_FILTER,
-            EXCLUDE_RUN_ONCE_FILTER,
-            {
-              terms: {
-                'observer.name': locationIds,
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          SUMMARY_FILTER,
+          EXCLUDE_RUN_ONCE_FILTER,
+          {
+            terms: {
+              'observer.name': locationIds,
             },
-            {
-              term: {
-                config_id: configId,
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: `now-${interval}m`,
-                  lte: 'now',
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        byId: {
-          terms: {
-            field: 'config_id',
           },
-          aggs: {
-            byLocation: {
-              terms: {
-                field: 'observer.name',
+          {
+            term: {
+              config_id: configId,
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: `now-${interval}m`,
+                lte: 'now',
               },
-              aggs: {
-                last50: {
-                  histogram: {
-                    field: '@timestamp',
-                    interval: interval * 1000,
-                    min_doc_count: 1,
-                  },
-                  aggs: {
-                    max: {
-                      avg: {
-                        field: 'monitor.duration.us',
-                      },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      byId: {
+        terms: {
+          field: 'config_id',
+        },
+        aggs: {
+          byLocation: {
+            terms: {
+              field: 'observer.name',
+            },
+            aggs: {
+              last50: {
+                histogram: {
+                  field: '@timestamp',
+                  interval: interval * 1000,
+                  min_doc_count: 1,
+                },
+                aggs: {
+                  max: {
+                    avg: {
+                      field: 'monitor.duration.us',
                     },
                   },
                 },
+              },
+              stats: {
                 stats: {
-                  stats: {
-                    field: 'monitor.duration.us',
-                  },
+                  field: 'monitor.duration.us',
                 },
-                median: {
-                  percentiles: {
-                    field: 'monitor.duration.us',
-                    percents: [50],
-                  },
+              },
+              median: {
+                percentiles: {
+                  field: 'monitor.duration.us',
+                  percents: [50],
                 },
               },
             },
           },
         },
       },
-      _source: false,
-      sort: [
-        {
-          '@timestamp': 'desc',
-        },
-      ],
-      fields: ['monitor.duration.us'],
     },
+    _source: false,
+    sort: [
+      {
+        '@timestamp': 'desc',
+      },
+    ],
+    fields: ['monitor.duration.us'],
   });
 
 export type TrendsQuery = ReturnType<typeof getFetchTrendsQuery>;

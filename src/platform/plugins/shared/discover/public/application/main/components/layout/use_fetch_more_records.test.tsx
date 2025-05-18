@@ -13,14 +13,14 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import {
+import type {
   DataDocuments$,
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import React from 'react';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 describe('useFetchMoreRecords', () => {
   const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));

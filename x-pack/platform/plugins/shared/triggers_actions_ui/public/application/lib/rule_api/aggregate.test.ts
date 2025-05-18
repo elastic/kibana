@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { loadRuleAggregations, loadRuleTags } from './aggregate';
+import { loadRuleAggregations } from './aggregate';
 
 const http = httpServiceMock.createStartContract();
 
@@ -283,43 +283,6 @@ describe('loadRuleAggregations', () => {
         "/internal/alerting/rules/_aggregate",
         Object {
           "body": "{\\"search_fields\\":\\"[\\\\\\"name\\\\\\",\\\\\\"tags\\\\\\"]\\",\\"search\\":\\"baz\\",\\"filter\\":\\"alert.attributes.tags:(a or b or c)\\",\\"default_search_operator\\":\\"AND\\"}",
-        },
-      ]
-    `);
-  });
-
-  test('loadRuleTags should call the getTags API', async () => {
-    const resolvedValue = {
-      data: ['a', 'b', 'c'],
-      total: 3,
-      page: 2,
-      per_page: 30,
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
-
-    const result = await loadRuleTags({
-      http,
-      search: 'test',
-      page: 2,
-      perPage: 30,
-    });
-
-    expect(result).toEqual({
-      data: ['a', 'b', 'c'],
-      page: 2,
-      perPage: 30,
-      total: 3,
-    });
-
-    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "/internal/alerting/rules/_tags",
-        Object {
-          "query": Object {
-            "page": 2,
-            "per_page": 30,
-            "search": "test",
-          },
         },
       ]
     `);

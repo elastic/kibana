@@ -90,7 +90,8 @@ export async function unpackArchiveEntriesIntoMemory(
 export async function traverseArchiveEntries(
   archiveBuffer: Buffer,
   contentType: string,
-  onEntry: (entry: ArchiveEntry) => Promise<void>
+  onEntry: (entry: ArchiveEntry) => Promise<void>,
+  readBuffer?: (path: string) => boolean
 ) {
   const bufferExtractor = getBufferExtractor({ contentType });
   if (!bufferExtractor) {
@@ -100,7 +101,7 @@ export async function traverseArchiveEntries(
   }
   try {
     const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
-    await bufferExtractor(archiveBuffer, onlyFiles, onEntry);
+    await bufferExtractor(archiveBuffer, onlyFiles, onEntry, readBuffer);
   } catch (error) {
     throw new PackageInvalidArchiveError(
       `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`

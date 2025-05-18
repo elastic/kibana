@@ -49,7 +49,7 @@ describe('IndexEntryEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
-      data: { indices: ['index-1', 'index-2'] },
+      data: { 'index-1': ['field-1'], 'index-2': ['field-2'] },
     });
   });
 

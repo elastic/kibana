@@ -37,6 +37,6 @@ Each subdomain folder should be owned by a single GitHub team in the `.github/CO
 Some examples for reference:
 
 - [Test plan template](./test_plan_template.md).
-- [Installation and Upgrade of Prebuilt Rules](./detection_response/prebuilt_rules/installation_and_upgrade.md).
+- [Test plans for prebuilt rules](./detection_response/prebuilt_rules/prebuilt_rules.md).
 
 Feel free to tune the structure whenever it makes sense and improves readability or maintainability of your plan: add more sections to `Useful info`, add more top-level sections in addition to `Useful info` and `Scenarios`, etc.

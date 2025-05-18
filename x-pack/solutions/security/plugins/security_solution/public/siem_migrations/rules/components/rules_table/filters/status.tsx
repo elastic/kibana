@@ -9,12 +9,10 @@ import React, { useCallback, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import {
-  RuleTranslationResult,
-  StatusFilter,
-} from '../../../../../../common/siem_migrations/constants';
-import * as i18n from './translations';
+import { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import { convertTranslationResultIntoText } from '../../../utils/translation_results';
+import { StatusFilter } from '../../../types';
+import * as i18n from './translations';
 
 const STATUS_FILTER_POPOVER_WIDTH = 250;
 

@@ -16,11 +16,11 @@ import { RegistryEventDetailsLine } from './registry_event_details_line';
 interface Props {
   contextId: string;
   data: Ecs;
-  isDraggable?: boolean;
   text: string;
+  scopeId: string;
 }
 
-const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, isDraggable, text }) => {
+const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, text, scopeId }) => {
   const hostName: string | null | undefined = get('host.name[0]', data);
   const id = data._id;
   const processName: string | null | undefined = get('process.name[0]', data);
@@ -37,10 +37,10 @@ const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, isDra
   return (
     <Details>
       <RegistryEventDetailsLine
+        scopeId={scopeId}
         contextId={contextId}
         hostName={hostName}
         id={id}
-        isDraggable={isDraggable}
         processName={processName}
         processPid={processPid}
         registryKey={registryKey}

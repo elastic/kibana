@@ -189,7 +189,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-        await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        await testSubjects.click(
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+        );
       }
 
       // Submit create artifact form
@@ -208,7 +210,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-        await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        await testSubjects.click(
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+        );
       }
 
       // Submit edit artifact form

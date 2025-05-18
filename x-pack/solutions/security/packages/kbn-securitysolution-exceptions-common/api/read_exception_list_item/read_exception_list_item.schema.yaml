@@ -14,13 +14,13 @@ paths:
         - name: id
           in: query
           required: false
-          description: Either `id` or `item_id` must be specified
+          description: Exception list item's identifier. Either `id` or `item_id` must be specified.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemId'
         - name: item_id
           in: query
           required: false
-          description: Either `id` or `item_id` must be specified
+          description: Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
         - name: namespace_type
@@ -29,6 +29,11 @@ paths:
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: single
+          examples:
+            single:
+              value: single
+            agnostic:
+              value: agnostic
       responses:
         200:
           description: Successful response
@@ -36,6 +41,33 @@ paths:
             application/json:
               schema:
                 $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItem'
+              examples:
+                simpleListItem:
+                  value:
+                    id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                    item_id: simple_list_item
+                    list_id: simple_list
+                    type: simple
+                    name: Sample Exception List Item
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - type: exists
+                        field: actingProcess.file.signer
+                        operator: excluded
+                      - type: match_any
+                        field: host.name
+                        value: [saturn, jupiter]
+                        operator: included
+                    namespace_type: single
+                    os_types: [linux]
+                    tags: [malware]
+                    comments: []
+                    _version: WzQsMV0=
+                    tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                    created_at: 2025-01-07T20:07:33.119Z
+                    created_by: elastic
+                    updated_at: 2025-01-07T20:07:33.119Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -44,27 +76,55 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/exception_lists/items?item_id=&namespace_type=single] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: Exception list item not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'exception list item item_id: \"foo\" does not exist'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

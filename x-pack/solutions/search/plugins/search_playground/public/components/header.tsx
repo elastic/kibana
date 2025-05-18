@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiBetaBadge,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiPageHeaderSection,
@@ -14,40 +14,38 @@ import {
   EuiSelect,
   EuiTitle,
   useEuiTheme,
+  type EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+
 import { PlaygroundHeaderDocs } from './playground_header_docs';
 import { Toolbar } from './toolbar';
-import { ViewMode } from './app';
-import { PlaygroundPageMode } from '../types';
+import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
+import { usePlaygroundParameters } from '../hooks/use_playground_parameters';
 
 interface HeaderProps {
   showDocs?: boolean;
-  selectedMode: string;
-  onModeChange: (mode: ViewMode) => void;
-  selectedPageMode: PlaygroundPageMode;
+  onModeChange: (mode: PlaygroundViewMode) => void;
   onSelectPageModeChange: (mode: PlaygroundPageMode) => void;
   isActionsDisabled?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  selectedMode,
   onModeChange,
   showDocs = false,
   isActionsDisabled = false,
-  selectedPageMode,
   onSelectPageModeChange,
 }) => {
+  const { pageMode, viewMode } = usePlaygroundParameters();
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
-  const options = [
+  const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
     {
-      id: ViewMode.chat,
+      id: PlaygroundViewMode.preview,
       label:
-        selectedPageMode === PlaygroundPageMode.chat
+        pageMode === PlaygroundPageMode.chat
           ? i18n.translate('xpack.searchPlayground.header.view.chat', {
               defaultMessage: 'Chat',
             })
@@ -57,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
       'data-test-subj': 'chatMode',
     },
     {
-      id: ViewMode.query,
+      id: PlaygroundViewMode.query,
       label: i18n.translate('xpack.searchPlayground.header.view.query', {
         defaultMessage: 'Query',
       }),
@@ -89,29 +87,21 @@ export const Header: React.FC<HeaderProps> = ({
             <EuiSelect
               data-test-subj="page-mode-select"
               options={[
-                { value: 'chat', text: 'Chat' },
-                { value: 'search', text: 'Search' },
+                { value: PlaygroundPageMode.Chat, text: 'Chat' },
+                { value: PlaygroundPageMode.Search, text: 'Search' },
               ]}
-              value={selectedPageMode}
+              value={pageMode}
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}
-
-          <EuiBetaBadge
-            label={i18n.translate('xpack.searchPlayground.pageTitle.techPreview', {
-              defaultMessage: 'TECH PREVIEW',
-            })}
-            color="hollow"
-            alignment="middle"
-          />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>
         <EuiButtonGroup
           legend="viewMode"
           options={options}
-          idSelected={selectedMode}
-          onChange={(id: string) => onModeChange(id as ViewMode)}
+          idSelected={viewMode}
+          onChange={(id: string) => onModeChange(id as PlaygroundViewMode)}
           buttonSize="compressed"
           isDisabled={isActionsDisabled}
           data-test-subj="viewModeSelector"
@@ -120,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiPageHeaderSection>
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
-          <Toolbar selectedPageMode={selectedPageMode} />
+          <Toolbar selectedPageMode={pageMode} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

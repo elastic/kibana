@@ -186,7 +186,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 rows={5}
                 {...inputs.kafkaSslCertificateInput.props}
                 placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
+                  'xpack.fleet.settings.editOutputFlyout.kafkaSslCertificateInputPlaceholder',
                   {
                     defaultMessage: 'Specify ssl certificate',
                   }
@@ -355,7 +355,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
             }
           )}
           label={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
+            'xpack.fleet.settings.editOutputFlyout.kafkaSslCertificateAuthoritiesInputLabel',
             {
               defaultMessage: 'Server SSL certificate authorities (optional)',
             }

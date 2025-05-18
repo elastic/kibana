@@ -12,16 +12,17 @@ import type { SecurityAppStore } from '../../common/store';
 import type { StartServices } from '../../types';
 import { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
 
-const createDiscoverHistogramCustomFilterAction = (
+const createDiscoverHistogramCustomFilterAction = async (
   _store: SecurityAppStore,
   _history: History,
   coreSetup: CoreSetup,
   services: StartServices
 ) => {
-  const histogramApplyFilter = createFilterAction(
+  const [coreStart] = await coreSetup.getStartServices();
+  const histogramApplyFilter = await createFilterAction(
     services.customDataService.query.filterManager,
     services.customDataService.query.timefilter.timefilter,
-    coreSetup,
+    coreStart,
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );
@@ -40,7 +41,7 @@ const createDiscoverHistogramCustomTrigger = (
   });
 };
 
-export const registerDiscoverHistogramActions = (
+export const registerDiscoverHistogramActions = async (
   store: SecurityAppStore,
   history: History,
   coreSetup: CoreSetup,
@@ -48,7 +49,7 @@ export const registerDiscoverHistogramActions = (
 ) => {
   createDiscoverHistogramCustomTrigger(store, history, services);
 
-  const histogramApplyFilter = createDiscoverHistogramCustomFilterAction(
+  const histogramApplyFilter = await createDiscoverHistogramCustomFilterAction(
     store,
     history,
     coreSetup,

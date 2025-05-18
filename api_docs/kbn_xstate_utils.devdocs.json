@@ -82,6 +82,39 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-public.getPlaceholderFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getPlaceholderFor",
+        "description": [],
+        "signature": [
+          "<ImplementationFactory extends (...factoryArgs: any[]) => any>(_implementationFactory: ImplementationFactory) => ReturnType<ImplementationFactory>"
+        ],
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/xstate-utils",
+            "id": "def-public.getPlaceholderFor.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "_implementationFactory",
+            "description": [],
+            "signature": [
+              "ImplementationFactory"
+            ],
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
         "id": "def-public.isDevMode",
         "type": "Function",
         "tags": [],

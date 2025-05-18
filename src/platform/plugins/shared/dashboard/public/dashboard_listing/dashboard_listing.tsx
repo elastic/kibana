@@ -14,14 +14,17 @@ import { TableListView } from '@kbn/content-management-table-list-view';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { QueryClientProvider } from '@tanstack/react-query';
 
-import { DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID } from '../dashboard_constants';
+import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 import {
   coreServices,
   savedObjectsTaggingService,
   serverlessService,
   usageCollectionService,
 } from '../services/kibana_services';
+import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
 import { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
@@ -60,27 +63,29 @@ export const DashboardListing = ({
 
   return (
     <I18nProvider>
-      <TableListViewKibanaProvider
-        {...{
-          core: coreServices,
-          savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-          FormattedRelative,
-          favorites: dashboardFavoritesClient,
-          contentInsightsClient,
-          isKibanaVersioningEnabled: !serverlessService,
-        }}
-      >
-        <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
-          <>
-            {children}
-            <DashboardUnsavedListing
-              goToDashboard={goToDashboard}
-              unsavedDashboardIds={unsavedDashboardIds}
-              refreshUnsavedDashboards={refreshUnsavedDashboards}
-            />
-          </>
-        </TableListView>
-      </TableListViewKibanaProvider>
+      <QueryClientProvider client={dashboardQueryClient}>
+        <TableListViewKibanaProvider
+          {...{
+            core: coreServices,
+            savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+            FormattedRelative,
+            favorites: dashboardFavoritesClient,
+            contentInsightsClient,
+            isKibanaVersioningEnabled: !serverlessService,
+          }}
+        >
+          <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
+            <>
+              {children}
+              <DashboardUnsavedListing
+                goToDashboard={goToDashboard}
+                unsavedDashboardIds={unsavedDashboardIds}
+                refreshUnsavedDashboards={refreshUnsavedDashboards}
+              />
+            </>
+          </TableListView>
+        </TableListViewKibanaProvider>
+      </QueryClientProvider>
     </I18nProvider>
   );
 };

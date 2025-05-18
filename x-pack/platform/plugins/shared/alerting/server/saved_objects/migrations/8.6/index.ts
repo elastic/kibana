@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createEsoMigration, pipeMigrations } from '../utils';
-import { RawRule, RuleLastRunOutcomeValues } from '../../../types';
+import type { RawRule } from '../../../types';
+import { RuleLastRunOutcomeValues } from '../../../types';
 import { getDefaultMonitoring } from '../../../lib/monitoring';
 
 const succeededStatus = ['ok', 'active', 'succeeded'];
@@ -60,6 +61,7 @@ const getMonitoring = (attributes: RawRule) => {
 
   const { lastExecutionDate, lastDuration } = executionStatus;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const monitoringExecution = (monitoring as any).execution;
 
   return {

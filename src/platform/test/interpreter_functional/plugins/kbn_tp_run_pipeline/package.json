@@ -1,0 +1,14 @@
+{
+  "name": "@kbn/kbn-tp-run-pipeline-plugin",
+  "version": "1.0.0",
+  "main": "target/test/interpreter_functional/plugins/kbn_tp_run_pipeline",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "kbn": "node ./../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
+  }
+}

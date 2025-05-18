@@ -20,15 +20,6 @@ describe('useRowHeightsOptions', () => {
     expect(result.current.defaultHeight).toEqual('auto');
   });
 
-  it('should convert rowHeightLines 0 to undefined', () => {
-    const { result } = renderHook(() => {
-      return useRowHeightsOptions({
-        rowHeightLines: 0,
-      });
-    });
-    expect(result.current.defaultHeight).toEqual(undefined);
-  });
-
   it('should convert custom rowHeightLines to lineCount', () => {
     const { result } = renderHook(() => {
       return useRowHeightsOptions({

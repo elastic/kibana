@@ -40,7 +40,7 @@ export interface BaseFields8130 extends BaseFields8120 {
   [ALERT_HOST_CRITICALITY]: string | undefined;
   [ALERT_USER_CRITICALITY]: string | undefined;
   /**
-   * Risk scores fields was added aroung 8.5.0, but the fields were not added to the alert schema
+   * Risk scores fields was added around 8.5.0, but the fields were not added to the alert schema
    */
   [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: string | undefined;
   [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: number | undefined;

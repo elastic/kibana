@@ -236,6 +236,195 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "savedObjectsTagging",
+          "id": "def-server.SavedObjectTaggingStart.convertTagNameToId",
+          "type": "Function",
+          "tags": [],
+          "label": "convertTagNameToId",
+          "description": [],
+          "signature": [
+            "(tagName: string, allTags: ",
+            {
+              "pluginId": "savedObjectsTaggingOss",
+              "scope": "common",
+              "docId": "kibSavedObjectsTaggingOssPluginApi",
+              "section": "def-common.Tag",
+              "text": "Tag"
+            },
+            "[]) => string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "savedObjectsTagging",
+              "id": "def-server.SavedObjectTaggingStart.convertTagNameToId.$1",
+              "type": "string",
+              "tags": [],
+              "label": "tagName",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "savedObjectsTagging",
+              "id": "def-server.SavedObjectTaggingStart.convertTagNameToId.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "allTags",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "savedObjectsTaggingOss",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsTaggingOssPluginApi",
+                  "section": "def-common.Tag",
+                  "text": "Tag"
+                },
+                "[]"
+              ],
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "savedObjectsTagging",
+          "id": "def-server.SavedObjectTaggingStart.getTagsFromReferences",
+          "type": "Function",
+          "tags": [],
+          "label": "getTagsFromReferences",
+          "description": [],
+          "signature": [
+            "(references: ",
+            "SavedObjectReference",
+            "[], allTags: ",
+            {
+              "pluginId": "savedObjectsTaggingOss",
+              "scope": "common",
+              "docId": "kibSavedObjectsTaggingOssPluginApi",
+              "section": "def-common.Tag",
+              "text": "Tag"
+            },
+            "[]) => { tags: ",
+            {
+              "pluginId": "savedObjectsTaggingOss",
+              "scope": "common",
+              "docId": "kibSavedObjectsTaggingOssPluginApi",
+              "section": "def-common.Tag",
+              "text": "Tag"
+            },
+            "[]; missingRefs: ",
+            "SavedObjectReference",
+            "[]; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "savedObjectsTagging",
+              "id": "def-server.SavedObjectTaggingStart.getTagsFromReferences.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "references",
+              "description": [],
+              "signature": [
+                "SavedObjectReference",
+                "[]"
+              ],
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "savedObjectsTagging",
+              "id": "def-server.SavedObjectTaggingStart.getTagsFromReferences.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "allTags",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "savedObjectsTaggingOss",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsTaggingOssPluginApi",
+                  "section": "def-common.Tag",
+                  "text": "Tag"
+                },
+                "[]"
+              ],
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "savedObjectsTagging",
+          "id": "def-server.SavedObjectTaggingStart.replaceTagReferences",
+          "type": "Function",
+          "tags": [],
+          "label": "replaceTagReferences",
+          "description": [],
+          "signature": [
+            "(references: ",
+            "SavedObjectReference",
+            "[], newTagIds: string[]) => ",
+            "SavedObjectReference",
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "savedObjectsTagging",
+              "id": "def-server.SavedObjectTaggingStart.replaceTagReferences.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "references",
+              "description": [],
+              "signature": [
+                "SavedObjectReference",
+                "[]"
+              ],
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "savedObjectsTagging",
+              "id": "def-server.SavedObjectTaggingStart.replaceTagReferences.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "newTagIds",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -245,6 +434,261 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.convertTagNameToId",
+        "type": "Function",
+        "tags": [],
+        "label": "convertTagNameToId",
+        "description": [],
+        "signature": [
+          "(tagName: string, allTags: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          "[]) => string | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.convertTagNameToId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "tagName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.convertTagNameToId.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "allTags",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.getObjectTags",
+        "type": "Function",
+        "tags": [],
+        "label": "getObjectTags",
+        "description": [],
+        "signature": [
+          "(object: { references: ",
+          "SavedObjectReference",
+          "[]; }, allTags: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          "[]) => { tags: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          "[]; missingRefs: ",
+          "SavedObjectReference",
+          "[]; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getObjectTags.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "object",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTagging",
+                "id": "def-common.getObjectTags.$1.references",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getObjectTags.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "allTags",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.getTag",
+        "type": "Function",
+        "tags": [],
+        "label": "getTag",
+        "description": [],
+        "signature": [
+          "(tagId: string, allTags: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          "[]) => ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          " | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getTag.$1",
+            "type": "string",
+            "tags": [],
+            "label": "tagId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getTag.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "allTags",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.getTagIdsFromReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "getTagIdsFromReferences",
+        "description": [],
+        "signature": [
+          "(references: SavedObjectReferenceLike[]) => string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getTagIdsFromReferences.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReferenceLike[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "savedObjectsTagging",
         "id": "def-common.getTagsCapabilities",
@@ -271,7 +715,7 @@
           {
             "parentPluginId": "savedObjectsTagging",
             "id": "def-common.getTagsCapabilities.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "capabilities",
             "description": [],
@@ -279,6 +723,173 @@
               "Capabilities"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.getTagsFromReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "getTagsFromReferences",
+        "description": [],
+        "signature": [
+          "(references: ",
+          "SavedObjectReference",
+          "[], allTags: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          "[]) => { tags: ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "common",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-common.Tag",
+            "text": "Tag"
+          },
+          "[]; missingRefs: ",
+          "SavedObjectReference",
+          "[]; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getTagsFromReferences.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.getTagsFromReferences.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "allTags",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.replaceTagReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceTagReferences",
+        "description": [
+          "\nUpdate the given `references` array, replacing all the `tag` references with\nreferences for the given `newTagIds`, while preserving all references to non-tag objects."
+        ],
+        "signature": [
+          "(references: ",
+          "SavedObjectReference",
+          "[], newTagIds: string[]) => ",
+          "SavedObjectReference",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.replaceTagReferences.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.replaceTagReferences.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "newTagIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTagging",
+        "id": "def-common.tagIdToReference",
+        "type": "Function",
+        "tags": [],
+        "label": "tagIdToReference",
+        "description": [
+          "\nCreate a {@link SavedObjectReference | reference} for given tag id."
+        ],
+        "signature": [
+          "(tagId: string) => ",
+          "SavedObjectReference"
+        ],
+        "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTagging",
+            "id": "def-common.tagIdToReference.$1",
+            "type": "string",
+            "tags": [],
+            "label": "tagId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

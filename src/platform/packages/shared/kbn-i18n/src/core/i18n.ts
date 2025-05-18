@@ -8,7 +8,7 @@
  */
 
 import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
-import type { MessageDescriptor } from '@formatjs/intl';
+import type { MessageDescriptor, Formatters } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
 import { Translation, TranslationInput } from '../translation';
@@ -101,6 +101,11 @@ export function getLocale() {
   return intl.locale;
 }
 
+type MessageFormatters = Pick<
+  Formatters,
+  'getNumberFormat' | 'getDateTimeFormat' | 'getPluralRules'
+>;
+
 export interface TranslateArguments {
   /**
    * Will be used unless translation was successful
@@ -121,6 +126,10 @@ export interface TranslateArguments {
    * any attributes
    */
   ignoreTag?: boolean;
+  /**
+   * Custom formatters to override the default intl formatters
+   */
+  formatters?: MessageFormatters;
 }
 
 /**
@@ -131,10 +140,11 @@ export interface TranslateArguments {
  * @param [options.defaultMessage] - will be used unless translation was successful
  * @param [options.description] - message description, used by translators and other devs to understand the message context.
  * @param [options.ignoreTag] - Whether to treat HTML/XML tags as string literal instead of parsing them as tag token. When this is false we only allow simple tags without any attributes
+ * @param [options.formatters] - Custom formatters to override the default intl formatters
  */
 export function translate(
   id: string,
-  { values = {}, description, defaultMessage, ignoreTag }: TranslateArguments
+  { values = {}, description, defaultMessage, ignoreTag, formatters }: TranslateArguments
 ): string {
   if (!id || typeof id !== 'string') {
     throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
@@ -152,7 +162,8 @@ export function translate(
         description,
       },
       values,
-      { ignoreTag, shouldParseSkeletons: true }
+      // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
+      { ignoreTag, shouldParseSkeletons: true, formatters }
     );
   } catch (e) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);

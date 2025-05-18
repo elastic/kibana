@@ -24,10 +24,16 @@ export interface GetAgentsRequest {
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
+    searchAfter?: string;
+    openPit?: boolean;
+    pitId?: string;
+    pitKeepAlive?: string;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
+  pit?: string;
+  nextSearchAfter?: string;
   statusSummary?: Record<AgentStatus, number>;
 }
 

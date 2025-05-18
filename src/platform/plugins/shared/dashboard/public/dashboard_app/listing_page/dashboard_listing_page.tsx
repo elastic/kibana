@@ -12,7 +12,6 @@ import React, { useEffect, useState } from 'react';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
@@ -22,6 +21,7 @@ import {
 } from '../no_data/dashboard_app_no_data';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { DashboardRedirect } from '../types';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;

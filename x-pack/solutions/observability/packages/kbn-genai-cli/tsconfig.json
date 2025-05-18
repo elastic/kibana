@@ -1,0 +1,24 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/inference-common",
+    "@kbn/observability-utils-common",
+    "@kbn/kibana-api-cli",
+    "@kbn/dev-cli-runner",
+    "@kbn/inference-cli",
+    "@kbn/tooling-log",
+  ],
+}

@@ -7,8 +7,10 @@
 
 import { services as apiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
+import { RoleScopedSupertestProvider } from '../deployment_agnostic/services/role_scoped_supertest';
 
 export const services = {
   ...commonServices,
   usageAPI: apiIntegrationServices.usageAPI,
+  roleScopedSupertest: RoleScopedSupertestProvider,
 };

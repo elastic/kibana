@@ -36,32 +36,30 @@ export async function getTransactionsPerMinute({
       apm: {
         events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          ],
         },
-        aggs: {
-          transactionType: {
-            terms: {
-              field: TRANSACTION_TYPE,
-            },
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                },
-                aggs: {
-                  throughput: { rate: { unit: 'minute' as const } },
-                },
+      },
+      aggs: {
+        transactionType: {
+          terms: {
+            field: TRANSACTION_TYPE,
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+              },
+              aggs: {
+                throughput: { rate: { unit: 'minute' as const } },
               },
             },
           },

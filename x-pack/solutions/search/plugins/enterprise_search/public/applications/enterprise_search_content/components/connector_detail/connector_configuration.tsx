@@ -57,6 +57,12 @@ export const ConnectorConfiguration: React.FC = () => {
     [connectors]
   );
 
+  // TODO service_type === "" is considered unknown/custom connector multiple places replace all of them with a better solution
+  const CUSTOM_CONNECTOR = useMemo(
+    () => connectors.filter(({ serviceType }) => serviceType === ''),
+    [connectors]
+  );
+
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
 
   if (!connector) {
@@ -69,19 +75,10 @@ export const ConnectorConfiguration: React.FC = () => {
 
   const isWaitingForConnector = !connector.status || connector.status === ConnectorStatus.CREATED;
 
-  const nativeConnector = NATIVE_CONNECTORS.find(
-    (connectorDefinition) => connectorDefinition.serviceType === connector.service_type
-  ) || {
-    docsUrl: '',
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    iconPath: 'custom.svg',
-    isBeta: true,
-    isNative: false,
-    keywords: [],
-    name: connector.name,
-    serviceType: connector.service_type ?? '',
-  };
+  const nativeConnector =
+    NATIVE_CONNECTORS.find(
+      (connectorDefinition) => connectorDefinition.serviceType === connector.service_type
+    ) || CUSTOM_CONNECTOR[0];
 
   const iconPath = nativeConnector.iconPath;
 

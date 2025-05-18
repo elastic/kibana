@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
 import type { APMConfig } from '../../..';
 import type { ApmTransactionDocumentType } from '../../../../common/document_type';
@@ -15,7 +14,6 @@ import { FAAS_BILLED_DURATION, FAAS_ID, METRICSET_NAME } from '../../../../commo
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import type { RollupInterval } from '../../../../common/rollup';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { getVizColorForIndex } from '../../../../common/viz_colors';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
 import type { GenericMetricsChart } from '../fetch_and_transform_metrics';
@@ -86,7 +84,6 @@ async function getServerlessLatencySeries({
       }),
       key: 'transaction_duration',
       type: 'linemark',
-      color: getVizColorForIndex(1, theme),
       overallValue: transactionLatency.overallAvgDuration ?? 0,
       data: transactionLatency.latencyTimeseries,
     },

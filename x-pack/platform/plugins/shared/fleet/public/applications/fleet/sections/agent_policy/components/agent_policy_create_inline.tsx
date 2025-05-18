@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useSpaceSettingsContext } from '../../../../../hooks/use_space_settings_context';
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
-import { sendCreateAgentPolicy, useStartServices, useAuthz } from '../../../hooks';
+import { useStartServices, useAuthz, sendCreateAgentPolicyForRq } from '../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../common/services/generate_new_agent_policy';
 
 import { agentPolicyFormValidation } from '.';
@@ -48,7 +48,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   isFleetServerPolicy,
   agentPolicyName,
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, notifications } = useStartServices();
   const authz = useAuthz();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
@@ -83,17 +83,20 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   const createAgentPolicy = useCallback(async () => {
     try {
       setIsLoading(true);
-      const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
-      if (resp.error) throw resp.error;
-      if (resp.data) {
-        updateAgentPolicy(resp.data.item);
-      }
+      const data = await sendCreateAgentPolicyForRq(newAgentPolicy, { withSysMonitoring });
+
+      updateAgentPolicy(data.item);
     } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.agentPolicyCreateInline.errorTitle', {
+          defaultMessage: 'Error creating agent policy',
+        }),
+      });
       updateAgentPolicy(null, mapError(e));
     } finally {
       setIsLoading(false);
     }
-  }, [newAgentPolicy, withSysMonitoring, updateAgentPolicy]);
+  }, [newAgentPolicy, withSysMonitoring, updateAgentPolicy, notifications.toasts]);
 
   function mapError(e: { statusCode: number }): JSX.Element | undefined {
     switch (e.statusCode) {

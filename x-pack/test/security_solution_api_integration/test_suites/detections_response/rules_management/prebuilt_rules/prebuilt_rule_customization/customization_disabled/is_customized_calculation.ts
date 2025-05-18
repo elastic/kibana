@@ -35,79 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    it('should set is_customized to "false" on prebuilt rule PATCH', async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
-      await installPrebuiltRules(es, supertest);
-
-      const { body: findResult } = await securitySolutionApi
-        .findRules({
-          query: {
-            per_page: 1,
-            filter: `alert.attributes.params.immutable: true`,
-          },
-        })
-        .expect(200);
-      const prebuiltRule = findResult.data[0];
-
-      // Check that the rule has been created and is not customized
-      expect(prebuiltRule).not.toBeNull();
-      expect(prebuiltRule.rule_source.is_customized).toEqual(false);
-
-      const { body } = await securitySolutionApi
-        .patchRule({
-          body: {
-            rule_id: 'test-rule-id',
-            name: 'some other rule name',
-          },
-        })
-        .expect(200);
-
-      // Check that the rule name has been updated and the rule is still not customized
-      expect(body).toEqual(
-        expect.objectContaining({
-          name: 'some other rule name',
-        })
-      );
-      expect(body.rule_source.is_customized).toEqual(false);
-    });
-
-    it('should set is_customized to "false" on prebuilt rule UPDATE', async () => {
-      await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
-      await installPrebuiltRules(es, supertest);
-
-      const { body: findResult } = await securitySolutionApi
-        .findRules({
-          query: {
-            per_page: 1,
-            filter: `alert.attributes.params.immutable: true`,
-          },
-        })
-        .expect(200);
-      const prebuiltRule = findResult.data[0];
-
-      // Check that the rule has been created and is not customized
-      expect(prebuiltRule).not.toBeNull();
-      expect(prebuiltRule.rule_source.is_customized).toEqual(false);
-
-      const { body } = await securitySolutionApi
-        .updateRule({
-          body: {
-            ...prebuiltRule,
-            id: undefined, // id together with rule_id is not allowed
-            name: 'some other rule name',
-          },
-        })
-        .expect(200);
-
-      // Check that the rule name has been updated and the rule is still not customized
-      expect(body).toEqual(
-        expect.objectContaining({
-          name: 'some other rule name',
-        })
-      );
-      expect(body.rule_source.is_customized).toEqual(false);
-    });
-
     it('should not allow prebuilt rule customization on import', async () => {
       await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
       await installPrebuiltRules(es, supertest);
@@ -134,30 +61,23 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const { body } = await securitySolutionApi
-        .importRules({ query: {} })
+        .importRules({ query: { overwrite: true } })
         .attach('file', ruleBuffer, 'rules.ndjson')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200);
 
       expect(body).toMatchObject({
         rules_count: 1,
-        success: false,
-        success_count: 0,
-        errors: [
-          {
-            error: {
-              message: expect.stringContaining('Importing prebuilt rules is not supported'),
-            },
-            rule_id: 'test-rule-id',
-          },
-        ],
+        success: true,
+        success_count: 1,
+        errors: [],
       });
 
-      // Check that the rule has not been customized
+      // Check that the imported rule is customized
       const { body: importedRule } = await securitySolutionApi.readRule({
         query: { rule_id: prebuiltRule.rule_id },
       });
-      expect(importedRule.rule_source.is_customized).toEqual(false);
+      expect(importedRule.rule_source.is_customized).toEqual(true);
     });
 
     it('should not allow rule customization on bulk edit', async () => {

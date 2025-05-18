@@ -29,8 +29,10 @@ export class InventoryPlugin
     >
 {
   logger: Logger;
+  private isDev;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
+    this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
   }
   setup(
@@ -55,6 +57,7 @@ export class InventoryPlugin
           };
         }) as unknown as InventoryRouteHandlerResources['plugins'],
       },
+      isDev: this.isDev,
     });
 
     pluginsSetup.features.registerKibanaFeature(INVENTORY_SERVER_FEATURE);

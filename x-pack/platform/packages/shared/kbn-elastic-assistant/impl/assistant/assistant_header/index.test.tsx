@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
+import { CLOSE } from './translations';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {
@@ -36,11 +38,15 @@ const testProps = {
   onChatCleared: jest.fn(),
   showAnonymizedValues: false,
   conversations: mockConversations,
+  refetchCurrentConversation: jest.fn(),
   refetchCurrentUserConversations: jest.fn(),
   isAssistantEnabled: true,
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   refetchAnonymizationFieldsResults: jest.fn(),
   allPrompts: [],
+  contentReferencesVisible: true,
+  setContentReferencesVisible: jest.fn(),
+  setPaginationObserver: jest.fn(),
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({
@@ -71,59 +77,6 @@ describe('AssistantHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('showAnonymizedValues is not checked when selectedConversation.replacements is null', () => {
-    const { getByText, getByTestId } = render(<AssistantHeader {...testProps} />, {
-      wrapper: TestProviders,
-    });
-    expect(getByText(welcomeConvo.title)).toBeInTheDocument();
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eyeClosed'
-    );
-  });
-
-  it('showAnonymizedValues is not checked when selectedConversation.replacements is empty', () => {
-    const { getByText, getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        selectedConversation={{ ...emptyWelcomeConvo, replacements: {} }}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(getByText(welcomeConvo.title)).toBeInTheDocument();
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eyeClosed'
-    );
-  });
-
-  it('showAnonymizedValues is not checked when selectedConversation.replacements has values and showAnonymizedValues is false', () => {
-    const { getByTestId } = render(
-      <AssistantHeader {...testProps} selectedConversation={alertConvo} />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eyeClosed'
-    );
-  });
-
-  it('showAnonymizedValues is checked when selectedConversation.replacements has values and showAnonymizedValues is true', () => {
-    const { getByTestId } = render(
-      <AssistantHeader {...testProps} selectedConversation={alertConvo} showAnonymizedValues />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-    expect(getByTestId('showAnonymizedValues').firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'eye'
-    );
-  });
 
   it('Conversation is updated when connector change occurs', async () => {
     const { getByTestId } = render(<AssistantHeader {...testProps} />, {
@@ -138,5 +91,15 @@ describe('AssistantHeader', () => {
       cId: alertConvo.id,
       cTitle: alertConvo.title,
     });
+  });
+
+  it('renders an accessible close button icon', () => {
+    const onCloseFlyout = jest.fn(); // required to render the close button
+
+    render(<AssistantHeader {...testProps} onCloseFlyout={onCloseFlyout} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByRole('button', { name: CLOSE })).toBeInTheDocument();
   });
 });

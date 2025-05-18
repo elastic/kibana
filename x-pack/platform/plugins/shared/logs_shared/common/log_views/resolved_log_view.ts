@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
+import type {
+  DataView,
+  DataViewLazy,
+  DataViewsContract,
+  FieldSpec,
+} from '@kbn/data-views-plugin/common';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { defaultLogViewsStaticConfig } from './defaults';
@@ -15,17 +20,16 @@ import { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } f
 
 export type ResolvedLogViewField = FieldSpec;
 
-export interface ResolvedLogView {
+export interface ResolvedLogView<DataViewReference = DataViewLazy> {
   name: string;
   description: string;
   indices: string;
   timestampField: string;
   tiebreakerField: string;
   messageField: string[];
-  fields: ResolvedLogViewField[];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogViewColumnConfiguration[];
-  dataViewReference: DataView;
+  dataViewReference: DataViewReference;
 }
 
 export const resolveLogView = (
@@ -60,19 +64,14 @@ const resolveLegacyReference = async (
   }
 
   const indices = logViewAttributes.logIndices.indexName;
-
   const dataViewReference = await dataViewsService
-    .create(
-      {
-        id: `log-view-${logViewId}`,
-        name: logViewAttributes.name,
-        title: indices,
-        timeFieldName: TIMESTAMP_FIELD,
-        allowNoIndex: true,
-      },
-      false,
-      false
-    )
+    .createDataViewLazy({
+      id: `log-view-${logViewId}`,
+      name: logViewAttributes.name,
+      title: indices,
+      timeFieldName: TIMESTAMP_FIELD,
+      allowNoIndex: true,
+    })
     .catch((error) => {
       throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
     });
@@ -82,7 +81,6 @@ const resolveLegacyReference = async (
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: config.messageFields ?? defaultLogViewsStaticConfig.messageFields,
-    fields: dataViewReference.fields,
     runtimeMappings: {},
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
@@ -101,21 +99,20 @@ const resolveDataViewReference = async (
 
   const { dataViewId } = logViewAttributes.logIndices;
 
-  const dataView = await dataViewsService.get(dataViewId).catch((error) => {
+  const dataViewLazy = await dataViewsService.getDataViewLazy(dataViewId).catch((error) => {
     throw new ResolveLogViewError(`Failed to fetch data view "${dataViewId}": ${error}`, error);
   });
 
   return {
-    indices: dataView.getIndexPattern(),
-    timestampField: dataView.timeFieldName ?? TIMESTAMP_FIELD,
+    indices: dataViewLazy.getIndexPattern(),
+    timestampField: dataViewLazy.timeFieldName ?? TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
-    fields: dataView.fields,
-    runtimeMappings: resolveRuntimeMappings(dataView),
+    runtimeMappings: resolveRuntimeMappings(dataViewLazy),
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
     description: logViewAttributes.description,
-    dataViewReference: dataView,
+    dataViewReference: dataViewLazy,
   };
 };
 
@@ -134,19 +131,14 @@ const resolveKibanaAdvancedSettingReference = async (
   const indices = (await logSourcesService.getLogSources())
     .map((logSource) => logSource.indexPattern)
     .join(',');
-
   const dataViewReference = await dataViewsService
-    .create(
-      {
-        id: `log-view-${logViewId}`,
-        name: logViewAttributes.name,
-        title: indices,
-        timeFieldName: TIMESTAMP_FIELD,
-        allowNoIndex: true,
-      },
-      false,
-      false
-    )
+    .createDataViewLazy({
+      id: `log-view-${logViewId}`,
+      name: logViewAttributes.name,
+      title: indices,
+      timeFieldName: TIMESTAMP_FIELD,
+      allowNoIndex: true,
+    })
     .catch((error) => {
       throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
     });
@@ -156,7 +148,6 @@ const resolveKibanaAdvancedSettingReference = async (
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
-    fields: dataViewReference.fields,
     runtimeMappings: {},
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
@@ -166,6 +157,8 @@ const resolveKibanaAdvancedSettingReference = async (
 };
 
 // this might take other sources of runtime fields into account in the future
-const resolveRuntimeMappings = (dataView: DataView): estypes.MappingRuntimeFields => {
-  return dataView.getRuntimeMappings();
+const resolveRuntimeMappings = (
+  dataViewLazy: DataView | DataViewLazy
+): estypes.MappingRuntimeFields => {
+  return dataViewLazy.getRuntimeMappings();
 };

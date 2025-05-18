@@ -27,9 +27,8 @@ const AnimatedCounterComponent: React.FC<Props> = ({ animationDurationMs = 1000 
 
       const text = svg
         .append('text')
-        .attr('x', 3)
-        .attr('y', 26)
-        .attr('fill', euiTheme.colors.text)
+        .attr('y', 24)
+        .attr('fill', euiTheme.colors.textHeading)
         .text(zero);
 
       text
@@ -45,14 +44,14 @@ const AnimatedCounterComponent: React.FC<Props> = ({ animationDurationMs = 1000 
         })
         .duration(animationDurationMs);
     }
-  }, [animationDurationMs, count, euiTheme.colors.text]);
+  }, [animationDurationMs, count, euiTheme.colors.textHeading]);
 
   return (
     <svg
       css={css`
         height: 32px;
         margin-right: ${euiTheme.size.xs};
-        width: ${count < 100 ? 40 : 60}px;
+        width: ${count < 100 ? 32 : 48}px;
       `}
       data-test-subj="animatedCounter"
       ref={d3Ref}

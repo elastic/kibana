@@ -10,7 +10,7 @@
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, EuiDelayRender } from '@elastic/eui';
 import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { ChromeDocTitle, ThemeServiceSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -42,7 +42,7 @@ export const Page: React.FC<PageProps> = ({
   if (error) {
     return (
       <KibanaThemeProvider {...startServices}>
-        <EuiPageTemplate>
+        <EuiPageTemplate minHeight={0} offset={0}>
           <RedirectEmptyPrompt docTitle={docTitle} error={error} homeHref={homeHref} />
         </EuiPageTemplate>
       </KibanaThemeProvider>
@@ -51,9 +51,11 @@ export const Page: React.FC<PageProps> = ({
 
   return (
     <KibanaThemeProvider {...startServices}>
-      <EuiPageTemplate>
-        <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
-      </EuiPageTemplate>
+      <EuiDelayRender>
+        <EuiPageTemplate minHeight={0} offset={0}>
+          <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
+        </EuiPageTemplate>
+      </EuiDelayRender>
     </KibanaThemeProvider>
   );
 };

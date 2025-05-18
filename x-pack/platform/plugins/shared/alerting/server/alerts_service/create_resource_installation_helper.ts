@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { Logger } from '@kbn/core/server';
-import { IRuleTypeAlerts } from '../types';
+import type { Logger } from '@kbn/core/server';
+import type { IRuleTypeAlerts } from '../types';
 
 export interface InitializationPromise {
   result: boolean;

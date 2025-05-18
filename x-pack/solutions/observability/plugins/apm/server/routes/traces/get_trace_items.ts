@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last, omit } from 'lodash';
@@ -27,6 +27,8 @@ import {
   ERROR_LOG_MESSAGE,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
+  OTEL_SPAN_LINKS_SPAN_ID,
+  OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -35,6 +37,7 @@ import {
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS,
@@ -59,10 +62,13 @@ import type { APMEventClient } from '../../lib/helpers/create_es_client/create_a
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
+import { mapOtelToSpanLink } from '../span_links/utils';
+
+export type TraceDoc = WaterfallTransaction | WaterfallSpan;
 
 export interface TraceItems {
   exceedsMax: boolean;
-  traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
+  traceDocs: TraceDoc[];
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
   traceDocsTotal: number;
@@ -102,6 +108,7 @@ export async function getTraceItems({
     PARENT_ID,
     TRANSACTION_ID,
     SPAN_ID,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
     ERROR_CULPRIT,
     ERROR_LOG_MESSAGE,
     ERROR_EXC_MESSAGE,
@@ -118,18 +125,16 @@ export async function getTraceItems({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
-          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-        },
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
+        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
   });
 
   const traceResponsePromise = getTraceDocsPaginated({
@@ -166,7 +171,7 @@ export async function getTraceItems({
       error: {
         ...(event.error ?? {}),
         exception:
-          (errorSource?.error.exception?.length ?? 0) > 1
+          (errorSource?.error.exception?.length ?? 0) > 0
             ? errorSource?.error.exception
             : event?.error.exception && [event.error.exception],
         log: errorSource?.error.log,
@@ -300,7 +305,10 @@ async function getTraceDocsPerPage({
     SPAN_COMPOSITE_COMPRESSION_STRATEGY,
     SPAN_COMPOSITE_SUM,
     SPAN_SYNC,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
     CHILD_ID,
+    OTEL_SPAN_LINKS_SPAN_ID,
+    OTEL_SPAN_LINKS_TRACE_ID,
   ] as const);
 
   const body = {
@@ -341,13 +349,16 @@ async function getTraceDocsPerPage({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body,
+    ...body,
   });
 
   return {
     hits: res.hits.hits.map((hit) => {
       const sort = hit.sort;
-      const spanLinksSource = 'span' in hit._source ? hit._source.span?.links : undefined;
+      const fields = unflattenKnownApmEventFields(hit?.fields);
+
+      const spanLinks =
+        'span' in hit._source ? hit._source.span?.links : mapOtelToSpanLink(fields.links);
 
       if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
         const spanEvent = unflattenKnownApmEventFields(hit.fields, [
@@ -365,7 +376,7 @@ async function getTraceDocsPerPage({
             composite: spanEvent.span.composite
               ? (spanEvent.span.composite as Required<WaterfallSpan['span']>['composite'])
               : undefined,
-            links: spanLinksSource,
+            links: spanLinks,
           },
           ...(spanEvent.child ? { child: spanEvent.child as WaterfallSpan['child'] } : {}),
         };
@@ -384,7 +395,7 @@ async function getTraceDocsPerPage({
         },
         span: {
           ...txEvent.span,
-          links: spanLinksSource,
+          links: spanLinks,
         },
       };
 

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { Observable } from 'rxjs';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RouteAuthz, StartServicesAccessor } from '@kbn/core/server';
 import { VersionedRouteValidation } from '@kbn/core-http-server';
@@ -19,6 +20,19 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
+
+/**
+ * Copied from `@kbn/data-plugin/server` to avoid a cyclic dependency.
+ *
+ * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`
+ * which aborts when the given request is aborted.
+ * @param aborted$ The observable of abort events (usually `request.events.aborted$`)
+ */
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+}
 
 /**
  * Accepts one of the following:
@@ -42,7 +56,19 @@ export const parseFields = (fields: string | string[], fldName: string): string[
 
 const access = 'internal';
 
-export type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
+export type IBody =
+  | {
+      index_filter?: estypes.QueryDslQueryContainer;
+      runtime_mappings?: estypes.MappingRuntimeFields;
+    }
+  | undefined;
+
+export const bodySchema = schema.maybe(
+  schema.object({
+    index_filter: schema.maybe(schema.any()),
+    runtime_mappings: schema.maybe(schema.any()),
+  })
+);
 export interface IQuery {
   pattern: string;
   meta_fields: string | string[];
@@ -111,7 +137,7 @@ export const validate: VersionedRouteValidation<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
-    body: schema.maybe(schema.object({ index_filter: schema.any() })),
+    body: bodySchema,
   },
   response: {
     200: {
@@ -126,6 +152,7 @@ export const validate: VersionedRouteValidation<any, any, any> = {
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
+    const abortSignal = getRequestAbortedSignal(request.events.aborted$);
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
     const uiSettings = core.uiSettings.client;
@@ -148,6 +175,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
     // not available to get request
     const indexFilter = request.body?.index_filter;
+    const runtimeMappings = request.body?.runtime_mappings;
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
@@ -174,7 +202,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         indexFilter,
         allowHidden,
         includeEmptyFields,
+        runtimeMappings,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
+        abortSignal,
       });
 
       const body: { fields: FieldDescriptorRestResponse[]; indices: string[] } = {
@@ -220,26 +250,23 @@ export const registerFieldForWildcard = (
   const authz: RouteAuthz = { enabled: false, reason: 'Authorization provided by Elasticsearch' };
 
   // handler
-  router.versioned.put({ path, access }).addVersion(
+  router.versioned.put({ path, access, security: { authz } }).addVersion(
     {
       version,
-      security: { authz },
       validate,
     },
     configuredHandler
   );
-  router.versioned.post({ path, access }).addVersion(
+  router.versioned.post({ path, access, security: { authz } }).addVersion(
     {
       version,
-      security: { authz },
       validate,
     },
     configuredHandler
   );
-  router.versioned.get({ path, access }).addVersion(
+  router.versioned.get({ path, access, security: { authz } }).addVersion(
     {
       version,
-      security: { authz },
       validate: { request: { query: querySchema }, response: validate.response },
     },
     configuredHandler

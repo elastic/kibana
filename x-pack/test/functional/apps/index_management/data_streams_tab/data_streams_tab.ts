@@ -49,7 +49,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 },
               },
               lifecycle: {
-                // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
                 enabled: true,
               },
             },
@@ -288,6 +287,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
         await testSubjects.click('closeDetailsButton');
 
+        // Perform rollover so that index mode of data stream is updated
+        await es.indices.rollover({
+          alias: TEST_DS_NAME,
+        });
+
         // Navigate to the data streams tab
         await pageObjects.indexManagement.changeTabs('data_streamsTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -343,7 +347,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await verifyModeHasBeenChanged(INDEX_MODE.STANDARD);
       });
 
-      it('allows to upgrade data stream from time series to logsdb index mode', async () => {
+      // Fails because of https://github.com/elastic/elasticsearch/issues/126473
+      it.skip('allows to upgrade data stream from time series to logsdb index mode', async () => {
         await setIndexModeTemplate({
           mode: 'time_series',
           routing_path: 'test',
@@ -365,7 +370,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
       });
 
-      it('allows to downgrade data stream from logsdb to time series index mode', async () => {
+      // Fails because of https://github.com/elastic/elasticsearch/issues/126473
+      it.skip('allows to downgrade data stream from logsdb to time series index mode', async () => {
         await setIndexModeTemplate({
           mode: 'logsdb',
         });

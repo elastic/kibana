@@ -8,14 +8,15 @@
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import { SourcePicker, SourcePickerProps } from './source_picker';
 
 export function SourceModal(props: SourcePickerProps) {
   return (
-    <div className="gphSourceModal">
+    <div css={sourceModalStyles}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id="source-modal-title">
           <FormattedMessage
             id="xpack.graph.sourceModal.title"
             defaultMessage="Select a data source"
@@ -28,3 +29,8 @@ export function SourceModal(props: SourcePickerProps) {
     </div>
   );
 }
+
+const sourceModalStyles = css`
+  width: 720px;
+  min-height: 530px;
+`;

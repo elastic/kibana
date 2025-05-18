@@ -27,23 +27,21 @@ export const useSimpleRunOnceMonitors = ({
   const { data, loading } = useEsSearch(
     createEsParams({
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              FINAL_SUMMARY_FILTER,
-              {
-                term: {
-                  test_run_id: testRunId,
-                },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            FINAL_SUMMARY_FILTER,
+            {
+              term: {
+                test_run_id: testRunId,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       size: 1000,

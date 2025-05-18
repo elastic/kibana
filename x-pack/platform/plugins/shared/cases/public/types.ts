@@ -31,6 +31,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -78,7 +79,10 @@ export interface CasesPublicStartDependencies {
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
-  lens: LensPublicStart;
+  /**
+   * Lens is not supported in all serverless tiers
+   */
+  lens?: LensPublicStart;
   /**
    * Cases in used by other plugins. Plugins pass the
    * service to their KibanaContext. ML does not pass
@@ -92,6 +96,7 @@ export interface CasesPublicStartDependencies {
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**

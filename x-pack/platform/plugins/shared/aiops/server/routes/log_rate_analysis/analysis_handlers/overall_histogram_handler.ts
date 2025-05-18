@@ -46,11 +46,8 @@ export const overallHistogramHandlerFactory =
         {
           index: requestBody.index,
           size: 0,
-          body: {
-            query: overallHistogramQuery,
-            aggs: wrap(miniHistogramAgg),
-            size: 0,
-          },
+          query: overallHistogramQuery,
+          aggs: wrap(miniHistogramAgg),
         },
         { signal: abortSignal, maxRetries: 0 }
       );

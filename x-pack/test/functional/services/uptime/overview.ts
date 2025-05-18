@@ -15,8 +15,8 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
     async expandMonitorDetail(id: string): Promise<void> {
       return testSubjects.click(`xpack.synthetics.monitorList.${id}.expandMonitorDetail`);
     },
-    async openIntegrationsPopoverForMonitor(id: string): Promise<void> {
-      return testSubjects.click(`xpack.synthetics.monitorList.actionsPopover.${id}`);
+    async openIntegrationsPopoverForMonitor(id: string, plugin = 'synthetics'): Promise<void> {
+      return testSubjects.click(`xpack.${plugin}.monitorList.actionsPopover.${id}`);
     },
     async openAlertsPopover(): Promise<void> {
       return testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');

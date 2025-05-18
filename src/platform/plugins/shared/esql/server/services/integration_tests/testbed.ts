@@ -48,14 +48,12 @@ export class EsqlServiceTestbed {
 
     await client.indices.create({
       index: 'lookup_index1',
-      body: {
-        settings: {
-          'index.mode': 'lookup',
-        },
-        mappings: {
-          properties: {
-            field1: { type: 'keyword' },
-          },
+      settings: {
+        'index.mode': 'lookup',
+      },
+      mappings: {
+        properties: {
+          field1: { type: 'keyword' },
         },
       },
     });
@@ -63,17 +61,56 @@ export class EsqlServiceTestbed {
     // Lookup index with aliases
     await client.indices.create({
       index: 'lookup_index2',
-      body: {
-        settings: {
-          'index.mode': 'lookup',
+      settings: {
+        'index.mode': 'lookup',
+      },
+      aliases: {
+        lookup_index2_alias1: {},
+        lookup_index2_alias2: {},
+      },
+      mappings: {
+        properties: {
+          field2: { type: 'keyword' },
         },
-        aliases: {
-          lookup_index2_alias1: {},
-          lookup_index2_alias2: {},
+      },
+    });
+  }
+
+  public async setupTimeseriesIndices() {
+    const client = this.esClient();
+
+    await client.indices.create({
+      index: 'ts_index1',
+      settings: {
+        'index.mode': 'time_series',
+        'index.routing_path': ['field1'],
+      },
+      mappings: {
+        properties: {
+          field1: {
+            type: 'long',
+            time_series_dimension: true,
+          },
         },
-        mappings: {
-          properties: {
-            field2: { type: 'keyword' },
+      },
+    });
+
+    // Lookup index with aliases
+    await client.indices.create({
+      index: 'ts_index2',
+      settings: {
+        'index.mode': 'time_series',
+        'index.routing_path': ['field2'],
+      },
+      aliases: {
+        ts_index2_alias1: {},
+        ts_index2_alias2: {},
+      },
+      mappings: {
+        properties: {
+          field2: {
+            type: 'long',
+            time_series_dimension: true,
           },
         },
       },

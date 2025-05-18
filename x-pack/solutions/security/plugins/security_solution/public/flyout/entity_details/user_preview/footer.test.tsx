@@ -18,7 +18,6 @@ const mockProps: UserPreviewPanelFooterProps = {
   userName: 'test',
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 describe('<UserPreviewPanelFooter />', () => {

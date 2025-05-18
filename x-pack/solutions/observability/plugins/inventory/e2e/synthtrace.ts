@@ -10,6 +10,7 @@ import type {
   EntityFields,
   ApmFields,
   InfraDocument,
+  LogDocument,
 } from '@kbn/apm-synthtrace-client';
 
 export const entitiesSynthtrace = {
@@ -31,7 +32,7 @@ export const apmSynthtrace = {
 };
 
 export const logsSynthtrace = {
-  index: (events: SynthtraceGenerator<ApmFields> | Array<Serializable<ApmFields>>) =>
+  index: (events: SynthtraceGenerator<LogDocument> | Array<Serializable<LogDocument>>) =>
     cy.task(
       'logsSynthtrace:index',
       Array.from(events).flatMap((event) => event.serialize())

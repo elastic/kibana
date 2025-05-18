@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
@@ -15,10 +15,8 @@ import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
-  body: {
-    size: number;
-    track_total_hits: boolean | number;
-  };
+  size: number;
+  track_total_hits: boolean | number;
 };
 
 export type InfraMetricsClient = Awaited<ReturnType<typeof getInfraMetricsClient>>;
@@ -47,7 +45,7 @@ export async function getInfraMetricsClient({
     search<TDocument, TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
-      const searchFilter = searchParams.body.query?.bool?.must_not ?? [];
+      const searchFilter = searchParams.query?.bool?.must_not ?? [];
 
       // This flattens arrays by one level, and non-array values can be added as well, so it all
       // results in a nice [QueryDsl, QueryDsl, ...] array.
@@ -60,14 +58,11 @@ export async function getInfraMetricsClient({
           ...searchParams,
           ignore_unavailable: true,
           index: metricsIndices,
-          body: {
-            ...searchParams.body,
-            query: {
-              ...searchParams.body.query,
-              bool: {
-                ...searchParams.body.query?.bool,
-                must_not: mustNot,
-              },
+          query: {
+            ...searchParams.query,
+            bool: {
+              ...searchParams.query?.bool,
+              must_not: mustNot,
             },
           },
         },

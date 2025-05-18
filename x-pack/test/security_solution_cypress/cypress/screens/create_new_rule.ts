@@ -9,6 +9,8 @@ export const ABOUT_CONTINUE_BTN = '[data-test-subj="about-continue"]';
 
 export const ABOUT_EDIT_BUTTON = '[data-test-subj="edit-about-rule"]';
 
+export const DEFINITION_EDIT_TAB = '[data-test-subj="edit-rule-define-tab"]';
+
 export const ABOUT_EDIT_TAB = '[data-test-subj="edit-rule-about-tab"]';
 
 export const ACTIONS_EDIT_TAB = '[data-test-subj="edit-rule-actions-tab"]';
@@ -106,8 +108,7 @@ export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
 
 export const THREAT_MATCH_QUERY_REQUIRED = 'An indicator index query is required.';
 
-export const DATA_VIEW_COMBO_BOX =
-  '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
+export const DATA_VIEW_COMBO_BOX = '[data-test-subj="pick-rule-data-source"]';
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
 

@@ -22,11 +22,7 @@ import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import {
-  ML_MANAGE_TRAINED_MODELS_PATH,
-  NEW_INDEX_PATH,
-} from '../../../enterprise_search_content/routes';
+import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../enterprise_search_content/routes';
 import { docLinks } from '../../../shared/doc_links';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
@@ -90,7 +86,7 @@ const steps: EuiContainedStepProps[] = [
     children: (
       <EuiLinkTo
         data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-createIndexButton"
-        to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
+        to={generatePath('/app/elasticsearch/indices/create')}
         shouldNotCreateHref
       >
         <EuiButton iconType="plusInCircle">

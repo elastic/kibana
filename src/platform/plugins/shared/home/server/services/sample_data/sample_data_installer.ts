@@ -161,13 +161,11 @@ export class SampleDataInstaller {
       if (dataIndex.isDataStream) {
         const request = {
           name: index,
-          body: {
-            template: {
-              mappings: { properties: dataIndex.fields },
-            },
-            index_patterns: [index],
-            data_stream: {},
+          template: {
+            mappings: { properties: dataIndex.fields },
           },
+          index_patterns: [index],
+          data_stream: {},
         };
         await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
 
@@ -177,14 +175,12 @@ export class SampleDataInstaller {
       } else {
         await this.esClient.asCurrentUser.indices.create({
           index,
-          body: {
-            settings: {
-              index: {
-                ...dataIndex.indexSettings,
-              },
+          settings: {
+            index: {
+              ...dataIndex.indexSettings,
             },
-            mappings: { properties: dataIndex.fields },
           },
+          mappings: { properties: dataIndex.fields },
         });
       }
     } catch (err) {

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { sum } from 'lodash';
 import objectHash from 'object-hash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
@@ -41,6 +40,7 @@ export const getStats = async ({
   filter,
   numBuckets,
   offset,
+  withTimeseries,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -48,6 +48,7 @@ export const getStats = async ({
   filter: QueryDslQueryContainer[];
   numBuckets: number;
   offset?: string;
+  withTimeseries: boolean;
 }) => {
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -61,6 +62,7 @@ export const getStats = async ({
     endWithOffset,
     filter,
     numBuckets,
+    withTimeseries,
   });
 
   return (
@@ -85,27 +87,15 @@ export const getStats = async ({
           type: NodeType.dependency as const,
         },
         value: {
-          count: sum(bucket.timeseries.buckets.map((dateBucket) => dateBucket.count.value ?? 0)),
-          latency_sum: sum(
-            bucket.timeseries.buckets.map((dateBucket) => dateBucket.latency_sum.value ?? 0)
-          ),
-          error_count: sum(
-            bucket.timeseries.buckets.flatMap(
-              (dateBucket) =>
-                dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0
-            )
-          ),
+          count: bucket.doc_count ?? 0,
+          latency_sum: bucket.total_latency_sum.value ?? 0,
+          error_count: bucket.error_count.doc_count ?? 0,
         },
-        timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
+        timeseries: bucket.timeseries?.buckets.map((dateBucket) => ({
           x: dateBucket.key + offsetInMs,
-          count: dateBucket.count.value ?? 0,
-          latency_sum: dateBucket.latency_sum.value ?? 0,
-          error_count:
-            dateBucket[EVENT_OUTCOME].buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-            )?.count.value ?? 0,
+          count: dateBucket.doc_count ?? 0,
+          latency_sum: dateBucket.total_latency_sum.value ?? 0,
+          error_count: dateBucket.error_count.doc_count ?? 0,
         })),
       };
     }) ?? []
@@ -118,6 +108,7 @@ async function getConnectionStats({
   endWithOffset,
   filter,
   numBuckets,
+  withTimeseries,
 }: {
   apmEventClient: APMEventClient;
   startWithOffset: number;
@@ -125,7 +116,27 @@ async function getConnectionStats({
   filter: QueryDslQueryContainer[];
   numBuckets: number;
   after?: { serviceName: string | number; dependencyName: string | number };
+  withTimeseries: boolean;
+  dependencyNames?: string[];
 }) {
+  const statsAggs = {
+    total_latency_sum: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+      },
+    },
+    total_latency_count: {
+      sum: {
+        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+      },
+    },
+    error_count: {
+      filter: {
+        bool: { filter: [{ terms: { [EVENT_OUTCOME]: [EventOutcome.failure] } }] },
+      },
+    },
+  };
+
   return apmEventClient.search('get_connection_stats', {
     apm: {
       sources: [
@@ -135,113 +146,83 @@ async function getConnectionStats({
         },
       ],
     },
-    body: {
-      track_total_hits: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...filter,
-            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...excludeRumExitSpansQuery(),
-          ],
-        },
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...filter,
+          ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...excludeRumExitSpansQuery(),
+        ],
       },
-      aggs: {
-        connections: {
-          composite: {
-            size: MAX_ITEMS,
-            sources: asMutableArray([
-              {
-                serviceName: {
-                  terms: {
-                    field: SERVICE_NAME,
-                  },
+    },
+    aggs: {
+      connections: {
+        composite: {
+          size: MAX_ITEMS,
+          sources: asMutableArray([
+            {
+              serviceName: {
+                terms: {
+                  field: SERVICE_NAME,
                 },
               },
-              {
-                dependencyName: {
-                  terms: {
-                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
-                  },
+            },
+            {
+              dependencyName: {
+                terms: {
+                  field: SPAN_DESTINATION_SERVICE_RESOURCE,
                 },
               },
-            ] as const),
+            },
+          ] as const),
+        },
+        aggs: {
+          sample: {
+            top_metrics: {
+              size: 1,
+              metrics: asMutableArray([
+                {
+                  field: SERVICE_ENVIRONMENT,
+                },
+                {
+                  field: AGENT_NAME,
+                },
+                {
+                  field: SPAN_TYPE,
+                },
+                {
+                  field: SPAN_SUBTYPE,
+                },
+              ] as const),
+              sort: {
+                '@timestamp': 'desc',
+              },
+            },
           },
-          aggs: {
-            sample: {
-              top_metrics: {
-                size: 1,
-                metrics: asMutableArray([
-                  {
-                    field: SERVICE_ENVIRONMENT,
-                  },
-                  {
-                    field: AGENT_NAME,
-                  },
-                  {
-                    field: SPAN_TYPE,
-                  },
-                  {
-                    field: SPAN_SUBTYPE,
-                  },
-                ] as const),
-                sort: {
-                  '@timestamp': 'desc',
-                },
-              },
-            },
-            total_latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-              },
-            },
-            total_latency_count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: getBucketSize({
-                  start: startWithOffset,
-                  end: endWithOffset,
-                  numBuckets,
-                  minBucketSize: 60,
-                }).intervalString,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
-                },
-              },
-              aggs: {
-                latency_sum: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-                  },
-                },
-                count: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                  },
-                },
-                [EVENT_OUTCOME]: {
-                  terms: {
-                    field: EVENT_OUTCOME,
-                  },
-                  aggs: {
-                    count: {
-                      sum: {
-                        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-                      },
+          ...statsAggs,
+          ...(withTimeseries
+            ? {
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: getBucketSize({
+                      start: startWithOffset,
+                      end: endWithOffset,
+                      numBuckets,
+                      minBucketSize: 60,
+                    }).intervalString,
+                    extended_bounds: {
+                      min: startWithOffset,
+                      max: endWithOffset,
                     },
                   },
+                  aggs: statsAggs,
                 },
-              },
-            },
-          },
+              }
+            : undefined),
         },
       },
     },

@@ -37,7 +37,7 @@
           },
           ") => Promise<void>"
         ],
-        "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "BundlerConfig"
               }
             ],
-            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,7 +84,7 @@
           },
           ") => Promise<void>"
         ],
-        "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,7 +104,7 @@
                 "text": "MergerConfig"
               }
             ],
-            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,7 +122,7 @@
         "tags": [],
         "label": "BundlerConfig",
         "description": [],
-        "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -133,7 +133,7 @@
             "tags": [],
             "label": "sourceGlob",
             "description": [],
-            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +144,7 @@
             "tags": [],
             "label": "outputFilePath",
             "description": [],
-            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,7 +158,7 @@
             "signature": [
               "BundleOptions | undefined"
             ],
-            "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -172,7 +172,7 @@
         "tags": [],
         "label": "MergerConfig",
         "description": [],
-        "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -186,7 +186,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,7 +197,7 @@
             "tags": [],
             "label": "outputFilePath",
             "description": [],
-            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -211,7 +211,7 @@
             "signature": [
               "MergerOptions | undefined"
             ],
-            "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
             "trackAdoption": false
           }

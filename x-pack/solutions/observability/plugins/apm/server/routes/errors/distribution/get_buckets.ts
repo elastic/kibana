@@ -40,33 +40,31 @@ export async function getBuckets({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          must_not: {
-            term: { 'error.type': 'crash' },
-          },
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(ERROR_GROUP_ID, groupId),
-          ],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        must_not: {
+          term: { 'error.type': 'crash' },
         },
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(ERROR_GROUP_ID, groupId),
+        ],
       },
-      aggs: {
-        distribution: {
-          histogram: {
-            field: '@timestamp',
-            min_doc_count: 0,
-            interval: bucketSize,
-            extended_bounds: {
-              min: start,
-              max: end,
-            },
+    },
+    aggs: {
+      distribution: {
+        histogram: {
+          field: '@timestamp',
+          min_doc_count: 0,
+          interval: bucketSize,
+          extended_bounds: {
+            min: start,
+            max: end,
           },
         },
       },

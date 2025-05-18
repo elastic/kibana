@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
@@ -32,7 +33,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   return {
-    testFiles: [resolve(__dirname, './tests/onboarding_token.ts')],
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
+    testFiles: [resolve(__dirname, './tests/onboarding.ts')],
 
     services,
     pageObjects,

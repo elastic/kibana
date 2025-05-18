@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
@@ -46,7 +47,7 @@ export const registerUpdateInsightsRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteWorkflowInsights'] },
+        { all: ['canReadWorkflowInsights'] },
         endpointContext.logFactory.get('workflowInsights'),
         updateInsightsRouteHandler(endpointContext)
       )
@@ -63,14 +64,68 @@ const updateInsightsRouteHandler = (
 > => {
   const logger = endpointContext.logFactory.get('workflowInsights');
 
-  return async (_, request, response) => {
+  const isOnlyActionTypeUpdate = (body: Partial<UpdateWorkflowInsightsRequestBody>): boolean => {
+    // Type guard is done by schema validation
+    if (!body?.action?.type) return false;
+    // Make sure the body only contains the action.type field
+    return Object.keys(body).length === 1 && Object.keys(body.action).length === 1;
+  };
+
+  return async (context, request, response) => {
     const { insightId } = request.params;
+    const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
+    const { endpointManagementSpaceAwarenessEnabled } = endpointContext.experimentalFeatures;
+
+    const onlyActionTypeUpdate = isOnlyActionTypeUpdate(request.body);
+
+    if (!canWriteWorkflowInsights && !onlyActionTypeUpdate) {
+      return response.forbidden({ body: 'Unauthorized to update workflow insights' });
+    }
+
+    if (onlyActionTypeUpdate) {
+      if (request.body.action?.type === 'remediated') {
+        const telemetry = endpointContext.service.getTelemetryService();
+        telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT.eventType, {
+          insightId,
+        });
+      }
+    }
 
     logger.debug(`Updating insight ${insightId}`);
+
     try {
+      const retrievedInsight = (
+        await securityWorkflowInsightsService.fetch({ ids: [insightId] })
+      )[0];
+
+      if (!retrievedInsight) {
+        throw new Error('Failed to retrieve insight');
+      }
+
+      const backingIndex = retrievedInsight._index;
+
+      // If the endpoint management space awareness feature is enabled, we need to ensure that the agent IDs are in the current space
+      if (endpointManagementSpaceAwarenessEnabled) {
+        const spaceId = (await context.securitySolution).getSpaceId();
+        const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
+
+        // We need to make sure the agent IDs, both existing and injected through the request body, are in the current space
+        const existingAgentIds = retrievedInsight?._source?.target?.ids;
+        const newAgentIds = request.body.target?.ids;
+
+        const combinedAgentIds = Array.from(
+          new Set([...(existingAgentIds ?? []), ...(newAgentIds ?? [])])
+        );
+
+        if (combinedAgentIds.length > 0) {
+          await fleetServices.ensureInCurrentSpace({ agentIds: combinedAgentIds });
+        }
+      }
+
       const body = await securityWorkflowInsightsService.update(
         insightId,
-        request.body as Partial<SecurityWorkflowInsight>
+        request.body as Partial<SecurityWorkflowInsight>,
+        backingIndex
       );
       return response.ok({ body });
     } catch (e) {

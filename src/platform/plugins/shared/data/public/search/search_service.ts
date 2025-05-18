@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { handleWarnings } from '@kbn/search-response-warnings';
 import {
   CoreSetup,

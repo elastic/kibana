@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from './use_fetcher';
-import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useAnyOfApmParams } from './use_apm_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
+import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
 
 export type TraceSamplesFetchResult = ReturnType<typeof useTransactionTraceSamplesFetcher>;
@@ -18,16 +17,16 @@ export function useTransactionTraceSamplesFetcher({
   transactionName,
   kuery,
   environment,
+  rangeFrom,
+  rangeTo,
 }: {
   transactionName: string;
   kuery: string;
   environment: string;
+  rangeFrom: string;
+  rangeTo: string;
 }) {
   const { serviceName, transactionType } = useApmServiceContext();
-
-  const {
-    query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -61,6 +60,7 @@ export function useTransactionTraceSamplesFetcher({
     },
     // the samples should not be refetched if the transactionId or traceId changes
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,

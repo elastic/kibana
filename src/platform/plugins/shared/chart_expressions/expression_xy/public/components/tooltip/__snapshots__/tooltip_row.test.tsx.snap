@@ -3,19 +3,17 @@
 exports[`TooltipRow should render label and value if both are specified 1`] = `
 <tr>
   <td
-    className="detailedTooltip__label"
+    css="unknown styles"
   >
     <div
-      className="detailedTooltip__labelContainer"
+      css="unknown styles"
     >
       tooltip
     </div>
   </td>
-  <td
-    className="detailedTooltip__value"
-  >
+  <td>
     <div
-      className="detailedTooltip__valueContainer"
+      css="unknown styles"
     >
       0
     </div>

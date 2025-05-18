@@ -102,6 +102,23 @@ router.get({
 }, handler);
 ```
 
+### Naming conventions for privileges
+1. **Privilege should start with a valid `ApiOperation`**:
+   - **Valid operations**: `manage`, `read`, `update`, `delete`, `create`.
+   - Use the corresponding methods from the `ApiPrivileges` utility class: `ApiPrivileges.manage`, `ApiPrivileges.read`, etc.
+2. **Use `_` as the separator** between the operation and the subject.
+
+**Examples**:
+Incorrect privilege names ❌
+- `read-entity-a`: Uses `-` instead of `_`.
+- `delete_entity-a`: Mixes `_` and `-`.
+- `entity_manage`: Places the subject name before the operation.
+
+Correct privilege names ✅
+- `read_entity_a`
+- `delete_entity_a`
+- `manage_entity`
+
 ### Configuring operator and superuser privileges
 We have two special predefined privilege sets that can be used in security configuration:
 1. Operator
@@ -195,6 +212,48 @@ router.get({
   security: {
     authz: {
       requiredPrivileges: [{ allRequired: ['<privilege_1>', '<privilege_2>'], anyRequired: ['<privilege_3>', '<privilege_4>'] }],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 4: Complex configuration with nested `allOf`.**
+Requires (`<privilege_1>` AND `<privilege_2>`) OR (`<privilege_3>` AND `<privilege_4>`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [
+        { 
+          anyRequired: [
+            { allOf: ['<privilege_1>', '<privilege_2>']}, 
+            { allOf: ['<privilege_3>', '<privilege_4>']}
+          ],
+        }
+      ],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 5: Complex configuration with nested `anyOf`.**
+Requires (`<privilege_1>` OR `<privilege_2>`) AND (`<privilege_3>` OR `<privilege_4>`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [
+        { 
+          allRequired: [
+            { anyOf: ['<privilege_1>', '<privilege_2>']}, 
+            { anyOf: ['<privilege_3>', '<privilege_4>']}
+          ],
+        }
+      ],
     },
   },
   ...

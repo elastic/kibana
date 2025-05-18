@@ -35,25 +35,25 @@ export class StorybookMock extends AbstractStorybookMock<
   propArguments = {
     category: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
     title: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
     description: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
     button: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
@@ -61,7 +61,7 @@ export class StorybookMock extends AbstractStorybookMock<
 
   serviceArguments = {
     canAccessFleet: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: true,
     },
   };

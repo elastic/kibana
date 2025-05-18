@@ -22,11 +22,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
-
+                $ref: '#/components/schemas/ScanRouteResponse'
 components:
   schemas:
     ScanRouteRequestBody:
+      example:
+        endpoint_ids:
+          - "ed518850-681a-4d60-bb98-e22640cae2a8"
+        parameters:
+          path: "/usr/my-file.txt"
+        comment: "Scan the file for malware"
       allOf:
         - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
@@ -40,4 +45,34 @@ components:
               properties:
                 path:
                   type: string
+                  description: "The folder or file’s full path (including the file name)."
+                  example: "/usr/my-file.txt"
+    ScanRouteResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "27ba1b42-7cc6-4e53-86ce-675c876092b2"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: "gke-endpoint-gke-clu-endpoint-node-po-e1a3ab89-4c4r"
+          agentType: "endpoint"
+          command: "scan"
+          startedAt: "2023-07-28T19:00:03.911Z"
+          isCompleted: false
+          wasSuccessful: false
+          isExpired: false
+          status: "pending"
+          outputs: { }
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          createdBy: "myuser"
+          parameters:
+            path: "/usr/my-file.txt"
+
+
 

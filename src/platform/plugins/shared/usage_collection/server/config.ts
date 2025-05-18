@@ -14,7 +14,7 @@ import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/con
 export const configSchema = schema.object({
   usageCounters: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    retryCount: schema.number({ defaultValue: 1 }),
+    retryCount: schema.number({ defaultValue: 3 }),
     bufferDuration: schema.duration({ defaultValue: '5s' }),
   }),
   uiCounters: schema.object({

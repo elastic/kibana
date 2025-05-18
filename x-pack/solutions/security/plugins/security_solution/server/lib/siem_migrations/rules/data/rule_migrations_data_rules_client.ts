@@ -15,19 +15,20 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
-  type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
+import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -36,18 +37,6 @@ export type CreateRuleMigrationInput = Omit<
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationFilters {
-  status?: SiemMigrationStatus | SiemMigrationStatus[];
-  ids?: string[];
-  installed?: boolean;
-  installable?: boolean;
-  prebuilt?: boolean;
-  failed?: boolean;
-  fullyTranslated?: boolean;
-  partiallyTranslated?: boolean;
-  untranslatable?: boolean;
-  searchTerm?: string;
-}
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
   sort?: RuleMigrationSort;
@@ -162,45 +151,19 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
   }
 
-  /**
-   * Retrieves `pending` rule migrations with the provided id and updates their status to `processing`.
-   * This operation is not atomic at migration level:
-   * - Multiple tasks can process different migrations simultaneously.
-   * - Multiple tasks should not process the same migration simultaneously.
-   */
-  async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
+  /** Updates one rule migration status to `processing` */
+  async saveProcessing(id: string): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
-    const query = this.getFilterQuery(migrationId, { status: SiemMigrationStatus.PENDING });
-
-    const storedRuleMigrations = await this.esClient
-      .search<RuleMigration>({ index, query, sort: '_doc', size })
-      .then((response) =>
-        this.processResponseHits(response, { status: SiemMigrationStatus.PROCESSING })
-      )
-      .catch((error) => {
-        this.logger.error(`Error searching rule migrations: ${error.message}`);
-        throw error;
-      });
-
-    await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: storedRuleMigrations.flatMap(({ id, status }) => [
-          { update: { _id: id, _index: index } },
-          {
-            doc: { status, updated_by: profileId, updated_at: new Date().toISOString() },
-          },
-        ]),
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Error updating for rule migrations status to processing: ${error.message}`
-        );
-        throw error;
-      });
-
-    return storedRuleMigrations;
+    const doc = {
+      status: SiemMigrationStatus.PROCESSING,
+      updated_by: profileId,
+      updated_at: new Date().toISOString(),
+    };
+    await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
+      this.logger.error(`Error updating rule migration status to processing: ${error.message}`);
+      throw error;
+    });
   }
 
   /** Updates one rule migration with the provided data and sets the status to `completed` */
@@ -355,13 +318,15 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
     const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
     return buckets.map((bucket) => ({
-      id: bucket.key,
+      id: `${bucket.key}`,
       rules: {
         total: bucket.doc_count,
-        ...this.statusAggCounts(bucket.status),
+        ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
       },
-      created_at: bucket.createdAt?.value_as_string,
-      last_updated_at: bucket.lastUpdatedAt?.value_as_string,
+      created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
+        ?.value_as_string as string,
+      last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
+        ?.value_as_string as string,
     }));
   }
 
@@ -397,66 +362,55 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   private getFilterQuery(
     migrationId: string,
-    {
-      status,
-      ids,
-      installed,
-      installable,
-      prebuilt,
-      searchTerm,
-      failed,
-      fullyTranslated,
-      partiallyTranslated,
-      untranslatable,
-    }: RuleMigrationFilters = {}
+    filters: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
-    if (status) {
-      if (Array.isArray(status)) {
-        filter.push({ terms: { status } });
+    if (filters.status) {
+      if (Array.isArray(filters.status)) {
+        filter.push({ terms: { status: filters.status } });
       } else {
-        filter.push({ term: { status } });
+        filter.push({ term: { status: filters.status } });
       }
     }
-    if (ids) {
-      filter.push({ terms: { _id: ids } });
+    if (filters.ids) {
+      filter.push({ terms: { _id: filters.ids } });
     }
-    if (searchTerm?.length) {
-      filter.push(searchConditions.matchTitle(searchTerm));
+    if (filters.searchTerm?.length) {
+      filter.push(searchConditions.matchTitle(filters.searchTerm));
     }
-    if (installed === true) {
+    if (filters.installed === true) {
       filter.push(searchConditions.isInstalled());
-    } else if (installed === false) {
+    } else if (filters.installed === false) {
       filter.push(searchConditions.isNotInstalled());
     }
-    if (installable === true) {
+    if (filters.installable === true) {
       filter.push(...searchConditions.isInstallable());
-    } else if (installable === false) {
+    } else if (filters.installable === false) {
       filter.push(...searchConditions.isNotInstallable());
     }
-    if (prebuilt === true) {
+    if (filters.prebuilt === true) {
       filter.push(searchConditions.isPrebuilt());
-    } else if (prebuilt === false) {
+    } else if (filters.prebuilt === false) {
       filter.push(searchConditions.isCustom());
     }
-    if (failed === true) {
+    if (filters.failed === true) {
       filter.push(searchConditions.isFailed());
-    } else if (failed === false) {
+    } else if (filters.failed === false) {
       filter.push(searchConditions.isNotFailed());
     }
-    if (fullyTranslated === true) {
+    if (filters.fullyTranslated === true) {
       filter.push(searchConditions.isFullyTranslated());
-    } else if (fullyTranslated === false) {
+    } else if (filters.fullyTranslated === false) {
       filter.push(searchConditions.isNotFullyTranslated());
     }
-    if (partiallyTranslated === true) {
+    if (filters.partiallyTranslated === true) {
       filter.push(searchConditions.isPartiallyTranslated());
-    } else if (partiallyTranslated === false) {
+    } else if (filters.partiallyTranslated === false) {
       filter.push(searchConditions.isNotPartiallyTranslated());
     }
-    if (untranslatable === true) {
+    if (filters.untranslatable === true) {
       filter.push(searchConditions.isUntranslatable());
-    } else if (untranslatable === false) {
+    } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };

@@ -24,6 +24,7 @@ export interface HighlightFieldProps {
   useBadge?: boolean;
   value?: unknown;
   children?: (props: { content: React.ReactNode }) => React.ReactNode | React.ReactNode;
+  truncate?: boolean;
 }
 
 export function HighlightField({
@@ -35,6 +36,7 @@ export function HighlightField({
   useBadge = false,
   value,
   children,
+  truncate,
   ...props
 }: HighlightFieldProps) {
   const hasFieldDescription = !!fieldMetadata?.short;
@@ -47,7 +49,7 @@ export function HighlightField({
         </EuiTitle>
         {hasFieldDescription ? <HighlightFieldDescription fieldMetadata={fieldMetadata} /> : null}
       </EuiFlexGroup>
-      <HoverActionPopover title={value} value={value} field={field}>
+      <HoverActionPopover title={value} value={value} field={field} truncate={truncate}>
         <EuiFlexGroup
           responsive={false}
           alignItems="center"

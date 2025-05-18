@@ -23,7 +23,6 @@
       "embeddable",
       "features",
       "fieldFormats",
-      "lens",
       "logsShared",
       "metricsDataAccess",
       "observability",
@@ -38,13 +37,14 @@
       "visTypeTimeseries",
       "apmDataAccess",
       "logsDataAccess",
-      "entityManager"
+      "entityManager",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
+      "lens",
       "spaces",
       "ml",
       "home",
-      "embeddable",
       "osquery",
       "cloud",
       "profilingDataAccess",
@@ -59,7 +59,6 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "embeddable",
       "controls"
     ]
   }

@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { rulesSettingsClientMock } from './rules_settings_client.mock';
 import { RulesSettingsService } from './rules_settings_service';
 import { DEFAULT_QUERY_DELAY_SETTINGS, DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS } from '../types';

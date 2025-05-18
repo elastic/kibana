@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { buildRangeFilter, Filter } from '@kbn/es-query';
-import {
+import type { Filter } from '@kbn/es-query';
+import { buildRangeFilter, updateFilterReferences } from '@kbn/es-query';
+import type {
   DataView,
   DataViewsContract,
   ISearchSource,
   ISearchStartSearchSource,
-  SortDirection,
 } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -20,13 +21,14 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { OnlySearchSourceRuleParams } from '../types';
+import type { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 import { checkForShardFailures } from '../util';
 
@@ -246,30 +248,9 @@ export async function generateLink(
 
   // use `lzCompress` flag for making the link readable during debugging/testing
   // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
-  return start + spacePrefix + '/app' + end;
-}
-
-export function updateFilterReferences(
-  filters: Filter[],
-  fromDataView: string,
-  toDataView: string | undefined
-) {
-  return (filters || []).map((filter) => {
-    if (filter.meta.index === fromDataView) {
-      return {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          index: toDataView,
-        },
-      };
-    } else {
-      return filter;
-    }
-  });
+  return redirectUrl;
 }
 
 export function getSmallerDataViewSpec(

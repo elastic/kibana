@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '.';
 import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsClientContract } from '@kbn/core/server';
@@ -59,6 +59,19 @@ describe('Index Pattern Fetcher - server', () => {
   });
 
   it('calls rollup api when given rollup data view', async () => {
+    esClient.rollup.getRollupIndexCaps.mockResponse(
+      rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
+    );
+    indexPatterns = new IndexPatternsFetcher(esClient, optionalParams);
+    await indexPatterns.getFieldsForWildcard({
+      pattern: patternList,
+      type: DataViewType.ROLLUP,
+      rollupIndex: 'foo',
+    });
+    expect(esClient.rollup.getRollupIndexCaps).toHaveBeenCalledTimes(1);
+  });
+
+  it("works with index aliases - when rollup response doesn't have index as key", async () => {
     esClient.rollup.getRollupIndexCaps.mockResponse(
       rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
     );

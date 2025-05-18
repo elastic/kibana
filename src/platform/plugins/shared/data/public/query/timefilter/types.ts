@@ -22,8 +22,8 @@ export interface TimefilterConfig {
 export type InputTimeRange =
   | TimeRange
   | {
-      from: Moment;
-      to: Moment;
+      from: Moment | string;
+      to: Moment | string;
     };
 
 export type { TimeRangeBounds } from '../../../common';

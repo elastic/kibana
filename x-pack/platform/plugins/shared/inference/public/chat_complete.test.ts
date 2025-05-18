@@ -25,6 +25,7 @@ describe('createChatCompleteApi', () => {
       functionCalling: 'native',
       system: 'system',
       temperature: 0.5,
+      modelName: 'gpt-4o',
       messages: [{ role: MessageRole.User, content: 'question' }],
     };
     await chatComplete(params as ChatCompleteOptions);
@@ -46,6 +47,7 @@ describe('createChatCompleteApi', () => {
       functionCalling: 'native',
       stream: true,
       temperature: 0.4,
+      modelName: 'gemini-1.5',
       system: 'system',
       messages: [{ role: MessageRole.User, content: 'question' }],
     };

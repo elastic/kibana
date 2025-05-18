@@ -251,13 +251,11 @@ export default function ({ getService }: FtrProviderContext) {
         // modify the rule to get it fire a decryption error
         await es.updateByQuery({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            script: {
-              lang: 'painless',
-              source: 'ctx._source.alert.params.foo = "bar"',
-            },
-            query: { ids: { values: [`alert:${ruleId}`] } },
+          script: {
+            lang: 'painless',
+            source: 'ctx._source.alert.params.foo = "bar"',
           },
+          query: { ids: { values: [`alert:${ruleId}`] } },
           refresh: true,
           conflicts: 'proceed',
         });
@@ -283,13 +281,11 @@ export default function ({ getService }: FtrProviderContext) {
         // modify the rule to get it fire a validation error
         await es.updateByQuery({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            script: {
-              lang: 'painless',
-              source: 'ctx._source.alert.params.foo = "bar"',
-            },
-            query: { ids: { values: [`alert:${ruleId}`] } },
+          script: {
+            lang: 'painless',
+            source: 'ctx._source.alert.params.foo = "bar"',
           },
+          query: { ids: { values: [`alert:${ruleId}`] } },
           refresh: true,
           conflicts: 'proceed',
         });

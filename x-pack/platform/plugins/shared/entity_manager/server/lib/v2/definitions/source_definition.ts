@@ -46,7 +46,7 @@ export async function storeSourceDefinition({
 
   const sources = await runESQLQuery('fetch source definition for conflict check', {
     esClient,
-    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "source" AND _id == "${source.type_id}:${source.id}" | KEEP _id`,
+    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "source" AND _id == "${source.type_id}:${source.id}" | KEEP _id | LIMIT 1000`,
     logger,
   });
 
@@ -88,7 +88,7 @@ export async function readSourceDefinitions(
     'fetch all source definitions',
     {
       esClient,
-      query: `FROM ${DEFINITIONS_ALIAS} METADATA _source | WHERE definition_type == "source" ${typeFilter} | KEEP _source`,
+      query: `FROM ${DEFINITIONS_ALIAS} METADATA _source | WHERE definition_type == "source" ${typeFilter} | KEEP _source | LIMIT 1000`,
       logger,
     }
   );

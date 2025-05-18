@@ -16,17 +16,17 @@ import { HorizontalSpacer } from './helpers';
 interface MatchDetailsProps {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
+  scopeId: string;
 }
 
 export const MatchDetails: React.FC<MatchDetailsProps> = ({
   contextId,
   eventId,
-  isDraggable,
   sourceField,
   sourceValue,
+  scopeId,
 }) => (
   <EuiFlexGroup
     alignItems="center"
@@ -38,11 +38,11 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   >
     <EuiFlexItem grow={false}>
       <DraggableBadge
+        scopeId={scopeId}
         contextId={contextId}
         data-test-subj="threat-match-details-source-field"
         eventId={eventId}
         field={INDICATOR_MATCHED_FIELD}
-        isDraggable={isDraggable}
         value={sourceField}
         isAggregatable={true}
         fieldType={'keyword'}
@@ -58,11 +58,11 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <DraggableBadge
+        scopeId={scopeId}
         contextId={contextId}
         data-test-subj="threat-match-details-source-value"
         eventId={eventId}
         field={sourceField}
-        isDraggable={isDraggable}
         value={sourceValue}
         isAggregatable={true}
         fieldType={'keyword'}

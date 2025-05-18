@@ -7,6 +7,10 @@
   width: 0;
   overflow: hidden;
 
+  border-left-width: 1px;
+  border-left-color: $euiColorBackgroundLightText;
+  border-left-style: solid;
+
   > * {
     width: $euiSizeXXL * 12;
   }

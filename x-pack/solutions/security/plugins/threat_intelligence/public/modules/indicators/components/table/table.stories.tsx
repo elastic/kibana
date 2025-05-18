@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { mockIndicatorsFiltersContext } from '../../../../mocks/mock_indicators_filters_context';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
@@ -18,8 +17,6 @@ export default {
   component: IndicatorsTable,
   title: 'IndicatorsTable',
 };
-
-const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
@@ -54,7 +51,6 @@ export function IndicatorsFullyLoaded() {
           onChangePage={stub}
           onChangeItemsPerPage={stub}
           indicatorCount={indicatorsFixture.length * 2}
-          indexPattern={mockIndexPattern}
           columnSettings={columnSettings}
         />
       </IndicatorsFiltersContext.Provider>
@@ -77,7 +73,6 @@ export function FirstLoad() {
         onChangeItemsPerPage={stub}
         indicatorCount={0}
         isLoading={true}
-        indexPattern={mockIndexPattern}
         columnSettings={columnSettings}
       />
     </StoryProvidersComponent>
@@ -103,7 +98,6 @@ export function DataUpdateInProgress() {
           onChangePage={stub}
           onChangeItemsPerPage={stub}
           indicatorCount={indicatorsFixture.length * 2}
-          indexPattern={mockIndexPattern}
           columnSettings={columnSettings}
         />
       </IndicatorsFiltersContext.Provider>
@@ -126,7 +120,6 @@ export function WithNoIndicators() {
         onChangeItemsPerPage={stub}
         indicatorCount={0}
         isLoading={false}
-        indexPattern={mockIndexPattern}
         columnSettings={columnSettings}
       />
     </StoryProvidersComponent>

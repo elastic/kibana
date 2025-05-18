@@ -17,8 +17,11 @@ import type {
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
-import type { NormalizedExternalConnectorClient } from '../../../../..';
+import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
+import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
+import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from '../../../mocks';
+import type { NormalizedExternalConnectorClient } from '../../../../..';
 
 export interface MicrosoftDefenderActionsClientOptionsMock
   extends ResponseActionsClientOptionsMock {
@@ -26,12 +29,45 @@ export interface MicrosoftDefenderActionsClientOptionsMock
 }
 
 const createMsDefenderClientConstructorOptionsMock = () => {
-  return {
+  const options = {
     ...responseActionsClientMock.createConstructorOptions(),
     connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
       createMsConnectorActionsClientMock()
     ),
   };
+  const generator = new MicrosoftDefenderDataGenerator('seed');
+  const msLogIndexEsHit = generator.generateEndpointLogEsHit({
+    cloud: { instance: { id: '1-2-3' } },
+  });
+
+  msLogIndexEsHit.inner_hits = {
+    most_recent: {
+      hits: {
+        hits: [
+          {
+            _index: '',
+            _source: {
+              agent: {
+                id: '1-2-3',
+              },
+              cloud: {
+                instance: { id: '1-2-3' },
+              },
+            },
+          },
+        ],
+      },
+    },
+  };
+
+  // Mocks for MS data indexes
+  applyEsClientSearchMock({
+    esClientMock: options.esClient,
+    index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+    response: generator.generateEndpointLogEsSearchResponse([msLogIndexEsHit]),
+  });
+
+  return options;
 };
 
 const createMsConnectorActionsClientMock = (): ActionsClientMock => {
@@ -153,29 +189,32 @@ const createMicrosoftMachineActionMock = (
   };
 };
 
-const createMicrosoftGetActionsApiResponseMock =
-  (): MicrosoftDefenderEndpointGetActionsResponse => {
-    return {
-      '@odata.context': 'some-context',
-      '@odata.count': 1,
-      total: 1,
-      page: 1,
-      pageSize: 0,
-      value: [createMicrosoftMachineActionMock()],
-    };
+const createMicrosoftGetActionsApiResponseMock = (
+  overrides: Partial<MicrosoftDefenderEndpointMachineAction> = {}
+): MicrosoftDefenderEndpointGetActionsResponse => {
+  return {
+    '@odata.context': 'some-context',
+    '@odata.count': 1,
+    total: 1,
+    page: 1,
+    pageSize: 0,
+    value: [createMicrosoftMachineActionMock(overrides)],
   };
+};
 
-const createMicrosoftGetMachineListApiResponseMock =
-  (): MicrosoftDefenderEndpointAgentListResponse => {
-    return {
-      '@odata.context': 'some-context',
-      '@odata.count': 1,
-      total: 1,
-      page: 1,
-      pageSize: 0,
-      value: [createMicrosoftMachineMock()],
-    };
+const createMicrosoftGetMachineListApiResponseMock = (
+  /** Any overrides to the 1 machine action that is included in the mock response */
+  machineActionOverrides: Partial<MicrosoftDefenderEndpointMachine> = {}
+): MicrosoftDefenderEndpointAgentListResponse => {
+  return {
+    '@odata.context': 'some-context',
+    '@odata.count': 1,
+    total: 1,
+    page: 1,
+    pageSize: 0,
+    value: [createMicrosoftMachineMock(machineActionOverrides)],
   };
+};
 
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,

@@ -7,22 +7,15 @@
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { TaskTypes } from '../../common/types';
-
-function isTaskType(type?: string): type is InferenceTaskType {
-  return type ? Object.values(TaskTypes).includes(type as TaskTypes) : true;
-}
 
 export const deleteInferenceEndpoint = async (
   client: ElasticsearchClient,
-  type: string,
+  type: InferenceTaskType,
   id: string,
   scanUsage?: boolean
 ) => {
-  if (isTaskType(type)) {
-    if (scanUsage) {
-      return await client.inference.delete({ inference_id: id, task_type: type, dry_run: true });
-    }
-    return await client.inference.delete({ inference_id: id, task_type: type, force: true });
+  if (scanUsage) {
+    return await client.inference.delete({ inference_id: id, task_type: type, dry_run: true });
   }
+  return await client.inference.delete({ inference_id: id, task_type: type, force: true });
 };

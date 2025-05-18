@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -24,11 +32,10 @@ import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
-import { FULL_SCREEN } from '../../body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import {
-  useTimelineFullScreen,
   useGlobalFullScreen,
+  useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../../../store';
@@ -36,10 +43,7 @@ import { timelineDefaults } from '../../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry';
 import { isFullScreen } from '../../helpers';
-
-const FullScreenButtonIcon = styled(EuiButtonIcon)`
-  margin: 4px 0 4px 0;
-`;
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface NavigationProps {
   fullScreen: boolean;
@@ -62,6 +66,8 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   graphEventId,
   activeTab,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const title = () => {
     if (isActiveTimelines) {
       return activeTab === TimelineTabs.graph ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;
@@ -81,10 +87,10 @@ const NavigationComponent: React.FC<NavigationProps> = ({
           {title()}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      {isActiveTimelines === false && (
+      {!isActiveTimelines && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
-            <FullScreenButtonIcon
+          <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+            <EuiButtonIcon
               aria-label={
                 isFullScreen({
                   globalFullScreen,
@@ -92,13 +98,16 @@ const NavigationComponent: React.FC<NavigationProps> = ({
                   timelineFullScreen,
                 })
                   ? EXIT_FULL_SCREEN
-                  : FULL_SCREEN
+                  : i18n.FULL_SCREEN
               }
               display={fullScreen ? 'fill' : 'empty'}
               color="primary"
               data-test-subj="full-screen"
               iconType="fullScreen"
               onClick={toggleFullScreen}
+              css={css`
+                margin: ${euiTheme.size.xs} 0;
+              `}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -272,7 +281,15 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     [globalFullScreen, scopeId, timelineFullScreen]
   );
 
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openFlyout } = useExpandableFlyoutApi();

@@ -33,6 +33,7 @@ describe('copyValueToClipboard', () => {
       fieldFormats: servicesMock.fieldFormats,
       rowIndex,
       columnId,
+      columnsMeta: undefined,
       options,
     });
 

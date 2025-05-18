@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { OTHER_CATEGORY } from '../constants';
 import { getQueryDsl } from './get_query_dsl';
@@ -38,81 +38,79 @@ export async function executeEsQuery(
 
   const esQuery = {
     index,
-    body: {
-      size: 0, // do not fetch hits
-      aggs: {
-        shapes: {
-          filters: {
-            other_bucket_key: OTHER_CATEGORY,
-            filters: shapesFilters,
-          },
-          aggs: {
-            entitySplit: {
-              terms: {
-                size: MAX_BUCKETS_LIMIT / ((Object.keys(shapesFilters).length || 1) * 2),
-                field: entity,
-              },
-              aggs: {
-                entityHits: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        [dateField]: {
-                          order: 'desc',
-                        },
+    size: 0, // do not fetch hits
+    aggs: {
+      shapes: {
+        filters: {
+          other_bucket_key: OTHER_CATEGORY,
+          filters: shapesFilters as estypes.AggregationsBuckets<estypes.QueryDslQueryContainer>,
+        },
+        aggs: {
+          entitySplit: {
+            terms: {
+              size: MAX_BUCKETS_LIMIT / ((Object.keys(shapesFilters).length || 1) * 2),
+              field: entity,
+            },
+            aggs: {
+              entityHits: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      [dateField]: {
+                        order: 'desc' as const,
                       },
-                    ],
-                    fields: [
-                      entity,
-                      {
-                        field: dateField,
-                        format: 'strict_date_optional_time',
-                      },
-                      {
-                        field: geoField,
-                        format: 'wkt',
-                      },
-                    ],
-                    _source: false,
-                  },
+                    },
+                  ],
+                  fields: [
+                    entity,
+                    {
+                      field: dateField,
+                      format: 'strict_date_optional_time',
+                    },
+                    {
+                      field: geoField,
+                      format: 'wkt',
+                    },
+                  ],
+                  _source: false,
                 },
               },
             },
           },
         },
       },
-      query: esFormattedQuery
-        ? esFormattedQuery
-        : {
-            bool: {
-              must: [],
-              filter: [
-                {
-                  match_all: {},
-                },
-                {
-                  range: {
-                    [dateField]: {
-                      ...(gteDateTime ? { gte: gteDateTime } : {}),
-                      lt: ltDateTime, // 'less than' to prevent overlap between intervals
-                      format: 'strict_date_optional_time',
-                    },
+    },
+    query: esFormattedQuery
+      ? esFormattedQuery
+      : {
+          bool: {
+            must: [],
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                range: {
+                  [dateField]: {
+                    ...(gteDateTime ? { gte: gteDateTime } : {}),
+                    lt: ltDateTime, // 'less than' to prevent overlap between intervals
+                    format: 'strict_date_optional_time',
                   },
                 },
-              ],
-              should: [],
-              must_not: [],
-            },
+              },
+            ],
+            should: [],
+            must_not: [],
           },
-      stored_fields: ['*'],
-      docvalue_fields: [
-        {
-          field: dateField,
-          format: 'date_time',
         },
-      ],
-    },
+    stored_fields: ['*'],
+    docvalue_fields: [
+      {
+        field: dateField,
+        format: 'date_time',
+      },
+    ],
   };
 
   try {

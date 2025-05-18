@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import React from 'react';
+import { AssetInventoryOnboarding } from '../components/onboarding/asset_inventory_onboarding';
+import { AllAssets } from './all_assets';
 
-const AssetInventoryLazy = lazy(() => import('../components/app'));
-
-export const AssetInventoryContainer = React.memo(() => {
+const AssetInventoryPage = () => {
   return (
-    <SecuritySolutionPageWrapper noPadding>
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <AssetInventoryLazy />
-      </Suspense>
-    </SecuritySolutionPageWrapper>
+    <AssetInventoryOnboarding>
+      <AllAssets />
+    </AssetInventoryOnboarding>
   );
-});
+};
 
-AssetInventoryContainer.displayName = 'AssetInventoryContainer';
+AssetInventoryPage.displayName = 'AssetInventoryPage';
+
+// eslint-disable-next-line import/no-default-export
+export default AssetInventoryPage;

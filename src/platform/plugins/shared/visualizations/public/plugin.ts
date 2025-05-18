@@ -37,7 +37,7 @@ import type {
   ApplicationStart,
   SavedObjectsClientContract,
 } from '@kbn/core/public';
-import { UiActionsStart, UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -47,11 +47,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -119,16 +115,14 @@ import {
   setNotifications,
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
-import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
 import {
   LATEST_VERSION,
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
-import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import type { VisualizeSerializedState } from './embeddable/types';
-import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
+import type { VisualizeSavedObjectInputState } from './embeddable/types';
+import { registerActions } from './actions/register_actions';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -332,8 +326,8 @@ export class VisualizationsPlugin
           navigation: pluginsStart.navigation,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
-          visualizeCapabilities: coreStart.application.capabilities.visualize,
-          dashboardCapabilities: coreStart.application.capabilities.dashboard,
+          visualizeCapabilities: coreStart.application.capabilities.visualize_v2,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard_v2,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
@@ -403,22 +397,28 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(aggBasedVisualizationTrigger);
     uiActions.registerTrigger(visualizeEditorTrigger);
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
-    const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
+      const { getVisualizeEmbeddableFactory } = await import('./embeddable/visualize_embeddable');
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
-      onAdd: (container, savedObject) => {
-        container.addNewPanel<VisualizeSerializedState>({
-          panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: { savedObjectId: savedObject.id },
-        });
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<VisualizeSavedObjectInputState>(
+          {
+            panelType: VISUALIZE_EMBEDDABLE_TYPE,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: savedObject.references,
+            },
+          },
+          true
+        );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
@@ -498,8 +498,7 @@ export class VisualizationsPlugin
       setSavedObjectTagging(savedObjectsTaggingOss);
     }
 
-    const addAggVisAction = new AddAggVisualizationPanelAction(types);
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
+    registerActions(uiActions, data, types);
 
     return {
       ...types,

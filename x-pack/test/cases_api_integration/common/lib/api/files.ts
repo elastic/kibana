@@ -7,11 +7,11 @@
 
 import type SuperTest from 'supertest';
 import { apiRoutes as fileApiRoutes } from '@kbn/files-plugin/public/files_client/files_client';
-import { BaseFilesClient } from '@kbn/shared-ux-file-types';
+import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import { OWNERS } from '@kbn/cases-plugin/common/constants';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
 import { superUser } from '../authentication/users';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';
 
 export const downloadFile = async ({

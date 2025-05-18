@@ -17,6 +17,7 @@ import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_c
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
@@ -102,14 +103,12 @@ export function dataFrameAnalyticsRoutes(
     }
 
     const body = await client.asCurrentUser.security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names: [destinationIndex], // uses wildcard
-            privileges: ['delete_index'],
-          },
-        ],
-      },
+      index: [
+        {
+          names: [destinationIndex], // uses wildcard
+          privileges: ['delete_index'],
+        },
+      ],
     });
 
     return body?.has_all_requested === true;
@@ -399,9 +398,7 @@ export function dataFrameAnalyticsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
         try {
           const body = await mlClient.explainDataFrameAnalytics(
-            {
-              body: request.body,
-            },
+            request.body,
             getAuthorizationHeader(request)
           );
           return response.ok({
@@ -471,10 +468,38 @@ export function dataFrameAnalyticsRoutes(
                 // If user does have privilege to delete the index, then delete the index
                 if (userCanDeleteDestIndex) {
                   try {
-                    await client.asCurrentUser.indices.delete({
-                      index: destinationIndex,
-                    });
-                    destIndexDeleted.success = true;
+                    // It's possible that the destination index has been reindexed with a new name
+                    // so if it's an alias first, then delete the real index
+                    let destinationIndexToDelete = destinationIndex;
+                    const alias = await client.asCurrentUser.indices.getAlias(
+                      {
+                        index: destinationIndex,
+                      },
+                      {
+                        ignore: [404],
+                      }
+                    );
+                    if (alias) {
+                      const reindexedDestName = Object.keys(alias)[0];
+                      if (reindexedDestName && isPopulatedObject(alias, [reindexedDestName])) {
+                        const keys = Object.keys(alias[reindexedDestName]?.aliases);
+                        if (keys[0] === destinationIndex) {
+                          destinationIndexToDelete = reindexedDestName;
+                        }
+                      }
+                    }
+
+                    const deleted = await client.asCurrentUser.indices.delete(
+                      {
+                        index: destinationIndexToDelete,
+                      },
+                      {
+                        ignore: [404],
+                      }
+                    );
+                    if (deleted?.acknowledged) {
+                      destIndexDeleted.success = true;
+                    }
                   } catch ({ body }) {
                     destIndexDeleted.error = body;
                   }
@@ -620,7 +645,7 @@ export function dataFrameAnalyticsRoutes(
           const body = await mlClient.updateDataFrameAnalytics(
             {
               id: analyticsId,
-              body: request.body,
+              ...request.body,
             },
             getAuthorizationHeader(request)
           );

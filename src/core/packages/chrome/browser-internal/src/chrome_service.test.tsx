@@ -462,6 +462,9 @@ describe('start', () => {
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
 
+      chrome.project.setCloudUrls({
+        deploymentUrl: 'my-deployment-url.com',
+      });
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]); // only setting the classic breadcrumbs
 
       {
@@ -492,21 +495,70 @@ describe('start', () => {
   describe('breadcrumbsAppendExtension$', () => {
     it('updates the breadcrumbsAppendExtension$', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
+      const promise = chrome.getBreadcrumbsAppendExtensions$().pipe(toArray()).toPromise();
 
-      chrome.setBreadcrumbsAppendExtension({
+      const ext1 = chrome.setBreadcrumbsAppendExtension({
         content: () => () => {},
       });
+      chrome.setBreadcrumbsAppendExtension({
+        order: 0,
+        content: () => () => {},
+      });
+      const ext3 = chrome.setBreadcrumbsAppendExtension({
+        order: 100,
+        content: () => () => {},
+      });
+      ext3();
+      ext1();
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-              Array [
-                undefined,
-                Object {
-                  "content": [Function],
-                },
-              ]
-            `);
+        Array [
+          Array [],
+          Array [
+            Object {
+              "content": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "content": [Function],
+              "order": 0,
+            },
+            Object {
+              "content": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "content": [Function],
+              "order": 0,
+            },
+            Object {
+              "content": [Function],
+            },
+            Object {
+              "content": [Function],
+              "order": 100,
+            },
+          ],
+          Array [
+            Object {
+              "content": [Function],
+              "order": 0,
+            },
+            Object {
+              "content": [Function],
+            },
+          ],
+          Array [
+            Object {
+              "content": [Function],
+              "order": 0,
+            },
+          ],
+        ]
+      `);
     });
   });
 

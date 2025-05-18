@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RuleActionParams } from '../types';
-import { RuleUrl } from './action_scheduler';
+import type { RuleActionParams } from '../types';
+import type { RuleUrl } from './action_scheduler';
 
 export interface InjectActionParamsOpts {
   actionTypeId: string;

@@ -6,9 +6,9 @@
  */
 
 import { fromByteArray } from 'base64-js';
-import { ImportDocTika } from '../../common/types';
+import type { ImportDocTika } from '../../common/types';
 import { Importer } from './importer';
-import { CreateDocsResponse } from './types';
+import type { CreateDocsResponse } from './types';
 
 export class TikaImporter extends Importer {
   constructor() {

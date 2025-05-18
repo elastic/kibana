@@ -33,13 +33,12 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isDraggable?: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -57,13 +56,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
-  contextID,
-  scopeId,
-  hostName,
-  isDraggable,
-  isPreviewMode,
-}: HostPanelProps) => {
+export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostPanelProps) => {
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -98,7 +91,7 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'host.name',
+    field: EntityIdentifierFields.hostName,
     value: hostName,
     to,
     from,
@@ -123,7 +116,6 @@ export const HostPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
     contextID,
-    isDraggable,
   });
 
   const openDefaultPanel = useCallback(
@@ -179,7 +171,6 @@ export const HostPanel = ({
               riskScoreState={riskScoreState}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
               openDetailsPanel={openDetailsPanel}
               isLinkEnabled={isLinkEnabled}
               recalculatingScore={recalculatingScore}
@@ -187,12 +178,7 @@ export const HostPanel = ({
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
-              <HostPreviewPanelFooter
-                hostName={hostName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

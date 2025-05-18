@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariable } from '@kbn/alerting-types';
 import { validateParamsForWarnings } from './validate_params_for_warnings';
 
 describe('validateParamsForWarnings', () => {

@@ -15,6 +15,16 @@ import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
 
+export enum DimensionType {
+  Y_AXIS = 'y',
+  X_AXIS = 'x',
+  REFERENCE_LINE = 'reference',
+  BREAKDOWN = 'breakdown',
+  MARK_SIZE = 'markSize',
+  SPLIT_COLUMN = 'splitCol',
+  SPLIT_ROW = 'splitRow',
+}
+
 const name = 'datatable';
 
 /**
@@ -73,9 +83,13 @@ export interface DatatableColumnMeta {
    */
   index?: string;
   /**
-   * names the domain this column represents
+   * i18nized names the domain this column represents
    */
   dimensionName?: string;
+  /**
+   * types of dimension this column represents
+   */
+  dimensionType?: string;
   /**
    * serialized field format
    */
@@ -90,6 +104,23 @@ export interface DatatableColumnMeta {
   sourceParams?: SerializableRecord;
 }
 
+interface SourceParamsESQL extends Record<string, unknown> {
+  indexPattern: string;
+  sourceField: string;
+  operationType: string;
+  interval?: number;
+}
+
+export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
+  return (
+    obj &&
+    typeof obj.indexPattern === 'string' &&
+    typeof obj.sourceField === 'string' &&
+    typeof obj.operationType === 'string' &&
+    (typeof obj.interval === 'number' || !obj.interval)
+  );
+}
+
 /**
  * This type represents the shape of a column in a `Datatable`.
  */
@@ -98,6 +129,7 @@ export interface DatatableColumn {
   name: string;
   meta: DatatableColumnMeta;
   isNull?: boolean;
+  variable?: string;
 }
 
 /**

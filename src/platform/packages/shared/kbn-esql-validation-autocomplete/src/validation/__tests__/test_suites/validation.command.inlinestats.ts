@@ -45,11 +45,11 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | INLINESTATS count(`doubleField`)', []);
             await expectErrors('from a_index | INLINESTATS count(*)', []);
             await expectErrors('from a_index | INLINESTATS count()', []);
-            await expectErrors('from a_index | INLINESTATS var0 = count(*)', []);
-            await expectErrors('from a_index | INLINESTATS var0 = count()', []);
-            await expectErrors('from a_index | INLINESTATS var0 = avg(doubleField), count(*)', []);
+            await expectErrors('from a_index | INLINESTATS col0 = count(*)', []);
+            await expectErrors('from a_index | INLINESTATS col0 = count()', []);
+            await expectErrors('from a_index | INLINESTATS col0 = avg(doubleField), count(*)', []);
             await expectErrors(`from a_index | INLINESTATS sum(case(false, 0, 1))`, []);
-            await expectErrors(`from a_index | INLINESTATS var0 = sum( case(false, 0, 1))`, []);
+            await expectErrors(`from a_index | INLINESTATS col0 = sum( case(false, 0, 1))`, []);
 
             // "or" must accept "null"
             await expectErrors('from a_index | INLINESTATS count(textField == "a" or null)', []);
@@ -138,10 +138,10 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               'Unknown column [wrongField]',
             ]);
             await expectErrors(
-              'from a_index | INLINESTATS avg(doubleField) by var0 = wrongField + 1',
+              'from a_index | INLINESTATS avg(doubleField) by col0 = wrongField + 1',
               ['Unknown column [wrongField]']
             );
-            await expectErrors('from a_index | INLINESTATS var0 = avg(fn(number)), count(*)', [
+            await expectErrors('from a_index | INLINESTATS col0 = avg(fn(number)), count(*)', [
               'Unknown function [fn]',
             ]);
           });
@@ -278,18 +278,18 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
 
           for (const nesting of NESTED_DEPTHS) {
             describe(`depth = ${nesting}`, () => {
-              describe('builtin', () => {
-                const builtinWrapping = Array(nesting).fill('+1').join('');
+              describe('operators', () => {
+                const operatorsWrapping = Array(nesting).fill('+1').join('');
 
                 test('no errors', async () => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | INLINESTATS 5 + avg(doubleField) ${builtinWrapping}`,
+                    `from a_index | INLINESTATS 5 + avg(doubleField) ${operatorsWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | INLINESTATS 5 ${builtinWrapping} + avg(doubleField)`,
+                    `from a_index | INLINESTATS 5 ${operatorsWrapping} + avg(doubleField)`,
                     []
                   );
                 });
@@ -298,21 +298,21 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | INLINESTATS 5 ${builtinWrapping} + doubleField`,
+                    `from a_index | INLINESTATS 5 ${operatorsWrapping} + doubleField`,
                     [
-                      `At least one aggregation function required in [INLINESTATS], found [5${builtinWrapping}+doubleField]`,
+                      `At least one aggregation function required in [INLINESTATS], found [5${operatorsWrapping}+doubleField]`,
                     ]
                   );
                   await expectErrors(
-                    `from a_index | INLINESTATS 5 + doubleField ${builtinWrapping}`,
+                    `from a_index | INLINESTATS 5 + doubleField ${operatorsWrapping}`,
                     [
-                      `At least one aggregation function required in [INLINESTATS], found [5+doubleField${builtinWrapping}]`,
+                      `At least one aggregation function required in [INLINESTATS], found [5+doubleField${operatorsWrapping}]`,
                     ]
                   );
                   await expectErrors(
-                    `from a_index | INLINESTATS 5 + doubleField ${builtinWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | INLINESTATS 5 + doubleField ${operatorsWrapping}, col0 = sum(doubleField)`,
                     [
-                      `At least one aggregation function required in [INLINESTATS], found [5+doubleField${builtinWrapping}]`,
+                      `At least one aggregation function required in [INLINESTATS], found [5+doubleField${operatorsWrapping}]`,
                     ]
                   );
                 });
@@ -365,13 +365,13 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                     ]
                   );
                   await expectErrors(
-                    `from a_index | INLINESTATS ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | INLINESTATS ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, col0 = sum(doubleField)`,
                     [
                       `Cannot combine aggregation and non-aggregation values in [INLINESTATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]
                   );
                   await expectErrors(
-                    `from a_index | INLINESTATS var0 = ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var1 = sum(doubleField)`,
+                    `from a_index | INLINESTATS col0 = ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, col1 = sum(doubleField)`,
                     [
                       `Cannot combine aggregation and non-aggregation values in [INLINESTATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]

@@ -39,25 +39,23 @@ export async function getNCT({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        netConnectionTypes: {
-          terms: {
-            field: NETWORK_CONNECTION_TYPE,
-            size,
-          },
+    },
+    aggs: {
+      netConnectionTypes: {
+        terms: {
+          field: NETWORK_CONNECTION_TYPE,
+          size,
         },
       },
     },

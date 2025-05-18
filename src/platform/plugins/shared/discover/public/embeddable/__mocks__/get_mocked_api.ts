@@ -9,15 +9,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
-import { SearchSource } from '@kbn/data-plugin/common';
+import type { SearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { TimeRange } from '@kbn/es-query';
-import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-import { FetchContext } from '@kbn/presentation-publishing';
-import { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import type { TimeRange } from '@kbn/es-query';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { FetchContext } from '@kbn/presentation-publishing';
+import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 
 export const getMockedSearchApi = ({
@@ -27,21 +27,23 @@ export const getMockedSearchApi = ({
   searchSource: SearchSource;
   savedSearch: SavedSearch;
 }) => {
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   return {
     api: {
       uuid: 'testEmbeddable',
-      savedObjectId: new BehaviorSubject<string | undefined>(undefined),
-      dataViews: new BehaviorSubject<DataView[] | undefined>([
+      savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
         searchSource.getField('index') ?? dataViewMock,
       ]),
-      panelTitle: new BehaviorSubject<string | undefined>(undefined),
-      defaultPanelTitle: new BehaviorSubject<string | undefined>(undefined),
-      hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
+      title$: new BehaviorSubject<string | undefined>(undefined),
+      defaultTitle$: new BehaviorSubject<string | undefined>(undefined),
+      hideTitle$: new BehaviorSubject<boolean | undefined>(false),
       fetchContext$: new BehaviorSubject<FetchContext | undefined>(undefined),
       timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
       setTimeRange: jest.fn(),
-      dataLoading: new BehaviorSubject<boolean | undefined>(undefined),
-      blockingError: new BehaviorSubject<Error | undefined>(undefined),
+      dataLoading$,
+      blockingError$,
       fetchWarnings$: new BehaviorSubject<SearchResponseIncompleteWarning[]>([]),
       savedSearch$: new BehaviorSubject<SavedSearch>(savedSearch),
     },
@@ -59,6 +61,10 @@ export const getMockedSearchApi = ({
       totalHitCount: new BehaviorSubject<number | undefined>(0),
       columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
       inspectorAdapters: new BehaviorSubject<Adapters>({}),
+    },
+    setters: {
+      setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+      setBlockingError: (error: Error | undefined) => blockingError$.next(error),
     },
   };
 };

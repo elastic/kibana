@@ -13,8 +13,8 @@ import {
   getIndexPatternFromESQLQuery,
   getTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverServices } from '../../../../build_services';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../build_services';
 
 export async function getEsqlDataView(
   query: AggregateQuery,

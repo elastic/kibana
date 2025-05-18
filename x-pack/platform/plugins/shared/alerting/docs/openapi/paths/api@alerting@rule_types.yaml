@@ -71,7 +71,7 @@ get:
                           description:
                             type: string
                           name:
-                            type: string 
+                            type: string
                 alerts:
                   type: object
                   description: >
@@ -95,10 +95,10 @@ get:
                       type: string
                       description: Indicates whether new fields are added dynamically.
                       enum:
-                        - "false"
-                        - "runtime"
-                        - "strict"
-                        - "true"
+                        - 'false'
+                        - 'runtime'
+                        - 'strict'
+                        - 'true'
                     isSpaceAware:
                       type: boolean
                       description: >
@@ -119,7 +119,7 @@ get:
                       description: >
                         A secondary alias.
                         It is typically used to support the signals alias for detection rules.
-                    shouldWrite: 
+                    shouldWrite:
                       type: boolean
                       description: >
                         Indicates whether the rule should write out alerts as data.
@@ -212,7 +212,7 @@ get:
                         all:
                           type: boolean
                         read:
-                          type: boolean                  
+                          type: boolean
                 category:
                   type: string
                   description: The rule category, which is used by features such as category-specific maintenance windows.
@@ -234,7 +234,7 @@ get:
                   description: Indicates whether the rule type has custom mappings for the alert data.
                 has_fields_for_a_a_d:
                   type: boolean
-                id: 
+                id:
                   description: The unique identifier for the rule type.
                   type: string
                 is_exportable:

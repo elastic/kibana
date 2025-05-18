@@ -6,6 +6,7 @@
  */
 
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
@@ -110,6 +111,7 @@ export const getData = async (
   alertOnGroupDisappear: boolean,
   timeframe: { start: number; end: number },
   logger: Logger,
+  runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
   previousResults: GetDataResponse = {},
   afterKey?: Record<string, string>
@@ -170,6 +172,7 @@ export const getData = async (
           alertOnGroupDisappear,
           timeframe,
           logger,
+          runtimeMappings,
           lastPeriodEnd,
           previous,
           nextAfterKey
@@ -201,7 +204,7 @@ export const getData = async (
     index,
     allow_no_indices: true,
     ignore_unavailable: true,
-    body: getElasticsearchMetricQuery(
+    ...getElasticsearchMetricQuery(
       params,
       timeframe,
       timeFieldName,
@@ -209,6 +212,7 @@ export const getData = async (
       alertOnGroupDisappear,
       searchConfiguration,
       esQueryConfig,
+      runtimeMappings,
       lastPeriodEnd,
       groupBy,
       afterKey,

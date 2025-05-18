@@ -16,12 +16,10 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { skip } from 'rxjs';
-import { DASHBOARD_ACTION_GROUP } from '.';
+import { map, skip } from 'rxjs';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
-
-export const ACTION_EXPAND_PANEL = 'togglePanel';
+import { ACTION_EXPAND_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 
@@ -36,14 +34,14 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.expandedPanelId.value
+    return embeddable.parentApi.expandedPanelId$.value
       ? dashboardExpandPanelActionStrings.getMinimizeTitle()
       : dashboardExpandPanelActionStrings.getMaximizeTitle();
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.expandedPanelId.value ? 'minimize' : 'expand';
+    return embeddable.parentApi.expandedPanelId$.value ? 'minimize' : 'expand';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
@@ -54,14 +52,13 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
     return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: ExpandPanelAction) => void
-  ) {
-    if (!isApiCompatible(embeddable)) return;
-    return embeddable.parentApi.expandedPanelId.pipe(skip(1)).subscribe(() => {
-      onChange(isApiCompatible(embeddable), this);
-    });
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable)
+      ? embeddable.parentApi.expandedPanelId$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      : undefined;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

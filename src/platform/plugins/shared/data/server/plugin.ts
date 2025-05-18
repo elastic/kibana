@@ -12,6 +12,7 @@ import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { createSearchSessionsDeprecationsConfig } from './deprecations';
 import { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
@@ -90,6 +91,7 @@ export class DataServerPlugin
     this.kqlTelemetryService.setup(core, { usageCollection });
 
     core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
+    core.deprecations.registerDeprecations(createSearchSessionsDeprecationsConfig(core));
 
     const searchSetup = this.searchService.setup(core, {
       expressions,

@@ -1,0 +1,69 @@
+toc:
+  - file: index.md
+  - file: development-getting-started.md
+    children:
+      - file: running-kibana-advanced.md
+      - file: sample-data.md
+      - file: kibana-debugging.md
+      - file: building-kibana.md
+      - file: development-plugin-resources.md
+      - file: monorepo-packages.md
+  - file: development-best-practices.md
+    children:
+      - file: plugin-performance.md
+      - file: kibana-navigation.md
+      - file: stability.md
+      - file: security-best-practices.md
+      - file: typescript.md
+  - file: kibana-architecture.md
+    children:
+      - file: kibana-platform-plugin-api.md
+      - file: kibana-platform-api.md
+      - file: application-service.md
+      - file: configuration-service.md
+      - file: elasticsearch-service.md
+      - file: http-service.md
+      - file: logging-service.md
+      - file: logging-config-changes.md
+      - file: saved-objects-service.md
+      - file: ui-settings-service.md
+      - file: patterns.md
+      - file: core-packages.md
+      - file: development-security.md
+      - file: add-data-tutorials.md
+      - file: development-visualize-index.md
+      - file: reporting-integration.md
+  - file: contributing.md
+    children:
+      - file: development-github.md
+      - file: development-tests.md
+      - file: interpreting-ci-failures.md
+      - file: ci-metrics.md
+      - file: development-documentation.md
+      - file: development-pull-request.md
+      - file: kibana-issue-reporting.md
+      - file: pr-review.md
+      - file: kibana-linting.md
+  - file: external-plugin-development.md
+    children:
+      - file: plugin-tooling.md
+      - file: external-plugin-functional-tests.md
+      - file: external-plugin-localization.md
+      - file: testing-kibana-plugin.md
+  - file: advanced.md
+    children:
+      - file: running-elasticsearch.md
+      - file: development-basepath.md
+      - file: upgrading-nodejs.md
+      - file: sharing-saved-objects.md
+      - file: legacy-url-aliases.md
+  - file: plugin-list.md
+    children:
+      - file: kibana-dashboard-plugin.md
+      - file: kibana-expressions-plugin.md
+      - file: uiactions-plugin.md
+      - file: dashboard-enhanced-plugin.md
+      - file: enhanced-embeddables-plugin.md
+      - file: translations-plugin.md
+  - file: dependencies-versions.md
+  - file: development-telemetry.md

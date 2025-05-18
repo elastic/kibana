@@ -8,8 +8,8 @@
 import { RecoveredActionGroup } from '../../../../common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import { RawRuleAction } from '../../../types';
+import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
+import type { RawRuleAction } from '../../../types';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
@@ -21,6 +21,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
@@ -63,44 +64,44 @@ const isSystemAction = (id: string) => id === 'my-system-action-id';
 describe('transformRuleAttributesToRuleDomain', () => {
   const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
   const logger = loggingSystemMock.create().get();
-  const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
-
-  const rule = {
-    enabled: false,
-    tags: ['foo'],
-    createdBy: 'user',
-    createdAt: '2019-02-12T21:01:22.479Z',
-    updatedAt: '2019-02-12T21:01:22.479Z',
-    legacyId: null,
-    muteAll: false,
-    mutedInstanceIds: [],
-    snoozeSchedule: [],
-    alertTypeId: 'myType',
-    schedule: { interval: '1m' },
-    consumer: 'myApp',
-    scheduledTaskId: 'task-123',
-    executionStatus: {
-      lastExecutionDate: '2019-02-12T21:01:22.479Z',
-      status: 'pending' as const,
-      error: null,
-      warning: null,
-    },
-    params: {},
-    throttle: null,
-    notifyWhen: null,
-    actions: [defaultAction, systemAction],
-    name: 'my rule name',
-    revision: 0,
-    updatedBy: 'user',
-    apiKey: MOCK_API_KEY,
-    apiKeyOwner: 'user',
-    flapping: {
-      lookBackWindow: 20,
-      statusChangeThreshold: 20,
-    },
-  };
 
   it('transforms the actions correctly', () => {
+    const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
+
+    const rule = {
+      enabled: false,
+      tags: ['foo'],
+      createdBy: 'user',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      legacyId: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+      snoozeSchedule: [],
+      alertTypeId: 'myType',
+      schedule: { interval: '1m' },
+      consumer: 'myApp',
+      scheduledTaskId: 'task-123',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending' as const,
+        error: null,
+        warning: null,
+      },
+      params: {},
+      throttle: null,
+      notifyWhen: null,
+      actions: [defaultAction, systemAction],
+      name: 'my rule name',
+      revision: 0,
+      updatedBy: 'user',
+      apiKey: MOCK_API_KEY,
+      apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
+    };
     const res = transformRuleAttributesToRuleDomain(
       rule,
       {
@@ -150,6 +151,93 @@ describe('transformRuleAttributesToRuleDomain', () => {
           "uuid": "123",
         },
       ]
+    `);
+  });
+
+  it('transforms the artifacts correctly', () => {
+    const artifacts = {
+      dashboards: [
+        {
+          refId: 'dashboard_0',
+        },
+        {
+          refId: 'dashboard_1',
+        },
+      ],
+    };
+
+    const actionReferences = [
+      { name: 'default-action-ref', type: 'action', id: 'default-action-id' },
+    ];
+
+    const artifactsReferences = [
+      { name: 'dashboard_0', type: 'dashboard', id: 'dashboard-1' },
+      { name: 'dashboard_1', type: 'dashboard', id: 'dashboard-2' },
+    ];
+
+    const references = [...actionReferences, ...artifactsReferences];
+
+    const rule = {
+      enabled: false,
+      tags: ['foo'],
+      createdBy: 'user',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      legacyId: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+      snoozeSchedule: [],
+      alertTypeId: 'myType',
+      schedule: { interval: '1m' },
+      consumer: 'myApp',
+      scheduledTaskId: 'task-123',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending' as const,
+        error: null,
+        warning: null,
+      },
+      params: {},
+      throttle: null,
+      notifyWhen: null,
+      actions: [defaultAction, systemAction],
+      artifacts,
+      name: 'my rule name',
+      revision: 0,
+      updatedBy: 'user',
+      apiKey: MOCK_API_KEY,
+      apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
+    };
+
+    const res = transformRuleAttributesToRuleDomain(
+      rule,
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
+
+    expect(res.artifacts).toMatchInlineSnapshot(`
+      Object {
+        "dashboards": Array [
+          Object {
+            "id": "dashboard-1",
+          },
+          Object {
+            "id": "dashboard-2",
+          },
+        ],
+        "investigation_guide": Object {
+          "blob": "",
+        },
+      }
     `);
   });
 });

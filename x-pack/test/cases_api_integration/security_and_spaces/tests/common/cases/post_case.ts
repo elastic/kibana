@@ -13,13 +13,14 @@ import {
   CaseSeverity,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import type { ConnectorJiraTypeFields } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
   removeServerGeneratedPropertiesFromCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
@@ -33,7 +34,7 @@ import {
   noKibanaPrivileges,
   testDisabled,
 } from '../../../../common/lib/authentication/users';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -140,14 +141,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[0]);
 
         expect(creationUserAction).to.eql({
           action: 'create',
           type: 'create_case',
           created_by: defaultUser,
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
           payload: {

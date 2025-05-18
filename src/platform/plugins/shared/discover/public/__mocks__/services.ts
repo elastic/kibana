@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { DiscoverServices } from '../build_services';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import type { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
   analyticsServiceMock,
-  chromeServiceMock,
   coreMock,
   docLinksServiceMock,
   scopedHistoryMock,
@@ -41,13 +41,13 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
-import { SearchSourceDependencies } from '@kbn/data-plugin/common';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { urlTrackerMock } from './url_tracker.mock';
+import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { DiscoverEBTManager } from '../plugin_imports/discover_ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
+import { createUrlTrackerMock } from './url_tracker.mock';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -61,6 +61,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
     to: '2022-09-01T09:16:29.553Z',
   }));
   dataPlugin.query.timefilter.timefilter.getTime = jest.fn(() => {
+    return { from: 'now-15m', to: 'now' };
+  });
+  dataPlugin.query.timefilter.timefilter.getTimeDefaults = jest.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
   dataPlugin.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
@@ -149,18 +152,19 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
+  corePluginMock.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('classic'));
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
-    chrome: chromeServiceMock.createStartContract(),
+    chrome: corePluginMock.chrome,
     history: {
       location: {
         search: '',
       },
-      listen: jest.fn(),
+      listen: jest.fn(() => () => {}),
     },
     getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
@@ -174,10 +178,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     docLinks: docLinksServiceMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     capabilities: {
-      visualize: {
+      visualize_v2: {
         show: true,
       },
-      discover: {
+      discover_v2: {
         save: false,
       },
       advancedSettings: {
@@ -247,7 +251,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
-    urlTracker: urlTrackerMock,
+    urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),

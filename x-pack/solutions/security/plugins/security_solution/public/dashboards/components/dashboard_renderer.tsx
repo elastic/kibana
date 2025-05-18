@@ -7,19 +7,18 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import type {
   DashboardApi,
   DashboardCreationOptions,
-  DashboardLocatorParams,
+  DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public/dashboard_container/external_api/dashboard_renderer';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -28,7 +27,9 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<Partial<DashboardContainerInput>>({});
+const initialInput = new BehaviorSubject<
+  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
+>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -40,7 +41,7 @@ const DashboardRendererComponent = ({
   query,
   savedObjectId,
   timeRange,
-  viewMode = ViewMode.VIEW,
+  viewMode = 'view',
 }: {
   canReadDashboard: boolean;
   dashboardContainer?: DashboardApi;
@@ -149,7 +150,8 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, query]);
 
   useEffect(() => {
-    dashboardContainer?.setTimeRange(timeRange);
+    const { from, to } = timeRange;
+    dashboardContainer?.setTimeRange({ from, to });
   }, [dashboardContainer, timeRange]);
 
   useEffect(() => {

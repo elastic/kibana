@@ -27,7 +27,11 @@ interface StartServiceArgs {
   license?: ILicense | null;
 }
 
-export const createStartServicesMock = ({ license }: StartServiceArgs = {}): StartServices => {
+type StartServicesWithRequiredLens = StartServices & Required<Pick<StartServices, 'lens'>>;
+
+export const createStartServicesMock = ({
+  license,
+}: StartServiceArgs = {}): StartServicesWithRequiredLens => {
   const licensingPluginMock = licensingMock.createStart();
   const triggersActionsUi = triggersActionsUiMock.createStart();
 
@@ -41,15 +45,14 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
     security: securityMock.createStart(),
     triggersActionsUi: {
       actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      getAlertsStateTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
+      getAlertsStateTable: jest.fn(() => <div data-test-subj="alerts-table" />),
     },
     spaces: spacesPluginMock.createStartContract(),
     licensing:
       license != null
         ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
         : licensingPluginMock,
-  } as unknown as StartServices;
+  } as unknown as StartServicesWithRequiredLens;
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
   services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(
@@ -83,7 +86,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCasesV2: {
+    generalCasesV3: {
       create_cases: true,
       read_cases: true,
       update_cases: true,
@@ -93,9 +96,10 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       cases_settings: true,
       case_reopen: true,
       create_comment: true,
+      cases_assign: true,
     },
-    visualize: { save: true, show: true },
-    dashboard: { show: true, createNew: true },
+    visualize_v2: { save: true, show: true },
+    dashboard_v2: { show: true, createNew: true },
   };
 
   return services;

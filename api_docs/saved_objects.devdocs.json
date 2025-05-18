@@ -1,231 +1,7 @@
 {
   "id": "savedObjects",
   "client": {
-    "classes": [
-      {
-        "parentPluginId": "savedObjects",
-        "id": "def-public.SavedObjectSaveModal",
-        "type": "Class",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "SavedObjectSaveModal",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectSaveModal",
-            "text": "SavedObjectSaveModal"
-          },
-          " extends React.Component<Props, ",
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SaveModalState",
-            "text": "SaveModalState"
-          },
-          ", any>"
-        ],
-        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-        "deprecated": true,
-        "removeBy": "8.8.0",
-        "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "presentationUtil",
-            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
-          },
-          {
-            "plugin": "presentationUtil",
-            "path": "src/platform/plugins/shared/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/attribute_service.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_container/embeddable/api/overlays/save_modal.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/add_to_library_action.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/platform/plugins/private/graph/public/components/save_modal.tsx"
-          },
-          {
-            "plugin": "links",
-            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
-          },
-          {
-            "plugin": "links",
-            "path": "src/platform/plugins/private/links/public/content_management/save_to_library.tsx"
-          }
-        ],
-        "children": [
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectSaveModal.state",
-            "type": "Object",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.copyOnSave",
-                "type": "boolean",
-                "tags": [],
-                "label": "copyOnSave",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.isTitleDuplicateConfirmed",
-                "type": "boolean",
-                "tags": [],
-                "label": "isTitleDuplicateConfirmed",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.hasTitleDuplicate",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasTitleDuplicate",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.isLoading",
-                "type": "boolean",
-                "tags": [],
-                "label": "isLoading",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.visualizationDescription",
-                "type": "string",
-                "tags": [],
-                "label": "visualizationDescription",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "savedObjects",
-                "id": "def-public.SavedObjectSaveModal.state.hasAttemptedSubmit",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasAttemptedSubmit",
-                "description": [],
-                "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectSaveModal.componentDidMount",
-            "type": "Function",
-            "tags": [],
-            "label": "componentDidMount",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.SavedObjectSaveModal.render",
-            "type": "Function",
-            "tags": [],
-            "label": "render",
-            "description": [],
-            "signature": [
-              "() => React.JSX.Element"
-            ],
-            "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "savedObjects",
@@ -269,6 +45,38 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
+        "id": "def-public.SavedObjectSaveModal",
+        "type": "Function",
+        "tags": [],
+        "label": "SavedObjectSaveModal",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<Props, \"theme\"> & React.RefAttributes<Omit<Props, \"theme\">>>"
+        ],
+        "path": "src/platform/plugins/shared/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModal.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

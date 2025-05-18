@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
@@ -153,9 +153,12 @@ export function calculateModelMemoryLimitProvider(
     datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
     const info = await mlClient.info();
-    const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
-    const effectiveMaxModelMemoryLimit =
-      info.limits.effective_max_model_memory_limit?.toUpperCase();
+    const maxModelMemoryLimit = (
+      info.limits.max_model_memory_limit as string | undefined
+    )?.toUpperCase();
+    const effectiveMaxModelMemoryLimit = (
+      info.limits.effective_max_model_memory_limit as string | undefined
+    )?.toUpperCase();
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
       analysisConfig,
@@ -168,11 +171,9 @@ export function calculateModelMemoryLimitProvider(
     );
 
     const body = await mlClient.estimateModelMemory({
-      body: {
-        analysis_config: analysisConfig,
-        overall_cardinality: overallCardinality,
-        max_bucket_cardinality: maxBucketCardinality,
-      },
+      analysis_config: analysisConfig,
+      overall_cardinality: overallCardinality,
+      max_bucket_cardinality: maxBucketCardinality,
     });
     const estimatedModelMemoryLimit = body.model_memory_estimate.toUpperCase();
 

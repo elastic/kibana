@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-a-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "corePluginA",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "core_plugin_a"
+    ]
+  }
+}

@@ -615,4 +615,6 @@ export type {
   RouteSecurityGetter,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
 } from '@kbn/core-http-server';

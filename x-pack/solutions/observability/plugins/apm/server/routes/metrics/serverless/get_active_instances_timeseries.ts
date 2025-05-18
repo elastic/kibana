@@ -50,31 +50,29 @@ export async function getActiveInstancesTimeseries({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(METRICSET_NAME, 'app'),
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(METRICSET_NAME, 'app'),
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(FAAS_ID, serverlessId),
+        ],
       },
-      aggs: {
-        ...aggs,
-        timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs,
-        },
+    },
+    aggs: {
+      ...aggs,
+      timeseriesData: {
+        date_histogram: getMetricsDateHistogramParams({
+          start,
+          end,
+          metricsInterval: config.metricsInterval,
+        }),
+        aggs,
       },
     },
   };

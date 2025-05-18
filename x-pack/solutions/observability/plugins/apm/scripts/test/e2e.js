@@ -6,97 +6,42 @@
  */
 
 /* eslint-disable no-console */
-const { times } = require('lodash');
 const path = require('path');
 const yargs = require('yargs');
 const childProcess = require('child_process');
-const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { argv } = yargs(process.argv.slice(2))
   .parserConfiguration({ 'unknown-options-as-args': true })
-  .option('kibana-install-dir', {
-    default: '',
-    type: 'string',
-    description: 'Path to the Kibana install directory',
-  })
-  .option('server', {
+  .option('headed', {
     default: false,
     type: 'boolean',
-    description: 'Start Elasticsearch and Kibana',
+    description: 'Runs Cypress in headed mode',
   })
-  .option('runner', {
+  .option('open', {
     default: false,
     type: 'boolean',
-    description:
-      'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
-  })
-  .option('times', {
-    type: 'number',
-    description: 'Repeat the test n number of times',
-  })
-  .option('bail', {
-    default: false,
-    type: 'boolean',
-    description: 'stop tests after the first failure',
+    description: 'Opens Cypress dashboard',
   })
   .help();
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
-let ftrScript = 'functional_tests.js';
-if (argv.server) {
-  ftrScript = 'functional_tests_server.js';
-} else if (argv.runner) {
-  ftrScript = 'functional_test_runner.js';
-}
-
-const cypressCliArgs = yargs(argv._).parserConfiguration({
-  'boolean-negation': false,
-}).argv;
-
-if (cypressCliArgs.grep) {
-  throw new Error('--grep is not supported. Please use --spec instead');
-}
-
-const spawnArgs = [
-  `${REPO_ROOT}/scripts/${ftrScript}`,
-  `--config=./ftr_config.ts`,
-  `--kibana-install-dir=${argv.kibanaInstallDir}`,
-  ...(argv.bail ? [`--bail`] : []),
-];
-
 function runTests() {
-  console.log(`Running e2e tests: "node ${spawnArgs.join(' ')}"`);
+  const mode = argv.open ? 'open' : 'run';
+  const isHeaded = mode === 'run' && argv.headed ? ':headed' : '';
 
-  return childProcess.spawnSync('node', spawnArgs, {
+  console.log(`Running e2e tests: "yarn cypress:${mode}${isHeaded}"`);
+
+  return childProcess.spawnSync('yarn', [`cypress:${mode}${isHeaded}`], {
     cwd: e2eDir,
-    env: {
-      ...process.env,
-      CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs),
-      NODE_OPTIONS: '--openssl-legacy-provider',
-    },
     encoding: 'utf8',
     stdio: 'inherit',
   });
 }
 
-const runCounter = { succeeded: 0, failed: 0, remaining: argv.times };
 let exitStatus = 0;
-times(argv.times ?? 1, () => {
-  const child = runTests();
-  if (child.status === 0) {
-    runCounter.succeeded++;
-  } else {
-    exitStatus = child.status;
-    runCounter.failed++;
-  }
-
-  runCounter.remaining--;
-
-  if (argv.times > 1) {
-    console.log(runCounter);
-  }
-});
+const child = runTests();
+exitStatus = child.status;
 
 process.exitCode = exitStatus;
 console.log(`Quitting with exit code ${exitStatus}`);

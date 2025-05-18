@@ -203,6 +203,8 @@ export const GetActionsParamsSchema = schema.object({
   ),
   page: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
   pageSize: schema.maybe(schema.number({ min: 1, max: 1000, defaultValue: 20 })),
+  sortField: schema.maybe(schema.string({ minLength: 1 })),
+  sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
 
 // ----------------------------------

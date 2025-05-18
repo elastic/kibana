@@ -30,7 +30,11 @@ const mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initializ
 mockSessionIndexInitialize.mockResolvedValue();
 
 const mockSessionIndexCleanUp = jest.spyOn(SessionIndex.prototype, 'cleanUp');
-mockSessionIndexCleanUp.mockResolvedValue();
+mockSessionIndexCleanUp.mockResolvedValue({
+  state: {
+    shardMissingCounter: 0,
+  },
+});
 
 describe('SessionManagementService', () => {
   let service: SessionManagementService;

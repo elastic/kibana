@@ -59,23 +59,27 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
   switch (node.type) {
     case 'function':
     case 'command':
+    case 'order':
     case 'option': {
-      for (const arg of singleItems(node.args)) {
-        yield arg;
-      }
+      yield* singleItems(node.args);
       break;
     }
     case 'list': {
-      for (const item of singleItems(node.values)) {
-        yield item;
-      }
+      yield* singleItems(node.values);
+      break;
+    }
+    case 'map': {
+      yield* node.entries;
+      break;
+    }
+    case 'map-entry': {
+      yield node.key;
+      yield node.value;
       break;
     }
     case 'inlineCast': {
       if (Array.isArray(node.value)) {
-        for (const item of singleItems(node.value)) {
-          yield item;
-        }
+        yield* singleItems(node.value);
       } else {
         yield node.value;
       }

@@ -6,6 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
+import { getOr } from 'lodash/fp';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { EventEnrichmentRequestOptions } from '../../../../../../common/api/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildIndicatorEnrichments, getTotalCount } from './helpers';
@@ -19,7 +21,8 @@ export const parseEventEnrichmentResponse = async (
     dsl: [inspectStringifyObject(buildEventEnrichmentQuery(options))],
   };
   const totalCount = getTotalCount(response.rawResponse.hits.total);
-  const enrichments = buildIndicatorEnrichments(response.rawResponse.hits.hits);
+  const hits: SearchHit[] = getOr([], 'rawResponse.hits.hits', response);
+  const enrichments = buildIndicatorEnrichments(hits);
 
   return {
     ...response,

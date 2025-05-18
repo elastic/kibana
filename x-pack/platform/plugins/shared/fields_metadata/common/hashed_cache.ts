@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import hash from 'object-hash';
 
 export interface IHashedCache<KeyType, ValueType> {
@@ -14,10 +14,10 @@ export interface IHashedCache<KeyType, ValueType> {
   reset(): void;
 }
 
-export class HashedCache<KeyType, ValueType> {
+export class HashedCache<KeyType extends hash.NotUndefined, ValueType extends {}> {
   private cache: LRUCache<string, ValueType>;
 
-  constructor(options: LRUCache.Options<string, ValueType> = { max: 500 }) {
+  constructor(options: LRUCache.Options<string, ValueType, unknown> = { max: 500 }) {
     this.cache = new LRUCache<string, ValueType>(options);
   }
 
@@ -37,7 +37,7 @@ export class HashedCache<KeyType, ValueType> {
   }
 
   public reset() {
-    return this.cache.reset();
+    return this.cache.clear();
   }
 
   private getHashedKey(key: KeyType) {

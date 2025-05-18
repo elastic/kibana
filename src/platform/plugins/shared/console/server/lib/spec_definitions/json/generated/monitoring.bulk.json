@@ -22,7 +22,7 @@
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html",
     "availability": {
-      "stack": true,
+      "stack": false,
       "serverless": false
     }
   }

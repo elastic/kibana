@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { left, right } from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/Either';
 import { errors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
+import type { RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
+import { RuleDataClient } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
-import { Dataset, RuleDataWriterInitializationError } from '..';
+import type { Dataset } from '..';
+import { RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -107,12 +109,10 @@ describe('RuleDataClient', () => {
 
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
-          await reader.search({
-            body: query,
-          });
+          await reader.search(query);
 
           expect(scopedClusterClient.search).toHaveBeenCalledWith({
-            body: query,
+            ...query,
             ignore_unavailable: true,
             index: `.alerts-observability.apm.alerts*`,
             seq_no_primary_term: true,
@@ -131,12 +131,10 @@ describe('RuleDataClient', () => {
 
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader({ namespace: 'test' });
-          await reader.search({
-            body: query,
-          });
+          await reader.search(query);
 
           expect(scopedClusterClient.search).toHaveBeenCalledWith({
-            body: query,
+            ...query,
             ignore_unavailable: true,
             index: `.alerts-observability.apm.alerts-test`,
             seq_no_primary_term: true,
@@ -151,11 +149,9 @@ describe('RuleDataClient', () => {
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
 
-          await expect(
-            reader.search({
-              body: query,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+          await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"something went wrong!"`
+          );
 
           expect(logger.error).toHaveBeenCalledWith(
             `Error performing search in RuleDataClient - something went wrong!`
@@ -224,11 +220,9 @@ describe('RuleDataClient', () => {
 
           const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
           const reader = ruleDataClient.getReader();
-          await expect(
-            reader.search({
-              body: query,
-            })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`"could not get cluster client"`);
+          await expect(reader.search(query)).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"could not get cluster client"`
+          );
 
           await expect(reader.getDynamicIndexPattern()).rejects.toThrowErrorMatchingInlineSnapshot(
             `"could not get cluster client"`

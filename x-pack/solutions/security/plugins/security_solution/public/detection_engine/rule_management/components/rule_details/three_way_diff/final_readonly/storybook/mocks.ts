@@ -139,7 +139,8 @@ const commonDiffableRuleFields: DiffableCommonFields = {
   required_fields: [],
   rule_schedule: {
     interval: '5m',
-    lookback: '360s',
+    from: 'now-660s',
+    to: 'now',
   },
   max_signals: DEFAULT_MAX_SIGNALS,
 };

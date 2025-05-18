@@ -6,12 +6,10 @@
  */
 
 import type { Unionize } from 'utility-types';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getVizColorForIndex } from '../../../common/viz_colors';
 import type {
   APMEventClient,
   APMEventESSearchRequest,
@@ -33,14 +31,12 @@ type MetricsAggregationMap = Unionize<{
 type MetricAggs = Record<string, MetricsAggregationMap>;
 
 export type GenericMetricsRequest = APMEventESSearchRequest & {
-  body: {
-    aggs: {
-      timeseriesData: {
-        date_histogram: AggregationOptionsByType['date_histogram'];
-        aggs: MetricAggs;
-      };
-    } & MetricAggs;
-  };
+  aggs: {
+    timeseriesData: {
+      date_histogram: AggregationOptionsByType['date_histogram'];
+      aggs: MetricAggs;
+    };
+  } & MetricAggs;
 };
 
 export type GenericMetricsChart = FetchAndTransformMetrics;
@@ -53,7 +49,6 @@ export interface FetchAndTransformMetrics {
     title: string;
     key: string;
     type: ChartType;
-    color: string;
     overallValue: number;
     data: Coordinate[];
   }>;
@@ -91,32 +86,30 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...serviceNodeNameQuery(serviceNodeName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...additionalFilters,
-          ],
-        },
+    track_total_hits: 1,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...serviceNodeNameQuery(serviceNodeName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...additionalFilters,
+        ],
       },
-      aggs: {
-        timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs,
-        },
-        ...aggs,
+    },
+    aggs: {
+      timeseriesData: {
+        date_histogram: getMetricsDateHistogramParams({
+          start,
+          end,
+          metricsInterval: config.metricsInterval,
+        }),
+        aggs,
       },
+      ...aggs,
     },
   };
 
@@ -139,7 +132,6 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
               title: chartBase.series[seriesKey].title,
               key: seriesKey,
               type: chartBase.type,
-              color: chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
               overallValue,
               data:
                 timeseriesData?.buckets.map((bucket) => {

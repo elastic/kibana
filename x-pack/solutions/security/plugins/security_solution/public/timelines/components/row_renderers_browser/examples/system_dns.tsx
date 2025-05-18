@@ -18,7 +18,6 @@ const SystemDnsExampleComponent: React.FC = () => {
     <>
       {systemDnsRowRenderer.renderRow({
         data: demoEndgameDnsRequest,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

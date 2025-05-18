@@ -83,7 +83,6 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
-
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
@@ -262,6 +261,7 @@ export async function handleInstallPackageFailure({
   esClient,
   spaceId,
   authorizationHeader,
+  keepFailedInstallation,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -271,6 +271,7 @@ export async function handleInstallPackageFailure({
   esClient: ElasticsearchClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  keepFailedInstallation?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
     return;
@@ -306,6 +307,9 @@ export async function handleInstallPackageFailure({
       logger.error(
         `Uninstalling ${pkgkey} after error installing: [${error.toString()}] with install type: ${installType}`
       );
+      if (keepFailedInstallation) {
+        return;
+      }
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
       return;
     }
@@ -388,6 +392,7 @@ interface InstallRegistryPackageParams {
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
+  keepFailedInstallation?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -451,6 +456,7 @@ async function installPackageFromRegistry({
   ignoreMappingUpdateErrors = false,
   skipDataStreamRollover = false,
   retryFromLastState = false,
+  keepFailedInstallation = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -486,18 +492,16 @@ async function installPackageFromRegistry({
     }
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo, assetsMap, archiveIterator, verificationResult }] =
+    const [latestPackage, { paths, packageInfo, archiveIterator, verificationResult }] =
       await Promise.all([
         latestPkg ? Promise.resolve(latestPkg) : queryLatest(),
         Registry.getPackage(pkgName, pkgVersion, {
           ignoreUnverified: force && !neverIgnoreVerificationError,
-          useStreaming,
+          useStreaming: true,
         }),
       ]);
-
     const packageInstallContext: PackageInstallContext = {
       packageInfo,
-      assetsMap,
       paths,
       archiveIterator,
     };
@@ -553,6 +557,7 @@ async function installPackageFromRegistry({
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      keepFailedInstallation,
     });
   } catch (e) {
     sendEvent({
@@ -573,7 +578,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
   return subscription || packageInfo.license || 'basic';
 }
 
-async function installPackageWithStateMachine(options: {
+export async function installPackageWithStateMachine(options: {
   pkgName: string;
   pkgVersion: string;
   installSource: InstallSource;
@@ -592,6 +597,7 @@ async function installPackageWithStateMachine(options: {
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   useStreaming?: boolean;
+  keepFailedInstallation?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -612,6 +618,7 @@ async function installPackageWithStateMachine(options: {
     packageInstallContext,
     retryFromLastState,
     useStreaming,
+    keepFailedInstallation,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -737,6 +744,7 @@ async function installPackageWithStateMachine(options: {
           spaceId,
           esClient,
           authorizationHeader,
+          keepFailedInstallation,
         });
         sendEvent({
           ...telemetryEvent!,
@@ -822,7 +830,7 @@ async function installPackageByUpload({
       packageInfo,
     });
 
-    const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
       archiveBuffer,
       contentType,
       useStreaming,
@@ -830,7 +838,6 @@ async function installPackageByUpload({
 
     const packageInstallContext: PackageInstallContext = {
       packageInfo: { ...packageInfo, version: pkgVersion },
-      assetsMap,
       paths,
       archiveIterator,
     };
@@ -898,6 +905,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      keepFailedInstallation,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -940,7 +948,9 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
+      keepFailedInstallation,
     });
+
     return response;
   } else if (args.installSource === 'upload') {
     const {
@@ -1024,7 +1034,6 @@ export async function installCustomPackage(
   const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
   const packageInstallContext: PackageInstallContext = {
-    assetsMap,
     paths,
     packageInfo,
     archiveIterator,
@@ -1052,6 +1061,7 @@ export const updateVersion = async (
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1076,6 +1086,7 @@ export const updateInstallStatusToFailed = async ({
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
   try {
@@ -1117,6 +1128,7 @@ export async function restartInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1169,6 +1181,7 @@ export async function createInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'create',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1190,12 +1203,13 @@ export const kibanaAssetsToAssetsRef = (
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetRefs: KibanaAssetReference[],
+  assetRefs: KibanaAssetReference[] | null,
   saveAsAdditionnalSpace = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1227,11 +1241,11 @@ export const saveKibanaAssetsRefs = async (
                   installation?.attributes?.additional_spaces_installed_kibana ?? {},
                   spaceId
                 ),
-                ...(assetRefs.length > 0 ? { [spaceId]: assetRefs } : {}),
+                ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
               },
             }
           : {
-              installed_kibana: assetRefs,
+              installed_kibana: assetRefs !== null ? assetRefs : [],
             },
         { refresh: false }
       );
@@ -1239,7 +1253,7 @@ export const saveKibanaAssetsRefs = async (
     { retries: 20 } // Use a number of retries higher than the number of es asset update operations
   );
 
-  return assetRefs;
+  return assetRefs !== null ? assetRefs : [];
 };
 
 export async function ensurePackagesCompletedInstall(
@@ -1362,7 +1376,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
       const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
       packageInstallContext = {
-        assetsMap: pkg.assetsMap,
         packageInfo: pkg.packageInfo,
         paths: pkg.paths,
         archiveIterator,
@@ -1370,7 +1383,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
     } else {
       const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
       packageInstallContext = {
-        assetsMap: installedPkgWithAssets.assetsMap,
         packageInfo: installedPkgWithAssets.packageInfo,
         paths: installedPkgWithAssets.paths,
         archiveIterator,

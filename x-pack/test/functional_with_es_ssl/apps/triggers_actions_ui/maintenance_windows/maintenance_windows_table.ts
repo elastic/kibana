@@ -20,13 +20,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/205269
-  describe.skip('Maintenance windows table', function () {
+  describe('Maintenance windows table', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await objectRemover.removeAll();
     });
 
@@ -289,6 +288,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.isEnabled('pagination-button-0');
       const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
       expect(listedOnSecondPageMWs.length).to.be(2);
+    });
+
+    it('should delete a maintenance window', async () => {
+      const name = generateUniqueKey();
+      await createMaintenanceWindow({
+        name,
+        getService,
+      });
+
+      await browser.refresh();
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
+      const listBefore = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(listBefore.length).to.eql(1);
+
+      await testSubjects.click('table-actions-popover');
+      await testSubjects.click('table-actions-delete');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql('Deleted maintenance window');
+      });
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
+      const listAfter = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(listAfter.length).to.eql(0);
     });
   });
 };

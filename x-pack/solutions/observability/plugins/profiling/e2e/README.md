@@ -1,6 +1,6 @@
 # Profiling E2E tests
 
-Profiling uses [FTR](../../../../../packages/kbn-test/README.md) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
+Profiling uses [FTR](../../../../../../src/platform/packages/shared/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
 
 ## E2E Tests (Cypress)
 
@@ -11,41 +11,35 @@ Tests run on buildkite PR pipeline are parallelized (4 parallel jobs) and are or
 ```yml
     ...
     depends_on: build
-    parallelism: 4
+    parallelism: 3
     ...
 ```
 
 ## Running it locally
 
-### Start test server
+### Start with Cypress Dashboard
 
 ```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --server
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --open
 ```
 
 ### Run tests
 Runs all tests in the terminal
 
 ```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --runner
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e
 ```
 
-### Open cypress dashboard
-Opens cypress dashboard, there it's possible to select what test you want to run.
+### Run tests in headed mode
 
 ```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --open
+node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --headed
 ```
+
 ### Arguments
 
 | Option       | Description                                     |
 | ------------ | ----------------------------------------------- |
-| --server     | Only start ES and Kibana                        |
-| --runner     | Only run tests                                  |
-| --spec       | Specify the specs to run                        |
-| --times      | Repeat the test n number of times               |
-| --bail       | stop tests after the first failure              |
+| --open       | Opens Cypress dashboard                         |
+| --headed     | Runs tests in headed mode                       |
 
-```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e.js --runner --spec cypress/e2e/profiling.cy.ts --times 2
-```

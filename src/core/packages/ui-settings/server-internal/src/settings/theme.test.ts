@@ -11,7 +11,6 @@ import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { getThemeSettings, type GetThemeSettingsOptions } from './theme';
 
 const defaultOptions: GetThemeSettingsOptions = {
-  isServerless: false,
   isDist: true,
   isThemeSwitcherEnabled: undefined,
 };
@@ -42,6 +41,8 @@ describe('theme settings', () => {
     const validate = getValidationFn(themeSettings['theme:name']);
 
     it('should only accept expected values', () => {
+      // TODO: Remove amsterdam theme
+      // https://github.com/elastic/eui-private/issues/170
       expect(() => validate('amsterdam')).not.toThrow();
       expect(() => validate('borealis')).not.toThrow();
 
@@ -50,25 +51,24 @@ describe('theme settings', () => {
     });
 
     describe('readonly', () => {
-      it('should be readonly when `isServerless = true`', () => {
+      it('should not be editable when `isThemeSwitcherEnabled` is falsy', () => {
+        expect(getThemeSettings(defaultOptions)['theme:name'].readonly).toBe(true);
         expect(
-          getThemeSettings({ ...defaultOptions, isServerless: true })['theme:name'].readonly
+          getThemeSettings({
+            ...defaultOptions,
+            isThemeSwitcherEnabled: false,
+          })['theme:name'].readonly
         ).toBe(true);
-        expect(
-          getThemeSettings({ ...defaultOptions, isServerless: false })['theme:name'].readonly
-        ).toBe(false);
       });
 
       it('should be editable when `isThemeSwitcherEnabled = true`', () => {
         expect(
-          getThemeSettings({ ...defaultOptions, isServerless: true, isThemeSwitcherEnabled: true })[
-            'theme:name'
-          ].readonly
+          getThemeSettings({ ...defaultOptions, isThemeSwitcherEnabled: true })['theme:name']
+            .readonly
         ).toBe(false);
         expect(
           getThemeSettings({
             ...defaultOptions,
-            isServerless: false,
             isThemeSwitcherEnabled: true,
           })['theme:name'].readonly
         ).toBe(false);
@@ -76,16 +76,17 @@ describe('theme settings', () => {
     });
 
     describe('value', () => {
-      it('should default to `amsterdam` when `isServerless = true`', () => {
-        expect(
-          getThemeSettings({ ...defaultOptions, isServerless: true })['theme:name'].value
-        ).toBe('amsterdam');
+      it('should default to `borealis`', () => {
+        expect(getThemeSettings(defaultOptions)['theme:name'].value).toBe('borealis');
       });
 
-      it('should default to `borealis` when `isServerless = false`', () => {
+      it('should use the `defaultTheme` value when defined', () => {
         expect(
-          getThemeSettings({ ...defaultOptions, isServerless: false })['theme:name'].value
-        ).toBe('borealis');
+          getThemeSettings({
+            ...defaultOptions,
+            defaultTheme: 'amsterdam',
+          })['theme:name'].value
+        ).toBe('amsterdam');
       });
     });
   });

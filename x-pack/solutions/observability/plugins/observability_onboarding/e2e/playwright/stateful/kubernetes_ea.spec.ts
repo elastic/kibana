@@ -45,22 +45,19 @@ test('Kubernetes EA', async ({
   fs.writeFileSync(outputPath, clipboardData);
 
   await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
-  await kubernetesEAFlowPage.clickKubernetesAgentCTA();
 
-  await kubernetesOverviewDashboardPage.openNodesInspector();
   /**
    * There might be a case that dashboard still does not show
    * the data even though it was ingested already. This usually
-   * happens during in the test when navigation from the onboarding
+   * happens during the test when navigation from the onboarding
    * flow to the dashboard happens almost immediately.
-   * Waiting for a few seconds and reloading the page handles
-   * this case and makes the test a bit more robust.
+   * Having a timeout before going to the dashboard "solves"
+   * the issue. 2 minutes is generous and should be more then enough
+   * for the data to propagate everywhere.
    */
-  try {
-    await kubernetesOverviewDashboardPage.assertNodesNoResultsNotVisible();
-  } catch {
-    await kubernetesOverviewDashboardPage.page.waitForTimeout(2000);
-    await kubernetesOverviewDashboardPage.page.reload();
-  }
-  await kubernetesOverviewDashboardPage.assetNodesInspectorStatusTableCells();
+  await page.waitForTimeout(2 * 60000);
+
+  await kubernetesEAFlowPage.clickKubernetesAgentCTA();
+
+  await kubernetesOverviewDashboardPage.assertNodesPanelNotEmpty();
 });

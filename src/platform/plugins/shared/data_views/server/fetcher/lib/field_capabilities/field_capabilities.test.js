@@ -34,6 +34,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
   const fillUndefinedParams = (args) => ({
     callCluster: undefined,
+    abortSignal: undefined,
     indices: undefined,
     expandWildcards: undefined,
     fieldCapsOptions: undefined,
@@ -41,6 +42,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     indexFilter: undefined,
     fields: undefined,
     includeEmptyFields: undefined,
+    runtimeMappings: undefined,
     ...args,
   });
 

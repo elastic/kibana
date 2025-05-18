@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   createLegacyRuleAction,
@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
+        .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true`)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .attach('file', Buffer.from(ndjson), 'rules.ndjson')
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
         const { body } = await supertestWithoutAuth
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .auth(ROLES.hunter_no_actions, 'changeme')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const { body } = await supertestWithoutAuth
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .auth(ROLES.hunter, 'changeme')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
@@ -158,10 +158,10 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
-                status_code: 403,
+                  'Rule actions reference the following missing action IDs: cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+                status_code: 404,
               },
-              rule_id: '(unknown id)',
+              rule_id: 'rule-with-actions',
             },
           ],
           success: false,
@@ -173,10 +173,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
+                  'You may not have actions privileges required to import actions: Unable to bulk_create action',
                 status_code: 403,
               },
-              rule_id: '(unknown id)',
             },
           ],
           action_connectors_warnings: [],
@@ -217,7 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const { body } = await supertestWithoutAuth
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .auth(ROLES.hunter_no_actions, 'changeme')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
@@ -234,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
                 status_code: 403,
               },
-              rule_id: '(unknown id)',
+              rule_id: 'rule-with-actions',
             },
           ],
           rules_count: 1,
@@ -244,10 +243,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                  'You may not have actions privileges required to import actions: Unable to bulk_create action',
                 status_code: 403,
               },
-              rule_id: '(unknown id)',
             },
           ],
           action_connectors_warnings: [],
@@ -269,7 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
@@ -308,7 +306,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
@@ -345,7 +343,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')

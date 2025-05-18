@@ -84,6 +84,10 @@ Object {
   "payloadTimeout": 20000,
   "port": 5601,
   "protocol": "http1",
+  "prototypeHardening": false,
+  "rateLimiter": Object {
+    "enabled": false,
+  },
   "requestId": Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],

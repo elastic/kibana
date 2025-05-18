@@ -18,22 +18,17 @@ import {
   apiHasInspectorAdapters,
   type Adapters,
 } from '@kbn/inspector-plugin/public';
-import {
-  EmbeddableApiContext,
-  PublishesPanelTitle,
-  getPanelTitle,
-} from '@kbn/presentation-publishing';
+import { EmbeddableApiContext, PublishesTitle, getTitle } from '@kbn/presentation-publishing';
 import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
-
-export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
+import { ACTION_EXPORT_CSV } from './constants';
 
 export type ExportContext = EmbeddableApiContext & {
   // used for testing
   asString?: boolean;
 };
 
-export type ExportCsvActionApi = HasInspectorAdapters & Partial<PublishesPanelTitle>;
+export type ExportCsvActionApi = HasInspectorAdapters & Partial<PublishesTitle>;
 
 const isApiCompatible = (api: unknown | null): api is ExportCsvActionApi =>
   Boolean(apiHasInspectorAdapters(api));
@@ -91,7 +86,7 @@ export class ExportCSVAction implements Action<ExportContext> {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
             const untitledFilename = dashboardExportCsvActionStrings.getUntitledFilename();
 
-            memo[`${getPanelTitle(embeddable) || untitledFilename}${postFix}.csv`] = {
+            memo[`${getTitle(embeddable) || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {
                 csvSeparator: coreServices.uiSettings.get('csv:separator', ','),
                 quoteValues: coreServices.uiSettings.get('csv:quoteValues', true),

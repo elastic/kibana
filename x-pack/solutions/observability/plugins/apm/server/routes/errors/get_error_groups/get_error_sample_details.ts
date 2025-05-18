@@ -29,6 +29,12 @@ import {
   ERROR_STACK_TRACE,
   SPAN_ID,
   SERVICE_LANGUAGE_NAME,
+  URL_FULL,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_PAGE_URL,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -42,6 +48,7 @@ export interface ErrorSampleDetailsResponse {
   transaction: Transaction | undefined;
   error: Omit<APMError, 'transaction' | 'error'> & {
     transaction?: { id?: string; type?: string };
+    user_agent?: { name?: string; version?: string };
     error: {
       id: string;
     } & Omit<APMError['error'], 'exception' | 'log'> & {
@@ -90,6 +97,12 @@ export async function getErrorSampleDetails({
     ERROR_EXC_MESSAGE,
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
+    URL_FULL,
+    HTTP_REQUEST_METHOD,
+    HTTP_RESPONSE_STATUS_CODE,
+    TRANSACTION_PAGE_URL,
+    USER_AGENT_NAME,
+    USER_AGENT_VERSION,
   ] as const);
 
   const params = {
@@ -101,23 +114,21 @@ export async function getErrorSampleDetails({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [ERROR_ID]: errorId } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [ERROR_ID]: errorId } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [ERROR_EXCEPTION, 'error.log'],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [ERROR_EXCEPTION, 'error.log'],
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
@@ -159,7 +170,7 @@ export async function getErrorSampleDetails({
       error: {
         ...errorFromFields.error,
         exception:
-          (source?.error.exception?.length ?? 0) > 1
+          (source?.error.exception?.length ?? 0) > 0
             ? source?.error.exception
             : errorFromFields?.error.exception && [errorFromFields.error.exception],
         log: source?.error?.log,

@@ -23,6 +23,7 @@ export * from './visualizations/metric';
 export * from './visualizations/partition/pie_visualization';
 export * from './visualizations/partition';
 export * from './visualizations/xy/xy_visualization';
+export * from './visualizations/xy/types';
 export * from './visualizations/xy';
 export * from './visualizations/heatmap/heatmap_visualization';
 export * from './visualizations/heatmap';
@@ -33,11 +34,11 @@ export * from './visualizations/tagcloud';
 export { getEditLensConfiguration } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export * from './datasources/form_based/form_based';
-export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
+export { getTextBasedDatasource } from './datasources/form_based/esql_layer/text_based_languages';
 export { createFormulaPublicApi } from './datasources/form_based/operations/definitions/formula/formula_public_api';
 export * from './lens_suggestions_api';
 
-export * from './datasources/text_based';
+export * from './datasources/form_based/esql_layer';
 export * from './datasources/form_based';
 export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
@@ -47,7 +48,16 @@ export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
+export * from './utils';
 
 export * from './trigger_actions/open_in_discover_helpers';
-export * from './trigger_actions/open_lens_config/create_action_helpers';
 export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';
+export { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
+export { getAddLensPanelAction } from './trigger_actions/add_lens_panel_action';
+export { AddESQLPanelAction } from './trigger_actions/open_lens_config/add_esql_panel_action';
+export { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
+export { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
+export { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+
+export { deserializeState } from './react_embeddable/helper';
+export * from './react_embeddable/lens_embeddable';

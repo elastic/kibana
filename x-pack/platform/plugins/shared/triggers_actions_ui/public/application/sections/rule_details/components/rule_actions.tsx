@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { NOTIFY_WHEN_OPTIONS } from '@kbn/response-ops-rule-form';
 import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
-import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
 import { RuleUiAction } from '../../../../types';
 
 export interface RuleActionsProps {
@@ -54,15 +54,17 @@ export function RuleActions({
 
   const getNotifyText = (action: RuleUiAction, isSystemAction?: boolean): string | ReactNode => {
     if (isSystemAction) {
-      return NOTIFY_WHEN_OPTIONS[1].inputDisplay;
+      return NOTIFY_WHEN_OPTIONS[1].value.inputDisplay;
     }
 
     if ('frequency' in action) {
       const notifyWhen = NOTIFY_WHEN_OPTIONS.find(
-        (options) => options.value === action.frequency?.notifyWhen
+        (options) => options.value.value === action.frequency?.notifyWhen
       );
 
-      return notifyWhen?.inputDisplay ?? action.frequency?.notifyWhen ?? legacyNotifyWhen ?? '';
+      return (
+        notifyWhen?.value.inputDisplay ?? action.frequency?.notifyWhen ?? legacyNotifyWhen ?? ''
+      );
     }
 
     return '';

@@ -65,7 +65,7 @@ describe('getAttackDiscoveryMarkdown', () => {
       expect(result).toBe('');
     });
 
-    it('returns the expected attack chain markdown when tactics are detected', () => {
+    it('returns the expected attack chain markdown when a subset of tactics are detected', () => {
       const result = getAttackChainMarkdown(mockAttackDiscovery);
 
       expect(result).toBe(`### Attack Chain
@@ -73,6 +73,48 @@ describe('getAttackDiscoveryMarkdown', () => {
 - Execution
 - Persistence
 - Privilege Escalation
+- Credential Access
+`);
+    });
+
+    it('returns the expected attack chain markdown when the full set of tactics are detected', () => {
+      const allTactics = {
+        ...mockAttackDiscovery,
+        mitreAttackTactics: [
+          'Reconnaissance',
+          'Resource Development',
+          'Initial Access',
+          'Execution',
+          'Persistence',
+          'Privilege Escalation',
+          'Defense Evasion',
+          'Credential Access',
+          'Discovery',
+          'Lateral Movement',
+          'Collection',
+          'Command and Control',
+          'Exfiltration',
+          'Impact',
+        ],
+      };
+
+      const result = getAttackChainMarkdown(allTactics);
+
+      expect(result).toBe(`### Attack Chain
+- Reconnaissance
+- Resource Development
+- Initial Access
+- Execution
+- Persistence
+- Privilege Escalation
+- Defense Evasion
+- Credential Access
+- Discovery
+- Lateral Movement
+- Collection
+- Command & Control
+- Exfiltration
+- Impact
 `);
     });
   });
@@ -138,6 +180,7 @@ This appears to be a multi-stage attack involving malware delivery, privilege es
 - Execution
 - Persistence
 - Privilege Escalation
+- Credential Access
 
 `;
 
@@ -174,6 +217,7 @@ This appears to be a multi-stage attack involving malware delivery, privilege es
 - Execution
 - Persistence
 - Privilege Escalation
+- Credential Access
 
 `;
 

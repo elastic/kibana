@@ -47,6 +47,7 @@ export const getValueForField = ({
             pick_version: globalPickVersion,
           },
           ruleFieldsDiff,
+          onConflict: requestBody.on_conflict,
         })
       : getValueFromRuleTriad({
           fieldName,
@@ -85,6 +86,7 @@ export const getValueForField = ({
         upgradeableRule,
         fieldUpgradeSpecifier,
         ruleFieldsDiff,
+        onConflict: requestBody.on_conflict,
       })
     : getValueFromRuleTriad({
         fieldName,

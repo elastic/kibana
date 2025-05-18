@@ -74,4 +74,15 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should render an empty component when the user does not have access to timeline', () => {
+    const mockData: Indicator = generateMockUrlIndicator();
+
+    const { container } = render(
+      <TestProvidersComponent securityContextOverrides={{ hasAccessToTimeline: false }}>
+        <InvestigateInTimelineContextMenu data={mockData} data-test-subj={TEST_ID} />
+      </TestProvidersComponent>
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
 });

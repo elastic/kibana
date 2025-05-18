@@ -5,4 +5,13 @@
  * 2.0.
  */
 
-export * from './common.gen';
+export type {
+  EntityAnalyticsPrivileges,
+  EntityRiskLevels,
+  EntityRiskScoreRecord,
+  RiskScoreInput,
+  EntityAfterKey,
+  RiskScoreWeights,
+  TaskManagerUnavailableResponse,
+} from './common.gen';
+export { AfterKeys, RiskScoreWeight, EntityRiskLevelsEnum } from './common.gen';

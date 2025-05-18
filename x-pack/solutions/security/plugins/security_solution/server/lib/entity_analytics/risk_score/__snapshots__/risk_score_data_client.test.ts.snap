@@ -9,6 +9,13 @@ Object {
         "ignore_malformed": false,
         "type": "date",
       },
+      "event": Object {
+        "properties": Object {
+          "ingested": Object {
+            "type": "date",
+          },
+        },
+      },
       "host": Object {
         "properties": Object {
           "name": Object {

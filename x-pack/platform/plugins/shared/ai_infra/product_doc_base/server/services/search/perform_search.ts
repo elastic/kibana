@@ -13,11 +13,13 @@ import type { ProductDocumentationAttributes } from '@kbn/product-doc-common';
 export const performSearch = async ({
   searchQuery,
   size,
+  highlights,
   index,
   client,
 }: {
   searchQuery: string;
   size: number;
+  highlights: number;
   index: string | string[];
   client: ElasticsearchClient;
 }) => {
@@ -78,6 +80,18 @@ export const performSearch = async ({
         ],
       },
     },
+    ...(highlights > 0
+      ? {
+          highlight: {
+            fields: {
+              content_body: {
+                type: 'semantic',
+                number_of_fragments: highlights,
+              },
+            },
+          },
+        }
+      : {}),
   });
 
   return results.hits.hits;

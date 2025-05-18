@@ -6,9 +6,9 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { map, fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';

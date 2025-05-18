@@ -12,7 +12,7 @@ import { Config } from '../types';
 
 export async function setupKibanaSystemUser(config: Config, client: Client, logger: ToolingLog) {
   await client.security
-    .changePassword({ username: 'kibana_system', body: { password: 'changeme' } })
+    .changePassword({ username: 'kibana_system', password: 'changeme' })
     .then(() => {
       logger.info('Password changed to "changeme" for "kibana_system" user');
     })

@@ -5,62 +5,36 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { InferenceForm } from './inference_form';
-import * as i18n from './translations';
+import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface AddInferenceFlyoutWrapperProps {
-  onClose: (state: boolean) => void;
+  onFlyoutClose: () => void;
+  reloadFn: () => void;
 }
 
 export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps> = ({
-  onClose,
+  onFlyoutClose,
+  reloadFn,
 }) => {
-  const inferenceCreationFlyoutId = useGeneratedHtmlId({
-    prefix: 'addInferenceFlyoutId',
-  });
-  const closeFlyout = () => onClose(false);
+  const {
+    services: {
+      http,
+      notifications: { toasts },
+    },
+  } = useKibana();
+  const onSubmitSuccess = useCallback(() => {
+    reloadFn();
+  }, [reloadFn]);
 
   return (
-    <EuiFlyout
-      ownFocus
-      onClose={closeFlyout}
-      aria-labelledby={inferenceCreationFlyoutId}
-      data-test-subj="create-inference-flyout"
-    >
-      <EuiFlyoutHeader hasBorder data-test-subj="create-inference-flyout-header">
-        <EuiTitle size="m">
-          <h2 id={inferenceCreationFlyoutId}>{i18n.CREATE_ENDPOINT_TITLE}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <InferenceForm onSubmitSuccess={onClose} />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="create-inference-flyout-close-button"
-              onClick={closeFlyout}
-              flush="left"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+    <InferenceFlyoutWrapper
+      onFlyoutClose={onFlyoutClose}
+      http={http}
+      toasts={toasts}
+      onSubmitSuccess={onSubmitSuccess}
+    />
   );
 };

@@ -13,22 +13,22 @@ import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
 import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 import {
-  ID,
   DESTINATION_IP,
   DESTINATION_PORT,
   EVENT_CATEGORY,
+  eventKindMatches,
   FILE_NAME,
   HOST_NAME,
+  ID,
   KIBANA_ALERT_RULE_NAME,
   KIBANA_ALERT_SEVERITY,
   PROCESS_NAME,
   PROCESS_PARENT_NAME,
+  showWith,
   SOURCE_IP,
   SOURCE_PORT,
   USER_NAME,
   WITH_FIELD_NAMES,
-  eventKindMatches,
-  showWith,
 } from './helpers';
 import { Details } from '../helpers';
 import { RowRendererContainer } from '../row_renderer';
@@ -54,7 +54,7 @@ export const ALERT_RENDERER_FIELDS = [
 export const alertRenderer: RowRenderer = {
   id: RowRendererIdEnum.alert,
   isInstance: (ecs) => eventKindMatches(get('event.kind', ecs)),
-  renderRow: ({ contextId = DEFAULT_CONTEXT_ID, data, isDraggable, scopeId }) => {
+  renderRow: ({ contextId = DEFAULT_CONTEXT_ID, data, scopeId }) => {
     const eventId = get(ID, data);
     const destinationIp = get(DESTINATION_IP, data);
     const destinationPort = get(DESTINATION_PORT, data);
@@ -78,7 +78,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={EVENT_CATEGORY}
               eventId={eventId}
               field={EVENT_CATEGORY}
-              isDraggable={isDraggable}
               scopeId={scopeId}
               values={eventCategory}
             />
@@ -101,7 +100,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={PROCESS_NAME}
               eventId={eventId}
               field={PROCESS_NAME}
-              isDraggable={isDraggable}
               prefix={` ${i18n.PROCESS} `}
               suffix=", "
               scopeId={scopeId}
@@ -113,7 +111,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={PROCESS_PARENT_NAME}
               eventId={eventId}
               field={PROCESS_PARENT_NAME}
-              isDraggable={isDraggable}
               prefix={` ${i18n.PARENT_PROCESS} `}
               suffix=", "
               scopeId={scopeId}
@@ -125,7 +122,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={FILE_NAME}
               eventId={eventId}
               field={FILE_NAME}
-              isDraggable={isDraggable}
               prefix={` ${i18n.FILE} `}
               suffix=", "
               scopeId={scopeId}
@@ -137,7 +133,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={SOURCE_IP}
               eventId={eventId}
               field={SOURCE_IP}
-              isDraggable={isDraggable}
               prefix={` ${i18n.SOURCE} `}
               scopeId={scopeId}
               values={sourceIp}
@@ -148,7 +143,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={SOURCE_PORT}
               eventId={eventId}
               field={SOURCE_PORT}
-              isDraggable={isDraggable}
               prefix=":"
               suffix=", "
               scopeId={scopeId}
@@ -160,7 +154,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={DESTINATION_IP}
               eventId={eventId}
               field={DESTINATION_IP}
-              isDraggable={isDraggable}
               prefix={` ${i18n.DESTINATION} `}
               scopeId={scopeId}
               values={destinationIp}
@@ -171,7 +164,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={DESTINATION_PORT}
               eventId={eventId}
               field={DESTINATION_PORT}
-              isDraggable={isDraggable}
               prefix=":"
               suffix=", "
               scopeId={scopeId}
@@ -183,7 +175,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={USER_NAME}
               eventId={eventId}
               field={USER_NAME}
-              isDraggable={isDraggable}
               prefix={` ${i18n.BY} `}
               scopeId={scopeId}
               values={userName}
@@ -194,7 +185,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={HOST_NAME}
               eventId={eventId}
               field={HOST_NAME}
-              isDraggable={isDraggable}
               prefix={` ${i18n.ON} `}
               scopeId={scopeId}
               values={hostName}
@@ -205,7 +195,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={KIBANA_ALERT_SEVERITY}
               eventId={eventId}
               field={KIBANA_ALERT_SEVERITY}
-              isDraggable={isDraggable}
               prefix={` ${i18n.CREATED} `}
               suffix={` ${i18n.ALERT} `}
               scopeId={scopeId}
@@ -217,7 +206,6 @@ export const alertRenderer: RowRenderer = {
               data-test-subj={KIBANA_ALERT_RULE_NAME}
               eventId={eventId}
               field={KIBANA_ALERT_RULE_NAME}
-              isDraggable={isDraggable}
               suffix="."
               scopeId={scopeId}
               values={kibanaAlertRuleName}

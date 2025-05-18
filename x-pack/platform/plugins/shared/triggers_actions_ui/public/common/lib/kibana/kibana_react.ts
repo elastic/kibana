@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaContextProvider,
-  KibanaReactContextValue,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
 } from '@kbn/kibana-react-plugin/public';
-import { TriggersAndActionsUiServices } from '../../../application/rules_app';
+import type { TriggersAndActionsUiServices } from '../../../application/rules_app';
 
 export type KibanaContext = KibanaReactContextValue<TriggersAndActionsUiServices>;
 export interface WithKibanaProps {

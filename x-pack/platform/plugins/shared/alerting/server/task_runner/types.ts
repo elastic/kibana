@@ -14,20 +14,20 @@ import type {
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { IAlertsClient } from '../alerts_client/types';
-import { Alert } from '../alert';
-import { AlertsService } from '../alerts_service/alerts_service';
-import {
+import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IAlertsClient } from '../alerts_client/types';
+import type { Alert } from '../alert';
+import type { AlertsService } from '../alerts_service/alerts_service';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
@@ -41,21 +41,21 @@ import {
   RuleSystemAction,
   RulesSettingsFlappingProperties,
 } from '../../common';
-import { ActionsConfigMap } from '../lib/get_actions_config_map';
-import { NormalizedRuleType } from '../rule_type_registry';
-import {
+import type { ActionsConfigMap } from '../lib/get_actions_config_map';
+import type { NormalizedRuleType } from '../rule_type_registry';
+import type {
   CombinedSummarizedAlerts,
   RawRule,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
 } from '../types';
-import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { BackfillClient } from '../backfill_client/backfill_client';
-import { ElasticsearchError } from '../lib';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { RulesSettingsService } from '../rules_settings';
-import { MaintenanceWindowsService } from './maintenance_windows';
+import type { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import type { BackfillClient } from '../backfill_client/backfill_client';
+import type { ElasticsearchError } from '../lib';
+import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import type { RulesSettingsService } from '../rules_settings';
+import type { MaintenanceWindowsService } from './maintenance_windows';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -138,6 +138,7 @@ export type Executable<
 export interface RuleTypeRunnerContext {
   alertingEventLogger: AlertingEventLogger;
   flappingSettings?: RulesSettingsFlappingProperties;
+  logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   namespace?: string;
   queryDelaySec?: number;
@@ -179,5 +180,6 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
 }
