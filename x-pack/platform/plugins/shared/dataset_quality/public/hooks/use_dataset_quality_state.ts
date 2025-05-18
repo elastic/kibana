@@ -9,7 +9,7 @@ import { useSelector } from '@xstate/react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 
 export const useDatasetQualityState = () => {
-  const { service, isFailureStoreEnabled } = useDatasetQualityContext();
+  const { service } = useDatasetQualityContext();
 
   const { datasetUserPrivileges } = useSelector(service, (state) => state.context) ?? {};
 
@@ -20,6 +20,5 @@ export const useDatasetQualityState = () => {
   return {
     statsLoading,
     canUserReadFailureStore,
-    isFailureStoreEnabled,
   };
 };

@@ -15,7 +15,7 @@ import { BasicDataStream } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
-  const { service, telemetryClient, isFailureStoreEnabled } = useDatasetQualityDetailsContext();
+  const { service, telemetryClient } = useDatasetQualityDetailsContext();
 
   const {
     services: { fieldFormats },
@@ -163,7 +163,6 @@ export const useDatasetQualityDetailsState = () => {
   return {
     service,
     telemetryClient,
-    isFailureStoreEnabled,
     fieldFormats,
     isIndexNotFoundError,
     dataStream,

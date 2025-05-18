@@ -90,14 +90,9 @@ const failedDocsDetailsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<FailedDocsDetails> {
-    const { context, params, getEsCapabilities } = resources;
+    const { context, params } = resources;
     const coreContext = await context.core;
     const { dataStream } = params.path;
-    const isServerless = (await getEsCapabilities()).serverless;
-
-    if (isServerless) {
-      throw notImplemented('Failure store is not available in serverless mode');
-    }
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
@@ -128,14 +123,9 @@ const failedDocsErrorsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<FailedDocsErrorsResponse> {
-    const { context, params, getEsCapabilities } = resources;
+    const { context, params } = resources;
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-    const isServerless = (await getEsCapabilities()).serverless;
-
-    if (isServerless) {
-      throw notImplemented('Failure store is not available in serverless mode');
-    }
 
     return await getFailedDocsErrors({
       esClient,

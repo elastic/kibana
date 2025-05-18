@@ -781,7 +781,6 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -790,7 +789,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
-  isFailureStoreEnabled,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -855,14 +853,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
-        if (!isFailureStoreEnabled) {
-          const unsupportedError = {
-            message: 'Failure store is disabled',
-            statusCode: 501,
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({
@@ -917,14 +907,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       loadfailedDocsErrors: (context) => {
-        if (!isFailureStoreEnabled) {
-          const unsupportedError = {
-            message: 'Failure store is disabled',
-            statusCode: 501,
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
           const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
