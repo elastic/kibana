@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
+import { waitForPluginInitialized } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
