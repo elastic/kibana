@@ -17,6 +17,7 @@ import { useDatasetQualityContext } from '../components/dataset_quality/context'
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 import { SortDirection } from '../../common/types';
+import { useDatasetQualityState } from './use_dataset_quality_state';
 
 export type DatasetTableSortField = keyof DataStreamStat;
 
@@ -37,6 +38,7 @@ export const useDatasetQualityTable = () => {
   } = useKibanaContextForPlugin();
 
   const { service, isFailureStoreEnabled } = useDatasetQualityContext();
+  const { canUserReadFailureStore: canReadFailureStore } = useDatasetQualityState();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
@@ -116,6 +118,7 @@ export const useDatasetQualityTable = () => {
         timeRange,
         urlService: url,
         isFailureStoreEnabled,
+        canReadFailureStore,
       }),
     [
       fieldFormats,
@@ -130,6 +133,7 @@ export const useDatasetQualityTable = () => {
       timeRange,
       url,
       isFailureStoreEnabled,
+      canReadFailureStore,
     ]
   );
 

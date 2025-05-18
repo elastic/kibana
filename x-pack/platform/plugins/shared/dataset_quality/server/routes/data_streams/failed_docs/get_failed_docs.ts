@@ -22,7 +22,7 @@ export async function getFailedDocsPaginated(options: {
   const { esClient, types, datasetQuery, start, end } = options;
 
   const datasetNames = datasetQuery
-    ? [`datasetQuery${FAILURE_STORE_SELECTOR}`]
+    ? [`${datasetQuery}${FAILURE_STORE_SELECTOR}`]
     : types.map((type) =>
         streamPartsToIndexPattern({
           typePattern: type,
