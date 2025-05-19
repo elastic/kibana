@@ -6,6 +6,7 @@
  */
 
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+
 import type { MlApi } from './ml_api_service';
 
 export interface ExistingJobsAndGroups {
