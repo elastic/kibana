@@ -166,7 +166,7 @@ export default function (providerContext: FtrProviderContext) {
             });
             const total = result.hits.total as SearchTotalHits;
             expect(total.value).to.eql(1);
-            const hit = result.hits.hits[0] as SearchHit<Ecs>;
+            const hit = result.hits.hits[0];
             expect(hit._source).ok();
 
             expect(hit._source?.host?.name).to.eql(HOST_NAME);
