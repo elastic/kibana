@@ -85,10 +85,11 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
       const dateHistogramId = args.dateHistogramColumn;
       return {
         ...input,
-        columns: [
-          ...input.columns,
-          { id: args.id, name: 'Formula interval', meta: { type: 'number' } },
-        ],
+        columns: input.columns.concat({
+          id: args.id,
+          name: 'Formula interval',
+          meta: { type: 'number' },
+        }),
         rows: input.rows.map((row, i) => {
           const interval =
             (input.rows[i + 1]?.[dateHistogramId!] ?? endRange) - input.rows[i][dateHistogramId!];
