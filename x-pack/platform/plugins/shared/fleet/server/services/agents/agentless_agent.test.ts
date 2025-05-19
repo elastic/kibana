@@ -14,7 +14,10 @@ import axios from 'axios';
 
 import { AgentlessAgentConfigError } from '../../errors';
 import type { AgentPolicy, NewAgentPolicy } from '../../types';
-import { type AgentlessApiDeploymentResponse } from '../../../common/types';
+import {
+  type AgentlessApiDeploymentResponse,
+  AgentlessApiDeploymentResponseCode,
+} from '../../../common/types';
 
 import { appContextService } from '../app_context';
 import { listEnrollmentApiKeys } from '../api_keys';
@@ -69,7 +72,7 @@ let mockedLogger: jest.Mocked<Logger>;
 
 const mockAgentlessDeploymentResponse: Partial<AxiosResponse<AgentlessApiDeploymentResponse>> = {
   data: {
-    code: 'SUCCESS',
+    code: AgentlessApiDeploymentResponseCode.Success,
     error: null,
   },
 };
