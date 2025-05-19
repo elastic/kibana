@@ -9,7 +9,7 @@ import { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
-import { useMlApi } from '../../../../../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   isMultiMetricJobCreator,
