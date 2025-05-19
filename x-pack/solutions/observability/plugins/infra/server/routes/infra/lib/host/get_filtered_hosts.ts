@@ -8,9 +8,9 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
-import { HOST_NAME_FIELD, SYSTEM_INTEGRATION } from '../../../../../common/constants';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { GetHostParameters } from '../types';
-import { getFilterByIntegration } from '../helpers/query';
+import { getOTelHostmetricsOrSystemIntegrationFilter } from '../helpers/query';
 
 export const getFilteredHostNames = async ({
   infraMetricsClient,
@@ -30,7 +30,7 @@ export const getFilteredHostNames = async ({
         filter: [
           ...castArray(query),
           ...rangeQuery(from, to),
-          getFilterByIntegration(SYSTEM_INTEGRATION),
+          getOTelHostmetricsOrSystemIntegrationFilter(),
         ],
       },
     },
@@ -70,7 +70,7 @@ export const getHasDataFromSystemIntegration = async ({
         filter: [
           ...castArray(query),
           ...rangeQuery(from, to),
-          getFilterByIntegration(SYSTEM_INTEGRATION),
+          getOTelHostmetricsOrSystemIntegrationFilter(),
         ],
       },
     },

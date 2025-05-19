@@ -75,6 +75,27 @@ const diskUsageByMountPoint: LensConfigWithId = {
         },
       ],
     },
+    {
+      seriesType: 'area',
+      type: 'series',
+      xAxis: '@timestamp',
+      breakdown: {
+        type: 'topValues',
+        field: 'attributes.mountpoint',
+        size: 5,
+      },
+      yAxis: [
+        {
+          ...formulas.diskUsageAverageOTel,
+          label: i18n.translate(
+            'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
+            {
+              defaultMessage: 'Used',
+            }
+          ),
+        },
+      ],
+    },
   ],
   ...DEFAULT_XY_FITTING_FUNCTION,
   ...DEFAULT_XY_LEGEND,
