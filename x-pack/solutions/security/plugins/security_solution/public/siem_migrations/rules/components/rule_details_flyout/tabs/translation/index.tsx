@@ -48,7 +48,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
         <EuiSpacer size="m" />
         {migrationRule.translation_result && !isInstalled && (
           <>
-            <TranslationCallOut ruleMigration={migrationRule} />
+            <TranslationCallOut migrationRule={migrationRule} />
             <EuiSpacer size="m" />
           </>
         )}

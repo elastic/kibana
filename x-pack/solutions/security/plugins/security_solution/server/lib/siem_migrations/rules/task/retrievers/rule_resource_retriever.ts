@@ -54,8 +54,8 @@ export class RuleResourceRetriever {
     this.existingResources = existingRuleResources;
   }
 
-  public async getResources(ruleMigration: RuleMigrationRule): Promise<RuleMigrationResources> {
-    const originalRule = ruleMigration.original_rule;
+  public async getResources(migrationRule: RuleMigrationRule): Promise<RuleMigrationResources> {
+    const originalRule = migrationRule.original_rule;
     const existingResources = this.existingResources;
     if (!existingResources) {
       throw new Error('initialize must be called before calling getResources');

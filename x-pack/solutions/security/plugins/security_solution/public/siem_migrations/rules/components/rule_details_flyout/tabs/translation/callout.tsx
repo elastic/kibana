@@ -49,17 +49,17 @@ const getCallOutInfo = (
 };
 
 export interface TranslationCallOutProps {
-  ruleMigration: RuleMigrationRule;
+  migrationRule: RuleMigrationRule;
 }
 
-export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ ruleMigration }) => {
-  if (!ruleMigration.translation_result) {
+export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ migrationRule }) => {
+  if (!migrationRule.translation_result) {
     return null;
   }
 
-  const mode = ruleMigration.elastic_rule?.prebuilt_rule_id
+  const mode = migrationRule.elastic_rule?.prebuilt_rule_id
     ? 'mapped'
-    : ruleMigration.translation_result;
+    : migrationRule.translation_result;
   const { title, message, icon, color } = getCallOutInfo(mode);
 
   return (

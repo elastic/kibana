@@ -20,8 +20,8 @@ interface UseMigrationRuleDetailsFlyoutParams {
         matchedPrebuiltRule?: RuleResponse;
       }
     | undefined;
-  ruleActionsFactory: (ruleMigration: RuleMigrationRule, closeRulePreview: () => void) => ReactNode;
-  extraTabsFactory?: (ruleMigration: RuleMigrationRule) => EuiTabbedContentTab[];
+  ruleActionsFactory: (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => ReactNode;
+  extraTabsFactory?: (migrationRule: RuleMigrationRule) => EuiTabbedContentTab[];
 }
 
 interface UseMigrationRuleDetailsFlyoutResult {

@@ -180,7 +180,7 @@ export const startRuleMigration = async ({
   );
 };
 
-export interface GetRuleMigrationParams {
+export interface GetMigrationRulesParams {
   /** `id` of the migration to get rules documents for */
   migrationId: string;
   /** Optional page number to retrieve */
@@ -197,7 +197,7 @@ export interface GetRuleMigrationParams {
   signal?: AbortSignal;
 }
 /** Retrieves all the migration rule documents of a specific migration. */
-export const getRuleMigrations = async ({
+export const getMigrationRules = async ({
   migrationId,
   page,
   perPage,
@@ -205,7 +205,7 @@ export const getRuleMigrations = async ({
   sortDirection,
   filters,
   signal,
-}: GetRuleMigrationParams): Promise<GetRuleMigrationRulesResponse> => {
+}: GetMigrationRulesParams): Promise<GetRuleMigrationRulesResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     {

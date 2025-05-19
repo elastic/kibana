@@ -184,7 +184,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.SUMMARY_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <SummaryTab ruleMigration={migrationRule} />
+            <SummaryTab migrationRule={migrationRule} />
           </TabContentPadding>
         ),
       }),

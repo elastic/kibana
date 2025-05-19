@@ -22,17 +22,17 @@ import { updateMigrationRules } from '../api';
 
 export const UPDATE_MIGRATION_RULE_MUTATION_KEY = ['PUT', SIEM_RULE_MIGRATION_RULES_PATH];
 
-export const useUpdateMigrationRule = (ruleMigration: RuleMigrationRule) => {
+export const useUpdateMigrationRule = (migrationRule: RuleMigrationRule) => {
   const { addError } = useAppToasts();
   const { telemetry } = useKibana().services.siemMigrations.rules;
 
-  const migrationId = ruleMigration.migration_id;
+  const migrationId = migrationRule.migration_id;
 
   const reportTelemetry = useCallback(
     (error?: Error) => {
-      telemetry.reportTranslatedRuleUpdate({ ruleMigration, error });
+      telemetry.reportTranslatedRuleUpdate({ migrationRule, error });
     },
-    [telemetry, ruleMigration]
+    [telemetry, migrationRule]
   );
 
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();

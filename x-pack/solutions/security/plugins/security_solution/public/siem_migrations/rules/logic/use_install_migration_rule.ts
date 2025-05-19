@@ -20,7 +20,7 @@ import { installMigrationRules } from '../api';
 export const INSTALL_MIGRATION_RULE_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
 interface InstallMigrationRuleParams {
-  ruleMigration: RuleMigrationRule;
+  migrationRule: RuleMigrationRule;
   enabled?: boolean;
 }
 
@@ -29,8 +29,11 @@ export const useInstallMigrationRule = (migrationId: string) => {
   const { telemetry } = useKibana().services.siemMigrations.rules;
 
   const reportTelemetry = useCallback(
-    ({ ruleMigration, enabled = false }: InstallMigrationRuleParams, error?: Error) => {
-      telemetry.reportTranslatedRuleInstall({ ruleMigration, enabled, error });
+    (
+      { migrationRule: ruleMigration, enabled = false }: InstallMigrationRuleParams,
+      error?: Error
+    ) => {
+      telemetry.reportTranslatedRuleInstall({ migrationRule: ruleMigration, enabled, error });
     },
     [telemetry]
   );
@@ -39,7 +42,7 @@ export const useInstallMigrationRule = (migrationId: string) => {
   const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
   return useMutation<InstallMigrationRulesResponse, Error, InstallMigrationRuleParams>(
-    ({ ruleMigration, enabled }) =>
+    ({ migrationRule: ruleMigration, enabled }) =>
       installMigrationRules({ migrationId, ids: [ruleMigration.id], enabled }),
     {
       mutationKey: INSTALL_MIGRATION_RULE_MUTATION_KEY,

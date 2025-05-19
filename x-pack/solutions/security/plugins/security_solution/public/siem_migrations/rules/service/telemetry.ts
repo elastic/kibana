@@ -125,36 +125,36 @@ export class SiemRulesMigrationsTelemetry {
 
   // Translated rule actions
 
-  reportTranslatedRuleUpdate = (params: { ruleMigration: RuleMigrationRule; error?: Error }) => {
-    const { ruleMigration, error } = params;
+  reportTranslatedRuleUpdate = (params: { migrationRule: RuleMigrationRule; error?: Error }) => {
+    const { migrationRule, error } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleUpdate, {
       eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleUpdate],
-      migrationId: ruleMigration.migration_id,
-      ruleMigrationId: ruleMigration.id,
+      migrationId: migrationRule.migration_id,
+      ruleMigrationId: migrationRule.id,
       ...this.getBaseResultParams(error),
     });
   };
 
   reportTranslatedRuleInstall = (params: {
-    ruleMigration: RuleMigrationRule;
+    migrationRule: RuleMigrationRule;
     enabled: boolean;
     error?: Error;
   }) => {
-    const { ruleMigration, enabled, error } = params;
+    const { migrationRule, enabled, error } = params;
     const eventParams: ReportTranslatedRuleInstallActionParams = {
       eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleInstall],
-      migrationId: ruleMigration.migration_id,
-      ruleMigrationId: ruleMigration.id,
+      migrationId: migrationRule.migration_id,
+      ruleMigrationId: migrationRule.id,
       author: 'custom',
       enabled,
       ...this.getBaseResultParams(error),
     };
 
-    if (ruleMigration.elastic_rule?.prebuilt_rule_id) {
+    if (migrationRule.elastic_rule?.prebuilt_rule_id) {
       eventParams.author = 'elastic';
       eventParams.prebuiltRule = {
-        id: ruleMigration.elastic_rule.prebuilt_rule_id,
-        title: ruleMigration.elastic_rule.title,
+        id: migrationRule.elastic_rule.prebuilt_rule_id,
+        title: migrationRule.elastic_rule.title,
       };
     }
 
