@@ -8,7 +8,6 @@
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
-import { useMlApi } from '../../contexts/kibana';
 
 export type MlResultsService = ReturnType<typeof resultsServiceProvider> &
   ReturnType<typeof resultsServiceRxProvider>;
@@ -34,9 +33,4 @@ export function mlResultsServiceProvider(mlApi: MlApi) {
   };
 
   return mlResultsService;
-}
-
-export function useMlResultsService(): MlResultsService {
-  const mlApi = useMlApi();
-  return mlResultsServiceProvider(mlApi);
 }

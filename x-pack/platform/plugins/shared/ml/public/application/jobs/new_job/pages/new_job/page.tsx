@@ -22,10 +22,12 @@ import {
 } from '@kbn/ml-common-constants/new_job';
 import type { ExistingJobsAndGroups } from '@kbn/ml-services/job_service';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { PageTitle } from '../../../../components/page_title';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { useDataSource } from '../../../../contexts/ml';
-import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';

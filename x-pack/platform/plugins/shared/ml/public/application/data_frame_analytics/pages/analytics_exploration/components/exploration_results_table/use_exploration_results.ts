@@ -32,9 +32,10 @@ import {
   useRenderCellValue,
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import { getIndexData, getIndexFields } from '../../../../common';
