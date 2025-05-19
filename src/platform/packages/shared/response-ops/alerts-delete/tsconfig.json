@@ -6,5 +6,13 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/i18n"]
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/alerting-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/i18n-react",
+    "@kbn/alerting-types",
+    "@kbn/core-notifications-browser",
+  ]
 }

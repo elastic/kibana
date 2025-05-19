@@ -25,6 +25,11 @@ import {
   EuiFieldText,
   EuiPanel,
 } from '@elastic/eui';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { HttpStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import * as i18n from '../translations';
 import { ModalThresholdSelector as ThresholdSelector } from './modal_threshold_selector';
 import {
@@ -35,6 +40,8 @@ import {
   MIN_THRESHOLD_DAYS,
   THRESHOLD_UNITS,
 } from '../constants';
+import { useAlertDeletePreview } from '../api/preview/use_alert_delete_preview';
+import { useAlertDeleteSchedule } from '../api/schedule/use_alert_delete_schedule';
 
 const FORM_ID = 'alert-delete-settings';
 const MODAL_ID = 'alert-delete-modal';
@@ -52,6 +59,57 @@ const getThresholdInDays = (threshold: number, thresholdUnit: EuiSelectOption) =
   }
 };
 
+interface PreviewMessageProps {
+  activeStateChecked: boolean;
+  inactiveStateChecked: boolean;
+  previewAffectedAlertsCount: number | undefined;
+  isValidThreshold: boolean;
+}
+const PreviewMessage = ({
+  activeStateChecked,
+  inactiveStateChecked,
+  previewAffectedAlertsCount,
+  isValidThreshold,
+}: PreviewMessageProps) => {
+  if ((!activeStateChecked && !inactiveStateChecked) || previewAffectedAlertsCount === undefined) {
+    return (
+      <FormattedMessage
+        id="responseOpsAlertDelete.previewInitial"
+        defaultMessage="Select the type of alerts you wish to delete"
+      />
+    );
+  }
+
+  if (previewAffectedAlertsCount === 0) {
+    return (
+      <FormattedMessage
+        id="responseOpsAlertDelete.previewEmpty"
+        defaultMessage="No alerts match the selected criteria."
+      />
+    );
+  }
+
+  if (!isValidThreshold) {
+    return (
+      <FormattedMessage
+        id="responseOpsAlertDelete.previewDisabled"
+        defaultMessage="Affected alerts preview is disabled because the threshold is invalid."
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="responseOpsAlertDelete.preview"
+      defaultMessage="This action will permanently delete a total of <strong>{count} {count, plural, one {alert} other {alerts}}</strong> and you won't be able to restore them."
+      values={{
+        strong: (chunks) => <strong>{chunks}</strong>,
+        count: previewAffectedAlertsCount,
+      }}
+    />
+  );
+};
+
 const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOption) => {
   const thresholdInDays = getThresholdInDays(threshold, thresholdUnit);
   const errorMessages = [];
@@ -65,10 +123,19 @@ const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOp
 };
 
 export interface AlertDeleteProps {
+  services: { http: HttpStart; notifications: NotificationsStart };
+  categoryIds: AlertDeleteCategoryIds[];
   onCloseModal: () => void;
   isVisible: boolean;
+  isDisabled?: boolean;
 }
-export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) => {
+export const AlertDeleteModal = ({
+  services: { http, notifications },
+  categoryIds,
+  onCloseModal,
+  isVisible,
+  isDisabled = false,
+}: AlertDeleteProps) => {
   const [activeState, setActiveState] = useState({
     checked: DEFAULT_THRESHOLD_ENABLED,
     threshold: DEFAULT_THRESHOLD,
@@ -98,12 +165,52 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
       deleteConfirmation === i18n.DELETE_PASSKEY || deleteConfirmation.length === 0,
   };
 
+  const isValidThreshold =
+    validations.isActiveThresholdValid && validations.isInactiveThresholdValid;
+
+  const {
+    data: { affectedAlertCount: previewAffectedAlertsCount } = { affectedAlertCount: undefined },
+  } = useAlertDeletePreview({
+    services: {
+      http,
+    },
+    isEnabled: isValidThreshold,
+    queryParams: {
+      activeAlertDeleteThreshold: activeState.checked
+        ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
+        : undefined,
+      inactiveAlertDeleteThreshold: inactiveState.checked
+        ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
+        : undefined,
+      categoryIds,
+    },
+  });
+
+  const { mutate: createAlertDeleteSchedule } = useAlertDeleteSchedule({
+    services: { http },
+    onSuccess: () => {
+      notifications.toasts.addSuccess(i18n.ALERT_DELETE_SUCCESS);
+      onClose();
+    },
+    onError: (error: IHttpFetchError<ResponseErrorBody>) => {
+      notifications.toasts.addDanger({
+        title: i18n.ALERT_DELETE_FAILURE,
+        text: error.body?.message || i18n.UNKNOWN_ERROR,
+      });
+    },
+  });
+
+  const currentSettingsWouldDeleteAlerts =
+    (activeState.checked || inactiveState.checked) &&
+    previewAffectedAlertsCount &&
+    previewAffectedAlertsCount > 0;
+
   const isFormValid =
     validations.isDeleteConfirmationValid &&
     validations.isActiveThresholdValid &&
     validations.isInactiveThresholdValid &&
     deleteConfirmation.length > 0 &&
-    (activeState.checked || inactiveState.checked);
+    currentSettingsWouldDeleteAlerts;
 
   const activeAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,19 +246,17 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
     setDeleteConfirmation(e.target.value);
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // const formState = {
-    //   isActiveAlertsDeleteEnabled: validations.isActiveThresholdValid,
-    //   isInactiveAlertsDeleteEnabled: validations.isInactiveThresholdValid,
-    //   activeAlertsDeleteThreshold: getThresholdInDays(
-    //     activeState.threshold,
-    //     activeState.thresholdUnit
-    //   ),
-    //   inactiveAlertsDeleteThreshold: getThresholdInDays(
-    //     inactiveState.threshold,
-    //     inactiveState.thresholdUnit
-    //   ),
-    // };
+  const onScheduleCleanUpTask = (ev: React.FormEvent) => {
+    ev.preventDefault();
+
+    createAlertDeleteSchedule({
+      activeAlertDeleteThreshold: validations.isActiveThresholdValid
+        ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
+        : undefined,
+      inactiveAlertDeleteThreshold: validations.isInactiveThresholdValid
+        ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
+        : undefined,
+    });
   };
 
   const onClose = () => {
@@ -178,7 +283,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
 
   return (
     <EuiModal aria-labelledby={MODAL_ID} onClose={onClose} data-test-subj="alert-delete-modal">
-      <EuiForm id={FORM_ID} component="form" onSubmit={onSubmit}>
+      <EuiForm id={FORM_ID} component="form">
         <EuiModalHeader>
           <EuiModalHeaderTitle id={MODAL_ID}>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -187,11 +292,12 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
           <p>{i18n.MODAL_DESCRIPTION}</p>
           <EuiSpacer size="l" />
 
-          <EuiPanel hasShadow={false} hasBorder color="subdued">
+          <EuiPanel hasShadow={false} hasBorder color="subdued" id="alert-delete-active-panel">
             <EuiCheckbox
               id="alert-delete-active"
               data-test-subj="alert-delete-active-checkbox"
               checked={activeState.checked}
+              disabled={isDisabled}
               onChange={activeAlertsCallbacks.onChangeEnabled}
               labelProps={{ css: 'width: 100%' }}
               label={
@@ -203,7 +309,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
                   onChangeThreshold={activeAlertsCallbacks.onChangeThreshold}
                   onChangeThresholdUnit={activeAlertsCallbacks.onChangeThresholdUnit}
                   isInvalid={!validations.isActiveThresholdValid}
-                  isDisabled={!activeState.checked} // TODO: also if readonly
+                  isDisabled={!activeState.checked || isDisabled}
                   error={errorMessages.activeThreshold}
                   thresholdTestSubj="alert-delete-active-threshold"
                   thresholdUnitTestSubj="alert-delete-active-threshold-unit"
@@ -218,6 +324,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
               id="alert-delete-inactive"
               data-test-subj="alert-delete-inactive-checkbox"
               checked={inactiveState.checked}
+              disabled={isDisabled}
               onChange={inactiveAlertsCallbacks.onChangeEnabled}
               labelProps={{ css: 'width: 100%' }}
               label={
@@ -229,7 +336,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
                   onChangeThreshold={inactiveAlertsCallbacks.onChangeThreshold}
                   onChangeThresholdUnit={inactiveAlertsCallbacks.onChangeThresholdUnit}
                   isInvalid={!validations.isInactiveThresholdValid}
-                  isDisabled={!inactiveState.checked} // TODO: also if readonly
+                  isDisabled={!inactiveState.checked || isDisabled}
                   error={errorMessages.inactiveThreshold}
                   thresholdTestSubj="alert-delete-inactive-threshold"
                   thresholdUnitTestSubj="alert-delete-inactive-threshold-unit"
@@ -237,9 +344,17 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
               }
             />
           </EuiPanel>
+
           <EuiHorizontalRule />
 
-          <p>{i18n.PREVIEW}</p>
+          <p data-test-subj="alert-delete-preview-message">
+            <PreviewMessage
+              activeStateChecked={activeState.checked}
+              inactiveStateChecked={inactiveState.checked}
+              previewAffectedAlertsCount={previewAffectedAlertsCount}
+              isValidThreshold={isValidThreshold}
+            />
+          </p>
           <EuiSpacer size="m" />
 
           <EuiFormRow
@@ -249,6 +364,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
           >
             <EuiFieldText
               value={deleteConfirmation}
+              disabled={isDisabled || !currentSettingsWouldDeleteAlerts}
               onChange={onChangeDeleteConfirmation}
               data-test-subj="alert-delete-delete-confirmation"
             />
@@ -264,8 +380,9 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
             form={FORM_ID}
             fill
             color="danger"
-            isDisabled={!isFormValid}
+            isDisabled={!isFormValid || isDisabled}
             data-test-subj="alert-delete-submit"
+            onClick={onScheduleCleanUpTask}
           >
             {i18n.MODAL_SUBMIT}
           </EuiButton>

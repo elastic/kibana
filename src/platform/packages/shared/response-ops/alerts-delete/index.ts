@@ -8,4 +8,23 @@
  */
 
 export { AlertDeleteModal } from './components/modal';
-export { AlertDeleteRuleSettingsSection as AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';
+export { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
+
+export {
+  type UseAlertDeletePreviewParams,
+  useAlertDeletePreview,
+} from './api/preview/use_alert_delete_preview';
+export {
+  type GetAlertDeletePreviewParams,
+  type GetAlertDeletePreviewResponse,
+  getAlertDeletePreview,
+} from './api/preview/get_alert_delete_preview';
+
+export {
+  type UseAlertDeleteScheduleParams,
+  useAlertDeleteSchedule,
+} from './api/schedule/use_alert_delete_schedule';
+export {
+  type CreateAlertDeleteScheduleParams,
+  createAlertDeleteSchedule,
+} from './api/schedule/create_alert_delete_schedule';

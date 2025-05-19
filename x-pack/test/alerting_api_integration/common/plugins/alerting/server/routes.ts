@@ -889,45 +889,6 @@ export function defineRoutes(
   );
 
   // Remove when we have real routes
-  router.post(
-    {
-      path: '/api/alerts_fixture/preview_alert_deletion',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {
-        body: schema.object({
-          isActiveAlertDeleteEnabled: schema.boolean(),
-          isInactiveAlertDeleteEnabled: schema.boolean(),
-          activeAlertDeleteThreshold: schema.number({ min: 1 }),
-          inactiveAlertDeleteThreshold: schema.number({ min: 1 }),
-          categoryIds: schema.maybe(schema.arrayOf(schema.string())),
-        }),
-      },
-    },
-    async (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> => {
-      const [, { spaces }] = await core.getStartServices();
-      const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
-      const alerting = await alertingStart;
-
-      try {
-        const result = await alerting.previewAlertDeletion(req.body, spaceId);
-        return res.ok({
-          body: { numAlertsDeleted: result },
-        });
-      } catch (err) {
-        return res.notFound();
-      }
-    }
-  );
-
   router.get(
     {
       path: '/api/alerts_fixture/last_run_alert_deletion',
@@ -950,59 +911,6 @@ export function defineRoutes(
         const result = await alerting.getLastRunAlertDeletion(req);
         return res.ok({
           body: { lastRun: result },
-        });
-      } catch (err) {
-        return res.notFound();
-      }
-    }
-  );
-
-  router.post(
-    {
-      path: '/api/alerts_fixture/schedule_alert_deletion',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {
-        body: schema.object({
-          isActiveAlertDeleteEnabled: schema.boolean(),
-          isInactiveAlertDeleteEnabled: schema.boolean(),
-          activeAlertDeleteThreshold: schema.number({ min: 1 }),
-          inactiveAlertDeleteThreshold: schema.number({ min: 1 }),
-          categoryIds: schema.maybe(schema.arrayOf(schema.string())),
-          spaceIds: schema.maybe(schema.arrayOf(schema.string())),
-        }),
-      },
-    },
-    async (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> => {
-      try {
-        const alerting = await alertingStart;
-        let spaceIds = req.body?.spaceIds;
-        if (spaceIds == null) {
-          const [, { spaces }] = await core.getStartServices();
-          const currentSpaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
-          spaceIds = [currentSpaceId];
-        }
-        const result = await alerting.scheduleAlertDeletion(
-          req,
-          {
-            isActiveAlertDeleteEnabled: req.body.isActiveAlertDeleteEnabled,
-            isInactiveAlertDeleteEnabled: req.body.isInactiveAlertDeleteEnabled,
-            activeAlertDeleteThreshold: req.body.activeAlertDeleteThreshold,
-            inactiveAlertDeleteThreshold: req.body.inactiveAlertDeleteThreshold,
-            categoryIds: req.body.categoryIds,
-          },
-          spaceIds
-        );
-        return res.ok({
-          body: { result },
         });
       } catch (err) {
         return res.notFound();

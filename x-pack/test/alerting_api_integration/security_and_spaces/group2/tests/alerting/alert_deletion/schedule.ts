@@ -16,10 +16,11 @@ import {
 } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import type { Space } from '../../../../../common/types';
 import {
-  GlobalReadAtSpace1,
   Space1,
-  Space1AllAtSpace1,
+  Space2,
   SuperuserAtSpace1,
+  Space1AllAtSpace1,
+  UserAtSpaceScenarios,
 } from '../../../../scenarios';
 import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -67,6 +68,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         provider: 'alerting',
         actions: new Map([['execute', { equal: 1 }]]),
       });
+    });
+  };
+
+  const cleanupEventLog = async () => {
+    await retry.try(async () => {
+      const results = await es.deleteByQuery({
+        index: '.kibana-event-log*',
+        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+        conflicts: 'proceed',
+      });
+      expect((results?.deleted ?? 0) > 0).to.eql(true);
     });
   };
 
@@ -177,51 +189,52 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         query: { match_all: {} },
         conflicts: 'proceed',
       });
-      await retry.try(async () => {
-        const results = await es.deleteByQuery({
-          index: '.kibana-event-log*',
-          query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
-          conflicts: 'proceed',
-        });
-        expect((results?.deleted ?? 0) > 0).to.eql(true);
-      });
     });
 
     after(async () => {
       await objectRemover.removeAll();
     });
 
-    // TODO - switch to all scenarios when real APIs available
-    for (const scenario of [
-      GlobalReadAtSpace1,
-      SuperuserAtSpace1,
-      Space1AllAtSpace1,
-    ] /* UserAtSpaceScenarios*/) {
+    for (const scenario of UserAtSpaceScenarios) {
       describe(scenario.id, () => {
         it('should delete the correct of alerts - all category active alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: undefined,
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            // when schedule route is available, expect a forbidden error
-            // current test route does not gate on rules settings permissions
-            // break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -245,7 +258,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -254,28 +267,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - all category inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
+              active_alert_delete_threshold: undefined,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['management', 'securitySolution', 'observability'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -299,6 +327,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -307,28 +336,42 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - all category active and inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: 90,
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -352,6 +395,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -360,29 +404,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - observability active alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: undefined,
+              category_ids: ['observability'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -404,6 +462,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -412,29 +471,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - observability inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability'],
+              active_alert_delete_threshold: undefined,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['observability'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -456,6 +529,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -464,29 +538,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - observability active and inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['observability'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -510,6 +598,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -518,29 +607,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - security active alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: undefined,
+              category_ids: ['securitySolution'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -562,6 +665,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -570,29 +674,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('testtest should delete the correct of alerts - security inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution'],
+              active_alert_delete_threshold: undefined,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['securitySolution'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -614,6 +732,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -622,29 +741,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - security active and inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['securitySolution'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -668,6 +801,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -676,29 +810,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - management active alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['management'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: undefined,
+              category_ids: ['management'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -720,6 +868,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -728,29 +877,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - management inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['management'],
+              active_alert_delete_threshold: undefined,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['management'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -772,6 +935,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -780,29 +944,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - management active and inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['management'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['management'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -826,6 +1004,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -834,29 +1013,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - multi-category active alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability', 'management'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: undefined,
+              category_ids: ['observability', 'management'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -880,6 +1073,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -888,29 +1082,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - multi-category inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability', 'securitySolution'],
+              active_alert_delete_threshold: undefined,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['observability', 'securitySolution'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -934,6 +1142,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -942,29 +1151,43 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         it('should delete the correct of alerts - multi-category active and inactive alerts', async () => {
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution', 'management'],
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: 90,
+              category_ids: ['securitySolution', 'management'],
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -988,6 +1211,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1056,28 +1280,42 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           await es.bulk({ refresh: 'wait_for', operations });
 
           // schedule the task
-          const scheduleResponse = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          const scheduleResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
+              active_alert_delete_threshold: 90,
+              inactive_alert_delete_threshold: 90,
             });
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when schedule route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
             case 'global_read at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(scheduleResponse.statusCode).to.eql(403);
+              expect(scheduleResponse.body).to.eql({
+                error: 'Forbidden',
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
+                statusCode: 403,
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(200);
+              expect(scheduleResponse.status).to.eql(204);
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -1108,6 +1346,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
+              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1127,16 +1366,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
         // schedule the task
         await supertest
-          .post(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          .post(
+            `${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_schedule`
+          )
           .set('kbn-xsrf', 'foo')
           .send({
-            isActiveAlertDeleteEnabled: false,
-            isInactiveAlertDeleteEnabled: true,
-            activeAlertDeleteThreshold: 90,
-            inactiveAlertDeleteThreshold: 90,
-            spaceIds: [Space1.id, 'default'],
+            active_alert_delete_threshold: undefined,
+            inactive_alert_delete_threshold: 90,
+            space_ids: [Space1.id, 'default'],
           })
-          .expect(200);
+          .expect(204);
 
         const expectedAlerts = [
           ...inactiveStackAlertsNewerThan90,
@@ -1200,6 +1439,26 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
           });
         });
+
+        await cleanupEventLog();
+      });
+    });
+
+    it('should throw when attempting to delete alerts in a space without permission', async () => {
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_schedule`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Space1AllAtSpace1.user.username, Space1AllAtSpace1.user.password)
+        .send({
+          active_alert_delete_threshold: undefined,
+          inactive_alert_delete_threshold: 90,
+          space_ids: [Space1.id, Space2.id], // no space2 privileges
+        });
+
+      expect(response.body).to.eql({
+        error: 'Forbidden',
+        message: `Insufficient privileges to delete alerts in the specified spaces`,
+        statusCode: 403,
       });
     });
   });
