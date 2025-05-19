@@ -6,4 +6,3 @@
  */
 
 export type { MLSavedObjectService } from './service';
-export { getJobDetailsFromTrainedModel } from './util';

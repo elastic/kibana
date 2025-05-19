@@ -13,15 +13,15 @@ import type {
   DeleteMLSpaceAwareItemsCheckResponse,
   MlSavedObjectType,
 } from '@kbn/ml-common-types/saved_objects';
-
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { getJobDetailsFromTrainedModel, getJobsAndModels } from '@kbn/ml-client';
+
 import type {
   MLSavedObjectService,
   TrainedModelJob,
   JobObject,
   TrainedModelObject,
 } from './service';
-import { getJobDetailsFromTrainedModel, getJobsAndModels } from './util';
 
 export interface JobSavedObjectStatus {
   jobId: string;

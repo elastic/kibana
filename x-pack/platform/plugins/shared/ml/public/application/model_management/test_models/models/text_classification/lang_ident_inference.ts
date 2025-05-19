@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+import type { trainedModelsApiProvider } from '@kbn/ml-services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferenceType } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
-import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
-import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType: InferenceType = 'classification';
