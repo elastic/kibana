@@ -9,9 +9,15 @@
   },
   "include": [
     "**/*.ts",
+    "**/*.json"
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/ml-common-types",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-common-constants",
+  ]
 }
