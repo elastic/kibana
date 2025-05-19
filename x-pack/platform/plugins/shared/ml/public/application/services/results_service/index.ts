@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
-import type { MlApi } from '../ml_api_service';
 import { useMlApi } from '../../contexts/kibana';
 
 export type MlResultsService = ReturnType<typeof resultsServiceProvider> &
