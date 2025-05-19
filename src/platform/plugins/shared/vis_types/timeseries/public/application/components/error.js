@@ -12,10 +12,23 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import './_error.scss';
+import { css } from '@emotion/react';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
+
+const errorSectionSpacingStyle = ({ euiTheme }) => css`
+  margin-top: ${euiTheme.size.s};
+`;
+
+const errorStackStyle = ({ euiTheme }) => css`
+  padding: ${euiTheme.size.s};
+  background: ${euiTheme.colors.lightestShade};
+  color: ${euiTheme.colors.text};
+  line-height: ${euiTheme.font.lineHeightMultiplier};
+  font-family: ${euiTheme.font.familyCode};
+  font-weight: ${euiTheme.font.weight.regular};
+  white-space: pre-wrap;
+`;
 
 export function ErrorComponent(props) {
   const { error } = props;
@@ -36,13 +49,19 @@ export function ErrorComponent(props) {
     const scriptStack = _.get(error, 'error.caused_by.script_stack');
     reason = _.get(error, 'error.caused_by.caused_by.reason');
     additionalInfo = (
-      <div className="tvbError__additional">
+      <div className="tvbError__additional" css={errorSectionSpacingStyle}>
         <div>{reason}</div>
-        <div className="tvbError__stack">{scriptStack.join('\n')}</div>
+        <div className="tvbError__stack" css={[errorSectionSpacingStyle, errorStackStyle]}>
+          {scriptStack.join('\n')}
+        </div>
       </div>
     );
   } else if (reason) {
-    additionalInfo = <div className="tvbError__additional">{reason}</div>;
+    additionalInfo = (
+      <div className="tvbError__additional" css={errorSectionSpacingStyle}>
+        {reason}
+      </div>
+    );
   }
 
   return (
