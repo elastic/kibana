@@ -78,8 +78,13 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       const foundScript = data.find((script) => script.id === option.value);
       return (
         <>
-          <strong>{option.label}</strong>
-          <EuiText size="s" color="subdued" css={{ wordBreak: 'break-word', width: '100%' }}>
+          <strong data-test-subj={`${option.value}-label`}>{option.label}</strong>
+          <EuiText
+            data-test-subj={`${option.value}-description`}
+            size="s"
+            color="subdued"
+            css={{ wordBreak: 'break-word', width: '100%' }}
+          >
             <p style={{ whiteSpace: 'normal' }}>{foundScript?.description}</p>
           </EuiText>
         </>
