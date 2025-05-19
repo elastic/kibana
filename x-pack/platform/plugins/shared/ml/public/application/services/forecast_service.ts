@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { get, find, each } from 'lodash';
 import { map } from 'rxjs';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { MlApi } from './ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export interface AggType {

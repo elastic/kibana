@@ -47,8 +47,33 @@ import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/te
 
 import type { TrainedModelsApiService } from '../ml_api_service/trained_models';
 
-import type { DeploymentParamsUI } from './deployment_setup';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
+
+/**
+ * Interface for deployment params in the UI.
+ */
+export interface DeploymentParamsUI {
+  /**
+   * Deployment ID
+   */
+  deploymentId?: string;
+  /**
+   * Indicates the use case deployment is optimized for.
+   * For ingest, use 1 thread
+   * For search, use N threads, where N = no. of physical cores of an ML node
+   */
+  optimized: 'optimizedForIngest' | 'optimizedForSearch';
+  /**
+   * Adaptive resources
+   */
+  adaptiveResources: boolean;
+  /**
+   * Level of vCPU usage.
+   * When adaptive resources are enabled, corresponds to the min-max range.
+   * When adaptive resources are disabled (and for on-prem deployments), set to a static number of allocations.
+   */
+  vCPUUsage: 'low' | 'medium' | 'high';
+}
 
 interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;

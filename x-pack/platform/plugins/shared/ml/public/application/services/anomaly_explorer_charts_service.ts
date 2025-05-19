@@ -16,11 +16,11 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
-import type { MlApi } from './ml_api_service';
 import {
   DEFAULT_MAX_SERIES_TO_PLOT,
   MAX_CHARTS_PER_ROW,

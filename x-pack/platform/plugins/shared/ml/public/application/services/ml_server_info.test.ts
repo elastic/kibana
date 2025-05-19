@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { MlApi } from './ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
 import {
   loadMlServerInfo,
   getCloudDeploymentId,

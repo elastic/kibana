@@ -6,19 +6,22 @@
  */
 import { BehaviorSubject, throwError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type { TrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import type { ScheduledDeployment } from './trained_models_service';
-import { TrainedModelsService } from './trained_models_service';
+
+import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   StartTrainedModelDeploymentResponse,
   TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import type { TrainedModelsApiService } from '@kbn/ml-services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
-import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
-import type { ITelemetryClient } from '../services/telemetry/types';
-import type { DeploymentParamsUI } from './deployment_setup';
+
+import type { ScheduledDeployment } from './trained_models_service';
+import { TrainedModelsService } from './trained_models_service';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
+import type { DeploymentParamsUI } from './trained_models_service';
 
 // Helper that resolves on the next microtask tick
 const flushPromises = () =>

@@ -7,6 +7,15 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+export interface CloudInfo {
+  cloudId: string | null;
+  isCloud: boolean;
+  isCloudTrial: boolean;
+  deploymentId: string | null;
+  cloudUrl: string | null;
+  isMlAutoscalingEnabled: boolean;
+}
+
 export interface MlServerDefaults {
   anomaly_detectors: {
     categorization_examples_limit?: number;
