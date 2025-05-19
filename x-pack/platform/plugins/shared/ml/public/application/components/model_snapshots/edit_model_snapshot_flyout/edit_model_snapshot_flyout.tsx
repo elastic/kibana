@@ -30,7 +30,8 @@ import {
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 
-import { useMlApi, useNotifications } from '../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useNotifications } from '../../../contexts/kibana';
 
 interface Props {
   snapshot: ModelSnapshot;

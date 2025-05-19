@@ -7,7 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useEffect, Fragment, useMemo } from 'react';
+
 import { EuiText } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
@@ -19,6 +21,9 @@ import {
   DEFAULT_BUCKET_SPAN,
 } from '@kbn/ml-common-constants/new_job';
 import type { ExistingJobsAndGroups } from '@kbn/ml-services/job_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -35,7 +40,6 @@ import { MapLoader } from '../../common/map_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useDataSource } from '../../../../contexts/ml';
-import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { useNewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';

@@ -13,7 +13,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
-import { useMlApi } from '../../../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
