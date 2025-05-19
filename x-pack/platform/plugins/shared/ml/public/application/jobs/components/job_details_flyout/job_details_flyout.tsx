@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
-import { useMlApi } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
 import { loadFullJob } from '../../jobs_list/components/utils';
 import { useToastNotificationService } from '../../../services/toast_notification_service';

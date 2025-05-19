@@ -26,7 +26,8 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
 // Keep top nested field and remove all <nested_field>.* fields

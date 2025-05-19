@@ -25,14 +25,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '@kbn/ml-common-constants/jobs_list';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
-import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 
 import { isManagedJob } from '../../../jobs_utils';
 
-import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 import { resetJobs } from '../utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 

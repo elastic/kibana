@@ -34,9 +34,10 @@ import {
   FieldStatsFlyoutProvider,
   type FieldForStats,
 } from '@kbn/ml-field-stats-flyout';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import type { DropDownLabel } from '../../../../../jobs/new_job/pages/components/pick_fields_step/components/agg_select';
-import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 

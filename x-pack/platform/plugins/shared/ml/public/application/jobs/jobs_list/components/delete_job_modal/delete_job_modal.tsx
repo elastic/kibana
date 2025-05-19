@@ -26,9 +26,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '@kbn/ml-common-constants/jobs_list';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
-import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { deleteJobs } from '../utils';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import { isManagedJob } from '../../../jobs_utils';

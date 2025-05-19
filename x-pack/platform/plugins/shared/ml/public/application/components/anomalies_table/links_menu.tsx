@@ -52,8 +52,8 @@ import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
 import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
-import { useMlApi } from '../../contexts/kibana';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';

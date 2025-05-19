@@ -19,7 +19,10 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
+import { useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';

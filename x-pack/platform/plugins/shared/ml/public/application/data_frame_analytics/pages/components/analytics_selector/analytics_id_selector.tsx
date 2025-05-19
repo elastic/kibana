@@ -23,15 +23,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
+
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import type { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../model_management/config_mapping';
-import { useMlApi } from '../../../../contexts/kibana';
 
 export interface AnalyticsSelectorIds {
   model_id?: string;
