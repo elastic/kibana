@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, configure } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleDetails } from './rule_details';
 
@@ -21,7 +21,20 @@ jest.mock('../hooks', () => ({
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
+configure({ testIdAttribute: 'data-test-subj' });
+
 describe('RuleDetails', () => {
+  beforeAll(() => {
+    class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+
+    // Only override it for this test file
+    globalThis.ResizeObserver = ResizeObserver;
+  });
+
   beforeEach(() => {
     useRuleFormState.mockReturnValue({
       formData: {
@@ -34,6 +47,12 @@ describe('RuleDetails', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  afterAll(() => {
+    if ('ResizeObserver' in globalThis) {
+      delete (globalThis as any).ResizeObserver;
+    }
   });
 
   test('Renders correctly', () => {
