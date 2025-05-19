@@ -476,20 +476,4 @@ describe('Legacy Alerts Client', () => {
     expect(alertsClient.isTrackedAlert('2')).toBe(true);
     expect(alertsClient.isTrackedAlert('3')).toBe(false);
   });
-
-  test('isTrackedAlert() should return true if alert was active in a previous execution, false otherwise', async () => {
-    const alertsClient = new LegacyAlertsClient({
-      alertingEventLogger,
-      logger,
-      request: fakeRequest,
-      spaceId: 'space1',
-      ruleType,
-      maintenanceWindowsService,
-    });
-
-    await alertsClient.initializeExecution(defaultExecutionOpts);
-    expect(alertsClient.isTrackedAlert('1')).toBe(true);
-    expect(alertsClient.isTrackedAlert('2')).toBe(true);
-    expect(alertsClient.isTrackedAlert('3')).toBe(false);
-  });
 });
