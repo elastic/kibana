@@ -407,7 +407,7 @@ export const createAgentAndPackagePoliciesHandler: FleetRequestHandler<
   TypeOf<typeof CreateAgentAndPackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const logger = appContextService.getLogger();
+  const logger = appContextService.getLogger().get('httpCreateAgentAndPackagePoliciesHandler');
   logger.debug('Creating agent and package policies');
 
   // Try to create the agent policy
@@ -516,6 +516,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.query>,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('httpUpdateAgentPolicyHandler');
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -523,6 +524,8 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
 
   let spaceId = fleetContext.spaceId;
+
+  logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
     if (spaceIds?.length) {

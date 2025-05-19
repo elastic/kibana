@@ -910,12 +910,17 @@ class AgentPolicyService {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
-    }).then((updatedAgentPolicy) => {
-      return this.runExternalCallbacks(
-        'agentPolicyPostUpdate',
-        updatedAgentPolicy
-      ) as unknown as AgentPolicy;
-    });
+    })
+      .then((updatedAgentPolicy) => {
+        return this.runExternalCallbacks(
+          'agentPolicyPostUpdate',
+          updatedAgentPolicy
+        ) as unknown as AgentPolicy;
+      })
+      .then((response) => {
+        logger.debug(`Update of agent policy [${id}] done`);
+        return response;
+      });
   }
 
   public async copy(
