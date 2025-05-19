@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlApi } from '../use_ml_api';
 
 export function useMlResultsService(): MlResultsService {
   const mlApi = useMlApi();
