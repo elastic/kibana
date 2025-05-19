@@ -34,6 +34,7 @@
     "@kbn/ml-parse-interval",
     "@kbn/ml-runtime-field-utils",
     "@kbn/ml-server-routes-schemas",
+    "@kbn/ml-services",
     "@kbn/ml-trained-models-utils",
     "@kbn/ml-validators",
     "@kbn/usage-collection-plugin",
