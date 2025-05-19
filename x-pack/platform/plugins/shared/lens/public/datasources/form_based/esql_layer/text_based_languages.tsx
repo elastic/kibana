@@ -353,7 +353,7 @@ export function getTextBasedDatasource({
       for (const layer of Object.values(initState.layers)) {
         layer.type = 'esql';
       }
-      
+
       return {
         ...initState,
         indexPatternRefs: refs,
