@@ -8,7 +8,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import { errorHandler } from '../error_handler';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
-import { getCustomScriptsClient } from '../../services/scripts/clients/get_custom_scripts_client';
+import { getCustomScriptsClient } from '../../services/custom_scripts/clients/get_custom_scripts_client';
 import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import { CustomScriptsRequestSchema } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 
