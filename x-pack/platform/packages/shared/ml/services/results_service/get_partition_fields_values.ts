@@ -9,9 +9,9 @@ import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils/constants';
+import type { MlClient } from '@kbn/ml-client';
 import type { CriteriaField } from './results_service';
 import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
-import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {

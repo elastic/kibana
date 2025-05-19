@@ -13,10 +13,11 @@ import type {
   StartTrainedModelDeploymentResponse,
   TrainedModelUIItem,
 } from '@kbn/ml-common-types/trained_models';
-import type { TrainedModelsApiService } from '@kbn/ml-services/ml_api_service/trained_models';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
+
+import type { TrainedModelsApiService } from '../ml_api_service/trained_models';
 
 import type { ScheduledDeployment } from './trained_models_service';
 import { TrainedModelsService } from './trained_models_service';
