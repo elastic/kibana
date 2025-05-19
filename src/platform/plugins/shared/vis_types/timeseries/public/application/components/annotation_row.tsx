@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Query } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
 import { getDataViewsStart } from '../../services';
 
 import { AddDeleteButtons } from './add_delete_buttons';
@@ -133,7 +134,14 @@ export const AnnotationRow = ({
   );
 
   return (
-    <div className="tvbAnnotationsEditor" key={model.id}>
+    <div
+      className="tvbAnnotationsEditor"
+      key={model.id}
+      css={css`
+        margin-bottom: ${euiTheme.size.base};
+        padding: ${euiTheme.size.s};
+      `}
+    >
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
