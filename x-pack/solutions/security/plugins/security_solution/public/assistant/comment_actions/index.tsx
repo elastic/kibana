@@ -28,7 +28,7 @@ interface Props {
 
 /**
  * Returns the content of the message compatible with a standard markdown renderer.
- * 
+ *
  * Content references are removed as they can only be rendered by the assistant.
  */
 function getSelfContainedContent(content: string): string {
