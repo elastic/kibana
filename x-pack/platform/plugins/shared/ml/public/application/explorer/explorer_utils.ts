@@ -39,8 +39,8 @@ import { ML_RESULTS_INDEX_PATTERN } from '@kbn/ml-common-constants/index_pattern
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MlJobService } from '@kbn/ml-services/job_service';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-
 import type { MlIndexUtils } from '@kbn/ml-services/index_service';
+
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
