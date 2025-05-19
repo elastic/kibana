@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
@@ -32,7 +33,6 @@ import { PipelineDetails } from './pipeline_details';
 import { TestTrainedModel } from './test_trained_model';
 import { OnFailureConfiguration } from '../../components/shared';
 import { ReviewAndCreatePipeline } from '../../components/shared';
-import { useMlApi } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
 import { type InferencePipelineCreationState } from './state';

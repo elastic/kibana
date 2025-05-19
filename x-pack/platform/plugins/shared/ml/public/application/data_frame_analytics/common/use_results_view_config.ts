@@ -20,8 +20,8 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
-import { useMlApi } from '../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
