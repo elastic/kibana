@@ -118,6 +118,7 @@ paths-ignore:
   - x-pack/packages/kbn-synthetics-private-location
   - x-pack/platform/packages/shared/kbn-inference-cli
   - x-pack/platform/packages/shared/kbn-sample-parser
+  - x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/public/assets/**
   - x-pack/platform/test
   - x-pack/performance
   - x-pack/scripts
