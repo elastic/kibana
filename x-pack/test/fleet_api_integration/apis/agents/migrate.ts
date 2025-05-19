@@ -36,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
         document: {
           revision_idx: 3,
           policy_id: 'policy2',
+          is_protected: true,
           coordinator_idx: 0,
           '@timestamp': '2023-03-15T13:00:00.000Z',
         },
@@ -56,8 +57,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENTS_INDEX,
         id: 'agent2',
         document: {
-          policy_id: 'policy1',
-          is_protected: true,
+          policy_id: 'policy2', // Policy 2 is tamper protected
         },
       });
       await es.index({
