@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
 import { StreamEnrichmentContextType } from './types';
 
 /**
  * Selects the processor marked as the draft processor.
  */
-export const selectDraftProcessor = createSelector(
-  [(context: StreamEnrichmentContextType | undefined) => context?.processorsRefs],
-  (processorsRefs) => {
-    const draft = processorsRefs?.find((p) => p.getSnapshot().matches('draft'));
-    return {
-      processor: draft?.getSnapshot().context.processor,
-      resources: draft?.getSnapshot().context.resources,
-    };
-  }
-);
+export const selectDraftProcessor = (context: StreamEnrichmentContextType | undefined) => {
+  const draft = context?.processorsRefs?.find((p) => p.getSnapshot().matches('draft'));
+  return {
+    processor: draft?.getSnapshot().context.processor,
+    resources: draft?.getSnapshot().context.resources,
+  };
+};

@@ -192,7 +192,9 @@ const OutcomePreviewTable = () => {
     );
   }
 
-  return draftProcessor?.processor && isGrokProcessor(draftProcessor.processor) ? (
+  return draftProcessor?.processor &&
+    isGrokProcessor(draftProcessor.processor) &&
+    !isEmpty(draftProcessor.processor.grok.field) ? (
     <PreviewTable
       documents={previewDocuments}
       displayColumns={[draftProcessor.processor.grok.field]}
