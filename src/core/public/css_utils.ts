@@ -88,8 +88,8 @@ type StyleMap = Record<
 type StaticStyleMap = Record<string, Interpolation<Theme>>;
 
 /**
- * Custom hook to reduce boilerplate when working with Emotion styles that may be static
- * or dynamically dependent on the EUI theme.
+ * Custom hook to reduce boilerplate when working with Emotion styles that may depend on
+ * the EUI theme.
  *
  * Accepts a map of styles where each entry is either a static Emotion style (via `css`)
  * or a function that returns styles based on the current `euiTheme`.
