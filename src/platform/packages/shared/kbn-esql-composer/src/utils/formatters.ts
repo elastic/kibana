@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function escapeIdentifier(identifier: string) {
-  return `\`${identifier}\``;
+export function escapeColumn(column: string) {
+  return `\`${column}\``;
 }
 
 export const formatValue = (value: any) => {
@@ -16,5 +16,5 @@ export const formatValue = (value: any) => {
 };
 
 export const formatColumn = (column: string) => {
-  return column.startsWith('?') ? column : escapeIdentifier(column);
+  return column.startsWith('??') ? column : escapeColumn(column);
 };

@@ -9,7 +9,7 @@
 
 import { createPipeline } from '../create_pipeline';
 import type { QueryPipeline } from '../types';
-import { escapeIdentifier } from '../utils/formatters';
+import { escapeColumn } from '../utils/formatters';
 
 export function from(...patterns: Array<string | string[]>): QueryPipeline {
   const allPatterns = patterns.flatMap((pattern) => pattern);
@@ -17,7 +17,7 @@ export function from(...patterns: Array<string | string[]>): QueryPipeline {
   return createPipeline({
     commands: [
       {
-        body: `FROM ${allPatterns.map((pattern) => escapeIdentifier(pattern)).join(',')}`,
+        body: `FROM ${allPatterns.map((pattern) => escapeColumn(pattern)).join(',')}`,
       },
     ],
     params: [],

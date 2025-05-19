@@ -25,24 +25,18 @@ describe('evaluate', () => {
 
   it('handles EVAL with params', () => {
     const pipeline = source.pipe(
-      evaluate('hour = DATE_TRUNC(1 hour, ?ts)', {
-        ts: {
-          identifier: '@timestamp',
-        },
+      evaluate('latestTs = MAX(??ts)', {
+        ts: '@timestamp',
       })
     );
     const queryRequest = pipeline.asRequest();
 
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, ?ts)');
+    expect(queryRequest.query).toEqual('FROM `logs-*`\n\t| EVAL latestTs = MAX(??ts)');
     expect(queryRequest.params).toEqual([
       {
-        ts: {
-          identifier: '@timestamp',
-        },
+        ts: '@timestamp',
       },
     ]);
-    expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n\t| EVAL hour = DATE_TRUNC(1 hour, `@timestamp`)'
-    );
+    expect(pipeline.asString()).toEqual('FROM `logs-*`\n\t| EVAL latestTs = MAX(`@timestamp`)');
   });
 });

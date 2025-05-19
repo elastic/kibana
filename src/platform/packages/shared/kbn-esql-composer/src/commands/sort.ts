@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NamedParameterWithIdentifier, QueryOperator } from '../types';
+import { Params, QueryOperator } from '../types';
 import { formatColumn } from '../utils/formatters';
 import { append } from './append';
 
@@ -21,10 +21,10 @@ type Sort = Record<string, SortOrder>;
 type SortArgs = Sort | string | Array<Sort | string>;
 
 // TODO: a better name?
-export function sortRaw<
-  TQuery extends string,
-  TParams extends NamedParameterWithIdentifier<TQuery>
->(body: TQuery, params?: TParams): QueryOperator {
+export function sortRaw<TQuery extends string, TParams extends Params<TQuery>>(
+  body: TQuery,
+  params?: TParams
+): QueryOperator {
   return append({ command: `SORT ${body}`, params });
 }
 

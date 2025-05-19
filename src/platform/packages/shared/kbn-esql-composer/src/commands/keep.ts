@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escapeIdentifier } from '../utils/formatters';
+import { escapeColumn } from '../utils/formatters';
 import { append } from './append';
 
 export function keep(...columns: Array<string | string[]>) {
   const command = `KEEP ${columns
     .flatMap((column) => column)
-    .map((column) => escapeIdentifier(column))
+    .map((column) => escapeColumn(column))
     .join(', ')}`;
 
   return append({ command });

@@ -123,10 +123,10 @@ import { from, stats } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    stats('AVG(?duration), COUNT(?svcName) WHERE agent.name == "java" BY ?env', {
-      duration: { identifier: 'transaction.duration.us' },
-      svcName: { identifier: 'service.name' },
-      env: { identifier: 'service.environment' },
+    stats('AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+      duration: 'transaction.duration.us',
+      svcName: 'service.name',
+      env: 'service.environment',
     })
   )
   .asRequest();
@@ -137,22 +137,16 @@ Returns
 ```ts
 { 
   query: `FROM \`logs-*\`
-  | AVG(?duration), COUNT(?svcName) WHERE agent.name == "java" BY ?env`,
+  | AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env`,
   params: [
     {
-      duration: {
-        identifier: 'transaction.duration.us',
-      },
+      duration: 'transaction.duration.us',
     },
     {
-      svcName: {
-        identifier: 'service.name',
-      },
+      svcName: 'service.name',
     },
     {
-      env: {
-        identifier: 'service.environment',
-      },
+      env: 'service.environment',
     },
   ]
 }
@@ -180,7 +174,7 @@ import { from, evaluate } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    evaluate('hour = DATE_TRUNC(1 hour, ?ts)', {
+    evaluate('latestTs = MAX(?ts)', {
       ts: { identifier: '@timestamp' },
     })
   )
@@ -190,12 +184,10 @@ from('logs-*')
 ```ts
 { 
   query: `FROM \`logs-*\`
-  | EVA hour = DATE_TRUNC(1 hour, ?ts)`,
+  | EVAL latestTs = MAX(?ts)`,
   params: [
     {
-      ts: {
-        identifier: '@timestamp',
-      },
+      ts: '@timestamp',
     }
   ]
 }
@@ -234,9 +226,9 @@ import { from, sortRaw } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    sortRaw('?timestamp DESC, ?logLevel ASC', {
-      timestamp: { identifier: '@timestamp' },
-      logLevel: { identifier: 'log.level' },
+    sortRaw('??timestamp DESC, ??logLevel ASC', {
+      timestamp: '@timestamp',
+      logLevel: 'log.level',
     })
   )
   .asRequest();
@@ -249,8 +241,8 @@ Returns
   query: `FROM \`logs-*\`
   | SORT ?timestamp DESC, ?logLevel ASC`,
   params: [
-    { timestamp: { identifier: '@timestamp' } },
-    { logLevel: { identifier: 'log.level' } }
+    { timestamp: '@timestamp' },
+    { logLevel: 'log.level' }
   ]
 }
 ```

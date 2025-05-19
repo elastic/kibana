@@ -45,27 +45,19 @@ describe('sort', () => {
 
   it('handles SORT with params', () => {
     const pipeline = source.pipe(
-      sortRaw('?timestamp DESC, ?logLevel ASC', {
-        timestamp: {
-          identifier: '@timestamp',
-        },
-        logLevel: {
-          identifier: 'log.level',
-        },
+      sortRaw('??timestamp DESC, ??logLevel ASC', {
+        timestamp: '@timestamp',
+        logLevel: 'log.level',
       })
     );
     const queryRequest = pipeline.asRequest();
-    expect(queryRequest.query).toEqual('FROM `logs-*`\n\t| SORT ?timestamp DESC, ?logLevel ASC');
+    expect(queryRequest.query).toEqual('FROM `logs-*`\n\t| SORT ??timestamp DESC, ??logLevel ASC');
     expect(queryRequest.params).toEqual([
       {
-        timestamp: {
-          identifier: '@timestamp',
-        },
+        timestamp: '@timestamp',
       },
       {
-        logLevel: {
-          identifier: 'log.level',
-        },
+        logLevel: 'log.level',
       },
     ]);
 

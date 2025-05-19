@@ -25,38 +25,26 @@ describe('stats', () => {
 
   it('handles STATS with params', () => {
     const pipeline = source.pipe(
-      stats('AVG(?duration), COUNT(?svcName) WHERE agent.name == "java" BY ?env', {
-        duration: {
-          identifier: 'transaction.duration.us',
-        },
-        svcName: {
-          identifier: 'service.name',
-        },
-        env: {
-          identifier: 'service.environment',
-        },
+      stats('AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+        duration: 'transaction.duration.us',
+        svcName: 'service.name',
+        env: 'service.environment',
       })
     );
     const queryRequest = pipeline.asRequest();
 
     expect(queryRequest.query).toEqual(
-      'FROM `logs-*`\n\t| STATS AVG(?duration), COUNT(?svcName) WHERE agent.name == "java" BY ?env'
+      'FROM `logs-*`\n\t| STATS AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env'
     );
     expect(queryRequest.params).toEqual([
       {
-        duration: {
-          identifier: 'transaction.duration.us',
-        },
+        duration: 'transaction.duration.us',
       },
       {
-        svcName: {
-          identifier: 'service.name',
-        },
+        svcName: 'service.name',
       },
       {
-        env: {
-          identifier: 'service.environment',
-        },
+        env: 'service.environment',
       },
     ]);
     expect(pipeline.asString()).toEqual(
