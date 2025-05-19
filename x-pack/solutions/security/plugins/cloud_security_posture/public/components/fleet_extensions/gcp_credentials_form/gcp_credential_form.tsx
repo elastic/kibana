@@ -577,28 +577,8 @@ export const GcpInputVarFields = ({
   };
 
   const organizationIdFields = getFieldById('gcp.organization_id');
-  const organizationIdValueInvalid = fieldIsInvalid(
-    organizationIdFields?.value,
-    hasInvalidRequiredVars
-  );
-  const organizationIdError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
-    {
-      defaultMessage: '{field} is required',
-      values: {
-        field: organizationIdFields?.label,
-      },
-    }
-  );
 
   const projectIdFields = getFieldById('gcp.project_id');
-  const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
-  const projectIdError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-    defaultMessage: '{field} is required',
-    values: {
-      field: projectIdFields?.label,
-    },
-  });
 
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
 
@@ -644,12 +624,7 @@ export const GcpInputVarFields = ({
     <div>
       <EuiForm component="form">
         {organizationIdFields && isOrganization && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.organization_id'].label}
-            isInvalid={organizationIdValueInvalid}
-            error={organizationIdValueInvalid ? organizationIdError : undefined}
-          >
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -657,17 +632,11 @@ export const GcpInputVarFields = ({
               fullWidth
               value={organizationIdFields.value || ''}
               onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
-              isInvalid={organizationIdValueInvalid}
             />
           </EuiFormRow>
         )}
         {projectIdFields && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.project_id'].label}
-            isInvalid={projectIdValueInvalid}
-            error={projectIdValueInvalid ? projectIdError : undefined}
-          >
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -675,7 +644,6 @@ export const GcpInputVarFields = ({
               fullWidth
               value={projectIdFields.value || ''}
               onChange={(event) => onChange(projectIdFields.id, event.target.value)}
-              isInvalid={projectIdValueInvalid}
             />
           </EuiFormRow>
         )}
@@ -728,6 +696,7 @@ export const GcpInputVarFields = ({
               label={gcpField.fields['gcp.credentials.json'].label}
               isInvalid={credentialJSONFieldsInvalid}
               error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
             >
               <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                 <LazyPackagePolicyInputVarField
@@ -743,8 +712,6 @@ export const GcpInputVarFields = ({
                   onChange={(value) => {
                     onChange(credentialJSONFields.id, value);
                   }}
-                  errors={credentialJSONFieldsInvalid ? [credentialJSONError] : []}
-                  forceShowErrors={false}
                   isEditPage={isEditPage}
                 />
               </Suspense>
