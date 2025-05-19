@@ -104,7 +104,6 @@ import {
   isTextBasedLayer,
   hasTextBasedLayers,
   TextBasedField,
-  hasFormBasedLayers,
 } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
