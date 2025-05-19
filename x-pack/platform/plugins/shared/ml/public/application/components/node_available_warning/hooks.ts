@@ -8,8 +8,9 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { mlApiProvider } from '@kbn/ml-services/ml_api_service';
+import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import { HttpService } from '../../services/http_service';
-import { type CloudInfo, extractDeploymentId } from '../../services/ml_server_info';
+import { extractDeploymentId } from '../../services/ml_server_info';
 
 export function useMlNodeAvailableCheck() {
   const { mlNodesAvailable } = useMlNodeCheck();
