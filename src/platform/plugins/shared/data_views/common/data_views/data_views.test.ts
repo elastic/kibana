@@ -666,17 +666,18 @@ describe('IndexPatterns', () => {
   });
 
   test('failed request does not affect adhoc data view being created', () => {
-    savedObjectsClient.get = jest.fn().mockRejectedValue({});
+    const badRequest = new Error('bad request');
+    savedObjectsClient.get = jest.fn().mockRejectedValue(badRequest);
 
     const id = '1';
     const failedDataViewPromise = indexPatterns.get(id);
     const adhocDataViewPromise = indexPatterns.create({ id });
 
     // failed request!
-    expect(failedDataViewPromise).rejects.toBeDefined();
+    expect(failedDataViewPromise).rejects.toBe(badRequest);
 
     // successful subsequent request
-    expect(adhocDataViewPromise).resolves.toBeDefined();
+    expect(adhocDataViewPromise).resolves.toBeInstanceOf(DataView);
   });
 
   test('can set and remove field format', async () => {
