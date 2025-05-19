@@ -29,17 +29,6 @@ export const RuleDetails = () => {
 
   const { tags = [], name } = formData;
 
-  // const ruleDetailsContainerCss = css`
-  //   @container (max-width: 767px) {
-  //     &.euiDescribedFormGroup {
-  //       flex-direction: column;
-  //     }
-  //     &.euiDescribedFormGroup > .euiFlexItem {
-  //       width: 100%;
-  //     }
-  //   }
-  // `;
-
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
   }, [tags]);
