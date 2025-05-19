@@ -6,9 +6,9 @@
  */
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { MlIndexUtils } from '@kbn/ml-services/index_service';
 import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils';
 
+import type { MlIndexUtils } from './index_service';
 import type { MlJobService } from './job_service';
 import type { MlApi } from './ml_api_service';
 

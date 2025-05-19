@@ -8,8 +8,9 @@
 import type { InfluencersFilterQuery, EntityField } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+
+import type { MlApi } from '../ml_api_service';
 
 export function resultsServiceProvider(mlApi: MlApi): {
   getScoresByBucket(
