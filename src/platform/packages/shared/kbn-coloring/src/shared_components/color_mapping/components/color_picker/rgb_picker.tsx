@@ -80,7 +80,7 @@ export function RGBPicker({
     ? euiThemeVars.euiColorWarningText
     : '';
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" style={{ padding: 8 }}>
+    <EuiFlexGroup direction="column" gutterSize="s" css={{ padding: 8 }}>
       <EuiFlexItem>
         <EuiColorPicker
           onChange={(c) => {
@@ -139,6 +139,7 @@ export function RGBPicker({
                       });
                     }
                   }}
+                  data-test-subj="lns-colorMapping-colorPicker-custom-input"
                   aria-label={i18n.translate(
                     'coloring.colorMapping.colorPicker.hexColorinputAriaLabel',
                     {

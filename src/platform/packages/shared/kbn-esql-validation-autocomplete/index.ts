@@ -26,7 +26,7 @@ export { suggest } from './src/autocomplete/autocomplete';
 export type {
   ValidationErrors,
   ESQLUserDefinedColumn,
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   ESQLPolicy,
   ErrorTypes as ESQLValidationErrorTypes,
 } from './src/validation/types';

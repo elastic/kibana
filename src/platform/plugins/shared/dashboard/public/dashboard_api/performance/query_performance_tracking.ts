@@ -12,6 +12,12 @@ import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } fro
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+import {
+  clearPerformanceTrackersByType,
+  getMeanFromPerformanceMeasures,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
@@ -124,7 +130,19 @@ function reportPerformanceMetrics({
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
-  const e = {
+  const meanPanelPrerender = getMeanFromPerformanceMeasures({
+    type: PERFORMANCE_TRACKER_TYPES.PANEL,
+    startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+    endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+  });
+
+  const meanPanelRenderComplete = getMeanFromPerformanceMeasures({
+    type: PERFORMANCE_TRACKER_TYPES.PANEL,
+    startMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+    endMark: PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE,
+  });
+
+  const performanceMetricEvent = {
     eventName: DASHBOARD_LOADED_EVENT,
     duration,
     key1: 'time_to_data',
@@ -133,6 +151,12 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
+    key8: 'mean_panel_prerender',
+    value8: meanPanelPrerender,
+    key9: 'mean_panel_rendering',
+    value9: meanPanelRenderComplete,
   };
-  reportPerformanceMetricEvent(coreServices.analytics, e);
+
+  reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);
+  clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.PANEL);
 }
