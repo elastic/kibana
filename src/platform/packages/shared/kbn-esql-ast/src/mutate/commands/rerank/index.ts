@@ -44,8 +44,10 @@ export const setFields = (
   fields: string[] | ESQLAstRerankCommand['fields']
 ) => {
   if (typeof fields[0] === 'string') {
-    fields = fields.map((str) => {
-      return Builder.expression.column(str);
+    fields = fields.map((fieldOrFieldName) => {
+      return typeof fieldOrFieldName === 'string'
+        ? Builder.expression.column(fieldOrFieldName)
+        : fieldOrFieldName;
     });
   }
 
