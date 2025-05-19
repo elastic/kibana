@@ -17,7 +17,7 @@ import { mlApiProvider } from './ml_api_service';
 import { mlUsageCollectionProvider } from './usage_collection';
 import { mlJobServiceFactory } from './job_service';
 import { indexServiceFactory } from './index_service';
-import { TrainedModelsService } from '../model_management/trained_models_service';
+import { TrainedModelsService } from './model_management/trained_models_service';
 
 /**
  * Provides global services available across the entire ML app.
@@ -53,3 +53,5 @@ export function getMlGlobalServices(
     trainedModelsService,
   };
 }
+
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;

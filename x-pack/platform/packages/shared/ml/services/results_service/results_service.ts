@@ -29,13 +29,13 @@ import type {
 } from '@kbn/ml-common-types/results';
 import { defaultSearchQuery } from '@kbn/ml-common-types/results';
 import type { MlClient } from '@kbn/ml-client';
+import { getIndicesOptions } from '@kbn/ml-common-utils/datafeed_utils';
+import { annotationServiceProvider } from '@kbn/ml-common-utils/annotation_service';
 
-import { datafeedsProvider } from '@kbn/ml-services/job_service/datafeeds';
-import { getIndicesOptions } from '../../../common/util/datafeed_utils';
+import { datafeedsProvider } from '../datafeeds';
 
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { annotationServiceProvider } from '../annotation_service';
 import { anomalyChartsDataProvider } from './anomaly_charts';
 
 // Service for carrying out Elasticsearch queries to obtain data for the

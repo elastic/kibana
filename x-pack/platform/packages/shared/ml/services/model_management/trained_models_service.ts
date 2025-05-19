@@ -42,9 +42,11 @@ import type {
   UpdateAllocationParams,
   DeleteModelParams,
   StartAllocationParams,
-} from '@kbn/ml-services/ml_api_service/trained_models';
-import { type TrainedModelsApiService } from '@kbn/ml-services/ml_api_service/trained_models';
-import type { ITelemetryClient } from '../services/telemetry/types';
+} from '@kbn/ml-common-types/trained_models';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+
+import type { TrainedModelsApiService } from '../ml_api_service/trained_models';
+
 import type { DeploymentParamsUI } from './deployment_setup';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
 

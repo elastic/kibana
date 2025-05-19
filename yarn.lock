@@ -7367,6 +7367,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-hooks@link:x-pack/platform/packages/shared/ml/hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-in-memory-table@link:x-pack/platform/packages/private/ml/in_memory_table":
   version "0.0.0"
   uid ""

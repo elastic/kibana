@@ -18,10 +18,11 @@ import {
   type DataFrameTaskStateType,
   type TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
-import { useMlApi, useMlKibana } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlIndexUtils } from '../../util/index_service';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';

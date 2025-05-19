@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
+
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { getMlGlobalServices } from '@kbn/ml-services/get_services';
+
 import { HttpService } from '../../application/services/http_service';
 import type { AnomalyChartsEmbeddableState } from '../types';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
-import { getMlGlobalServices } from '../../application/util/get_services';
 import type { MlStartDependencies } from '../../plugin';
 
 export function EmbeddableAnomalyChartsUserInput({

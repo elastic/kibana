@@ -20,6 +20,7 @@
     "@kbn/ml-common-constants",
     "@kbn/ml-common-types",
     "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/ml-error-utils",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-saved-objects",
   ]

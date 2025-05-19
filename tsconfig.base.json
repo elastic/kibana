@@ -1434,6 +1434,8 @@
       "@kbn/ml-error-utils/*": ["x-pack/platform/packages/shared/ml/error_utils/*"],
       "@kbn/ml-field-stats-flyout": ["x-pack/platform/packages/private/ml/field_stats_flyout"],
       "@kbn/ml-field-stats-flyout/*": ["x-pack/platform/packages/private/ml/field_stats_flyout/*"],
+      "@kbn/ml-hooks": ["x-pack/platform/packages/shared/ml/hooks"],
+      "@kbn/ml-hooks/*": ["x-pack/platform/packages/shared/ml/hooks/*"],
       "@kbn/ml-in-memory-table": ["x-pack/platform/packages/private/ml/in_memory_table"],
       "@kbn/ml-in-memory-table/*": ["x-pack/platform/packages/private/ml/in_memory_table/*"],
       "@kbn/ml-is-defined": ["x-pack/platform/packages/private/ml/is_defined"],

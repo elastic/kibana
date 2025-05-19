@@ -24,7 +24,7 @@ import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
 } from '@kbn/ml-common-types/saved_objects';
-import { MLJobNotFound, MLModelNotFound } from '@kbn/ml-client';
+import { MLJobNotFound, MLModelNotFound } from '@kbn/ml-error-utils';
 import { getSavedObjectClientError } from './util';
 import { authorizationProvider } from './authorization';
 

@@ -151,5 +151,8 @@
     "@kbn/ml-kibana-context",
     "@kbn/ml-services",
     "@kbn/ml-embeddables",
+    "@kbn/ml-license",
+    "@kbn/ml-client",
+    "@kbn/ml-hooks",
   ]
 }

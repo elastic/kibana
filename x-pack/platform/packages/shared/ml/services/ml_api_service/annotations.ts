@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { Annotation, GetAnnotationsResponse } from '@kbn/ml-common-types/annotations';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { HttpService } from '../http_service';
 
 export const annotationsApiProvider = (httpService: HttpService) => ({
@@ -65,15 +63,3 @@ export const annotationsApiProvider = (httpService: HttpService) => ({
 });
 
 export type AnnotationsApiService = ReturnType<typeof annotationsApiProvider>;
-
-/**
- * Hooks for accessing {@link AnnotationsApiService} in React components.
- */
-export function useAnnotationsApiService(): AnnotationsApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => annotationsApiProvider(httpService), [httpService]);
-}

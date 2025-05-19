@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { ManagementListResponse } from '@kbn/ml-common-types/management';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import type { HttpService } from '../http_service';
 
@@ -49,15 +46,3 @@ export function managementApiProvider(httpService: HttpService) {
 }
 
 export type ManagementApiService = ReturnType<typeof managementApiProvider>;
-
-/**
- * Hooks for accessing {@link ManagementApiService} in React components.
- */
-export function useManagementApiService(): ManagementApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => managementApiProvider(httpService), [httpService]);
-}
