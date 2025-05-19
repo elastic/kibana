@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: AppendConversationMessage
-      description: Append a message to the conversation
+      description: This endpoint allows you to append a new message to an existing conversation. The message will be added to the specified conversation identified by its unique `id`.
       summary: Append a message to the conversation
       tags:
         - Conversation API
@@ -16,9 +16,10 @@ paths:
         - name: id
           in: path
           required: true
-          description: The conversation's `id` value.
+          description: The unique identifier (`id`) of the conversation to which the message will be appended.
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "abc123"
       requestBody:
         required: true
         content:
@@ -27,13 +28,27 @@ paths:
               $ref: './common_attributes.schema.yaml#/components/schemas/ConversationMessageCreateProps'
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful call and the message has been appended to the conversation.
           content:
             application/json:
               schema:
                 $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+              examples:
+                success:
+                  value:
+                    id: "abc123"
+                    title: "Security Issue"
+                    messages:
+                      - id: "msg1"
+                        content: "This is the first message."
+                        sender_id: "admin"
+                        timestamp: "2025-05-01T12:00:00Z"
+                      - id: "msg2"
+                        content: "This is a follow-up message."
+                        sender_id: "user123"
+                        timestamp: "2025-05-01T12:05:00Z"
         400:
-          description: Generic Error
+          description: Generic Error, indicating an issue with the request (e.g., invalid message format, missing required fields).
           content:
             application/json:
               schema:
@@ -41,7 +56,13 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: The HTTP status code for the error.
+                    example: 400
                   error:
                     type: string
+                    description: A short error message.
+                    example: "Bad Request"
                   message:
                     type: string
+                    description: A detailed error message providing more information about the failure.
+                    example: "The message content is missing."

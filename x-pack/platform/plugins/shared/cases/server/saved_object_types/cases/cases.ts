@@ -211,7 +211,6 @@ export const createCaseSavedObjectType = (
               },
               boolean: {
                 type: 'boolean',
-                // @ts-expect-error: es types are not correct. ignore_malformed is supported.
                 ignore_malformed: true,
               },
               string: {
