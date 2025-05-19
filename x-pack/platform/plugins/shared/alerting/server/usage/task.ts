@@ -169,8 +169,6 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
-                count_rules_snoozed_by_type: {},
-                count_rules_muted_by_type: {},
                 count_rules_with_linked_dashboards:
                   totalCountAggregations.count_rules_with_linked_dashboards,
                 count_rules_with_investigation_guide:

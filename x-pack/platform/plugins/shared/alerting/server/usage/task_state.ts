@@ -247,7 +247,7 @@ export const stateSchemaByVersion = {
   },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[4].schema;
+const latestTaskStateSchema = stateSchemaByVersion[3].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -297,8 +297,6 @@ export const emptyState: LatestTaskStateSchema = {
   },
   count_rules_snoozed: 0,
   count_rules_muted: 0,
-  count_rules_snoozed_by_type: {},
-  count_rules_muted_by_type: {},
   count_mw_total: 0,
   count_mw_with_repeat_toggle_on: 0,
   count_mw_with_filter_alert_toggle_on: 0,
