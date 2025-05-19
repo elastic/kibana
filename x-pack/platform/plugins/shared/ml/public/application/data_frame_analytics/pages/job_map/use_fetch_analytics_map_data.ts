@@ -14,7 +14,7 @@ import {
   JOB_MAP_NODE_TYPES,
   type AnalyticsMapReturnType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlApi } from '../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 interface GetDataObjectParameter {
   analyticsId?: string;
   id?: string;

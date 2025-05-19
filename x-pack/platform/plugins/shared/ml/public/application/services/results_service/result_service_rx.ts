@@ -12,9 +12,11 @@
 // Extra query object can be supplied, or pass null if no additional query
 // to that built from the supplied entity fields.
 // Returned response contains a results property containing the requested aggregation.
+
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { each, get } from 'lodash';
+
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
@@ -24,9 +26,10 @@ import type { Dictionary } from '@kbn/ml-common-types/common';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { findAggField } from '../../../../common/util/validation_utils';
-import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
+import { ML_MEDIAN_PERCENTS } from '@kbn/ml-common-utils/job_utils';
+import { findAggField } from '@kbn/ml-common-utils/validation_utils';
+import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
+
 import type { CriteriaField } from '.';
 
 export interface ResultResponse {

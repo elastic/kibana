@@ -17,14 +17,11 @@ import type {
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { HelpMenu } from '../../components/help_menu';
-import {
-  useMlApi,
-  useMlKibana,
-  useMlLocator,
-  useMlManagementLocatorInternal,
-} from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlLocator, useMlManagementLocatorInternal } from '../../contexts/kibana';
 
+import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
