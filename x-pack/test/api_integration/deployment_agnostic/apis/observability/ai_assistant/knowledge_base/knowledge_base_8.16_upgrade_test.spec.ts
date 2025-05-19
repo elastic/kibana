@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import expect from '@kbn/expect';
-import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { sortBy } from 'lodash';
+import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   getKnowledgeBaseEntriesFromEs,
   getKnowledgeBaseEntriesFromApi,
+  refreshKbIndex,
 } from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
@@ -39,87 +46,113 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
 
-    before(async () => {
-      await teardownTinyElserModelAndInferenceEndpoint(getService);
-      await deleteIndexAssets(getService);
-      await restoreKbSnapshot({
-        log,
-        es,
-        snapshotFolderName: 'snapshot_kb_8.16',
-        snapshotName: 'kb_snapshot_8.16',
-      });
-
-      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
-
-      await deployTinyElserAndSetupKb(getService);
-    });
-
-    after(async () => {
-      await teardownTinyElserModelAndInferenceEndpoint(getService);
-      await restoreIndexAssets(getService);
-    });
-
-    describe('before migrating', () => {
-      it('the docs do not have semantic_text embeddings', async () => {
-        const hits = await getKnowledgeBaseEntriesFromEs(es);
-        const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
-
-        expect(hits.length).to.be(60);
-        expect(hasSemanticTextEmbeddings).to.be(false);
-      });
-    });
-
-    describe('after migrating', () => {
+    describe('using a snapshot', () => {
       before(async () => {
+        await teardownTinyElserModelAndInferenceEndpoint(getService);
+        await deleteIndexAssets(getService);
+        await restoreKbSnapshot({
+          log,
+          es,
+          snapshotFolderName: 'snapshot_kb_8.16',
+          snapshotName: 'kb_snapshot_8.16',
+        });
+
+        await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+        await deployTinyElserAndSetupKb(getService);
+      });
+
+      after(async () => {
+        await teardownTinyElserModelAndInferenceEndpoint(getService);
+        await restoreIndexAssets(getService);
+      });
+
+      describe('before migrating', () => {
+        it('the docs do not have semantic_text embeddings', async () => {
+          const hits = await getKnowledgeBaseEntriesFromEs(es);
+          const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
+
+          expect(hits.length).to.be(60);
+          expect(hasSemanticTextEmbeddings).to.be(false);
+        });
+      });
+
+      describe('after migrating', () => {
+        before(async () => {
+          await runStartupMigrations(observabilityAIAssistantAPIClient);
+        });
+
+        it('the docs have semantic_text field', async () => {
+          await retry.try(async () => {
+            const hits = await getKnowledgeBaseEntriesFromEs(es);
+            const hasSemanticTextField = hits.every((hit) => hit._source?.semantic_text);
+
+            expect(hits.length).to.be(60);
+            expect(hasSemanticTextField).to.be(true);
+          });
+        });
+
+        it('the docs have embeddings', async () => {
+          await retry.try(async () => {
+            const hits = await getKnowledgeBaseEntriesFromEs(es);
+
+            const everyEntryHasEmbeddings = hits.every(
+              (hit) =>
+                // @ts-expect-error
+                Object.keys(hit._source?.semantic_text.inference.chunks[0].embeddings).length > 0
+            );
+            expect(hits.length).to.be(60);
+            expect(everyEntryHasEmbeddings).to.be(true);
+          });
+        });
+
+        it('returns entries correctly via API', async () => {
+          const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
+          expect(res.status).to.be(200);
+
+          expect(
+            sortBy(
+              res.body.entries
+                .filter(omitLensEntry)
+                .map(({ title, text, type }) => ({ title, text, type })),
+              ({ title }) => title
+            )
+          ).to.eql([
+            { title: 'movie_quote', type: 'contextual', text: 'To infinity and beyond!' },
+            {
+              title: 'user_color',
+              type: 'contextual',
+              text: "The user's favourite color is blue.",
+            },
+          ]);
+        });
+      });
+    });
+
+    describe('manually created entries', () => {
+      before(async () => {
+        await restoreIndexAssets(getService);
+        await deployTinyElserAndSetupKb(getService);
+
+        // index sample documents
+        await Promise.all([
+          addEntryWithoutSemanticText({ es, title: 'user_color', text: 'Red' }),
+          addEntryWithoutSemanticText({ es, title: 'user_nickname', text: 'Peter Parker' }),
+          addEntryWithoutSemanticText({ es, title: 'empty_text_doc', text: '' }), // important to test for empty text: https://github.com/elastic/kibana/issues/220339
+        ]);
+        await refreshKbIndex(es);
         await runStartupMigrations(observabilityAIAssistantAPIClient);
       });
 
-      it('the docs have semantic_text field', async () => {
-        await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntriesFromEs(es);
-          const hasSemanticTextField = hits.every((hit) => hit._source?.semantic_text);
-
-          expect(hits.length).to.be(60);
-          expect(hasSemanticTextField).to.be(true);
-        });
+      after(async () => {
+        await teardownTinyElserModelAndInferenceEndpoint(getService);
       });
 
-      it('the docs have embeddings', async () => {
+      it('should migrate entries with `text` and ignore entries without `text`', async () => {
         await retry.try(async () => {
           const hits = await getKnowledgeBaseEntriesFromEs(es);
-          const hasEmbeddings = hits.every(
-            (hit) =>
-              // @ts-expect-error
-              Object.keys(hit._source?.semantic_text.inference.chunks[0].embeddings).length > 0
-          );
-          expect(hits.length).to.be(60);
-          expect(hasEmbeddings).to.be(true);
+          expect(hits.filter((hit) => hit._source?.semantic_text)).to.have.length(2);
+          expect(hits.length).to.be(3);
         });
-      });
-
-      it('returns entries correctly via API', async () => {
-        const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
-        expect(res.status).to.be(200);
-
-        expect(
-          sortBy(
-            res.body.entries
-              .filter(omitLensEntry)
-              .map(({ title, text, type }) => ({ title, text, type })),
-            ({ title }) => title
-          )
-        ).to.eql([
-          {
-            title: 'movie_quote',
-            type: 'contextual',
-            text: 'To infinity and beyond!',
-          },
-          {
-            title: 'user_color',
-            type: 'contextual',
-            text: "The user's favourite color is blue.",
-          },
-        ]);
       });
     });
   });
@@ -127,4 +160,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
 function omitLensEntry(entry?: KnowledgeBaseEntry) {
   return entry?.labels?.category !== 'lens';
+}
+
+async function addEntryWithoutSemanticText({
+  es,
+  title,
+  text,
+}: {
+  es: ElasticsearchClient;
+  title: string;
+  text: string;
+}) {
+  await es.index<KnowledgeBaseEntry>({
+    index: resourceNames.writeIndexAlias.kb,
+    document: {
+      id: uuidV4(),
+      title,
+      text,
+      confidence: 'high',
+      is_correction: false,
+      type: 'contextual',
+      public: false,
+      role: KnowledgeBaseEntryRole.UserEntry,
+      '@timestamp': new Date().toISOString(),
+    },
+  });
 }
