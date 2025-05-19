@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       log.info('Restoring index assets');
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
 
       log.info('Tearing down tiny ELSER model and inference endpoint');
       await teardownTinyElserModelAndInferenceEndpoint(getService);
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('before running migrations', () => {
       before(async () => {
         log.info('Delete index assets');
-        await deleteIndexAssets(es);
+        await deleteIndexAssets(getService);
 
         log.info('Restoring snapshot');
         await restoreKbSnapshot({
@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('after running migrations', () => {
       beforeEach(async () => {
-        await deleteIndexAssets(es);
+        await deleteIndexAssets(getService);
         await restoreKbSnapshot({
           log,
           es,
