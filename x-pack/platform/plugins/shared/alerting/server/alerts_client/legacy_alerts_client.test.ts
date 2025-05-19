@@ -418,6 +418,25 @@ describe('Legacy Alerts Client', () => {
       recoveredAlerts: {
         '3': new Alert<AlertInstanceContext, AlertInstanceContext>('3', recoveredAlert),
       },
+      currentRecoveredAlerts: {},
+    });
+
+    (trimRecoveredAlerts as jest.Mock).mockReturnValue({
+      trimmedAlertsRecovered: {},
+      earlyRecoveredAlerts: {},
+    });
+
+    (getAlertsForNotification as jest.Mock).mockReturnValue({
+      newAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+      },
+      activeAlerts: {
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', activeAlert),
+      },
+      recoveredAlerts: {
+        '3': new Alert<AlertInstanceContext, AlertInstanceContext>('3', recoveredAlert),
+      },
+      currentRecoveredAlerts: {},
     });
     const alertsClient = new LegacyAlertsClient({
       alertingEventLogger,
