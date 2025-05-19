@@ -29,21 +29,3 @@ export interface HasSerializableState<State extends object = object> {
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
   return Boolean((api as HasSerializableState)?.serializeState);
 };
-
-/**
- * @deprecated use HasSerializableState instead
- */
-export interface HasSnapshottableState<RuntimeState extends object = object> {
-  /**
-   * Serializes all runtime state exactly as it appears. This can be used
-   * to rehydrate a component's state without needing to serialize then deserialize it.
-   */
-  snapshotRuntimeState: () => RuntimeState;
-}
-
-/**
- * @deprecated use apiHasSerializableState instead
- */
-export const apiHasSnapshottableState = (api: unknown | null): api is HasSnapshottableState => {
-  return Boolean((api as HasSnapshottableState)?.snapshotRuntimeState);
-};
