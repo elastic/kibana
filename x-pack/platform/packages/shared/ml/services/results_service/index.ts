@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { resultsServiceProvider } from './results_service';
+export { resultsServiceProvider, type CriteriaField } from './results_service';

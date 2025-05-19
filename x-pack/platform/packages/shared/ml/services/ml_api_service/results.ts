@@ -15,7 +15,6 @@ import type {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
-
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type {
   GetStoppedPartitionResult,
@@ -26,9 +25,10 @@ import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { PartitionFieldsConfig } from '@kbn/ml-common-types/storage';
 import type { ExplorerChartsData } from '@kbn/ml-common-types/results';
 
+import type { PartitionFieldsDefinition } from '../results_service_2/result_service_rx';
+
 import type { HttpService } from '../http_service';
 import type { CriteriaField } from '../results_service';
-import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export interface CategoryDefinition {
   categoryId: number;

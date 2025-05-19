@@ -45,7 +45,8 @@ import { CHART_TYPE, SCHEDULE_EVENT_MARKER_ENTITY } from '@kbn/ml-common-constan
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job as MlJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -53,12 +54,11 @@ import {
   isSourceDataChartableForDetector,
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
-} from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
+} from '@kbn/ml-common-utils/job_utils';
+import { findAggField } from '@kbn/ml-common-utils/validation_utils';
+import { getChartType } from '@kbn/ml-common-utils/chart_utils';
 
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { findAggField } from '../../../common/util/validation_utils';
-import { getChartType } from '../../../common/util/chart_utils';
+import type { CriteriaField } from './results_service';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
