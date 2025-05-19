@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   EuiSpacer,
   type UseEuiTheme,
+  hexToRgb,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -501,6 +502,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     name: 'amsterdam',
   }).darkMode;
 
+  const rgbaShadowAlpha20 = `rgba(${hexToRgb(euiTheme.colors.shadow)}, 0.2)`;
+
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
       setChartSize(undefined);
@@ -513,9 +516,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             aria-hidden={true}
             css={[
               css`
-                filter: drop-shadow(0 6px 12px rgba(0, 0, 1, 0.2))
-                  drop-shadow(0 4px 4px rgba(0, 0, 1, 0.2))
-                  drop-shadow(0 2px 2px rgba(0, 0, 1, 0.2));
+                filter: drop-shadow(0 6px 12px ${rgbaShadowAlpha20})
+                  drop-shadow(0 4px 4px ${rgbaShadowAlpha20})
+                  drop-shadow(0 2px 2px ${rgbaShadowAlpha20});
               `,
               promptIllustrationStyle,
             ]}

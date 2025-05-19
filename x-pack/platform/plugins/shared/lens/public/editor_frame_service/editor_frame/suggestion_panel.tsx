@@ -607,7 +607,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
-  const rgbDanger = hexToRgb(euiTheme.colors.danger);
+  const rgbaDangerAlpha10 = `rgba(${hexToRgb(euiTheme.colors.danger)}, 0.1)`;
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -672,10 +672,10 @@ export function SuggestionPanel({
           padding-top: ${euiTheme.size.xs};
           mask-image: linear-gradient(
             to right,
-            rgba(${rgbDanger.join(', ')}, 0.1) 0%,
+            ${rgbaDangerAlpha10} 0%,
             ${euiTheme.colors.danger} 5px,
             ${euiTheme.colors.danger} calc(100% - 5px),
-            rgba(${rgbDanger.join(', ')}, 0.1) 100%
+            ${rgbaDangerAlpha10} 100%
           );
         `}
       >
