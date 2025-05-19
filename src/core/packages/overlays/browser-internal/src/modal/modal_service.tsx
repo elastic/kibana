@@ -19,13 +19,13 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type {
   OverlayModalConfirmOptions,
   OverlayModalOpenOptions,
   OverlayModalStart,
 } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { OverlayMountWrapper } from '../overlay_mount_wrapper';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to
@@ -94,7 +94,7 @@ export class ModalService {
         render(
           <KibanaRenderContextProvider {...startDeps}>
             <EuiModal {...options} onClose={() => modal.close()}>
-              <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
+              <OverlayMountWrapper mount={mount} />
             </EuiModal>
           </KibanaRenderContextProvider>,
           targetDomElement
@@ -134,11 +134,7 @@ export class ModalService {
           const props = {
             ...options,
             children:
-              typeof message === 'string' ? (
-                message
-              ) : (
-                <MountWrapper mount={message} className="kbnOverlayMountWrapper" />
-              ),
+              typeof message === 'string' ? message : <OverlayMountWrapper mount={message} />,
             onCancel: () => closeModal(false),
             onConfirm: () => closeModal(true),
             cancelButtonText:

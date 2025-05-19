@@ -12,6 +12,10 @@ import { parsedAlerts } from './mock_data';
 import type { GroupBySelection } from './types';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

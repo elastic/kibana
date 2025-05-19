@@ -14,13 +14,20 @@ import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
 import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
 import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
+import { integrationsExternalDetectionsCardConfig } from './cards/integrations_external_detections';
+import { knowledgeSourceCardConfig } from './cards/knowledge_source';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
     title: i18n.translate('xpack.securitySolution.onboarding.dataGroup.title', {
       defaultMessage: 'Ingest your data',
     }),
-    cards: [integrationsCardConfig, dashboardsCardConfig],
+    cards: [
+      integrationsCardConfig,
+      integrationsExternalDetectionsCardConfig,
+      dashboardsCardConfig,
+      knowledgeSourceCardConfig,
+    ],
   },
   {
     title: i18n.translate('xpack.securitySolution.onboarding.alertsGroup.title', {
@@ -33,6 +40,12 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
       defaultMessage: 'Discover Elastic AI',
     }),
     // TODO: Add attackDiscoveryCardConfig when it is ready (https://github.com/elastic/kibana/issues/189487)
+    cards: [assistantCardConfig],
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.onboarding.customizeLLM.title', {
+      defaultMessage: 'Customize your LLM',
+    }),
     cards: [assistantCardConfig],
   },
 ];
