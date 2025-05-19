@@ -34,6 +34,13 @@ export interface RepositorySupertestClient<TServerRouteRepository extends Server
       } & ClientRequestParamsOf<TServerRouteRepository, TEndpoint>
     >
   ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
+
+  sendFile: <TEndpoint extends EndpointOf<TServerRouteRepository>>(
+    endpoint: TEndpoint,
+    options: ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & {
+      file: { key: string; filename: string };
+    }
+  ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
 }
 
 type RepositorySupertestReturnOf<
@@ -90,6 +97,38 @@ async function getApiClient<TServerRouteRepository extends ServerRouteRepository
       }
 
       return res as RepositorySupertestReturnOf<
+        TServerRouteRepository,
+        EndpointOf<TServerRouteRepository>
+      >;
+    },
+
+    sendFile: (endpoint, options) => {
+      const params = 'params' in options ? (options.params as Record<string, any>) : {};
+      const { method, pathname, version } = formatRequest(endpoint, params.path);
+      const url = format({ pathname, query: params.query });
+
+      const headers: Record<string, string> = {
+        'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
+      };
+
+      if (version) {
+        headers['Elastic-Api-Version'] = version;
+      }
+
+      const fields: Array<[string, any]> = Object.entries(params.body);
+      const formDataRequest = supertestWithRoleScoped[method](url)
+        .set(headers)
+        .set('Content-type', 'multipart/form-data')
+        .attach(options.file.key, params.body[options.file.key], {
+          filename: options.file.filename,
+        });
+
+      for (const field of fields.filter(([key]) => key !== options.file.key)) {
+        void formDataRequest.field(field[0], field[1]);
+      }
+
+      return formDataRequest as RepositorySupertestReturnOf<
         TServerRouteRepository,
         EndpointOf<TServerRouteRepository>
       >;

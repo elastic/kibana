@@ -1,0 +1,30 @@
+---
+id: kibDevRenderingService
+slug: /kibana-dev-docs/rendering-service
+title: Core Rendering Service
+description: This a service provided by SharedUX which abstracts the dependencies needed for a fully-loaded React context. 
+tags: ['shared-ux', 'core', 'react', 'context']
+date: 2025-04-25
+---
+
+## Description
+
+### Custom React elements require global context
+Kibana's browser-side architecture is an application composed of many different points where custom React elements can be mounted onto a DOM container. These elements have a self-contained component tree, this process is often described as an "ad-hoc" render. A self-contained component tree has no awareness of global context or stateful core services, such as i18n and theming which are often needed. That is why we use shared context providers.
+
+### Adding the global context
+The public contract Core Rendering Service offers a wrapper to add context to your React elements. The wrapper uses its own internal state to handle the dependencies needed for each internal context provider, so developers do not have to worry about passing many services from the CoreStart contract. There is only a single service to pass down, the Core Rendering Service, which is available in the CoreStart contract as `core.rendering`.
+
+## Example
+
+This React 16 example adds context from the Core Rendering Service to the `MyApplication` component, and then mounts it to the DOM.
+
+```tsx
+const renderApp = ({ core, targetDomElement }: { core: CoreStart; targetDomElement: HTMLElement; }) => {
+  ReactDOM.render(core.rendering.addContext(<MyApplication />), targetDomElement);
+  return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+};
+```
+
+## See Also
+- <DocLink id="kibDevReactKibanaContext" />

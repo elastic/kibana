@@ -19,13 +19,14 @@ export const deleteSloInstancesRoute = createSloServerRoute({
     },
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ response, context, params, plugins }) => {
+  handler: async ({ request, logger, response, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const deleteSloInstances = new DeleteSLOInstances(esClient);
+    const { scopedClusterClient } = await getScopedClients({ request, logger });
 
+    const deleteSloInstances = new DeleteSLOInstances(scopedClusterClient.asCurrentUser);
     await deleteSloInstances.execute(params.body);
+
     return response.noContent();
   },
 });

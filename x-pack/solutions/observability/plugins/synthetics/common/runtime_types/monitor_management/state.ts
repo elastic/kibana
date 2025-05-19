@@ -6,12 +6,16 @@
  */
 
 import * as t from 'io-ts';
+import { Mixed } from 'io-ts';
+import { useLogicalAndFields } from '../../constants/filters_fields_with_logical_and';
 
-export const FetchMonitorManagementListQueryArgsCodec = t.partial({
-  page: t.number,
-  perPage: t.number,
-  sortField: t.string,
-  sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
+const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
+  Mixed,
+  Mixed,
+  ...Mixed[]
+];
+
+const FetchMonitorQueryArgsCommon = {
   query: t.string,
   searchFields: t.array(t.string),
   tags: t.array(t.string),
@@ -20,8 +24,17 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   projects: t.array(t.string),
   schedules: t.array(t.string),
   monitorQueryIds: t.array(t.string),
-  internal: t.boolean,
+  sortField: t.string,
+  sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
   showFromAllSpaces: t.boolean,
+  useLogicalAndFor: t.array(t.union(useLogicalAndFileLiteral)),
+};
+
+export const FetchMonitorManagementListQueryArgsCodec = t.partial({
+  ...FetchMonitorQueryArgsCommon,
+  page: t.number,
+  perPage: t.number,
+  internal: t.boolean,
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<
@@ -29,17 +42,7 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
 >;
 
 export const FetchMonitorOverviewQueryArgsCodec = t.partial({
-  query: t.string,
-  searchFields: t.array(t.string),
-  tags: t.array(t.string),
-  locations: t.array(t.string),
-  projects: t.array(t.string),
-  schedules: t.array(t.string),
-  monitorTypes: t.array(t.string),
-  monitorQueryIds: t.array(t.string),
-  sortField: t.string,
-  sortOrder: t.string,
-  showFromAllSpaces: t.boolean,
+  ...FetchMonitorQueryArgsCommon,
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

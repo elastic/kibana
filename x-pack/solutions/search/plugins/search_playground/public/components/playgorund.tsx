@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { useWatch } from 'react-hook-form';
 import { PLUGIN_ID } from '../../common';
-import { QueryMode } from './query_mode/query_mode';
 import { SearchQueryMode } from './query_mode/search_query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
@@ -41,6 +41,7 @@ export interface AppProps {
 
 export const Playground: React.FC<AppProps> = ({ showDocs = false }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
+  const location = useLocation();
   const { pageMode, viewMode } = usePlaygroundParameters();
   const { application } = useKibana().services;
   const { data: connectors } = useLoadConnectors();
@@ -50,15 +51,21 @@ export const Playground: React.FC<AppProps> = ({ showDocs = false }) => {
     }).length
   );
   const navigateToView = useCallback(
-    (page: PlaygroundPageMode, view?: PlaygroundViewMode) => {
+    (page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
+      let path = view && view !== PlaygroundViewMode.preview ? `/${page}/${view}` : `/${page}`;
+      if (searchParams) {
+        path += searchParams;
+      }
       application.navigateToApp(PLUGIN_ID, {
-        path: view && view !== PlaygroundViewMode.preview ? `/${page}/${view}` : `/${page}`,
+        path,
       });
     },
     [application]
   );
-  const handleModeChange = (id: PlaygroundViewMode) => navigateToView(pageMode, id);
-  const handlePageModeChange = (mode: PlaygroundPageMode) => navigateToView(mode, viewMode);
+  const handleModeChange = (id: PlaygroundViewMode) =>
+    navigateToView(pageMode, id, location.search);
+  const handlePageModeChange = (mode: PlaygroundPageMode) =>
+    navigateToView(mode, viewMode, location.search);
   const { showSetupPage } = usePageMode({
     hasSelectedIndices,
     hasConnectors: Boolean(connectors?.length),
@@ -86,9 +93,7 @@ export const Playground: React.FC<AppProps> = ({ showDocs = false }) => {
             <Route
               exact
               path={PLAYGROUND_CHAT_QUERY_PATH}
-              render={() =>
-                isSearchModeEnabled ? <SearchQueryMode pageMode={pageMode} /> : <QueryMode />
-              }
+              render={() => <SearchQueryMode pageMode={pageMode} />}
             />
             {isSearchModeEnabled && (
               <>
