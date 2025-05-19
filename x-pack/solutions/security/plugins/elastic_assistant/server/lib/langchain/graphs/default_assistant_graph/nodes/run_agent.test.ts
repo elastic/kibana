@@ -74,7 +74,7 @@ describe('runAgent', () => {
       ...testParams, kbDataClient: {
         getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([]),
       },
-    });
+    } as unknown as RunAgentParams);
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
