@@ -144,7 +144,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
         >
           {state.isPopoverOpen && (
             <EuiComboBox
-              onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+              onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
                 // Necessary to move focus to the popover's input when it opens so we can type right away
                 event.stopPropagation();
               }}

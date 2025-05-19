@@ -14,13 +14,14 @@ import type { CrowdstrikeGetScriptsResponse } from '@kbn/stack-connectors-plugin
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { CustomScriptsClientError } from '../lib/errors';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { CustomScriptsResponse } from '../../../../../../common/endpoint/types/custom_scripts';
 import { NormalizedExternalConnectorClient } from '../../..';
 import { CustomScriptsClient } from '../lib/base_custom_scripts_client';
 
 export class CrowdstrikeCustomScriptsClient extends CustomScriptsClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
 
-  private async getCustomScriptsFromConnectorAction() {
+  private async getCustomScriptsFromConnectorAction(): Promise<CustomScriptsResponse> {
     const connectorActions = new NormalizedExternalConnectorClient(
       this.options.connectorActionsClient as ActionsClient,
       this.log
@@ -34,12 +35,20 @@ export class CrowdstrikeCustomScriptsClient extends CustomScriptsClient {
       },
     })) as ActionTypeExecutorResult<CrowdstrikeGetScriptsResponse>;
 
-    return customScriptsResponse.data?.resources;
+    const resources = customScriptsResponse.data?.resources || [];
+
+    // Transform CrowdStrike script resources to CustomScriptsResponse format
+    return resources.map((script) => ({
+      // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
+      id: script.id || '',
+      name: script.name || '',
+      description: script.description || '',
+    }));
   }
 
-  async getCustomScripts(): Promise<CustomScriptsRecords> {
+  async getCustomScripts(): Promise<CustomScriptsResponse> {
     try {
-      return this.getCustomScriptsFromConnectorAction();
+      return await this.getCustomScriptsFromConnectorAction();
     } catch (err) {
       const error = new CustomScriptsClientError(
         `Failed to fetch crowdstrike agent status, failed with: ${err.message}`,
