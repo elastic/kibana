@@ -66,6 +66,8 @@ interface State {
   showTimesliderButton: boolean;
 }
 
+const mapWrapperStyles = css({ position: 'relative' });
+
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
@@ -205,7 +207,7 @@ export class MapContainer extends Component<Props, State> {
     return (
       <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
         <EuiFlexItem
-          css={css({ position: 'relative' })}
+          css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
           <MBMap
@@ -254,8 +256,6 @@ const componentStyles = {
 const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) => {
   let flyoutPanel = null;
   const { euiTheme } = useEuiTheme();
-  const isVisible = !!flyoutPanel;
-  const styles = useMemoizedStyles(componentStyles);
   if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
     flyoutPanel = <AddLayerPanel />;
   } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
@@ -263,20 +263,16 @@ const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) 
   } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
     flyoutPanel = <MapSettingsPanel />;
   }
+  const isVisible = !!flyoutPanel;
+  const stylesVisible = isVisible
+    ? css({
+        width: `calc(${euiTheme.size.xxl} * 12)`,
+        transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+      })
+    : css({ width: 0 });
+  const styles = useMemoizedStyles(componentStyles);
   return (
-    <EuiFlexItem
-      // css={styles.flyoutPanelWrapperStyles}
-      css={[
-        styles.flyoutPanelWrapperStyles,
-        css({
-          width: isVisible ? `calc(${euiTheme.size.xxl} * 12)` : 0,
-          transition: isVisible
-            ? `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`
-            : undefined,
-        }),
-      ]}
-      grow={false}
-    >
+    <EuiFlexItem css={[styles.flyoutPanelWrapperStyles, stylesVisible]} grow={false}>
       {flyoutPanel}
     </EuiFlexItem>
   );
