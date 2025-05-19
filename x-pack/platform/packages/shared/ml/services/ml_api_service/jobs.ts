@@ -6,7 +6,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { CategorizationAnalyzer, FieldValidationResults } from '@kbn/ml-category-validator';
@@ -33,7 +32,6 @@ import type {
   ResetJobsResponse,
 } from '@kbn/ml-common-types/job_service';
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type { HttpService } from '../http_service';
 
@@ -420,15 +418,3 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 });
 
 export type JobsApiService = ReturnType<typeof jobsApiProvider>;
-
-/**
- * Hooks for accessing {@link JobsApiService} in React components.
- */
-export function useJobsApiService(): JobsApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => jobsApiProvider(httpService), [httpService]);
-}

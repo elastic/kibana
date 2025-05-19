@@ -14,9 +14,9 @@ import { map } from 'rxjs';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MLHttpFetchError } from '@kbn/ml-error-utils';
-import type { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+import type { trainedModelsApiProvider } from '@kbn/ml-services/ml_api_service/trained_models';
 import { getInferenceInfoComponent } from './inference_info';
-import type { ITelemetryClient } from '../../../services/telemetry/types';
 
 export type InferenceType =
   | SupportedPytorchTasksType

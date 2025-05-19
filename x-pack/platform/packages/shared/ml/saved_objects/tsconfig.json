@@ -18,6 +18,6 @@
     "@kbn/security-plugin",
     "@kbn/ml-common-types",
     "@kbn/ml-common-constants",
-    "@kbn/ml-client",
+    "@kbn/ml-error-utils",
   ]
 }

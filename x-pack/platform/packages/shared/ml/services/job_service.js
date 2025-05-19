@@ -8,7 +8,6 @@
 import { cloneDeep, each, find, get } from 'lodash';
 
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { useMlApi } from '@kbn/ml-kibana-context';
 import { createDatafeedId } from '@kbn/ml-common-utils/job_utils';
 import { isWebUrl } from '@kbn/ml-common-utils/url_utils';
 
@@ -290,9 +289,4 @@ export const mlJobServiceFactory = (mlApi) => {
 
   mlJobService = new JobService(mlApi);
   return mlJobService;
-};
-
-export const useMlJobService = () => {
-  const mlApi = useMlApi();
-  return mlJobServiceFactory(mlApi);
 };

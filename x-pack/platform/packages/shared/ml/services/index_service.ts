@@ -7,7 +7,6 @@
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export function indexServiceFactory(dataViewsService: DataViewsContract) {
   /**
@@ -53,5 +52,3 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
 }
 
 export type MlIndexUtils = ReturnType<typeof indexServiceFactory>;
-
-export const useMlIndexUtils = () => indexServiceFactory(useMlKibana().services.data.dataViews);

@@ -11,8 +11,8 @@ import type {
   TrainedModelsDeploymentEbtProps,
   TrainedModelsModelDownloadEbtProps,
   TrainedModelsModelTestedEbtProps,
-} from './types';
-import { TrainedModelsTelemetryEventTypes } from './types';
+} from '@kbn/ml-trained-models-utils/src/types/telemetry';
+import { TrainedModelsTelemetryEventTypes } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}

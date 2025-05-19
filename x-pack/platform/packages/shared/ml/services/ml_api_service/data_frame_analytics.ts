@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-
 import type { DeepPartial } from '@kbn/utility-types';
 import type { NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import type {
@@ -19,7 +17,6 @@ import type {
 import type { ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { PutDataFrameAnalyticsResponseSchema } from '@kbn/ml-server-routes-schemas/data_frame_analytics_schema';
 
 import type { HttpService } from '../http_service';
@@ -209,15 +206,3 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
 });
 
 export type DataFrameAnalyticsApiService = ReturnType<typeof dataFrameAnalyticsApiProvider>;
-
-/**
- * Hooks for accessing {@link DataFrameAnalyticsApiService} in React components.
- */
-export function useDataFrameAnalyticsApiService(): DataFrameAnalyticsApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => dataFrameAnalyticsApiProvider(httpService), [httpService]);
-}

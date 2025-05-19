@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, type PropsWithChildren, createContext, useContext } from 'react';
-import type { ITelemetryClient } from '../../services/telemetry/types';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 
 interface MlTelemetryClientContextValue {
   telemetryClient: ITelemetryClient;

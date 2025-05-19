@@ -14,10 +14,10 @@ import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
-import { getJobDetailsFromTrainedModel } from '@kbn/ml-saved-objects';
+import { MLJobNotFound, MLModelNotFound } from '@kbn/ml-error-utils';
 
+import { getJobDetailsFromTrainedModel } from './util';
 import { searchProvider } from './search';
-import { MLJobNotFound, MLModelNotFound } from './errors';
 import type {
   MlClient,
   MlClientParams,
