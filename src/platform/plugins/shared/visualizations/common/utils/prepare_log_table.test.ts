@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DimensionType } from '@kbn/expressions-plugin/common';
 import { prepareLogTable } from './prepare_log_table';
 
 describe('prepareLogTable', () => {
@@ -74,5 +75,51 @@ describe('prepareLogTable', () => {
       }
     `
     );
+  });
+  test('returns passed dimension types', () => {
+    const datatable = {
+      columns: [
+        {
+          meta: {},
+        },
+        {
+          meta: {},
+        },
+        {
+          id: 'd3',
+          meta: {},
+        },
+      ],
+    };
+    const logTable = prepareLogTable(datatable as any, [
+      [[{ accessor: 0 } as any], 'dimension1', DimensionType.Y_AXIS],
+      [[{ accessor: { id: 'd3' } } as any], 'dimension3', DimensionType.X_AXIS],
+      [[{ accessor: 1 } as any], 'dimension2', DimensionType.BREAKDOWN],
+    ]);
+    expect(logTable).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          Object {
+            "meta": Object {
+              "dimensionName": "dimension1",
+              "dimensionType": "y",
+            },
+          },
+          Object {
+            "meta": Object {
+              "dimensionName": "dimension2",
+              "dimensionType": "breakdown",
+            },
+          },
+          Object {
+            "id": "d3",
+            "meta": Object {
+              "dimensionName": "dimension3",
+              "dimensionType": "x",
+            },
+          },
+        ],
+      }
+    `);
   });
 });
