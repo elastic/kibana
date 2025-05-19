@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -19,8 +19,6 @@ import {
 import { RULE_NAME_INPUT_TITLE, RULE_TAG_INPUT_TITLE, RULE_TAG_PLACEHOLDER } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
-
-export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
   const { formData, baseErrors } = useRuleFormState();
@@ -72,13 +70,8 @@ export const RuleDetails = () => {
     }
   }, [dispatch, tags]);
 
-  const {
-    ref,
-    size: { width },
-  } = useContainerRef();
-
   return (
-    <EuiFlexGroup ref={ref} direction={width > RULE_DETAIL_MIN_ROW_WIDTH ? 'row' : 'column'}>
+    <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFormRow
           data-test-subj="ruleDetails"
@@ -119,23 +112,3 @@ export const RuleDetails = () => {
     </EuiFlexGroup>
   );
 };
-
-function useContainerRef() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setSize({ width, height });
-    });
-
-    observer.observe(ref.current);
-
-    return observer.disconnect;
-  }, []);
-
-  return { ref, size };
-}
