@@ -38,8 +38,8 @@ import {
   type RuntimeMappings,
 } from '@kbn/ml-runtime-field-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
-
-import { useMlApi, useMlKibana } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -467,7 +467,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '200px' }} grow={false}>
+            <EuiFlexItem css={{ width: '200px' }} grow={false}>
               <EuiFormRow
                 label={
                   <OptionLabelWithIconTip
@@ -491,7 +491,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '120px' }} grow={false}>
+            <EuiFlexItem css={{ width: '120px' }} grow={false}>
               <EuiFormRow
                 label={
                   <OptionLabelWithIconTip
@@ -518,7 +518,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
             {resultsField !== undefined && legendType === undefined && (
-              <EuiFlexItem style={{ width: '120px' }} grow={false}>
+              <EuiFlexItem css={{ width: '120px' }} grow={false}>
                 <EuiFormRow
                   label={
                     <OptionLabelWithIconTip

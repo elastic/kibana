@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { MlEntitySelector } from './ml_entity_selector';
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 

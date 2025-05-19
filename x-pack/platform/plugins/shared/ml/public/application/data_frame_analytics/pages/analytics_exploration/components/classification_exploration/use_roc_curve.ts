@@ -14,9 +14,9 @@ import {
   type DataFrameAnalyticsConfig,
   type RocCurveItem,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlApi } from '../../../../../contexts/kibana';
 
 import type { ResultsSearchQuery } from '../../../../common/analytics';
 import { isClassificationEvaluateResponse } from '../../../../common/analytics';

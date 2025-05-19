@@ -11,7 +11,8 @@ import type { Field, Aggregation, AggId, FieldId } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 

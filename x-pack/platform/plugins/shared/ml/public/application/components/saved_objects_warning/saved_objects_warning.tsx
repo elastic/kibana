@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { JobSpacesSyncFlyout } from '../job_spaces_sync';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 

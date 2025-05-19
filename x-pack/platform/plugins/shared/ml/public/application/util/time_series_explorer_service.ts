@@ -25,6 +25,8 @@ import type { GetAnnotationsResponse } from '@kbn/ml-common-types/annotations';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
@@ -37,7 +39,6 @@ import {
 import { useMlResultsService, type MlResultsService } from '../services/results_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
-import { useMlApi, useMlKibana } from '../contexts/kibana';
 
 export interface Interval {
   asMilliseconds: () => number;

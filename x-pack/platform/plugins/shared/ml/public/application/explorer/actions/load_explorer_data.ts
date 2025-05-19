@@ -18,6 +18,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
@@ -30,7 +31,6 @@ import {
   loadOverallAnnotations,
 } from '../explorer_utils';
 
-import { useMlApi } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';

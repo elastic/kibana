@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { useDataSource } from '../../../contexts/ml/data_source_context';
-import { useMlApi } from '../../../contexts/kibana';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import {
