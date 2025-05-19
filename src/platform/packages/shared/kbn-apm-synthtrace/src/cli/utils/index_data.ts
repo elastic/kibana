@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray } from 'lodash';
-import { memoryUsage } from 'process';
 import { timerange } from '@kbn/apm-synthtrace-client';
+import { castArray } from 'lodash';
 import { Logger } from '../../lib/utils/create_logger';
 import { SynthtraceClients } from './get_clients';
 import { getScenario } from './get_scenario';
-import { WorkerData } from './synthtrace_worker';
+import { BaseWorkerData } from './workers/types';
 import { StreamManager } from './stream_manager';
+import { startPerformanceLogger } from './performance_logger';
 
-export async function indexHistoricalData({
+export async function indexData({
+  file,
   bucketFrom,
   bucketTo,
   runOptions,
@@ -26,9 +27,13 @@ export async function indexHistoricalData({
   from,
   to,
   streamManager,
-}: WorkerData & { logger: Logger; clients: SynthtraceClients; streamManager: StreamManager }) {
-  const file = runOptions.file;
-
+  autoTerminateStreams = true,
+}: BaseWorkerData & {
+  logger: Logger;
+  clients: SynthtraceClients;
+  streamManager: StreamManager;
+  autoTerminateStreams?: boolean;
+}) {
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
   logger.info(
@@ -37,7 +42,7 @@ export async function indexHistoricalData({
     })`
   );
 
-  const { generate } = await scenario({ ...runOptions, logger, from, to });
+  const { generate, setupPipeline } = await scenario({ ...runOptions, logger, from, to });
 
   logger.debug('Generating scenario');
 
@@ -50,23 +55,13 @@ export async function indexHistoricalData({
     )
   );
 
-  logger.debug('Indexing scenario');
-
-  function mb(value: number): string {
-    return Math.round(value / 1024 ** 2).toString() + 'mb';
+  if (setupPipeline) {
+    setupPipeline(clients);
   }
 
-  let cpuUsage = process.cpuUsage();
+  logger.debug('Indexing scenario');
 
-  const intervalId = setInterval(async () => {
-    cpuUsage = process.cpuUsage(cpuUsage);
-    const mem = memoryUsage();
-    logger.debug(
-      `cpu time: (user: ${Math.round(cpuUsage.user / 1000)}mss, sys: ${Math.round(
-        cpuUsage.system / 1000
-      )}ms), memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`
-    );
-  }, 5000);
+  const stopPerformanceLogger = startPerformanceLogger({ logger });
 
   await logger.perf('index_scenario', async () => {
     await Promise.all(
@@ -74,8 +69,13 @@ export async function indexHistoricalData({
         await streamManager.index(client, generator);
       })
     ).finally(async () => {
-      await streamManager.teardown();
-      clearInterval(intervalId);
+      if (autoTerminateStreams) {
+        await streamManager.teardown();
+      }
+
+      stopPerformanceLogger();
     });
   });
+
+  return generatorsAndClients;
 }

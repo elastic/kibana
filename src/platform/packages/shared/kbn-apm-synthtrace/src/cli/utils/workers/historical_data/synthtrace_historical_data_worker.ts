@@ -8,22 +8,15 @@
  */
 
 import { parentPort, workerData } from 'worker_threads';
-import { bootstrap } from './bootstrap';
-import { indexHistoricalData } from './index_historical_data';
-import { loggerProxy } from './logger_proxy';
-import { RunOptions } from './parse_run_cli_flags';
-import { StreamManager } from './stream_manager';
+import { bootstrap } from '../../bootstrap';
+import { indexData } from '../../index_data';
+import { loggerProxy } from '../../logger_proxy';
+import { StreamManager } from '../../stream_manager';
+import { BaseWorkerData } from '../types';
 
-export interface WorkerData {
-  from: number;
-  to: number;
-  bucketFrom: Date;
-  bucketTo: Date;
-  runOptions: RunOptions;
-  workerId: string;
-}
+export type WorkerData = BaseWorkerData;
 
-const { bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as WorkerData;
+const { file, bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as WorkerData;
 
 async function start() {
   const logger = loggerProxy;
@@ -36,7 +29,8 @@ async function start() {
     clean: false,
   });
 
-  await indexHistoricalData({
+  await indexData({
+    file,
     bucketFrom,
     bucketTo,
     clients,

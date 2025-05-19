@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires*/
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-});
+import { RunOptions } from '../parse_run_cli_flags';
 
-require('./synthtrace_worker');
+export interface BaseWorkerData {
+  bucketFrom: Date;
+  bucketTo: Date;
+  workerId: string;
+  file: string;
+  from: number;
+  to: number;
+  runOptions: RunOptions;
+}
