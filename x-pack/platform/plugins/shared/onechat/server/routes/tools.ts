@@ -6,8 +6,7 @@
  */
 
 import type { RouteDependencies } from './types';
-import { registerToolsRoutes } from './tools';
 
-export const registerRoutes = (dependencies: RouteDependencies) => {
-  registerToolsRoutes(dependencies);
-};
+export function registerToolsRoutes({ coreSetup, router }: RouteDependencies) {
+  // TODO
+}

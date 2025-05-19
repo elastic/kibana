@@ -7,62 +7,37 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
-  createClient as createInferenceClient,
-  createChatModel,
-  type BoundInferenceClient,
-  type InferenceClient,
-} from './inference_client';
-import { registerRoutes } from './routes';
-import type { InferenceConfig } from './config';
-import {
-  InferenceBoundClientCreateOptions,
-  InferenceClientCreateOptions,
-  InferenceServerSetup,
-  InferenceServerStart,
-  InferenceSetupDependencies,
-  InferenceStartDependencies,
+import type { OnechatConfig } from './config';
+import type {
+  OnechatPluginSetup,
+  OnechatPluginStart,
+  OnechatSetupDependencies,
+  OnechatStartDependencies,
 } from './types';
-import { initLangfuseProcessor } from './tracing/langfuse/init_langfuse_processor';
-import { initPhoenixProcessor } from './tracing/phoenix/init_phoenix_processor';
+import { registerRoutes } from './routes';
 
-export class InferencePlugin
+export class OnechatPlugin
   implements
     Plugin<
-      InferenceServerSetup,
-      InferenceServerStart,
-      InferenceSetupDependencies,
-      InferenceStartDependencies
+      OnechatPluginSetup,
+      OnechatPluginStart,
+      OnechatSetupDependencies,
+      OnechatStartDependencies
     >
 {
   private logger: Logger;
+  // @ts-expect-error unused for now
+  private config: OnechatConfig;
 
-  private config: InferenceConfig;
-
-  private shutdownProcessor?: () => Promise<void>;
-
-  constructor(context: PluginInitializerContext<InferenceConfig>) {
+  constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
-
-    const exporter = this.config.tracing?.exporter;
-
-    if (exporter && 'langfuse' in exporter) {
-      this.shutdownProcessor = initLangfuseProcessor({
-        logger: this.logger,
-        config: exporter.langfuse,
-      });
-    } else if (exporter && 'phoenix' in exporter) {
-      this.shutdownProcessor = initPhoenixProcessor({
-        logger: this.logger,
-        config: exporter.phoenix,
-      });
-    }
   }
+
   setup(
-    coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
-    pluginsSetup: InferenceSetupDependencies
-  ): InferenceServerSetup {
+    coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
+    pluginsSetup: OnechatSetupDependencies
+  ): OnechatPluginSetup {
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -74,29 +49,9 @@ export class InferencePlugin
     return {};
   }
 
-  start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
-    return {
-      getClient: <T extends InferenceClientCreateOptions>(options: T) => {
-        return createInferenceClient({
-          ...options,
-          actions: pluginsStart.actions,
-          logger: this.logger.get('client'),
-        }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
-      },
-
-      getChatModel: async (options) => {
-        return createChatModel({
-          request: options.request,
-          connectorId: options.connectorId,
-          chatModelOptions: options.chatModelOptions,
-          actions: pluginsStart.actions,
-          logger: this.logger,
-        });
-      },
-    };
+  start(core: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+    return {};
   }
 
-  async stop() {
-    await this.shutdownProcessor?.();
-  }
+  stop() {}
 }

@@ -7,24 +7,21 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { createOutputApi } from '../common/output';
-import type { GetConnectorsResponseBody } from '../common/http_apis';
-import { createChatCompleteApi } from './chat_complete';
 import type {
   ConfigSchema,
-  InferencePublicSetup,
-  InferencePublicStart,
-  InferenceSetupDependencies,
-  InferenceStartDependencies,
+  OnechatPluginSetup,
+  OnechatPluginStart,
+  OnechatSetupDependencies,
+  OnechatStartDependencies,
 } from './types';
 
-export class InferencePlugin
+export class OnechatPlugin
   implements
     Plugin<
-      InferencePublicSetup,
-      InferencePublicStart,
-      InferenceSetupDependencies,
-      InferenceStartDependencies
+      OnechatPluginSetup,
+      OnechatPluginStart,
+      OnechatSetupDependencies,
+      OnechatStartDependencies
     >
 {
   logger: Logger;
@@ -33,25 +30,13 @@ export class InferencePlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<InferenceStartDependencies, InferencePublicStart>,
-    pluginsSetup: InferenceSetupDependencies
-  ): InferencePublicSetup {
+    coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
+    pluginsSetup: OnechatSetupDependencies
+  ): OnechatPluginSetup {
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: InferenceStartDependencies): InferencePublicStart {
-    const chatComplete = createChatCompleteApi({ http: coreStart.http });
-    const output = createOutputApi(chatComplete);
-
-    return {
-      chatComplete,
-      output,
-      getConnectors: async () => {
-        const res = await coreStart.http.get<GetConnectorsResponseBody>(
-          '/internal/inference/connectors'
-        );
-        return res.connectors;
-      },
-    };
+  start(coreStart: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+    return {};
   }
 }

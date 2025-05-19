@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { RouteDependencies } from './types';
-import { registerToolsRoutes } from './tools';
-
-export const registerRoutes = (dependencies: RouteDependencies) => {
-  registerToolsRoutes(dependencies);
-};
+export const ONECHAT_FRAMEWORK_FEATURE_ID = 'onechat_framework';
+export const ONECHAT_FRAMEWORK_FEATURE_NAME = 'onechat_framework';
+export const ONECHAT_FRAMEWORK_APP_ID = 'onechat_framework';

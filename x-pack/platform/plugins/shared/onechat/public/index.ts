@@ -7,22 +7,21 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import type {
-  InferencePublicSetup,
-  InferencePublicStart,
-  InferenceSetupDependencies,
-  InferenceStartDependencies,
+  OnechatPluginSetup,
+  OnechatPluginStart,
+  OnechatSetupDependencies,
+  OnechatStartDependencies,
   ConfigSchema,
 } from './types';
-import { InferencePlugin } from './plugin';
+import { OnechatPlugin } from './plugin';
 
-export { httpResponseIntoObservable } from './util/http_response_into_observable';
-
-export type { InferencePublicSetup, InferencePublicStart };
+export type { OnechatPluginSetup, OnechatPluginStart };
 
 export const plugin: PluginInitializer<
-  InferencePublicSetup,
-  InferencePublicStart,
-  InferenceSetupDependencies,
-  InferenceStartDependencies
-> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
-  new InferencePlugin(pluginInitializerContext);
+  OnechatPluginSetup,
+  OnechatPluginStart,
+  OnechatSetupDependencies,
+  OnechatStartDependencies
+> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) => {
+  return new OnechatPlugin(pluginInitializerContext);
+};

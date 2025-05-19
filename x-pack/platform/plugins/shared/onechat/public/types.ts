@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import type { ChatCompleteAPI, OutputAPI, InferenceConnector } from '@kbn/inference-common';
-
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
-export interface InferenceSetupDependencies {}
+export interface OnechatSetupDependencies {}
 
-export interface InferenceStartDependencies {}
+export interface OnechatStartDependencies {}
 
-export interface InferencePublicSetup {}
+export interface OnechatPluginSetup {}
 
-export interface InferencePublicStart {
-  chatComplete: ChatCompleteAPI;
-  output: OutputAPI;
-  getConnectors: () => Promise<InferenceConnector[]>;
-}
+export interface OnechatPluginStart {}

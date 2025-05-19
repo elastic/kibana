@@ -5,37 +5,25 @@
  * 2.0.
  */
 
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
+import type { OnechatConfig } from './config';
 import type {
-  PluginConfigDescriptor,
-  PluginInitializer,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import { InferenceConfig, configSchema } from './config';
-import type {
-  InferenceServerSetup,
-  InferenceServerStart,
-  InferenceSetupDependencies,
-  InferenceStartDependencies,
+  OnechatPluginSetup,
+  OnechatPluginStart,
+  OnechatSetupDependencies,
+  OnechatStartDependencies,
 } from './types';
-import { InferencePlugin } from './plugin';
+import { OnechatPlugin } from './plugin';
 
-export type { InferenceClient, BoundInferenceClient } from './inference_client';
-export type { InferenceServerSetup, InferenceServerStart };
-
-export { withChatCompleteSpan } from './tracing/with_chat_complete_span';
-export { withInferenceSpan } from './tracing/with_inference_span';
-export { withExecuteToolSpan } from './tracing/with_execute_tool_span';
-
-export { naturalLanguageToEsql } from './tasks/nl_to_esql';
+export type { OnechatPluginSetup, OnechatPluginStart };
 
 export const plugin: PluginInitializer<
-  InferenceServerSetup,
-  InferenceServerStart,
-  InferenceSetupDependencies,
-  InferenceStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<InferenceConfig>) =>
-  new InferencePlugin(pluginInitializerContext);
-
-export const config: PluginConfigDescriptor<InferenceConfig> = {
-  schema: configSchema,
+  OnechatPluginSetup,
+  OnechatPluginStart,
+  OnechatSetupDependencies,
+  OnechatStartDependencies
+> = async (pluginInitializerContext: PluginInitializerContext<OnechatConfig>) => {
+  return new OnechatPlugin(pluginInitializerContext);
 };
+
+export { config } from './config';
