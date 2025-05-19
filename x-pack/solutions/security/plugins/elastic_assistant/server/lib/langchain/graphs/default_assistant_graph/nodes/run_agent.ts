@@ -100,7 +100,7 @@ export async function runAgent({
 const sanitizeChatHistory = (messages: BaseMessage[]): BaseMessage[] => {
   return messages.map((message) => {
     if (!Array.isArray(message.content)) {
-      message.content = removeContentReferences(message.content);
+      message.content = removeContentReferences(message.content).trim();
     }
     return message;
   });
