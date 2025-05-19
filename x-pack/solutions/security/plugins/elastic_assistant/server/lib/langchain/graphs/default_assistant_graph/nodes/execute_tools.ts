@@ -74,7 +74,6 @@ export async function executeTools({
       };
     })
   );
-  // throw new Error('tool error!!');
 
   return { steps, lastNode: NodeType.TOOLS };
 }
