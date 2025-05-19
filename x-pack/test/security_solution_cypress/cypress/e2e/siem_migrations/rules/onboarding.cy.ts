@@ -84,7 +84,7 @@ describe(
       cy.task('esArchiverLoad', {
         archiveName: 'siem_migrations/rule_migrations',
       });
-      login();
+      login(Cypress.env('IS_SERVERLESS') ? 'admin' : undefined);
       createBedrockConnector();
       visit(GET_STARTED_URL);
     });

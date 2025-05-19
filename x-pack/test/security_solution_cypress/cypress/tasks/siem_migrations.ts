@@ -6,13 +6,22 @@
  */
 
 import { RULES_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
-import { openNavigationPanel } from '../screens/serverless_security_header';
+import {
+  openNavigationPanel,
+  RULES_PANEL_BTN as RULES_PANEL_BTN_SERVERLESS,
+  TRANSLATED_RULES_PAGE as TRANSLATED_RULES_PAGE_SERVERLESS,
+} from '../screens/serverless_security_header';
 import * as SELECTORS from '../screens/siem_migrations';
 import { bedrockConnectorAPIPayload } from './api_calls/connectors';
 
 export const navigateToTranslatedRulesPage = () => {
-  openNavigationPanel(RULES_PANEL_BTN);
-  cy.get(TRANSLATED_RULES_PAGE).click();
+  if (Cypress.env('IS_SERVERLESS')) {
+    openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
+    cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
+  } else {
+    openNavigationPanel(RULES_PANEL_BTN);
+    cy.get(TRANSLATED_RULES_PAGE).click();
+  }
 };
 
 export const toggleSiemMigrationsCard = () => {

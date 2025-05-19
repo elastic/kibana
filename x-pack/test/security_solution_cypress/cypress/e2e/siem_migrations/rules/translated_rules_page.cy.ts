@@ -44,7 +44,7 @@ describe(
       });
 
       createBedrockConnector();
-      login();
+      login(Cypress.env('IS_SERVERLESS') ? 'admin' : undefined);
       visit(GET_STARTED_URL);
       selectMigrationConnector();
       navigateToTranslatedRulesPage();
