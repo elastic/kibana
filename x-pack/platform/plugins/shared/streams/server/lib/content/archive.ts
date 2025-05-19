@@ -109,25 +109,28 @@ async function extractManifest(rootDir: string, zip: AdmZip): Promise<ContentPac
 }
 
 async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPackEntry[]> {
+  const supportedEntries = zip
+    .getEntries()
+    .filter((entry) => isSupportedFile(rootDir, entry.entryName));
+
+  supportedEntries.forEach((entry) => assertUncompressedSize(entry));
+
   const entries = await Promise.all(
-    zip
-      .getEntries()
-      .filter((entry) => isSupportedFile(rootDir, entry.entryName))
-      .map((entry) => {
-        const type = getEntryTypeByFile(rootDir, entry.entryName);
-        switch (type) {
-          case 'lens':
-          case 'index-pattern':
-            // these are handled by their parent dashboard
-            return [];
+    supportedEntries.map((entry) => {
+      const type = getEntryTypeByFile(rootDir, entry.entryName);
+      switch (type) {
+        case 'lens':
+        case 'index-pattern':
+          // these are handled by their parent dashboard
+          return [];
 
-          case 'dashboard':
-            return resolveDashboard(rootDir, zip, entry);
+        case 'dashboard':
+          return resolveDashboard(rootDir, zip, entry);
 
-          default:
-            missingEntryTypeImpl(type);
-        }
-      })
+        default:
+          missingEntryTypeImpl(type);
+      }
+    })
   );
 
   return entries.flat();
@@ -138,8 +141,6 @@ async function resolveDashboard(
   zip: AdmZip,
   dashboardEntry: AdmZip.IZipEntry
 ): Promise<ContentPackSavedObject[]> {
-  assertUncompressedSize(dashboardEntry);
-
   const dashboard = JSON.parse(
     (await readEntry(dashboardEntry)).toString()
   ) as ContentPackDashboard;
@@ -162,8 +163,6 @@ async function resolveDashboard(
       )
     )
   );
-
-  includedReferences.forEach((entry) => assertUncompressedSize(entry));
 
   const resolvedReferences = await Promise.all(
     includedReferences.map(
