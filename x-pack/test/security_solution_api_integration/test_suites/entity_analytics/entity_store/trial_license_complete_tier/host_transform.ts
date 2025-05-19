@@ -211,7 +211,11 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
   return document;
 }
 
-async function createDocumentsAndTriggerTransform(providerContext: FtrProviderContext, docs: HostTransformTestDocuments, docCount: number): Promise<void>{
+async function createDocumentsAndTriggerTransform(
+  providerContext: FtrProviderContext,
+  docs: hostTransformTestDocuments,
+  docCount: number
+): Promise<void> {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
 
