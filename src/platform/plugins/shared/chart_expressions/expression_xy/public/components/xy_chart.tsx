@@ -59,6 +59,7 @@ import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
   BrushEvent,
@@ -141,6 +142,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -204,6 +206,7 @@ export function XYChart({
   minInterval,
   onClickValue,
   onClickMultiValue,
+  onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -232,6 +235,7 @@ export function XYChart({
     singleTable,
     annotations,
   } = args;
+
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
@@ -753,6 +757,9 @@ export function XYChart({
   const applicationQuery = data.query.queryString.getQuery();
   const canCreateFilters =
     !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
+  // ES|QL charts are allowed to create alert rules only in dashboards
+  const canCreateAlerts =
+    isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
   return (
     <>
@@ -794,11 +801,14 @@ export function XYChart({
               actions={getTooltipActions(
                 dataLayers,
                 onClickMultiValue,
+                onCreateAlertRule,
                 fieldFormats,
                 formattedDatatables,
                 xAxisFormatter,
                 formatFactory,
-                interactive && !args.detailedTooltip && !isEsqlMode
+                isEsqlMode,
+                canCreateAlerts,
+                interactive && !args.detailedTooltip
               )}
               customTooltip={
                 args.detailedTooltip
