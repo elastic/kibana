@@ -6,7 +6,8 @@
  */
 
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
-import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
+import { useMlApi } from '../use_ml_api';
 
 export const useMlJobService = () => {
   const mlApi = useMlApi();

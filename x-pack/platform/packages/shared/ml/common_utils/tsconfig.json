@@ -19,5 +19,13 @@
     "@kbn/ml-common-types",
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-common-constants",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/ml-is-populated-object",
+    "@kbn/utility-types",
+    "@kbn/ml-validators",
+    "@kbn/ml-parse-interval",
+    "@kbn/ml-is-defined",
+    "@kbn/ml-data-grid",
   ]
 }
