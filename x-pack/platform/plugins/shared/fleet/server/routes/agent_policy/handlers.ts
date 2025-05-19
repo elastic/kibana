@@ -328,6 +328,8 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
+  const logger = appContextService.getLogger().get('httpCreateAgentPolicyHandler');
+
   const {
     has_fleet_server: hasFleetServer,
     force,
@@ -337,9 +339,13 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
+  logger.debug(`Creating agent policy [${newPolicy.name}]`);
+
   try {
     let authorizedSpaces: string[] | undefined;
     if (spaceIds?.length) {
+      logger.debug(`Checking privileges for spaces [${spaceIds.join(', ')}] `);
+
       authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(request, context, spaceIds);
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
