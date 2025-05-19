@@ -21,14 +21,11 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
   const lensVisualization = getLensVisualizations(parsedComment?.children ?? []);
 
-  const {
-    lens: { navigateToPrefilledEditor, canUseEditor },
-  } = useKibana().services;
-
-  const hasLensPermissions = canUseEditor();
+  const { lens } = useKibana().services;
+  const hasLensPermissions = lens?.canUseEditor();
 
   const handleClick = useCallback(() => {
-    navigateToPrefilledEditor(
+    lens?.navigateToPrefilledEditor(
       {
         id: '',
         timeRange: lensVisualization[0].timeRange,
@@ -39,7 +36,7 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
         openInNewTab: true,
       }
     );
-  }, [lensVisualization, navigateToPrefilledEditor]);
+  }, [lens, lensVisualization]);
 
   if (!lensVisualization.length || lensVisualization?.[0]?.attributes == null) {
     return { canUseEditor: hasLensPermissions, actionConfig: null };
