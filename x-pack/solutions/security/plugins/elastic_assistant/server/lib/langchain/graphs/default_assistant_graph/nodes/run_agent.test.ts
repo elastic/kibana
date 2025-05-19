@@ -38,7 +38,9 @@ const testParams = {
   },
   config: undefined,
   kbDataClient: {
-    getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([{ text: 'foobar', id: 1234 }]),
+    getRequiredKnowledgeBaseDocumentEntries: jest
+      .fn()
+      .mockResolvedValue([{ text: 'foobar', id: 1234 }]),
   },
   contentReferencesStore: newContentReferencesStoreMock(),
 } as unknown as RunAgentParams;
@@ -63,7 +65,8 @@ describe('runAgent', () => {
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        knowledge_history: 'Knowledge History:\n["Citation: {reference(exampleContentReferenceId)}\\nfoobar"]',
+        knowledge_history:
+          'Knowledge History:\n["Citation: {reference(exampleContentReferenceId)}\\nfoobar"]',
       }),
       undefined
     );
@@ -71,7 +74,8 @@ describe('runAgent', () => {
 
   it('invoked with knowledgeHistory placeholder', async () => {
     await runAgent({
-      ...testParams, kbDataClient: {
+      ...testParams,
+      kbDataClient: {
         getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([]),
       },
     } as unknown as RunAgentParams);
