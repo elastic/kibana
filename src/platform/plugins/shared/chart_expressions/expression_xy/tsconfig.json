@@ -38,6 +38,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
+    "@kbn/alerts-ui-shared",
+    "@kbn/ui-actions-browser",
     "@kbn/ebt-tools",
   ],
   "exclude": [

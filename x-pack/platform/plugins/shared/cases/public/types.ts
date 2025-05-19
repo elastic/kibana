@@ -79,7 +79,10 @@ export interface CasesPublicStartDependencies {
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
-  lens: LensPublicStart;
+  /**
+   * Lens is not supported in all serverless tiers
+   */
+  lens?: LensPublicStart;
   /**
    * Cases in used by other plugins. Plugins pass the
    * service to their KibanaContext. ML does not pass
