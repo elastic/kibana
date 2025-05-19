@@ -89,6 +89,7 @@ export const createMockPluginStart = async (
     data: dataPluginMock.createStartContract(),
     fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),
+    notifications: notificationsMock.createStart(),
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),
