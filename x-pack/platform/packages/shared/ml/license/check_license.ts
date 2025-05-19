@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlLicense } from '../../../common/license';
+import type { MlLicense } from './ml_license';
 
 let mlLicense: MlLicense | null = null;
 
