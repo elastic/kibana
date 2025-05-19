@@ -13,19 +13,19 @@ import { QueryViewer } from './query_viewer';
 import * as i18n from './translations';
 
 interface OriginalRuleQueryProps {
-  ruleMigration: RuleMigrationRule;
+  migrationRule: RuleMigrationRule;
 }
 
 export const OriginalRuleQuery: React.FC<OriginalRuleQueryProps> = React.memo(
-  ({ ruleMigration }) => {
+  ({ migrationRule }) => {
     return (
       <>
         <QueryHeader title={i18n.SPLUNK_QUERY_TITLE} tooltip={i18n.SPLUNK_QUERY_TOOLTIP} />
         <EuiHorizontalRule margin="xs" />
         <QueryViewer
-          ruleName={ruleMigration.original_rule.title}
-          query={ruleMigration.original_rule.query}
-          language={ruleMigration.original_rule.query_language}
+          ruleName={migrationRule.original_rule.title}
+          query={migrationRule.original_rule.query}
+          language={migrationRule.original_rule.query_language}
         />
       </>
     );

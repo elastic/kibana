@@ -35,22 +35,22 @@ const transformQueryLanguage = (language: QueryLanguage) => {
 };
 
 interface TranslatedRuleQueryProps {
-  ruleMigration: RuleMigrationRule;
+  migrationRule: RuleMigrationRule;
   matchedPrebuiltRule?: RuleResponse;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
 export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.memo(
-  ({ ruleMigration, matchedPrebuiltRule, onTranslationUpdate }) => {
-    const isInstalled = !!ruleMigration.elastic_rule?.id;
+  ({ migrationRule, matchedPrebuiltRule, onTranslationUpdate }) => {
+    const isInstalled = !!migrationRule.elastic_rule?.id;
     const canEdit = !matchedPrebuiltRule && !isInstalled;
 
     const translatedData = useMemo(() => {
-      let ruleName = ruleMigration.elastic_rule?.title ?? '';
+      let ruleName = migrationRule.elastic_rule?.title ?? '';
       let title = i18n.CUSTOM_TRANSLATION_TITLE;
       let titleTooltip = i18n.TRANSLATION_QUERY_TOOLTIP;
-      let query = ruleMigration.elastic_rule?.query ?? '';
-      let language = ruleMigration.elastic_rule?.query_language ?? '';
+      let query = migrationRule.elastic_rule?.query ?? '';
+      let language = migrationRule.elastic_rule?.query_language ?? '';
       let queryPlaceholder = i18n.TRANSLATION_QUERY_PLACEHOLDER;
       if (matchedPrebuiltRule) {
         ruleName = matchedPrebuiltRule.name;
@@ -72,7 +72,7 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
         language,
         queryPlaceholder,
       };
-    }, [matchedPrebuiltRule, ruleMigration.elastic_rule]);
+    }, [matchedPrebuiltRule, migrationRule.elastic_rule]);
 
     const formDefaultValue: RuleTranslationSchema = useMemo(() => {
       return {

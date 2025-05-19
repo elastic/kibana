@@ -16,7 +16,7 @@ interface UseMigrationRuleDetailsFlyoutParams {
   isLoading?: boolean;
   getMigrationRuleData: (ruleId: string) =>
     | {
-        ruleMigration?: RuleMigrationRule;
+        migrationRule?: RuleMigrationRule;
         matchedPrebuiltRule?: RuleResponse;
       }
     | undefined;
@@ -51,22 +51,22 @@ export function useMigrationRuleDetailsFlyout({
 
   const ruleActions = useMemo(
     () =>
-      migrationRuleData?.ruleMigration &&
-      ruleActionsFactory(migrationRuleData.ruleMigration, closeMigrationRuleDetails),
-    [migrationRuleData?.ruleMigration, ruleActionsFactory, closeMigrationRuleDetails]
+      migrationRuleData?.migrationRule &&
+      ruleActionsFactory(migrationRuleData.migrationRule, closeMigrationRuleDetails),
+    [migrationRuleData?.migrationRule, ruleActionsFactory, closeMigrationRuleDetails]
   );
   const extraTabs = useMemo(
     () =>
-      migrationRuleData?.ruleMigration && extraTabsFactory
-        ? extraTabsFactory(migrationRuleData.ruleMigration)
+      migrationRuleData?.migrationRule && extraTabsFactory
+        ? extraTabsFactory(migrationRuleData.migrationRule)
         : [],
-    [extraTabsFactory, migrationRuleData?.ruleMigration]
+    [extraTabsFactory, migrationRuleData?.migrationRule]
   );
 
   return {
-    migrationRuleDetailsFlyout: migrationRuleData?.ruleMigration && (
+    migrationRuleDetailsFlyout: migrationRuleData?.migrationRule && (
       <MigrationRuleDetailsFlyout
-        ruleMigration={migrationRuleData.ruleMigration}
+        migrationRule={migrationRuleData.migrationRule}
         matchedPrebuiltRule={migrationRuleData.matchedPrebuiltRule}
         size="l"
         closeFlyout={closeMigrationRuleDetails}
