@@ -87,6 +87,7 @@ export interface FleetConfigType {
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
+    taskInterval?: string;
     retryDelays?: string[];
   };
   integrationsHomeOverride?: string;

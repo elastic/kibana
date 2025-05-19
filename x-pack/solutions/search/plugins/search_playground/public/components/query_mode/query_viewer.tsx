@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -23,6 +23,8 @@ import { CodeEditor } from '@kbn/code-editor';
 import { monaco as monacoEditor } from '@kbn/monaco';
 
 import { Controller, useController, useFormContext } from 'react-hook-form';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 import { FullHeight, QueryViewTitlePanel, PanelFillContainer } from './styles';
 import { formatElasticsearchQueryString } from '../../utils/user_query';
@@ -37,6 +39,8 @@ export const ElasticsearchQueryViewer = ({
   isLoading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const usageTracker = useUsageTracker();
+  const [esQueryFirstEdit, setEsQueryFirtEdit] = useState<boolean>(false);
   const { control } = useFormContext<PlaygroundForm>();
   const {
     field: { value: elasticsearchQuery },
@@ -66,6 +70,16 @@ export const ElasticsearchQueryViewer = ({
       schemas: [],
     });
   }, []);
+  const onEditorChange = useCallback(
+    (value: string) => {
+      if (esQueryFirstEdit === false && value !== generatedEsQuery) {
+        setEsQueryFirtEdit(true);
+        usageTracker?.count(AnalyticsEvents.editElasticsearchQuery);
+      }
+      onChangeUserQuery(value);
+    },
+    [esQueryFirstEdit, generatedEsQuery, usageTracker, onChangeUserQuery]
+  );
 
   return (
     <EuiSplitPanel.Outer grow hasBorder css={FullHeight}>
@@ -160,6 +174,7 @@ export const ElasticsearchQueryViewer = ({
               dataTestSubj="ViewElasticsearchQueryResult"
               languageId="json"
               {...field}
+              onChange={onEditorChange}
               value={userElasticsearchQuery ?? generatedEsQuery}
               options={{
                 automaticLayout: true,
