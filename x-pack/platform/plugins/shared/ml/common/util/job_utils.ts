@@ -24,7 +24,6 @@ import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
 import { maxLengthValidator, ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
 import { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 import type {
   CombinedJob,
@@ -37,6 +36,7 @@ import type {
   JobValidationMessage,
   JobValidationMessageId,
 } from '@kbn/ml-common-constants/messages';
+
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
