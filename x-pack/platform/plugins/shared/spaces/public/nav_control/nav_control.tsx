@@ -10,7 +10,6 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { initTour } from './solution_view_tour';
 import type { EventTracker } from '../analytics';
@@ -39,7 +38,7 @@ export function initSpacesNavControl(
       );
 
       ReactDOM.render(
-        <KibanaRenderContextProvider {...core}>
+        core.rendering.addContext(
           <Suspense fallback={<EuiLoadingSpinner />}>
             <LazyNavControlPopover
               spacesManager={spacesManager}
@@ -54,7 +53,7 @@ export function initSpacesNavControl(
               onFinishTour={onFinishTour}
             />
           </Suspense>
-        </KibanaRenderContextProvider>,
+        ),
         targetDomElement
       );
 
