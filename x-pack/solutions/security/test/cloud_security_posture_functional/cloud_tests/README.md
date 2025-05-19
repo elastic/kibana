@@ -16,7 +16,7 @@ export ES_SECURITY_ENABLED=1
 node scripts/functional_test_runner [--config <config>] [--es-version <instance version>]
 ```
 
-- **Suite Config** - The config file is located here: `x-pack/test/cloud_security_posture_functional/config.cloud.ts`.
+- **Suite Config** - The config file is located here: `x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts`.
 
 
 **Final Testing on Demand**

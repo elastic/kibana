@@ -73,7 +73,7 @@ yarn test:ftr --config x-pack/test_serverless/api_integration/test_suites/securi
 Run [**End-to-End Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_running_functional_tests):
 
 ```bash
-yarn test:ftr --config x-pack/test/cloud_security_posture_functional/config.ts
+yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 yarn test:ftr --config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
 ```
 
@@ -108,8 +108,8 @@ yarn test:ftr:runner --config x-pack/test/cloud_security_posture_api/config.ts
 
 run ESS (stateful) e2e tests:
 ```bash
-yarn test:ftr:server --config x-pack/test/cloud_security_posture_functional/config.ts
-yarn test:ftr:runner --config x-pack/test/cloud_security_posture_functional/config.ts
+yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 ```
 
 run serverless api integration tests:

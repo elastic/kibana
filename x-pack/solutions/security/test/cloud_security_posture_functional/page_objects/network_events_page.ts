@@ -6,26 +6,26 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrService } from '../../functional/ftr_provider_context';
+import { FtrService } from '@kbn/test-suites-xpack/functional/ftr_provider_context';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
-  ALERT_TABLE_ROW_CSS_SELECTOR,
+  EVENTS_TABLE_ROW_CSS_SELECTOR,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GRAPH_PREVIEW_LOADING_TEST_ID,
 } = testSubjectIds;
 
-export class AlertsPageObject extends FtrService {
+export class NetworkEventsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
 
-  async navigateToAlertsPage(urlQueryParams: string = ''): Promise<void> {
+  async navigateToNetworkEventsPage(urlQueryParams: string = ''): Promise<void> {
     await this.pageObjects.common.navigateToUrlWithBrowserHistory(
       'securitySolution',
-      '/alerts',
+      '/network/events',
       `${urlQueryParams && `?${urlQueryParams}`}`,
       {
         ensureCurrentUrl: false,
@@ -38,20 +38,20 @@ export class AlertsPageObject extends FtrService {
     return `timerange=(global:(linkTo:!(),timerange:(from:%27${from}%27,kind:absolute,to:%27${to}%27)))`;
   }
 
-  getFlyoutFilter(alertId: string) {
-    return `flyout=(preview:!(),right:(id:document-details-right,params:(id:%27${alertId}%27,indexName:.internal.alerts-security.alerts-default-000001,scopeId:alerts-page)))`;
+  getFlyoutFilter(eventId: string) {
+    return `flyout=(preview:!(),right:(id:document-details-right,params:(id:%27${eventId}%27,indexName:logs-gcp.audit-default,scopeId:network-page-events)))`;
   }
 
   /**
-   * Clicks the refresh button on the Alerts page and waits for it to complete
+   * Clicks the refresh button on the network events page and waits for it to complete
    */
   async clickRefresh(): Promise<void> {
-    await this.ensureOnAlertsPage();
+    await this.ensureOnNetworkEventsPage();
     await this.testSubjects.click('querySubmitButton');
 
     // wait for refresh to complete
     await this.retry.waitFor(
-      'Alerts pages refresh button to be enabled',
+      'Network events pages refresh button to be enabled',
       async (): Promise<boolean> => {
         const refreshButton = await this.testSubjects.find('querySubmitButton');
 
@@ -60,24 +60,24 @@ export class AlertsPageObject extends FtrService {
     );
   }
 
-  async ensureOnAlertsPage(): Promise<void> {
-    await this.testSubjects.existOrFail('detectionsAlertsPage');
+  async ensureOnNetworkEventsPage(): Promise<void> {
+    await this.testSubjects.existOrFail('network-details-headline');
   }
 
-  async waitForListToHaveAlerts(timeoutMs?: number): Promise<void> {
+  async waitForListToHaveEvents(timeoutMs?: number): Promise<void> {
     const allEventRows = await this.testSubjects.findService.allByCssSelector(
-      ALERT_TABLE_ROW_CSS_SELECTOR
+      EVENTS_TABLE_ROW_CSS_SELECTOR
     );
 
     if (!Boolean(allEventRows.length)) {
       await this.retry.waitForWithTimeout(
-        'waiting for alerts to show up on alerts page',
+        'waiting for events to show up on network events page',
         timeoutMs ?? this.defaultTimeoutMs,
         async (): Promise<boolean> => {
           await this.clickRefresh();
 
           const allEventRowsInner = await this.testSubjects.findService.allByCssSelector(
-            ALERT_TABLE_ROW_CSS_SELECTOR
+            EVENTS_TABLE_ROW_CSS_SELECTOR
           );
 
           return Boolean(allEventRowsInner.length);

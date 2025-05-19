@@ -11,7 +11,7 @@ import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack/functional/config.base')
   );
   // FTR configuration for cloud testing
   return {

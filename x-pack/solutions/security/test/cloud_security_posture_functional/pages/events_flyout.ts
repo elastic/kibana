@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForPluginInitialized } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
+import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
 
       await waitForPluginInitialized({ retry, supertest, logger });
@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
     });
 
