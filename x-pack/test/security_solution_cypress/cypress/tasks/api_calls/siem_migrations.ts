@@ -12,7 +12,6 @@ const MIGRATION_INDEX_PREFIX = '.kibana-siem-rule-migrations';
 export const cleanMigrationData = () => {
   cy.currentSpace().then((spaceId = 'default') => {
     const migrationIndices = [
-      // `${MIGRATION_INDEX_PREFIX}-resources-${spaceId}`,
       `${MIGRATION_INDEX_PREFIX}-rules-${spaceId}`,
       `${MIGRATION_INDEX_PREFIX}-migrations-${spaceId}`,
     ];
