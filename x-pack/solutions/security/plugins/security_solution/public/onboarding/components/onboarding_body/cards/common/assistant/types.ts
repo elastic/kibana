@@ -6,7 +6,7 @@
  */
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ConnectorsAuthz } from '../common/connectors/authz';
+import type { ConnectorsAuthz } from '../connectors/authz';
 
 export interface AssistantCardMetadata extends ConnectorsAuthz {
   connectors: ActionConnector[];

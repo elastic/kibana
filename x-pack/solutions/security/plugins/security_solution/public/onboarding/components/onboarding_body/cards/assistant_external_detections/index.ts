@@ -14,20 +14,20 @@ import { ASSISTANT_CARD_TITLE } from '../common/assistant/translations';
 import { checkAssistantCardComplete } from '../common/connectors/assistant_check_complete';
 import type { AssistantCardMetadata } from '../common/assistant/types';
 
-export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
-  id: OnboardingCardId.assistant,
+export const assistantExternalDetectionsCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
+  id: OnboardingCardId.assistantExternalDetections,
   title: ASSISTANT_CARD_TITLE,
   icon: AssistantIcon,
   Component: React.lazy(
     () =>
       import(
-        /* webpackChunkName: "onboarding_assistant_card" */
+        /* webpackChunkName: "onboarding_assistant_external_detections_card" */
         '../common/assistant/assistant_card'
       )
   ),
   checkComplete: checkAssistantCardComplete,
   capabilitiesRequired: [
-    ['securitySolutionAssistant.ai-assistant', `${SECURITY_FEATURE_ID}.detections`],
+    ['securitySolutionAssistant.ai-assistant', `${SECURITY_FEATURE_ID}.external_detections`],
   ],
   licenseTypeRequired: 'enterprise',
 };
