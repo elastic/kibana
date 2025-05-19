@@ -328,7 +328,7 @@ describe('to_esql', () => {
     );
   });
 
-  it.only('should work with custom filters on the layer', () => {
+  it('should work with custom filters on the layer', () => {
     const esql = getESQLForLayer(
       [
         [

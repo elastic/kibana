@@ -144,14 +144,13 @@ export function getESQLForLayer(
     metricESQL = `${esAggsId} = ` + metricESQL;
 
     if (wrapInFilter || wrapInTimeFilter) {
-      debugger;
       if (wrapInFilter) {
         if (col.filter?.language === 'kuery') {
           metricESQL += ` WHERE KQL("${col.filter.query}")`;
         } else if (col.filter?.language === 'lucene') {
           metricESQL += ` WHERE QSTR("${col.filter.query}")`;
         } else {
-          metricESQL += ` WHERE ${col.filter.query}`;
+          return;
         }
       }
       if (wrapInTimeFilter) {
