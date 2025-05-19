@@ -350,6 +350,10 @@ export function getTextBasedDatasource({
       });
 
       const initState = state || { layers: {} };
+      for (const layer of Object.values(initState.layers)) {
+        layer.type = 'esql';
+      }
+      
       return {
         ...initState,
         indexPatternRefs: refs,
