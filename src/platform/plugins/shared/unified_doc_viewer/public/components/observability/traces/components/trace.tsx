@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
@@ -28,11 +28,7 @@ export interface TraceProps {
 export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
-  const {
-    timeState: {
-      asAbsoluteTimeRange: { from: rangeFrom, to: rangeTo },
-    },
-  } = data.query.timefilter.timefilter.useTimefilter();
+  const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const getParentApi = useCallback(
     () => ({
@@ -75,7 +71,7 @@ export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
         <EuiFlexItem>{fieldRows}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type="APM_TRACE_WATERFALL_EMBEDDABLE"
         getParentApi={getParentApi}
         hidePanelChrome={true}

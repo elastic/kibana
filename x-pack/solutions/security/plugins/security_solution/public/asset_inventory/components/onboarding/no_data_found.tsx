@@ -23,6 +23,7 @@ import illustration from '../../../common/images/integrations_light.png';
 import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
 import { SecurityIntegrations } from '../../../common/lib/integrations/components';
 import { IntegrationContextProvider } from '../../../common/lib/integrations/hooks/integration_context';
+import { INTEGRATION_TABS } from '../../../common/lib/integrations/configs/integration_tabs_configs';
 
 export const NoDataFound = () => {
   const spaceId = useSpaceId();
@@ -68,7 +69,7 @@ export const NoDataFound = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <IntegrationContextProvider spaceId={spaceId}>
+        <IntegrationContextProvider spaceId={spaceId} integrationTabs={INTEGRATION_TABS}>
           <SecurityIntegrations />
         </IntegrationContextProvider>
       </EuiPanel>

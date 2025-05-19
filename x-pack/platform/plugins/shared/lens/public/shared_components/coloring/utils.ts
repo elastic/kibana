@@ -51,7 +51,7 @@ export function getPaletteDisplayColors(
  * Note: to be used for Lens UI only
  */
 export function getAccessorType(
-  datasource: DatasourcePublicAPI | undefined,
+  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
   accessor: string | undefined
 ) {
   // No accessor means it's not a numeric type by default

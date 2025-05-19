@@ -8,7 +8,18 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, debounceTime, first, skip, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  debounceTime,
+  first,
+  map,
+  merge,
+  skip,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -19,14 +30,24 @@ import { Filter } from '@kbn/es-query';
 import { StateComparators, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import { i18n } from '@kbn/i18n';
-import type { DefaultControlState, DefaultDataControlState } from '../../../common';
+import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
-import { initializeDefaultControlApi } from '../initialize_default_control_api';
+import {
+  defaultControlComparators,
+  initializeDefaultControlApi,
+} from '../initialize_default_control_api';
 import type { ControlApiInitialization, ControlStateManager } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
+
+export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
+  ...defaultControlComparators,
+  title: 'referenceEquality',
+  dataViewId: 'referenceEquality',
+  fieldName: 'referenceEquality',
+};
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
@@ -40,15 +61,16 @@ export const initializeDataControl = <EditorState extends object = {}>(
   editorStateManager: ControlStateManager<EditorState>,
   controlGroupApi: ControlGroupApi
 ): {
-  api: ControlApiInitialization<DataControlApi>;
+  api: Omit<ControlApiInitialization<DataControlApi>, 'hasUnsavedChanges$' | 'resetUnsavedChanges'>;
   cleanup: () => void;
-  comparators: StateComparators<DefaultDataControlState>;
+  anyStateChange$: Observable<void>;
   setters: {
     onSelectionChange: () => void;
     setOutputFilter: (filter: Filter | undefined) => void;
   };
   stateManager: ControlStateManager<DefaultDataControlState>;
-  serialize: () => SerializedPanelState<DefaultControlState>;
+  getLatestState: () => SerializedPanelState<DefaultDataControlState>;
+  reinitializeState: (lastSaved?: DefaultDataControlState) => void;
 } => {
   const defaultControl = initializeDefaultControlApi(state);
 
@@ -164,7 +186,10 @@ export const initializeDataControl = <EditorState extends object = {}>(
           );
         } else {
           // replace the control with a new one of the updated type
-          controlGroupApi.replacePanel(controlId, { panelType: newType, initialState: newState });
+          controlGroupApi.replacePanel(controlId, {
+            panelType: newType,
+            serializedState: { rawState: newState },
+          });
         }
       },
       initialState: {
@@ -184,42 +209,35 @@ export const initializeDataControl = <EditorState extends object = {}>(
     filtersReady$.next(true);
   });
 
-  const api: ControlApiInitialization<DataControlApi> = {
-    ...defaultControl.api,
-    title$,
-    defaultTitle$,
-    dataViews$,
-    field$,
-    fieldFormatter,
-    onEdit,
-    filters$,
-    isEditingEnabled: () => true,
-    untilFiltersReady: async () => {
-      return new Promise((resolve) => {
-        combineLatest([defaultControl.api.blockingError$, filtersReady$])
-          .pipe(
-            first(([blockingError, filtersReady]) => filtersReady || blockingError !== undefined)
-          )
-          .subscribe(() => {
-            resolve();
-          });
-      });
-    },
-  };
-
   return {
-    api,
+    api: {
+      ...defaultControl.api,
+      title$,
+      defaultTitle$,
+      dataViews$,
+      field$,
+      fieldFormatter,
+      onEdit,
+      filters$,
+      isEditingEnabled: () => true,
+      untilFiltersReady: async () => {
+        return new Promise((resolve) => {
+          combineLatest([defaultControl.api.blockingError$, filtersReady$])
+            .pipe(
+              first(([blockingError, filtersReady]) => filtersReady || blockingError !== undefined)
+            )
+            .subscribe(() => {
+              resolve();
+            });
+        });
+      },
+    },
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
       filtersReadySubscription.unsubscribe();
     },
-    comparators: {
-      ...defaultControl.comparators,
-      title: [title$, (value: string | undefined) => title$.next(value)],
-      dataViewId: [dataViewId, (value: string) => dataViewId.next(value)],
-      fieldName: [fieldName, (value: string) => fieldName.next(value)],
-    },
+    anyStateChange$: merge(title$, dataViewId, fieldName).pipe(map(() => undefined)),
     setters: {
       onSelectionChange: () => {
         filtersReady$.next(false);
@@ -229,10 +247,10 @@ export const initializeDataControl = <EditorState extends object = {}>(
       },
     },
     stateManager,
-    serialize: () => {
+    getLatestState: () => {
       return {
         rawState: {
-          ...defaultControl.serialize().rawState,
+          ...defaultControl.getLatestState().rawState,
           dataViewId: dataViewId.getValue(),
           fieldName: fieldName.getValue(),
           title: title$.getValue(),
@@ -245,6 +263,12 @@ export const initializeDataControl = <EditorState extends object = {}>(
           },
         ],
       };
+    },
+    reinitializeState: (lastSaved?: DefaultDataControlState) => {
+      defaultControl.reinitializeState(lastSaved);
+      title$.next(lastSaved?.title);
+      dataViewId.next(lastSaved?.dataViewId ?? '');
+      fieldName.next(lastSaved?.fieldName ?? '');
     },
   };
 };

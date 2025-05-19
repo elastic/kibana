@@ -171,3 +171,11 @@ export interface ResponseActionsClient {
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   >;
 }
+
+/**
+ * The ResponseActionsClient class method names that match the set of supported response actions.
+ */
+export type ResponseActionsClientMethods = keyof Omit<
+  ResponseActionsClient,
+  'processPendingActions' | 'getFileInfo' | 'getFileDownload'
+>;
