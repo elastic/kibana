@@ -72,7 +72,7 @@ export function createAddAnomalyChartsPanelAction(
 
         presentationContainerParent.addNewPanel({
           panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-          initialState,
+          serializedState: { rawState: initialState },
         });
       } catch (e) {
         // eslint-disable-next-line no-console
