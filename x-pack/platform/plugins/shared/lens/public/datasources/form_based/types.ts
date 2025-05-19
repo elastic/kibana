@@ -131,6 +131,12 @@ export function hasTextBasedLayers(
   return Object.values(state.layers).some((layer) => isTextBasedLayer(layer));
 }
 
+export function hasFormBasedLayers(
+  state: FormBasedPrivateState | CombinedFormBasedPrivateState
+): state is CombinedFormBasedPrivateState {
+  return Object.values(state.layers).some((layer) => isFormBasedLayer(layer));
+}
+
 export interface FormBasedPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, FormBasedLayer>;

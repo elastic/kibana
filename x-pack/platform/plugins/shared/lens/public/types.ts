@@ -556,7 +556,7 @@ export interface DatasourcePublicAPI {
   /**
    * Returns true if this is a text based language datasource
    */
-  isTextBasedLanguage: () => boolean;
+  isTextBasedLanguage: (layerId: string) => boolean;
   /**
    * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */

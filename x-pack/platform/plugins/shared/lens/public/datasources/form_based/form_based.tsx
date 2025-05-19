@@ -104,6 +104,7 @@ import {
   isTextBasedLayer,
   hasTextBasedLayers,
   TextBasedField,
+  hasFormBasedLayers,
 } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
@@ -981,7 +982,13 @@ export function getFormBasedDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
-        isTextBasedLanguage: () => true,
+        isTextBasedLanguage: (layerId?: string) => {
+          if (!layerId) {
+            return !hasFormBasedLayers(state);
+          }
+          const layer = state.layers[layerId];
+          return Boolean(layer && isTextBasedLayer(layer));
+        },
         getOperationForColumnId: (columnId: string) => {
           if (!layer) {
             return null;

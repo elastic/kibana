@@ -288,7 +288,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
+    datasource?.isTextBasedLanguage(layerId) ||
     isOfAggregateQueryType(editorProps.attributes?.state.query) ||
     false;
 
