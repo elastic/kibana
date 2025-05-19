@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { MlApi } from '../ml_api_service';
+
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
 
@@ -15,11 +16,6 @@ export type MlResultsService = ReturnType<typeof resultsServiceProvider> &
 type Time = string;
 export interface ModelPlotOutputResults {
   results: Record<Time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
-}
-
-export interface CriteriaField {
-  fieldName: string;
-  fieldValue: any;
 }
 
 // This is to retain the singleton behavior of the previous direct instantiation and export.

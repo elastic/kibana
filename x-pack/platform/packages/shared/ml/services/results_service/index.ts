@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { resultsServiceProvider } from './results_service';
 export { getTopInfluencers } from './top_influencers';
 export { getScoresByBucket, getInfluencerValueMaxScoreByTime } from './view_by';
+export { resultsServiceProvider, type CriteriaField } from './results_service';
