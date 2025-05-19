@@ -38,6 +38,6 @@
     "@kbn/ml-parse-interval",
     "@kbn/analytics",
     "@kbn/ml-common-utils",
-    "@kbn/ml-services",
+    "@kbn/field-types",
   ]
 }
