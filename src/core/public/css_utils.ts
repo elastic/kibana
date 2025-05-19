@@ -9,8 +9,9 @@
 
 // This file replaces scss core/public/_mixins.scss
 
-import { css, keyframes } from '@emotion/react';
-import { COLOR_MODES_STANDARD, UseEuiTheme, euiCanAnimate } from '@elastic/eui';
+import { Interpolation, Theme, css, keyframes } from '@emotion/react';
+import { COLOR_MODES_STANDARD, UseEuiTheme, euiCanAnimate, useEuiTheme } from '@elastic/eui';
+import { useMemo } from 'react';
 import bg_top_branded from './styles/core_app/images/bg_top_branded.svg';
 import bg_top_branded_dark from './styles/core_app/images/bg_top_branded_dark.svg';
 import bg_bottom_branded from './styles/core_app/images/bg_bottom_branded.svg';
@@ -19,11 +20,10 @@ import bg_bottom_branded_dark from './styles/core_app/images/bg_bottom_branded_d
 // The `--kbnAppHeadersOffset` CSS variable is automatically updated by
 // styles/rendering/_base.scss, based on whether the Kibana chrome has a
 // header banner, app menu, and is visible or hidden
-export const kibanaFullBodyHeightCss = (additionalOffset = 0) => css`
-  height: calc(
-    100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset}px
-  );
-`;
+export const kibanaFullBodyHeightCss = (additionalOffset = '0px') =>
+  css({
+    height: `calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset})`,
+  });
 
 export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEuiTheme) => {
   const lightOrDarkTheme = (lightSvg: any, darkSvg: any) => {
@@ -78,4 +78,41 @@ export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEu
       },
     },
   });
+};
+
+type StyleMap = Record<
+  string,
+  Interpolation<Theme> | ((theme: UseEuiTheme) => Interpolation<Theme>)
+>;
+
+type StaticStyleMap = Record<string, Interpolation<Theme>>;
+
+/**
+ * Custom hook to reduce boilerplate when working with Emotion styles that may depend on
+ * the EUI theme.
+ *
+ * Accepts a map of styles where each entry is either a static Emotion style (via `css`)
+ * or a function that returns styles based on the current `euiTheme`.
+ *
+ * It returns a memoized version of the style map with all values resolved to static
+ * Emotion styles, allowing components to use a clean and unified object for styling.
+ *
+ * This helps simplify component code by centralizing theme-aware style logic.
+ *
+ * Example usage:
+ *   const componentStyles = {
+ *     container: css({ overflow: hidden }),
+ *     leftPane: ({ euiTheme }) => css({ paddingTop: euiTheme.size.m }),
+ *   }
+ *   const styles = useMemoizedStyles(componentStyles);
+ */
+export const useMemoizedStyles = (styleMap: StyleMap) => {
+  const euiThemeContext = useEuiTheme();
+  const outputStyles = useMemo(() => {
+    return Object.entries(styleMap).reduce<StaticStyleMap>((acc, [key, value]) => {
+      acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
+      return acc;
+    }, {});
+  }, [euiThemeContext, styleMap]);
+  return outputStyles;
 };
