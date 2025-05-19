@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable } from '../../../../services';
@@ -195,31 +196,14 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
-      width: '185px',
+      width: '220px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
-        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
-            {agentPolicy && (
-              <EuiFlexItem grow={false}>
-                <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
-              </EuiFlexItem>
-            )}
-            {showWarning && (
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="warning" color="warning" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Outdated policy"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          agentPolicy && (
+            <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+          )
         );
       },
     },
@@ -294,7 +278,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            min-width: 0;
+          `}
+          direction="column"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
               <EuiFlexItem grow={false}>

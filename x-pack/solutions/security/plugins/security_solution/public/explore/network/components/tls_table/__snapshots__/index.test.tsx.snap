@@ -252,26 +252,30 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="SHA1 fingerprint"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                   >
-                    SHA1 fingerprint
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="SHA1 fingerprint"
+                    >
+                      SHA1 fingerprint
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell emotion-euiTableHeaderCell"
@@ -557,7 +561,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
               class="euiPagination__item"
             >
               <button
-                aria-current="true"
+                aria-current="page"
                 aria-label="Page 1 of 5"
                 class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                 data-test-subj="pagination-button-0"

@@ -15,12 +15,19 @@ import {
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import type { LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
+import type {
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  LensSerializedState,
+  StructuredDatasourceStates,
+} from './types';
 import { loadESQLAttributes } from './esql';
+import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
+import { FormBasedPersistedState } from '../datasources/form_based/types';
+import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -99,39 +106,6 @@ export async function deserializeState(
   return newState;
 }
 
-export function emptySerializer() {
-  return {};
-}
-
-export type ComparatorType<T extends unknown> = [
-  BehaviorSubject<T>,
-  (newValue: T) => void,
-  (a: T, b: T) => boolean
-];
-
-export function makeComparator<T extends unknown>(
-  observable: BehaviorSubject<T>
-): ComparatorType<T> {
-  return [observable, (newValue: T) => observable.next(newValue), fastIsEqual];
-}
-
-/**
- * Helper function to either extract an observable from an API or create a new one
- * with a default value to start with.
- * Note that extracting from the API will make subscription emit if the value changes upstream
- * as it keeps the original reference without cloning.
- * @returns the observable and a comparator to use for detecting "unsaved changes" on it
- */
-export function buildObservableVariable<T extends unknown>(
-  variable: T | PublishingSubject<T>
-): [BehaviorSubject<T>, ComparatorType<T>] {
-  if (variable instanceof BehaviorSubject) {
-    return [variable, makeComparator(variable)];
-  }
-  const variable$ = new BehaviorSubject<T>(variable as T);
-  return [variable$, makeComparator(variable$)];
-}
-
 export function isTextBasedLanguage(state: LensRuntimeState) {
   return isOfAggregateQueryType(state.attributes?.state.query);
 }
@@ -171,4 +145,17 @@ export function extractInheritedViewModeObservable(
     return extractInheritedViewModeObservable(parentApi.parentApi);
   }
   return new BehaviorSubject<ViewMode>('view');
+}
+
+export function getStructuredDatasourceStates(
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+): StructuredDatasourceStates {
+  return {
+    formBased: ((datasourceStates as DatasourceStates)?.formBased?.state ??
+      datasourceStates?.formBased ??
+      undefined) as FormBasedPersistedState,
+    textBased: ((datasourceStates as DatasourceStates)?.textBased?.state ??
+      datasourceStates?.textBased ??
+      undefined) as TextBasedPersistedState,
+  };
 }

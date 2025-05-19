@@ -20,14 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import {
-  StreamDefinition,
-  getSegments,
-  isDescendantOf,
-  isRootStreamDefinition,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { Streams, getSegments, isDescendantOf, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
@@ -36,11 +29,11 @@ import { getIndexPatterns } from '../../util/hierarchy_helpers';
 export interface StreamTree {
   name: string;
   type: 'wired' | 'root' | 'classic';
-  stream: StreamDefinition;
+  stream: Streams.all.Definition;
   children: StreamTree[];
 }
 
-export function asTrees(streams: StreamDefinition[]) {
+export function asTrees(streams: Streams.all.Definition[]) {
   const trees: StreamTree[] = [];
   const sortedStreams = streams
     .slice()
@@ -60,7 +53,7 @@ export function asTrees(streams: StreamDefinition[]) {
         name: stream.name,
         children: [],
         stream,
-        type: isUnwiredStreamDefinition(stream)
+        type: Streams.UnwiredStream.Definition.is(stream)
           ? 'classic'
           : isRootStreamDefinition(stream)
           ? 'root'
@@ -78,7 +71,7 @@ export function StreamsList({
   query,
   showControls,
 }: {
-  streams: StreamDefinition[] | undefined;
+  streams: Streams.all.Definition[] | undefined;
   query?: string;
   showControls: boolean;
 }) {
@@ -90,7 +83,7 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || isWiredStreamDefinition(item))
+      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item))
       .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 

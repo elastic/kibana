@@ -6,7 +6,11 @@
  */
 
 import type { Alert } from '@kbn/alerting-types';
-import { getAlertFieldValueAsStringOrNull, isJsonObjectValue } from './type_utils';
+import {
+  getAlertFieldValueAsStringOrNull,
+  getAlertFieldValueAsStringOrNumberOrNull,
+  isJsonObjectValue,
+} from './type_utils';
 import type { JsonValue } from '@kbn/utility-types';
 
 describe('getAlertFieldValueAsStringOrNull', () => {
@@ -97,6 +101,99 @@ describe('getAlertFieldValueAsStringOrNull', () => {
     const field = 'field1';
 
     const result = getAlertFieldValueAsStringOrNull(alert, field);
+
+    expect(result).toEqual('[object Object]');
+  });
+});
+
+describe('getAlertFieldValueAsStringOrNumberOrNull', () => {
+  it('should handle missing field', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: 'value1',
+    };
+    const field = 'columnId';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
+
+    expect(result).toBe(null);
+  });
+
+  it('should handle string value', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: 'value1',
+    };
+    const field = 'field1';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
+
+    expect(result).toEqual('value1');
+  });
+
+  it('should handle a number value', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: 123,
+    };
+    const field = 'field1';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
+
+    expect(result).toEqual(123);
+  });
+
+  it('should handle array of booleans', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: [true, false],
+    };
+    const field = 'field1';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
+
+    expect(result).toEqual('true');
+  });
+
+  it('should handle array of numbers', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: [1, 2],
+    };
+    const field = 'field1';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
+
+    expect(result).toEqual(1);
+  });
+
+  it('should handle array of null', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: [null, null],
+    };
+    const field = 'field1';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
+
+    expect(result).toEqual(null);
+  });
+
+  it('should join array of JsonObjects', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: [{ subField1: 'value1', subField2: 'value2' }],
+    };
+    const field = 'field1';
+
+    const result = getAlertFieldValueAsStringOrNumberOrNull(alert, field);
 
     expect(result).toEqual('[object Object]');
   });

@@ -17,7 +17,7 @@ import {
   SyncStatus,
   type GetRemoteSyncedIntegrationsStatusResponse,
 } from '../../../../../../../common/types';
-import { sendGetPackageInfoByKeyForRq } from '../../../../hooks';
+import { sendGetPackageInfoByKeyForRq, useStartServices } from '../../../../hooks';
 
 import { IntegrationSyncFlyout } from './integration_sync_flyout';
 
@@ -27,6 +27,7 @@ jest.mock('../../../../../../components', () => ({
 }));
 
 const mockSendGetPackageInfoByKeyForRq = sendGetPackageInfoByKeyForRq as jest.Mock;
+const mockUseStartServices = useStartServices as jest.Mock;
 
 describe('IntegrationSyncFlyout', () => {
   const mockOnClose = jest.fn();
@@ -103,6 +104,15 @@ describe('IntegrationSyncFlyout', () => {
         title: startCase(packageName),
       })
     );
+    mockUseStartServices.mockReturnValue({
+      docLinks: {
+        links: {
+          fleet: {
+            remoteESOoutput: 'https://www.elastic.co/guide/en/fleet/current/remote-output.html',
+          },
+        },
+      },
+    });
   });
 
   it('render accordion per integration', async () => {

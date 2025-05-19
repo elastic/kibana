@@ -195,6 +195,7 @@ export const EventSchema = schema.maybe(
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
                         gap_range: ecsDateRange(),
+                        frozen_indices_queried_count: ecsStringOrNumber(),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
                         trigger_actions_duration_ms: ecsStringOrNumber(),

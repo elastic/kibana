@@ -78,9 +78,6 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
   const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
-  const dockerImageOverride = isServerless
-    ? '--set defaultCRConfig.image.repository="docker.elastic.co/elastic-agent/elastic-agent"'
-    : '';
 
   const otelKubeStackValuesFileUrl = data
     ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/values.yaml`
@@ -95,7 +92,7 @@ kubectl create secret generic elastic-secret-otel \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
-  --values '${otelKubeStackValuesFileUrl}' ${dockerImageOverride} \\
+  --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
     : undefined;
 
@@ -306,7 +303,12 @@ spec:
                     { defaultMessage: 'Annotate all resources in a namespace' }
                   )}
                 >
-                  <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                  <EuiCodeBlock
+                    paddingSize="m"
+                    language="bash"
+                    isCopyable={true}
+                    data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
+                  >
                     {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
                   </EuiCodeBlock>
                 </EuiAccordion>
@@ -325,7 +327,12 @@ spec:
                   )}
                 </p>
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="bash"
+                  isCopyable={true}
+                  data-test-subj="observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet"
+                >
                   {`kubectl rollout restart deployment myapp -n my-namespace
 
 kubectl describe pod <myapp-pod-name> -n my-namespace`}
