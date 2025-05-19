@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export type { Tool, ToolHandlerContext } from './src/tools';
+export type { ToolsServiceSetup, ToolsServiceStart } from './types';
+export { ToolsService } from './tools_service';

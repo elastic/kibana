@@ -15,6 +15,14 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { registerRoutes } from './routes';
+import {
+  createServices,
+  setupServices,
+  startServices,
+  type InternalServices,
+  type InternalSetupServices,
+  type InternalStartServices,
+} from './services';
 
 export class OnechatPlugin
   implements
@@ -29,6 +37,11 @@ export class OnechatPlugin
   // @ts-expect-error unused for now
   private config: OnechatConfig;
 
+  private services?: InternalServices;
+  private serviceSetups?: InternalSetupServices;
+  // @ts-expect-error unused for now
+  private serviceStarts?: InternalStartServices;
+
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -38,6 +51,9 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    this.services = createServices();
+    this.serviceSetups = setupServices({ services: this.services });
+
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -46,11 +62,23 @@ export class OnechatPlugin
       logger: this.logger,
     });
 
-    return {};
+    return {
+      tools: {
+        register: this.serviceSetups!.tools.register.bind(this.serviceSetups!.tools),
+      },
+    };
   }
 
   start(core: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
-    return {};
+    if (!this.services) {
+      throw new Error('#start called before #setup');
+    }
+
+    this.serviceStarts = startServices({ services: this.services });
+
+    return {
+      tools: {},
+    };
   }
 
   stop() {}

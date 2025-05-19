@@ -10,6 +10,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ToolsServiceSetup } from './services/tools';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -23,12 +24,22 @@ export interface OnechatStartDependencies {
   inference: InferenceServerStart;
 }
 
+export interface ToolsSetup {
+  register: ToolsServiceSetup['register'];
+}
+
+export interface ToolsStart {}
+
 /**
  * Setup contract of the onechat plugin.
  */
-export interface OnechatPluginSetup {}
+export interface OnechatPluginSetup {
+  tools: ToolsSetup;
+}
 
 /**
  * Start contract of the onechat plugin.
  */
-export interface OnechatPluginStart {}
+export interface OnechatPluginStart {
+  tools: ToolsStart;
+}
