@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
@@ -43,7 +42,11 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import {
+  isFleetNotFoundError,
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -169,7 +172,7 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
       return notFoundResponse();
     }
   } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+    if (isFleetNotFoundError(error)) {
       return notFoundResponse();
     }
     throw error;
