@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LIGHT_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME } from '@elastic/charts';
 
 import React from 'react';
 import { render } from '@testing-library/react';
@@ -15,7 +15,7 @@ import { Props, Threshold } from './threshold';
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {
     const defaultProps: Props = {
-      chartProps: { baseTheme: LIGHT_THEME },
+      chartProps: { baseTheme: AMSTERDAM_LIGHT_THEME },
       comparator: COMPARATORS.GREATER_THAN,
       id: 'componentId',
       threshold: [90],
