@@ -17,13 +17,14 @@ import { usePersistedQuery } from './use_persisted_query';
 export interface AssetsBaseURLQuery {
   query: Query;
   filters: Filter[];
+  pageFilters?: Filter[];
   /**
    * Grouping component selection
    */
   groupBy?: string[];
 }
 
-export type AssetsURLQuery = Pick<AssetsBaseURLQuery, 'query' | 'filters'>;
+export type AssetsURLQuery = Pick<AssetsBaseURLQuery, 'query' | 'filters' | 'pageFilters'>;
 
 export type URLQuery = AssetsBaseURLQuery & Record<string, unknown>;
 
@@ -33,6 +34,7 @@ export interface AssetInventoryURLStateResult {
   setUrlQuery: (query: Record<string, unknown>) => void;
   sort: SortOrder[];
   filters: Filter[];
+  pageFilters: Filter[];
   query: { bool: BoolQuery };
   queryError?: Error;
   pageIndex: number;
@@ -52,6 +54,7 @@ export interface AssetInventoryURLStateResult {
 const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
   query,
   filters,
+  pageFilters: [],
   sort: { field: '@timestamp', direction: 'desc' },
   pageIndex: 0,
 });
@@ -128,6 +131,7 @@ export const useAssetInventoryURLState = ({
    */
   const baseEsQuery = useBaseEsQuery({
     filters: urlQuery.filters,
+    pageFilters: urlQuery.pageFilters,
     query: urlQuery.query,
   });
 
@@ -151,6 +155,7 @@ export const useAssetInventoryURLState = ({
     setUrlQuery,
     sort: urlQuery.sort as SortOrder[],
     filters: urlQuery.filters || [],
+    pageFilters: urlQuery.pageFilters || [],
     query: baseEsQuery.query
       ? baseEsQuery.query
       : {
