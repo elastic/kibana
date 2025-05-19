@@ -6,8 +6,13 @@
  */
 
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
+import {
+  getErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running/errors';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { Evaluation } from './lib/evaluate_rule';
@@ -233,6 +238,64 @@ const setup = () => {
 describe('The custom threshold alert type', () => {
   describe('with average aggregation', () => {
     setup();
+
+    describe('check error scenarios', () => {
+      beforeEach(() => jest.clearAllMocks());
+      afterAll(() => clearInstances());
+      const execute = (
+        comparator: COMPARATORS,
+        threshold: number[],
+        sourceId: string = 'default'
+      ) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            ...mockOptions.params,
+            sourceId,
+            criteria: [
+              {
+                ...customThresholdNonCountCriterion,
+                comparator,
+                threshold,
+              },
+            ],
+          },
+        });
+      const setResults = (
+        comparator: COMPARATORS,
+        threshold: number[],
+        shouldFire: boolean = false,
+        isNoData: boolean = false
+      ) =>
+        setEvaluationResults([
+          {
+            '*': {
+              ...customThresholdNonCountCriterion,
+              comparator,
+              threshold,
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire,
+              isNoData,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+      test('should throw user error if data view is not found', async () => {
+        searchSourceCommonMock.createLazy.mockImplementationOnce(() => {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', 'abc');
+        });
+
+        try {
+          setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+          await execute(COMPARATORS.GREATER_THAN, [0.75]);
+        } catch (err) {
+          expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+          expect(err.message).toBe('Saved object [index-pattern/abc] not found');
+        }
+      });
+    });
 
     describe('querying the entire infrastructure', () => {
       beforeEach(() => jest.clearAllMocks());
