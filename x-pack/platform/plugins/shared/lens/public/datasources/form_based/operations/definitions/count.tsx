@@ -201,16 +201,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       esql = `COUNT(${sanitazeESQLInput(field.name)})`;
     }
 
-    // if (column.filter) {
-    //   if (column.filter.language === 'kuery') {
-    //     esql += ` WHERE KQL("${column.filter.query}")`;
-    //   } else if (column.filter.language === 'lucene') {
-    //     esql += ` WHERE QSTR("${column.filter.query}")`;
-    //   } else {
-    //     esql += ` WHERE ${column.filter.query}`;
-    //   }
-    // }
-
     return esql;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
