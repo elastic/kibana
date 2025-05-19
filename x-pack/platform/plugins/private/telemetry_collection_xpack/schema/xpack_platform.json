@@ -460,12 +460,6 @@
             "monitoring_alert_nodes_changed": {
               "type": "long"
             },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
-              "type": "long"
-            },
             "siem__signals": {
               "type": "long"
             },
@@ -567,12 +561,6 @@
               "type": "long"
             },
             "monitoring_alert_nodes_changed": {
-              "type": "long"
-            },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
               "type": "long"
             },
             "siem__signals": {
@@ -682,12 +670,6 @@
               "type": "long"
             },
             "monitoring_alert_nodes_changed": {
-              "type": "long"
-            },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
               "type": "long"
             },
             "siem__signals": {
@@ -817,12 +799,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -924,12 +900,6 @@
                   "type": "long"
                 },
                 "monitoring_alert_nodes_changed": {
-                  "type": "long"
-                },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
                   "type": "long"
                 },
                 "siem__signals": {
@@ -1035,12 +1005,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -1144,12 +1108,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -1251,12 +1209,6 @@
                   "type": "long"
                 },
                 "monitoring_alert_nodes_changed": {
-                  "type": "long"
-                },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
                   "type": "long"
                 },
                 "siem__signals": {
@@ -1365,12 +1317,6 @@
               "type": "long"
             },
             "monitoring_alert_nodes_changed": {
-              "type": "long"
-            },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
               "type": "long"
             },
             "siem__signals": {
@@ -1494,12 +1440,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -1603,12 +1543,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -1710,12 +1644,6 @@
                   "type": "long"
                 },
                 "monitoring_alert_nodes_changed": {
-                  "type": "long"
-                },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
                   "type": "long"
                 },
                 "siem__signals": {
@@ -1903,12 +1831,6 @@
             "monitoring_alert_nodes_changed": {
               "type": "long"
             },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
-              "type": "long"
-            },
             "siem__signals": {
               "type": "long"
             },
@@ -2015,12 +1937,6 @@
             "monitoring_alert_nodes_changed": {
               "type": "long"
             },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
-              "type": "long"
-            },
             "siem__signals": {
               "type": "long"
             },
@@ -2125,12 +2041,6 @@
               "type": "long"
             },
             "monitoring_alert_nodes_changed": {
-              "type": "long"
-            },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
               "type": "long"
             },
             "siem__signals": {
@@ -2251,12 +2161,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -2360,12 +2264,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -2467,12 +2365,6 @@
                   "type": "long"
                 },
                 "monitoring_alert_nodes_changed": {
-                  "type": "long"
-                },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
                   "type": "long"
                 },
                 "siem__signals": {
@@ -2595,12 +2487,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -2704,12 +2590,6 @@
                 "monitoring_alert_nodes_changed": {
                   "type": "long"
                 },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
-                  "type": "long"
-                },
                 "siem__signals": {
                   "type": "long"
                 },
@@ -2811,12 +2691,6 @@
                   "type": "long"
                 },
                 "monitoring_alert_nodes_changed": {
-                  "type": "long"
-                },
-                "rule_snooze_status": {
-                  "type": "long"
-                },
-                "rule_mute_status": {
                   "type": "long"
                 },
                 "siem__signals": {
@@ -2927,12 +2801,6 @@
             "monitoring_alert_nodes_changed": {
               "type": "long"
             },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
-              "type": "long"
-            },
             "siem__signals": {
               "type": "long"
             },
@@ -3036,12 +2904,6 @@
             "monitoring_alert_nodes_changed": {
               "type": "long"
             },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
-              "type": "long"
-            },
             "siem__signals": {
               "type": "long"
             },
@@ -3143,12 +3005,6 @@
               "type": "long"
             },
             "monitoring_alert_nodes_changed": {
-              "type": "long"
-            },
-            "rule_snooze_status": {
-              "type": "long"
-            },
-            "rule_mute_status": {
               "type": "long"
             },
             "siem__signals": {
