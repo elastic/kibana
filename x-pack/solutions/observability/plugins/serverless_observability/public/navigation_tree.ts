@@ -370,7 +370,31 @@ export const createNavigationTree = ({
                 ],
               },
               {
-                link: 'integrations',
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.access', {
+                  defaultMessage: 'Access',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+                  { link: 'management:roles', breadcrumbStatus: 'hidden' },
+                  {
+                    cloudLink: 'userAndRoles',
+                    title: i18n.translate(
+                      'xpack.observabilityServerless.navLinks.projectSettings.mngt.usersAndRoles',
+                      { defaultMessage: 'Manage organization members' }
+                    ),
+                  },
+                ],
+              },
+              {
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.alertsAndInsights', {
+                  defaultMessage: 'Alerts and insights',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                  { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
+                ],
               },
               {
                 link: 'fleet',
