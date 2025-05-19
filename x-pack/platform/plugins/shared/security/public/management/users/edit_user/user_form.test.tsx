@@ -51,7 +51,7 @@ describe('UserForm', () => {
         <Providers services={coreStart} authc={authc} history={history}>
           <UserForm {...defaultProps} {...props} />
         </Providers>
-      ),
+      )
     );
   };
 
