@@ -351,7 +351,7 @@ export function getTextBasedDatasource({
 
       const initState = state || { layers: {} };
       for (const layer of Object.values(initState.layers)) {
-        layer.type = 'esql';
+        if (!layer.type) layer.type = 'esql';
       }
 
       return {
