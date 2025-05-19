@@ -20,8 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import { NoChangePointsWarningTooltip } from './no_change_points_warning_tooltip';
 import type {
   ChangePoint,
   FieldConfig,
@@ -35,6 +37,7 @@ import { type ChartComponentProps } from './chart_component';
 import { NoDataFoundWarning } from './no_data_warning';
 import { useCommonChartProps } from './use_common_chart_props';
 import type { ChangePointType } from './constants';
+import { hasRealChangePoints } from './types';
 
 export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
@@ -131,6 +134,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
+  const containsChangePoints = useMemo(() => hasRealChangePoints(annotations), [annotations]);
+
+  const isEmbeddable = embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS;
+
   const { bucketInterval } = useChangePointDetectionContext();
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
@@ -144,7 +151,13 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       sortable: true,
       truncateText: false,
       width: '230px',
-      render: (timestamp: ChangePoint['timestamp']) => dateFormatter.convert(timestamp),
+      render: (timestamp: ChangePoint['timestamp'], annotation: ChangePointAnnotation) => {
+        if (isEmbeddable && !containsChangePoints && !timestamp) {
+          return <NoChangePointsWarningTooltip reason={annotation.reason} />;
+        }
+
+        return dateFormatter.convert(timestamp);
+      },
     },
     {
       id: 'preview',

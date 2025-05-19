@@ -13,16 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiPagination,
   EuiPanel,
+  EuiPagination,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { type RefreshInterval } from '@kbn/data-plugin/common';
+import { NoChangePointsWarningTooltip } from './no_change_points_warning_tooltip';
 import {
   type SelectedChangePoint,
   useChangePointDetectionContext,
@@ -95,27 +93,7 @@ export const ChartsGrid: FC<{
                   ) : null}
 
                   {!containsChangePoints ? (
-                    <EuiToolTip
-                      position="top"
-                      content={
-                        v.reason ??
-                        i18n.translate('xpack.aiops.changePointDetection.noChangePointsWarning', {
-                          defaultMessage: 'No change points detected - showing sample metric data',
-                        })
-                      }
-                    >
-                      <EuiIcon
-                        tabIndex={0}
-                        color={'warning'}
-                        type="warning"
-                        title={i18n.translate(
-                          'xpack.aiops.changePointDetection.notResultsWarning',
-                          {
-                            defaultMessage: 'No change point agg results warning',
-                          }
-                        )}
-                      />
-                    </EuiToolTip>
+                    <NoChangePointsWarningTooltip reason={v.reason} />
                   ) : null}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
