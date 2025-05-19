@@ -86,13 +86,12 @@ export function injectReferences(
     )?.id;
 
     if (isPersistedFormBasedLayer(persistedLayer)) {
-      if (!indexPatternId) {
-        throw new Error(`Missing index pattern reference for layer ${layerId}`);
+      if (indexPatternId) {
+        layers[layerId] = {
+          ...persistedLayer,
+          indexPatternId,
+        };
       }
-      layers[layerId] = {
-        ...persistedLayer,
-        indexPatternId,
-      };
     } else {
       layers[layerId] = persistedLayer;
     }
