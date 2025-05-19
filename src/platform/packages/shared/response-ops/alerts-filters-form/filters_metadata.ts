@@ -9,8 +9,21 @@
 
 import { filterMetadata as ruleTagsFilterMetadata } from './components/alerts_filter_by_rule_tags';
 import { filterMetadata as ruleTypesFilterMetadata } from './components/alerts_filter_by_rule_types';
+import type { AlertsFilterMetadata, AlertsFiltersType } from './types';
 
-export const alertsFiltersMetadata = {
-  [ruleTagsFilterMetadata.id]: ruleTagsFilterMetadata,
-  [ruleTypesFilterMetadata.id]: ruleTypesFilterMetadata,
-} as const;
+export const alertsFiltersMetadata: Record<AlertsFiltersType, AlertsFilterMetadata<any>> = {
+  ruleTags: ruleTagsFilterMetadata,
+  ruleTypes: ruleTypesFilterMetadata,
+};
+
+export const getFilterMetadata = <T>(
+  type: AlertsFilterMetadata<T>['id']
+): AlertsFilterMetadata<T> => {
+  const filterMetadata = alertsFiltersMetadata[type];
+
+  if (!filterMetadata) {
+    throw new Error(`Alerts filter of type ${type} not found`);
+  }
+
+  return filterMetadata;
+};
