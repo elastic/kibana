@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
-import { useMlApi } from '../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 
 const tooltipContent = i18n.translate(
