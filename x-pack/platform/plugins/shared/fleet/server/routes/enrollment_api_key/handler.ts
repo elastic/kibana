@@ -8,6 +8,8 @@
 import { type RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { appContextService } from '../../services';
+
 import type {
   GetEnrollmentAPIKeysRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
@@ -56,9 +58,10 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
-  const { elasticsearch, savedObjects } = await context.core;
-  const soClient = savedObjects.client;
+  const { elasticsearch } = await context.core;
+  const soClient = appContextService.getInternalUserSOClient(request);
   const esClient = elasticsearch.client.asInternalUser;
+
   // validate policy exists in the current space
   await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
     if (isFleetNotFoundError(err)) {
