@@ -7,7 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useMlApi, useMlKibana } from '../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const useFetchPipelines = () => {
   const [pipelineNames, setPipelineNames] = useState<string[]>([]);

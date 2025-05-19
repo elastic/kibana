@@ -16,12 +16,12 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import type { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
 import { DATA_FRAME_MODE } from '../../../analytics_management/components/analytics_list/common';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
-import { useMlApi } from '../../../../../contexts/kibana';
 import type { ExpandableSectionProps } from './expandable_section';
 import { ExpandableSection, HEADER_ITEMS_LOADING } from './expandable_section';
 

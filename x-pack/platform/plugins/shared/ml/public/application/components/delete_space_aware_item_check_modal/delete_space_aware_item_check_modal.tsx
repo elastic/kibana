@@ -28,7 +28,7 @@ import type {
   CanDeleteMLSpaceAwareItemsResponse,
   MlSavedObjectType,
 } from '@kbn/ml-common-types/saved_objects';
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
 

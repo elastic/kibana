@@ -34,8 +34,9 @@ import {
 import { parseUrlState } from '@kbn/ml-url-state';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
-import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';

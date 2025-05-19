@@ -8,13 +8,15 @@
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
+
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useMlApi, useNotifications } from '../../../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
+import { useNotifications } from '../../../../../contexts/kibana';
 import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
@@ -142,7 +144,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
             defaultMessage: 'Configuration request body',
           }
         )}
-        style={{ maxWidth: '100%' }}
+        css={{ maxWidth: '100%' }}
       >
         <div data-test-subj={'mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor'}>
           <EditorComponent
