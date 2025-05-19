@@ -112,11 +112,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitRowCommand) break;
         return this.visitRowCommand(parent, commandNode, input as any);
       }
-      // TODO: uncomment this when the command is implemented
-      // case 'ts': {
-      //   if (!this.methods.visitTimeseriesCommand) break;
-      //   return this.visitTimeseriesCommand(parent, commandNode, input as any);
-      // }
+      case 'ts': {
+        if (!this.methods.visitTimeseriesCommand) break;
+        return this.visitTimeseriesCommand(parent, commandNode, input as any);
+      }
       case 'show': {
         if (!this.methods.visitShowCommand) break;
         return this.visitShowCommand(parent, commandNode, input as any);

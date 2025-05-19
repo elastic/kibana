@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 export interface ModelOptionsData {
   key: string;
@@ -44,40 +48,17 @@ export const e5SmallDescription = i18n.translate(
   }
 );
 
-const e5LargeTitle = i18n.translate(
-  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5largeTitle',
-  {
-    defaultMessage: 'E5-large (multilingual)',
-  }
-);
-
-const e5LargeDescription = i18n.translate(
-  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5largeDescription',
-  {
-    defaultMessage:
-      'E5 is an NLP model by Elastic designed to enhance multilingual semantic search by focusing on query context rather than keywords. E5-large is an optimized version for Intel® silicon.',
-  }
-);
-
 const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
 > = {
-  '.elser-2-elasticsearch': {
+  [ELSER_ON_ML_NODE_INFERENCE_ID]: {
     title: elserTitle,
     description: elserDescription,
   },
-  '.elser-v2-elastic': {
-    title: elserTitle,
-    description: elserDescription,
-  },
-  '.multilingual-e5-small-elasticsearch': {
+  [E5_SMALL_INFERENCE_ID]: {
     title: e5SmallTitle,
     description: e5SmallDescription,
-  },
-  '.multilingual-e5-large-elasticsearch': {
-    title: e5LargeTitle,
-    description: e5LargeDescription,
   },
 };
 
@@ -86,22 +67,18 @@ export const getModelOptionsForInferenceEndpoints = ({
 }: {
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
-  // TODO: add logic to show the EIS models if EIS is enabled, if not show the other models
-  const preConfiguredEndpoints = endpoints
+  return endpoints
+    .filter((endpoint) => {
+      // Only include preconfigured endpoints and skip custom endpoints
+      return Boolean(PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]);
+    })
     .map((endpoint) => {
-      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id];
-
-      if (!meta) {
-        return undefined;
-      }
+      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]!;
 
       return {
         key: endpoint.inference_id,
         label: meta.title,
         description: meta.description,
       };
-    })
-    .filter(Boolean) as ModelOptionsData[];
-
-  return preConfiguredEndpoints;
+    });
 };
