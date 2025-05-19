@@ -36,6 +36,7 @@ import type {
   RecognizeResult,
 } from '@kbn/ml-common-types/modules';
 import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type { HttpService } from '../http_service';
 
