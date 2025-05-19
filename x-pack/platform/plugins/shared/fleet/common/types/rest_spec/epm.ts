@@ -130,6 +130,7 @@ export interface InstallPackageResponse {
   items: AssetReference[];
   _meta: {
     install_source: InstallSource;
+    name: string;
   };
 }
 
@@ -145,6 +146,7 @@ export interface InstallResult {
   error?: Error;
   installType: InstallType;
   installSource?: InstallSource;
+  pkgName: string;
 }
 
 export interface BulkInstallPackageInfo {
