@@ -28,7 +28,7 @@ interface Props {
 
 /**
  * Returns the content of the message compatible with a standard markdown renderer.
- *
+ * 
  * Content references are removed as they can only be rendered by the assistant.
  */
 function getSelfContainedContent(content: string): string {
@@ -54,19 +54,18 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   );
 
   const content = message.content ?? '';
-  const selfContainedContent = getSelfContainedContent(content);
 
   const onAddNoteToTimeline = useCallback(() => {
     updateAndAssociateNode({
       associateNote,
-      newNote: selfContainedContent,
+      newNote: getSelfContainedContent(content),
       updateNewNote: () => {},
       updateNote,
       user: '', // TODO: attribute assistant messages
     });
 
     toasts.addSuccess(i18n.ADDED_NOTE_TO_TIMELINE);
-  }, [associateNote, content, toasts, updateNote, selfContainedContent]);
+  }, [associateNote, toasts, updateNote, content]);
 
   // Attach to case support
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -78,13 +77,13 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     selectCaseModal.open({
       getAttachments: () => [
         {
-          comment: selfContainedContent,
+          comment: getSelfContainedContent(content),
           type: AttachmentType.user,
           owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],
     });
-  }, [content, selectCaseModal, selfContainedContent]);
+  }, [selectCaseModal, content]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
@@ -140,7 +139,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-          <EuiCopy textToCopy={selfContainedContent}>
+          <EuiCopy textToCopy={getSelfContainedContent(content)}>
             {(copy) => (
               <EuiButtonIcon
                 aria-label={i18n.COPY_TO_CLIPBOARD}
