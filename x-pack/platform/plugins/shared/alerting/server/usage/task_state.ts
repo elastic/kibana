@@ -128,6 +128,11 @@ const stateSchemaV3 = stateSchemaV2.extends({
   count_rules_with_investigation_guide: schema.number(),
 });
 
+const stateSchemaV4 = stateSchemaV3.extends({
+  count_rules_snoozed_by_type: schema.recordOf(schema.string(), schema.number()),
+  count_rules_muted_by_type: schema.recordOf(schema.string(), schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -236,9 +241,17 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV3,
   },
+  4: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[3].up(state),
+      count_rules_snoozed_by_type: state.count_rules_snoozed_by_type || {},
+      count_rules_muted_by_type: state.count_rules_muted_by_type || {},
+    }),
+    schema: stateSchemaV4,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[3].schema;
+const latestTaskStateSchema = stateSchemaByVersion[4].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
