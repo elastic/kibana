@@ -7,8 +7,6 @@
 
 // Service for managing job saved objects
 
-import { useMemo } from 'react';
-
 import { ML_INTERNAL_BASE_PATH, ML_EXTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type {
   JobType,
@@ -22,7 +20,6 @@ import type {
   SyncCheckResponse,
   CanSyncToAllSpacesResponse,
 } from '@kbn/ml-common-types/saved_objects';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import type { HttpService } from '../http_service';
 
@@ -119,15 +116,3 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
 });
 
 export type SavedObjectsApiService = ReturnType<typeof savedObjectsApiProvider>;
-
-/**
- * Hooks for accessing {@link SavedObjectsApiService} in React components.
- */
-export function useSavedObjectsApiService(): SavedObjectsApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => savedObjectsApiProvider(httpService), [httpService]);
-}

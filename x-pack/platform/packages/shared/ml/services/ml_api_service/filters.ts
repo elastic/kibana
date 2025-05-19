@@ -7,10 +7,9 @@
 
 // Service for querying filters, which hold lists of entities,
 // for example a list of known safe URL domains.
-import { useMemo } from 'react';
+
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { Filter, FilterStats } from '@kbn/ml-common-types/filters';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { HttpService } from '../http_service';
 
 export const filtersApiProvider = (httpService: HttpService) => ({
@@ -70,15 +69,3 @@ export const filtersApiProvider = (httpService: HttpService) => ({
 });
 
 export type FiltersApiService = ReturnType<typeof filtersApiProvider>;
-
-/**
- * Hooks for accessing {@link FiltersApiService} in React components.
- */
-export function useFiltersApiService(): FiltersApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => filtersApiProvider(httpService), [httpService]);
-}
