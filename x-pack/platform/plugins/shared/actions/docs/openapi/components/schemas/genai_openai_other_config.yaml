@@ -47,19 +47,28 @@ properties:
     type: string
     description: PEM-encoded private key content.
     minLength: 1
+  caFile:
+    oneOf:
+      - type: string
+        description: Path to the CA certificate file (.pem).
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+        minItems: 1
+        description: Array of paths to CA certificate files (.pem).
+  caData:
+    type: string
+    description: PEM-encoded CA certificate content.
+    minLength: 1
   verificationMode:
     type: string
-    description: SSL verification mode for PKI authentication. Only used if hasPKI is true.
+    description: SSL verification mode for PKI authentication.
     enum: ['full', 'certificate', 'none']
     default: 'full'
-  __internal__:
+  headers:
     type: object
-    properties:
-      hasHeaders:
-        type: boolean
-        description: Indicates whether custom headers are enabled.
-        default: false
-      hasPKI:
-        type: boolean
-        description: Indicates whether PKI authentication is enabled. If false, PKI-related fields (certificateFile, certificateData, privateKeyFile, privateKeyData, verificationMode) are ignored.
-        default: false
+    description: Custom headers to include in requests.
+    additionalProperties:
+      type: string
