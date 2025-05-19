@@ -71,6 +71,8 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 
+import { setSoClientInfo } from './services/utils/saved_object_clients';
+
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -552,6 +554,12 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         const esClient = coreContext.elasticsearch.client;
         const soClient = coreContext.savedObjects.getClient();
+
+        setSoClientInfo(soClient, {
+          isUnScoped: false,
+          spaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+        });
+
         const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
         const routeAuthz = routeRequiredAuthz
           ? calculateRouteAuthz(authz, routeRequiredAuthz)
