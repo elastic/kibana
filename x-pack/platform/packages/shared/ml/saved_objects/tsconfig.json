@@ -17,7 +17,7 @@
     "@kbn/core",
     "@kbn/security-plugin",
     "@kbn/ml-common-types",
-    "@kbn/ml-client",
     "@kbn/ml-common-constants",
+    "@kbn/ml-error-utils",
   ]
 }
