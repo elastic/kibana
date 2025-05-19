@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should successfully trigger a host transform', async () => {
         const HOST_NAME: string = 'host-transform-test-ip';
-        const testDocs: hostTransformTestDocuments = {
+        const testDocs: HostTransformTestDocuments = {
           name: HOST_NAME,
           ip: ['1.1.1.1', '2.2.2.2'],
           domain: undefined,
@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should successfully collect all expected fields', async () => {
         const HOST_NAME: string = 'host-transform-test-all-fields';
-        const testDocs: hostTransformTestDocuments = {
+        const testDocs: HostTransformTestDocuments = {
           name: HOST_NAME,
           domain: ['example.com', 'sub.example.com'],
           hostname: ['example.com', 'example.com'],
@@ -211,7 +211,7 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
   return document;
 }
 
-async function createDocumentsAndTriggerTransform(providerContext: FtrProviderContext, docs: hostTransformTestDocuments, docCount: number): Promise<void>{
+async function createDocumentsAndTriggerTransform(providerContext: FtrProviderContext, docs: HostTransformTestDocuments, docCount: number): Promise<void>{
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
 
@@ -273,7 +273,7 @@ async function createDocumentsAndTriggerTransform(providerContext: FtrProviderCo
   });
 }
 
-interface hostTransformTestDocuments {
+interface HostTransformTestDocuments {
   name: string; // required
 
   domain: string[] | undefined;
