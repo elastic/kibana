@@ -213,7 +213,7 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
 
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
-  docs: hostTransformTestDocuments,
+  docs: HostTransformTestDocuments,
   docCount: number
 ): Promise<void> {
   const retry = providerContext.getService('retry');
