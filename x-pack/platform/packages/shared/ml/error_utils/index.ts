@@ -19,3 +19,4 @@ export type {
   QueryErrorMessage,
 } from './src/types';
 export { isBoomError, isErrorString, isEsErrorBody, isMLResponseError } from './src/types';
+export { MLJobNotFound, MLModelNotFound } from './src/ml_errors';

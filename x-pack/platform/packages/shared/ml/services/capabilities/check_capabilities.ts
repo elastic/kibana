@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
 import {
   BehaviorSubject,
   combineLatest,
@@ -16,17 +15,12 @@ import {
 } from 'rxjs';
 import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs';
 import { isEqual } from 'lodash';
-import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getDefaultCapabilities,
-  type MlCapabilities,
-  type MlCapabilitiesKey,
-} from '@kbn/ml-common-types/capabilities';
-import { useMlKibana, type MlGlobalServices } from '@kbn/ml-kibana-context';
+import { getDefaultCapabilities, type MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { hasLicenseExpired } from '@kbn/ml-license';
 
+import type { MlGlobalServices } from '../get_services';
 import type { MlApi } from '../ml_api_service';
 
 import { getCapabilities } from './get_capabilities';
@@ -118,51 +112,6 @@ export class MlCapabilitiesService {
       this._subscription.unsubscribe();
     }
   }
-}
-
-/**
- * Check the privilege type and the license to see whether a user has permission to access a feature.
- *
- * @param capability
- */
-export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesKey[]>(
-  capability: T
-): T extends MlCapabilitiesKey ? boolean : boolean[] {
-  const {
-    services: {
-      mlServices: { mlCapabilities: mlCapabilitiesService },
-    },
-  } = useMlKibana();
-
-  // Memoize argument, in case it's an array to preserve the reference.
-  const requestedCapabilities = useRef(capability);
-
-  const capabilities = useObservable(
-    mlCapabilitiesService.capabilities$,
-    mlCapabilitiesService.getCapabilities()
-  );
-  return useMemo(() => {
-    return Array.isArray(requestedCapabilities.current)
-      ? requestedCapabilities.current.map((c) => capabilities[c])
-      : capabilities[requestedCapabilities.current];
-  }, [capabilities]);
-}
-
-/**
- * Check whether upgrade mode has been set.
- */
-export function useUpgradeCheck(): boolean {
-  const {
-    services: {
-      mlServices: { mlCapabilities: mlCapabilitiesService },
-    },
-  } = useMlKibana();
-
-  const isUpgradeInProgress = useObservable(
-    mlCapabilitiesService.isUpgradeInProgress$(),
-    mlCapabilitiesService.isUpgradeInProgress()
-  );
-  return isUpgradeInProgress ?? false;
 }
 
 export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalServices) {

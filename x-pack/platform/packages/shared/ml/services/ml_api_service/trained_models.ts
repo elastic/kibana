@@ -8,7 +8,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
-import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type {
@@ -19,7 +18,6 @@ import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   ModelPipelines,
-  TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
   ModelDownloadState,
@@ -27,61 +25,16 @@ import type {
   TrainedModelConfigResponse,
   StartTrainedModelDeploymentResponse,
 } from '@kbn/ml-common-types/trained_models';
-import { useMlKibana } from '@kbn/ml-kibana-context';
+import type {
+  InferenceQueryParams,
+  InferenceStatsQueryParams,
+  InferenceStatsResponse,
+  DeleteModelParams,
+  StartAllocationParams,
+  UpdateAllocationParams,
+} from '@kbn/ml-common-types/trained_models';
 
 import type { HttpService } from '../http_service';
-
-export interface InferenceQueryParams {
-  from?: number;
-  size?: number;
-  tags?: string;
-  include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
-}
-
-export interface InferenceStatsQueryParams {
-  from?: number;
-  size?: number;
-}
-
-export interface IngestStats {
-  count: number;
-  time_in_millis: number;
-  current: number;
-  failed: number;
-}
-
-export interface InferenceStatsResponse {
-  count: number;
-  trained_model_stats: TrainedModelStat[];
-}
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type CommonDeploymentParams = {
-  deployment_id?: string;
-  threads_per_allocation: number;
-  priority: 'low' | 'normal';
-  number_of_allocations?: number;
-};
-
-export interface AdaptiveAllocationsParams {
-  enabled: boolean;
-  min_number_of_allocations?: number;
-  max_number_of_allocations?: number;
-}
-
-export interface StartAllocationParams {
-  modelId: string;
-  deploymentParams: CommonDeploymentParams;
-  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
-}
-export interface DeleteModelParams {
-  modelId: string;
-  options?: { with_pipelines?: boolean; force?: boolean };
-}
-export interface UpdateAllocationParams {
-  number_of_allocations?: number;
-  adaptive_allocations?: AdaptiveAllocationsParams;
-}
 
 /**
  * Service with APIs calls to perform operations with trained models.
@@ -349,15 +302,3 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 }
 
 export type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
-
-/**
- * Hooks for accessing {@link TrainedModelsApiService} in React components.
- */
-export function useTrainedModelsApiService(): TrainedModelsApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => trainedModelsApiProvider(httpService), [httpService]);
-}

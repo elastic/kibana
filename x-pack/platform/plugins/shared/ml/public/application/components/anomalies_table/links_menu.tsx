@@ -49,7 +49,11 @@ import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
+import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
 
+import { useMlApi } from '../../contexts/kibana';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
@@ -57,9 +61,6 @@ import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/st
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
 import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlApi, useMlKibana } from '../../contexts/kibana';
-import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import type { FocusTrapProps } from '../../util/create_focus_trap_props';

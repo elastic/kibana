@@ -6,7 +6,8 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { TrainedModelType } from '@kbn/ml-trained-models-utils';
+
+import type { TrainedModelType } from '../constants/trained_models';
 
 export interface TrainedModelsDeploymentEbtProps {
   model_id: string;

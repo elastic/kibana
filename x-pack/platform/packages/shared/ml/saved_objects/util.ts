@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-
 import {
   type SavedObjectsServiceStart,
   type KibanaRequest,
@@ -16,7 +14,7 @@ import {
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '@kbn/ml-common-constants/trained_models';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 
-import type { TrainedModelJob, MLSavedObjectService } from './service';
+import type { MLSavedObjectService } from './service';
 
 export function savedObjectClientsFactory(
   getSavedObjectsStart: () => SavedObjectsServiceStart | null
@@ -48,21 +46,6 @@ export function savedObjectClientsFactory(
 
 export function getSavedObjectClientError(error: any) {
   return error.isBoom && error.output?.payload ? error.output.payload : error.body ?? error;
-}
-
-export function getJobDetailsFromTrainedModel(
-  model: estypes.MlTrainedModelConfig | estypes.MlPutTrainedModelRequest['body']
-): TrainedModelJob | null {
-  // @ts-ignore types are wrong
-  if (model.metadata?.analytics_config === undefined) {
-    return null;
-  }
-
-  // @ts-ignore types are wrong
-  const jobId: string = model.metadata.analytics_config.id;
-  // @ts-ignore types are wrong
-  const createTime: number = model.metadata.analytics_config.create_time;
-  return { job_id: jobId, create_time: createTime };
 }
 
 /*
