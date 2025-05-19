@@ -27,6 +27,7 @@ import type {
   CrowdStrikeExecuteRTRResponse,
 } from '../../../common/crowdstrike/types';
 import type { CrowdstrikeGetTokenResponseSchema } from '../../../common/crowdstrike/schema';
+import { CrowdstrikeGetScriptsResponseSchema } from '../../../common/crowdstrike/schema';
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
@@ -34,7 +35,6 @@ import {
   RelaxedCrowdstrikeBaseApiResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
-  CrowdstrikeGetScriptsParamsSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
@@ -146,11 +146,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
         method: 'batchAdminExecuteRTR',
         schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
       });
-      // temporary to fetch scripts and help testing
       this.registerSubAction({
         name: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
         method: 'getRTRCloudScripts',
-        schema: CrowdstrikeGetScriptsParamsSchema,
+        schema: CrowdstrikeRTRCommandParamsSchema, // Empty schema
       });
     }
   }
@@ -371,18 +370,16 @@ export class CrowdstrikeConnector extends SubActionConnector<
     );
   }
 
-  // TODO: for now just for testing purposes, will be a part of a following PR
   public async getRTRCloudScripts(
     payload: CrowdstrikeGetAgentsParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
-    // @ts-expect-error will be a part of the next PR
     return this.crowdstrikeApiRequest(
       {
         url: this.urls.getRTRCloudScriptsDetails,
         method: 'GET',
         paramsSerializer,
-        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+        responseSchema: CrowdstrikeGetScriptsResponseSchema,
       },
       connectorUsageCollector
     );

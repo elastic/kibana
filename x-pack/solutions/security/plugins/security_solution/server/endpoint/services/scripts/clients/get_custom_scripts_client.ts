@@ -17,6 +17,7 @@ import type { ResponseActionAgentType } from '../../../../../common/endpoint/ser
  * @param constructorOptions
  *
  */
+
 export const getCustomScriptsClient = (
   agentType: ResponseActionAgentType,
   constructorOptions: CustomScriptsClientOptions

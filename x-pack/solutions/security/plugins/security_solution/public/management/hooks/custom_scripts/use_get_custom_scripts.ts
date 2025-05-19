@@ -5,45 +5,51 @@
  * 2.0.
  */
 
-import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import type { CustomScriptsResponse } from '../../../../common/endpoint/types/custom_scripts';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 import { useHttp } from '../../../common/lib/kibana';
 
-interface ErrorType {
+/**
+ * Error type for custom scripts API errors
+ */
+interface CustomScriptsErrorType {
   statusCode: number;
   message: string;
-  meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
+  meta: ActionTypeExecutorResult<unknown>;
 }
 
 /**
- * Retrieve the status of a supported host's agent type
- * @param agentType
- * @param options
+ * Hook to retrieve custom scripts for a specific agent type
+ * @param agentType - The type of agent to get scripts for (e.g., 'crowdstrike')
+ * @param options - Additional options for the query
+ * @returns Query result containing custom scripts data
  */
 export const useGetCustomScripts = (
   agentType: ResponseActionAgentType,
-  options: any = {}
-): UseQueryResult<any, IHttpFetchError<ErrorType>> => {
+  options: Omit<
+    UseQueryOptions<CustomScriptsResponse, IHttpFetchError<CustomScriptsErrorType>>,
+    'queryKey' | 'queryFn'
+  > = {}
+): UseQueryResult<CustomScriptsResponse, IHttpFetchError<CustomScriptsErrorType>> => {
   const http = useHttp();
 
-  return useQuery<any, IHttpFetchError<ErrorType>>({
-    queryKey: ['get-agent-status', agentType],
-    // refetchInterval: DEFAULT_POLL_INTERVAL,
+  return useQuery<CustomScriptsResponse, IHttpFetchError<CustomScriptsErrorType>>({
+    queryKey: ['get-custom-scripts', agentType],
     ...options,
     queryFn: () => {
       return http
-        .get<any>(CUSTOM_SCRIPTS_ROUTE, {
+        .get<{ data: CustomScriptsResponse }>(CUSTOM_SCRIPTS_ROUTE, {
           version: '1',
           query: {
             agentType,
           },
         })
-        .then((response) => response.data);
+        .then((response) => response);
     },
   });
 };

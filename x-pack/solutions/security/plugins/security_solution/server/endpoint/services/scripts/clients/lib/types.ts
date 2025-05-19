@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { AgentStatusRecords } from '../../../../../../common/endpoint/types';
+import type { CustomScriptsResponse } from '../../../../../../common/endpoint/types/custom_scripts';
 
+/**
+ * Interface for custom scripts clients
+ * Each provider (CrowdStrike, SentinelOne, etc.) should implement this interface
+ */
 export interface CustomScriptsClientInterface {
-  getCustomScripts: (agentIds: string[]) => Promise<AgentStatusRecords>;
+  /**
+   * Retrieves custom scripts available for the specified agent IDs
+   * @returns Promise resolving to a standardized custom scripts response
+   */
+  getCustomScripts: () => Promise<CustomScriptsResponse>;
 }

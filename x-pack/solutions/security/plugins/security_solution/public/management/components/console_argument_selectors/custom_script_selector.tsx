@@ -5,140 +5,159 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import {
-  EuiPopover,
-  EuiSuperSelect,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import type { EuiFilePickerProps } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { EuiPopover, EuiText, EuiFlexGroup, EuiFlexItem, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
+import type { CustomScript } from '../../../../common/endpoint/types/custom_scripts';
 
 const INITIAL_DISPLAY_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.initialDisplayLabel',
   { defaultMessage: 'Click to select script' }
 );
 
-const OPEN_FILE_PICKER_LABEL = i18n.translate(
-  'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.filePickerButtonLabel',
-  { defaultMessage: 'Open scripts picker' }
-);
-
-const NO_FILE_SELECTED = i18n.translate(
+const NO_SCRIPT_SELECTED = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.noFileSelected',
   { defaultMessage: 'No script selected' }
 );
 
-interface ArgumentFileSelectorState {
+/**
+ * State for the custom script selector component
+ */
+interface CustomScriptSelectorState {
   isPopoverOpen: boolean;
 }
 
 /**
- * A Console Argument Selector component that enables the user to select a file from the local machine
+ * Option for the script dropdown
  */
-export const CustomScriptSelector = memo<
-  CommandArgumentValueSelectorProps<string, ArgumentFileSelectorState>
->(({ value, valueText, onChange, store: _store }) => {
-  const state = useMemo<ArgumentFileSelectorState>(() => {
-    return _store ?? { isPopoverOpen: true };
-  }, [_store]);
+interface ScriptOption {
+  value: string;
+  label: string;
+  script: CustomScript;
+}
 
-  const setIsPopoverOpen = useCallback(
-    (newValue: boolean) => {
-      onChange({
-        value,
-        valueText,
-        store: {
-          ...state,
-          isPopoverOpen: newValue,
-        },
-      });
-    },
-    [onChange, state, value, valueText]
-  );
-  console.log({ store: _store });
-  const { data = [] } = useGetCustomScripts('crowdstrike');
+/**
+ * A Console Argument Selector component that enables the user to select a custom script
+ * @param agentType The type of agent to fetch scripts for
+ * @returns A component that can be used as a CommandArgumentValueSelector
+ */
+export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
+  const CustomScriptSelectorComponent = memo<
+    CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
+  >(({ value, valueText, onChange, store: _store }) => {
+    const state = useMemo<CustomScriptSelectorState>(() => {
+      return _store ?? { isPopoverOpen: true };
+    }, [_store]);
 
-  const scriptsOptions = useMemo(() => {
-    return data.map((script) => ({
-      value: script.name,
-      inputDisplay: script.name,
-      dropdownDisplay: (
-        <>
-          <strong>{script.name}</strong>
-          <EuiText size="s" color="subdued">
-            <p>{script.description}</p>
-          </EuiText>
-        </>
-      ),
-    }));
-  }, [data]);
+    const setIsPopoverOpen = useCallback(
+      (newValue: boolean) => {
+        onChange({
+          value,
+          valueText,
+          store: {
+            ...state,
+            isPopoverOpen: newValue,
+          },
+        });
+      },
+      [onChange, state, value, valueText]
+    );
 
-  const filePickerUUID = useMemo(() => {
-    return htmlIdGenerator('console')();
-  }, []);
-  const handleOpenPopover = useCallback(() => {
-    setIsPopoverOpen(true);
-  }, [setIsPopoverOpen]);
+    const { data = [] } = useGetCustomScripts(agentType);
+    // Create options for the dropdown
+    const scriptsOptions = useMemo<ScriptOption[]>(() => {
+      return data.map((script: CustomScript) => ({
+        value: script.id,
+        label: script.name,
+        script,
+      }));
+    }, [data]);
 
-  const handleClosePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, [setIsPopoverOpen]);
+    // Type-safe render function for EuiComboBox options
+    const renderOption = (option: ScriptOption) => {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiText size="m" color="default" className="eui-textTruncate">
+              {option.label}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued">
+              {option.script.description || ''}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
 
-  const [selectedScript, setSelectedScript] = useState<string>('');
-  const handleScriptSelection = useCallback<NonNullable<EuiFilePickerProps['onChange']>>(
-    (selectedScript) => {
-      console.log({ selectedScript });
+    const handleOpenPopover = useCallback(() => {
+      setIsPopoverOpen(true);
+    }, [setIsPopoverOpen]);
 
-      // Get only the first file selected
-      setSelectedScript(selectedScript);
-      onChange({
-        value: selectedScript ?? undefined,
-        valueText: selectedScript || '',
-        store: {
-          ...state,
-          isPopoverOpen: false,
-        },
-      });
-      // TODO fix focus back to the input and not Back > button
-    },
-    [onChange, state]
-  );
+    const handleClosePopover = useCallback(() => {
+      setIsPopoverOpen(false);
+    }, [setIsPopoverOpen]);
 
-  return (
-    <div>
-      <EuiPopover
-        isOpen={state.isPopoverOpen}
-        closePopover={handleClosePopover}
-        anchorPosition="upCenter"
-        initialFocus={`[id="${filePickerUUID}"]`}
-        button={
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-              <div className="eui-textTruncate" title={valueText || NO_FILE_SELECTED}>
-                {valueText || INITIAL_DISPLAY_LABEL}
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        {state.isPopoverOpen && (
-          <EuiSuperSelect
-            options={scriptsOptions}
-            valueOfSelected={selectedScript}
-            placeholder="Select an option"
-            itemLayoutAlign="top"
-            hasDividers
-            onChange={handleScriptSelection}
-          />
-        )}
-      </EuiPopover>
-    </div>
-  );
-});
-CustomScriptSelector.displayName = 'ArgumentFileSelector';
+    const [selectedScript, setSelectedScript] = useState<ScriptOption | null>(null);
+    const popoverRef = useRef<HTMLDivElement>(null);
+
+    const handleScriptSelection = useCallback(
+      (options: ScriptOption[]) => {
+        const selected = options[0];
+        setSelectedScript(selected);
+
+        onChange({
+          value: selected.label,
+          valueText: selected.label,
+          store: {
+            ...state,
+            isPopoverOpen: false,
+          },
+        });
+      },
+      [onChange, state]
+    );
+
+    return (
+      <div ref={popoverRef}>
+        <EuiPopover
+          initialFocus={'#options-combobox'}
+          isOpen={state.isPopoverOpen}
+          closePopover={handleClosePopover}
+          anchorPosition="upCenter"
+          panelPaddingSize="m"
+          button={
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
+                <div className="eui-textTruncate" title={valueText || NO_SCRIPT_SELECTED}>
+                  {valueText || INITIAL_DISPLAY_LABEL}
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          {state.isPopoverOpen && (
+            <EuiComboBox
+              id="options-combobox"
+              aria-label="Select a custom script"
+              placeholder="Select a single option"
+              singleSelection={{ asPlainText: true }}
+              options={scriptsOptions}
+              renderOption={renderOption}
+              fullWidth
+              selectedOptions={selectedScript ? [selectedScript] : []}
+              onChange={handleScriptSelection}
+            />
+          )}
+        </EuiPopover>
+      </div>
+    );
+  });
+
+  CustomScriptSelectorComponent.displayName = 'CustomScriptSelector';
+  return CustomScriptSelectorComponent;
+};

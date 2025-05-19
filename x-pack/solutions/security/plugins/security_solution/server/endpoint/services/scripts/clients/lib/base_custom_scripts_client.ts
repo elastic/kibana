@@ -9,11 +9,14 @@ import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { CustomScriptsNotSupportedError } from './errors';
-import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
+import type { CustomScriptsResponse } from '../../../../../../common/endpoint/types/custom_scripts';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import type { CustomScriptsClientInterface } from './types';
 
+/**
+ * Options for creating a custom scripts client
+ */
 export interface CustomScriptsClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
@@ -21,6 +24,10 @@ export interface CustomScriptsClientOptions {
   connectorActionsClient?: ActionsClient;
 }
 
+/**
+ * Base class for all custom scripts clients
+ * Provides common functionality and enforces the interface
+ */
 export abstract class CustomScriptsClient implements CustomScriptsClientInterface {
   protected readonly log: Logger;
   protected abstract readonly agentType: ResponseActionAgentType;
@@ -29,7 +36,11 @@ export abstract class CustomScriptsClient implements CustomScriptsClientInterfac
     this.log = options.endpointService.createLogger(this.constructor.name ?? 'CustomScriptsClient');
   }
 
-  public async getCustomScripts(agentIds: string[]): Promise<AgentStatusRecords> {
-    throw new CustomScriptsNotSupportedError(agentIds, this.agentType);
+  /**
+   * Default implementation that throws an error
+   * Provider-specific implementations should override this method
+   */
+  public async getCustomScripts(): Promise<CustomScriptsResponse> {
+    throw new CustomScriptsNotSupportedError(this.agentType);
   }
 }

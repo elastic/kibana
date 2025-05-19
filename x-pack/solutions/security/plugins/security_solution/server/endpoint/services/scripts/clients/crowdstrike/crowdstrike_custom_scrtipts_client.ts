@@ -10,7 +10,7 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type { CrowdstrikeGetScriptsResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { CustomScriptsClientError } from '../lib/errors';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -20,7 +20,7 @@ import { CustomScriptsClient } from '../lib/base_custom_scripts_client';
 export class CrowdstrikeCustomScriptsClient extends CustomScriptsClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
 
-  private async getCustomScriptsFromConnectorAction(agentIds: string[]) {
+  private async getCustomScriptsFromConnectorAction() {
     const connectorActions = new NormalizedExternalConnectorClient(
       this.options.connectorActionsClient as ActionsClient,
       this.log
@@ -32,19 +32,17 @@ export class CrowdstrikeCustomScriptsClient extends CustomScriptsClient {
         subAction: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
         subActionParams: {},
       },
-    })) as ActionTypeExecutorResult<CrowdstrikeGetAgentOnlineStatusResponse>;
+    })) as ActionTypeExecutorResult<CrowdstrikeGetScriptsResponse>;
 
     return customScriptsResponse.data?.resources;
   }
 
-  async getCustomScripts(agentIds: string[]): Promise<CustomScriptsRecords> {
+  async getCustomScripts(): Promise<CustomScriptsRecords> {
     try {
-      const customScripts = await this.getCustomScriptsFromConnectorAction(agentIds);
-
-      return customScripts;
+      return this.getCustomScriptsFromConnectorAction();
     } catch (err) {
       const error = new CustomScriptsClientError(
-        `Failed to fetch crowdstrike agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
+        `Failed to fetch crowdstrike agent status, failed with: ${err.message}`,
         500,
         err
       );

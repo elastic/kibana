@@ -36,14 +36,9 @@ export class UnsupportedAgentTypeError extends CustomScriptsClientError {
 }
 
 export class CustomScriptsNotSupportedError extends CustomScriptsClientError {
-  constructor(
-    agentIds: string[],
-    agentType: ResponseActionAgentType,
-    statusCode: number = 405,
-    meta?: unknown
-  ) {
+  constructor(agentType: ResponseActionAgentType, statusCode: number = 405, meta?: unknown) {
     super(
-      `Customs scripts are not available for ${`[agentIds: ${agentIds} and agentType: ${agentType}]`} not supported`,
+      `Customs scripts are not available for agentType: ${agentType} not supported`,
       statusCode,
       meta
     );

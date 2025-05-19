@@ -6,11 +6,12 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getCustomScriptsClient } from '../../services/scripts/clients/get_custom_scripts_client';
-import { CustomScriptsRequestSchema } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import { errorHandler } from '../error_handler';
-import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
+import { getCustomScriptsClient } from '../../services/scripts/clients/get_custom_scripts_client';
+import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import { CustomScriptsRequestSchema } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -19,6 +20,11 @@ import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
+/**
+ * Registers the custom scripts route
+ * @param router - Security solution plugin router
+ * @param endpointContext - Endpoint app context
+ */
 export const registerCustomScriptsRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
@@ -44,28 +50,30 @@ export const registerCustomScriptsRoute = (
       withEndpointAuthz(
         { all: ['canReadSecuritySolution'] },
         endpointContext.logFactory.get('customScriptsRoute'),
-        getAgentStatusRouteHandler(endpointContext)
+        getCustomScriptsRouteHandler(endpointContext)
       )
     );
 };
 
-export const getAgentStatusRouteHandler = (
+/**
+ * Creates a handler for the custom scripts route
+ * @param endpointContext - Endpoint app context
+ * @returns Request handler for custom scripts
+ */
+export const getCustomScriptsRouteHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
   never,
-  EndpointAgentStatusRequestQueryParams,
+  CustomScriptsRequestQueryParams,
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointContext.logFactory.get('customScriptsRoute');
 
   return async (context, request, response) => {
-    const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
-    const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
+    const { agentType = 'endpoint' } = request.query;
 
-    logger.debug(
-      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
-    );
+    logger.debug(`Retrieving custom scripts for: agentType ${agentType}`);
 
     // Note: because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
@@ -106,7 +114,7 @@ export const getAgentStatusRouteHandler = (
       });
       const data = await customScriptsClient.getCustomScripts();
 
-      return response.ok({ body: { data } });
+      return response.ok({ body: data });
     } catch (e) {
       return errorHandler(logger, response, e);
     }
