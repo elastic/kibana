@@ -55,15 +55,8 @@ export const getApiKeyFromRequest = (request: KibanaRequest) => {
 export const createApiKey = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  canEncryptSo: boolean,
   security: SecurityServiceStart
 ) => {
-  if (!canEncryptSo) {
-    throw Error(
-      'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
-    );
-  }
-
   if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
     throw Error('API keys are not enabled, cannot create API key.');
   }
@@ -132,11 +125,10 @@ export const createApiKey = async (
 export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  canEncryptSo: boolean,
   security: SecurityServiceStart,
   spaces?: SpacesPluginStart
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
-  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, canEncryptSo, security);
+  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
   const space = await spaces?.spacesService.getActiveSpace(request);
   const user = security.authc.getCurrentUser(request);
 

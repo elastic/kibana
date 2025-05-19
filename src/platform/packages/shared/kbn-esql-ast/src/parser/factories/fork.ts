@@ -17,8 +17,11 @@ import {
 import { Builder } from '../../builder';
 import { ESQLCommand } from '../../types';
 import { createCommand, createParserFields } from '../factories';
+import { createDissectCommand } from './dissect';
+import { createEvalCommand } from './eval';
 import { createLimitCommand } from './limit';
 import { createSortCommand } from './sort';
+import { createStatsCommand } from './stats';
 import { createWhereCommand } from './where';
 
 export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> => {
@@ -76,5 +79,20 @@ function visitForkSubQueryProcessingCommandContext(ctx: ForkSubQueryProcessingCo
   const limitCtx = ctx.limitCommand();
   if (limitCtx) {
     return createLimitCommand(limitCtx);
+  }
+
+  const dissectCtx = ctx.dissectCommand();
+  if (dissectCtx) {
+    return createDissectCommand(dissectCtx);
+  }
+
+  const evalCtx = ctx.evalCommand();
+  if (evalCtx) {
+    return createEvalCommand(evalCtx);
+  }
+
+  const statsCtx = ctx.statsCommand();
+  if (statsCtx) {
+    return createStatsCommand(statsCtx);
   }
 }

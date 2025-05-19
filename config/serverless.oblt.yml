@@ -27,6 +27,8 @@ xpack.features.overrides:
     order: 1200
   ### Stack alerts is hidden in Role management since it's not needed.
   stackAlerts.hidden: true
+  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  maps_v2.hidden: true
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
   uptime.name: 'Synthetics'
 
