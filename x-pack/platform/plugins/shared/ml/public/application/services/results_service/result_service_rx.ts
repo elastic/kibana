@@ -23,10 +23,10 @@ import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { Dictionary } from '@kbn/ml-common-types/common';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import type { MlApi } from '../ml_api_service';
 import type { CriteriaField } from '.';
 
 export interface ResultResponse {

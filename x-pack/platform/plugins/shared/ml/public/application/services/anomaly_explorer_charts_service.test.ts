@@ -7,7 +7,7 @@
 
 import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
 import { of } from 'rxjs';
-import type { MlApi } from './ml_api_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import moment from 'moment';
 import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
