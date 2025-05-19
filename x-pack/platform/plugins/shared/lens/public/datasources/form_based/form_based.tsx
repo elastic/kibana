@@ -982,11 +982,7 @@ export function getFormBasedDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
-        isTextBasedLanguage: (layerId?: string) => {
-          if (!layerId) {
-            return !hasFormBasedLayers(state);
-          }
-          const layer = state.layers[layerId];
+        isTextBasedLanguage: () => {
           return Boolean(layer && isTextBasedLayer(layer));
         },
         getOperationForColumnId: (columnId: string) => {

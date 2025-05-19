@@ -97,7 +97,7 @@ export interface CombinedFormBasedPersistedState {
 }
 
 export function isTextBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is TextBasedLayer {
-  return layer.type === 'esql';
+  return layer?.type === 'esql';
 }
 export function isFormBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is FormBasedLayer {
   return !layer.type || layer.type === 'form';

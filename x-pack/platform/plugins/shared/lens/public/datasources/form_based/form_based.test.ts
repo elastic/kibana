@@ -1980,7 +1980,7 @@ describe('IndexPattern Data Source', () => {
           layers: {
             first: {
               ...state.layers.first,
-              linkToLayers: undefined,
+              linkToLayers: [],
               sampling: 1,
               ignoreGlobalFilters: false,
             },
@@ -1995,6 +1995,7 @@ describe('IndexPattern Data Source', () => {
       expect(FormBasedDatasource.createEmptyLayer('index-pattern-id')).toEqual({
         currentIndexPatternId: 'index-pattern-id',
         layers: {},
+        indexPatternRefs: [],
       });
     });
   });

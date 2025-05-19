@@ -109,6 +109,7 @@ test('generates tag cloud chart config', async () => {
                   "esql": "from test | count=count() by category",
                 },
                 "timeField": undefined,
+                "type": "esql",
               },
             },
           },

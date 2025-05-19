@@ -326,6 +326,7 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
+            type: 'esql',
             columns: [],
             errors: [],
             index: '4',
@@ -431,6 +432,7 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
+            type: 'esql',
             columns: [],
             errors: [],
             index: '4',
@@ -541,6 +543,7 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
+            type: 'esql',
             columns: [],
             errors: [],
             index: 'adHoc-id',
