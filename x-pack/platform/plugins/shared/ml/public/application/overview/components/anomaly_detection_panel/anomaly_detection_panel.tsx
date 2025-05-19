@@ -7,7 +7,9 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
+
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { zipObject, groupBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,9 +21,11 @@ import type {
   MlSummaryJob,
   MlSummaryJobs,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlApi, useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import { useRefresh } from '../../../routing/use_refresh';
