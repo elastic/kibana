@@ -110,24 +110,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -270,6 +252,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
             },
             "flamegraph": Object {
+              "minimapFocusBorder": "magenta",
               "navigation": Object {
                 "buttonBackgroundColor": "#CCE4F5",
                 "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -347,7 +330,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "align": "center",
                 "border": Object {
                   "stroke": "gray",
-                  "strokeWidth": 1,
+                  "strokeWidth": 0,
                 },
                 "label": Object {
                   "fontFamily": "Sans-Serif",
@@ -371,7 +354,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "xAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -387,7 +370,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
               "yAxisLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 12,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
@@ -482,7 +465,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontStyle": "normal",
                 "fontVariant": "normal",
                 "fontWeight": 400,
@@ -499,7 +482,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "horizontalTextEnforcer": 1,
               "idealFontSizeJump": 1.05,
               "linkLabel": Object {
-                "fontFamily": "Sans-Serif",
+                "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "fontSize": 11,
                 "fontStyle": "normal",
                 "fontVariant": "normal",
