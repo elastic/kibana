@@ -63,9 +63,7 @@ export * from '../services/actions/mocks';
 
 export * from './package_policy.mocks';
 
-export const createSavedObjectClientMock = (): ReturnType<
-  typeof savedObjectsServiceMock.create
-> => {
+export const createSavedObjectClientMock = () => {
   const soClientMock = savedObjectsClientMock.create();
 
   // The SO client mock does not return promises for async methods, so we mock those here in order

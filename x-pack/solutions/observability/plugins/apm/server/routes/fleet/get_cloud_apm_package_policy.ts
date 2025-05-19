@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { AgentPolicyNotFoundError } from '@kbn/fleet-plugin/server';
+import { isFleetNotFoundError } from '@kbn/fleet-plugin/server';
 import type { Maybe } from '../../../typings/common';
 import type { APMPluginStartDependencies } from '../../types';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
@@ -27,7 +27,7 @@ export async function getCloudAgentPolicy({
       POLICY_ELASTIC_AGENT_ON_CLOUD
     );
   } catch (error) {
-    if (error instanceof AgentPolicyNotFoundError) {
+    if (isFleetNotFoundError(error)) {
       return;
     }
     throw error;

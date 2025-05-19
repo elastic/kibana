@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { FleetErrorWithStatusCode } from '.';
+import { FleetErrorWithStatusCode, FleetNotFoundError } from '.';
 
 export function isESClientError(error: unknown): error is errors.ResponseError {
   return error instanceof errors.ResponseError;
@@ -60,4 +60,13 @@ export const catchAndWrapError: CatchAndWrapError = (error: Error): Promise<neve
 
 catchAndWrapError.withMessage = (message) => {
   return (err: Error) => Promise.reject(wrapWithFleetErrorIfNeeded(err, message));
+};
+
+/** Determine if an error from Fleet is a "Not found" type */
+export const isFleetNotFoundError = (err: Error): boolean => {
+  return (
+    err instanceof FleetNotFoundError ||
+    ('statusCode' in err && err.statusCode === 404) ||
+    (err as { output?: { statusCode: number } }).output?.statusCode === 404
+  );
 };

@@ -39,7 +39,7 @@ export type {
   FleetRequestHandlerContext,
   PostPackagePolicyPostCreateCallback,
 } from './types';
-export { AgentNotFoundError, FleetUnauthorizedError, AgentPolicyNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError, isFleetNotFoundError } from './errors';
 export { config } from './config';
 export type { FleetConfigType } from './config';
 

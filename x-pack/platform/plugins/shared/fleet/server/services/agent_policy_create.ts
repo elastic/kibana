@@ -22,7 +22,7 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
-import { AgentlessAgentCreateOverProvisionnedError, AgentPolicyNotFoundError } from '../errors';
+import { AgentlessAgentCreateOverProvisionnedError, isFleetNotFoundError } from '../errors';
 
 import { agentPolicyService, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
@@ -49,11 +49,7 @@ async function getFleetServerAgentPolicyId(
       false
     );
   } catch (err) {
-    if (
-      err?.output?.statusCode !== 404 &&
-      err?.statusCode !== 404 &&
-      !(err instanceof AgentPolicyNotFoundError)
-    ) {
+    if (!isFleetNotFoundError(err)) {
       throw err;
     }
   }
