@@ -52,8 +52,9 @@ import {
   type TrainedModelDeploymentStatsResponse,
 } from '@kbn/ml-common-types/trained_models';
 import type { NLPSettings } from '@kbn/ml-common-constants/app';
+import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 
-import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
+import { getNewJobLimits } from '../services/ml_server_info';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 import type { HttpService } from '../services/http_service';
@@ -78,32 +79,6 @@ interface DeploymentSetupProps {
   showNodeInfo: boolean;
   disableAdaptiveResourcesControl?: boolean;
   deploymentParamsMapper: DeploymentParamsMapper;
-}
-
-/**
- * Interface for deployment params in the UI.
- */
-export interface DeploymentParamsUI {
-  /**
-   * Deployment ID
-   */
-  deploymentId?: string;
-  /**
-   * Indicates the use case deployment is optimized for.
-   * For ingest, use 1 thread
-   * For search, use N threads, where N = no. of physical cores of an ML node
-   */
-  optimized: 'optimizedForIngest' | 'optimizedForSearch';
-  /**
-   * Adaptive resources
-   */
-  adaptiveResources: boolean;
-  /**
-   * Level of vCPU usage.
-   * When adaptive resources are enabled, corresponds to the min-max range.
-   * When adaptive resources are disabled (and for on-prem deployments), set to a static number of allocations.
-   */
-  vCPUUsage: 'low' | 'medium' | 'high';
 }
 
 const sliderPalette = euiPaletteCool(3);
