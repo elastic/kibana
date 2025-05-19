@@ -83,7 +83,7 @@ describe('Index migrator', () => {
         loggerMock
       );
       await migrator.run();
-      expect(loggerMock.info).toHaveBeenCalledWith('No spaces or index found for rule migration');
+      expect(loggerMock.info).toHaveBeenCalledWith('No spaces or index found for index migration');
       expect(mockPerSpaceIndexMigrator).not.toHaveBeenCalled();
     });
   });

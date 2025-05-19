@@ -14,6 +14,8 @@ import type {
 import type { Adapters, StoredSiemMigration } from '../types';
 import { processResponseHits } from '../../common';
 
+const MAX_ES_SIZE = 10000;
+
 export class RuleMigrationSpaceIndexMigrator {
   constructor(
     private spaceId: string,
@@ -26,7 +28,7 @@ export class RuleMigrationSpaceIndexMigrator {
     const index = this.ruleMigrationIndexAdapters.rules.getIndexName(this.spaceId);
     const aggregations: Record<string, AggregationsAggregationContainer> = {
       migrationIds: {
-        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: 10000 },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: MAX_ES_SIZE },
         aggregations: {
           createdAt: { min: { field: '@timestamp' } },
           createdBy: { terms: { field: 'created_by' } },
@@ -86,7 +88,7 @@ export class RuleMigrationSpaceIndexMigrator {
   }
 
   async run() {
-    this.migrateRuleMigrationIndex();
+    await this.migrateRuleMigrationIndex();
   }
 
   /**

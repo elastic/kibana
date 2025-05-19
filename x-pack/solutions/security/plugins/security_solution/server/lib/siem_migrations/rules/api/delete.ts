@@ -59,9 +59,8 @@ export const registerSiemRuleMigrationsDeleteRoute = (
               migrationId,
               error,
             });
-            return res.customError({
+            return res.badRequest({
               body: error.message,
-              statusCode: 500,
             });
           }
         })
