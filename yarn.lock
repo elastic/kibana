@@ -6464,6 +6464,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/onechat-plugin@link:x-pack/platform/plugins/shared/onechat":
+  version "0.0.0"
+  uid ""
+
 "@kbn/onechat-server@link:x-pack/platform/packages/shared/onechat/onechat-server":
   version "0.0.0"
   uid ""
