@@ -97,12 +97,12 @@ export const ChartsGrid: FC<{
                   {!containsChangePoints ? (
                     <EuiToolTip
                       position="top"
-                      content={i18n.translate(
-                        'xpack.aiops.changePointDetection.noChangePointsWarning',
-                        {
+                      content={
+                        v.reason ??
+                        i18n.translate('xpack.aiops.changePointDetection.noChangePointsWarning', {
                           defaultMessage: 'No change points detected - showing sample metric data',
-                        }
-                      )}
+                        })
+                      }
                     >
                       <EuiIcon
                         tabIndex={0}
