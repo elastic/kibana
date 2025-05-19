@@ -283,6 +283,13 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
+  'responseOpsRuleForm.investigationGuide.editor.title',
+  {
+    defaultMessage: 'Investigation Guide',
+  }
+);
+
 export const RULE_NAME_ARIA_LABEL_TEXT = i18n.translate(
   'responseOpsRuleForm.ruleForm.rulePage.ruleNameAriaLabelText',
   {
