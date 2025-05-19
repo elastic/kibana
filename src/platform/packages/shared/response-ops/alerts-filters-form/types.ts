@@ -10,24 +10,25 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ComponentType } from 'react';
-import type { alertsFiltersMetadata } from './filters';
 
 export type AlertsFilterComponentType<T> = ComponentType<{
   value?: T;
   onChange: (newValue: T) => void;
   isDisabled?: boolean;
+  error?: string;
 }>;
 
-export interface AlertsFilter {
-  type?: AlertsFiltersFormItemType;
-  value?: unknown;
+export interface AlertsFilter<T = unknown> {
+  type?: AlertsFiltersType;
+  value?: T;
 }
 
 export interface AlertsFilterMetadata<T> {
-  id: string;
+  id: AlertsFiltersType;
   displayName: string;
   component: AlertsFilterComponentType<T>;
   isEmpty: (value?: T) => boolean;
+  toKql: (value?: T) => string | null;
 }
 
 export interface AlertsFiltersFormContextValue {
@@ -42,7 +43,7 @@ export interface AlertsFiltersFormContextValue {
   };
 }
 
-export type AlertsFiltersFormItemType = keyof typeof alertsFiltersMetadata;
+export type AlertsFiltersType = 'ruleTags' | 'ruleTypes';
 
 export type AlertsFiltersExpressionOperator = 'and' | 'or';
 
@@ -55,3 +56,5 @@ export type AlertsFiltersExpressionItem =
     };
 
 export type AlertsFiltersExpression = AlertsFiltersExpressionItem[];
+
+export type AlertsFiltersExpressionErrors = Array<{ type?: string; value?: string } | undefined>;
