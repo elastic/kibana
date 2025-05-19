@@ -43,7 +43,7 @@ export const useGetCustomScripts = (
     ...options,
     queryFn: () => {
       return http
-        .get<{ data: CustomScriptsResponse }>(CUSTOM_SCRIPTS_ROUTE, {
+        .get<CustomScriptsResponse>(CUSTOM_SCRIPTS_ROUTE, {
           version: '1',
           query: {
             agentType,

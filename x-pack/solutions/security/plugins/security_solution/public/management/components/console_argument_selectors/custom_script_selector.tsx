@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { EuiPopover, EuiText, EuiFlexGroup, EuiFlexItem, EuiComboBox } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import {
+  EuiPopover,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBox,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
@@ -28,15 +36,6 @@ const NO_SCRIPT_SELECTED = i18n.translate(
  */
 interface CustomScriptSelectorState {
   isPopoverOpen: boolean;
-}
-
-/**
- * Option for the script dropdown
- */
-interface ScriptOption {
-  value: string;
-  label: string;
-  script: CustomScript;
 }
 
 /**
@@ -68,29 +67,22 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
 
     const { data = [] } = useGetCustomScripts(agentType);
     // Create options for the dropdown
-    const scriptsOptions = useMemo<ScriptOption[]>(() => {
+    const scriptsOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       return data.map((script: CustomScript) => ({
         value: script.id,
         label: script.name,
-        script,
       }));
     }, [data]);
 
-    // Type-safe render function for EuiComboBox options
-    const renderOption = (option: ScriptOption) => {
+    const renderOption = (option: EuiComboBoxOptionOption<string>) => {
+      const foundScript = data.find((script) => script.id === option.value);
       return (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiText size="m" color="default" className="eui-textTruncate">
-              {option.label}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued">
-              {option.script.description || ''}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <strong>{option.label}</strong>
+          <EuiText size="s" color="subdued" css={{ wordBreak: 'break-word', width: '100%' }}>
+            <p style={{ whiteSpace: 'normal' }}>{foundScript?.description}</p>
+          </EuiText>
+        </>
       );
     };
 
@@ -102,11 +94,12 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       setIsPopoverOpen(false);
     }, [setIsPopoverOpen]);
 
-    const [selectedScript, setSelectedScript] = useState<ScriptOption | null>(null);
-    const popoverRef = useRef<HTMLDivElement>(null);
+    const [selectedScript, setSelectedScript] = useState<EuiComboBoxOptionOption<string> | null>(
+      null
+    );
 
     const handleScriptSelection = useCallback(
-      (options: ScriptOption[]) => {
+      (options: Array<EuiComboBoxOptionOption<string>>) => {
         const selected = options[0];
         setSelectedScript(selected);
 
@@ -122,14 +115,17 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
-    return (
-      <div ref={popoverRef}>
+    if (scriptsOptions.length) {
+      return (
         <EuiPopover
           initialFocus={'#options-combobox'}
           isOpen={state.isPopoverOpen}
           closePopover={handleClosePopover}
-          anchorPosition="upCenter"
-          panelPaddingSize="m"
+          anchorPosition="rightDown"
+          panelPaddingSize="l"
+          panelStyle={{
+            width: '100%',
+          }}
           button={
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
@@ -151,11 +147,13 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
               fullWidth
               selectedOptions={selectedScript ? [selectedScript] : []}
               onChange={handleScriptSelection}
+              rowHeight={60}
             />
           )}
         </EuiPopover>
-      </div>
-    );
+      );
+    }
+    return <EuiLoadingSpinner />;
   });
 
   CustomScriptSelectorComponent.displayName = 'CustomScriptSelector';
