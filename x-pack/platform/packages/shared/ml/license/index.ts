@@ -7,3 +7,4 @@
 
 export type { LicenseStatus } from './ml_license';
 export { MlLicense } from './ml_license';
+export { hasLicenseExpired, isFullLicense, setLicenseCache } from './check_license';
