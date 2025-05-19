@@ -2728,7 +2728,7 @@
                 "properties": {
                   "purgeType": {
                     "type": "string",
-                    "description": "Specifies whether documents will be purged based on a specific age or on a timestamp",
+                    "description": "Specifies whether documents will be purged based on a specific age, timestamp, or number of elapsed cycles",
                     "enum": [
                       "fixed-age"
                     ]
@@ -2745,7 +2745,7 @@
                 "properties": {
                   "purgeType": {
                     "type": "string",
-                    "description": "Specifies whether documents will be purged based on a specific age or on a timestamp",
+                    "description": "Specifies whether documents will be purged based on a specific age, timestamp, or number of elapsed cycles",
                     "enum": [
                       "fixed-time"
                     ]
@@ -2754,6 +2754,23 @@
                     "type": "string",
                     "description": "The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.",
                     "example": "2024-12-31T00:00:00.000Z"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "purgeType": {
+                    "type": "string",
+                    "description": "Specifies whether documents will be purged based on a specific age, timestamp, or number of elapsed cycles",
+                    "enum": [
+                      "elapsed-cycles"
+                    ]
+                  },
+                  "cycles": {
+                    "type": "string",
+                    "description": "The number of cycles based on the SLI policy to determine which documents to purge. The value must be greater than zero.",
+                    "example": 1
                   }
                 }
               }
