@@ -67,7 +67,7 @@ describe('streamGraph', () => {
     isEnabledKnowledgeBase: false,
     telemetry: {
       reportEvent: jest.fn(),
-    } as AnalyticsServiceSetup,
+    } as unknown as AnalyticsServiceSetup,
   };
 
   beforeEach(() => {
