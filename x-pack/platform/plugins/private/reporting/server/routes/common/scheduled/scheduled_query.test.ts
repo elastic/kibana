@@ -8,10 +8,16 @@
 import {
   ElasticsearchClient,
   KibanaRequest,
+  KibanaResponseFactory,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
 import {
@@ -21,6 +27,7 @@ import {
 } from './scheduled_query';
 import { ReportingCore } from '../../..';
 import { ScheduledReportType } from '../../../types';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const fakeRawRequest = {
   headers: {
@@ -29,90 +36,98 @@ const fakeRawRequest = {
   path: '/',
 } as unknown as KibanaRequest;
 
+const getMockResponseFactory = () =>
+  ({
+    ...httpServerMock.createResponseFactory(),
+    forbidden: (obj: unknown) => obj,
+    unauthorized: (obj: unknown) => obj,
+    customError: (err: unknown) => err,
+  } as unknown as KibanaResponseFactory);
+
+const savedObjects: Array<SavedObject<ScheduledReportType>> = [
+  {
+    type: 'scheduled_report',
+    id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+    namespaces: ['default'],
+    attributes: {
+      createdAt: '2025-05-06T21:10:17.137Z',
+      createdBy: 'elastic',
+      enabled: true,
+      jobType: 'printable_pdf_v2',
+      meta: {
+        isDeprecated: false,
+        layout: 'preserve_layout',
+        objectType: 'dashboard',
+      },
+      migrationVersion: '9.1.0',
+      title: '[Logs] Web Traffic',
+      payload:
+        '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
+      schedule: {
+        rrule: {
+          freq: 3,
+          interval: 3,
+          byhour: [12],
+          byminute: [0],
+          tzid: 'UTC',
+        },
+      },
+    },
+    references: [],
+    managed: false,
+    updated_at: '2025-05-06T21:10:17.137Z',
+    created_at: '2025-05-06T21:10:17.137Z',
+    version: 'WzEsMV0=',
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '10.1.0',
+  },
+  {
+    type: 'scheduled_report',
+    id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+    namespaces: ['default'],
+    attributes: {
+      createdAt: '2025-05-06T21:12:06.584Z',
+      createdBy: 'not-elastic',
+      enabled: true,
+      jobType: 'PNGV2',
+      meta: {
+        isDeprecated: false,
+        layout: 'preserve_layout',
+        objectType: 'dashboard',
+      },
+      migrationVersion: '9.1.0',
+      notification: {
+        email: {
+          to: ['user@elastic.co'],
+        },
+      },
+      title: '[Logs] Web Traffic',
+      payload:
+        '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
+      schedule: {
+        rrule: {
+          freq: 1,
+          interval: 3,
+          tzid: 'UTC',
+        },
+      },
+    },
+    references: [],
+    managed: false,
+    updated_at: '2025-05-06T21:12:06.584Z',
+    created_at: '2025-05-06T21:12:06.584Z',
+    version: 'WzIsMV0=',
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '10.1.0',
+  },
+];
 const soResponse: SavedObjectsFindResponse<ScheduledReportType> = {
   page: 1,
   per_page: 10,
   total: 2,
-  saved_objects: [
-    {
-      type: 'scheduled_report',
-      id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      namespaces: ['default'],
-      attributes: {
-        createdAt: '2025-05-06T21:10:17.137Z',
-        createdBy: 'elastic',
-        enabled: true,
-        jobType: 'printable_pdf_v2',
-        meta: {
-          isDeprecated: false,
-          layout: 'preserve_layout',
-          objectType: 'dashboard',
-        },
-        migrationVersion: '9.1.0',
-        title: '[Logs] Web Traffic',
-        payload:
-          '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
-        schedule: {
-          rrule: {
-            freq: 3,
-            interval: 3,
-            byhour: [12],
-            byminute: [0],
-            tzid: 'UTC',
-          },
-        },
-      },
-      references: [],
-      managed: false,
-      updated_at: '2025-05-06T21:10:17.137Z',
-      created_at: '2025-05-06T21:10:17.137Z',
-      version: 'WzEsMV0=',
-      coreMigrationVersion: '8.8.0',
-      typeMigrationVersion: '10.1.0',
-      score: 0,
-    },
-    {
-      type: 'scheduled_report',
-      id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      namespaces: ['default'],
-      attributes: {
-        createdAt: '2025-05-06T21:12:06.584Z',
-        createdBy: 'elastic',
-        enabled: true,
-        jobType: 'PNGV2',
-        meta: {
-          isDeprecated: false,
-          layout: 'preserve_layout',
-          objectType: 'dashboard',
-        },
-        migrationVersion: '9.1.0',
-        notification: {
-          email: {
-            to: ['user@elastic.co'],
-          },
-        },
-        title: '[Logs] Web Traffic',
-        payload:
-          '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
-        schedule: {
-          rrule: {
-            freq: 1,
-            interval: 3,
-            tzid: 'UTC',
-          },
-        },
-      },
-      references: [],
-      managed: false,
-      updated_at: '2025-05-06T21:12:06.584Z',
-      created_at: '2025-05-06T21:12:06.584Z',
-      version: 'WzIsMV0=',
-      coreMigrationVersion: '8.8.0',
-      typeMigrationVersion: '10.1.0',
-      score: 0,
-    },
-  ],
+  saved_objects: savedObjects.map((so) => ({ ...so, score: 0 })),
 };
+
 const lastRunResponse: CreatedAtSearchResponse = {
   took: 1,
   timed_out: false,
@@ -149,11 +164,15 @@ const lastRunResponse: CreatedAtSearchResponse = {
   },
 };
 
+const mockLogger = loggingSystemMock.createLogger();
+
 describe('scheduledQueryFactory', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let core: ReportingCore;
   let soClient: SavedObjectsClientContract;
+  let taskManager: TaskManagerStartContract;
   let scheduledQuery: ReturnType<typeof scheduledQueryFactory>;
+  let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
 
   beforeEach(async () => {
     const schema = createMockConfigSchema();
@@ -163,17 +182,41 @@ describe('scheduledQueryFactory', () => {
     soClient.find = jest.fn().mockImplementation(async () => {
       return soResponse;
     });
+    soClient.bulkGet = jest.fn().mockImplementation(async () => ({ saved_objects: savedObjects }));
+    soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+      saved_objects: savedObjects.map((so) => ({
+        id: so.id,
+        type: so.type,
+        attributes: { enabled: false },
+      })),
+    }));
     client = (await core.getEsClient()).asInternalUser as typeof client;
     client.search.mockResponse(
       lastRunResponse as unknown as Awaited<ReturnType<ElasticsearchClient['search']>>
     );
+    taskManager = await core.getTaskManager();
+    taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+      tasks: savedObjects.map((so) => ({ id: so.id })),
+      errors: [],
+    }));
     scheduledQuery = scheduledQueryFactory(core);
     jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
+
+    mockResponseFactory = getMockResponseFactory();
+    (mockResponseFactory.ok as jest.Mock) = jest.fn((args: unknown) => args);
+    (mockResponseFactory.forbidden as jest.Mock) = jest.fn((args: unknown) => args);
+    (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
   });
 
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
-      const result = await scheduledQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10);
+      const result = await scheduledQuery.list(
+        fakeRawRequest,
+        mockResponseFactory,
+        { username: 'somebody' },
+        1,
+        10
+      );
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.find).toHaveBeenCalledWith({
@@ -231,7 +274,7 @@ describe('scheduledQueryFactory', () => {
           {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
             created_at: '2025-05-06T21:12:06.584Z',
-            created_by: 'elastic',
+            created_by: 'not-elastic',
             enabled: true,
             jobtype: 'PNGV2',
             last_run: '2025-05-06T21:12:07.198Z',
@@ -256,7 +299,13 @@ describe('scheduledQueryFactory', () => {
 
     it('should filter by username when user does not have manage reporting permissions', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
-      await scheduledQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10);
+      await scheduledQuery.list(
+        fakeRawRequest,
+        mockResponseFactory,
+        { username: 'somebody' },
+        1,
+        10
+      );
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.find).toHaveBeenCalledWith({
@@ -296,7 +345,13 @@ describe('scheduledQueryFactory', () => {
         total: 0,
         saved_objects: [],
       }));
-      const result = await scheduledQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10);
+      const result = await scheduledQuery.list(
+        fakeRawRequest,
+        mockResponseFactory,
+        { username: 'somebody' },
+        1,
+        10
+      );
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.find).toHaveBeenCalledWith({
         type: 'scheduled_report',
@@ -313,8 +368,13 @@ describe('scheduledQueryFactory', () => {
       });
 
       await expect(
-        scheduledQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10)
-      ).rejects.toMatchInlineSnapshot(`[Error: Some error]`);
+        scheduledQuery.list(fakeRawRequest, mockResponseFactory, { username: 'somebody' }, 1, 10)
+      ).rejects.toMatchInlineSnapshot(`
+        Object {
+          "body": "Error listing scheduled reports: Some error",
+          "statusCode": 500,
+        }
+      `);
     });
 
     it('should reject if the esClient.search throws an error', async () => {
@@ -323,8 +383,442 @@ describe('scheduledQueryFactory', () => {
       });
 
       await expect(
-        scheduledQuery.list(fakeRawRequest, { username: 'somebody' }, 1, 10)
-      ).rejects.toMatchInlineSnapshot(`[Error: Some other error]`);
+        scheduledQuery.list(fakeRawRequest, mockResponseFactory, { username: 'somebody' }, 1, 10)
+      ).rejects.toMatchInlineSnapshot(`
+        Object {
+          "body": "Error listing scheduled reports: Some other error",
+          "statusCode": 500,
+        }
+      `);
+    });
+  });
+
+  describe('bulkDisable', () => {
+    it('should pass parameters in the request body', async () => {
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'somebody' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: [
+          'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        ],
+        errors: [],
+        total: 2,
+      });
+    });
+
+    it('should not disable scheduled report when user does not have permissions', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+            attributes: { enabled: false },
+          },
+        ],
+      }));
+      taskManager.bulkDisable = jest.fn().mockImplementationOnce(async () => ({
+        tasks: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca' }],
+        errors: [],
+      }));
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'elastic' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        errors: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message:
+              'Insufficient privileges to disable scheduled report "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4".',
+            status: 403,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk get', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            error: {
+              error: 'Not Found',
+              message:
+                'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+              statusCode: 404,
+            },
+          },
+          savedObjects[1],
+        ],
+      }));
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            attributes: { enabled: false },
+          },
+        ],
+      }));
+      taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+        tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
+        errors: [],
+      }));
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'elastic' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should short-circuit if no saved objects to update', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            error: {
+              error: 'Not found',
+              message:
+                'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+              statusCode: 404,
+            },
+          },
+          {
+            id: savedObjects[1].id,
+            type: savedObjects[1].type,
+            error: { error: 'Bad Request', message: 'Some unspecified error', statusCode: 404 },
+          },
+        ],
+      }));
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'elastic' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Saved object [scheduled-report/aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] not found',
+            status: 404,
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            message: 'Some unspecified error',
+            status: 404,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should not update saved object if already disabled', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: savedObjects[0].id,
+            type: savedObjects[0].type,
+            attributes: { ...savedObjects[0].attributes, enabled: false },
+          },
+          savedObjects[1],
+        ],
+      }));
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            attributes: { enabled: false },
+          },
+        ],
+      }));
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'somebody' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+      ]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        `Scheduled report aa8b6fb3-cf61-4903-bce3-eec9ddc823ca is already disabled`
+      );
+      expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+      // TM still called with both in case the task was not disabled
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: [
+          'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+        ],
+        errors: [],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk update', async () => {
+      soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            attributes: { enabled: false },
+          },
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+            error: { error: 'Conflict', message: 'Error updating saved object', statusCode: 409 },
+          },
+        ],
+      }));
+      taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+        tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
+        errors: [],
+      }));
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'elastic' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message: 'Error updating saved object',
+            status: 409,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should handle errors in bulk disable', async () => {
+      taskManager.bulkDisable = jest.fn().mockImplementation(async () => ({
+        tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
+        errors: [
+          {
+            type: 'task',
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            error: {
+              statusCode: 400,
+              error: 'Fail',
+              message: 'Error disabling task',
+            },
+          },
+        ],
+      }));
+      const result = await scheduledQuery.bulkDisable(
+        mockLogger,
+        fakeRawRequest,
+        mockResponseFactory,
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        { username: 'elastic' }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          type: 'scheduled_report',
+          attributes: { enabled: false },
+        },
+      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
+        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+      ]);
+
+      expect(result).toEqual({
+        scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        errors: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            message:
+              'Scheduled report disabled but task disabling failed due to: Error disabling task',
+            status: 400,
+          },
+        ],
+        total: 2,
+      });
+    });
+
+    it('should reject if the soClient throws an error', async () => {
+      soClient.bulkGet = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('Some error');
+      });
+
+      await expect(
+        scheduledQuery.bulkDisable(
+          mockLogger,
+          fakeRawRequest,
+          mockResponseFactory,
+          ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+          { username: 'somebody' }
+        )
+      ).rejects.toMatchInlineSnapshot(`
+        Object {
+          "body": "Error disabling scheduled reports: Some error",
+          "statusCode": 500,
+        }
+      `);
     });
   });
 });
@@ -358,7 +852,7 @@ describe('transformResponse', () => {
         {
           id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
           created_at: '2025-05-06T21:12:06.584Z',
-          created_by: 'elastic',
+          created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
           last_run: '2025-05-06T21:12:07.198Z',
@@ -417,7 +911,7 @@ describe('transformResponse', () => {
         {
           id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
           created_at: '2025-05-06T21:12:06.584Z',
-          created_by: 'elastic',
+          created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
           last_run: '2025-05-06T21:12:07.198Z',

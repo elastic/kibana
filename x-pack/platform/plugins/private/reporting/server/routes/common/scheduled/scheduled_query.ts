@@ -176,7 +176,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
         const taskManager = await reportingCore.getTaskManager();
 
         const bulkErrors: BulkOperationError[] = [];
-        const disabledScheduledReportIds: string[] = [];
+        const disabledScheduledReportIds: Set<string> = new Set();
         let taskIdsToDisable: string[] = [];
 
         const username = getUsername(user);
@@ -207,7 +207,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
               });
             } else if (so.attributes.enabled === false) {
               logger.debug(`Scheduled report ${so.id} is already disabled`);
-              disabledScheduledReportIds.push(so.id);
+              disabledScheduledReportIds.add(so.id);
             } else {
               scheduledReportSavedObjectsToUpdate.push(so);
             }
@@ -237,12 +237,18 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
               taskIdsToDisable.push(so.id);
             }
           }
+        } else {
+          return {
+            scheduled_report_ids: [...disabledScheduledReportIds],
+            errors: bulkErrors,
+            total: disabledScheduledReportIds.size + bulkErrors.length,
+          };
         }
 
         // it's possible that the scheduled report saved object was disabled but
         // task disabling failed so add the list of already disabled IDs
         // task manager filters out disabled tasks so this will not cause extra load
-        taskIdsToDisable = taskIdsToDisable.concat(disabledScheduledReportIds);
+        taskIdsToDisable = taskIdsToDisable.concat([...disabledScheduledReportIds]);
 
         const resultFromDisablingTasks = await taskManager.bulkDisable(taskIdsToDisable);
         for (const error of resultFromDisablingTasks.errors) {
@@ -254,13 +260,13 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
         }
 
         for (const result of resultFromDisablingTasks.tasks) {
-          disabledScheduledReportIds.push(result.id);
+          disabledScheduledReportIds.add(result.id);
         }
 
         return {
-          scheduled_report_ids: disabledScheduledReportIds,
+          scheduled_report_ids: [...disabledScheduledReportIds],
           errors: bulkErrors,
-          total: disabledScheduledReportIds.length + bulkErrors.length,
+          total: disabledScheduledReportIds.size + bulkErrors.length,
         };
       } catch (error) {
         throw res.customError({
