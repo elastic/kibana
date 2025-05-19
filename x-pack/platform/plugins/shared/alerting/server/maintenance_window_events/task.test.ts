@@ -11,9 +11,10 @@ import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../types';
 import {
-  findMaintenanceWindowsSo,
-  generateEventsAndUpdateMaintenanceWindowSavedObjects,
+  getSOFinder,
+  generateEvents,
   getStatusFilter,
+  updateMaintenanceWindowsEvents,
 } from './task';
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -297,95 +298,174 @@ describe('Maintenance window events generator task', () => {
     });
   });
 
-  describe('findMaintenanceWindowsSo', () => {
-    it('throws an error if createPointInTimeFinder has an error', async () => {
-      internalSavedObjectsRepository.createPointInTimeFinder = jest
-        .fn()
-        .mockRejectedValueOnce(new Error('error!'));
-
-      await findMaintenanceWindowsSo({
-        savedObjectsClient: internalSavedObjectsRepository,
-        logger,
-        filter: statusFilter as KueryNode,
-      });
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to find maintenance windows saved object". Error: error!'
-      );
-    });
-
-    it('should find maintenance windows', async () => {
+  describe('getSOFinder', () => {
+    it('should return finder', async () => {
       mockCreatePointInTimeFinderAsInternalUser();
 
-      const result = await findMaintenanceWindowsSo({
+      const result = await getSOFinder({
         savedObjectsClient: internalSavedObjectsRepository,
         logger,
         filter: statusFilter as KueryNode,
       });
 
-      expect(result.length).toEqual(4);
-      expect(result[0].id).toEqual('1');
-      expect(result[1].id).toEqual('2');
-      expect(result[2].id).toEqual('3');
-      expect(result[3].id).toEqual('4');
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "close": [MockFunction],
+          "find": [Function],
+        }
+      `);
     });
   });
 
-  describe('generateEventsAndUpdateMaintenanceWindowSavedObjects', () => {
-    test('should succeed when there are no maintenance windows to update', async () => {
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
-        logger,
-        savedObjectsClient: internalSavedObjectsRepository,
+  describe('generateEvents', () => {
+    test('should handle empty maintenance windows', async () => {
+      const totalMWs = await generateEvents({
         maintenanceWindowsSO: [],
         startRangeDate: '2025-04-23T09:00:00.000Z',
       });
 
-      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
-      expect(total).toEqual(0);
-      expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
+      expect(totalMWs).toEqual([]);
     });
 
-    test('should not update maintenance window when finished', async () => {
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
+    test('should return 0 when finished maintenance window', async () => {
+      const totalMWs = await generateEvents({
         maintenanceWindowsSO: [finishedWithEventsMaintenanceWindowMock],
         startRangeDate: '2025-04-23T09:00:00.000Z',
-        logger,
-        savedObjectsClient: internalSavedObjectsRepository,
       });
 
-      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
-      expect(total).toEqual(0);
-      expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
+      expect(totalMWs).toEqual([]);
     });
 
     test('should not generate new events when events are empty', async () => {
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
+      const totalMWs = await generateEvents({
         maintenanceWindowsSO: [finishedMaintenanceWindowMock],
         startRangeDate: '2025-04-23T09:00:00.000Z',
-        logger,
-        savedObjectsClient: internalSavedObjectsRepository,
       });
 
-      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
-      expect(total).toEqual(0);
-      expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
+      expect(totalMWs).toEqual([]);
     });
 
     test('should ignore maintenance window if it does not have recurring schedule', async () => {
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
+      const totalMWs = await generateEvents({
         maintenanceWindowsSO: [finishedMaintenanceWindowMock, nonRecurringMaintenanceWindowMock],
         startRangeDate: '2025-04-23T09:00:00.000Z',
-        logger,
-        savedObjectsClient: internalSavedObjectsRepository,
       });
 
-      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
+      expect(totalMWs).toEqual([]);
+    });
+
+    test('should return multiple maintenance windows with new events', async () => {
+      const upcomingMaintenanceWindowAttributes = {
+        ...upcomingMaintenanceWindowMock.attributes,
+        events: [
+          {
+            gte: '2025-05-20T09:00:00.000Z',
+            lte: '2025-05-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-06-20T09:00:00.000Z',
+            lte: '2025-06-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-07-20T09:00:00.000Z',
+            lte: '2025-07-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-08-20T09:00:00.000Z',
+            lte: '2025-08-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-09-20T09:00:00.000Z',
+            lte: '2025-09-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-10-20T09:00:00.000Z',
+            lte: '2025-10-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-11-20T09:00:00.000Z',
+            lte: '2025-11-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-12-20T09:00:00.000Z',
+            lte: '2025-12-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-01-20T09:00:00.000Z',
+            lte: '2026-01-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-02-20T09:00:00.000Z',
+            lte: '2026-02-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-03-20T09:00:00.000Z',
+            lte: '2026-03-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-04-20T09:00:00.000Z',
+            lte: '2026-04-20T11:00:00.000Z',
+          },
+        ],
+        expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+      };
+
+      const total = await generateEvents({
+        maintenanceWindowsSO: [
+          finishedMaintenanceWindowMock,
+          nonRecurringMaintenanceWindowMock,
+          upcomingMaintenanceWindowMock,
+          runningMaintenanceWindowMock,
+        ],
+        startRangeDate: '2025-04-23T09:00:00.000Z',
+      });
+
+      expect(total).toEqual([
+        {
+          id: '3',
+          ...upcomingMaintenanceWindowAttributes,
+          eventEndTime: '2025-04-20T17:00:00.000Z',
+          eventStartTime: '2025-04-20T09:00:00.000Z',
+          status: 'finished',
+        },
+        {
+          id: '4',
+          eventEndTime: '2025-04-23T17:00:00.000Z',
+          eventStartTime: '2025-04-23T05:00:00.000Z',
+          status: 'running',
+          ...runningMaintenanceWindowMock.attributes,
+          expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+          events: [
+            {
+              gte: '2026-04-23T05:00:00.000Z',
+              lte: '2026-04-23T13:00:00.000Z',
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe('updateMaintenanceWindowsEvents', () => {
+    test('should not update any maintenance windows when there are none', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [],
+      });
+      const total = await updateMaintenanceWindowsEvents({
+        logger,
+        savedObjectsClient: internalSavedObjectsRepository,
+        filter: statusFilter as KueryNode,
+        startRangeDate: '2025-04-23T09:00:00.000Z',
+      });
+
+      expect(internalSavedObjectsRepository.bulkUpdate).not.toHaveBeenCalled();
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
     });
 
-    test('should generate single events set', async () => {
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
-        maintenanceWindowsSO: [
+    test('should update single maintenance window', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
           {
             ...finishedWithEventsMaintenanceWindowMock,
             attributes: {
@@ -394,137 +474,187 @@ describe('Maintenance window events generator task', () => {
             },
           },
         ],
+      });
+
+      internalSavedObjectsRepository.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '5',
+            type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+            attributes: {
+              ...finishedWithEventsMaintenanceWindowMock.attributes,
+              events: [
+                {
+                  gte: '2025-04-28T00:00:00.011Z',
+                  lte: '2025-04-28T02:00:00.011Z',
+                },
+              ],
+              expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+            },
+            references: [],
+          },
+        ],
+      });
+      const total = await updateMaintenanceWindowsEvents({
+        filter: statusFilter as KueryNode,
         startRangeDate: '2025-04-23T09:00:00.000Z',
         logger,
         savedObjectsClient: internalSavedObjectsRepository,
       });
 
-      expect(internalSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
-      expect(internalSavedObjectsRepository.update).toHaveBeenNthCalledWith(
-        1,
-        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        '5',
+      expect(internalSavedObjectsRepository.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(internalSavedObjectsRepository.bulkUpdate).toHaveBeenNthCalledWith(1, [
         {
-          ...finishedWithEventsMaintenanceWindowMock.attributes,
-          rRule: {
-            ...finishedWithEventsMaintenanceWindowMock.attributes.rRule,
-            count: 5,
-          },
-          events: [
-            ...finishedWithEventsMaintenanceWindowMock.attributes.events,
-            {
-              gte: '2025-04-28T00:00:00.011Z',
-              lte: '2025-04-28T02:00:00.011Z',
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          id: '5',
+          attributes: {
+            ...finishedWithEventsMaintenanceWindowMock.attributes,
+            rRule: {
+              ...finishedWithEventsMaintenanceWindowMock.attributes.rRule,
+              count: 5,
             },
-          ],
-          expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
-        }
-      );
+            events: [
+              {
+                gte: '2025-04-28T00:00:00.011Z',
+                lte: '2025-04-28T02:00:00.011Z',
+              },
+            ],
+            expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+          },
+        },
+      ]);
       expect(total).toEqual(1);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "1"`);
     });
 
     test('should update multiple maintenance windows with new events', async () => {
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
-        maintenanceWindowsSO: [
-          finishedMaintenanceWindowMock,
-          nonRecurringMaintenanceWindowMock,
-          upcomingMaintenanceWindowMock,
-          runningMaintenanceWindowMock,
+      const upcomingMaintenanceWindowAttributes = {
+        ...upcomingMaintenanceWindowMock.attributes,
+        events: [
+          {
+            gte: '2025-05-20T09:00:00.000Z',
+            lte: '2025-05-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-06-20T09:00:00.000Z',
+            lte: '2025-06-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-07-20T09:00:00.000Z',
+            lte: '2025-07-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-08-20T09:00:00.000Z',
+            lte: '2025-08-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-09-20T09:00:00.000Z',
+            lte: '2025-09-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-10-20T09:00:00.000Z',
+            lte: '2025-10-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-11-20T09:00:00.000Z',
+            lte: '2025-11-20T11:00:00.000Z',
+          },
+          {
+            gte: '2025-12-20T09:00:00.000Z',
+            lte: '2025-12-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-01-20T09:00:00.000Z',
+            lte: '2026-01-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-02-20T09:00:00.000Z',
+            lte: '2026-02-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-03-20T09:00:00.000Z',
+            lte: '2026-03-20T11:00:00.000Z',
+          },
+          {
+            gte: '2026-04-20T09:00:00.000Z',
+            lte: '2026-04-20T11:00:00.000Z',
+          },
         ],
+        expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+      };
+
+      mockCreatePointInTimeFinderAsInternalUser();
+
+      internalSavedObjectsRepository.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '3',
+            type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+            attributes: upcomingMaintenanceWindowAttributes,
+            references: [],
+          },
+          {
+            type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+            id: '4',
+            attributes: {
+              ...runningMaintenanceWindowMock.attributes,
+              expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+              events: [
+                {
+                  gte: '2026-04-23T05:00:00.000Z',
+                  lte: '2026-04-23T13:00:00.000Z',
+                },
+              ],
+            },
+            references: [],
+          },
+        ],
+      });
+
+      const total = await updateMaintenanceWindowsEvents({
+        filter: statusFilter as KueryNode,
         startRangeDate: '2025-04-23T09:00:00.000Z',
         logger,
         savedObjectsClient: internalSavedObjectsRepository,
       });
 
-      expect(internalSavedObjectsRepository.update).toHaveBeenCalledTimes(2);
-      expect(internalSavedObjectsRepository.update).toHaveBeenNthCalledWith(
-        1,
-        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        '3',
+      expect(internalSavedObjectsRepository.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(internalSavedObjectsRepository.bulkUpdate).toHaveBeenNthCalledWith(1, [
         {
-          ...upcomingMaintenanceWindowMock.attributes,
-          events: [
-            ...upcomingMaintenanceWindowMock.attributes.events,
-            {
-              gte: '2025-05-20T09:00:00.000Z',
-              lte: '2025-05-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-06-20T09:00:00.000Z',
-              lte: '2025-06-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-07-20T09:00:00.000Z',
-              lte: '2025-07-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-08-20T09:00:00.000Z',
-              lte: '2025-08-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-09-20T09:00:00.000Z',
-              lte: '2025-09-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-10-20T09:00:00.000Z',
-              lte: '2025-10-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-11-20T09:00:00.000Z',
-              lte: '2025-11-20T11:00:00.000Z',
-            },
-            {
-              gte: '2025-12-20T09:00:00.000Z',
-              lte: '2025-12-20T11:00:00.000Z',
-            },
-            {
-              gte: '2026-01-20T09:00:00.000Z',
-              lte: '2026-01-20T11:00:00.000Z',
-            },
-            {
-              gte: '2026-02-20T09:00:00.000Z',
-              lte: '2026-02-20T11:00:00.000Z',
-            },
-            {
-              gte: '2026-03-20T09:00:00.000Z',
-              lte: '2026-03-20T11:00:00.000Z',
-            },
-            {
-              gte: '2026-04-20T09:00:00.000Z',
-              lte: '2026-04-20T11:00:00.000Z',
-            },
-          ],
-          expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
-        }
-      );
-      expect(internalSavedObjectsRepository.update).toHaveBeenNthCalledWith(
-        2,
-        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        '4',
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          id: '3',
+          attributes: upcomingMaintenanceWindowAttributes,
+        },
         {
-          ...runningMaintenanceWindowMock.attributes,
-          expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
-          events: [
-            ...runningMaintenanceWindowMock.attributes.events,
-            {
-              gte: '2026-04-23T05:00:00.000Z',
-              lte: '2026-04-23T13:00:00.000Z',
-            },
-          ],
-        }
-      );
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          id: '4',
+          attributes: {
+            ...runningMaintenanceWindowMock.attributes,
+            expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+            events: [
+              {
+                gte: '2026-04-23T05:00:00.000Z',
+                lte: '2026-04-23T13:00:00.000Z',
+              },
+            ],
+          },
+        },
+      ]);
       expect(total).toEqual(2);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "2"`);
     });
 
     test('should handle errors during update', async () => {
-      internalSavedObjectsRepository.update.mockRejectedValueOnce(
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [runningMaintenanceWindowMock],
+      });
+
+      internalSavedObjectsRepository.bulkUpdate.mockRejectedValueOnce(
         new Error('something went wrong')
       );
 
-      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
-        maintenanceWindowsSO: [runningMaintenanceWindowMock],
+      const total = await updateMaintenanceWindowsEvents({
+        filter: statusFilter as KueryNode,
         startRangeDate: '2025-05-23T09:00:00.000Z',
         logger,
         savedObjectsClient: internalSavedObjectsRepository,

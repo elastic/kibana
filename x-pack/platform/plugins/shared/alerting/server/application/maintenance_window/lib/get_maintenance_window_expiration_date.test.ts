@@ -5,40 +5,8 @@
  * 2.0.
  */
 
-import { getMaintenanceWindowExpirationDate } from './get_maintenance_window_expiration_date';
-import type { DateRange } from '../../../../common';
 import { Frequency } from '@kbn/rrule';
-
-const events: DateRange[] = [
-  {
-    gte: '2023-03-25T00:00:00.000Z',
-    lte: '2023-03-25T01:00:00.000Z',
-  },
-  {
-    gte: '2023-03-26T00:00:00.000Z',
-    lte: '2023-03-26T01:00:00.000Z',
-  },
-  {
-    gte: '2023-03-27T00:00:00.000Z',
-    lte: '2023-03-27T01:00:00.000Z',
-  },
-  {
-    gte: '2023-03-28T00:00:00.000Z',
-    lte: '2023-03-28T01:00:00.000Z',
-  },
-  {
-    gte: '2023-03-29T00:00:00.000Z',
-    lte: '2023-03-29T01:00:00.000Z',
-  },
-  {
-    gte: '2023-03-30T00:00:00.000Z',
-    lte: '2023-03-30T01:00:00.000Z',
-  },
-  {
-    gte: '2023-03-31T00:00:00.000Z',
-    lte: '2023-03-31T01:00:00.000Z',
-  },
-];
+import { getMaintenanceWindowExpirationDate } from './get_maintenance_window_expiration_date';
 
 describe('getMaintenanceWindowExpirationDate', () => {
   beforeAll(() => {
