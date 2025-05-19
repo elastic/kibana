@@ -66,18 +66,18 @@ import {
 } from '@kbn/ml-common-constants/app';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { isFullLicense } from '@kbn/ml-license/is_full_license';
+import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { getElasticModels } from './application/services/get_elastic_models';
 import { getMlLocator } from './locator/get_ml_locator';
-import { isFullLicense } from '../common/license/is_full_license';
-import { isMlEnabled } from '../common/license/is_ml_enabled';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import type { getMlManagementLocator } from './locator/get_ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
-import type { ITelemetryClient } from './application/services/telemetry/types';
 import { registerEmbeddables } from './embeddables';
 
 export interface MlStartDependencies {

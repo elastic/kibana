@@ -38,6 +38,8 @@ import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '@kbn/ml-common-constants/settings';
 import { ML_ANOMALY_EXPLORER_PANELS } from '@kbn/ml-common-types/storage';
+import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -74,10 +76,9 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import { useToastNotificationService } from '../services/toast_notification_service';
-import { useMlKibana, useMlLocator } from '../contexts/kibana';
+import { useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { AlertsPanel } from './alerts';
-import { useMlIndexUtils } from '../util/index_service';
 import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
 
@@ -115,7 +116,7 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
 }) => (
   <>
     <EuiPageHeader>
-      <EuiPageHeaderSection style={{ width: '100%' }}>
+      <EuiPageHeaderSection css={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
         {indexPattern && updateLanguage ? (
@@ -576,7 +577,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             </EuiTitle>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+          <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
             <AnomalyContextMenu
               selectedJobs={selectedJobs!}
               mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}

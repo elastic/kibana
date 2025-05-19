@@ -34,13 +34,11 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { MlServicesContext } from '@kbn/ml-services/get_services';
+import type { MlGlobalServices } from '@kbn/ml-services/get_services';
 
 export interface MlServicesContext {
   mlServices: MlGlobalServices;
 }
-
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 interface StartPlugins {
   cases?: CasesPublicStart;

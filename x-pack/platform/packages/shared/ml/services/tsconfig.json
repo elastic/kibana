@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/ml-common-types",
     "@kbn/i18n",
-    "@kbn/ml-kibana-context",
     "@kbn/ml-license",
     "@kbn/field-formats-plugin",
     "@kbn/core",
@@ -37,7 +36,7 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-parse-interval",
-    "@kbn/ml-services",
     "@kbn/analytics",
+    "@kbn/ml-common-utils",
   ]
 }

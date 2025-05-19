@@ -22,5 +22,6 @@
     "@kbn/ml-common-types",
     "@kbn/ml-saved-objects",
     "@kbn/ml-common-constants",
+    "@kbn/ml-error-utils",
   ]
 }
