@@ -432,7 +432,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(executionStatus).to.be('active');
       });
 
-      /* Adjust when we add backwards compatibility support for `stackAlerts` consumer in serverless.
+      /*
        * It indeed SHOULD be visible in serverless
        * It SHOULD NOT be visible in stateful */
       it('should be visible from logs role', async () => {
