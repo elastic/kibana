@@ -122,14 +122,15 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           isOpen={state.isPopoverOpen}
           closePopover={handleClosePopover}
           anchorPosition="rightDown"
-          panelPaddingSize="l"
+          panelPaddingSize="none"
           panelStyle={{
             width: '100%',
           }}
           button={
+            // TODO: temporary ui - waiting for UX feedback
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-                <div className="eui-textTruncate" title={valueText || NO_SCRIPT_SELECTED}>
+              <EuiFlexItem grow={false} onClick={handleOpenPopover}>
+                <div title={valueText || NO_SCRIPT_SELECTED}>
                   {valueText || INITIAL_DISPLAY_LABEL}
                 </div>
               </EuiFlexItem>
@@ -138,6 +139,10 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
         >
           {state.isPopoverOpen && (
             <EuiComboBox
+              onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+                // Necessary to move focus to the popover's input when it opens so we can type right away
+                event.stopPropagation();
+              }}
               id="options-combobox"
               aria-label="Select a custom script"
               placeholder="Select a single option"

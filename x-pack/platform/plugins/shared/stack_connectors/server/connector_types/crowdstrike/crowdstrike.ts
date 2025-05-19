@@ -25,6 +25,7 @@ import type {
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
+  CrowdstrikeGetScriptsResponse,
 } from '../../../common/crowdstrike/types';
 import type { CrowdstrikeGetTokenResponseSchema } from '../../../common/crowdstrike/schema';
 import { CrowdstrikeGetScriptsResponseSchema } from '../../../common/crowdstrike/schema';
@@ -76,7 +77,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     batchExecuteRTR: string;
     batchActiveResponderExecuteRTR: string;
     batchAdminExecuteRTR: string;
-    getRTRCloudScriptsDetails: string;
+    getRTRCloudScripts: string;
   };
 
   constructor(
@@ -95,7 +96,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       batchExecuteRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
       batchActiveResponderExecuteRTR: `${this.config.url}/real-time-response/combined/batch-active-responder-command/v1`,
       batchAdminExecuteRTR: `${this.config.url}/real-time-response/combined/batch-admin-command/v1`,
-      getRTRCloudScriptsDetails: `${this.config.url}/real-time-response/entities/scripts/v1`,
+      getRTRCloudScripts: `${this.config.url}/real-time-response/entities/scripts/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -371,12 +372,12 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   public async getRTRCloudScripts(
-    payload: CrowdstrikeGetAgentsParams,
+    payload: unknown,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
+  ): Promise<CrowdstrikeGetScriptsResponse> {
     return this.crowdstrikeApiRequest(
       {
-        url: this.urls.getRTRCloudScriptsDetails,
+        url: this.urls.getRTRCloudScripts,
         method: 'GET',
         paramsSerializer,
         responseSchema: CrowdstrikeGetScriptsResponseSchema,
