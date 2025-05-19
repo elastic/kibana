@@ -28,6 +28,18 @@ jest.mock('../hooks', () => ({
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
 describe('RuleDetails', () => {
+  beforeAll(() => {
+    class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+
+    // this only sets the mock polyfill for this test file's env
+    // we delete it in `afterAll` as well
+    globalThis.ResizeObserver = ResizeObserver;
+  });
+
   beforeEach(() => {
     useRuleFormState.mockReturnValue({
       formData: {
@@ -40,6 +52,12 @@ describe('RuleDetails', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  afterAll(() => {
+    if ('ResizeObserver' in globalThis) {
+      delete (globalThis as any).ResizeObserver;
+    }
   });
 
   test('Renders correctly', () => {

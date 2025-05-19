@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -17,9 +17,13 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { RULE_NAME_INPUT_TITLE, RULE_TAG_INPUT_TITLE, RULE_TAG_PLACEHOLDER } from '../translations';
+import {
+  RULE_INVESTIGATION_GUIDE_LABEL,
+  RULE_NAME_INPUT_TITLE,
+  RULE_TAG_INPUT_TITLE,
+  RULE_TAG_PLACEHOLDER,
+} from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from '../rule_definition/rule_investigation_guide_editor';
@@ -89,14 +93,9 @@ export const RuleDetails = () => {
     [dispatch, formData.artifacts]
   );
 
-  const {
-    ref,
-    size: { width },
-  } = useContainerRef();
-
   return (
     <>
-      <EuiFlexGroup ref={ref} direction={width > RULE_DETAIL_MIN_ROW_WIDTH ? 'row' : 'column'}>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             data-test-subj="ruleDetails"
@@ -136,13 +135,7 @@ export const RuleDetails = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('responseOpsRuleForm.investigationGuide.editor.title', {
-          defaultMessage: 'Investigation Guide',
-        })}
-        labelAppend={OptionalFieldLabel}
-      >
+      <EuiFormRow fullWidth label={RULE_INVESTIGATION_GUIDE_LABEL} labelAppend={OptionalFieldLabel}>
         <InvestigationGuideEditor
           setRuleParams={onSetArtifacts}
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
@@ -152,23 +145,3 @@ export const RuleDetails = () => {
     </>
   );
 };
-
-function useContainerRef() {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setSize({ width, height });
-    });
-
-    observer.observe(ref.current);
-
-    return observer.disconnect;
-  }, []);
-
-  return { ref, size };
-}
