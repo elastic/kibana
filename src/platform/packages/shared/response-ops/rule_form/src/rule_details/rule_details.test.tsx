@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, configure } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleDetails } from './rule_details';
 
@@ -21,8 +21,6 @@ jest.mock('../hooks', () => ({
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
-configure({ testIdAttribute: 'data-test-subj' });
-
 describe('RuleDetails', () => {
   beforeAll(() => {
     class ResizeObserver {
@@ -31,7 +29,8 @@ describe('RuleDetails', () => {
       disconnect() {}
     }
 
-    // Only override it for this test file
+    // this only sets the mock polyfill for this test file's env
+    // we delete it in `afterAll` as well
     globalThis.ResizeObserver = ResizeObserver;
   });
 
