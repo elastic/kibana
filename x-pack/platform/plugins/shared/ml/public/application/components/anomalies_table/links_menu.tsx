@@ -48,7 +48,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
 import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
