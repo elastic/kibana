@@ -7,7 +7,6 @@
 
 // Service for obtaining data for the ML Results dashboards.
 
-import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type {
   MlAnomalyRecordDoc,
@@ -26,7 +25,6 @@ import type {
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { PartitionFieldsConfig } from '@kbn/ml-common-types/storage';
 import type { ExplorerChartsData } from '@kbn/ml-common-types/results';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import type { HttpService } from '../http_service';
 import type { CriteriaField } from '../results_service';
@@ -247,15 +245,3 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 });
 
 export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
-
-/**
- * Hooks for accessing {@link ResultsApiService} in React components.
- */
-export function useResultsApiService(): ResultsApiService {
-  const {
-    services: {
-      mlServices: { httpService },
-    },
-  } = useMlKibana();
-  return useMemo(() => resultsApiProvider(httpService), [httpService]);
-}

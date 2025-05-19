@@ -10,7 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+import type { trainedModelsApiProvider } from '@kbn/ml-services/ml_api_service/trained_models';
 import type { INPUT_TYPE } from '../inference_base';
 import { InferenceBase } from '../inference_base';
 import { processInferenceResult, processResponse } from './common';
@@ -18,7 +19,6 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 
 import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
-import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
