@@ -36,9 +36,6 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   monitoring_alert_license_expiration: { type: 'long' },
   monitoring_alert_logstash_version_mismatch: { type: 'long' },
   monitoring_alert_nodes_changed: { type: 'long' },
-  // Rules
-  rule_snooze_status: { type: 'long' },
-  rule_mute_status: { type: 'long' },
   // Security Solution
   siem__signals: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   siem__notifications: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
