@@ -79,8 +79,6 @@ export class RuleMigrationSpaceIndexMigrator {
       },
     ]);
 
-    this.logger.warn(`\n\n\n ${JSON.stringify({ createOperations }, null, 2)} \n\n\n`);
-
     return this.esClient.bulk({
       refresh: 'wait_for',
       operations: createOperations,

@@ -29,11 +29,8 @@ export const useInstallMigrationRule = (migrationId: string) => {
   const { telemetry } = useKibana().services.siemMigrations.rules;
 
   const reportTelemetry = useCallback(
-    (
-      { migrationRule: ruleMigration, enabled = false }: InstallMigrationRuleParams,
-      error?: Error
-    ) => {
-      telemetry.reportTranslatedRuleInstall({ migrationRule: ruleMigration, enabled, error });
+    ({ migrationRule, enabled = false }: InstallMigrationRuleParams, error?: Error) => {
+      telemetry.reportTranslatedRuleInstall({ migrationRule, enabled, error });
     },
     [telemetry]
   );
