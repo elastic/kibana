@@ -28,9 +28,10 @@ import type { UrlStateService } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { MlJobService } from '../services/job_service';
-import type { MlApi } from '../services/ml_api_service';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { MlJobService } from '@kbn/ml-services/job_service';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { TableSeverityState } from '../components/controls/select_severity';
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
@@ -43,7 +44,6 @@ import {
   getSelectionJobIds,
   getSelectionTimeRange,
 } from './explorer_utils';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { MAX_CATEGORY_EXAMPLES } from './explorer_constants';
 import {
   isModelPlotChartableForDetector,
