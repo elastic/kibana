@@ -6,6 +6,7 @@
  */
 
 import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
+import { bedrockConnectorAPIPayload } from '../tasks/api_calls/connectors';
 
 export const ONBOARDING_SIEM_MIGRATION_TOPIC = getDataTestSubjectSelector('siem_migrations');
 
@@ -61,8 +62,6 @@ export const RULE_MIGRATION_PROGRESS_BAR_TEXT = `${RULE_MIGRATION_PROGRESS_BAR} 
 
 export const REPROCESS_FAILED_RULES_BTN = getDataTestSubjectSelector('reprocessFailedRulesButton');
 
-export const FAKE_BEDROCK_CONNECTOR_NAME = 'bedrock fake';
-
 export const FAKE_BEDROCK_SELECTOR = getDataTestSubjectSelector(
-  `connector-${FAKE_BEDROCK_CONNECTOR_NAME}`
+  `connector-${bedrockConnectorAPIPayload.name}`
 );

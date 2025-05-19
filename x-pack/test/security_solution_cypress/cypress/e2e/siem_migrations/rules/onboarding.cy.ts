@@ -10,7 +10,9 @@ import {
   RULE_MIGRATIONS_GROUP_PANEL,
   RULE_MIGRATION_PROGRESS_BAR,
 } from '../../../screens/siem_migrations';
-import { cleanMigrationData } from '../../../tasks/api_calls/siem_migration';
+import { deleteConnectors } from '../../../tasks/api_calls/common';
+import { createBedrockConnector } from '../../../tasks/api_calls/connectors';
+import { cleanMigrationData } from '../../../tasks/api_calls/siem_migrations';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -70,55 +72,50 @@ export const SPLUNK_TEST_RULES = [
 describe(
   'Rule Migrations - Basic Workflow',
   {
-    tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.actions.preconfigured=${JSON.stringify({
-            fakeBedRock: {
-              actionTypeId: '.bedrock',
-              config: {
-                apiUrl: 'someAPi',
-                defaultModel: 'someModel',
-              },
-              name: 'bedrock fake',
-              secrets: {
-                accessKey: 'accessKey',
-                secret: 'secret',
-              },
-            },
-          })}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless', '@serverlessQA'],
   },
   () => {
     beforeEach(() => {
+      deleteConnectors();
+      cy.task('esArchiverLoad', {
+        archiveName: 'siem_migrations/rules',
+      });
+
+      cy.task('esArchiverLoad', {
+        archiveName: 'siem_migrations/rule_migrations',
+      });
       login();
-      cleanMigrationData();
+      createBedrockConnector();
       visit(GET_STARTED_URL);
     });
-    it('should be able to create migrations', () => {
-      selectMigrationConnector();
-      openUploadRulesFlyout();
-      uploadRules(SPLUNK_TEST_RULES);
-      startMigrationFromFlyout();
-      cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
-        cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
-        cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
+
+    after(() => {
+      cy.task('esArchiverUnload', {
+        archiveName: 'siem_migrations/rules',
+      });
+
+      cy.task('esArchiverUnload', {
+        archiveName: 'siem_migrations/rule_migrations',
+      });
+    });
+
+    context('First Migration', () => {
+      beforeEach(() => {
+        cleanMigrationData();
+      });
+      it('should be able to create migrations', () => {
+        selectMigrationConnector();
+        openUploadRulesFlyout();
+        uploadRules(SPLUNK_TEST_RULES);
+        startMigrationFromFlyout();
+        cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
+          cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+          cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
+        });
       });
     });
 
     context('On Successful Translation', () => {
-      beforeEach(() => {
-        cy.task('esArchiverLoad', {
-          archiveName: 'siem_migrations/rules',
-        });
-
-        cy.task('esArchiverLoad', {
-          archiveName: 'siem_migrations/rule_migrations',
-        });
-      });
       context('Migration Results', () => {
         it('should be able to see the result of the completed migration', () => {
           selectMigrationConnector();

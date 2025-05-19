@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import { RULES_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
+import { openNavigationPanel } from '../screens/serverless_security_header';
 import * as SELECTORS from '../screens/siem_migrations';
+import { bedrockConnectorAPIPayload } from './api_calls/connectors';
+
+export const navigateToTranslatedRulesPage = () => {
+  openNavigationPanel(RULES_PANEL_BTN);
+  cy.get(TRANSLATED_RULES_PAGE).click();
+};
 
 export const toggleSiemMigrationsCard = () => {
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.AI_CONNECTORS).click();
@@ -18,7 +26,7 @@ export const selectMigrationConnector = () => {
   cy.get(SELECTORS.FAKE_BEDROCK_SELECTOR).click();
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.SELECT_CONNECTORS).should(
     'have.text',
-    'bedrock fake'
+    bedrockConnectorAPIPayload.name
   );
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.AI_CONNECTORS).within(() => {
     cy.get('[title = "Completed"]').should('exist');

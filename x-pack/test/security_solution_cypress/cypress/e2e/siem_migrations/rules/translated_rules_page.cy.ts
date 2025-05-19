@@ -13,6 +13,8 @@ import {
   TRANSLATED_RULE_RESULT_BADGE,
   TRANSLATED_RULES_RESULT_TABLE,
 } from '../../../screens/siem_migrations';
+import { deleteConnectors } from '../../../tasks/api_calls/common';
+import { createBedrockConnector } from '../../../tasks/api_calls/connectors';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -21,37 +23,18 @@ import {
   saveUpdatedTranslatedRuleQuery,
   selectMigrationConnector,
   updateTranslatedRuleQuery,
+  navigateToTranslatedRulesPage,
 } from '../../../tasks/siem_migrations';
-import { GET_STARTED_URL, SIEM_MIGRATIONS_TRANSLATED_RULES_URL } from '../../../urls/navigation';
+import { GET_STARTED_URL } from '../../../urls/navigation';
 
 describe(
   'Rule Migrations - Translated Rules Page',
   {
-    tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.actions.preconfigured=${JSON.stringify({
-            fakeBedRock: {
-              actionTypeId: '.bedrock',
-              config: {
-                apiUrl: 'someAPi',
-                defaultModel: 'someModel',
-              },
-              name: 'bedrock fake',
-              secrets: {
-                accessKey: 'accessKey',
-                secret: 'secret',
-              },
-            },
-          })}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless', '@serverlessQA'],
   },
   () => {
     beforeEach(() => {
-      login();
+      deleteConnectors();
       cy.task('esArchiverLoad', {
         archiveName: 'siem_migrations/rules',
       });
@@ -59,9 +42,12 @@ describe(
       cy.task('esArchiverLoad', {
         archiveName: 'siem_migrations/rule_migrations',
       });
+
+      createBedrockConnector();
+      login();
       visit(GET_STARTED_URL);
       selectMigrationConnector();
-      visit(SIEM_MIGRATIONS_TRANSLATED_RULES_URL);
+      navigateToTranslatedRulesPage();
     });
 
     after(() => {
