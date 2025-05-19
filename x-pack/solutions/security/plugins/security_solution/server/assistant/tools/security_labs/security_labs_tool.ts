@@ -53,17 +53,25 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           let reference: ContentReference | undefined;
           try {
             const yamlString = doc.pageContent.split('---')[1];
-            const parsed = yaml.load(yamlString);
+            const parsed = yaml.load(yamlString) as {
+              slug: string | undefined;
+              title: string | undefined;
+            };
             const slug = parsed.slug;
             const title = parsed.title;
+
+            if (!slug || !title) {
+              throw new Error('Slug or title not found in YAML');
+            }
+
             reference = contentReferencesStore.add((p) =>
               hrefReference(
                 p.id,
                 `https://www.elastic.co/security-labs/${slug}`,
-                title ? `Security Labs: ${title}` : undefined
+                `Security Labs: ${title}`
               )
             );
-          } catch (e) {
+          } catch (_error) {
             reference = contentReferencesStore.add((p) =>
               knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
             );
