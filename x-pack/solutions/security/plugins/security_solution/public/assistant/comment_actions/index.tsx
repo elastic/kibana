@@ -66,7 +66,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     });
 
     toasts.addSuccess(i18n.ADDED_NOTE_TO_TIMELINE);
-  }, [associateNote, content, toasts, updateNote]);
+  }, [associateNote, content, toasts, updateNote, selfContainedContent]);
 
   // Attach to case support
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -84,7 +84,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
         },
       ],
     });
-  }, [content, selectCaseModal]);
+  }, [content, selectCaseModal, selfContainedContent]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
