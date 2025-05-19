@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { isStringValidJSON } from './utils';
+import { isNotFoundError } from './utils';
 
-describe('isStringValidJSON', () => {
-  it('should return true for valid JSON strings', () => {
-    expect(isStringValidJSON('{"key": "value"}')).toBe(true);
-    expect(isStringValidJSON('{"key": 123}')).toBe(true);
-    expect(isStringValidJSON('{"key": true}')).toBe(true);
-    expect(isStringValidJSON('{"key": null}')).toBe(true);
-    expect(isStringValidJSON('[]')).toBe(true);
+describe('isNotFoundError', () => {
+  it('should return true if message has key found with value false', () => {
+    expect(isNotFoundError(new Error('{"key": "value", "found": false}'))).toBe(true);
   });
 
   it('should return false for invalid JSON strings', () => {
-    expect(isStringValidJSON('{key: "value"}')).toBe(false);
-    expect(isStringValidJSON('Some Non JSON String')).toBe(false);
+    expect(isNotFoundError(new Error('{key: "value"}'))).toBe(false);
+    expect(isNotFoundError(new Error('Some Non JSON String'))).toBe(false);
+  });
+
+  it('should return false if message does not have key `found` or it is `true`', () => {
+    expect(isNotFoundError(new Error('{"message": {key: "value", "found": true}}'))).toBe(false);
+    expect(isNotFoundError(new Error('{"message": {key: "value"}}'))).toBe(false);
   });
 });
