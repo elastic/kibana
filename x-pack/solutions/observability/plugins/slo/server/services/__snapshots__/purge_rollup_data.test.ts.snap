@@ -126,6 +126,86 @@ exports[`purge rollup data happy path successfully makes a query to remove SLI d
 }
 `;
 
+exports[`purge rollup data happy path successfully makes a query to remove SLI data based on number of cycles - calendar aligned 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "slo.id": "test6",
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "2025-04-06T04:00:00.000Z",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data based on number of cycles - rolling 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "slo.id": "test7",
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "2025-04-09T04:00:00.000Z",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
 exports[`purge rollup data happy path successfully makes a query to remove SLI data older than 30 days 1`] = `
 [MockFunction] {
   "calls": Array [

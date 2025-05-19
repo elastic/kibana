@@ -105,6 +105,34 @@ describe('purge rollup data', () => {
 
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();
     });
+
+    it('successfully makes a query to remove SLI data based on number of cycles - calendar aligned', async () => {
+      const slo = createSLOWithCalendarTimeWindow({
+        id: 'test6',
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        list: ['test6'],
+        purgePolicy: { purgeType: 'elapsed_window', cycles: 2 },
+      });
+
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('successfully makes a query to remove SLI data based on number of cycles - rolling', async () => {
+      const slo = createSLO({
+        id: 'test7',
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        list: ['test7'],
+        purgePolicy: { purgeType: 'elapsed_window', cycles: 2 },
+      });
+
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
   });
 
   describe('error path', () => {
@@ -158,6 +186,24 @@ describe('purge rollup data', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+      );
+
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
+    });
+
+    it('fails to makes a query to remove SLI data with 0 cycles', async () => {
+      const slo = createSLOWithCalendarTimeWindow({
+        id: 'test4',
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await expect(
+        purgeRollupData.execute({
+          list: ['test4'],
+          purgePolicy: { purgeType: 'elapsed_window', cycles: 0 },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"The provided purge policy is invalid. The number of cycles must be greater than 0."`
       );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
