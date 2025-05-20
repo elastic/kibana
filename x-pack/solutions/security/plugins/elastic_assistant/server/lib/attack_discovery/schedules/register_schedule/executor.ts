@@ -85,6 +85,12 @@ export const attackDiscoveryScheduleExecutor = async ({
     savedObjectsClient,
   });
 
+  // Remove this when alerting framework adds a way to abort rule execution:
+  // https://github.com/elastic/kibana/issues/219152
+  if (services.shouldStopExecution()) {
+    throw new Error('Rule execution cancelled due to timeout');
+  }
+
   attackDiscoveries?.forEach((attack) => {
     const payload: AttackDiscoveryAlertDocumentBase = {
       [ECS_VERSION]: EcsVersion,
