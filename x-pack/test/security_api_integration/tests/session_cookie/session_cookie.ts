@@ -14,7 +14,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const config = getService('config');
 
   async function adminSessionCookie() {
     const response = await supertest
