@@ -7,8 +7,8 @@
 
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import numeral from '@elastic/numeral';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common/constants';
-import { isTikaType } from '../../../../../common/utils/tika_utils';
+import { FILE_SIZE_DISPLAY_FORMAT } from '../constants';
+import { isTikaType } from './tika_utils';
 
 export class FileSizeChecker {
   private _maxBytes: number;

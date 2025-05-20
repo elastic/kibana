@@ -11,8 +11,8 @@ import React from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { getTikaDisplayType } from '../../../../../common/utils/tika_utils';
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
+import { getTikaDisplayType } from '@kbn/file-upload-common/src/file_manager/tika_utils';
 
 interface Props {
   results: FindFileStructureResponse;

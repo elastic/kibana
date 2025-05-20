@@ -24,7 +24,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { FileUploadResults } from '../types';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 
@@ -35,7 +35,7 @@ import {
   getFormatClashes,
   getMappingClashInfo,
 } from './merge_tools';
-import { createUrlOverrides } from '../../../common/components/utils';
+import { createUrlOverrides } from '../utils';
 import { AutoDeploy } from './auto_deploy';
 
 export enum STATUS {
@@ -46,7 +46,7 @@ export enum STATUS {
   FAILED,
 }
 
-export interface Config<T> {
+export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
   json: T;
   string: string;
   valid: boolean;
@@ -99,8 +99,8 @@ export class FileUploadManager {
     valid: false,
     count: 0,
   });
-  public readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping | null>>({
-    json: null,
+  public readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping>>({
+    json: {},
     string: '',
     valid: false,
     count: 0,
@@ -141,14 +141,7 @@ export class FileUploadManager {
     existingIndexName: string | null = null,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
-    // eslint-disable-next-line no-console
-    console.log('FileUploadManager constructor');
     this.setExistingIndexName(existingIndexName);
-
-    // if (existingIndexName !== null) {
-    //   this.loadExistingIndexMappings();
-    //   this.autoCreateDataView = false;
-    // }
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
@@ -181,8 +174,6 @@ export class FileUploadManager {
 
         const { formatsOk, fileClashes } = this.getFormatClashes();
         const { mappingClashes, mergedMappings, existingIndexChecks } = this.createMergedMappings();
-        // eslint-disable-next-line no-console
-        console.log('existingIndexChecks', existingIndexChecks);
 
         let mappingsOk = mappingClashes.length === 0;
         if (existingIndexChecks !== undefined) {
@@ -409,7 +400,7 @@ export class FileUploadManager {
       }
     } else {
       config$.next({
-        json: config as IndicesIndexSettings | MappingTypeMapping,
+        json: config,
         string: '',
         valid: true,
         count: currentConfig.count + 1,

@@ -7,7 +7,7 @@
 
 import type { AnalysisResult, PreviewTikaResponse } from '@kbn/file-upload-plugin/common/types';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS } from '../constants';
 
 export async function analyzeTikaFile(
   data: ArrayBuffer,

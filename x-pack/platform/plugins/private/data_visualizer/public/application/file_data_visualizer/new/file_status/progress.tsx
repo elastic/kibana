@@ -6,8 +6,8 @@
  */
 
 import { EuiProgress } from '@elastic/eui';
+import type { FileAnalysis } from '@kbn/file-upload-common';
 import React from 'react';
-import type { FileAnalysis } from '../file_manager/file_wrapper';
 
 interface UploadProgressProps {
   fileStatus: FileAnalysis;

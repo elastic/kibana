@@ -8,13 +8,12 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import { useFileUpload, type FileUploadResults, FileUploadContext } from '@kbn/file-upload-common';
+import { FileUploadManager } from '@kbn/file-upload-common/src/file_manager';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 import type { GetAdditionalLinks } from '../common/components/results_links';
-import { FileUploadManager } from './new/file_manager';
-import { FileUploadContext, useFileUpload } from './new/use_file_upload';
 import { FileUploadView } from './new/file_upload_view';
 
 export interface Props {

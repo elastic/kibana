@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
-import type { FileAnalysis } from '../file_manager/file_wrapper';
+import type { FileAnalysis } from '@kbn/file-upload-common';
 
 interface Props {
   fileStatus: FileAnalysis;

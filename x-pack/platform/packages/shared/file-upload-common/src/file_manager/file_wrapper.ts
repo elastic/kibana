@@ -15,15 +15,12 @@ import type {
   InputOverrides,
 } from '@kbn/file-upload-plugin/common/types';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { isSupportedFormat } from '../../../../../common/constants';
-import { isTikaType } from '../../../../../common/utils/tika_utils';
-import { processResults, readFile } from '../../../common/components/utils';
+import { isTikaType } from './tika_utils';
+import { processResults, readFile, isSupportedFormat } from '../utils';
 
 import { STATUS } from './file_manager';
 import { analyzeTikaFile } from './tika_analyzer';
 import { FileSizeChecker } from './file_size_check';
-
-export type ServerSettings = ReturnType<typeof processResults> | null;
 
 interface FileSizeInfo {
   fileSize: number;

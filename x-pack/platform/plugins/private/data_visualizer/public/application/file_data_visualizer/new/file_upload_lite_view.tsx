@@ -22,15 +22,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
-
+import { useFileUploadContext, type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
+import { STATUS } from '@kbn/file-upload-common/src/file_manager';
 import { FileClashWarning } from './file_clash_warning';
-import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
-import { useFileUploadContext } from './use_file_upload';
 import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
 import type { GetAdditionalLinks } from '../../common/components/results_links';

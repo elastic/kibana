@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import type { AnalysisResult, InputOverrides } from '@kbn/file-upload-plugin/common';
 import type { FormattedOverrides } from '@kbn/file-upload-plugin/common/types';
-import { MB, FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
+import { MB, FILE_FORMATS, NO_TIME_FORMAT } from './constants';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;
@@ -149,4 +149,15 @@ export function processResults({ results, overrides }: AnalysisResult) {
     grokPattern: results.grok_pattern,
     linesToSample,
   };
+}
+
+export type ServerSettings = ReturnType<typeof processResults> | null;
+
+export function isSupportedFormat(format: string) {
+  return (
+    format === FILE_FORMATS.NDJSON ||
+    format === FILE_FORMATS.DELIMITED ||
+    format === FILE_FORMATS.SEMI_STRUCTURED_TEXT ||
+    format === FILE_FORMATS.TIKA
+  );
 }

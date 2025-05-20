@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CLASH_TYPE } from './file_manager/merge_tools';
-import { useFileUploadContext } from './use_file_upload';
+import { useFileUploadContext } from '@kbn/file-upload-common';
+import { CLASH_TYPE } from '@kbn/file-upload-common/src/file_manager';
 
 export const FileClashWarning: FC = () => {
   const { uploadStatus, fileUploadManager } = useFileUploadContext();

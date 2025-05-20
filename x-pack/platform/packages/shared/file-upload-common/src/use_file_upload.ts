@@ -6,14 +6,13 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import type { FileUploadResults } from '@kbn/file-upload-common';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types/src/types';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FileUploadManager } from './file_manager/file_manager';
-import { STATUS } from './file_manager/file_manager';
+import type { FileUploadResults } from '..';
+import { FileUploadManager, STATUS } from './file_manager/file_manager';
 import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
 
 export enum UPLOAD_TYPE {
