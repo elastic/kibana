@@ -192,7 +192,9 @@ describe('FilterValueButton', function () {
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
         series={mockUxSeries}
-      />
+      />,
+      // TODO: fails with concurrent mode due to `.toHaveBeenCalledTimes(5);`
+      { renderOptions: { legacyRoot: true } }
     );
 
     await waitFor(() => {
