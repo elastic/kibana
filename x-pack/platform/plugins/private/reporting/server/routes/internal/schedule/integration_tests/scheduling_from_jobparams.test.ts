@@ -243,7 +243,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
-          `"[request body.notification.email.to]: array size is [0], but cannot be smaller than [1]"`
+          `"[request body.notification.email]: At least one email address is required"`
         )
       );
   });
@@ -327,7 +327,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
         }),
         notification: {
           email: {
-            to: ['single@email.com'],
+            bcc: ['single@email.com'],
           },
         },
         schedule: { rrule: { freq: 1, interval: 2 } },
