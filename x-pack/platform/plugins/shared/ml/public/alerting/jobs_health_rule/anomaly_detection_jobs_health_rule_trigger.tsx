@@ -7,20 +7,23 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useDebounce from 'react-use/lib/useDebounce';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
 import { ALL_JOBS_SELECTION } from '@kbn/ml-common-constants/alerts';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { HttpService } from '@kbn/ml-services/http_service';
+import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+
 import { JobSelectorControl, type JobSelection } from '../job_selector';
-import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
-import { HttpService } from '../../application/services/http_service';
 import { TestsSelectionControl } from './tests_selection_control';
 
 export type MlAnomalyAlertTriggerProps =
