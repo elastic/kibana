@@ -14,7 +14,6 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { MonitoringEntitySourceResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { MonitoringEntitySourceDataClient } from '../monitoring_entity_source_data_client';
 import { MonitoringEntitySourceDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 
 export const monitoringEntitySourceRoute = (
