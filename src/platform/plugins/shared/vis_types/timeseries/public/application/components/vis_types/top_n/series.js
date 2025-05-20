@@ -27,6 +27,7 @@ import { SeriesDragHandler } from '../../series_drag_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
+import { seriesBodyStyles } from '../../_series_editor';
 
 export const TopNSeries = injectI18n(function (props) {
   const {
@@ -90,7 +91,7 @@ export const TopNSeries = injectI18n(function (props) {
       );
     }
     body = (
-      <div className="tvbSeries__body">
+      <div className="tvbSeries__body" css={seriesBodyStyles}>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
             <FormattedMessage
