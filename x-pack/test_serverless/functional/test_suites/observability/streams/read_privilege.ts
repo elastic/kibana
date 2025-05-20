@@ -24,6 +24,7 @@ const request: Streams.WiredStream.UpsertRequest = {
   dashboards: [],
   queries: [],
   stream: {
+    description: '',
     ingest: {
       lifecycle: { inherit: {} },
       processing: [],
