@@ -240,6 +240,12 @@ describe('v2 migration', () => {
       });
 
       describe('a migrator performing a compatible upgrade migration', () => {
+        it('updates mappings meta properties with the correct modelVersions (>=10.0.0)', async () => {
+          const res = await kit.client.indices.getMapping({ index: defaultKibanaTaskIndex });
+          const indexMeta = Object.values(res)[0].mappings._meta!;
+          expect(indexMeta.mappingVersions.task).toEqual('10.2.0');
+        });
+
         it('updates target mappings when mappings have changed', () => {
           expect(logs).toMatch(
             `[${defaultKibanaTaskIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`
@@ -292,6 +298,15 @@ describe('v2 migration', () => {
             expect(logs).not.toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED`);
             expect(logs).not.toMatch(`[${defaultKibanaIndex}] PREPARE_COMPATIBLE_MIGRATION`);
           });
+        });
+
+        it('updates mappings meta properties with the correct modelVersions (>=10.0.0)', async () => {
+          const res = await kit.client.indices.getMapping({ index: defaultKibanaIndex });
+          const indexMeta = Object.values(res)[0].mappings._meta!;
+          expect(indexMeta.mappingVersions.basic).toEqual('10.1.0');
+          expect(indexMeta.mappingVersions.complex).toEqual('10.2.0');
+          expect(indexMeta.mappingVersions.old).toEqual('10.0.0');
+          expect(indexMeta.mappingVersions.recent).toEqual('10.1.0');
         });
 
         describe('copies the right documents over to the target indices', () => {
