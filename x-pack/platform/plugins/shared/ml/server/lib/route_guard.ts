@@ -20,15 +20,13 @@ import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/serv
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { createExecutionContext } from '@kbn/ml-route-utils';
-
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
-import type { MLSavedObjectService } from '../saved_objects';
-import { mlSavedObjectServiceFactory } from '../saved_objects';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects/service';
 import type { MlLicense } from '@kbn/ml-license';
-
 import type { MlClient } from '@kbn/ml-client';
+import { mlSavedObjectServiceFactory } from '@kbn/ml-saved-objects/service';
+import { MlAuditLogger, getMlClient } from '@kbn/ml-client';
 
-import { MlAuditLogger, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
