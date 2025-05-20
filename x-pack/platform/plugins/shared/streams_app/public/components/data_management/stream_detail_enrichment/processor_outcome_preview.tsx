@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
-  EuiFlexGroup,
+  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiEmptyPrompt,
+  EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
-import { PreviewTable } from '../preview_table';
+import React, { useMemo } from 'react';
 import { AssetImage } from '../../asset_image';
-import {
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
-} from './state_management/stream_enrichment_state_machine';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+} from './state_management/stream_enrichment_state_machine';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(

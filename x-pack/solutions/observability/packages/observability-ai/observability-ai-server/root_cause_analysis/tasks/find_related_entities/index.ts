@@ -10,9 +10,9 @@ import { Logger } from '@kbn/logging';
 import {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
-} from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+} from '@kbn/genai-utils-common/log_analysis/document_analysis';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_analysis/get_log_patterns';
 import {
   analyzeFetchedRelatedEntities,
   RelatedEntityFromSearchResults,

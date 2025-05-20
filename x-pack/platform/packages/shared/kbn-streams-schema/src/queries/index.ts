@@ -24,16 +24,6 @@ export interface StreamQueryKql extends StreamQueryBase {
 
 export type StreamQuery = StreamQueryKql;
 
-export interface StreamGetResponseBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
-
-export interface StreamUpsertRequestBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
-
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
