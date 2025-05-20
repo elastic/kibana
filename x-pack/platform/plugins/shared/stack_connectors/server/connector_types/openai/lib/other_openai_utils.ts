@@ -62,7 +62,7 @@ interface SSLOverridesInput {
   verificationMode?: 'full' | 'certificate' | 'none';
 }
 
-const getFilePath = (file?: string | string[]) => (Array.isArray(file) ? file[0] : file);
+const getFilePath = (file: string | string[]) => (Array.isArray(file) ? file[0] : file);
 
 const validateFile = (path: string, description: string) => {
   if (!fs.existsSync(path)) {
@@ -176,43 +176,52 @@ export const pkiErrorHandler = (error: AxiosError): string | undefined => {
 };
 
 export const pkiConfigValidator = (configObject: Config): void => {
-  // Ensure certificate pair is provided
-  if (!configObject.certificateFile && !configObject.certificateData) {
-    throw new Error('Either certificate file or certificate data must be provided for PKI');
-  }
-  if (!configObject.privateKeyFile && !configObject.privateKeyData) {
-    throw new Error('Either private key file or private key data must be provided for PKI');
-  }
-
-  // Validate file extensions for file paths
-  if (configObject.certificateFile) {
-    const certFile = Array.isArray(configObject.certificateFile)
-      ? configObject.certificateFile[0]
-      : configObject.certificateFile;
-    if (!certFile.endsWith('.pem')) {
-      throw new Error('Certificate file must end with .pem');
-    }
-  }
-  if (configObject.privateKeyFile) {
-    const keyFile = Array.isArray(configObject.privateKeyFile)
-      ? configObject.privateKeyFile[0]
-      : configObject.privateKeyFile;
-    if (!keyFile.endsWith('.pem')) {
-      throw new Error('Private key file must end with .pem');
-    }
-  }
-
-  // Validate PEM format for raw data
   if (
-    configObject.certificateData &&
-    !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')
+    'certificateFile' in configObject ||
+    'privateKeyFile' in configObject ||
+    'certificateData' in configObject ||
+    'privateKeyData' in configObject
   ) {
-    throw new Error('Certificate data must be PEM-encoded');
-  }
-  if (
-    configObject.privateKeyData &&
-    !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')
-  ) {
-    throw new Error('Private key data must be PEM-encoded');
+    // Ensure certificate pair is provided
+    if (!configObject.certificateFile && !configObject.certificateData) {
+      throw new Error('Either certificate file or certificate data must be provided for PKI');
+    }
+    if (!configObject.privateKeyFile && !configObject.privateKeyData) {
+      throw new Error('Either private key file or private key data must be provided for PKI');
+    }
+
+    // Validate file extensions for file paths
+    if (configObject.certificateFile) {
+      const certFile = Array.isArray(configObject.certificateFile)
+        ? configObject.certificateFile[0]
+        : configObject.certificateFile;
+      if (!certFile.endsWith('.pem')) {
+        throw new Error('Certificate file must end with .pem');
+      }
+    }
+    if (configObject.privateKeyFile) {
+      const keyFile = Array.isArray(configObject.privateKeyFile)
+        ? configObject.privateKeyFile[0]
+        : configObject.privateKeyFile;
+      if (!keyFile.endsWith('.pem')) {
+        throw new Error('Private key file must end with .pem');
+      }
+    }
+
+    // Validate PEM format for raw data
+    if (
+      configObject.certificateData &&
+      !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')
+    ) {
+      throw new Error('Certificate data must be PEM-encoded');
+    }
+    if (
+      configObject.privateKeyData &&
+      !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')
+    ) {
+      throw new Error('Private key data must be PEM-encoded');
+    }
+  } else {
+    throw new Error('PKI configuration requires certificate and private key');
   }
 };
