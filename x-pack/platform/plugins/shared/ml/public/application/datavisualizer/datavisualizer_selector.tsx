@@ -22,8 +22,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { isFullLicense } from '../license';
-import { useMlKibana } from '../contexts/kibana';
+import { isFullLicense } from '@kbn/ml-license';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { DataVisualizerGrid } from '../overview/data_visualizer_grid';

@@ -17,10 +17,9 @@ import {
   basicLicenseMlCapabilities,
   featureCapabilities,
 } from '@kbn/ml-common-types/capabilities';
-
-import { isFullLicense } from '../../../common/license/is_full_license';
-import { isMinimumLicense } from '../../../common/license/is_minimum_license';
-import { isMlEnabled } from '../../../common/license/is_ml_enabled';
+import { isFullLicense } from '@kbn/ml-license/is_full_license';
+import { isMinimumLicense } from '@kbn/ml-license/is_minimum_license';
+import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 
 export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,

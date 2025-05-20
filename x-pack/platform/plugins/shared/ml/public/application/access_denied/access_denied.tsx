@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
 import type { MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { createPermissionFailureMessage } from '../capabilities/check_capabilities';
+import { createPermissionFailureMessage } from '@kbn/ml-services/capabilities/check_capabilities';
 import { HelpMenu } from '../components/help_menu';
 
 export interface AccessDeniedCalloutProps {

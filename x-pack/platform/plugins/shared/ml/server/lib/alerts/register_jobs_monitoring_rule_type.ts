@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ByteSize,
   DateTime,
@@ -15,6 +12,10 @@ import type {
   MlJobState,
   MlJobStats,
 } from '@elastic/elasticsearch/lib/api/types';
+
+import { i18n } from '@kbn/i18n';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -28,7 +29,6 @@ import type { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
 import type { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { anomalyDetectionJobsHealthRuleParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection_jobs_health';
-
 import {
   ALERT_DATAFEED_RESULTS,
   ALERT_DELAYED_DATA_RESULTS,
@@ -38,9 +38,10 @@ import {
 import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license/constants';
+import { MINIMUM_FULL_LICENSE } from '@kbn/ml-license/constants';
+import type { AnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-server-api-schemas/alerting_schema';
+
 import { assertUserError } from './utils';
-import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];

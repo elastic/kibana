@@ -23,7 +23,7 @@ import {
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
-import type { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
+import type { setupModuleBodySchema } from '@kbn/ml-server-api-schemas/modules';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,

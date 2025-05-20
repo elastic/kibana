@@ -7,8 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EuiSpacer, EuiTab, EuiTabs, EuiNotificationBadge } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
@@ -18,9 +20,11 @@ import { useUrlState } from '@kbn/ml-url-state';
 import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
 import { ML_OVERVIEW_PANELS, ML_OVERVIEW_PANELS_EXTENDED } from '@kbn/ml-common-types/storage';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../components/collapsible_panel';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
@@ -28,7 +32,6 @@ import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warnin
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '../contexts/kibana';
 import { useMlNotifications } from '../contexts/ml/ml_notifications_context';
 import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
