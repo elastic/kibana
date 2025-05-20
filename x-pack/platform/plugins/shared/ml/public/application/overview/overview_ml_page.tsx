@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
+
 import type { EuiCardProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -27,13 +26,18 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { useNavigateToPath } from '../contexts/kibana';
 import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { MlPageHeader } from '../components/page_header';
 import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_overview';
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';

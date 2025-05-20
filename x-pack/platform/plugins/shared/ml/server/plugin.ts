@@ -36,6 +36,8 @@ import {
 } from '@kbn/ml-common-constants/app';
 import { getPluginPrivileges } from '@kbn/ml-common-types/capabilities';
 import { MlLicense } from '@kbn/ml-license';
+import { savedObjectClientsFactory } from '@kbn/ml-saved-objects/util';
+
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { notificationsRoutes } from './routes/notifications';
 import { initMlServerLog } from './lib/log';
@@ -61,11 +63,7 @@ import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
 import { managementRoutes } from './routes/management';
-import {
-  setupSavedObjects,
-  jobSavedObjectsInitializationFactory,
-  savedObjectClientsFactory,
-} from './saved_objects';
+import { setupSavedObjects, jobSavedObjectsInitializationFactory } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { alertingRoutes } from './routes/alerting';

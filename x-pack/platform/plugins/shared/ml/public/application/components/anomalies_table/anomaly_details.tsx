@@ -12,8 +12,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,13 +25,20 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
+import type { CategoryDefinition } from '@kbn/ml-services/ml_api_service/results';
+
 import { getAnomalyDescription } from '../../../../common/util/anomaly_description';
-import { MAX_CHARS } from './anomalies_table_constants';
-import type { CategoryDefinition } from '../../services/ml_api_service/results';
-import type { EntityCellFilter } from '../entity_cell';
+
 import type { ExplorerJob } from '../../explorer/explorer_utils';
+
+import type { EntityCellFilter } from '../entity_cell';
+
+import { MAX_CHARS } from './anomalies_table_constants';
 import {
   AnomalyExplanationDetails,
   DetailsItems,
@@ -287,7 +293,7 @@ const Influencers: FC<{
         {listItems.map(({ title, description }) => (
           <>
             <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem style={{ width: '180px' }} grow={false}>
+              <EuiFlexItem css={{ width: '180px' }} grow={false}>
                 {title}
               </EuiFlexItem>
               <EuiFlexItem>{description}</EuiFlexItem>

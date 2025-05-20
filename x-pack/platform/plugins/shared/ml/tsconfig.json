@@ -155,5 +155,8 @@
     "@kbn/ml-client",
     "@kbn/ml-hooks",
     "@kbn/ml-common-utils",
+    "@kbn/ml-hooks",
+    "@kbn/ml-server-api-schemas",
+    "@kbn/ml-saved-objects",
   ]
 }
