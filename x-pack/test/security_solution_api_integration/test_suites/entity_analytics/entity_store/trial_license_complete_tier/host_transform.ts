@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { Ecs, EcsHost } from '@elastic/ecs';
+import { Ecs, EcsHost } from '@elastic/ecs';
 import type {
   IndexRequest,
   SearchHit,
@@ -166,18 +166,18 @@ export default function (providerContext: FtrProviderContext) {
             });
             const total = result.hits.total as SearchTotalHits;
             expect(total.value).to.eql(1);
-            const hit = result.hits.hits[0];
-            expect(hit._source).ok();
+            expect(result.hits.hits[0]._source?.host).ok();
+            const hit = result.hits.hits[0]._source.host as EcsHost;
 
-            expect(hit._source?.host?.name).to.eql(HOST_NAME);
-            expectFieldToEqualValues(hit._source?.host?.domain, testDocs.domain);
-            expectFieldToEqualValues(hit._source?.host?.hostname, ['example.com']);
-            expectFieldToEqualValues(hit._source?.host?.id, testDocs.id);
-            expectFieldToEqualValues(hit._source?.host?.os?.name, testDocs.osName);
-            expectFieldToEqualValues(hit._source?.host?.os?.type, testDocs.osType);
-            expectFieldToEqualValues(hit._source?.host?.ip, testDocs.ip);
-            expectFieldToEqualValues(hit._source?.host?.mac, testDocs.mac);
-            expectFieldToEqualValues(hit._source?.host?.architecture, testDocs.arch);
+            expect(hit.name).to.eql(HOST_NAME);
+            expectFieldToEqualValues(hit.domain, testDocs.domain);
+            expectFieldToEqualValues(hit.hostname, ['example.com']);
+            expectFieldToEqualValues(hit.id, testDocs.id);
+            expectFieldToEqualValues(hit.os?.name, testDocs.osName);
+            expectFieldToEqualValues(hit.os?.type, testDocs.osType);
+            expectFieldToEqualValues(hit.ip, testDocs.ip);
+            expectFieldToEqualValues(hit.mac, testDocs.mac);
+            expectFieldToEqualValues(hit.architecture, testDocs.arch);
 
             return true;
           }
@@ -289,3 +289,4 @@ interface HostTransformTestDocuments {
   arch: string[] | undefined;
   ip: string[] | undefined;
 }
+
