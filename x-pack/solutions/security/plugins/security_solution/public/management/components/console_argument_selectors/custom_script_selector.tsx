@@ -10,6 +10,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
@@ -40,6 +41,8 @@ interface CustomScriptSelectorState {
   isPopoverOpen: boolean;
 }
 
+type SelectableOption = EuiSelectableOption<Partial<{ description: CustomScript['description'] }>>;
+
 /**
  * A Console Argument Selector component that enables the user to select a custom script
  * @param agentType The type of agent to fetch scripts for
@@ -67,21 +70,24 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     );
 
     const { data = [] } = useGetCustomScripts(agentType);
-    const scriptsOptions = useMemo(() => {
+    const scriptsOptions: SelectableOption[] = useMemo(() => {
       return data.map((script: CustomScript) => ({
-        value: script.id,
         label: script.name,
         description: script.description,
       }));
     }, [data]);
 
-    const renderOption = (option: EuiSelectableOption) => {
-      console.log({ option });
-
+    const renderOption = (option: SelectableOption) => {
       return (
         <>
-          <strong data-test-subj={`${option.value}-label`}>{option.label}</strong>
-          <EuiText data-test-subj={`${option.value}-description`} size="s">
+          <EuiTitle size="xxs">
+            <p data-test-subj={`${option.label}-label`}>{option.label}</p>
+          </EuiTitle>
+          <EuiText
+            data-test-subj={`${option.label}-description`}
+            size="s"
+            className="eui-textTruncate"
+          >
             {option?.description}
           </EuiText>
         </>
@@ -118,7 +124,6 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
         const selected = options.find((option: EuiSelectableOption) => option.checked === 'on');
         if (selected) {
           setSelectedScript({
-            value: selected.value,
             label: selected.label,
           });
 
@@ -139,6 +144,10 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       return (
         <EuiPopover
           isOpen={state.isPopoverOpen}
+          panelStyle={{
+            padding: 0,
+            transform: 'translateY(-10px)',
+          }}
           closePopover={handleClosePopover}
           button={
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
@@ -151,16 +160,14 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           }
         >
           {state.isPopoverOpen && (
-            <EuiPanel
-              paddingSize="s"
-              css={{ inlineSize: 400, resize: 'horizontal', overflow: 'auto' }}
-            >
+            <EuiPanel paddingSize="none" css={{ minWidth: 400 }}>
               <EuiSelectable
                 id="options-combobox"
                 searchable={true}
                 options={scriptsOptions}
                 onChange={handleScriptSelection}
                 renderOption={renderOption}
+                singleSelection
                 searchProps={{
                   autoFocus: true,
                   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -179,10 +186,6 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
                   rowHeight: 60,
                   showIcons: false,
                   textWrap: 'truncate',
-                  truncationProps: {
-                    truncation: 'end',
-                    truncationOffset: 0,
-                  },
                 }}
               >
                 {(list, search) => (
