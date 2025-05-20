@@ -9261,7 +9261,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -9945,7 +9945,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.TagcloudState.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -10200,7 +10200,9 @@
               },
               "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
               "Config",
-              "; } | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
+              "; } | undefined, datasourceStates?: ",
+              "GeneralDatasourceStates",
+              " | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -10210,7 +10212,9 @@
               },
               "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
               "Config",
-              "; } | undefined, annotationGroups?: ",
+              "; } | undefined, datasourceStates?: ",
+              "GeneralDatasourceStates",
+              " | undefined, annotationGroups?: ",
               "AnnotationGroups",
               " | undefined, references?: ",
               "SavedObjectReference",
@@ -14090,7 +14094,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.XYDataLayerConfig.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
