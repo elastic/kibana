@@ -41,7 +41,7 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
 import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
-import { hasElasticManagedLlmConnector } from '../../utils/has_elastic_managed_llm_connector';
+import { getElasticManagedLlmConnector } from '../../utils/get_elastic_managed_llm_connector';
 import { ElasticLlmTourCallout } from '../tour_callout/elastic_llm_tour_callout';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
@@ -439,7 +439,7 @@ export function Insight({
     );
   }
 
-  const hasElasticLlm = hasElasticManagedLlmConnector(connectors.connectors);
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
 
   return (
     <InsightBase
@@ -452,7 +452,7 @@ export function Insight({
         setInsightOpen(isOpen);
       }}
       controls={
-        hasElasticLlm ? (
+        !!elasticManagedLlm ? (
           <ElasticLlmTourCallout isOpen={isTourCalloutOpen}>
             <ActionsMenu
               connectors={connectors}

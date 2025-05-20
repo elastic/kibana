@@ -24,7 +24,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ElasticLlmTourCallout,
-  hasElasticManagedLlmConnector,
+  getElasticManagedLlmConnector,
   useElasticLlmTourCalloutDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
@@ -111,7 +111,7 @@ export function ChatHeader({
     }
   };
 
-  const hasElasticLlm = hasElasticManagedLlmConnector(connectors.connectors);
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
   const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmTourCalloutDismissed(false);
 
   return (
@@ -275,7 +275,7 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                {hasElasticLlm && !tourCalloutDismissed ? (
+                {!!elasticManagedLlm && !tourCalloutDismissed ? (
                   <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
                     <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
                   </ElasticLlmTourCallout>

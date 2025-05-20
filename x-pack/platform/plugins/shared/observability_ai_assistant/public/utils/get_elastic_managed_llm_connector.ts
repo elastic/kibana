@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 
-export const hasElasticManagedLlmConnector = (connectors: FindActionResult[] | undefined) => {
+export const getElasticManagedLlmConnector = (
+  connectors: UseGenAIConnectorsResult['connectors'] | undefined
+) => {
   if (!Array.isArray(connectors) || connectors.length === 0) {
     return false;
   }
 
-  return connectors.some(
+  return connectors.filter(
     (connector) =>
       connector.actionTypeId === '.inference' &&
-      connector.id === 'elastic-llm' &&
       connector.isPreconfigured &&
       connector.config?.provider === 'elastic'
-  );
+  )[0];
 };

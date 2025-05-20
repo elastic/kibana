@@ -8,14 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
-import { hasElasticManagedLlmConnector } from '@kbn/observability-ai-assistant-plugin/public';
+import { getElasticManagedLlmConnector } from '@kbn/observability-ai-assistant-plugin/public';
 import { ElasticLlmTourCallout } from '@kbn/observability-ai-assistant-plugin/public';
 
 jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
   ElasticLlmTourCallout: jest.fn(({ children }) => (
     <div data-test-subj="elastic-llm-tour">{children}</div>
   )),
-  hasElasticManagedLlmConnector: jest.fn(),
+  getElasticManagedLlmConnector: jest.fn(),
   useElasticLlmTourCalloutDismissed: jest.fn().mockReturnValue([false, jest.fn()]),
 }));
 
@@ -66,31 +66,30 @@ describe('ChatHeader', () => {
   });
 
   it('shows the Elastic Managed LLM connector tour callout when the connector is present', () => {
-    (hasElasticManagedLlmConnector as jest.Mock).mockReturnValue(true);
+    const elasticManagedConnector = {
+      id: 'elastic-llm',
+      actionTypeId: '.inference',
+      name: 'Elastic LLM',
+      isPreconfigured: true,
+      isDeprecated: false,
+      isSystemAction: false,
+      config: {
+        provider: 'elastic',
+        taskType: 'chat_completion',
+        inferenceId: '.rainbow-sprinkles-elastic',
+        providerConfig: {
+          model_id: 'rainbow-sprinkles',
+        },
+      },
+      referencedByCount: 0,
+    };
+    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
 
     render(
       <ChatHeader
         {...baseProps}
         connectors={{
-          connectors: [
-            {
-              id: 'elastic-llm',
-              actionTypeId: '.inference',
-              name: 'Elastic LLM',
-              isPreconfigured: true,
-              isDeprecated: false,
-              isSystemAction: false,
-              config: {
-                provider: 'elastic',
-                taskType: 'chat_completion',
-                inferenceId: '.rainbow-sprinkles-elastic',
-                providerConfig: {
-                  model_id: 'rainbow-sprinkles',
-                },
-              },
-              referencedByCount: 0,
-            },
-          ],
+          connectors: [elasticManagedConnector],
           selectedConnector: undefined,
           loading: false,
           error: undefined,
@@ -106,7 +105,7 @@ describe('ChatHeader', () => {
   });
 
   it('does not render the tour callout when the Elastic Managed LLM Connector is not present', () => {
-    (hasElasticManagedLlmConnector as jest.Mock).mockReturnValue(false);
+    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(undefined);
 
     render(
       <ChatHeader
