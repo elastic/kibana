@@ -22,13 +22,13 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   const options = request.body;
   // First validate the agent exists
   const agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
-
   // Using the agent id, get the agent policy
   const agentPolicy = await AgentService.getAgentPolicyForAgent(
     soClient,
     esClient,
     request.params.agentId
   );
+
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
   if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
     throw new AgentRequestInvalidError(`Agent is protected and cannot be migrated`);

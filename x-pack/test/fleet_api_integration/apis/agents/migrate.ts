@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AGENTS_INDEX, AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -18,37 +18,124 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agents_migrate', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
-      // Create agent policies
-      await es.index({
-        refresh: 'wait_for',
-        index: AGENT_POLICY_INDEX,
-        document: {
-          revision_idx: 2,
-          policy_id: 'policy1',
-          coordinator_idx: 0,
-          '@timestamp': '2023-03-15T13:00:00.000Z',
-        },
-      });
 
-      await es.index({
-        refresh: 'wait_for',
-        index: AGENT_POLICY_INDEX,
-        document: {
-          revision_idx: 3,
-          policy_id: 'policy2',
-          is_protected: true,
-          coordinator_idx: 0,
-          '@timestamp': '2023-03-15T13:00:00.000Z',
-        },
-      });
+      // Create agent policies using the Fleet API
+      // Policy 1 - regular policy without tamper protection
+      const policy1Response = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          name: 'Policy 1',
+          namespace: 'default',
+          description: 'Test policy 1',
+          monitoring_enabled: ['logs', 'metrics'],
+        })
+        .expect(200);
 
-      // Create agents
+      const policy1 = policy1Response.body.item;
+
+      // Policy 2 - with tamper protection
+      const policy2Response = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          name: 'Policy 2',
+          namespace: 'default',
+          description: 'Test policy 2 with tamper protection',
+          monitoring_enabled: ['logs', 'metrics'],
+        })
+        .expect(200);
+
+      const policy2 = policy2Response.body.item;
+
+      // First, install the endpoint package which is required for the endpoint package policy
+      const installPackageResponse = await supertest
+        .post('/api/fleet/epm/packages/endpoint')
+        .set('kbn-xsrf', 'xx')
+        .send({ force: true })
+        .expect(200);
+
+      // Create Elastic Defend package policy for policy2 with proper configuration
+      const packagePolicyResponse = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          name: 'endpoint-1',
+          description: 'Endpoint Security Integration',
+          namespace: 'default',
+          policy_id: policy2.id,
+          enabled: true,
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                policy: {
+                  value: {
+                    windows: {
+                      events: {
+                        dll_and_driver_load: true,
+                        dns: true,
+                        file: true,
+                        network: true,
+                        process: true,
+                        registry: true,
+                        security: true,
+                      },
+                      malware: { mode: 'prevent' },
+                      ransomware: { mode: 'prevent' },
+                      memory_protection: { mode: 'prevent' },
+                      behavior_protection: { mode: 'prevent' },
+                      popup: {
+                        malware: { enabled: true, message: '' },
+                        ransomware: { enabled: true, message: '' },
+                      },
+                    },
+                    mac: {
+                      events: { file: true, network: true, process: true },
+                      malware: { mode: 'prevent' },
+                      behavior_protection: { mode: 'prevent' },
+                      popup: { malware: { enabled: true, message: '' } },
+                    },
+                    linux: {
+                      events: { file: true, network: true, process: true },
+                      malware: { mode: 'prevent' },
+                      behavior_protection: { mode: 'prevent' },
+                      popup: { malware: { enabled: true, message: '' } },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Defend',
+            version: '9.0.0', // Use the version from the installPackageResponse
+          },
+        })
+        .expect(200);
+
+      // Now enable tamper protection on policy2
+      const updatePolicy2Response = await supertest
+        .put(`/api/fleet/agent_policies/${policy2.id}`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          name: policy2.name,
+          namespace: 'default',
+          description: policy2.description,
+          is_protected: true, // Enable tamper protection
+        })
+        .expect(200);
+
+      // Create agents in Elasticsearch
       await es.index({
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         id: 'agent1',
         document: {
-          policy_id: 'policy1',
+          policy_id: policy1.id,
         },
       });
 
@@ -57,7 +144,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENTS_INDEX,
         id: 'agent2',
         document: {
-          policy_id: 'policy2', // Policy 2 is tamper protected
+          policy_id: policy2.id, // Policy 2 is tamper protected
         },
       });
       await es.index({
@@ -65,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
         index: AGENTS_INDEX,
         id: 'agent3',
         document: {
-          policy_id: 'policy1',
+          policy_id: policy1.id,
           components: [
             {
               type: 'fleet-server',
@@ -79,6 +166,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      // Cleanup will be handled automatically by Fleet API
     });
 
     describe('POST /agents/{agentId}/migrate', () => {
@@ -93,7 +181,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return a 500 if the agent is tamper protected', async () => {
+      it('should return a 400 if the agent is tamper protected', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/agent2/migrate`)
           .set('kbn-xsrf', 'xx')
@@ -101,10 +189,10 @@ export default function (providerContext: FtrProviderContext) {
             enrollment_token: '1234',
             uri: 'https://example.com',
           })
-          .expect(500);
+          .expect(400);
       });
 
-      it('should return a 500 is the agent is a fleet-agent', async () => {
+      it('should return a 400 if the agent is a fleet-agent', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/agent3/migrate`)
           .set('kbn-xsrf', 'xx')
@@ -112,7 +200,7 @@ export default function (providerContext: FtrProviderContext) {
             enrollment_token: '1234',
             uri: 'https://example.com',
           })
-          .expect(500);
+          .expect(400);
       });
 
       it('should return a 404 when agent does not exist', async () => {
