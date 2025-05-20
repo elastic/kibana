@@ -58,31 +58,6 @@ export class MonitoringEntitySourceDescriptorClient {
     return created;
   }
 
-  private async resetToDefaultDescriptor(
-    entitySourceDescriptor: SavedObjectsFindResponse<MonitoringEntitySourceDescriptor, unknown>
-  ) {
-    const old = entitySourceDescriptor.saved_objects[0].attributes;
-    const update = {
-      ...old,
-      error: undefined,
-      type: 'default',
-      name: 'default',
-      managed: true,
-      indexPattern: '',
-      enabled: true,
-      integrationName: '',
-      matchers: [],
-      filter: {},
-    };
-    await this.dependencies.soClient.update<MonitoringEntitySourceDescriptor>(
-      monitoringEntitySourceTypeName,
-      this.getSavedObjectId(),
-      update,
-      { refresh: 'wait_for' }
-    );
-    return update;
-  }
-
   async update(monitoringEntitySource: Partial<MonitoringEntitySourceDescriptor>) {
     const id = this.getSavedObjectId();
     const { attributes } =
