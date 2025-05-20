@@ -32,38 +32,24 @@ export const ConfigSchema = schema.oneOf([
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
     apiUrl: schema.string(),
     defaultModel: schema.string(),
-    certificateFile: schema.maybe(
-      schema.oneOf([
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-      ])
-    ),
-    certificateData: schema.maybe(schema.string({ minLength: 1 })),
-    privateKeyFile: schema.maybe(
-      schema.oneOf([
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-      ])
-    ),
-    privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
     verificationMode: schema.maybe(
       schema.oneOf(
         [schema.literal('full'), schema.literal('certificate'), schema.literal('none')],
         { defaultValue: 'full' }
       )
     ),
-    caFile: schema.maybe(
-      schema.oneOf([
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-      ])
-    ),
-    caData: schema.maybe(schema.string({ minLength: 1 })),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 ]);
 
-export const SecretsSchema = schema.object({ apiKey: schema.string() });
+export const SecretsSchema = schema.oneOf([
+  schema.object({ apiKey: schema.string() }),
+  schema.object({
+    certificateData: schema.maybe(schema.string({ minLength: 1 })),
+    privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
+    caData: schema.maybe(schema.string({ minLength: 1 })),
+  }),
+]);
 
 // Run action schema
 export const RunActionParamsSchema = schema.object({
