@@ -10,6 +10,7 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 export interface ModelOptionsData {
@@ -30,6 +31,13 @@ export const elserDescription = i18n.translate(
   {
     defaultMessage:
       'Focus on query meaning, not just keyword matching, using learned associations between terms. It delivers more relevant, context-aware results and works out of the box with no need for deep machine learning expertise.',
+  }
+);
+
+export const testElserOnEisTitle = i18n.translate(
+  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.elserOnEisTitle',
+  {
+    defaultMessage: 'ELSER v2 (EIS)',
   }
 );
 
@@ -56,6 +64,10 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: elserTitle,
     description: elserDescription,
   },
+  [ELSER_IN_EIS_INFERENCE_ID]: {
+    title: testElserOnEisTitle,
+    description: elserDescription,
+  },
   [E5_SMALL_INFERENCE_ID]: {
     title: e5SmallTitle,
     description: e5SmallDescription,
@@ -67,8 +79,15 @@ export const getModelOptionsForInferenceEndpoints = ({
 }: {
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
+  // const hasElserEIS = endpoints.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID);
+
   return endpoints
     .filter((endpoint) => {
+      // if ELSER exists in EIS, skip the other ELSER model
+      // if (endpoint.inference_id === ELSER_ON_ML_NODE_INFERENCE_ID && hasElserEIS) {
+      //   return false;
+      // }
+
       // Only include preconfigured endpoints and skip custom endpoints
       return Boolean(PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]);
     })
