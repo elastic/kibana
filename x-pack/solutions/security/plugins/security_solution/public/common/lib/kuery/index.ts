@@ -209,28 +209,48 @@ export const convertToBuildEsQuery = ({
   dataViewSpec,
   queries,
   filters,
+  luceneQuery,
+  operator = 'and',
 }: {
   config: EsQueryConfig;
   dataViewSpec: DataViewSpec | undefined;
   queries: Query[];
   filters: Filter[];
+  luceneQuery?: Query;
+  /* Combined provided KQL Query and Lucene Query */
+  operator?: 'and' | 'or';
 }): [string, undefined] | [undefined, Error] => {
   try {
-    return [
-      JSON.stringify(
-        buildEsQuery(
-          dataViewSpecToViewBase(dataViewSpec),
-          queries,
-          filters.filter((f) => f.meta.disabled === false),
-          {
-            nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
-            ...config,
-            dateFormatTZ: undefined,
-          }
-        )
-      ),
-      undefined,
-    ];
+    const esDslQuery = buildEsQuery(
+      dataViewSpecToViewBase(dataViewSpec),
+      queries,
+      filters.filter((f) => f.meta.disabled === false),
+      {
+        nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
+        ...config,
+        dateFormatTZ: undefined,
+      }
+    );
+
+    if (luceneQuery) {
+      const luceneDslQuery = buildEsQuery(
+        dataViewSpecToViewBase(dataViewSpec),
+        luceneQuery ?? [],
+        [],
+        {
+          ...config,
+          dateFormatTZ: undefined,
+        }
+      );
+      if (operator === 'or') {
+        esDslQuery.bool.should = [...esDslQuery.bool.filter, ...luceneDslQuery.bool.must];
+        esDslQuery.bool.filter = [];
+      } else {
+        esDslQuery.bool.filter = [...esDslQuery.bool.filter, ...luceneDslQuery.bool.must];
+      }
+    }
+
+    return [JSON.stringify(esDslQuery), undefined];
   } catch (error) {
     return [undefined, error];
   }
@@ -251,13 +271,14 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
 }: CombineQueries): CombinedQuery | null => {
-  const kuery: Query = { query: '', language: kqlQuery.language };
+  const query: Query = { query: '', language: kqlQuery.language };
+  const luceneQuery = kqlQuery.language === 'lucene' ? kqlQuery : undefined;
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
   } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
-      queries: [kuery],
+      queries: [query],
       dataViewSpec,
       filters,
     });
@@ -265,34 +286,49 @@ export const combineQueries = ({
     return {
       filterQuery,
       kqlError,
-      baseKqlQuery: kuery,
+      baseKqlQuery: query,
     };
   }
 
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
+  const dataProviderQueryString = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+  const dataProviderQuery: Query = {
+    query: dataProviderQueryString,
+    language: 'kuery',
+  };
 
-  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
-
-  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
-
-  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
-
-  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
-
-  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
-
-  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
+  let queries = [];
+  if (query.language === 'kuery') {
+    query.query = combineKQLQueryString(
+      operatorKqlQuery,
+      dataProviderQueryString,
+      kqlQuery.query as string
+    );
+    queries.push(query);
+  } else {
+    queries = [dataProviderQuery];
+  }
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
-    queries: [kuery],
+    queries,
     dataViewSpec,
     filters,
+    luceneQuery,
+    operator: operatorKqlQuery,
   });
 
   return {
     filterQuery,
     kqlError,
-    baseKqlQuery: kuery,
+    baseKqlQuery: query,
   };
+};
+
+export const combineKQLQueryString = (operator: 'and' | 'or', ...queryStrings: string[]) => {
+  return queryStrings
+    .filter(Boolean)
+    .map((q) => `${q}`)
+    .join(` (${operator}) `)
+    .trim();
 };
