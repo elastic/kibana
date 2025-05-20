@@ -10,55 +10,43 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiProvider } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { DiscoverDocuments, onResize } from './discover_documents';
+import { DiscoverDocuments, type DiscoverDocumentsProps, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import type { DiscoverCustomization } from '../../../../customizations';
+import type {
+  DiscoverCustomization,
+  DiscoverCustomizationService,
+} from '../../../../customizations';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import type { ProfilesManager } from '../../../../context_awareness';
 import { CurrentTabProvider, internalStateActions } from '../../state_management/redux';
-import { getCellRendererFromColumnMap } from '@kbn/unified-data-table';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
-jest.mock('@kbn/unified-data-table', () => {
-  const actual = jest.requireActual('@kbn/unified-data-table');
-  return {
-    ...actual,
-    getCellRendererFromColumnMap: jest.fn(actual.getCellRendererFromColumnMap),
-  };
-});
-
-const customisationService = createCustomizationService();
-
-async function mountComponent(
-  fetchStatus: FetchStatus,
-  hits: EsHitRecord[],
-  profilesManager?: ProfilesManager
-) {
-  const services = discoverServiceMock;
-
-  services.data.query.timefilter.timefilter.getTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-
-  const documents$ = new BehaviorSubject({
-    fetchStatus,
-    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-  }) as DataDocuments$;
-  const stateContainer = getDiscoverStateMock({});
+async function mountComponent({
+  fetchStatus,
+  records = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+  services = createDiscoverServicesMock(),
+  stateContainer = getDiscoverStateMock({}),
+  customizationService = createCustomizationService(),
+}: {
+  fetchStatus: FetchStatus;
+  records?: DataTableRecord[];
+  services?: DiscoverServices;
+  stateContainer?: DiscoverStateContainer;
+  customizationService?: DiscoverCustomizationService;
+}) {
   stateContainer.appState.update({
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
@@ -76,10 +64,12 @@ async function mountComponent(
       },
     })
   );
+  stateContainer.dataState.data$.documents$.next({
+    fetchStatus,
+    result: records,
+  });
 
-  stateContainer.dataState.data$.documents$ = documents$;
-
-  const props = {
+  const props: DiscoverDocumentsProps = {
     viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
@@ -88,10 +78,8 @@ async function mountComponent(
   };
 
   const component = mountWithIntl(
-    <KibanaContextProvider
-      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
-    >
-      <DiscoverCustomizationProvider value={customisationService}>
+    <KibanaContextProvider services={services}>
+      <DiscoverCustomizationProvider value={customizationService}>
         <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
           <DiscoverMainProvider value={stateContainer}>
             <EuiProvider highContrastMode={false}>
@@ -102,10 +90,12 @@ async function mountComponent(
       </DiscoverCustomizationProvider>
     </KibanaContextProvider>
   );
+
   await act(async () => {
     component.update();
   });
-  return component;
+
+  return { component };
 }
 
 describe('Discover documents layout', () => {
@@ -114,19 +104,19 @@ describe('Discover documents layout', () => {
   });
 
   test('render loading when loading and no documents', async () => {
-    const component = await mountComponent(FetchStatus.LOADING, []);
+    const { component } = await mountComponent({ fetchStatus: FetchStatus.LOADING, records: [] });
     expect(component.find('.dscDocuments__loading').exists()).toBeTruthy();
     expect(component.find('.dscTable').exists()).toBeFalsy();
   });
 
   test('render complete when loading but documents were already fetched', async () => {
-    const component = await mountComponent(FetchStatus.LOADING, esHitsMock);
+    const { component } = await mountComponent({ fetchStatus: FetchStatus.LOADING });
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
   test('render complete', async () => {
-    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+    const { component } = await mountComponent({ fetchStatus: FetchStatus.COMPLETE });
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
@@ -153,17 +143,19 @@ describe('Discover documents layout', () => {
   });
 
   test('should render customisations', async () => {
+    const customizationService = createCustomizationService();
     const customization: DiscoverCustomization = {
       id: 'data_table',
       logsEnabled: true,
       rowAdditionalLeadingControls: [],
     };
-
-    customisationService.set(customization);
-    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+    customizationService.set(customization);
+    const { component } = await mountComponent({
+      fetchStatus: FetchStatus.COMPLETE,
+      customizationService,
+    });
     const discoverGridComponent = component.find(DiscoverGrid);
     expect(discoverGridComponent.exists()).toBeTruthy();
-
     expect(discoverGridComponent.prop('rowAdditionalLeadingControls')).toBe(
       customization.rowAdditionalLeadingControls
     );
@@ -172,22 +164,34 @@ describe('Discover documents layout', () => {
   });
 
   describe('context awareness', () => {
-    it('should pass cell renderers from profile', async () => {
-      customisationService.set({
-        id: 'data_table',
-        logsEnabled: true,
-      });
-      await discoverServiceMock.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
-      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
-      const discoverGridComponent = component.find(DiscoverGrid);
-      expect(discoverGridComponent.exists()).toBeTruthy();
-      expect(getCellRendererFromColumnMap).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          _source: expect.any(Function),
-          rootProfile: expect.any(Function),
+    it('should use cell renderers from profiles', async () => {
+      const services = createDiscoverServicesMock();
+      await services.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
+      await services.profilesManager.resolveDataSourceProfile({});
+      const records = esHitsMock.map((hit) =>
+        services.profilesManager.resolveDocumentProfile({
+          record: buildDataTableRecord(hit, dataViewMock),
         })
       );
-      expect(discoverGridComponent.prop('getCustomCellRenderer')).toEqual(expect.any(Function));
+      const stateContainer = getDiscoverStateMock({ services });
+      stateContainer.appState.update({
+        columns: ['rootProfile', 'dataSourceProfile', 'documentProfile'],
+      });
+      const { component } = await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        records,
+        services,
+        stateContainer,
+      });
+      expect(
+        findTestSubject(component, 'root-profile-renderer').first().getDOMNode()
+      ).toHaveTextContent('root-profile');
+      expect(
+        findTestSubject(component, 'data-source-profile-renderer').first().getDOMNode()
+      ).toHaveTextContent('data-source-profile');
+      expect(
+        findTestSubject(component, 'document-profile-renderer').first().getDOMNode()
+      ).toHaveTextContent('document-profile');
     });
   });
 });

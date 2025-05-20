@@ -94,19 +94,21 @@ export const onResize = (
   stateContainer.appState.update({ grid: newGrid });
 };
 
+export interface DiscoverDocumentsProps {
+  viewModeToggle: React.ReactElement | undefined;
+  dataView: DataView;
+  onAddFilter?: DocViewFilterFn;
+  stateContainer: DiscoverStateContainer;
+  onFieldEdited?: () => void;
+}
+
 function DiscoverDocumentsComponent({
   viewModeToggle,
   dataView,
   onAddFilter,
   stateContainer,
   onFieldEdited,
-}: {
-  viewModeToggle: React.ReactElement | undefined;
-  dataView: DataView;
-  onAddFilter?: DocViewFilterFn;
-  stateContainer: DiscoverStateContainer;
-  onFieldEdited?: () => void;
-}) {
+}: DiscoverDocumentsProps) {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
