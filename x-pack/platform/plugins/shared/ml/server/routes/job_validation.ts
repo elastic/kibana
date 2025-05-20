@@ -29,7 +29,7 @@ import {
   validateDatafeedPreview,
 } from '../models/job_validation';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { MlClient } from '../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
