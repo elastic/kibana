@@ -211,6 +211,7 @@ export const postActionsConnectorExecuteRoute = (
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
             isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
+            errorLocation: 'postActionsConnectorExecuteRoute',
           });
 
           return resp.error({
