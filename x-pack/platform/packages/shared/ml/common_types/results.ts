@@ -7,13 +7,15 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
-import type { ErrorType } from '@kbn/ml-error-utils';
+
 import type {
   ES_AGGREGATION,
   ML_JOB_AGGREGATION,
   MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
 import { type MlEntityField, type MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
+
+import type { ErrorType } from './errors';
 import type { Datafeed } from './anomaly_detection_jobs/datafeed';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { ModelSnapshot } from './anomaly_detection_jobs/model_snapshot';
