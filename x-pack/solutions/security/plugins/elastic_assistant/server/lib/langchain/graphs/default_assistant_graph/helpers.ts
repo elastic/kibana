@@ -7,11 +7,9 @@
 
 import agent, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
-import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { AgentFinish } from 'langchain/agents';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
@@ -19,39 +17,37 @@ import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
+import { Callbacks } from '@langchain/core/callbacks/manager';
 
 interface StreamGraphParams {
-  apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-  telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
+  callbacks: Callbacks | undefined 
 }
 
 /**
  * Execute the graph in streaming mode
  *
- * @param apmTracer
  * @param assistantGraph
  * @param inputs
  * @param logger
  * @param onLlmResponse
  * @param request
- * @param telemetryTracer
  * @param traceOptions
+ * @param callbacks
  */
 export const streamGraph = async ({
-  apmTracer,
   assistantGraph,
   inputs,
   logger,
   onLlmResponse,
   request,
-  telemetryTracer,
   traceOptions,
+  callbacks
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
   let streamingSpan: Span | undefined;
   if (agent.isStarted()) {
@@ -91,11 +87,7 @@ export const streamGraph = async ({
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
-        callbacks: [
-          apmTracer,
-          ...(traceOptions?.tracers ?? []),
-          ...(telemetryTracer ? [telemetryTracer] : []),
-        ],
+        callbacks,
         runName: DEFAULT_ASSISTANT_GRAPH_ID,
         tags: traceOptions?.tags ?? [],
         version: 'v2',
@@ -139,11 +131,7 @@ export const streamGraph = async ({
   const stream = assistantGraph.streamEvents(
     inputs,
     {
-      callbacks: [
-        apmTracer,
-        ...(traceOptions?.tracers ?? []),
-        ...(telemetryTracer ? [telemetryTracer] : []),
-      ],
+      callbacks,
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       streamMode: 'values',
       tags: traceOptions?.tags ?? [],
@@ -193,12 +181,11 @@ export const streamGraph = async ({
 };
 
 interface InvokeGraphParams {
-  apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
   onLlmResponse?: OnLlmResponse;
-  telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
+  callbacks: Callbacks | undefined 
 }
 interface InvokeGraphResponse {
   output: string;
@@ -217,12 +204,11 @@ interface InvokeGraphResponse {
  * @param traceOptions
  */
 export const invokeGraph = async ({
-  apmTracer,
   assistantGraph,
   inputs,
   onLlmResponse,
-  telemetryTracer,
   traceOptions,
+  callbacks
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
   return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
     let traceData: TraceData = {};
@@ -235,11 +221,7 @@ export const invokeGraph = async ({
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
     const result = await assistantGraph.invoke(inputs, {
-      callbacks: [
-        apmTracer,
-        ...(traceOptions?.tracers ?? []),
-        ...(telemetryTracer ? [telemetryTracer] : []),
-      ],
+      callbacks,
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
       recursionLimit: inputs?.isOssModel ? 50 : 25,

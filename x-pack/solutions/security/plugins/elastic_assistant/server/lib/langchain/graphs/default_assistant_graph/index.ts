@@ -27,6 +27,8 @@ import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { agentRunnableFactory } from './agentRunnable';
+import { Callbacks } from '@langchain/core/callbacks/manager';
+import { EsqlTelemetryTracer } from '../../tracers/esql_telemetry_tracer/esql_telemetry_tracer';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -198,25 +200,12 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     prompt: chatPromptTemplate,
   });
 
-  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-  const telemetryTracer = telemetryParams
-    ? new TelemetryTracer(
-        {
-          elasticTools: tools.map(({ name }) => name),
-          totalTools: tools.length,
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      )
-    : undefined;
-
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
-          connectorId,
-          actionsClient,
-        })
+        connectorId,
+        actionsClient,
+      })
       : { provider: llmType };
 
   const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
@@ -253,26 +242,43 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     provider: provider ?? '',
   };
 
+  const callbacks: Callbacks = [
+    new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger),
+    ...(traceOptions?.tracers ?? []),
+    ...(telemetryParams
+      ? [new TelemetryTracer(
+        {
+          elasticTools: tools.map(({ name }) => name),
+          totalTools: tools.length,
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      ), new EsqlTelemetryTracer({
+        telemetry,
+        telemetryParams
+      }, logger)]
+      : [])
+  ]
+
   if (isStream) {
     return streamGraph({
-      apmTracer,
       assistantGraph,
       inputs,
       logger,
       onLlmResponse,
       request,
-      telemetryTracer,
       traceOptions,
+      callbacks
     });
   }
 
   const graphResponse = await invokeGraph({
-    apmTracer,
     assistantGraph,
     inputs,
     onLlmResponse,
-    telemetryTracer,
     traceOptions,
+    callbacks
   });
 
   const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(
