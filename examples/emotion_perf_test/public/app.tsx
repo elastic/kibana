@@ -356,7 +356,7 @@ const VarRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
 };
 
 // with the root css variables TODO: structure it right
-const VarRowB = ({ disabled, index }: { disabled: boolean; index: number }) => {
+const VarRowB = ({ index }: { disabled: boolean; index: number }) => {
   return <div className={baseClass}>{index}</div>;
 };
 
