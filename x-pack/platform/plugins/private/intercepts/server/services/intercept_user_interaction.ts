@@ -76,8 +76,10 @@ export class InterceptUserInteractionService {
         security: {
           authz: {
             enabled: false,
-            reason:
-              'route is public and provides information about the next product intercept trigger',
+            reason: 'This route delegates authorization to SO client.',
+          },
+          authc: {
+            enabled: true,
           },
         },
       },
