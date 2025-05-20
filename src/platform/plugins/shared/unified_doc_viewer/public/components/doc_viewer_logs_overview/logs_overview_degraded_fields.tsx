@@ -30,6 +30,7 @@ import {
   DataQualityDetailsLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 type Direction = 'asc' | 'desc';
@@ -121,7 +122,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
     prefix: qualityIssuesAccordionTitle,
   });
 
-  const isRemoteClusterDataStream = rawDoc._index?.includes(':') ?? false;
+  const isCCSRemoteIndex = isCCSRemoteIndexName(rawDoc._index ?? '');
 
   const [tableOptions, setTableOptions] = useState<TableOptions>(DEFAULT_TABLE_OPTIONS);
 
@@ -195,7 +196,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         paddingSize="m"
         initialIsOpen={false}
         extraAction={
-          !isRemoteClusterDataStream && (
+          !isCCSRemoteIndex && (
             <DatasetQualityLink urlService={urlService} dataStream={dataStream} />
           )
         }
