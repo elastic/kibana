@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/emotion-perf-test-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Temporary example app used to check emotion performance",
+  "plugin": {
+    "id": "emotionPerfTest",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["developerExamples", "embeddable", "uiActions", "embeddableExamples"],
+    "requiredBundles": []
+  }
+}

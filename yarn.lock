@@ -5422,6 +5422,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/emotion-perf-test-plugin@link:examples/emotion_perf_test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/encrypted-saved-objects-plugin@link:x-pack/platform/plugins/shared/encrypted_saved_objects":
   version "0.0.0"
   uid ""

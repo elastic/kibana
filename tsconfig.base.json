@@ -838,6 +838,8 @@
       "@kbn/embeddable-plugin/*": ["src/platform/plugins/shared/embeddable/*"],
       "@kbn/embedded-lens-example-plugin": ["x-pack/examples/embedded_lens_example"],
       "@kbn/embedded-lens-example-plugin/*": ["x-pack/examples/embedded_lens_example/*"],
+      "@kbn/emotion-perf-test-plugin": ["examples/emotion_perf_test"],
+      "@kbn/emotion-perf-test-plugin/*": ["examples/emotion_perf_test/*"],
       "@kbn/encrypted-saved-objects-plugin": ["x-pack/platform/plugins/shared/encrypted_saved_objects"],
       "@kbn/encrypted-saved-objects-plugin/*": ["x-pack/platform/plugins/shared/encrypted_saved_objects/*"],
       "@kbn/encrypted-saved-objects-shared": ["src/platform/packages/shared/kbn-encrypted-saved-objects-shared"],
