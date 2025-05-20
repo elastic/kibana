@@ -34,6 +34,7 @@ export const elserDescription = i18n.translate(
   }
 );
 
+// TODO: remove this before merging
 export const testElserOnEisTitle = i18n.translate(
   'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.elserOnEisTitle',
   {
