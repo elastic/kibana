@@ -102,4 +102,54 @@ describe('RuleDetails', () => {
     expect(screen.getByText('name is invalid')).toBeInTheDocument();
     expect(screen.getByText('tags is invalid')).toBeInTheDocument();
   });
+
+  test('should call dispatch with artifacts object when investigation guide is added', async () => {
+    useRuleFormState.mockReturnValue({
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+    render(<RuleDetails />);
+
+    const investigationGuideEditor = screen.getByTestId('investigationGuideEditor');
+    const investigationGuideTextArea = screen.getByLabelText(
+      'Add guidelines for addressing alerts created by this rule'
+    );
+    expect(investigationGuideEditor).toBeInTheDocument();
+    expect(investigationGuideEditor).toBeVisible();
+    expect(
+      screen.getByPlaceholderText('Add guidelines for addressing alerts created by this rule')
+    );
+
+    fireEvent.change(investigationGuideTextArea, {
+      target: {
+        value: '# Example investigation guide',
+      },
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setRuleProperty',
+      payload: {
+        property: 'artifacts',
+        value: {
+          investigation_guide: {
+            blob: '# Example investigation guide',
+          },
+        },
+      },
+    });
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
+  });
 });
