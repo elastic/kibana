@@ -194,7 +194,11 @@ describe('Reporting Plugin', () => {
         scope: ['spaces', 'security'],
         app: [],
         privileges: {
-          all: { savedObject: { all: ['scheduled_report'], read: [] }, ui: ['show'] },
+          all: {
+            api: ['manage_scheduled_reports'],
+            savedObject: { all: ['scheduled_report'], read: [] },
+            ui: ['show'],
+          },
           read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
         },
       });
@@ -209,7 +213,7 @@ describe('Reporting Plugin', () => {
 
       plugin.setup(coreSetup, pluginSetup);
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(2, {
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(1, {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,
@@ -217,6 +221,22 @@ describe('Reporting Plugin', () => {
         app: [],
         privileges: {
           all: { savedObject: { all: [], read: [] }, ui: [] },
+          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        },
+      });
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(2, {
+        id: 'manageReporting',
+        name: 'Manage Scheduled Reports',
+        description: 'View and manage scheduled reports for all users in this space.',
+        category: DEFAULT_APP_CATEGORIES.management,
+        scope: ['spaces', 'security'],
+        app: [],
+        privileges: {
+          all: {
+            api: ['manage_scheduled_reports'],
+            savedObject: { all: ['scheduled_report'], read: [] },
+            ui: ['show'],
+          },
           read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
         },
       });
