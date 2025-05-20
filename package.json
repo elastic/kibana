@@ -1763,7 +1763,7 @@
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
     "backport": "^9.6.6",
     "blob-polyfill": "^7.0.20220408",
-    "buildkite-test-collector": "^1.7.0",
+    "buildkite-test-collector": "^1.8.1",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
     "chromedriver": "^136.0.0",
