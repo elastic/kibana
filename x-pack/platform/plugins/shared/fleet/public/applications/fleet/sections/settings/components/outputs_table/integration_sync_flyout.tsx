@@ -89,20 +89,22 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
             </EuiCallOut>
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
-            {(syncedIntegrationsStatus?.integrations ?? []).map((integration) => {
-              const customAssets = Object.values(
-                syncedIntegrationsStatus?.custom_assets ?? {}
-              ).filter((asset) => asset.package_name === integration.package_name);
-              return (
-                <EuiFlexItem grow={false} key={integration.package_name}>
-                  <IntegrationStatus
-                    data-test-subj={`${integration.package_name}-accordion`}
-                    integration={integration}
-                    customAssets={customAssets}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+            {(syncedIntegrationsStatus?.integrations ?? [])
+              .filter((integration) => integration.install_status.main === 'installed')
+              .map((integration) => {
+                const customAssets = Object.values(
+                  syncedIntegrationsStatus?.custom_assets ?? {}
+                ).filter((asset) => asset.package_name === integration.package_name);
+                return (
+                  <EuiFlexItem grow={false} key={integration.package_name}>
+                    <IntegrationStatus
+                      data-test-subj={`${integration.package_name}-accordion`}
+                      integration={integration}
+                      customAssets={customAssets}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
           </EuiFlexGroup>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

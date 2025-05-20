@@ -23,6 +23,10 @@ export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBase
   ]),
   error: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
+  install_status: schema.object({
+    main: schema.string(),
+    remote: schema.maybe(schema.string()),
+  }),
 });
 
 export const CustomAssetsDataSchema = schema.object({

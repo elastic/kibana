@@ -103,9 +103,6 @@ export const fetchAndCompareSyncedIntegrations = async (
     }
     const ccrIndex = searchRes.hits.hits[0]?._source;
     const { integrations: ccrIntegrations, custom_assets: ccrCustomAssets } = ccrIndex;
-    const installedCCRIntegrations = ccrIntegrations?.filter(
-      (integration) => integration.install_status !== 'not_installed'
-    );
 
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
@@ -125,10 +122,7 @@ export const fetchAndCompareSyncedIntegrations = async (
       ccrCustomAssets,
       installedIntegrationsByName
     );
-    const integrationsStatus = compareIntegrations(
-      installedCCRIntegrations,
-      installedIntegrationsByName
-    );
+    const integrationsStatus = compareIntegrations(ccrIntegrations, installedIntegrationsByName);
     const result = {
       ...integrationsStatus,
       ...(customAssetsStatus && { custom_assets: customAssetsStatus }),
@@ -150,25 +144,39 @@ const compareIntegrations = (
 ): { integrations: RemoteSyncedIntegrationsStatus[] } => {
   const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
     (ccrIntegration) => {
+      const baseIntegrationData = {
+        package_name: ccrIntegration.package_name,
+        package_version: ccrIntegration.package_version,
+        install_status: ccrIntegration.install_status,
+      };
       const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
       if (!localIntegrationSO) {
         return {
-          package_name: ccrIntegration.package_name,
-          package_version: ccrIntegration.package_version,
+          ...baseIntegrationData,
           updated_at: ccrIntegration.updated_at,
           sync_status: SyncStatus.SYNCHRONIZING,
+          install_status: { main: ccrIntegration.install_status },
         };
       }
-      if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
+      if (
+        ccrIntegration.install_status !== 'not_installed' &&
+        ccrIntegration.package_version !== localIntegrationSO?.attributes.version
+      ) {
         return {
-          package_name: ccrIntegration.package_name,
-          package_version: ccrIntegration.package_version,
+          ...baseIntegrationData,
           updated_at: ccrIntegration.updated_at,
           sync_status: SyncStatus.FAILED,
+          install_status: {
+            main: ccrIntegration.install_status,
+            remote: localIntegrationSO?.attributes.install_status,
+          },
           error: `Found incorrect installed version ${localIntegrationSO?.attributes.version}`,
         };
       }
-      if (localIntegrationSO?.attributes.install_status === 'install_failed') {
+      if (
+        ccrIntegration.install_status !== 'not_installed' &&
+        localIntegrationSO?.attributes.install_status === 'install_failed'
+      ) {
         const latestFailedAttemptTime = localIntegrationSO?.attributes
           ?.latest_install_failed_attempts?.[0].created_at
           ? `at ${new Date(
@@ -180,16 +188,47 @@ const compareIntegrations = (
           ? `- reason: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
           : '';
         return {
-          package_name: ccrIntegration.package_name,
-          package_version: ccrIntegration.package_version,
+          ...baseIntegrationData,
+          install_status: {
+            main: ccrIntegration.install_status,
+            remote: localIntegrationSO?.attributes.install_status,
+          },
           updated_at: ccrIntegration.updated_at,
           sync_status: SyncStatus.FAILED,
           error: `Installation status: ${localIntegrationSO?.attributes.install_status} ${latestFailedAttempt} ${latestFailedAttemptTime}`,
         };
       }
+      if (
+        ccrIntegration.install_status === 'not_installed' &&
+        localIntegrationSO?.attributes.latest_uninstall_failed_attempts !== undefined
+      ) {
+        const latestUninstallFailedAttemptTime = localIntegrationSO?.attributes
+          ?.latest_uninstall_failed_attempts?.[0].created_at
+          ? `at ${new Date(
+              localIntegrationSO?.attributes?.latest_uninstall_failed_attempts?.[0].created_at
+            ).toUTCString()}`
+          : '';
+        const latestUninstallFailedAttempt = localIntegrationSO?.attributes
+          ?.latest_uninstall_failed_attempts?.[0]?.error?.message
+          ? `- reason: ${localIntegrationSO?.attributes?.latest_uninstall_failed_attempts[0].error.message}`
+          : '';
+        return {
+          ...baseIntegrationData,
+          install_status: {
+            main: ccrIntegration.install_status,
+            remote: localIntegrationSO?.attributes.install_status,
+          },
+          updated_at: ccrIntegration.updated_at,
+          sync_status: SyncStatus.FAILED,
+          error: `Uninstall error: ${latestUninstallFailedAttempt} ${latestUninstallFailedAttemptTime}`,
+        };
+      }
       return {
-        package_name: ccrIntegration.package_name,
-        package_version: ccrIntegration.package_version,
+        ...baseIntegrationData,
+        install_status: {
+          main: ccrIntegration.install_status,
+          remote: localIntegrationSO?.attributes.install_status,
+        },
         sync_status:
           localIntegrationSO?.attributes.install_status === 'installed'
             ? SyncStatus.COMPLETED

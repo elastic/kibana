@@ -46,8 +46,9 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
     }
 
     const statuses = [
-      ...(syncedIntegrationsStatus?.integrations?.map((integration) => integration.sync_status) ||
-        []),
+      ...(syncedIntegrationsStatus?.integrations
+        ?.filter((integration) => integration.install_status.main === 'installed')
+        .map((integration) => integration.sync_status) || []),
       ...Object.values(syncedIntegrationsStatus?.custom_assets ?? {}).map(
         (asset) => asset.sync_status
       ),

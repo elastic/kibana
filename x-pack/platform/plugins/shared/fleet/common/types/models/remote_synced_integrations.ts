@@ -21,6 +21,10 @@ export interface RemoteSyncedIntegrationsStatus extends RemoteSyncedIntegrations
   sync_status: SyncStatus;
   error?: string;
   updated_at?: string;
+  install_status: {
+    main: string;
+    remote?: string;
+  };
 }
 export interface RemoteSyncedCustomAssetsStatus extends BaseCustomAssetsData {
   sync_status: SyncStatus;
