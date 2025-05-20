@@ -189,11 +189,6 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the storing of gaps in the event log
-   */
-  storeGapsInEventLogEnabled: false,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -258,6 +253,11 @@ export const allowedExperimentalValues = Object.freeze({
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: false,
+
+  /**
+   * Automatically installs the security AI prompts package
+   */
+  securityAIPromptsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
