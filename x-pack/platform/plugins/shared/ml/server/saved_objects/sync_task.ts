@@ -14,7 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { savedObjectClientsFactory } from './util';
+import { savedObjectClientsFactory } from '@kbn/ml-saved-objects/util';
 import { mlSavedObjectServiceFactory } from './service';
 import { syncSavedObjectsFactory } from './sync';
 
