@@ -94,7 +94,6 @@ export const DiscoverMainRoute = ({
       // if `_t` in URL changes (for example via browser history), try to restore the previous state
       onChanged: (urlState) => {
         const { tabId: restoreTabId } = urlState;
-        // console.log('URL state changed', urlState);
         if (restoreTabId) {
           internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
         } else {
