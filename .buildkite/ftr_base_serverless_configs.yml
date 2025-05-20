@@ -7,3 +7,8 @@ disabled:
   - x-pack/test_serverless/api_integration/config.base.ts
   - x-pack/test_serverless/functional/config.base.ts
   - x-pack/test_serverless/shared/config.base.ts
+
+enabled:
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/search.serverless.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/security.serverless.config.ts
