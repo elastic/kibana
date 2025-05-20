@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:ai4dsoc:run:serverless
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai4dsoc
     label: "Cypress MKI - AI4DSOC"
     key: test_ai4dsoc
     env:
@@ -18,8 +18,8 @@ steps:
     steps:
 
       - label: Running ai4dsoc_cases:runner:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_cases:runner:serverless
-        key: ai4dsoc_cases:runner:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_cases:qa:serverless
+        key: ai4dsoc_cases:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -32,8 +32,8 @@ steps:
               limit: 2
 
       - label: Running ai4dsoc_nlp_cleanup_task:runner:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_nlp_cleanup_task:runner:serverless
-        key: ai4dsoc_nlp_cleanup_task:runner:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_nlp_cleanup_task:qa:serverless
+        key: ai4dsoc_nlp_cleanup_task:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
