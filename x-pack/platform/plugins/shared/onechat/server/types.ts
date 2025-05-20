@@ -10,9 +10,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ToolsServiceSetup } from './services/tools';
-
-/* eslint-disable @typescript-eslint/no-empty-interface*/
+import type { ToolsServiceSetup, ScopedPublicToolRegistryFactoryFn } from './services/tools';
 
 export interface OnechatSetupDependencies {
   actions: ActionsPluginSetup;
@@ -24,11 +22,27 @@ export interface OnechatStartDependencies {
   inference: InferenceServerStart;
 }
 
+/**
+ * Onechat tool service's setup contract
+ */
 export interface ToolsSetup {
+  /**
+   * Register a built-in tool to be available in onechat.
+   *
+   * Refer to {@link ToolRegistration}
+   */
   register: ToolsServiceSetup['register'];
 }
 
-export interface ToolsStart {}
+/**
+ * Onechat tool service's start contract
+ */
+export interface ToolsStart {
+  /**
+   * Returns a version of the registry scoped to a given request.
+   */
+  getScopedRegistry: ScopedPublicToolRegistryFactoryFn;
+}
 
 /**
  * Setup contract of the onechat plugin.

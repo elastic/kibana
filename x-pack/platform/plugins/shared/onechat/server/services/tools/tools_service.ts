@@ -7,6 +7,7 @@
 
 import { BuiltinToolRegistry, ToolRegistration } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
+import { combineToolProviders, toolProviderToPublicRegistryFactory } from './utils';
 
 export class ToolsService {
   private builtinRegistry: BuiltinToolRegistry;
@@ -22,7 +23,14 @@ export class ToolsService {
   }
 
   start(): ToolsServiceStart {
-    return {};
+    const toolProvider = combineToolProviders(this.builtinRegistry);
+
+    return {
+      provider: toolProvider,
+      public: {
+        asScoped: toolProviderToPublicRegistryFactory({ provider: toolProvider }),
+      },
+    };
   }
 
   private register(toolRegistration: ToolRegistration) {

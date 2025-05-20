@@ -39,7 +39,6 @@ export class OnechatPlugin
 
   private services?: InternalServices;
   private serviceSetups?: InternalSetupServices;
-  // @ts-expect-error unused for now
   private serviceStarts?: InternalStartServices;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
@@ -77,7 +76,9 @@ export class OnechatPlugin
     this.serviceStarts = startServices({ services: this.services });
 
     return {
-      tools: {},
+      tools: {
+        getScopedRegistry: (opts) => this.serviceStarts!.tools.public.asScoped(opts),
+      },
     };
   }
 

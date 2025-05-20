@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export type { ToolsServiceSetup, ToolsServiceStart } from './types';
+export type {
+  ToolsServiceSetup,
+  ToolsServiceStart,
+  ScopedPublicToolRegistryFactoryFn,
+  ScopedPublicToolRegistry,
+} from './types';
 export { ToolsService } from './tools_service';

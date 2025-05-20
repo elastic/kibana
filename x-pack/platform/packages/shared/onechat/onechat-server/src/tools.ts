@@ -49,6 +49,8 @@ export interface ToolHandlerContext {
   // TODO: event system
 }
 
+//// tool provider
+
 /**
  * Common interface shared across all tool providers.
  */

@@ -15,7 +15,8 @@ import type {
 } from './types';
 import { OnechatPlugin } from './plugin';
 
-export type { OnechatPluginSetup, OnechatPluginStart };
+export type { OnechatPluginSetup, OnechatPluginStart, ToolsSetup, ToolsStart } from './types';
+export type { ScopedPublicToolRegistry, ScopedPublicToolRegistryFactoryFn } from './services/tools';
 
 export const plugin: PluginInitializer<
   OnechatPluginSetup,

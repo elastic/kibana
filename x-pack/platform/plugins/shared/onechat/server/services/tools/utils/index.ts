@@ -6,3 +6,5 @@
  */
 
 export { combineToolProviders } from './combine_tool_providers';
+export { toolToDescriptor } from './tool_to_descriptor';
+export { toolProviderToPublicRegistryFactory } from './tool_provider_to_public_registry';
