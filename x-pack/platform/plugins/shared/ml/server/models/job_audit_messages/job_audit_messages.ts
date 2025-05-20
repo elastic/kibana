@@ -13,7 +13,7 @@ import { ML_NOTIFICATION_INDEX_PATTERN } from '@kbn/ml-common-constants/index_pa
 import { MESSAGE_LEVEL } from '@kbn/ml-common-constants/message_levels';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import type { AuditMessage } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import type { MLSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
 import type { MlClient } from '@kbn/ml-client';
 
 const SIZE = 1000;

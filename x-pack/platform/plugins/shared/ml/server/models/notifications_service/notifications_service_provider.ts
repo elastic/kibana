@@ -15,11 +15,11 @@ import type {
   NotificationsCountResponse,
   NotificationsSearchResponse,
 } from '@kbn/ml-common-types/notifications';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
 import type {
   MessagesSearchParams,
   NotificationsCountParams,
-} from '../../routes/schemas/notifications_schema';
-import type { MLSavedObjectService } from '../../saved_objects';
+} from '@kbn/ml-server-api-schemas/notifications_schema';
 
 const MAX_NOTIFICATIONS_SIZE = 10000;
 
