@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+  const scrollToBottom$ = new Subject<void>();
   let scrollPosition: number | undefined;
 
   function setScrollToPanelId(id: string | undefined) {
@@ -71,6 +72,10 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
     },
     scrollToTop: () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    scrollToBottom$,
+    scrollToBottom: () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);

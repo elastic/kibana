@@ -17,7 +17,11 @@ import type {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/common';
 
-import type { DashboardPanelMap, DashboardSectionState } from './dashboard_container/types';
+import type {
+  DashboardPanelMap,
+  DashboardSectionMap,
+  DashboardSectionState,
+} from './dashboard_container/types';
 import type {
   DashboardAttributes,
   DashboardOptions,
@@ -59,6 +63,7 @@ export interface DashboardState extends DashboardSettings {
   refreshInterval?: RefreshInterval;
   viewMode: ViewMode;
   panels: DashboardPanelMap;
+  sections: DashboardSectionMap;
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.

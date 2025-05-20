@@ -12,10 +12,8 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
-import { StateComparators } from '@kbn/presentation-publishing';
 
-import { DashboardSectionMap } from '../../common';
-import { DashboardState } from './types';
+import { DashboardSectionMap, DashboardState } from '../../common';
 
 export function initializeSectionsManager(initialSections: DashboardSectionMap | undefined) {
   const scrollToBottom$ = new Subject<void>();
@@ -47,15 +45,6 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
       },
       setSections,
     },
-    comparators: {
-      sections: [
-        sections$,
-        setSections,
-        (a, b) => {
-          return fastIsEqual(a ?? {}, b ?? {});
-        },
-      ],
-    } as StateComparators<Pick<DashboardState, 'sections'>>,
     internalApi: {
       scrollToBottom$,
       scrollToBottom: () => {

@@ -55,15 +55,16 @@ export const DashboardViewport = ({
   }, [dashboardApi]);
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
+    console.log(layout);
     const visiblePanels = Object.values(layout).filter(({ gridData }) => {
       return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
     });
     return {
-      panelCount: Object.keys(panels).length,
+      panelCount: Object.keys(layout).length,
       visiblePanelCount: visiblePanels.length,
       sectionCount: Object.keys(sections ?? {}).length,
     };
-  }, [dashboardInternalApi, panels, sections]);
+  }, [dashboardInternalApi, layout]);
 
   const classes = classNames({
     dshDashboardViewport: true,

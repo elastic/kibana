@@ -26,7 +26,7 @@ import {
   tap,
 } from 'rxjs';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { initializePanelsManager } from './panels_manager';
+import { initializeLayoutManager } from './layout_manager';
 import { initializeSectionsManager } from './sections_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
@@ -57,7 +57,7 @@ export function initializeUnsavedChangesManager({
   getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
-  panelsManager: ReturnType<typeof initializePanelsManager>;
+  panelsManager: ReturnType<typeof initializeLayoutManager>;
   sectionsManager: ReturnType<typeof initializeSectionsManager>;
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;

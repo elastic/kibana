@@ -15,7 +15,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import { arePanelLayoutsEqual } from '../../dashboard_api/are_panel_layouts_equal';
+import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
 import { DashboardLayout } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -97,16 +97,16 @@ export const DashboardGrid = ({
         },
         {} as DashboardLayout
       );
-      if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
-        dashboardInternalApi.layout$.next(updatedPanels);
-      }
+      // if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
+      dashboardInternalApi.layout$.next(updatedPanels);
+      // }
     },
     [dashboardInternalApi.layout$, viewMode]
   );
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      const currentPanels = dashboardInternalApi.layout$.getValue();
+      const currentPanels = dashboardInternalApi.layout$.getValue().panels;
       if (!currentPanels[id]) return;
 
       if (!panelRefs.current[id]) {

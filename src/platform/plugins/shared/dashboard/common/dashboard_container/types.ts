@@ -18,7 +18,7 @@ export interface DashboardSectionMap {
 export interface DashboardSectionState {
   title: string;
   collapsed?: boolean; // if undefined, then collapsed is false
-  order: number;
+  readonly gridData: Pick<GridData, 'i' | 'y'>;
   id: string;
 }
 
