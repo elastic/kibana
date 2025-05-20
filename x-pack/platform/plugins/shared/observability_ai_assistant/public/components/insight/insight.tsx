@@ -453,7 +453,7 @@ export function Insight({
       }}
       controls={
         !!elasticManagedLlm ? (
-          <ElasticLlmTourCallout isOpen={isTourCalloutOpen}>
+          <ElasticLlmTourCallout isOpen={isTourCalloutOpen} zIndex={999}>
             <ActionsMenu
               connectors={connectors}
               onEditPrompt={() => {

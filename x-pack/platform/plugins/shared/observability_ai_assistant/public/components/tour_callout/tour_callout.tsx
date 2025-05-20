@@ -26,6 +26,7 @@ export interface TourCalloutProps
   children: ReactElement;
   isOpen?: boolean;
   footerButtonLabel: string;
+  zIndex?: number;
   dismissTour?: () => void;
 }
 
@@ -41,6 +42,7 @@ export const TourCallout = ({
   subtitle,
   maxWidth = 330,
   footerButtonLabel,
+  zIndex,
   dismissTour,
   ...rest
 }: TourCalloutProps) => {
@@ -79,10 +81,12 @@ export const TourCallout = ({
       step={step}
       stepsTotal={stepsTotal}
       anchorPosition={anchorPosition}
+      repositionOnScroll={true}
       isStepOpen={isStepOpen}
       onFinish={handleFinish}
       hasArrow={hasArrow}
       maxWidth={maxWidth}
+      zIndex={zIndex}
       footerAction={
         <EuiButtonEmpty size="s" color="text" onClick={handleFinish}>
           {footerButtonLabel}

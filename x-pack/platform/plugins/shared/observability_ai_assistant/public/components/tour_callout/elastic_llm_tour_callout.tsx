@@ -18,10 +18,12 @@ import { TourCallout } from './tour_callout';
 export const ElasticLlmTourCallout = ({
   children,
   isOpen = true,
+  zIndex,
   dismissTour,
 }: {
   children: ReactElement;
   isOpen?: boolean;
+  zIndex?: number;
   dismissTour?: () => void;
 }) => {
   return (
@@ -68,6 +70,7 @@ export const ElasticLlmTourCallout = ({
       footerButtonLabel={i18n.translate('xpack.observabilityAiAssistant.tour.footerButtonLabel', {
         defaultMessage: 'Ok',
       })}
+      zIndex={zIndex}
       dismissTour={dismissTour}
     >
       {children}
