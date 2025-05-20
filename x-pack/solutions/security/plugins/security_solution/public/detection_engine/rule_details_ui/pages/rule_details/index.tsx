@@ -39,6 +39,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import {
   defaultGroupStatsAggregations,
@@ -322,7 +323,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -568,6 +568,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const groupTakeActionItems = useGroupTakeActionsItems({
+    currentStatus: currentAlertStatusFilterValue,
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+  });
+
   const accordionExtraActionGroupStats = useMemo(
     () => ({
       aggregations: defaultGroupStatsAggregations,
@@ -805,14 +810,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <GroupedAlertsTable
                         accordionButtonContent={defaultGroupTitleRenderers}
                         accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
                         defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
                         globalFilters={filters}
                         globalQuery={query}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        hasIndexWrite={hasIndexWrite ?? false}
+                        groupTakeActionItems={groupTakeActionItems}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
                         runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
@@ -852,12 +855,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       theme={theme}
                     />
                     <EuiSpacer size="xl" />
-                    {storeGapsInEventLogEnabled && (
-                      <>
-                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
-                        <EuiSpacer size="xl" />
-                      </>
-                    )}
+                    <>
+                      <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                      <EuiSpacer size="xl" />
+                    </>
                     <RuleBackfillsInfo ruleId={ruleId} />
                   </>
                 </Route>

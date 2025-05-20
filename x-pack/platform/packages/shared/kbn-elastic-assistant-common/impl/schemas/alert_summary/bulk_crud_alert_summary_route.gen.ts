@@ -16,7 +16,13 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import {
+  BulkActionBase,
+  NonEmptyString,
+  NonEmptyTimestamp,
+  User,
+  BulkCrudActionSummary,
+} from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
@@ -47,7 +53,7 @@ export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
 export const AlertSummaryResponse = z.object({
   id: NonEmptyString,
   alertId: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   summary: z.string(),
   recommendedActions: z.string().optional(),
   replacements: Replacements,
@@ -70,14 +76,6 @@ export const AlertSummaryBulkCrudActionResults = z.object({
   skipped: z.array(AlertSummaryBulkActionSkipResult),
 });
 
-export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  failed: z.number().int(),
-  skipped: z.number().int(),
-  succeeded: z.number().int(),
-  total: z.number().int(),
-});
-
 export type AlertSummaryBulkCrudActionResponse = z.infer<typeof AlertSummaryBulkCrudActionResponse>;
 export const AlertSummaryBulkCrudActionResponse = z.object({
   success: z.boolean().optional(),
@@ -89,18 +87,6 @@ export const AlertSummaryBulkCrudActionResponse = z.object({
     summary: BulkCrudActionSummary,
     errors: z.array(NormalizedAlertSummaryError).optional(),
   }),
-});
-
-export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  /**
-   * Query to filter alert summaries
-   */
-  query: z.string().optional(),
-  /**
-   * Array of alert summary IDs
-   */
-  ids: z.array(z.string()).min(1).optional(),
 });
 
 export type AlertSummaryCreateProps = z.infer<typeof AlertSummaryCreateProps>;
