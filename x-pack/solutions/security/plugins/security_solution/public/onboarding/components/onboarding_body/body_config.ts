@@ -12,7 +12,6 @@ import { dashboardsCardConfig } from './cards/dashboards';
 import { rulesCardConfig } from './cards/rules';
 import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
-import { assistantExternalDetectionsCardConfig } from './cards/assistant_external_detections';
 import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
 import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
 import { integrationsExternalDetectionsCardConfig } from './cards/integrations_external_detections';
@@ -23,12 +22,7 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.dataGroup.title', {
       defaultMessage: 'Ingest your data',
     }),
-    cards: [
-      integrationsCardConfig,
-      integrationsExternalDetectionsCardConfig,
-      dashboardsCardConfig,
-      knowledgeSourceCardConfig,
-    ],
+    cards: [integrationsCardConfig, dashboardsCardConfig],
   },
   {
     title: i18n.translate('xpack.securitySolution.onboarding.alertsGroup.title', {
@@ -43,11 +37,23 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
     // TODO: Add attackDiscoveryCardConfig when it is ready (https://github.com/elastic/kibana/issues/189487)
     cards: [assistantCardConfig],
   },
+];
+
+export const defaultExternalDetectionsBodyConfig: OnboardingGroupConfig[] = [
   {
-    title: i18n.translate('xpack.securitySolution.onboarding.customizeLLMGroup.title', {
-      defaultMessage: 'Customize your LLM',
+    title: i18n.translate('xpack.securitySolution.onboarding.externalDetections.dataGroup.title', {
+      defaultMessage: 'Ingest your data',
     }),
-    cards: [assistantExternalDetectionsCardConfig],
+    cards: [integrationsExternalDetectionsCardConfig, knowledgeSourceCardConfig],
+  },
+  {
+    title: i18n.translate(
+      'xpack.securitySolution.onboarding.externalDetections.customizeLLMGroup.title',
+      {
+        defaultMessage: 'Customize your LLM',
+      }
+    ),
+    cards: [assistantCardConfig],
   },
 ];
 
