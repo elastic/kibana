@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import type { HttpFetchQuery } from '@kbn/core/public';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,

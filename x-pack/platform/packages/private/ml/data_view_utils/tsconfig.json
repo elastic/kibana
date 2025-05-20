@@ -18,8 +18,8 @@
   "kbn_references": [
     "@kbn/data-views-plugin",
     "@kbn/config-schema",
-    "@kbn/ml-error-utils",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/ml-common-types",
   ]
 }

@@ -18,7 +18,7 @@ import { map } from 'rxjs';
 import { each, get } from 'lodash';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils/es_aggregation';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';

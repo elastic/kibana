@@ -12,7 +12,7 @@ import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import type { MlClient } from '@kbn/ml-client';
-import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import { fillResultsWithTimeouts, isRequestTimeout } from '@kbn/ml-error-utils';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];

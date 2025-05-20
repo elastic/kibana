@@ -8,7 +8,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { MLErrorObject } from '@kbn/ml-error-utils';
+import type { MLErrorObject } from '@kbn/ml-common-types/errors';
 
 export const ErrorMessageContent = ({
   fieldName,
