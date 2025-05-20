@@ -205,7 +205,7 @@ export default function ({ getPageObjects, getService }) {
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
         layout: { visibility: 'visible' },
-        paint: { 'line-color': '#119793', 'line-opacity': 0.75, 'line-width': 1 },
+        paint: { 'line-color': '#009490', 'line-opacity': 0.75, 'line-width': 1 },
       });
     });
   });
