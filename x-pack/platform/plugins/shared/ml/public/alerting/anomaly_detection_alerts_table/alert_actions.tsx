@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -12,7 +14,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
