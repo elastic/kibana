@@ -371,7 +371,7 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('processAlerts() should set maintenance windows IDs on new alerts', async () => {
+  test('processAlerts() should set maintenance windows IDs on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
@@ -386,37 +386,57 @@ describe('Legacy Alerts Client', () => {
           eventStartTime: new Date().toISOString(),
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
-          id: 'test-id2',
+          id: 'test-id5',
         },
       ],
-      maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
+      maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id5'],
     });
+
+    const activeAlert = {
+      state: {},
+      meta: {
+        uuid: 'bar',
+        maintenanceWindowIds: ['test-id1', 'test-id2'],
+      },
+    };
+
+    const recoveredAlert = {
+      state: {},
+      meta: {
+        uuid: 'ghi',
+        maintenanceWindowIds: ['test-id1', `test-id3`],
+      },
+    };
+
     (processAlerts as jest.Mock).mockReturnValue({
       newAlerts: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
       },
       activeAlerts: {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', activeAlert),
+      },
+      recoveredAlerts: {
+        '3': new Alert<AlertInstanceContext, AlertInstanceContext>('3', recoveredAlert),
       },
       currentRecoveredAlerts: {},
-      recoveredAlerts: {},
     });
+
     (trimRecoveredAlerts as jest.Mock).mockReturnValue({
       trimmedAlertsRecovered: {},
       earlyRecoveredAlerts: {},
     });
+
     (getAlertsForNotification as jest.Mock).mockReturnValue({
       newAlerts: {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
       },
       activeAlerts: {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', activeAlert),
       },
-      currentActiveAlerts: {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      recoveredAlerts: {
+        '3': new Alert<AlertInstanceContext, AlertInstanceContext>('3', recoveredAlert),
       },
       currentRecoveredAlerts: {},
-      recoveredAlerts: {},
     });
     const alertsClient = new LegacyAlertsClient({
       alertingEventLogger,
@@ -430,7 +450,8 @@ describe('Legacy Alerts Client', () => {
     await alertsClient.initializeExecution({
       ...defaultExecutionOpts,
       activeAlertsFromState: {
-        '2': testAlert2,
+        '2': activeAlert,
+        '3': recoveredAlert,
       },
     });
 
@@ -447,27 +468,16 @@ describe('Legacy Alerts Client', () => {
       spaceId: 'space1',
     });
 
-    expect(getAlertsForNotification).toHaveBeenCalledWith(
-      {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      'default',
-      5,
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', {
-          ...testAlert1,
-          meta: { ...testAlert1.meta, maintenanceWindowIds: ['test-id1', 'test-id2'] },
-        }),
-      },
-      {
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {},
-      {},
-      null
-    );
+    expect(alertsClient.getProcessedAlerts('new')['1'].getMaintenanceWindowIds()).toEqual([
+      'test-id1',
+      'test-id5',
+    ]);
+    expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowIds()).toEqual([
+      'test-id1',
+    ]);
+    expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowIds()).toEqual([
+      'test-id1',
+    ]);
   });
 
   test('isTrackedAlert() should return true if alert was active in a previous execution, false otherwise', async () => {
