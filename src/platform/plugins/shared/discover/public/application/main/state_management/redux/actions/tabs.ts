@@ -68,7 +68,7 @@ export const updateTabs: InternalStateThunkActionCreator<
   async (
     dispatch,
     getState,
-    { services, runtimeStateManager, urlStateStorage, tabsStorageManager }
+    { services, runtimeStateManager, urlStateStorage }
   ) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
