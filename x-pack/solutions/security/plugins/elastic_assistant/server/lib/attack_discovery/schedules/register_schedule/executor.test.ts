@@ -88,6 +88,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     services: {
       ...services,
       actionsClient,
+      shouldStopExecution: () => false,
     },
     spaceId,
     state: {},
@@ -233,5 +234,18 @@ describe('attackDiscoveryScheduleExecutor', () => {
       },
       context: { attack: restDiscovery },
     });
+  });
+
+  it('should throw an error on execution timeout', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    options.services.shouldStopExecution = () => true;
+
+    const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      logger: mockLogger,
+      options,
+    });
+    await expect(attackDiscoveryScheduleExecutorPromise).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Rule execution cancelled due to timeout"'
+    );
   });
 });
