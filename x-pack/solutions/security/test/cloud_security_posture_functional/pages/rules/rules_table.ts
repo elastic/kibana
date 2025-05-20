@@ -96,8 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/220379
-    describe.skip('Rules Page - Bulk Action buttons', () => {
+    describe('Rules Page - Bulk Action buttons', () => {
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();

@@ -24,8 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/220524
-  describe.skip('Cloud Posture Rules Page - Table Headers', function () {
+  describe('Cloud Posture Rules Page - Table Headers', function () {
     this.tags(['cloud_security_posture_rules_page_table_headers']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
