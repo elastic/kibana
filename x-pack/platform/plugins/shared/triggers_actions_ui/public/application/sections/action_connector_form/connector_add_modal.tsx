@@ -164,12 +164,8 @@ const ConnectorAddModal = ({
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
-    }
-  }, [submit, preSubmitValidator, createConnector]);
-
-  useEffect(() => {
-    // only after a submit has completed with errors
-    if (formState.isSubmitted && formState.isValid === false && !formState.isSubmitting) {
+    } else {
+      // point the user to the first invalid field
       const container = containerRef.current;
       if (!container) return;
 
@@ -182,7 +178,7 @@ const ConnectorAddModal = ({
         });
       }
     }
-  }, [formState.isSubmitted, formState.isValid, formState.isSubmitting]);
+  }, [submit, preSubmitValidator, createConnector]);
 
   const closeModal = useCallback(() => {
     onClose();
