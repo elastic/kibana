@@ -49,20 +49,11 @@ export const monitoringEntitySourceRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const coreContext = await context.core;
-          const soClient = coreContext.savedObjects.client;
-          const clusterClient = coreContext.elasticsearch.client;
+          const secSol = await context.securitySolution;
+          const client = secSol.getMonitoringEntitySourceDataClient();
+          const body = await client.init(request.body);
 
-          const dataClient = new MonitoringEntitySourceDataClient({
-            soClient,
-            clusterClient,
-            logger,
-            namespace: 'default',
-          });
-
-          const result = await dataClient.init(request.body);
-
-          return response.ok({ body: result });
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
@@ -96,19 +87,10 @@ export const monitoringEntitySourceRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const coreContext = await context.core;
-          const soClient = coreContext.savedObjects.client;
-          const clusterClient = coreContext.elasticsearch.client;
-
-          const dataClient = new MonitoringEntitySourceDataClient({
-            soClient,
-            clusterClient,
-            logger,
-            namespace: 'default',
-          });
-
-          const result = await dataClient.get();
-          return response.ok({ body: result });
+          const secSol = await context.securitySolution;
+          const client = secSol.getMonitoringEntitySourceDataClient();
+          const body = await client.get();
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error getting monitoring entity source sync config: ${error.message}`);
