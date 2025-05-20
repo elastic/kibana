@@ -90,7 +90,5 @@
     "@kbn/presentation-util",
     "@kbn/ml-common-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
