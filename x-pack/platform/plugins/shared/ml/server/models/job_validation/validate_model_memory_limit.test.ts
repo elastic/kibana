@@ -10,7 +10,7 @@ import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/co
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 describe('ML - validateModelMemoryLimit', () => {
   // mock info endpoint response

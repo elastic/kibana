@@ -13,7 +13,8 @@ import type {
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Module } from '@kbn/ml-common-types/modules';
 import { DataRecognizer } from '.';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import type { MLSavedObjectService } from '../../saved_objects';
 import { type Config, filterConfigs } from './data_recognizer';
 
