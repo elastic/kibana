@@ -7,7 +7,8 @@
 
 import { modelsProvider } from './models_provider';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import downloadTasksResponse from './__mocks__/mock_download_tasks.json';
 import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import { mlLog } from '../../lib/log';
