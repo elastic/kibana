@@ -25,6 +25,7 @@ export const onboardingConfig: TopicConfig[] = [
     body: defaultBodyConfig,
   },
   {
+    // The "detections" and "external_detections" capabilities are mutually exclusive, so we will always have only one `default` topic enabled at a time
     id: OnboardingTopicId.default,
     title: i18n.translate('xpack.securitySolution.onboarding.topic.externalDetections.default', {
       defaultMessage: 'Set up Security',
