@@ -170,5 +170,6 @@
     "@kbn/reindex-service-plugin",
     "@kbn/ml-common-types",
     "@kbn/ml-common-constants",
+    "@kbn/ml-server-api-schemas",
   ]
 }

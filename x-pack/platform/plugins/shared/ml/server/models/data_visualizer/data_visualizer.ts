@@ -19,7 +19,7 @@ import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-u
 import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils/field_types';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
