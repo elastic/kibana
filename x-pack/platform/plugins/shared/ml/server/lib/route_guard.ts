@@ -26,7 +26,8 @@ import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
-import type { MlClient } from './ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import { MlAuditLogger, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
