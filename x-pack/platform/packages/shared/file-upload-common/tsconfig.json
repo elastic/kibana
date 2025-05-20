@@ -16,5 +16,9 @@
   "kbn_references": [
     "@kbn/file-upload-plugin",
     "@kbn/index-management-shared-types",
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
   ]
 }
