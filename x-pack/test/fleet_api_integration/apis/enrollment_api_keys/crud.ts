@@ -179,7 +179,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(404);
 
-        expect(apiResponse.message).to.be('Agent policy idonotexists not found');
+        expect(apiResponse.message).to.be('Agent policy "idonotexists" not found');
       });
 
       it('should allow to create an enrollment api key with only an agent policy', async () => {
