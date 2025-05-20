@@ -6,6 +6,7 @@
  */
 
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { MlClient } from '@kbn/ml-client';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
@@ -25,7 +26,6 @@ import {
   getCategorizerStatsSchema,
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
-import type { MlClient } from '../lib/ml_client';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);

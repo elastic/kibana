@@ -19,5 +19,6 @@
     "@kbn/ml-is-populated-object",
     "@kbn/i18n",
     "@kbn/ml-common-constants",
+    "@kbn/ml-common-types",
   ]
 }
