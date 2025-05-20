@@ -128,7 +128,8 @@ export const combineConcurrentResults = (
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
-        userError: accum.userError || item.errors.some((err) => checkErrorDetails(err).isUserError),
+        userError:
+          accum.userError || item.errors.every((err) => checkErrorDetails(err).isUserError),
         suppressedAlertsCount:
           (accum.suppressedAlertsCount ?? 0) + (item.suppressedAlertsCount ?? 0),
       };
