@@ -74,7 +74,9 @@ const validatePEMData = (
   type: 'CERTIFICATE' | 'PRIVATE KEY',
   description: string
 ): void => {
-  if (data && !data.includes(`-----BEGIN ${type}-----`)) {
+  const decodedData = data ? Buffer.from(data, 'base64') : undefined;
+
+  if (decodedData && !decodedData.includes(`-----BEGIN ${type}-----`)) {
     throw new Error(
       `Invalid ${description} file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN ${type}-----".`
     );
@@ -113,7 +115,7 @@ const validatePKICertificates = ({
  */
 const loadBuffer = (data?: string, type?: 'CERTIFICATE' | 'PRIVATE KEY'): Buffer => {
   if (data) {
-    return Buffer.from(formatPEMContent(data, type!));
+    return Buffer.from(formatPEMContent(Buffer.from(data, 'base64').toString(), type!));
   }
   throw new Error(`No ${type?.toLowerCase()} data provided`);
 };

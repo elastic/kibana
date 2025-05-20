@@ -66,10 +66,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
 
     if (
       apiProvider === OpenAiProviderType.Other &&
-      (configObject.certificateFile ||
-        configObject.certificateData ||
-        configObject.privateKeyFile ||
-        configObject.privateKeyData)
+      (configObject.certificateData || configObject.caData || configObject.privateKeyData)
     ) {
       pkiConfigValidator(configObject);
     }
