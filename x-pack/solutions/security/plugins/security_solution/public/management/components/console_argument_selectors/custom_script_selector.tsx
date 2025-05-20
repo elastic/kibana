@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiPanel,
   EuiPopover,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBox,
+  EuiSelectable,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
@@ -46,11 +48,10 @@ interface CustomScriptSelectorState {
 export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   const CustomScriptSelectorComponent = memo<
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
-  >(({ value, valueText, onChange, store: _store }) => {
+  >(({ value, valueText, onChange, store: _store, inputRef }) => {
     const state = useMemo<CustomScriptSelectorState>(() => {
       return _store ?? { isPopoverOpen: true };
     }, [_store]);
-
     const setIsPopoverOpen = useCallback(
       (newValue: boolean) => {
         onChange({
@@ -66,26 +67,22 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     );
 
     const { data = [] } = useGetCustomScripts(agentType);
-    // Create options for the dropdown
-    const scriptsOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+    const scriptsOptions = useMemo(() => {
       return data.map((script: CustomScript) => ({
         value: script.id,
         label: script.name,
+        description: script.description,
       }));
     }, [data]);
 
-    const renderOption = (option: EuiComboBoxOptionOption<string>) => {
-      const foundScript = data.find((script) => script.id === option.value);
+    const renderOption = (option: EuiSelectableOption) => {
+      console.log({ option });
+
       return (
         <>
           <strong data-test-subj={`${option.value}-label`}>{option.label}</strong>
-          <EuiText
-            data-test-subj={`${option.value}-description`}
-            size="s"
-            color="subdued"
-            css={{ wordBreak: 'break-word', width: '100%' }}
-          >
-            <p style={{ whiteSpace: 'normal' }}>{foundScript?.description}</p>
+          <EuiText data-test-subj={`${option.value}-description`} size="s">
+            {option?.description}
           </EuiText>
         </>
       );
@@ -103,19 +100,37 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       null
     );
 
-    const handleScriptSelection = useCallback(
-      (options: Array<EuiComboBoxOptionOption<string>>) => {
-        const selected = options[0];
-        setSelectedScript(selected);
+    // Focus on the input element when the popover closes after selection
+    useEffect(() => {
+      if (!state.isPopoverOpen) {
+        // Use setTimeout to ensure focus happens after the popover closes
+        setTimeout(() => {
+          if (inputRef?.current) {
+            inputRef?.current.focus(true);
+          }
+        }, 0);
+      }
+    }, [state.isPopoverOpen, selectedScript, inputRef]);
 
-        onChange({
-          value: selected.label,
-          valueText: selected.label,
-          store: {
-            ...state,
-            isPopoverOpen: false,
-          },
-        });
+    const handleScriptSelection = useCallback(
+      (options: EuiSelectableOption[]) => {
+        // Find the first option that is checked (selected)
+        const selected = options.find((option: EuiSelectableOption) => option.checked === 'on');
+        if (selected) {
+          setSelectedScript({
+            value: selected.value,
+            label: selected.label,
+          });
+
+          onChange({
+            value: selected.label,
+            valueText: selected.label,
+            store: {
+              ...state,
+              isPopoverOpen: false,
+            },
+          });
+        }
       },
       [onChange, state]
     );
@@ -123,16 +138,9 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     if (scriptsOptions.length) {
       return (
         <EuiPopover
-          initialFocus={'#options-combobox'}
           isOpen={state.isPopoverOpen}
           closePopover={handleClosePopover}
-          anchorPosition="rightDown"
-          panelPaddingSize="none"
-          panelStyle={{
-            width: '100%',
-          }}
           button={
-            // TODO: temporary ui - waiting for UX feedback
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false} onClick={handleOpenPopover}>
                 <div title={valueText || NO_SCRIPT_SELECTED}>
@@ -143,22 +151,48 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           }
         >
           {state.isPopoverOpen && (
-            <EuiComboBox
-              onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-                // Necessary to move focus to the popover's input when it opens so we can type right away
-                event.stopPropagation();
-              }}
-              id="options-combobox"
-              aria-label="Select a custom script"
-              placeholder="Select a single option"
-              singleSelection={{ asPlainText: true }}
-              options={scriptsOptions}
-              renderOption={renderOption}
-              fullWidth
-              selectedOptions={selectedScript ? [selectedScript] : []}
-              onChange={handleScriptSelection}
-              rowHeight={60}
-            />
+            <EuiPanel
+              paddingSize="s"
+              css={{ inlineSize: 400, resize: 'horizontal', overflow: 'auto' }}
+            >
+              <EuiSelectable
+                id="options-combobox"
+                searchable={true}
+                options={scriptsOptions}
+                onChange={handleScriptSelection}
+                renderOption={renderOption}
+                searchProps={{
+                  autoFocus: true,
+                  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
+                    // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
+                    if (
+                      event.key !== 'Enter' &&
+                      event.key !== 'ArrowUp' &&
+                      event.key !== 'ArrowDown' &&
+                      event.key !== 'Escape'
+                    ) {
+                      event.stopPropagation();
+                    }
+                  },
+                }}
+                listProps={{
+                  rowHeight: 60,
+                  showIcons: false,
+                  textWrap: 'truncate',
+                  truncationProps: {
+                    truncation: 'end',
+                    truncationOffset: 0,
+                  },
+                }}
+              >
+                {(list, search) => (
+                  <>
+                    {search}
+                    {list}
+                  </>
+                )}
+              </EuiSelectable>
+            </EuiPanel>
           )}
         </EuiPopover>
       );

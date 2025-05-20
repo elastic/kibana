@@ -112,8 +112,14 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const disableArrowButton = useMemo(() => fullTextEntered.trim().length === 0, [fullTextEntered]);
 
   const userInput = useMemo(() => {
-    return new EnteredInput(leftOfCursorText, rightOfCursorText, parsedInput, enteredCommand);
-  }, [enteredCommand, leftOfCursorText, parsedInput, rightOfCursorText]);
+    return new EnteredInput(
+      leftOfCursorText,
+      rightOfCursorText,
+      parsedInput,
+      enteredCommand,
+      keyCaptureFocusRef
+    );
+  }, [enteredCommand, leftOfCursorText, parsedInput, rightOfCursorText, keyCaptureFocusRef]);
 
   const handleOnResize = useCallback<EuiResizeObserverProps['onResize']>(({ width }) => {
     if (width > 0) {

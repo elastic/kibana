@@ -276,6 +276,15 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
    * @param newData
    */
   onChange: (newData: ArgSelectorState<TState>) => void;
+
+  /**
+   * Reference to the main input element, allowing selectors to return focus to it
+   * when their own UI elements close
+   */
+  inputRef?: React.MutableRefObject<{
+    focus: (force?: boolean) => void;
+    blur: () => void;
+  } | null> | null;
 }
 
 /**

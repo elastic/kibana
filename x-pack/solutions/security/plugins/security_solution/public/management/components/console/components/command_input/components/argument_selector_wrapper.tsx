@@ -51,13 +51,17 @@ export interface ArgumentSelectorWrapperProps {
   argName: string;
   argIndex: number;
   argDefinition: ArgDefinitionWithRequiredSelector;
+  inputRef?: React.MutableRefObject<{
+    focus: (force?: boolean) => void;
+    blur: () => void;
+  } | null>;
 }
 
 /**
  * handles displaying a custom argument value selector and manages its state
  */
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
-  ({ argName, argIndex, argDefinition: { SelectorComponent } }) => {
+  ({ argName, argIndex, argDefinition: { SelectorComponent }, inputRef }) => {
     const dispatch = useConsoleStateDispatch();
     const { valueText, value, store } = useWithCommandArgumentState(argName, argIndex);
 
@@ -100,6 +104,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
                 argIndex={argIndex}
                 store={store}
                 onChange={handleSelectorComponentOnChange}
+                inputRef={inputRef}
               />
             </div>
           </EuiFlexItem>
