@@ -14,6 +14,7 @@ import { AppMountParameters } from '@kbn/core-application-browser';
 
 import { Global } from '@emotion/react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { GlobalRow, InlineRow, InlineRowB, MemoRow, VarRow, VarRowB } from './cases';
 
 export const PerfTest = () => {
   const [rowCount, setRowCount] = useState(200);
@@ -143,17 +144,17 @@ function Harness({
 
     if (count === renderCount) {
       // Wait a tick for React to flush
-      requestAnimationFrame(() => {
         const total = performance.now() - start.current;
         setResults((results) => results.concat(total.toFixed(2)));
         setCount(null);
-      });
     }
   }, [setDisabled, count, rowCount]);
 
   const forceRerender = () => {
-    setCount(0);
-    start.current = performance.now();
+    if (count === null) {
+      setCount(0);
+      start.current = performance.now();
+    }
   };
 
   if (RowComponent.name === 'VarRowB') {
@@ -248,125 +249,3 @@ function Harness({
     </div>
   );
 }
-
-// Case A: Emotion inline styles
-const InlineRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div
-    css={{
-      outline: 0,
-      border: 0,
-      margin: '2px 2px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'anchor-center',
-      height: '30px',
-      fontSize: '20px',
-      width: '30px',
-      opacity: disabled ? 0.5 : 1,
-      color: disabled ? '#E2F9F7' : '#E2F8F0',
-      backgroundColor: disabled ? '#C61E25' : '#008A5E',
-    }}
-  >
-    {index}
-  </div>
-);
-
-// Case A: Emotion inline styles
-const InlineRowB = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div
-    css={[
-      {
-        outline: 0,
-        border: 0,
-        margin: '2px 2px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'anchor-center',
-        height: '30px',
-        fontSize: '20px',
-        width: '30px',
-        opacity: 1,
-        color: '#E2F8F0',
-        backgroundColor: '#008A5E',
-      },
-      disabled && {
-        opacity: 0.5,
-        color: '#E2F9F7',
-        backgroundColor: '#C61E25',
-      },
-    ]}
-  >
-    {index}
-  </div>
-);
-
-// Case B: Emotion memoized
-const useMemoStyles = (disabled: boolean) =>
-  useMemo(
-    () =>
-      css({
-        outline: 0,
-        border: 0,
-        margin: '2px 2px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'anchor-center',
-        height: '30px',
-        fontSize: '20px',
-        width: '30px',
-        opacity: disabled ? 0.5 : 1,
-        color: disabled ? '#E2F9F7' : '#E2F8F0',
-        backgroundColor: disabled ? '#C61E25' : '#008A5E',
-      }),
-    [disabled]
-  );
-
-const MemoRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
-  const cls = useMemoStyles(disabled);
-  return <div className={cls}> {index}</div>;
-};
-
-// Case C: CSS variables + single base class
-const baseClass = css({
-  outline: 0,
-  border: 0,
-  margin: '2px 2px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'anchor-center',
-  height: '30px',
-  fontSize: '20px',
-  width: '30px',
-  opacity: 'var(--opacity, 1)',
-  color: 'var(--color, #E2F8F0)',
-  background: 'var(--background, #008A5E)',
-});
-
-const VarRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
-  const vars = {
-    '--opacity': disabled ? 0.5 : 1,
-    '--color': disabled ? '#E2F9F7' : '#E2F8F0',
-    '--background': disabled ? '#C61E25' : '#008A5E',
-  };
-  return (
-    <div className={baseClass} style={vars}>
-      {index}
-    </div>
-  );
-};
-
-// with the root css variables TODO: structure it right
-const VarRowB = ({ index }: { disabled: boolean; index: number }) => {
-  return <div className={baseClass}>{index}</div>;
-};
-
-// Case D: Global utility class toggle
-// (you’d define
-// .disabled {
-//   pointer-events:none;
-//   ...
-// } in your CSS)
-
-const GlobalRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>
-);
