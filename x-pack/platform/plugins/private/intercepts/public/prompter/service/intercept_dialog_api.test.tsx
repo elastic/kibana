@@ -92,7 +92,7 @@ describe('InterceptDialogApi', () => {
       expect(nextHandlerFn).toHaveBeenCalledTimes(2); // called because of the initial value and the new intercept
       expect(nextHandlerFn).toHaveBeenLastCalledWith([intercept]);
 
-      interceptApi.ack({ interceptId: intercept.id, ackType: 'dismissed' });
+      interceptApi.ack({ interceptId: intercept.id, ackType: 'dismissed', interactionDuration: 0 });
 
       expect(nextHandlerFn).toHaveBeenCalledTimes(3); // called because of the initial value, the new intercept, and the ack
       expect(nextHandlerFn).toHaveBeenLastCalledWith([]);

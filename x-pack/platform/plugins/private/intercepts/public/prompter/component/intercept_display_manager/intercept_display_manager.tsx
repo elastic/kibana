@@ -74,6 +74,7 @@ export function InterceptDisplayManager({
   intercept$,
   staticAssetsHelper,
 }: InterceptDialogManagerProps) {
+  const interceptRenderMark = useRef<PerformanceMark>();
   const { euiTheme } = useEuiTheme();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentIntercept, setCurrentIntercept] = useState<Intercept | null>(null);
@@ -93,6 +94,7 @@ export function InterceptDisplayManager({
     const subscription = intercept$.subscribe((intercept) => {
       setCurrentStepIndex(0);
       setCurrentIntercept(intercept);
+      interceptRenderMark.current = performance.mark(`intercept-${intercept.id}-RenderMark`);
     });
 
     return () => subscription.unsubscribe();
@@ -116,6 +118,10 @@ export function InterceptDisplayManager({
             runId: currentIntercept!.runId,
             interceptId: currentIntercept!.id,
             ackType: 'completed',
+            interactionDuration: performance.measure('interceptCompleteMark', {
+              start: interceptRenderMark.current!.startTime,
+              end: performance.now(),
+            }).duration,
           });
         }
 
@@ -132,6 +138,10 @@ export function InterceptDisplayManager({
       interceptId: currentIntercept!.id,
       runId,
       ackType: 'dismissed',
+      interactionDuration: performance.measure('interceptDismissedMark', {
+        start: interceptRenderMark.current!.startTime,
+        end: performance.now(),
+      }).duration,
     });
 
     currentIntercept?.onDismiss?.({ runId, stepId: currentInterceptStep!.id });

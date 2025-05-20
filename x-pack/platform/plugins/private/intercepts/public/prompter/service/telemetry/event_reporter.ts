@@ -42,15 +42,18 @@ export class InterceptTelemetry {
   }
 
   private reportInterceptInteraction({
+    interactionDuration,
     interactionType,
     interceptId,
   }: {
+    interactionDuration: number;
     interactionType: string;
     interceptId: string;
   }) {
     this.reportEvent?.(EventMetric.INTERCEPT_TERMINATION_INTERACTION, {
       [EventFieldType.INTERACTION_TYPE]: interactionType,
       [EventFieldType.INTERCEPT_ID]: interceptId,
+      [EventFieldType.INTERACTION_DURATION]: interactionDuration,
     });
   }
 }

@@ -16,6 +16,7 @@ export enum EventMetric {
 export enum EventFieldType {
   INTERACTION_TYPE = 'interaction_type',
   INTERCEPT_ID = 'intercept_id',
+  INTERACTION_DURATION = 'interaction_duration',
 }
 
 const fields: Record<EventFieldType, RootSchema<unknown>> = {
@@ -37,10 +38,19 @@ const fields: Record<EventFieldType, RootSchema<unknown>> = {
       },
     },
   },
+  [EventFieldType.INTERACTION_DURATION]: {
+    [EventFieldType.INTERACTION_DURATION]: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the interaction in milliseconds',
+        optional: false,
+      },
+    },
+  },
 };
 
 /**
- * @description defines all the event types that can be reported by the product intercept dialog,
+ * @description defines all the event types that can be reported by the intercept dialog,
  * with the mapping that values provided will be ingested as within EBT
  */
 export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
@@ -49,6 +59,7 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     schema: {
       ...fields[EventFieldType.INTERACTION_TYPE],
       ...fields[EventFieldType.INTERCEPT_ID],
+      ...fields[EventFieldType.INTERACTION_DURATION],
     },
   },
   {

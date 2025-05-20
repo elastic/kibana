@@ -14,8 +14,41 @@ import { InterceptDisplayManager, type Intercept } from './intercept_display_man
 
 const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
+const mockPerformanceMark = jest.fn(
+  (name) =>
+    ({
+      name,
+      startTime: 0,
+      duration: 0,
+      entryType: 'mark',
+      detail: {},
+      toJSON: () => ({}),
+    } as PerformanceMark)
+);
+
+const mockPerformanceMeasure = jest.fn(
+  (name) =>
+    ({
+      name,
+      startTime: 0,
+      duration: 0,
+      entryType: 'measure',
+      detail: {},
+      toJSON: () => ({}),
+    } as PerformanceMeasure)
+);
+
 describe('InterceptDisplayManager', () => {
-  it('does not render the dialog shell when there is not intercept to display', () => {
+  beforeAll(() => {
+    window.performance.mark = mockPerformanceMark;
+    window.performance.measure = mockPerformanceMeasure;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not render the dialog shell when there is no intercept to display', () => {
     const ackProductIntercept = jest.fn();
 
     render(
@@ -100,6 +133,7 @@ describe('InterceptDisplayManager', () => {
       ackType: 'dismissed',
       interceptId: '1',
       runId: 1,
+      interactionDuration: expect.any(Number),
     });
 
     expect(screen.queryByRole('dialog')).toBeNull();
