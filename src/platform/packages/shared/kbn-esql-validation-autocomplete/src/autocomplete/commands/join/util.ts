@@ -8,11 +8,8 @@
  */
 
 import { ESQLCommand } from '@kbn/esql-ast';
-import { i18n } from '@kbn/i18n';
 import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
 import { SuggestionRawDefinition } from '../../types';
-import type { JoinIndexAutocompleteItem } from '../../../validation/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O)((?<after_on>\s+(?<cond>[^\s])?)?))?))?))?))?))?))?))?/i;
@@ -64,49 +61,6 @@ export const getPosition = (text: string, command: ESQLCommand): JoinCommandPosi
     pos,
     type: '',
   };
-};
-
-export const joinIndicesToSuggestions = (
-  indices: JoinIndexAutocompleteItem[]
-): SuggestionRawDefinition[] => {
-  const mainSuggestions: SuggestionRawDefinition[] = [];
-  const aliasSuggestions: SuggestionRawDefinition[] = [];
-
-  for (const index of indices) {
-    mainSuggestions.push({
-      label: index.name,
-      text: index.name + ' ',
-      kind: 'Issue',
-      detail: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.index',
-        {
-          defaultMessage: 'Index',
-        }
-      ),
-      sortText: '0-INDEX-' + index.name,
-      command: TRIGGER_SUGGESTION_COMMAND,
-    });
-
-    if (index.aliases) {
-      for (const alias of index.aliases) {
-        aliasSuggestions.push({
-          label: alias,
-          text: alias + ' $0',
-          kind: 'Issue',
-          detail: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.alias',
-            {
-              defaultMessage: 'Alias',
-            }
-          ),
-          sortText: '1-ALIAS-' + alias,
-          command: TRIGGER_SUGGESTION_COMMAND,
-        });
-      }
-    }
-  }
-
-  return [...mainSuggestions, ...aliasSuggestions];
 };
 
 export const suggestionIntersection = (
