@@ -63,6 +63,11 @@ describe('DeleteRulesetModal', () => {
       </Wrapper>
     );
 
+    // First need to check the confirmation checkbox
+    act(() => {
+      fireEvent.click(screen.getByLabelText('This ruleset is safe to delete'));
+    });
+
     act(() => {
       fireEvent.click(screen.getByText('Delete ruleset'));
     });
@@ -85,6 +90,11 @@ describe('DeleteRulesetModal', () => {
         <DeleteRulesetModal rulesetId="123" closeDeleteModal={onClose} />
       </Wrapper>
     );
+
+    // First need to check the confirmation checkbox
+    act(() => {
+      fireEvent.click(screen.getByLabelText('This ruleset is safe to delete'));
+    });
 
     act(() => {
       fireEvent.click(screen.getByText('Delete ruleset'));

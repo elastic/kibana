@@ -10,18 +10,18 @@ import { deleteRuleset } from './delete_query_rules_ruleset';
 
 describe('delete ruleset lib function', () => {
   const mockClient = {
-    rulesets: {
+    queryRules: {
       deleteRuleset: jest.fn(),
     },
   };
 
   const client = () => mockClient as unknown as ElasticsearchClient;
   it('should delete ruleset', async () => {
-    mockClient.rulesets.deleteRuleset.mockResolvedValue({});
+    mockClient.queryRules.deleteRuleset.mockResolvedValue({});
 
     await deleteRuleset(client(), 'my_ruleset');
 
-    expect(mockClient.rulesets.deleteRuleset).toHaveBeenCalledWith({
+    expect(mockClient.queryRules.deleteRuleset).toHaveBeenCalledWith({
       ruleset_id: 'my_ruleset',
     });
   });
