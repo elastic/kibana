@@ -413,6 +413,16 @@ describe('Handle request to schedule', () => {
       expect(requestHandler.getNotification()).toEqual({ email: { to: ['a@b.com'] } });
     });
 
+    test('parse notification from body when no to defined', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: { bcc: ['a@b.com'] } },
+      };
+      expect(requestHandler.getNotification()).toEqual({ email: { bcc: ['a@b.com'] } });
+    });
+
     test('returns undefined if notification object is empty', () => {
       // @ts-ignore body is a read-only property
       mockRequest.body = {
