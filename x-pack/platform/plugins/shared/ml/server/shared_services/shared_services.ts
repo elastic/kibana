@@ -20,7 +20,7 @@ import type { CompatibleModule, MlFeatures } from '@kbn/ml-common-constants/app'
 import type { ResolveMlCapabilities, MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 
-import type { MlLicense } from '../../common/license';
+import type { MlLicense } from '@kbn/ml-license';
 
 import { licenseChecks } from './license_checks';
 import type {
