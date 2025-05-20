@@ -14,6 +14,7 @@ export { futureTimeToInterval } from './helpers';
 
 type SnoozePanelProps = Pick<
   BaseSnoozePanelProps,
+  | 'ruleType'
   | 'interval'
   | 'snoozeRule'
   | 'unsnoozeRule'
@@ -26,6 +27,7 @@ type SnoozePanelProps = Pick<
 >;
 
 export const SnoozePanel: React.FC<SnoozePanelProps> = ({
+  ruleType,
   interval,
   snoozeRule,
   unsnoozeRule,
@@ -108,6 +110,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
 
   return !isSchedulerOpen ? (
     <BaseSnoozePanel
+      ruleType={ruleType}
       isLoading={isLoading}
       snoozeRule={onSnoozeRule}
       unsnoozeRule={onUnsnoozeRule}
@@ -123,6 +126,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
     />
   ) : (
     <RuleSnoozeScheduler
+      ruleType={ruleType}
       isLoading={isLoading}
       initialSchedule={initialSchedule}
       onClose={onCloseScheduler}

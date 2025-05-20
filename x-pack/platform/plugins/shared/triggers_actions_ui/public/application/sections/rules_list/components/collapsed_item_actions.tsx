@@ -76,6 +76,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
+  const snakeRuleType = item.ruleTypeId.replace(/:/g, '_');
+
   const collapsedItemActionsCss = css`
     .collapsedItemActions__deleteButton {
       color: ${euiTheme.colors.textDanger};
@@ -169,13 +171,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     return [
       {
         disabled: !item.isEditable || !item.enabledInLicense,
-        'data-test-subj': 'snoozeButton',
+        'data-test-subj': `snoozeButton__${snakeRuleType}`,
         icon: 'bellSlash',
         name: snoozedButtonText,
         panel: 1,
       },
     ];
-  }, [isDisabled, item, snoozedButtonText]);
+  }, [isDisabled, item, snoozedButtonText, snakeRuleType]);
 
   const onDisableModalOpen = useCallback(() => {
     setIsUntrackAlertsModalOpen(true);
@@ -224,7 +226,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable || !item.enabledInLicense,
-          'data-test-subj': 'disableButton',
+          'data-test-subj': isDisabled
+            ? `enableRule__${snakeRuleType}`
+            : `disableRule__${snakeRuleType}`,
           onClick: onDisableClick,
           name: isDisabled
             ? i18n.translate(
@@ -238,7 +242,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable || item.consumer === AlertConsumers.SIEM,
-          'data-test-subj': 'cloneRule',
+          'data-test-subj': `cloneRule__${snakeRuleType}`,
           onClick: async () => {
             setIsPopoverOpen(!isPopoverOpen);
             onCloneRule(item.id);
@@ -250,7 +254,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable || !isRuleTypeEditableInContext,
-          'data-test-subj': 'editRule',
+          'data-test-subj': `editRule__${snakeRuleType}`,
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
             onEditRule(item);
@@ -262,7 +266,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
-          'data-test-subj': 'updateApiKey',
+          'data-test-subj': `updateApiKey__${snakeRuleType}`,
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
             onUpdateAPIKey(item);
@@ -274,7 +278,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
-          'data-test-subj': 'runRule',
+          'data-test-subj': `runRule__${snakeRuleType}`,
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
             onRunRule(item);
@@ -286,8 +290,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
+          'data-test-subj': `deleteRule__${snakeRuleType}`,
           className: 'collapsedItemActions__deleteButton',
-          'data-test-subj': 'deleteRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
             onDeleteRule(item);
@@ -318,6 +322,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       content: (
         <EuiPanel>
           <SnoozePanel
+            ruleType={snakeRuleType}
             interval={futureTimeToInterval(item.isSnoozedUntil)}
             hasTitle={false}
             scheduledSnoozes={item.snoozeSchedule ?? []}
@@ -337,7 +342,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <EuiPopover
           button={
             <EuiButtonIcon
-              data-test-subj="selectActionButton"
+              data-test-subj={`selectActionButton__${snakeRuleType}`}
               data-testid="selectActionButton"
               iconType="boxesHorizontal"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}

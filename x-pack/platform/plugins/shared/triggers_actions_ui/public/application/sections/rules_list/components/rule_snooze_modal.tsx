@@ -46,6 +46,8 @@ export const RuleSnoozeModal: React.FunctionComponent<RuleSnoozeModalProps> = ({
     return isRuleSnoozed(rule);
   }, [rule]);
 
+  const snakeRuleType = rule.ruleTypeId.replace(/:/g, '_');
+
   const onApplySnooze = useCallback(
     async (snoozeSchedule: SnoozeSchedule) => {
       try {
@@ -88,6 +90,7 @@ export const RuleSnoozeModal: React.FunctionComponent<RuleSnoozeModalProps> = ({
       <EuiModalBody>
         <EuiSpacer size="s" />
         <SnoozePanel
+          ruleType={snakeRuleType}
           inPopover={false}
           interval={futureTimeToInterval(rule.isSnoozedUntil)}
           activeSnoozes={rule.activeSnoozes ?? []}

@@ -33,6 +33,7 @@ import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
 
 interface PanelOpts {
+  ruleType: string;
   onSaveSchedule: (sched: SnoozeSchedule) => void;
   onCancelSchedules: (ids: string[]) => void;
   initialSchedule: SnoozeSchedule | null;
@@ -88,7 +89,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
               <EuiIcon type="arrowLeft" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink color="text" style={{ fontWeight: 'bold' }} onClick={onClose}>
+              <EuiLink color="text" css={{ fontWeight: 'bold' }} onClick={onClose}>
                 {title}
               </EuiLink>
             </EuiFlexItem>
@@ -101,6 +102,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
 };
 
 const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
+  ruleType,
   onSaveSchedule,
   initialSchedule,
   isLoading,
@@ -349,7 +351,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             <EuiSplitPanel.Inner paddingSize="m">
               <EuiFormRow
                 display="columnCompressed"
-                style={{ alignItems: 'center' }}
+                css={{ alignItems: 'center' }}
                 fullWidth
                 label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel', {
                   defaultMessage: 'Timezone',
@@ -395,7 +397,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         disabled={!startDT || !endDT || startDT.isSameOrAfter(endDT) || startDT.isBefore(minDate)}
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
-        data-test-subj="scheduler-saveSchedule"
+        data-test-subj={`scheduler-saveSchedule__${ruleType}`}
       >
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',
@@ -406,7 +408,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           {!inPopover && <EuiSpacer size="s" />}
           <EuiPopoverFooter
             paddingSize="m"
-            style={
+            css={
               /* FIXME https://github.com/elastic/eui/issues/6695 */
               {
                 marginBlock: '16px -16px',
