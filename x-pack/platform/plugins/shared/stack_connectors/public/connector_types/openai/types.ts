@@ -21,12 +21,9 @@ export interface Config {
   defaultModel?: string;
   headers?: Record<string, string>;
   // PKI properties are only used when apiProvider is OpenAiProviderType.Other
-  certificateFile?: string | string[];
   certificateData?: string;
-  privateKeyFile?: string | string[];
   privateKeyData?: string;
   verificationMode?: 'full' | 'certificate' | 'none';
-  caFile?: string | string[];
   caData?: string;
 }
 

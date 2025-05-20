@@ -81,18 +81,14 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
-        (('certificateFile' in this.config && this.config.certificateFile) ||
-          ('certificateData' in this.config && this.config.certificateData) ||
-          ('privateKeyFile' in this.config && this.config.privateKeyFile) ||
+        (('certificateData' in this.config && this.config.certificateData) ||
+          ('caData' in this.config && this.config.caData) ||
           ('privateKeyData' in this.config && this.config.privateKeyData))
       ) {
         this.sslOverrides = getPKISSLOverrides({
           logger: this.logger,
-          certificateFile: this.config.certificateFile,
           certificateData: this.config.certificateData,
-          privateKeyFile: this.config.privateKeyFile,
           privateKeyData: this.config.privateKeyData,
-          caFile: this.config.caFile,
           caData: this.config.caData,
           verificationMode: this.config.verificationMode,
         });

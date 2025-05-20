@@ -415,16 +415,12 @@ describe('ConnectorFields renders', () => {
 
       const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
 
-      expect(screen.queryByTestId('config.certificateFile-input')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('config.privateKeyFile-input')).not.toBeInTheDocument();
       expect(screen.queryByTestId('config.certificateData-input')).not.toBeInTheDocument();
       expect(screen.queryByTestId('config.privateKeyData-input')).not.toBeInTheDocument();
       expect(screen.queryByTestId('verificationModeSelect')).not.toBeInTheDocument();
       expect(pkiToggle).toBeInTheDocument();
 
       await userEvent.click(pkiToggle);
-      expect(screen.getByTestId('config.certificateFile-input')).toBeInTheDocument();
-      expect(screen.getByTestId('config.privateKeyFile-input')).toBeInTheDocument();
       expect(screen.getByTestId('config.certificateData-input')).toBeInTheDocument();
       expect(screen.getByTestId('config.privateKeyData-input')).toBeInTheDocument();
       expect(screen.getByTestId('verificationModeSelect')).toBeInTheDocument();
@@ -470,8 +466,6 @@ describe('ConnectorFields renders', () => {
       );
       const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
       await userEvent.click(pkiToggle);
-      await userEvent.type(screen.getByTestId('config.certificateFile-input'), 'hello');
-      await userEvent.type(screen.getByTestId('config.privateKeyFile-input'), 'world');
       await userEvent.type(screen.getByTestId('config.certificateData-input'), 'hello');
       await userEvent.type(screen.getByTestId('config.privateKeyData-input'), 'world');
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
@@ -481,9 +475,7 @@ describe('ConnectorFields renders', () => {
             ...testFormData,
             config: {
               ...testFormData.config,
-              certificateFile: 'hello',
               certificateData: 'hello',
-              privateKeyFile: 'world',
               privateKeyData: 'world',
               verificationMode: 'full',
             },

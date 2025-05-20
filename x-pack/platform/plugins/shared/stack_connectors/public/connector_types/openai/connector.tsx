@@ -61,11 +61,8 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const hasPKI = __internal__ != null ? __internal__.hasPKI : false;
   const hasPKIDefaultValue = useMemo(
     () =>
-      !!getFieldDefaultValue<boolean | undefined>('config.certificateFile') ||
       !!getFieldDefaultValue<boolean | undefined>('config.certificateData') ||
-      !!getFieldDefaultValue<boolean | undefined>('config.privateKeyFile') ||
       !!getFieldDefaultValue<boolean | undefined>('config.privateKeyData') ||
-      !!getFieldDefaultValue<boolean | undefined>('config.caFile') ||
       !!getFieldDefaultValue<boolean | undefined>('config.caData'),
     [getFieldDefaultValue]
   );

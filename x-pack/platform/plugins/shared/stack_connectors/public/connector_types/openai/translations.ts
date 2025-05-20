@@ -72,24 +72,10 @@ export const DOCUMENTATION = i18n.translate(
   }
 );
 
-export const CERT_FILE_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.certificateFileLabel',
-  {
-    defaultMessage: 'Certificate File Path',
-  }
-);
-
 export const CERT_DATA_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.certificateDataLabel',
   {
     defaultMessage: 'Certificate Content',
-  }
-);
-
-export const KEY_FILE_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.privateKeyFileLabel',
-  {
-    defaultMessage: 'Private Key File Path',
   }
 );
 
@@ -193,12 +179,6 @@ export const PKI_MODE_LABEL = i18n.translate('xpack.stackConnectors.genAi.pkiMod
   defaultMessage: 'Enable PKI Authentication',
 });
 
-export const CA_FILE_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.caFileLabel',
-  { defaultMessage: 'CA Certificate File Path' }
-);
-
-export const CA_DATA_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.caDataLabel',
-  { defaultMessage: 'CA Certificate Data' }
-);
+export const CA_DATA_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.caDataLabel', {
+  defaultMessage: 'CA Certificate Data',
+});
