@@ -289,8 +289,9 @@ export const getReasonMessage = ({
       },
     });
   }
-  const { useTimeWindow, numberOfChecks, locationsThreshold, downThreshold, alertOnNoData } =
-    getConditionType(params?.condition);
+  const { useTimeWindow, numberOfChecks, locationsThreshold, downThreshold } = getConditionType(
+    params?.condition
+  );
   if (useTimeWindow) {
     return getReasonMessageForTimeWindow({
       name,
@@ -300,7 +301,7 @@ export const getReasonMessage = ({
     });
   }
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. {checksSummary}Alert when {downThreshold} out of the last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}{alertOnNoDataMessage}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. {checksSummary}Alert when {downThreshold} out of the last {numberOfChecks} checks are down from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,
@@ -318,7 +319,6 @@ export const getReasonMessage = ({
             },
           })
         : '',
-      alertOnNoDataMessage: alertOnNoData ? ALERT_ON_NO_DATA_REASON_MESSAGE : '',
     },
   });
 };
@@ -335,11 +335,9 @@ export const getReasonMessageForTimeWindow = ({
   params?: StatusRuleParams;
 }) => {
   const status = statusMap[reason];
-  const { timeWindow, locationsThreshold, downThreshold, alertOnNoData } = getConditionType(
-    params?.condition
-  );
+  const { timeWindow, locationsThreshold, downThreshold } = getConditionType(params?.condition);
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}{alertOnNoDataMessage}.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
       name,
       status,
@@ -348,7 +346,6 @@ export const getReasonMessageForTimeWindow = ({
       unitLabel: getTimeUnitLabel(timeWindow),
       locationsThreshold,
       size: timeWindow.size,
-      alertOnNoDataMessage: alertOnNoData ? ALERT_ON_NO_DATA_REASON_MESSAGE : '',
     },
   });
 };
@@ -363,10 +360,3 @@ export const UNAVAILABLE_LABEL = i18n.translate(
 export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
   defaultMessage: 'Host',
 });
-
-const ALERT_ON_NO_DATA_REASON_MESSAGE = i18n.translate(
-  'xpack.synthetics.alertRules.monitorStatus.reasonMessage.alertOnNoData',
-  {
-    defaultMessage: ' or pending',
-  }
-);
