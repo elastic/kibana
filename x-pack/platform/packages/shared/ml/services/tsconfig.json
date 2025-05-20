@@ -34,7 +34,7 @@
     "@kbn/ml-license",
     "@kbn/ml-parse-interval",
     "@kbn/ml-runtime-field-utils",
-    "@kbn/ml-server-routes-schemas",
+    "@kbn/ml-server-api-schemas",
     "@kbn/ml-trained-models-utils",
     "@kbn/ml-validators",
     "@kbn/usage-collection-plugin",

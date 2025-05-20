@@ -92,7 +92,6 @@
       "platform/packages/shared/ml/license",
       "platform/packages/shared/ml/ml_client",
       "platform/packages/shared/ml/saved_objects",
-      "platform/packages/shared/ml/server_routes_schemas",
       "platform/packages/shared/ml/services",
       "platform/packages/private/ml/creation_wizard_utils",
       "platform/packages/private/ml/data_grid",
