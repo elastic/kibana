@@ -122,8 +122,6 @@ const stateSchemaV2 = stateSchemaV1.extends({
 });
 
 const stateSchemaV3 = stateSchemaV2.extends({
-  count_rules_snoozed_by_type: schema.recordOf(schema.string(), schema.number()),
-  count_rules_muted_by_type: schema.recordOf(schema.string(), schema.number()),
   count_rules_with_linked_dashboards: schema.number(),
   count_rules_with_investigation_guide: schema.number(),
 });
