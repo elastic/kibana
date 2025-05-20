@@ -24,7 +24,7 @@ import { createExecutionContext } from '@kbn/ml-route-utils';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';
-import type { MlLicense } from '../../common/license';
+import type { MlLicense } from '@kbn/ml-license';
 
 import type { MlClient } from '@kbn/ml-client';
 

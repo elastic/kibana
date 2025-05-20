@@ -16,7 +16,7 @@ import type {
   ResolveMlCapabilities,
 } from '@kbn/ml-common-types/capabilities';
 import type { GetGuards } from '../shared_services';
-import type { MlLicense } from '../../../common/license';
+import type { MlLicense } from '@kbn/ml-license';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { capabilitiesProvider } from '../../lib/capabilities';
 
