@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
+
 import { useMlApi } from '../use_ml_api';
 
 export function useMlResultsService(): MlResultsService {

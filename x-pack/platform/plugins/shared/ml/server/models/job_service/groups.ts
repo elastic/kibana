@@ -9,7 +9,7 @@ import type { UpdateGroupsRequest } from '@kbn/ml-common-types/job_service';
 import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
 import type { Group } from '@kbn/ml-common-types/groups';
 import { CalendarManager } from '../calendar';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 export interface Results {
   [id: string]: {
