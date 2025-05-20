@@ -15,7 +15,7 @@ import type {
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from '@kbn/ml-saved-objects/util';
-import { mlSavedObjectServiceFactory } from './service';
+import { mlSavedObjectServiceFactory } from '@kbn/ml-saved-objects/service';
 import { syncSavedObjectsFactory } from './sync';
 
 const SAVED_OBJECTS_SYNC_TASK_TYPE = 'ML:saved-objects-sync';
