@@ -5,6 +5,8 @@ applies_to:
   serverless: all
 products:
   - id: kibana
+mapped_pages:
+  - https://www.elastic.co/guide/en/kibana/current/accessibility.html
 ---
 
 # {{kib}} accessibility statement
