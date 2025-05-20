@@ -6,7 +6,8 @@
  */
 
 import { MemoryUsageService } from './memory_usage';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import mockResponse from './__mocks__/mock_deployment_response.json';
 import type { MemoryStatsResponse } from '@kbn/ml-common-types/trained_models';
 

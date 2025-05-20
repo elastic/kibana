@@ -38,7 +38,7 @@ import {
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
 } from './types';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
