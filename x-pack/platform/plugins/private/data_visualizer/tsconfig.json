@@ -90,7 +90,8 @@
     "@kbn/file-upload",
     "@kbn/charts-theme",
     "@kbn/presentation-util",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
+    "@kbn/ml-common-types"
   ],
   "exclude": [
     "target/**/*",

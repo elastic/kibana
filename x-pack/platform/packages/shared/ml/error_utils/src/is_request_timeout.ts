@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ErrorType } from './errors';
+const REQUEST_TIMEOUT_NAME = 'RequestTimeout';
 
-export interface DatafeedValidationResponse {
-  valid: boolean;
-  documentsFound: boolean;
-  error?: ErrorType;
+export function isRequestTimeout(error: { name: string }) {
+  return error.name === REQUEST_TIMEOUT_NAME;
 }
