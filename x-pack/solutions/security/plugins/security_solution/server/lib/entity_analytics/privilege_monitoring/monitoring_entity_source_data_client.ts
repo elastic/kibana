@@ -12,17 +12,17 @@ import type {
 } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { MonitoringEntitySourceDescriptorClient } from './saved_object/monitoring_entity_source';
 
-interface MonitoringEntitySourceSyncDataClientOpts {
+interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
 
-export class MonitoringEntitySourceSyncDataClient {
-  private monitoringEntitySourceSyncClient: MonitoringEntitySourceDescriptorClient;
-  constructor(private readonly opts: MonitoringEntitySourceSyncDataClientOpts) {
-    this.monitoringEntitySourceSyncClient = new MonitoringEntitySourceDescriptorClient({
+export class MonitoringEntitySourceDataClient {
+  private monitoringEntitySourceClient: MonitoringEntitySourceDescriptorClient;
+  constructor(private readonly opts: MonitoringEntitySourceDataClientOpts) {
+    this.monitoringEntitySourceClient = new MonitoringEntitySourceDescriptorClient({
       soClient: this.opts.soClient,
       namespace: this.opts.namespace,
     });
@@ -31,14 +31,14 @@ export class MonitoringEntitySourceSyncDataClient {
   public async init(
     input: MonitoringEntitySourceDescriptor
   ): Promise<MonitoringEntitySourceResponse> {
-    const descriptor = await this.monitoringEntitySourceSyncClient.create(input);
-    this.log('debug', 'Initializing MonitoringEntitySourceSyncDataClient Saved Object');
+    const descriptor = await this.monitoringEntitySourceClient.create(input);
+    this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');
     return descriptor;
   }
 
   public async get(): Promise<MonitoringEntitySourceResponse> {
     this.log('debug', 'Getting Monitoring Entity Source Sync saved object');
-    return this.monitoringEntitySourceSyncClient.get();
+    return this.monitoringEntitySourceClient.get();
   }
 
   public async update(update: Partial<MonitoringEntitySourceResponse>) {
@@ -52,12 +52,12 @@ export class MonitoringEntitySourceSyncDataClient {
       })),
     };
 
-    return this.monitoringEntitySourceSyncClient.update(sanitizedUpdate);
+    return this.monitoringEntitySourceClient.update(sanitizedUpdate);
   }
 
   public async delete() {
     this.log('debug', 'Deleting Monitoring Entity Source Sync saved object');
-    return this.monitoringEntitySourceSyncClient.delete();
+    return this.monitoringEntitySourceClient.delete();
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

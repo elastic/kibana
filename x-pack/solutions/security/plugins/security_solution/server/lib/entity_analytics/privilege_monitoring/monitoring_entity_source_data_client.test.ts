@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringEntitySourceSyncDataClient } from './monitoring_entity_source_sync_data_client';
+import { MonitoringEntitySourceDataClient } from './monitoring_entity_source_sync_data_client';
 import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
@@ -14,7 +14,7 @@ import {
 import { monitoringEntitySourceTypeName } from './saved_object/monitoring_entity_source_type';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
-describe('MonitoringEntitySourceSyncDataClient', () => {
+describe('MonitoringEntitySourceDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
@@ -41,10 +41,10 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
     filter: {},
   };
 
-  let dataClient: MonitoringEntitySourceSyncDataClient;
+  let dataClient: MonitoringEntitySourceDataClient;
   beforeEach(() => {
     jest.clearAllMocks();
-    dataClient = new MonitoringEntitySourceSyncDataClient(defaultOpts);
+    dataClient = new MonitoringEntitySourceDataClient(defaultOpts);
   });
 
   describe('init', () => {
