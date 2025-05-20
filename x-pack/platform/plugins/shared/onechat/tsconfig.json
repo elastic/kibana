@@ -20,6 +20,9 @@
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/utility-types",
-    "@kbn/onechat-server"
+    "@kbn/onechat-server",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-mocks",
+    "@kbn/onechat-common"
   ]
 }
