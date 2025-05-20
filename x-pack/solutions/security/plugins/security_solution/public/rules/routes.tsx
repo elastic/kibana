@@ -43,6 +43,11 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
           main: EditRulePage,
           exact: true,
         },
+        {
+          path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
+          main: RulesPage,
+          exact: true,
+        },
       ]
     : []),
   ...(hasCapabilities(capabilities, [
@@ -60,14 +65,6 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
   {
     path: '/rules/create',
     main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
-      redirectOnMissing: true,
-      omitSpyRoute: true,
-    }),
-    exact: true,
-  },
-  {
-    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
-    main: withSecurityRoutePageWrapper(RulesPage, SecurityPageName.rulesManagement, {
       redirectOnMissing: true,
       omitSpyRoute: true,
     }),

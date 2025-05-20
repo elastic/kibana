@@ -8,4 +8,4 @@
  */
 
 export type { ElasticRequestState } from '.';
-export type { DocViewFilterFn, DocViewRenderProps } from './src/types';
+export type { DocViewFilterFn, DocViewRenderProps, DocView } from './src/types';
