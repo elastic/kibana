@@ -6,7 +6,14 @@
  */
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
-import { EuiCommentList, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCommentList,
+  useEuiTheme,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 
 import React, { useMemo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
@@ -110,12 +117,14 @@ export const UserActionsList = React.memo(
       handleDeleteComment,
     } = useUserActionsHandler();
 
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
     const builtUserActions: EuiCommentProps[] = useMemo(() => {
       if (!caseUserActions) {
         return [];
       }
 
-      return caseUserActions.reduce<EuiCommentProps[]>((userActions, userAction, index) => {
+      const events = caseUserActions.reduce<EuiCommentProps[]>((userActions, userAction, index) => {
         if (!isUserActionTypeSupported(userAction.type)) {
           return userActions;
         }
@@ -155,8 +164,56 @@ export const UserActionsList = React.memo(
           getRuleDetailsHref,
           onRuleDetailsClick,
         });
+
         return [...userActions, ...userActionBuilder.build()];
       }, []);
+
+      const solutionTimeline = {
+        username: 'elastic',
+        timelineAvatar: 'dot',
+        timelineAvatarAriaLabel: 'elastic',
+        event: 'triggered a solution event in timeline',
+        timestamp: 'on 15th April 2024',
+        eventColor: 'primary',
+        actions: [
+          <EuiButtonIcon
+            key="copy-alert"
+            title="Copy alert link"
+            aria-label="Copy alert link"
+            iconType="gear"
+            size="xs"
+            color="text"
+          />,
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                aria-label="Actions"
+                iconType="boxesHorizontal"
+                size="xs"
+                color="text"
+                onClick={() => setIsPopoverOpen((prev) => !prev)}
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="leftCenter"
+          >
+            <EuiContextMenuPanel
+              items={[
+                <EuiContextMenuItem key="A" icon="gear" onClick={() => {}}>
+                  {'Solution event item 1'}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem key="B" icon="gear" onClick={() => {}}>
+                  {'Solution event item 2'}
+                </EuiContextMenuItem>,
+              ]}
+            />
+          </EuiPopover>,
+        ],
+      };
+
+      return [...events, solutionTimeline];
     }, [
       caseUserActions,
       owner,
@@ -184,6 +241,7 @@ export const UserActionsList = React.memo(
       actionsNavigation,
       getRuleDetailsHref,
       onRuleDetailsClick,
+      isPopoverOpen,
     ]);
 
     const comments = bottomActions?.length

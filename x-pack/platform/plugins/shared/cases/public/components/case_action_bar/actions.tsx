@@ -70,6 +70,20 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
             },
           ]
         : []),
+      {
+        type: AttachmentActionType.BUTTON as const,
+        iconType: 'gear',
+        label: 'Solution action 1',
+        color: 'primary' as const,
+        onClick: () => {},
+      },
+      {
+        type: AttachmentActionType.BUTTON as const,
+        iconType: 'gear',
+        label: 'Solution action 2',
+        color: 'primary' as const,
+        onClick: () => {},
+      },
     ],
     [permissions.delete, openModal, currentExternalIncident, caseData.id, showSuccessToast]
   );

@@ -221,6 +221,20 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             },
           ]
         : []),
+      {
+        id: CASE_VIEW_PAGE_TABS.SOLUTION_1,
+        name: 'Solution tab 1',
+        css: css`
+          background-color: #e8f1ff;
+        `,
+      },
+      {
+        id: CASE_VIEW_PAGE_TABS.SOLUTION_2,
+        name: 'Solution tab 2',
+        css: css`
+          background-color: #e8f1ff;
+        `,
+      },
     ],
     [
       features.alerts.enabled,
@@ -244,6 +258,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         key={index}
         onClick={() => navigateToCaseView({ detailName: caseData.id, tabId: tab.id })}
         isSelected={tab.id === activeTab}
+        css={tab.css}
       >
         {tab.name}
         {tab.badge ?? null}

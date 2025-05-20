@@ -53,6 +53,7 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { PlaceHolder } from '../../placeholder/placeholder';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -218,6 +219,8 @@ export const CaseViewActivity = ({
           onUpdateField={onUpdateField}
         />
         <EuiSpacer size="l" />
+        <PlaceHolder height={100} />
+        <EuiSpacer size="l" />
         <EuiFlexItem grow={false}>
           <UserActionsActivityBar
             onUserActionsActivityChanged={handleUserActionsActivityChanged}
@@ -283,6 +286,9 @@ export const CaseViewActivity = ({
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />
+          <EuiFlexItem grow={false}>
+            <PlaceHolder height={100} />
+          </EuiFlexItem>
           <UserList
             dataTestSubj="case-view-user-list-reporter"
             theCase={caseData}
@@ -300,6 +306,9 @@ export const CaseViewActivity = ({
               userProfiles={userProfiles}
             />
           ) : null}
+          <EuiFlexItem grow={false}>
+            <PlaceHolder height={100} />
+          </EuiFlexItem>
           <EditTags
             tags={caseData.tags}
             onSubmit={onSubmitTags}
@@ -328,6 +337,9 @@ export const CaseViewActivity = ({
             customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomField}
           />
+          <EuiFlexItem grow={false}>
+            <PlaceHolder height={100} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

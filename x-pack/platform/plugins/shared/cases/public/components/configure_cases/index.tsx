@@ -20,6 +20,8 @@ import {
   EuiPageSection,
   EuiSpacer,
   useEuiTheme,
+  EuiDescribedFormGroup,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -58,6 +60,7 @@ import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
+import { PlaceHolder } from '../placeholder/placeholder';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -734,6 +737,40 @@ export const ConfigureCases: React.FC = React.memo(() => {
           )}
 
           <EuiSpacer size="xl" />
+
+          <div css={sectionWrapperCss}>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={<h2>{'Solution setting group 1'}</h2>}
+              description={
+                <>
+                  <p>{'A placeholder for solutions'}</p>
+                </>
+              }
+            >
+              <EuiFormRow fullWidth label={'Solution setting 1'}>
+                <PlaceHolder height={88} />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          </div>
+
+          <EuiSpacer size="xl" />
+
+          <div css={sectionWrapperCss}>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={<h2>{'Solution setting group 2'}</h2>}
+              description={
+                <>
+                  <p>{'A placeholder for solutions'}</p>
+                </>
+              }
+            >
+              <EuiFormRow fullWidth label={'Solution setting 2'}>
+                <PlaceHolder height={88} />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          </div>
 
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}

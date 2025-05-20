@@ -18,7 +18,8 @@ import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewFiles } from './components/case_view_files';
 import { CaseViewObservables } from './components/case_view_observables';
-import { CaseViewMetrics } from './metrics';
+import { PlaceHolder } from '../placeholder/placeholder';
+import { PlaceHolderTabContent } from '../placeholder/placeholder_tab_content';
 import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
@@ -107,7 +108,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         </HeaderPage>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+            <PlaceHolder />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
@@ -134,6 +135,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseData} />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.SOLUTION_1 && (
+            <PlaceHolderTabContent caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.SOLUTION_1} />
+          )}
+          {activeTabId === CASE_VIEW_PAGE_TABS.SOLUTION_2 && (
+            <PlaceHolderTabContent caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.SOLUTION_2} />
           )}
         </EuiFlexGroup>
       </>

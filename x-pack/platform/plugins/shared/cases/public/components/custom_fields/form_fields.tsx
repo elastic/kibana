@@ -29,6 +29,9 @@ const fieldTypeSelectOptions = (): EuiSelectOption[] => {
     options.push({ value: id, text: createdBuilder.label });
   }
 
+  options.push({ value: 'cf-solution-1', text: 'Solution custom field 1' });
+  options.push({ value: 'cf-solution-2', text: 'Solution custom field 2' });
+
   return options;
 };
 
