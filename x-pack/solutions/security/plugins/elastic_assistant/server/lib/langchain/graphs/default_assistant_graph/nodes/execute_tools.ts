@@ -60,7 +60,7 @@ export async function executeTools({
           errorMessage: err.message ?? err.toString(),
           assistantStreamingEnabled: telemetryParams?.assistantStreamingEnabled ?? state.isStream,
           isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
-          errorLocation: 'executeTools',
+          errorLocation: `executeTools-${action.tool}`,
         });
         return {
           action,
