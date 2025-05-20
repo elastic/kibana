@@ -5,9 +5,25 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
+import type { Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  merge,
+  of,
+  Subscription,
+} from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
+
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+
+import { openLazyFlyout } from '@kbn/presentation-util';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -33,21 +49,10 @@ import {
 } from '@kbn/presentation-publishing/interfaces/titles/title_manager';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing/publishing_subject';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
-import type { Observable } from 'rxjs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  map,
-  merge,
-  of,
-  Subscription,
-} from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { HttpService } from '@kbn/ml-services/http_service';
+
 import type { AnomalySwimlaneEmbeddableServices } from '../types';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
@@ -56,7 +61,6 @@ import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
@@ -81,7 +85,7 @@ export const getServices = async (
     getStartServices(),
     import('../../application/services/anomaly_detector_service'),
     import('../../application/services/anomaly_timeline_service'),
-    import('../../application/services/ml_api_service'),
+    import('@kbn/ml-services/ml_api_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);
