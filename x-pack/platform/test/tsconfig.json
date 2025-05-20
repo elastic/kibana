@@ -177,5 +177,6 @@
     "@kbn/connector-schemas",
     "@kbn/ml-common-types",
     "@kbn/ml-common-constants",
+    "@kbn/ml-server-api-schemas",
   ]
 }

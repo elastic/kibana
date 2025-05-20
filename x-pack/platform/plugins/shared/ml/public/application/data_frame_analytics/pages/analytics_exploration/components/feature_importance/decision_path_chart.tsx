@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
+
 import type {
   AxisStyle,
   LineAnnotationStyle,
@@ -24,13 +26,13 @@ import {
 } from '@elastic/charts';
 import { useEuiTheme, EuiIcon } from '@elastic/eui';
 
-import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
 

@@ -8,14 +8,14 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import moment from 'moment-timezone';
-import type { estypes } from '@elastic/elasticsearch';
 
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 
 const DeleteButton: FC<{
   onClick: () => void;

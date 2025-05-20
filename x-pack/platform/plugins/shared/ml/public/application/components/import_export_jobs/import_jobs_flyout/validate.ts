@@ -9,11 +9,11 @@ import { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
-
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils';
+
 import { isValidIndexName } from '../../../../../common/util/es_utils';
-import { isJobIdValid } from '../../../../../common/util/job_utils';
 import type { JobIdObject } from './jobs_import_service';
 
 export const useValidateIds = (

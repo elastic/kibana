@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
 import { of } from 'rxjs';
-import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import moment from 'moment';
+
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
+import { createTimefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
 import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
+
+import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
 
 export const mlResultsServiceMock = {};
 

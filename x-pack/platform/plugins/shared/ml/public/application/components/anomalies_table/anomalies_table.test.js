@@ -9,13 +9,13 @@ import React from 'react';
 import mockAnomaliesTableData from '../../../../common/__mocks__/mock_anomalies_table_data.json';
 import { getColumns } from './anomalies_table_columns';
 
-jest.mock('../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: () => false,
 }));
-jest.mock('../../license', () => ({
+jest.mock('@kbn/ml-license', () => ({
   hasLicenseExpired: () => false,
 }));
-jest.mock('../../capabilities/get_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/get_capabilities', () => ({
   getCapabilities: () => {},
 }));
 jest.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);

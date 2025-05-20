@@ -19,8 +19,8 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import { calculateDatafeedFrequencyDefaultSeconds } from '@kbn/ml-common-utils/job_utils';
 
-import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../ml_job_editor';
 
@@ -104,7 +104,7 @@ export class EditDatafeedTab extends Component {
                 defaultMessage="Query"
               />
             }
-            style={{ maxWidth: 'inherit' }}
+            css={{ maxWidth: 'inherit' }}
           >
             <MLJobEditor
               mode={ML_EDITOR_MODE.XJSON}

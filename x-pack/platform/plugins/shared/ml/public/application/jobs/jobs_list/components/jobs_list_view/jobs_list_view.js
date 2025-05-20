@@ -7,10 +7,22 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  BLOCKED_JOBS_REFRESH_INTERVAL_MS,
+  BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS,
+  BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
+} from '@kbn/ml-common-constants/jobs_list';
 
+import { removeNodeInfo } from '@kbn/ml-common-utils/job_utils';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
+
+import { jobCloningService } from '../../../../services/job_cloning_service';
+import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
+import { DatePicker } from '../../../../components/ml_page/date_picker';
 import { filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
@@ -26,21 +38,10 @@ import { NodeAvailableWarning } from '../../../../components/node_available_warn
 import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../../components/upgrade';
-
-import {
-  BLOCKED_JOBS_REFRESH_INTERVAL_MS,
-  BLOCKED_JOBS_REFRESH_INTERVAL_SLOW_MS,
-  BLOCKED_JOBS_REFRESH_THRESHOLD_MS,
-} from '@kbn/ml-common-constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
-import { removeNodeInfo } from '../../../../../../common/util/job_utils';
-import { jobCloningService } from '../../../../services/job_cloning_service';
-import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
-import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
-import { DatePicker } from '../../../../components/ml_page/date_picker';
 
 let blockingJobsRefreshTimeout = null;
 

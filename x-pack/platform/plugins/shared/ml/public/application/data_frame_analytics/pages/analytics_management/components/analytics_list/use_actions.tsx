@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
+
 import type { EuiTableActionsColumnType } from '@elastic/eui';
-import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
+
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { DeleteSpaceAwareItemCheckModal } from '../../../../../components/delete_space_aware_item_check_modal';
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';

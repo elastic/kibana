@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButton,
@@ -19,13 +19,17 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import {
   FlyoutType,
   useJobInfoFlyouts,
 } from '../../../../jobs/components/job_details_flyout/job_details_flyout_context';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+
 interface Props {
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   selectedId?: string;

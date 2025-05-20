@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { EuiSideNavItemType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
+
+import type { EuiSideNavItemType } from '@elastic/eui';
+
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
+import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { isFullLicense } from '@kbn/ml-license';
+
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';

@@ -6,13 +6,15 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlLicenseInfo } from '@kbn/ml-license/ml_license';
+
+import { useMlLicenseInfo } from '../contexts/kibana';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 import { useRouteResolver } from './use_resolver';
-import type { MlLicenseInfo } from '../../../common/license/ml_license';
 
 jest.mock('../contexts/kibana');
-jest.mock('../capabilities/check_capabilities');
+jest.mock('@kbn/ml-hooks/capabilities/use_permission_check');
 
 describe('useResolver', () => {
   beforeEach(() => {

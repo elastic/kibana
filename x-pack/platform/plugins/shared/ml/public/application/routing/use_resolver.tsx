@@ -6,17 +6,18 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
 import { i18n } from '@kbn/i18n';
-import useMount from 'react-use/lib/useMount';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { type MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { AccessDeniedCallout } from '../access_denied';
-import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useMlLicenseInfo } from '../contexts/kibana';
 import type { ResolverResults, Resolvers } from './resolvers';
 
 export interface RouteResolverContext {

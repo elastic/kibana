@@ -26,8 +26,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { DFAModelItem } from '@kbn/ml-common-types/trained_models';
-
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { isValidJson } from '@kbn/ml-common-utils/validation_utils';
+
 import {
   EDIT_MESSAGE,
   CANCEL_EDIT_MESSAGE,
@@ -35,11 +36,11 @@ import {
   CLEAR_BUTTON_LABEL,
 } from '../constants';
 import { validateInferenceConfig } from '../validation';
-import { isValidJson } from '../../../../../common/util/validation_utils';
-import { SaveChangesButton } from './save_changes_button';
 import type { MlInferenceState, InferenceModelTypes } from '../types';
-import { AdditionalAdvancedSettings } from './additional_advanced_settings';
 import { validateFieldMap } from '../validation';
+
+import { SaveChangesButton } from './save_changes_button';
+import { AdditionalAdvancedSettings } from './additional_advanced_settings';
 
 function getDefaultFieldMapString() {
   return JSON.stringify(

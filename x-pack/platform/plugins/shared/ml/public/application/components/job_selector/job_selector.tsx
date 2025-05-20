@@ -17,10 +17,10 @@ import type {
   MlSummaryJob,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 

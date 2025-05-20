@@ -6,8 +6,10 @@
  */
 
 import { difference } from 'lodash';
+
+import { processCreatedBy } from '@kbn/ml-common-utils/job_utils';
+
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { processCreatedBy } from '../../../../../../common/util/job_utils';
 
 export function saveJob(mlApi, job, newJobData, finish) {
   return new Promise((resolve, reject) => {

@@ -8,11 +8,13 @@
 import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import type { NavigateToPath } from '../../../contexts/kibana';
-import { useMlKibana } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
