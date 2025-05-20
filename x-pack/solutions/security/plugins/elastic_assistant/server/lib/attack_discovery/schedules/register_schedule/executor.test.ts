@@ -97,7 +97,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   };
   const executorOptions = {
     params,
-    rule: { id: 'rule-1', interval: '12m' },
+    rule: { id: 'rule-1', schedule: { interval: '12m' } },
     services: {
       ...services,
       actionsClient,
@@ -320,6 +320,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
       logger: mockLogger,
       options,
+      telemetry: mockTelemetry,
     });
     await expect(attackDiscoveryScheduleExecutorPromise).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Rule execution cancelled due to timeout"'
