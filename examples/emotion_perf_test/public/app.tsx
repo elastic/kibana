@@ -16,7 +16,7 @@ import { Global } from '@emotion/react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 export const PerfTest = () => {
-  const [rowCount, setRowCount] = useState(2);
+  const [rowCount, setRowCount] = useState(200);
   const [renderCount, setRenderCount] = useState(2);
   return (
     <div>
@@ -56,15 +56,11 @@ export const PerfTest = () => {
             height: '30px',
             fontSize: '20px',
             width: '30px',
-            pointerEvents: 'auto',
-            userSelect: 'auto',
             opacity: 1,
             color: '#E2F8F0',
             backgroundColor: '#008A5E',
           },
           '.perfTestDisabled': {
-            pointerEvents: 'none',
-            userSelect: 'none',
             opacity: 0.5,
             color: '#E2F9F7',
             backgroundColor: '#C61E25',
@@ -162,8 +158,6 @@ function Harness({
 
   if (RowComponent.name === 'VarRowB') {
     rootVars = {
-      '--pointer': disabled ? 'none' : 'auto',
-      '--select': disabled ? 'none' : 'auto',
       '--opacity': disabled ? 0.5 : 1,
       '--color': disabled ? '#E2F9F7' : '#E2F8F0',
       '--background': disabled ? '#C61E25' : '#008A5E',
@@ -256,7 +250,7 @@ function Harness({
 }
 
 // Case A: Emotion inline styles
-const InlineRow = ({ disabled, index }: { disabled: false; index: number }) => (
+const InlineRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div
     css={{
       outline: 0,
@@ -268,8 +262,6 @@ const InlineRow = ({ disabled, index }: { disabled: false; index: number }) => (
       height: '30px',
       fontSize: '20px',
       width: '30px',
-      pointerEvents: disabled ? 'none' : 'auto',
-      userSelect: disabled ? 'none' : 'auto',
       opacity: disabled ? 0.5 : 1,
       color: disabled ? '#E2F9F7' : '#E2F8F0',
       backgroundColor: disabled ? '#C61E25' : '#008A5E',
@@ -280,7 +272,7 @@ const InlineRow = ({ disabled, index }: { disabled: false; index: number }) => (
 );
 
 // Case A: Emotion inline styles
-const InlineRowB = ({ disabled, index }: { disabled: false; index: number }) => (
+const InlineRowB = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div
     css={[
       {
@@ -293,15 +285,11 @@ const InlineRowB = ({ disabled, index }: { disabled: false; index: number }) => 
         height: '30px',
         fontSize: '20px',
         width: '30px',
-        pointerEvents: 'auto',
-        userSelect: 'auto',
         opacity: 1,
         color: '#E2F8F0',
         backgroundColor: '#008A5E',
       },
       disabled && {
-        pointerEvents: 'none',
-        userSelect: 'none',
         opacity: 0.5,
         color: '#E2F9F7',
         backgroundColor: '#C61E25',
@@ -313,7 +301,7 @@ const InlineRowB = ({ disabled, index }: { disabled: false; index: number }) => 
 );
 
 // Case B: Emotion memoized
-const useMemoStyles = (disabled: false) =>
+const useMemoStyles = (disabled: boolean) =>
   useMemo(
     () =>
       css({
@@ -326,8 +314,6 @@ const useMemoStyles = (disabled: false) =>
         height: '30px',
         fontSize: '20px',
         width: '30px',
-        pointerEvents: disabled ? 'none' : 'auto',
-        userSelect: disabled ? 'none' : 'auto',
         opacity: disabled ? 0.5 : 1,
         color: disabled ? '#E2F9F7' : '#E2F8F0',
         backgroundColor: disabled ? '#C61E25' : '#008A5E',
@@ -335,7 +321,7 @@ const useMemoStyles = (disabled: false) =>
     [disabled]
   );
 
-const MemoRow = ({ disabled, index }: { disabled: false; index: number }) => {
+const MemoRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const cls = useMemoStyles(disabled);
   return <div className={cls}> {index}</div>;
 };
@@ -351,17 +337,13 @@ const baseClass = css({
   height: '30px',
   fontSize: '20px',
   width: '30px',
-  pointerEvents: 'var(--pointer, auto)',
-  userSelect: 'var(--select, auto)',
   opacity: 'var(--opacity, 1)',
   color: 'var(--color, #E2F8F0)',
   background: 'var(--background, #008A5E)',
 });
 
-const VarRow = ({ disabled, index }: { disabled: false; index: number }) => {
+const VarRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const vars = {
-    '--pointer': disabled ? 'none' : 'auto',
-    '--select': disabled ? 'none' : 'auto',
     '--opacity': disabled ? 0.5 : 1,
     '--color': disabled ? '#E2F9F7' : '#E2F8F0',
     '--background': disabled ? '#C61E25' : '#008A5E',
@@ -374,7 +356,7 @@ const VarRow = ({ disabled, index }: { disabled: false; index: number }) => {
 };
 
 // with the root css variables TODO: structure it right
-const VarRowB = ({ disabled, index }: { disabled: false; index: number }) => {
+const VarRowB = ({ disabled, index }: { disabled: boolean; index: number }) => {
   return <div className={baseClass}>{index}</div>;
 };
 
@@ -385,22 +367,6 @@ const VarRowB = ({ disabled, index }: { disabled: false; index: number }) => {
 //   ...
 // } in your CSS)
 
-const GlobalRow = ({ disabled, index }: { disabled: false; index: number }) => (
+const GlobalRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>
 );
-
-const styles = css({
-  outline: 0,
-  border: 0,
-  backgroundColor: 'transparent',
-  height: '100px',
-  pointerEvents: 'auto',
-  userSelect: 'auto',
-  opacity: 1,
-});
-
-const disabledStyles = css({
-  pointerEvents: 'none',
-  userSelect: 'none',
-  opacity: 0.5,
-});
