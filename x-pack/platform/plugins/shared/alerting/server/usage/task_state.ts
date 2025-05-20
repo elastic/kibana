@@ -236,8 +236,6 @@ export const stateSchemaByVersion = {
       ...stateSchemaByVersion[2].up(state),
       count_rules_with_linked_dashboards: state.count_rules_with_linked_dashboards || 0,
       count_rules_with_investigation_guide: state.count_rules_with_investigation_guide || 0,
-      count_rules_snoozed_by_type: state.count_rules_snoozed_by_type || {},
-      count_rules_muted_by_type: state.count_rules_muted_by_type || {},
     }),
     schema: stateSchemaV3,
   },
