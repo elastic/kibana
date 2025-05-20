@@ -18,6 +18,8 @@ import type {
   SessionStorageCookieOptions,
 } from '@kbn/core-http-server';
 
+import { isDeepStrictEqual } from 'util';
+
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> {
@@ -29,8 +31,6 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
 
   public async get(): Promise<T | null> {
     try {
-      // console.log(this.request.headers.cookie)
-
       const session = await this.server.auth.test('security-cookie', this.request);
 
       // A browser can send several cookies, if it's not an array, just return the session value
@@ -45,11 +45,17 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
 
       // If we have more than one session, return the first one if they are all the same
       if (session.credentials.length > 1) {
+        this.log.warn(
+          `Found ${session.credentials.length} auth sessions when we were only expecting 1.`
+        );
         const [firstSession] = session.credentials;
         const allEqual = session.credentials.every((s) => {
-          return JSON.stringify(s) === JSON.stringify(firstSession);
+          return isDeepStrictEqual(s, firstSession);
         });
         if (allEqual) {
+          this.log.error(
+            `Found ${session.credentials.length} auth sessions that are all the same.`
+          );
           return firstSession as T;
         }
       }
@@ -59,7 +65,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
       // the actual user. There's potential to change this behavior to ensure all valid sessions
       // identify the same user, or choose one valid one, but this is the safest option.
       this.log.warn(
-        `Found ${session.credentials.length} auth sessions when we were only expecting 1.`
+        `Found ${session.credentials.length} auth sessions when we were only expecting 1 with none of them the same.`
       );
       return null;
     } catch (error) {
