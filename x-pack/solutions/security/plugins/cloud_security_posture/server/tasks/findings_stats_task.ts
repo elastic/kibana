@@ -224,6 +224,16 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
     bool: {
+      must: [
+        {
+          range: {
+            '@timestamp': {
+              gte: 'now-1d',
+              lte: 'now',
+            },
+          },
+        },
+      ],
       must_not: filteredRules,
     },
   },
