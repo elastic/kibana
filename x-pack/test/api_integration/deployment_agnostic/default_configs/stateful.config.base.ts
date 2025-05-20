@@ -37,7 +37,7 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
 
 export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
   REPO_ROOT,
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshot_kb_8.10'
+  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshots/'
 );
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(

@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     it('does not send detected entities to the LLM via chat/complete', async () => {
       void proxy.interceptTitle('Title for a new conversation');
-      const simulatorPromise = proxy.interceptConversation('ok');
+      const simulatorPromise = proxy.interceptWithResponse('ok');
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
