@@ -307,5 +307,5 @@ interface HostTransformResultHost {
   os: {
     name: string[] | undefined;
     type: string[] | undefined;
-  }
+  };
 }
