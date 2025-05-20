@@ -85,4 +85,24 @@ describe('useAlertDeleteLastRun', () => {
 
     expect(getAlertDeleteLastRun).not.toHaveBeenCalled();
   });
+
+  it('does not call the API again if modal is already open (wasModalClosed is false)', () => {
+    (getAlertDeleteLastRun as jest.Mock).mockResolvedValueOnce({ lastRun: testDate });
+
+    const { rerender } = renderHook(
+      () =>
+        useAlertDeleteLastRun({
+          services: { http },
+          isEnabled: true,
+          isOpen: true,
+        }),
+      { wrapper }
+    );
+
+    expect(getAlertDeleteLastRun).toHaveBeenCalledTimes(1);
+
+    rerender();
+
+    expect(getAlertDeleteLastRun).toHaveBeenCalledTimes(1);
+  });
 });

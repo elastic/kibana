@@ -178,12 +178,6 @@ export interface AlertingServerStart {
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
-  scheduleAlertDeletion(
-    req: KibanaRequest,
-    settings: RulesSettingsAlertDeleteProperties,
-    spaceIds: string[]
-  ): Promise<void>;
-  getLastRunAlertDeletion(req: KibanaRequest): Promise<string | undefined>;
 }
 
 export interface AlertingPluginsSetup {
@@ -685,15 +679,6 @@ export class AlertingPlugin {
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
-
-      // remove when we have real routes
-      scheduleAlertDeletion: async (
-        req: KibanaRequest,
-        settings: RulesSettingsAlertDeleteProperties,
-        spaceIds: string[]
-      ) => await this.alertDeletionClient!.scheduleTask(req, settings, spaceIds),
-      getLastRunAlertDeletion: async (req: KibanaRequest) =>
-        await this.alertDeletionClient!.getLastRun(req),
     };
   }
 

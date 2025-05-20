@@ -46,7 +46,7 @@ describe('alertDeletePreviewRoute', () => {
     );
   });
 
-  it('gets the amount of affected alerts', async () => {
+  it('gets the last time the alert deletion was scheduled', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
