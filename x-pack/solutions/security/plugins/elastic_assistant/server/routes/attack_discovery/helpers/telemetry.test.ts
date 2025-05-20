@@ -51,7 +51,7 @@ describe('telemetry', () => {
       reportAttackDiscoveryGenerationFailure({
         apiConfig: mockApiConfig,
         errorMessage: 'Epic fail!',
-        schedule: { id: 'fake-id-1', name: 'Fake Schedule 1' },
+        schedule: { id: 'fake-id-1', interval: '21d' },
         telemetry: mockTelemetry,
       });
 
@@ -61,7 +61,7 @@ describe('telemetry', () => {
         model: 'gpt-4',
         schedule: {
           id: 'fake-id-1',
-          name: 'Fake Schedule 1',
+          interval: '21d',
         },
       });
     });
@@ -114,7 +114,7 @@ describe('telemetry', () => {
         durationMs: 456000,
         end: 'now',
         hasFilter: false,
-        schedule: { id: 'fake-id-2', name: 'Fake Schedule 2' },
+        schedule: { id: 'fake-id-2', interval: '32m' },
         size: 10,
         start: 'now-24h',
         telemetry: mockTelemetry,
@@ -133,7 +133,7 @@ describe('telemetry', () => {
         model: 'gpt-4',
         schedule: {
           id: 'fake-id-2',
-          name: 'Fake Schedule 2',
+          interval: '32m',
         },
       });
     });

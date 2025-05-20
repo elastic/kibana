@@ -238,7 +238,7 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
 
 interface AttackDiscoveryScheduleInfo {
   id: string;
-  name: string;
+  interval: string;
 }
 
 const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> = {
@@ -249,10 +249,10 @@ const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> =
         description: 'Attack discovery schedule id',
       },
     },
-    name: {
+    interval: {
       type: 'keyword',
       _meta: {
-        description: 'Attack discovery schedule name',
+        description: 'Attack discovery schedule interval',
       },
     },
   },

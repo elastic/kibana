@@ -36,7 +36,7 @@ export const reportAttackDiscoveryGenerationSuccess = ({
   hasFilter: boolean;
   schedule?: {
     id: string;
-    name: string;
+    interval: string;
   };
   size: number;
   start?: string;
@@ -73,7 +73,7 @@ export const reportAttackDiscoveryGenerationFailure = ({
   errorMessage: string;
   schedule?: {
     id: string;
-    name: string;
+    interval: string;
   };
   telemetry: AnalyticsServiceSetup;
 }) => {

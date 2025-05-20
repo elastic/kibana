@@ -97,7 +97,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   };
   const executorOptions = {
     params,
-    rule: { id: 'rule-1', name: 'Test Rule' },
+    rule: { id: 'rule-1', interval: '12m' },
     services: {
       ...services,
       actionsClient,
@@ -221,7 +221,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     expect(reportAttackDiscoveryGenerationFailure).toHaveBeenCalledWith({
       apiConfig: params.apiConfig,
       errorMessage: 'Big time failure',
-      schedule: { id: 'rule-1', name: 'Test Rule' },
+      schedule: { id: 'rule-1', interval: '12m' },
       telemetry: mockTelemetry,
     });
   });
@@ -241,7 +241,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       attackDiscoveries: mockAttackDiscoveries,
       durationMs: 0,
       hasFilter: true,
-      schedule: { id: 'rule-1', name: 'Test Rule' },
+      schedule: { id: 'rule-1', interval: '12m' },
       size: 123,
       start: 'now-24h',
       telemetry: mockTelemetry,

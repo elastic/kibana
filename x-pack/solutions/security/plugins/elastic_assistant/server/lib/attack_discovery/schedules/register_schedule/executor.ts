@@ -86,7 +86,7 @@ export const attackDiscoveryScheduleExecutor = async ({
       durationMs,
       end: restParams.end,
       hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
-      schedule: { id: rule.id, name: rule.name },
+      schedule: { id: rule.id, interval: rule.schedule.interval },
       size: restParams.size,
       start: restParams.start,
       telemetry,
@@ -120,7 +120,7 @@ export const attackDiscoveryScheduleExecutor = async ({
     reportAttackDiscoveryGenerationFailure({
       apiConfig: params.apiConfig,
       errorMessage: transformedError.message,
-      schedule: { id: rule.id, name: rule.name },
+      schedule: { id: rule.id, interval: rule.schedule.interval },
       telemetry,
     });
     throw error;
