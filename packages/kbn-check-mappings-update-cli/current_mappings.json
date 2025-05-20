@@ -2738,7 +2738,7 @@
       }
     }
   },
-  "monitoring-entity-source": {
+  "entity-analytics-monitoring-entity-source": {
     "dynamic": false,
     "properties": {
       "enabled": {
