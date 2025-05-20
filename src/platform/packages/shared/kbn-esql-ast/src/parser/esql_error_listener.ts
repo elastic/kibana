@@ -43,7 +43,6 @@ export class ESQLErrorListener extends ErrorListener<any> {
     }
 
     const textMessage = `SyntaxError: ${message}`;
-
     const tokenPosition = getPosition(offendingSymbol);
     const startColumn = offendingSymbol && tokenPosition ? tokenPosition.min + 1 : column + 1;
     const endColumn = offendingSymbol && tokenPosition ? tokenPosition.max + 1 : column + 2;
@@ -54,6 +53,10 @@ export class ESQLErrorListener extends ErrorListener<any> {
       startColumn,
       endColumn,
       message: textMessage,
+      location: {
+        min: tokenPosition.min,
+        max: tokenPosition.max - 1,
+      },
       severity: 'error',
     });
   }

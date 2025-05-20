@@ -23,7 +23,6 @@ import {
 import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
-  queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLFieldWithMetadata>> {
@@ -44,7 +43,7 @@ export async function retrieveFields(
   if (commands[0].name === 'row') {
     return new Map();
   }
-  const customQuery = buildQueryForFieldsFromSource(queryString, commands);
+  const customQuery = buildQueryForFieldsFromSource(commands);
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }
 

@@ -86,6 +86,8 @@ import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
 import { isNumericType } from '../shared/esql_types';
 
+import { definition as rerankDefinition } from './commands/rerank';
+
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
   const commandName = command.name.toUpperCase();
@@ -706,4 +708,5 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
+  rerankDefinition,
 ];
