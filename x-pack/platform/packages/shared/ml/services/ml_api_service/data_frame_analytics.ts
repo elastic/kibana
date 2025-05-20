@@ -17,7 +17,7 @@ import type {
 import type { ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
-import type { PutDataFrameAnalyticsResponseSchema } from '@kbn/ml-server-routes-schemas/data_frame_analytics_schema';
+import type { PutDataFrameAnalyticsResponseSchema } from '@kbn/ml-server-api-schemas/data_frame_analytics_schema';
 
 import type { HttpService } from '../http_service';
 

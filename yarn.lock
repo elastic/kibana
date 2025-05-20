@@ -7435,7 +7435,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-server-routes-schemas@link:x-pack/platform/packages/shared/ml/server_routes_schemas":
+"@kbn/ml-server-api-schemas@link:x-pack/platform/packages/shared/ml/server_api_schemas":
   version "0.0.0"
   uid ""
 

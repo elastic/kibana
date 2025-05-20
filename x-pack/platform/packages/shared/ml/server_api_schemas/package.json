@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/ml-server-routes-schemas",
+  "name": "@kbn/ml-server-api-schemas",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"
