@@ -7,15 +7,19 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
+
 import { EuiSpacer, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { css } from '@emotion/react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { JobsListView } from './components/jobs_list_view';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
@@ -27,7 +31,6 @@ import {
   SynchronizeSavedObjectsButton,
 } from './components/top_level_actions';
 import { NewJobButton } from './components/new_job_button';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
 import { ExportJobsFlyout } from '../../components/import_export_jobs';
 

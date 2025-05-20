@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import useObservable from 'react-use/lib/useObservable';
+
 import { EuiProgress, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
-import useObservable from 'react-use/lib/useObservable';
-import { isBaseNLPModelItem } from '../../../common/types/trained_models';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { isBaseNLPModelItem } from '@kbn/ml-common-types/trained_models';
+
 import type { NameOverrides } from './get_model_state';
 import { getModelStateColor } from './get_model_state';
-import { useMlKibana } from '../contexts/kibana';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export const ModelStatusIndicator = ({
   modelId,
