@@ -270,9 +270,10 @@ const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) 
         transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
       })
     : css({ width: 0 });
-  const styles = useMemoizedStyles(componentStyles);
+
+  const styles = useMemoizedStyles({ ...componentStyles, stylesVisible });
   return (
-    <EuiFlexItem css={[styles.flyoutPanelWrapperStyles, stylesVisible]} grow={false}>
+    <EuiFlexItem css={[styles.flyoutPanelWrapperStyles, styles.stylesVisible]} grow={false}>
       {flyoutPanel}
     </EuiFlexItem>
   );
