@@ -58,11 +58,11 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))
   );
-  const acceptableFieldsOccurrencies = countBy(acceptableDefaultFields);
+  const acceptableFieldsOccurrences = countBy(acceptableDefaultFields);
 
   // Sort by count descending first, then by order of field in prioritizedFields
   const sortedFields = orderBy(
-    Object.entries(acceptableFieldsOccurrencies),
+    Object.entries(acceptableFieldsOccurrences),
     [
       ([_field, occurrencies]) => occurrencies, // Sort entries by occurrencies descending
       ([field]) => prioritizedFields.indexOf(field), // Sort entries by priority order in well-known fields

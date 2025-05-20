@@ -15,7 +15,7 @@ export interface ProcessingDateSuggestionsParams {
     name: string;
   };
   body: {
-    dates: string[];
+    dates: unknown[];
   };
 }
 
@@ -27,7 +27,7 @@ export interface ProcessingDateSuggestionsHandlerDeps {
 export const processingDateSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    dates: z.array(NonEmptyString).nonempty(),
+    dates: z.array(z.unknown()).nonempty(),
   }),
 }) satisfies z.Schema<ProcessingDateSuggestionsParams>;
 
@@ -35,7 +35,7 @@ export const handleProcessingDateSuggestions = async ({
   params,
   scopedClusterClient,
 }: ProcessingDateSuggestionsHandlerDeps) => {
-  const { dates } = params.body;
+  const dates = parseDatesInput(params.body.dates);
   /**
    * Run structure detection against sample dates.
    * The `findMessageStructure` API is used to detect the structure of the date strings.
@@ -71,6 +71,19 @@ export const handleProcessingDateSuggestions = async ({
 
   return { formats };
 };
+
+function parseDatesInput(dates: unknown[]): string[] {
+  const areValidDates = z
+    .array(z.union([NonEmptyString, z.number()]))
+    .nonempty()
+    .safeParse(dates).success;
+
+  if (!areValidDates) {
+    throw new Error('Dates input must be non-empty string or number values.');
+  }
+
+  return dates.map(String);
+}
 
 interface DetectionAttemptParams {
   scopedClusterClient: IScopedClusterClient;
