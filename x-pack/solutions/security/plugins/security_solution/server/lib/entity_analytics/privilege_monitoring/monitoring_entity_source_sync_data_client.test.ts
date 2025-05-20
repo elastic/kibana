@@ -11,17 +11,20 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { monitoringEntitySourceTypeName } from './saved_object/monitoring_entity_source_type';
+import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('MonitoringEntitySourceSyncDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
+  const namespace = 'test-namespace';
   loggerMock.debug = jest.fn();
 
   const defaultOpts = {
     logger: loggerMock,
     clusterClient: clusterClientMock,
-    namespace: 'default',
+    namespace: 'test-namespace',
     soClient: mockSavedObjectClient,
     kibanaVersion: '8.0.0',
   };
@@ -46,22 +49,76 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
 
   describe('init', () => {
     it('should initialize Monitoring Entity Source Sync Config Successfully', async () => {
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+      } as unknown as SavedObjectsFindResponse<unknown, unknown>);
+
+      defaultOpts.soClient.create.mockResolvedValue({
+        id: `monitoring-entity-source-sync-${namespace}`,
+        type: monitoringEntitySourceTypeName,
+        attributes: testDescriptor,
+        references: [],
+      });
+
       const result = await dataClient.init(testDescriptor);
+
+      expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        testDescriptor,
+        { id: `monitoring-entity-source-sync-${namespace}` }
+      );
+
       expect(result).toEqual(testDescriptor);
     });
   });
 
   describe('get', () => {
     it('should get Monitoring Entity Source Sync Config Successfully', async () => {
+      const getResponse = {
+        id: `monitoring-entity-source-sync-${namespace}`,
+        type: monitoringEntitySourceTypeName,
+        attributes: testDescriptor,
+        references: [],
+      };
+      defaultOpts.soClient.get.mockResolvedValue(getResponse as unknown as SavedObject<unknown>);
       const result = await dataClient.get();
-      expect(result).toEqual(testDescriptor);
+      expect(defaultOpts.soClient.get).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        `monitoring-entity-source-sync-${namespace}`
+      );
+      expect(result).toEqual(getResponse.attributes);
     });
   });
 
   describe('update', () => {
     it('should update Monitoring Entity Source Sync Config Successfully', async () => {
+      const existingDescriptor = {
+        total: 1,
+        saved_objects: [{ attributes: testDescriptor }],
+      } as unknown as SavedObjectsFindResponse<unknown, unknown>;
+
+      defaultOpts.soClient.find.mockResolvedValue(
+        existingDescriptor as unknown as SavedObjectsFindResponse<unknown, unknown>
+      );
+
+      defaultOpts.soClient.update.mockResolvedValue({
+        id: `monitoring-entity-source-sync-${namespace}`,
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...testDescriptor, name: 'Updated Source' },
+        references: [],
+      });
+
       const updatedDescriptor = { ...testDescriptor, name: 'Updated Source' };
-      const result = await dataClient.update(updatedDescriptor);
+      const result = await dataClient.init(testDescriptor);
+
+      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        `monitoring-entity-source-sync-${namespace}`,
+        testDescriptor,
+        { refresh: 'wait_for' }
+      );
+
       expect(result).toEqual(updatedDescriptor);
     });
   });
@@ -70,8 +127,8 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
     it('should delete Monitoring Entity Source Sync Config Successfully', async () => {
       await dataClient.delete();
       expect(mockSavedObjectClient.delete).toHaveBeenCalledWith(
-        'monitoring-entity-source-sync',
-        'default'
+        monitoringEntitySourceTypeName,
+        `monitoring-entity-source-sync-${namespace}`
       );
     });
   });
