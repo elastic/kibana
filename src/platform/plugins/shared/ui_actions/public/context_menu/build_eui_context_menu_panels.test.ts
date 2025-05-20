@@ -499,7 +499,39 @@ test('it creates disabled actions', async () => {
   `);
 });
 
-test('it calls execute with the provided event', async () => {
+test('it calls execute with the right context when the target is a link', async () => {
+  const mockExecute = jest.fn();
+  const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
+  // We need to make sure that the current target is a HTMLAnchorElement
+  Object.defineProperty(mockMouseEvent, 'currentTarget', {
+    value: document.createElement('a'),
+  });
+
+  const actions = [
+    createTestAction({
+      order: 1,
+      displayName: 'Foo',
+      execute: mockExecute,
+    }),
+  ];
+
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
+  });
+
+  // Simulate clicking the first menu item
+  const firstMenuItem = menu[0].items![0];
+  if (firstMenuItem.onClick) {
+    firstMenuItem.onClick(mockMouseEvent as any);
+  }
+
+  expect(mockExecute).toHaveBeenCalledTimes(1);
+  expect(mockExecute).toHaveBeenCalledWith({
+    trigger: { id: 'TEST' },
+  });
+});
+
+test('it calls execute with the right context when the target is not a link', async () => {
   const mockExecute = jest.fn();
   const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
 
@@ -521,9 +553,9 @@ test('it calls execute with the provided event', async () => {
     firstMenuItem.onClick(mockMouseEvent as any);
   }
 
-  expect(mockExecute).toHaveBeenCalledWith(
-    expect.objectContaining({
-      event: mockMouseEvent,
-    })
-  );
+  expect(mockExecute).toHaveBeenCalledTimes(1);
+  expect(mockExecute).toHaveBeenCalledWith({
+    trigger: { id: 'TEST' },
+    event: mockMouseEvent,
+  });
 });
