@@ -18,7 +18,6 @@
   "kbn_references": [
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-is-populated-object",
-    "@kbn/ml-error-utils",
     "@kbn/ml-runtime-field-utils",
     "@kbn/utility-types",
     "@kbn/share-plugin",
@@ -35,5 +34,6 @@
     "@kbn/ml-local-storage",
     "@kbn/rule-data-utils",
     "@kbn/config-schema",
+    "@kbn/core-http-browser",
   ]
 }
