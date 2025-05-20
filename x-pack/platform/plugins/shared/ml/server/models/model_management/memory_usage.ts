@@ -22,7 +22,7 @@ import type {
   NodesOverviewResponse,
 } from '@kbn/ml-common-types/trained_models';
 
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();
