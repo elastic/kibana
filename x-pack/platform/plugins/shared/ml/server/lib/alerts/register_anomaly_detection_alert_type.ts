@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { takeRight } from 'lodash';
+
+import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
@@ -35,8 +36,9 @@ import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import type { InfluencerAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
 import { type RecordAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license/constants';
-import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-server-api-schemas/alerting_schema';
+import { MINIMUM_FULL_LICENSE } from '@kbn/ml-license/constants';
+
 import type { RegisterAlertParams } from './register_ml_alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 

@@ -22,16 +22,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { isValidJson } from '@kbn/ml-common-utils/validation_utils';
 
 import { SaveChangesButton } from '../ml_inference/components/save_changes_button';
 import type { MlInferenceState } from '../ml_inference/types';
 import { getDefaultOnFailureConfiguration } from '../ml_inference/state';
 import { CANCEL_EDIT_MESSAGE, EDIT_MESSAGE } from '../ml_inference/constants';
-import { useMlKibana } from '@kbn/ml-kibana-context';
-import { isValidJson } from '../../../../common/util/validation_utils';
 
 interface Props {
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;

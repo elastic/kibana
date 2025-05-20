@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getNewJobLimits } from '../../../services/ml_server_info';
-import { populateValidationMessages } from '../../new_job/common/job_validator/util';
-
 import {
   validateModelMemoryLimit as validateModelMemoryLimitUtils,
   validateGroupNames as validateGroupNamesUtils,
   validateModelMemoryLimitUnits as validateModelMemoryLimitUnitsUtils,
-} from '../../../../../common/util/job_utils';
+} from '@kbn/ml-common-utils/job_utils';
+
+import { getNewJobLimits } from '../../../services/ml_server_info';
+import { populateValidationMessages } from '../../new_job/common/job_validator/util';
 
 export function validateModelMemoryLimit(mml) {
   const limits = getNewJobLimits();

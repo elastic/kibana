@@ -15,10 +15,7 @@ import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '@kbn/ml-common-constants/trained_models';
 import { type TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
-import { wrapError } from '../client/error_wrapper';
-import { modelsProvider } from '../models/model_management';
-import type { RouteInitialization } from '../types';
-import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
+import { forceQuerySchema } from '@kbn/ml-server-api-schemas/anomaly_detectors_schema';
 import {
   createIngestPipelineSchema,
   curatedModelsParamsSchema,
@@ -36,7 +33,11 @@ import {
   threadingParamsBodySchema,
   threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
-} from './schemas/inference_schema';
+} from '@kbn/ml-server-api-schemas/inference_schema';
+
+import { wrapError } from '../client/error_wrapper';
+import { modelsProvider } from '../models/model_management';
+import type { RouteInitialization } from '../types';
 
 export function filterForEnabledFeatureModels<
   T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig

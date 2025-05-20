@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+
 import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
-import type { MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../locator';
 
 jest.mock('../../../contexts/kibana', () => ({
   useMlKibana: () => ({

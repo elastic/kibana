@@ -14,14 +14,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { ImportJobsFlyout } from '../../components/import_export_jobs/import_jobs_flyout';
 import { ExportJobsFlyout } from '../../components/import_export_jobs';
 import { PageTitle } from '../../components/page_title';

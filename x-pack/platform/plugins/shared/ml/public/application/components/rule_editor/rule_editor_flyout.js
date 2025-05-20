@@ -36,6 +36,8 @@ import {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '@kbn/ml-anomaly-utils/detector_rule';
+import { getPartitioningFieldNames } from '@kbn/ml-common-utils/job_utils';
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
@@ -52,8 +54,6 @@ import {
   addItemToFilter,
 } from './utils';
 
-import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 
 class RuleEditorFlyoutUI extends Component {

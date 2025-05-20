@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Observable } from 'rxjs';
 import {
   combineLatest,
@@ -22,6 +20,9 @@ import {
   tap,
 } from 'rxjs';
 import { get, isEqual } from 'lodash';
+
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import type { UrlStateService } from '@kbn/ml-url-state';
@@ -30,6 +31,11 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import {
+  isModelPlotChartableForDetector,
+  isModelPlotEnabled,
+  isSourceDataChartableForDetector,
+} from '@kbn/ml-common-utils/job_utils';
 import type { MlJobService } from '@kbn/ml-services/job_service';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
@@ -45,11 +51,6 @@ import {
   getSelectionTimeRange,
 } from './explorer_utils';
 import { MAX_CATEGORY_EXAMPLES } from './explorer_constants';
-import {
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isSourceDataChartableForDetector,
-} from '../../../common/util/job_utils';
 import { StateService } from '../services/state_service';
 import type { Refresh } from '../routing/use_refresh';
 

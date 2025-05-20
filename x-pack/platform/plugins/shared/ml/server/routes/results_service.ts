@@ -13,10 +13,16 @@ import {
   getScoresByBucket,
   getInfluencerValueMaxScoreByTime,
 } from '@kbn/ml-services/results_service/view_by';
-
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
-
+import {
+  getTopInfluencersSchema,
+  getScoresByBucketSchema,
+  getInfluencerValueMaxScoreByTimeSchema,
+} from '@kbn/ml-server-api-schemas/results_service_schema';
+import { jobIdSchema } from '@kbn/ml-server-api-schemas/anomaly_detectors_schema';
+import {
+  getCategorizerStatsSchema,
+  getCategorizerStoppedPartitionsSchema,
+} from '@kbn/ml-server-api-schemas/results_service_schema';
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -27,17 +33,10 @@ import {
   anomalySearchSchema,
   getAnomalyChartsSchema,
   getAnomalyRecordsSchema,
-} from './schemas/results_service_schema';
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
-import {
-  getCategorizerStatsSchema,
-  getCategorizerStoppedPartitionsSchema,
-} from './schemas/results_service_schema';
-import {
-  getTopInfluencersSchema,
-  getScoresByBucketSchema,
-  getInfluencerValueMaxScoreByTimeSchema,
-} from './schemas/results_service_schema';
+} from '@kbn/ml-server-api-schemas/results_service_schema';
+
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);

@@ -5,10 +5,13 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiButtonEmpty } from '@elastic/eui';
+
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../locator';
 
 export const SuppliedConfigurationsButton = () => {
   const redirectToSuppliedConfigurationsPage = useCreateAndNavigateToManagementMlLink(

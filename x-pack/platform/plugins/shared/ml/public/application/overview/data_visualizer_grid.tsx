@@ -7,11 +7,14 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
+import { EuiBetaBadge, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import { MLOverviewCard } from './overview_ml_page';
-import { ML_PAGES } from '../../locator';
 
 export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabled: boolean }> = ({
   buttonType,

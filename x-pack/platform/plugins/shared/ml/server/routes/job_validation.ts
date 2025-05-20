@@ -12,15 +12,17 @@ import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
   validateCardinalitySchema,
   validateJobSchema,
   validateDatafeedPreviewSchema,
-} from './schemas/job_validation_schema';
+} from '@kbn/ml-server-api-schemas/job_validation_schema';
+import type { MlClient } from '@kbn/ml-client';
+
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import {
@@ -29,7 +31,6 @@ import {
   validateDatafeedPreview,
 } from '../models/job_validation';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { MlClient } from '@kbn/ml-client';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 

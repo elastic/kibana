@@ -6,7 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useMlKibana } from '../contexts/kibana';
+
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { getEmptyFunctionComponent } from '../components/empty_component/get_empty_function_component';
 
 export const useCanManageSpacesAndSavedObjects = () => {
