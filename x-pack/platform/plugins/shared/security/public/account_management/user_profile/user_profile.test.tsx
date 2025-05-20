@@ -38,7 +38,6 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
     {children}
   </Providers>
 );
-
 describe('useUserProfileForm', () => {
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -195,17 +194,19 @@ describe('useUserProfileForm', () => {
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={nonCloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
       );
 
       expect(testWrapper.exists('UserAvatar')).toBeTruthy();
@@ -217,17 +218,19 @@ describe('useUserProfileForm', () => {
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={cloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={cloudUser} data={data} />
+          </Providers>
+        )
       );
 
       expect(testWrapper.exists('UserAvatar')).toBeFalsy();
@@ -241,17 +244,19 @@ describe('useUserProfileForm', () => {
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={nonCloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
       );
 
       const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
@@ -274,17 +279,19 @@ describe('useUserProfileForm', () => {
       const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={cloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={cloudUser} data={data} />
+          </Providers>
+        )
       );
 
       expect(testWrapper.exists('EuiKeyPadMenu[data-test-subj="themeMenu"]')).toBeFalsy();
@@ -327,17 +334,19 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={nonCloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
       );
 
       const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
@@ -363,17 +372,19 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={nonCloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
       );
 
       const overrideMsg = testWrapper.find('EuiToolTip[data-test-subj="themeOverrideTooltip"]');
@@ -401,17 +412,19 @@ describe('useUserProfileForm', () => {
       coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={nonCloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
       );
       expect(testWrapper.exists('span[data-test-subj="userRoles"]')).toBeTruthy();
 
@@ -428,17 +441,19 @@ describe('useUserProfileForm', () => {
 
       nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2'];
       const testWrapper = mount(
-        <Providers
-          services={coreStart}
-          history={history}
-          authc={authc}
-          securityApiClients={{
-            userProfiles: new UserProfileAPIClient(coreStart.http),
-            users: new UserAPIClient(coreStart.http),
-          }}
-        >
-          <UserProfile user={nonCloudUser} data={data} />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers
+            services={coreStart}
+            history={history}
+            authc={authc}
+            securityApiClients={{
+              userProfiles: new UserProfileAPIClient(coreStart.http),
+              users: new UserAPIClient(coreStart.http),
+            }}
+          >
+            <UserProfile user={nonCloudUser} data={data} />
+          </Providers>
+        )
       );
 
       const extraRoles = nonCloudUser.roles.splice(1);
