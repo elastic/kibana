@@ -11,7 +11,7 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
-import { MonitoringEntitySourceSyncDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_sync_data_client';
+import { MonitoringEntitySourceSyncDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
