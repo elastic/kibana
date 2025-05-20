@@ -7319,6 +7319,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-common-api-schemas@link:x-pack/platform/packages/shared/ml/common_api_schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-common-constants@link:x-pack/platform/packages/shared/ml/common_constants":
   version "0.0.0"
   uid ""

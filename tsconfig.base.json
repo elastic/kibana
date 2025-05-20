@@ -1410,6 +1410,8 @@
       "@kbn/ml-chi2test/*": ["x-pack/platform/packages/shared/ml/chi2test/*"],
       "@kbn/ml-client": ["x-pack/platform/packages/shared/ml/ml_client"],
       "@kbn/ml-client/*": ["x-pack/platform/packages/shared/ml/ml_client/*"],
+      "@kbn/ml-common-api-schemas": ["x-pack/platform/packages/shared/ml/common_api_schemas"],
+      "@kbn/ml-common-api-schemas/*": ["x-pack/platform/packages/shared/ml/common_api_schemas/*"],
       "@kbn/ml-common-constants": ["x-pack/platform/packages/shared/ml/common_constants"],
       "@kbn/ml-common-constants/*": ["x-pack/platform/packages/shared/ml/common_constants/*"],
       "@kbn/ml-common-types": ["x-pack/platform/packages/shared/ml/common_types"],

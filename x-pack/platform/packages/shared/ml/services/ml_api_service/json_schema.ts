@@ -6,9 +6,11 @@
  */
 
 import { omitBy } from 'lodash';
+
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
-import { type SupportedPath } from '../../../../common/api_schemas/json_schema_schema';
+import type { SupportedPath } from '@kbn/ml-common-api-schemas/json_schema_schema';
+
 import type { HttpService } from '../http_service';
 
 export interface GetSchemaDefinitionParams {

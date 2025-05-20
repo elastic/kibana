@@ -731,6 +731,7 @@
     "@kbn/ml-category-validator": "link:x-pack/platform/packages/private/ml/category_validator",
     "@kbn/ml-chi2test": "link:x-pack/platform/packages/shared/ml/chi2test",
     "@kbn/ml-client": "link:x-pack/platform/packages/shared/ml/ml_client",
+    "@kbn/ml-common-api-schemas": "link:x-pack/platform/packages/shared/ml/common_api_schemas",
     "@kbn/ml-common-constants": "link:x-pack/platform/packages/shared/ml/common_constants",
     "@kbn/ml-common-types": "link:x-pack/platform/packages/shared/ml/common_types",
     "@kbn/ml-common-utils": "link:x-pack/platform/packages/shared/ml/common_utils",
