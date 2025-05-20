@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringEntitySourceDataClient } from './monitoring_entity_source_sync_data_client';
+import { MonitoringEntitySourceDataClient } from './monitoring_entity_source_data_client';
 import {
   savedObjectsClientMock,
   elasticsearchServiceMock,
