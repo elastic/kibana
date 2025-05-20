@@ -48,7 +48,7 @@ import {
   MLFieldFormatRegistryUninitialized,
   MLUISettingsClientUninitialized,
 } from './errors';
-import type { MlClient } from '../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 import { getMlClient, MlAuditLogger } from '../lib/ml_client';
 import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';

@@ -6,12 +6,17 @@
  */
 
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { MlClient } from '@kbn/ml-client';
+import {
+  calendarSchema,
+  calendarIdSchema,
+  calendarIdsSchema,
+} from '@kbn/ml-server-api-schemas/calendars_schema';
+
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
-import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/calendars_schema';
 import type { Calendar, FormCalendar } from '../models/calendar';
 import { CalendarManager } from '../models/calendar';
-import type { MlClient } from '../lib/ml_client';
 
 function getAllCalendars(mlClient: MlClient) {
   const cal = new CalendarManager(mlClient);

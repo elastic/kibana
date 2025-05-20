@@ -11,7 +11,7 @@ import type { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
 import type { FormFilter, UpdateFilter } from '../models/filter';
 import { FilterManager } from '../models/filter';
-import type { MlClient } from '../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 // TODO - add function for returning a list of just the filter IDs.
 // TODO - add function for returning a list of filter IDs plus item count.
