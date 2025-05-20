@@ -50,13 +50,25 @@ export const getRequestWithStreamOption = (
 };
 
 // PKI utils
+/**
+ * Input interface for SSL overrides.
+ */
 interface SSLOverridesInput {
-  logger: Logger;
-  certificateData?: string;
-  privateKeyData?: string;
-  caData?: string;
-  verificationMode?: 'full' | 'certificate' | 'none';
+  logger: Logger; // Logger instance for logging errors or information.
+  certificateData?: string; // PEM-encoded certificate data as a string.
+  privateKeyData?: string; // PEM-encoded private key data as a string.
+  caData?: string; // PEM-encoded CA certificate data as a string.
+  verificationMode?: 'full' | 'certificate' | 'none'; // SSL verification mode.
 }
+
+/**
+ * Validates that the provided PEM data is in the correct format.
+ *
+ * @param data - The PEM data to validate.
+ * @param type - The type of PEM data ('CERTIFICATE' or 'PRIVATE KEY').
+ * @param description - A description of the data being validated.
+ * @throws Will throw an error if the PEM data is not in the correct format.
+ */
 const validatePEMData = (
   data: string | undefined,
   type: 'CERTIFICATE' | 'PRIVATE KEY',
@@ -69,6 +81,12 @@ const validatePEMData = (
   }
 };
 
+/**
+ * Validates the provided PKI certificates for correct PEM formatting.
+ *
+ * @param input - An object containing certificate, private key, and CA data, along with a logger.
+ * @throws Will log and throw an error if any of the provided certificates are invalid.
+ */
 const validatePKICertificates = ({
   certificateData,
   privateKeyData,
@@ -85,12 +103,28 @@ const validatePKICertificates = ({
   }
 };
 
+/**
+ * Converts PEM data into a Buffer.
+ *
+ * @param data - The PEM data to convert.
+ * @param type - The type of PEM data ('CERTIFICATE' or 'PRIVATE KEY').
+ * @returns A Buffer containing the PEM data.
+ * @throws Will throw an error if no data is provided.
+ */
 const loadBuffer = (data?: string, type?: 'CERTIFICATE' | 'PRIVATE KEY'): Buffer => {
   if (data) {
     return Buffer.from(formatPEMContent(data, type!));
   }
   throw new Error(`No ${type?.toLowerCase()} data provided`);
 };
+
+/**
+ * Generates SSL settings for PKI authentication.
+ *
+ * @param input - An object containing logger, certificate, private key, and CA data, along with verification mode.
+ * @returns An SSLSettings object containing the certificate, private key, CA, and verification mode.
+ * @throws Will throw an error if the provided certificates are invalid or missing.
+ */
 export const getPKISSLOverrides = ({
   logger,
   certificateData,
@@ -107,12 +141,19 @@ export const getPKISSLOverrides = ({
 
   const cert = loadBuffer(certificateData, 'CERTIFICATE');
   const key = loadBuffer(privateKeyData, 'PRIVATE KEY');
-  // ca can be undefined for certification mode "None"
+  // CA can be undefined for verification mode "none".
   const ca = caData ? loadBuffer(caData, 'CERTIFICATE') : undefined;
 
   return { cert, key, ca, verificationMode };
 };
 
+/**
+ * Formats PEM content to ensure proper structure and line breaks.
+ *
+ * @param pemContent - The PEM content to format.
+ * @param type - The type of PEM data ('CERTIFICATE' or 'PRIVATE KEY').
+ * @returns A properly formatted PEM string.
+ */
 function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY'): string {
   if (!pemContent) return pemContent;
 
@@ -134,6 +175,12 @@ function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY
   return `${header}\n${formattedBase64}\n${footer}`;
 }
 
+/**
+ * Handles PKI-related errors and provides user-friendly error messages.
+ *
+ * @param error - The AxiosError object containing details about the error.
+ * @returns A string with a user-friendly error message, or undefined if the error is not recognized.
+ */
 export const pkiErrorHandler = (error: AxiosError): string | undefined => {
   if (error.message.includes('UNABLE_TO_VERIFY_LEAF_SIGNATURE')) {
     return `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`;
@@ -146,6 +193,12 @@ export const pkiErrorHandler = (error: AxiosError): string | undefined => {
   }
 };
 
+/**
+ * Validates the PKI configuration object to ensure required fields are present and properly formatted.
+ *
+ * @param configObject - The configuration object containing PKI-related data.
+ * @throws Will throw an error if required fields are missing or if the provided data is not in valid PEM format.
+ */
 export const pkiConfigValidator = (configObject: Config): void => {
   if (
     'caData' in configObject ||
