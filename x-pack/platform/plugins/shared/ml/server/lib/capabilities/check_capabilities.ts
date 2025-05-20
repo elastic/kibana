@@ -18,7 +18,7 @@ import type { MlClient } from '@kbn/ml-client';
 
 import { mlLog } from '../log';
 import { upgradeCheckProvider } from './upgrade';
-import type { MlLicense } from '../../../common/license';
+import type { MlLicense } from '@kbn/ml-license';
 import {
   InsufficientMLCapabilities,
   UnknownMLCapabilitiesError,

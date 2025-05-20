@@ -7,7 +7,7 @@
 
 import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabilities';
 import { capabilitiesProvider } from './check_capabilities';
-import type { MlLicense } from '../../../common/license';
+import type { MlLicense } from '@kbn/ml-license';
 import { getDefaultCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlClient } from '@kbn/ml-client';
 
