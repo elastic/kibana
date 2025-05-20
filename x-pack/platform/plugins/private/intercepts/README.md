@@ -1,4 +1,4 @@
-## Product intercept plugin
+## Intercept plugin
 
 Contains business logic and orchestration for displaying the intercept dialog suited to the needs of Kibana, and is made available so that other solution teams might leverage this to register and schedule an intercept of their choosing
 
@@ -13,7 +13,9 @@ On the server;
 ```ts
 const TRIGGER_ID = 'some_trigger';
 
-registerTriggerDefinition(TRIGGER_ID, ({ isServerless isCloudDeployment, kibanaVersion}) => {
+const isServerless = (function evaluateIfIsServerless() {/* ... */})()
+
+registerTriggerDefinition(TRIGGER_ID, ({ }) => {
 
  return isServerless ? '30d' : '180d';
 
@@ -44,14 +46,14 @@ registerIntercept({
         // input received provided the user completed all steps
         //  for the intercept
     },
-    onDismiss({ runId }) {
+    onDismiss({ stepId, runId }) {
         // callback called when a user dismisses the intercept
     }
 })
 
 ```
 
-The `registerIntercept` returns a cold observable, that when subscribed to will kick off computation for when the intercept should be displayed and queue the intercept at the time it should be displayed, said subscription simply returns the ID of the last run.
+Invoking the `registerIntercept` method returns a cold observable, that when subscribed to will kick off computation for when the intercept should be displayed and queue the intercept at the time it should be displayed, said subscription simply returns the ID of the last run.
 
 This plugin also exposes the following config
 
