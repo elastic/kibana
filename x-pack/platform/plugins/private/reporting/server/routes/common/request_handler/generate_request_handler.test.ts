@@ -22,7 +22,7 @@ import {
   ReportingRequestHandlerContext,
   ReportingSetup,
 } from '../../../types';
-import { RequestHandler } from './request_handler';
+import { GenerateRequestHandler } from './generate_request_handler';
 
 jest.mock('@kbn/reporting-server/crypto', () => ({
   cryptoFactory: () => ({
@@ -68,7 +68,7 @@ describe('Handle request to generate', () => {
   let mockContext: ReturnType<typeof getMockContext>;
   let mockRequest: ReturnType<typeof getMockRequest>;
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
-  let requestHandler: RequestHandler;
+  let requestHandler: GenerateRequestHandler;
 
   beforeEach(async () => {
     reportingCore = await createMockReportingCore(createMockConfigSchema({}));
@@ -91,20 +91,23 @@ describe('Handle request to generate', () => {
     mockContext = getMockContext();
     mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
-    requestHandler = new RequestHandler(
-      reportingCore,
-      { username: 'testymcgee' },
-      mockContext,
-      '/api/reporting/test/generate/pdf',
-      mockRequest,
-      mockResponseFactory,
-      mockLogger
-    );
+    requestHandler = new GenerateRequestHandler({
+      reporting: reportingCore,
+      user: { username: 'testymcgee' },
+      context: mockContext,
+      path: '/api/reporting/test/generate/pdf',
+      req: mockRequest,
+      res: mockResponseFactory,
+      logger: mockLogger,
+    });
   });
 
   describe('Enqueue Job', () => {
     test('creates a report object to queue', async () => {
-      const report = await requestHandler.enqueueJob('printablePdfV2', mockJobParams);
+      const report = await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+      });
 
       const { _id, created_at: _created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
@@ -157,7 +160,10 @@ describe('Handle request to generate', () => {
     test('provides a default kibana version field for older POST URLs', async () => {
       // how do we handle the printable_pdf endpoint that isn't migrating to the class instance of export types?
       (mockJobParams as unknown as { version?: string }).version = undefined;
-      const report = await requestHandler.enqueueJob('printablePdfV2', mockJobParams);
+      const report = await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+      });
 
       const { _id, created_at: _created_at, ...snapObj } = report;
       expect(snapObj.payload.version).toBe('7.14.0');
@@ -206,10 +212,14 @@ describe('Handle request to generate', () => {
     });
   });
 
-  describe('handleGenerateRequest', () => {
+  describe('handleRequest', () => {
     test('disallows invalid export type', async () => {
-      expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
-        .toMatchInlineSnapshot(`
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'neanderthals',
+          jobParams: mockJobParams,
+        })
+      ).toMatchInlineSnapshot(`
               Object {
                 "body": "Invalid export-type of neanderthals",
               }
@@ -224,8 +234,12 @@ describe('Handle request to generate', () => {
         },
       }));
 
-      expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
-        .toMatchInlineSnapshot(`
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: mockJobParams,
+        })
+      ).toMatchInlineSnapshot(`
               Object {
                 "body": "seeing this means the license isn't supported",
               }
@@ -233,30 +247,26 @@ describe('Handle request to generate', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
-        csv_searchsource: {
-          enableLinks: false,
-          message: `seeing this means the license isn't supported`,
-        },
-      }));
-
       expect(
-        await requestHandler.handleGenerateRequest('csv_searchsource', {
-          ...mockJobParams,
-          browserTimezone: 'America/Amsterdam',
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: {
+            ...mockJobParams,
+            browserTimezone: 'America/Amsterdam',
+          },
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "body": "seeing this means the license isn't supported",
+          "body": "Invalid timezone \\"America/Amsterdam\\".",
         }
     `);
     });
 
     test('generates the download path', async () => {
-      const { body } = (await requestHandler.handleGenerateRequest(
-        'csv_searchsource',
-        mockJobParams
-      )) as unknown as { body: ReportingJobResponse };
+      const { body } = (await requestHandler.handleRequest({
+        exportTypeId: 'csv_searchsource',
+        jobParams: mockJobParams,
+      })) as unknown as { body: ReportingJobResponse };
 
       expect(body.path).toMatch('/mock-server-basepath/api/reporting/jobs/download/mock-report-id');
     });

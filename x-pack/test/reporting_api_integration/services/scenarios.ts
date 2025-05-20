@@ -15,6 +15,8 @@ import {
   REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
 } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -150,6 +152,19 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
+  const schedulePdf = async (
+    username: string,
+    password: string,
+    job: JobParamsPDFV2,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+  ) => {
+    const jobParams = rison.encode(job);
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/printablePdfV2`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule });
+  };
   const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
@@ -157,6 +172,19 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
+  };
+  const schedulePng = async (
+    username: string,
+    password: string,
+    job: JobParamsPNGV2,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+  ) => {
+    const jobParams = rison.encode(job);
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/pngV2`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule });
   };
   const generateCsv = async (
     job: JobParamsCSV,
@@ -170,6 +198,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
+  };
+  const scheduleCsv = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+  ) => {
+    const jobParams = rison.encode(job);
+
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule });
   };
 
   const postJob = async (
@@ -263,6 +305,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .expect(200);
   };
 
+  const getScheduledReportSO = async (id: string) => {
+    return await esSupertest.get(
+      `/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/scheduled_report:${id}`
+    );
+  };
+
   return {
     logTaskManagerHealth,
     initEcommerce,
@@ -281,6 +329,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     generatePdf,
     generatePng,
     generateCsv,
+    schedulePdf,
+    schedulePng,
+    scheduleCsv,
     postJob,
     postJobJSON,
     getCompletedJobOutput,
@@ -289,5 +340,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
     getJobErrorCode,
+    getScheduledReportSO,
   };
 }

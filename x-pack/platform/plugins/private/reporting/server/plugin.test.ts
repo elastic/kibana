@@ -76,6 +76,21 @@ describe('Reporting Plugin', () => {
     );
   });
 
+  it('registers a saved object for scheduled reports', async () => {
+    plugin.setup(coreSetup, pluginSetup);
+    expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'scheduled_report',
+        namespaceType: 'multiple',
+        hidden: true,
+        indexPattern: '.kibana_alerting_cases',
+        management: {
+          importableAndExportable: false,
+        },
+      })
+    );
+  });
+
   it('logs start issues', async () => {
     // wait for the setup phase background work
     plugin.setup(coreSetup, pluginSetup);
