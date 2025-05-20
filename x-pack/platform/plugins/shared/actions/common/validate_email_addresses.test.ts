@@ -288,18 +288,20 @@ describe('validate_email_address', () => {
   });
 
   test('isAddressMatchingSomePattern', () => {
-    const patterns = ['*-list@example.com', '*@mydomain.com'];
+    const patterns = ['*-list@example.com', '*@mydomain.com', 'foo.*@test.com'];
     const validEmails = [
       'dev-list@example.com',
       'sales-list@example.com',
       'users@mydomain.com',
       'execs@mydomain.com',
+      'foo.bar@test.com',
     ];
     const invalidEmails = [
       'dev-group@example.com',
       'devs@example.com',
       'foo@bar.com',
       'users@sub.mydomain.com',
+      'foobar@test.com',
     ];
 
     validEmails.forEach((email) => {

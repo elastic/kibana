@@ -6,6 +6,7 @@
  */
 
 import { parseAddressList } from 'email-addresses';
+import { escapeRegExp } from 'lodash';
 import type { ValidatedEmail } from './types';
 import { InvalidEmailReason } from './types';
 import { hasMustacheTemplate } from './mustache_template';
@@ -20,8 +21,8 @@ export interface ValidateEmailAddressesOptions {
 
 export const isAddressMatchingSomePattern = (address: string, patterns: string[]): boolean => {
   return patterns.some((pattern) => {
-    // replaces '.' with '\.' and '*' with '.*' for regex matching
-    const regexStr = '^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$';
+    // Escape special regex characters in the pattern except for '*'
+    const regexStr = '^' + pattern.split('*').map(escapeRegExp).join('.*') + '$';
     const regex = new RegExp(regexStr, 'i');
     const result = regex.test(address);
     return result;
