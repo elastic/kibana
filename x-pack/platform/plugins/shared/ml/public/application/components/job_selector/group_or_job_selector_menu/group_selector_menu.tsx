@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import React, { useMemo, useState } from 'react';
+
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiNotificationBadge, EuiPopover } from '@elastic/eui';
-
-import React, { useMemo, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
+
 import { useUrlState } from '@kbn/ml-url-state';
 import { i18n } from '@kbn/i18n';
-import type { MlPages } from '../../../../locator';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { MlPages } from '@kbn/ml-common-types/locator_ml_pages';
+
 import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 import { getOptionsForJobSelectorMenuItems } from './get_options_for_job_selector_menu';
-import { useMlKibana } from '../../../contexts/kibana';
 
 export const GroupSelectorMenu = ({
   groupId,

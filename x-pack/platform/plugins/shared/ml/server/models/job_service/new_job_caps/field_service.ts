@@ -6,7 +6,9 @@
  */
 
 import { cloneDeep } from 'lodash';
+
 import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -16,6 +18,7 @@ import {
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils/aggregation_types';
+
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 
