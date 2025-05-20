@@ -24,7 +24,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
       ...options,
       pipeline: streamsPipeline(),
     });
-    this.dataStreams = ['logs', 'logs.*'];
+    this.dataStreams = ['logs', 'logs.*', 'logs-generic-default'];
   }
 
   async forkStream(
