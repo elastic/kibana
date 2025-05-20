@@ -134,7 +134,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
 export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
-  (dispatch, _, { runtimeStateManager, tabsStorageManager }) => {
+  (dispatch, _, { runtimeStateManager }) => {
     dispatch(
       internalStateSlice.actions.setTabAppStateAndGlobalState({
         tabId,
