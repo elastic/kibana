@@ -25,7 +25,7 @@ If running on windows Elasticsearch recommends you use wsl.
 `yarn kbn bootstrap --force-install`
 
 
-# Build new plugin
+# Create Plugin
 Source: https://www.elastic.co/guide/en/kibana/current/plugin-tooling.html
 
 `node scripts/generate_plugin`
@@ -36,11 +36,24 @@ You will most likely want to select the following options:
 
 Delete the .git folder and the gitignore file in the newly created plugin so that it can be added to this repo
 
-# Build Existing Plugin
-run 'yarn build' in your plugin folder
+# Build Plugin
+navigate to your plugin folder
+run the following:
+`nvm use`
+`yarn build`
 
 # Docker container
 `docker build -f Dockerfile.martello -t kibana-martello .`
 
-to run, replace the kibana container image line [path to repo]\vdx\dev-tools\docker-compose.yml with
+To build a production version of the container see run the following commands: 
+`docker login cbmtdev.azurecr.io`
+`docker build -f Dockerfile.martello -t kibana-martello .`
+`docker tag kibana-martello cbmtdev.azurecr.io/kibana-martello:0.x`
+`docker push cbmtdev.azurecr.io/kibana-martello:0.x`
+
+a full guide is available here:
+https://portal.azure.com/#@gsx.com/resource/subscriptions/a548cb3d-0887-4b87-8460-6bf34967538b/resourceGroups/cbmtdev-shared/providers/Microsoft.ContainerRegistry/registries/cbmtdev/quickStart
+
+
+To run, replace the kibana container image line [path to repo]\vdx\dev-tools\docker-compose.yml with
 `image: kibana-martello`

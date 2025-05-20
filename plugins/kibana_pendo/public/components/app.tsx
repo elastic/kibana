@@ -35,21 +35,19 @@ export const KibanaPendoApp = ({
 }: KibanaPendoAppDeps) => {
   // Use React hooks to manage state.
   const [init, setInit] = useState<string | undefined>();
+  const [enabled, setEnabled] = useState<string | undefined>();
   const [ready, setReady] = useState<string | undefined>();
-  const [sendingEvents, setSendingEvents] = useState<string | undefined>();
   const [user, setUser] = useState<string | undefined>();
   const [account, setAccount] = useState<string | undefined>();
   const [lastUpdated, setLastUpdated] = useState<string | undefined>();
 
   const onClickHandler = () => {
     setInit("" + !(typeof window.pendo === 'undefined' || window.pendo === null));
+    setEnabled("" + window.pendo.getURL().includes("analyticsEnabled=true"));
     setReady("" + window.pendo?.isReady());
-    setSendingEvents("" + window.pendo?.isSendingEvents());
     setUser("" + window.pendo?.visitorId);
     setAccount("" + window.pendo?.accountId)
     setLastUpdated("" + new Date().toISOString());
-    //setStatus(pendoInitialized + pendoReady + pendoSendingEvents + pendoUser + lastUpdated);
-    //notifications.toasts.addSuccess(PLUGIN_NAME);
   };
 
   // Render the application DOM.
@@ -74,16 +72,16 @@ export const KibanaPendoApp = ({
                 <EuiPageContentBody>
                   <EuiText>
                     <p>Initialized: {init}</p>
+                    <p>Enabled: {enabled}</p>
                     <EuiHorizontalRule />
                     <p>Ready: {ready}</p>
-                    <p>Sending Events: {sendingEvents}</p>
-                    <p>User: {user}</p>
+                    <p>Pendo User: {user}</p>
                     <p>Pendo Account: {account}</p>
                     <EuiHorizontalRule />
                     <p>Updated: {lastUpdated}</p>
                     <EuiHorizontalRule />
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="kibanaPendo.buttonText" defaultMessage="Update Status" />
+                      <FormattedMessage id="kibanaPendo.buttonText" defaultMessage="Get Status" />
                     </EuiButton>
                   </EuiText>
                 </EuiPageContentBody>

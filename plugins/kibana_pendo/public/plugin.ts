@@ -20,6 +20,7 @@ export class KibanaPendoPlugin implements Plugin<KibanaPendoPluginSetup, KibanaP
     core.application.register({
       id: 'kibanaPendo',
       title: PLUGIN_NAME,
+      chromeless: true,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -92,9 +93,7 @@ function getAccount(): Account {
 function areAnalyticsEnabled() {
   const urlParams = new URLSearchParams(location.href);
   var enabled = urlParams.get('analyticsEnabled');
-  console.log("is enabled: " + enabled)
   var enabledBool = (enabled === "true")
-  console.log("is enabled as boolean: " + enabled)
   return enabledBool;
 }
 
