@@ -12,10 +12,10 @@
  */
 
 import { uniq } from 'lodash';
-
 import PropTypes from 'prop-types';
 import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
+
 import {
   EuiBadge,
   EuiCallOut,
@@ -27,26 +27,26 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-
-import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
-import { mlTableService } from '../../../services/table_service';
-import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
-} from '../../../../../common/util/job_utils';
-
-import { annotationsRefresh$, annotationsRefreshed } from '../../../services/annotations_service';
+} from '@kbn/ml-common-utils/job_utils';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '@kbn/ml-common-constants/annotations';
 import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
 import { timeFormatter } from '@kbn/ml-date-utils';
+
+import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
+import { mlTableService } from '../../../services/table_service';
+import { annotationsRefresh$, annotationsRefreshed } from '../../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
 import { RevertModelSnapshotFlyout } from '../../model_snapshots/revert_model_snapshot_flyout';

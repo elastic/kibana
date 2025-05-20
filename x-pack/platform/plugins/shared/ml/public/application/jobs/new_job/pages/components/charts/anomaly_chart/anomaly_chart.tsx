@@ -7,9 +7,12 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { Chart, Settings, TooltipType, Tooltip } from '@elastic/charts';
+
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import type { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
 import { ModelBounds } from './model_bounds';

@@ -25,9 +25,11 @@ import {
 import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { MlClient } from '@kbn/ml-client';
+import type { JobSelection } from '@kbn/ml-server-api-schemas/alerting_schema';
+import { datafeedsProvider, type DatafeedsService } from '@kbn/ml-services/datafeeds';
+import { annotationServiceProvider } from '@kbn/ml-common-utils/annotation_service';
+import type { AnnotationService } from '@kbn/ml-common-utils/annotation_service/annotation';
 
-import type { JobSelection } from '../../routes/schemas/alerting_schema';
-import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import type { GetGuards } from '../../shared_services/shared_services';
 import type {
   AnomalyDetectionJobHealthAlertPayload,
@@ -42,8 +44,6 @@ import {
   getResultJobsHealthRuleConfig,
   resolveLookbackInterval,
 } from '../../../common/util/alerts';
-import type { AnnotationService } from '../../models/annotation_service/annotation';
-import { annotationServiceProvider } from '../../models/annotation_service';
 import {
   jobAuditMessagesProvider,
   type JobAuditMessagesService,

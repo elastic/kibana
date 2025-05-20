@@ -7,11 +7,13 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';

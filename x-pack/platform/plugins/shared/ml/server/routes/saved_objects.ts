@@ -7,9 +7,6 @@
 
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
-import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
 import {
   updateJobsSpaces,
   updateTrainedModelsSpaces,
@@ -18,7 +15,11 @@ import {
   syncCheckSchema,
   canDeleteMLSpaceAwareItemsSchema,
   itemTypeSchema,
-} from './schemas/saved_objects';
+} from '@kbn/ml-server-api-schemas/saved_objects';
+
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 
 /**

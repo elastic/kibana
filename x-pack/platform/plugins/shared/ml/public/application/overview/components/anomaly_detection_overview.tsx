@@ -8,15 +8,16 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import type { MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
-import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../locator';
 import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_kibana.png';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';

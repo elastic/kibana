@@ -6,7 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
+
 import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from '@kbn/core/server';
 import type {
   JobType,
@@ -14,10 +16,10 @@ import type {
   MlSavedObjectType,
 } from '@kbn/ml-common-types/saved_objects';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
-import { getJobDetailsFromTrainedModel, getJobsAndModels } from '@kbn/ml-client';
+import { getJobDetailsFromTrainedModel } from '@kbn/ml-client';
 import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
-
-import type { TrainedModelJob, JobObject, TrainedModelObject } from '@kbn/ml-saved-objects';
+import { getJobsAndModels } from '@kbn/ml-saved-objects/util';
+import type { TrainedModelJob, JobObject, TrainedModelObject } from '@kbn/ml-saved-objects/service';
 
 export interface JobSavedObjectStatus {
   jobId: string;

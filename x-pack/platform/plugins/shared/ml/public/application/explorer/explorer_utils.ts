@@ -40,13 +40,13 @@ import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MlJobService } from '@kbn/ml-services/job_service';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { MlIndexUtils } from '@kbn/ml-services/index_service';
-
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
   isTimeSeriesViewJob,
-} from '../../../common/util/job_utils';
+} from '@kbn/ml-common-utils/job_utils';
+import type { MlResultsService } from '@kbn/ml-services/results_service/results_service';
 
 import type { SwimlaneType } from './explorer_constants';
 import {
@@ -55,7 +55,6 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import type { MlResultsService } from '../services/results_service';
 import type { GroupObj } from '../components/job_selector/job_selector';
 
 export interface ExplorerJob {
