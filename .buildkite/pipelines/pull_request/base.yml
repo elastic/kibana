@@ -145,3 +145,9 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - command: ".buildkite/scripts/steps/storybooks/storybook_tests.sh"
+    label: "Run Storybook Tests"
+    soft_fail: true
+    env:
+      STORYBOOK_URL: 'http://localhost:9001'
