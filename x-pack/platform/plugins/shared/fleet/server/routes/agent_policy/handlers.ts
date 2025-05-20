@@ -543,6 +543,10 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       });
 
       spaceId = spaceIds[0];
+
+      logger.debug(
+        `spaceId now set to [${spaceId}] for updating agent policy [${request.params.agentPolicyId}]`
+      );
     }
     const agentPolicy = await agentPolicyService.update(
       appContextService.getInternalUserSOClientForSpaceId(spaceId),

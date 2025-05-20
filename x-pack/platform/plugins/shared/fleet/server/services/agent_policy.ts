@@ -317,8 +317,10 @@ class AgentPolicyService {
     );
 
     if (options.returnUpdatedPolicy !== false) {
-      return (await this.get(soClient, id, false)) as AgentPolicy;
+      logger.debug(`returning updated policy for [${id}]`);
+      return (await this.get(soClient, id)) as AgentPolicy;
     }
+
     return newAgentPolicy as AgentPolicy;
   }
 
@@ -592,13 +594,9 @@ class AgentPolicyService {
         }]`
     );
 
-    const [agentPolicy] = await this.getByIds(soClient, [{ id, spaceId: options.spaceId }]);
-
-    if (withPackagePolicies) {
-      logger.debug(() => `retrieving package policies for agent policy ${agentPolicy.id}`);
-      agentPolicy.package_policies =
-        (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
-    }
+    const [agentPolicy] = await this.getByIds(soClient, [{ id, spaceId: options.spaceId }], {
+      withPackagePolicies,
+    });
 
     return agentPolicy;
   }
@@ -676,17 +674,16 @@ class AgentPolicyService {
             throw new FleetError(agentPolicySO.error.message);
           }
         }
+
         const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
+
         if (options.withPackagePolicies) {
-          const agentPolicyWithPackagePolicies = await this.get(
-            soClient,
-            agentPolicySO.id,
-            options.withPackagePolicies
-          );
-          if (agentPolicyWithPackagePolicies) {
-            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
-          }
+          logger.debug(`Retrieving package policies for agent policies [${agentPolicySO.id}]`);
+
+          agentPolicy.package_policies =
+            (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
+
         return agentPolicy;
       },
       { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
