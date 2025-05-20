@@ -6,3 +6,9 @@
  */
 
 export type { ToolDescriptor, ToolDescriptorMeta } from './src/tools';
+export {
+  OnechatErrorCode,
+  OnechatErrorUtils,
+  type OnechatInternalError,
+  type OnechatToolNotFoundError,
+} from './src/errors';

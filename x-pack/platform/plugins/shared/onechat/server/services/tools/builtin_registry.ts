@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { OnechatErrorUtils } from '@kbn/onechat-common';
 import type {
   Tool,
   ToolProvider,
@@ -70,8 +71,9 @@ export class BuiltinToolRegistry implements ToolProvider {
       }
     }
 
-    // TODO: onechat error
-    throw new Error('Method not implemented.');
+    throw OnechatErrorUtils.createToolNotFoundError({
+      toolId,
+    });
   }
 
   async list(options: ToolProviderListOptions): Promise<Tool[]> {
