@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -53,6 +54,7 @@ import {
   type NewPackagePolicyPostureInput,
   POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
+  POSTURE_NAMESPACE,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -541,6 +543,46 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
+const useEnsureDefaultNamespace = ({
+  newPolicy,
+  input,
+  updatePolicy,
+}: {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyPostureInput;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+}) => {
+  useEffect(() => {
+    console.log({ newPolicy });
+    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
+    if (newPolicy.namespace === '') {
+      const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+      updatePolicy(policy);
+      return;
+    }
+    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: newPolicy.namespace };
+    updatePolicy(policy);
+  }, [newPolicy, input, updatePolicy]);
+};
+
+// const useEnsureDefaultNamespace = ({
+//   newPolicy,
+//   input,
+//   updatePolicy,
+// }: {
+//   newPolicy: NewPackagePolicy;
+//   input: NewPackagePolicyPostureInput;
+//   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+// }) => {
+//   useEffect(() => {
+//     console.log('e111111');
+//     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
+//     const namespace = newPolicy.namespace ? newPolicy.namespace : POSTURE_NAMESPACE;
+//     const policy = { ...getPosturePolicy(newPolicy, input.type), namespace };
+//     updatePolicy(policy);
+//   }, [newPolicy, input, updatePolicy]);
+// };
+
 const usePolicyTemplateInitialName = ({
   isEditPage,
   isLoading,
@@ -807,6 +849,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
+    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
     useCloudFormationTemplate({
       packageInfo,
       updatePolicy,
@@ -959,7 +1003,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {/* Namespace selector */}
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         <EuiAccordion
           id="advancedOptions"
@@ -973,6 +1017,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           buttonClassName="advancedOptionsButton" // Add a custom class for styling
         >
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="xpack.csp.fleetIntegration.namespaceLabel"
@@ -983,13 +1028,31 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             error={validationResults?.namespace || null}
           >
             <EuiFieldText
+              fullWidth
               isInvalid={!!validationResults?.namespace}
-              defaultValue={newPolicy.namespace || ''}
+              defaultValue={POSTURE_NAMESPACE || ''}
               onChange={(event) => {
                 updatePolicy({ ...newPolicy, namespace: event.target.value });
               }}
             />
           </EuiFormRow>
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <a
+                    href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Learn more <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
+                  </a>
+                ),
+              }}
+            />
+          </EuiText>
         </EuiAccordion>
 
         {shouldRenderAgentlessSelector && (
