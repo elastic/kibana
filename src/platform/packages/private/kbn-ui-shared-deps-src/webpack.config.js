@@ -92,7 +92,10 @@ module.exports = {
             babelrc: false,
             envName: process.env.NODE_ENV || 'development',
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            plugins: [require.resolve('@babel/plugin-transform-numeric-separator')],
+            plugins: [
+              require.resolve('@babel/plugin-transform-numeric-separator'),
+              require.resolve('@babel/plugin-transform-class-static-block'),
+            ],
           },
         },
       },
