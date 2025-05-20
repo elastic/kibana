@@ -145,7 +145,7 @@ describe('ModelVersion map utilities', () => {
   });
 
   describe('getCurrentVirtualVersion', () => {
-    it('returns the latest registered migration if modelVersions is not defined', () => {
+    it('returns the default modelVersion (10.0.0) if modelVersions are not defined', () => {
       expect(
         getCurrentVirtualVersion(
           buildType({
@@ -155,7 +155,7 @@ describe('ModelVersion map utilities', () => {
             },
           })
         )
-      ).toEqual('8.6.0');
+      ).toEqual('10.0.0');
     });
 
     it('returns the virtual version of the latest model version if the type has modelVersions', () => {
@@ -205,7 +205,7 @@ describe('ModelVersion map utilities', () => {
         ])
       ).toEqual({
         foo: '10.1.0',
-        bar: '8.6.0',
+        bar: '10.0.0',
         dolly: '10.0.0',
       });
     });
@@ -273,7 +273,7 @@ describe('ModelVersion map utilities', () => {
   });
 
   describe('getLatestMappingsModelVersion', () => {
-    it('returns the latest registered migration if no model versions are defined', () => {
+    it('returns the default model version (10.0.0) if no model versions are defined', () => {
       expect(
         getLatestMappingsModelVersion(
           buildType({
@@ -283,7 +283,7 @@ describe('ModelVersion map utilities', () => {
             },
           })
         )
-      ).toEqual('8.6.0');
+      ).toEqual('10.0.0');
     });
 
     it('returns the virtual version of the latest model version if model versions are defined', () => {
@@ -337,7 +337,7 @@ describe('ModelVersion map utilities', () => {
         ])
       ).toEqual({
         foo: '10.1.0',
-        bar: '8.6.0',
+        bar: '10.0.0',
         dolly: '10.0.0',
       });
     });
