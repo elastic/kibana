@@ -30,6 +30,7 @@ export const NoChangePointsWarningTooltip: React.FC<NoChangePointsWarningTooltip
         tabIndex={0}
         color={'warning'}
         type="warning"
+        data-test-subj="aiopsNoChangePointsWarningTooltipIcon"
         title={i18n.translate('xpack.aiops.changePointDetection.notResultsWarning', {
           defaultMessage: 'No change point agg results warning',
         })}

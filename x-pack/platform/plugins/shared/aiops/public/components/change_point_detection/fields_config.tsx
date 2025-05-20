@@ -772,13 +772,14 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            data-test-subj="aiopsNoChangePointsWarningCallout"
             title={i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundTitle', {
               defaultMessage: 'No change points found',
             })}
             color="warning"
             iconType="warning"
           >
-            <p>
+            <p data-test-subj="aiopsNoChangePointsWarningCalloutText">
               {annotations[0].reason ??
                 i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundMessage', {
                   defaultMessage: 'No change points detected - showing sample metric data',
