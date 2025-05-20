@@ -18,6 +18,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const alertingApi = getService('alertingApi');
   const config = getService('config');
+  const isServerless = config.get('serverless');
 
   let editorRoleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
@@ -323,44 +324,80 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(executionStatus).to.be('active');
       });
 
-      /* Adjust when we add backwards compatibility support for `stackAlerts` consumer in serverless.
-       * It indeed SHOULD be visible in serverless
-       * It SHOULD NOT be visible in stateful */
-      it('should be visible from logs role', async () => {
-        await samlAuth.setCustomRole(ROLES.logs_only);
+      if (isServerless) {
+        it('should be visible from logs role', async () => {
+          await samlAuth.setCustomRole(ROLES.logs_only);
 
-        const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+          const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
-        const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: logsOnlyRole,
-          ruleId,
-          expectedStatus: 'active',
-          timeout: 1000 * 3,
+          const executionStatus = await alertingApi.waitForRuleStatus({
+            roleAuthc: logsOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          expect(executionStatus).to.be('active');
+          await samlAuth.invalidateM2mApiKeyWithRoleScope(logsOnlyRole);
+          await samlAuth.deleteCustomRole();
         });
-        expect(executionStatus).to.be('active');
-        await samlAuth.invalidateM2mApiKeyWithRoleScope(logsOnlyRole);
-        await samlAuth.deleteCustomRole();
-      });
 
-      /* Adjust when we add backwards compatibility support for `stackAlerts` consumer in serverless.
-       * It indeed SHOULD be visible in serverless
-       * It SHOULD NOT be visible in stateful */
-      it('should be visible from infra role', async () => {
-        await samlAuth.setCustomRole(ROLES.infra_only);
+        it('should be visible from infra role', async () => {
+          await samlAuth.setCustomRole(ROLES.infra_only);
 
-        const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+          const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
-        const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: infraOnlyRole,
-          ruleId,
-          expectedStatus: 'active',
-          timeout: 1000 * 3,
+          const executionStatus = await alertingApi.waitForRuleStatus({
+            roleAuthc: infraOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          expect(executionStatus).to.be('active');
+
+          await samlAuth.invalidateM2mApiKeyWithRoleScope(infraOnlyRole);
+          await samlAuth.deleteCustomRole();
         });
-        expect(executionStatus).to.be('active');
+      } else {
+        it('should NOT be visible from logs only role', async () => {
+          await samlAuth.setCustomRole(ROLES.logs_only);
 
-        await samlAuth.invalidateM2mApiKeyWithRoleScope(infraOnlyRole);
-        await samlAuth.deleteCustomRole();
-      });
+          const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+          try {
+            await alertingApi.waitForRuleStatus({
+              roleAuthc: logsOnlyRole,
+              ruleId,
+              expectedStatus: 'active',
+              timeout: 1000 * 3,
+            });
+            throw new Error('Expected rule to not be visible, but it was visible');
+          } catch (error) {
+            expect(error.message).to.contain('timeout');
+          }
+
+          await samlAuth.invalidateM2mApiKeyWithRoleScope(logsOnlyRole);
+          await samlAuth.deleteCustomRole();
+        });
+
+        it('should NOT be visible from infra only role', async () => {
+          await samlAuth.setCustomRole(ROLES.infra_only);
+
+          const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+          try {
+            await alertingApi.waitForRuleStatus({
+              roleAuthc: infraOnlyRole,
+              ruleId,
+              expectedStatus: 'active',
+              timeout: 1000 * 3,
+            });
+            throw new Error('Expected rule to not be visible, but it was visible');
+          } catch (error) {
+            expect(error.message).to.contain('timeout');
+          }
+
+          await samlAuth.invalidateM2mApiKeyWithRoleScope(infraOnlyRole);
+          await samlAuth.deleteCustomRole();
+        });
+      }
 
       it('should NOT be visible from synthetics only role', async () => {
         await samlAuth.setCustomRole(ROLES.synthetics_only);
