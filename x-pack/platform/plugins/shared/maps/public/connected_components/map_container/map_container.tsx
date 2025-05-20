@@ -6,15 +6,16 @@
  */
 
 import '../../_index.scss';
-import React, { Component, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, useEuiTheme, UseEuiTheme } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-import { css, Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -277,22 +278,4 @@ const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) 
       {flyoutPanel}
     </EuiFlexItem>
   );
-};
-
-type StyleMap = Record<
-  string,
-  Interpolation<Theme> | ((theme: UseEuiTheme) => Interpolation<Theme>)
->;
-
-type StaticStyleMap = Record<string, Interpolation<Theme>>;
-
-export const useMemoizedStyles = (styleMap: StyleMap) => {
-  const euiThemeContext = useEuiTheme();
-  const outputStyles = useMemo(() => {
-    return Object.entries(styleMap).reduce<StaticStyleMap>((acc, [key, value]) => {
-      acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
-      return acc;
-    }, {});
-  }, [euiThemeContext, styleMap]);
-  return outputStyles;
 };
