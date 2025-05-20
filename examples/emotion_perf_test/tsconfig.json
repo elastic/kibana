@@ -3,13 +3,6 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "index.ts",
-    "public/**/*.ts",
-    "public/**/*.tsx",
-    "../../typings/**/*",
-    "public/**/*.json"
-  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core-application-browser",
