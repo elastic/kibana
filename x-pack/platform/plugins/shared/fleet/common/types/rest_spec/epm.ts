@@ -152,7 +152,7 @@ export interface InstallResult {
 export interface BulkInstallPackageInfo {
   name: string;
   version: string;
-  result: InstallResult;
+  result: Omit<InstallResult, 'pkgName'>;
 }
 
 export interface BulkInstallPackagesResponse {
