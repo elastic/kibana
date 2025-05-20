@@ -39,5 +39,6 @@
     "@kbn/ml-common-utils",
     "@kbn/field-types",
     "@kbn/ml-server-api-schemas",
+    "@kbn/ml-common-api-schemas",
   ]
 }
