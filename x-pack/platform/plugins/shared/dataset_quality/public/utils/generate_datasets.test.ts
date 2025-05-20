@@ -44,6 +44,7 @@ describe('generateDatasets', () => {
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     },
     {
@@ -54,6 +55,7 @@ describe('generateDatasets', () => {
       totalDocs: 100,
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     },
   ];
@@ -411,6 +413,7 @@ describe('generateDatasets', () => {
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     };
 
