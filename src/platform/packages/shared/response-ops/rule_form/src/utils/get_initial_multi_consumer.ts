@@ -36,13 +36,11 @@ export const getInitialMultiConsumer = ({
   validConsumers,
   ruleType,
   ruleTypes,
-  isServerless,
 }: {
   multiConsumerSelection?: RuleCreationValidConsumer | null;
   validConsumers: RuleCreationValidConsumer[];
   ruleType: RuleTypeWithDescription;
   ruleTypes: RuleTypeWithDescription[];
-  isServerless?: boolean;
 }): RuleCreationValidConsumer | null => {
   // If rule type doesn't support multi-consumer or no valid consumers exists,
   // return nothing
