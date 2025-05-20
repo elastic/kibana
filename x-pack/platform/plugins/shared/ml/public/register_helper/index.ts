@@ -9,7 +9,7 @@
 // can be bundled together for a single async chunk.
 export { registerMlUiActions } from '../ui_actions';
 export { registerSearchLinks } from './register_search_links';
-export { registerCasesAttachments } from '../cases';
+export { registerCasesAttachments } from '../cases/register_cases_attachments';
 export { registerMlAlerts } from '../alerting/register_ml_alerts';
 export { registerMapExtension } from '../maps/register_map_extension';
 export { registerHomeFeature } from './register_home_feature';
