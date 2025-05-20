@@ -31,7 +31,8 @@ import {
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';

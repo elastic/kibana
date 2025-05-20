@@ -16,7 +16,7 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { getTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_title';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';

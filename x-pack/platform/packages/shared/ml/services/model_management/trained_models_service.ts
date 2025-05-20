@@ -30,7 +30,7 @@ import {
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import { i18n } from '@kbn/i18n';
 import {
   isBaseNLPModelItem,
