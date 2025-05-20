@@ -911,6 +911,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
+      license: 'PLATINUM',
       returnType: 'keyword',
     },
     {
@@ -921,6 +922,7 @@ const categorizeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
+      license: 'PLATINUM',
       returnType: 'keyword',
     },
   ],
