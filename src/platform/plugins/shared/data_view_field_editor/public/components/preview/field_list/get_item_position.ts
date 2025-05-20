@@ -26,7 +26,7 @@ function getItemPositionAfterUnpinning(
   fieldList: DocumentField[]
 ) {
   // There's one pinned field less since we are unpinning the item
-  const pinnedFieldsLength = Object.keys(pinnedFields).length - 1;
+  const pinnedFieldsLength = Object.values(pinnedFields).filter(Boolean).length - 1;
   const unpinnedItems = fieldList.filter(
     (item) => !pinnedFields[item.key] || item.key === fieldName
   );
