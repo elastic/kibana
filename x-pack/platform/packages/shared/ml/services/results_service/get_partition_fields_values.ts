@@ -6,11 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+
 import type { estypes } from '@elastic/elasticsearch';
 import { type MlPartitionFieldsType, type CriteriaField } from '@kbn/ml-anomaly-utils';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils/constants';
 import type { MlClient } from '@kbn/ml-client';
-import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
+import type { FieldConfig, FieldsConfig } from '@kbn/ml-server-api-schemas/results_service_schema';
 
 type SearchTerm =
   | {
