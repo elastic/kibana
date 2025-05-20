@@ -2765,11 +2765,11 @@
       "matchers": {
         "dynamic": false,
         "properties": {
-          "field": {
+          "fields": {
             "index": false,
             "type": "keyword"
           },
-          "value": {
+          "values": {
             "index": false,
             "type": "keyword"
           }
