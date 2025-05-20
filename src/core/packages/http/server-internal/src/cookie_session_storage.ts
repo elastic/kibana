@@ -48,8 +48,8 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
         this.log.warn(
           `Found multiple auth sessions. Found:[${session.credentials.length}] sessions. Checking equality...`
         );
-        const [firstSession] = session.credentials;
-        const allEqual = session.credentials.every((s) => {
+        const [firstSession, ...rest] = session.credentials;
+        const allEqual = rest.every((s) => {
           return isDeepStrictEqual(s, firstSession);
         });
         if (allEqual) {
