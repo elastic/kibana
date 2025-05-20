@@ -46,7 +46,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
       // If we have more than one session, return the first one if they are all the same
       if (session.credentials.length > 1) {
         this.log.warn(
-          `Found ${session.credentials.length} auth sessions when we were only expecting 1.`
+          `Found multiple auth sessions. Found:[${session.credentials.length}] sessions`
         );
         const [firstSession] = session.credentials;
         const allEqual = session.credentials.every((s) => {
@@ -54,7 +54,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
         });
         if (allEqual) {
           this.log.error(
-            `Found ${session.credentials.length} auth sessions that are all the same.`
+            `Found multiple auth sessions. Found:[${session.credentials.length}] equal sessions`
           );
           return firstSession as T;
         }
@@ -65,7 +65,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
       // the actual user. There's potential to change this behavior to ensure all valid sessions
       // identify the same user, or choose one valid one, but this is the safest option.
       this.log.warn(
-        `Found ${session.credentials.length} auth sessions when we were only expecting 1 with none of them the same.`
+        `Found multiple auth sessions. Found:[${session.credentials.length}] unequal sessions`
       );
       return null;
     } catch (error) {
