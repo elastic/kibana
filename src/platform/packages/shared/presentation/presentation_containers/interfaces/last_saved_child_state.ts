@@ -15,6 +15,12 @@ export interface HasLastSavedChildState<SerializedState extends object = object>
     childId: string
   ) => Observable<SerializedPanelState<SerializedState> | undefined>;
   getLastSavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
+  logUnsavedChildChanges?: (
+    childId: string,
+    key: string,
+    lastValue: unknown,
+    currentValue: unknown
+  ) => void;
 }
 
 export const apiHasLastSavedChildState = <SerializedState extends object = object>(

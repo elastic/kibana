@@ -50,7 +50,16 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState().rawState;
-      return !areComparatorsEqual(getComparators(), lastSavedState, currentState, defaultState);
+      return !areComparatorsEqual(
+        getComparators(),
+        lastSavedState,
+        currentState,
+        defaultState,
+        parentApi.logUnsavedChildChanges
+          ? (key: string, lastValue: unknown, currentValue: unknown) =>
+              parentApi.logUnsavedChildChanges!(uuid, key, lastValue, currentValue)
+          : undefined
+      );
     })
   );
 

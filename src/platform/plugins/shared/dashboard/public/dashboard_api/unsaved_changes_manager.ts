@@ -13,6 +13,7 @@ import {
   PublishesSavedObjectId,
   PublishingSubject,
   apiHasSerializableState,
+  getTitle,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import {
@@ -36,6 +37,7 @@ import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
 } from './control_group_manager';
+import { logUnsavedChange, shouldLogUnsavedChanges } from './unsaved_changes_logger';
 
 const DEBOUNCE_TIME = 100;
 
@@ -179,6 +181,18 @@ export function initializeUnsavedChangesManager({
       lastSavedStateForChild$: (panelId: string) =>
         lastSavedState$.pipe(map(() => getLastSavedStateForChild(panelId))),
       getLastSavedStateForChild,
+      logUnsavedChildChanges: (
+        uuid: string,
+        key: string,
+        lastValue: unknown,
+        currentValue: unknown
+      ) => {
+        if (!shouldLogUnsavedChanges()) return;
+        const childApi = panelsManager.api.children$.getValue()[uuid];
+        const panelTitle = childApi ? getTitle(childApi) : undefined;
+        const panelLabel = panelTitle ? `"${panelTitle}"` : uuid;
+        logUnsavedChange(`panel: ${panelLabel}, key: ${key}`, lastValue, currentValue);
+      },
     },
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();

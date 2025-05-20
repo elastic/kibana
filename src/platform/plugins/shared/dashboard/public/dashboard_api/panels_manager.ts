@@ -54,6 +54,7 @@ import {
   DashboardLayout,
   DashboardLayoutItem,
 } from './types';
+import { logUnsavedChange, shouldLogUnsavedChanges } from './unsaved_changes_logger';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -347,6 +348,13 @@ export function initializePanelsManager(
           map(([, lastSavedPanels]) => {
             const panels = serializePanels().panels;
             if (!arePanelLayoutsEqual(lastSavedPanels, panels)) {
+              if (shouldLogUnsavedChanges()) {
+                logUnsavedChange(
+                  'layout',
+                  deserializePanels(lastSavedPanels).layout,
+                  deserializePanels(panels).layout
+                );
+              }
               return { panels };
             }
             return {};
