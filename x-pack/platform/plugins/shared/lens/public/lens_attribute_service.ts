@@ -78,6 +78,17 @@ export function getLensAttributeService(
       managed: boolean;
     }> => {
       const { meta, item } = await savedObjectStore.load(savedObjectId);
+
+      const state = item.attributes.state as LensSavedObjectAttributes['state'];
+      if (state && state.datasourceStates.textBased) {
+        Object.values(state.datasourceStates.textBased.layers).forEach((layer: any) => {
+          layer.type = 'esql';
+        });
+        state.datasourceStates.formBased = {
+          ...state.datasourceStates.textBased,
+        };
+        delete state.datasourceStates.textBased;
+      }
       return {
         attributes: {
           ...item.attributes,

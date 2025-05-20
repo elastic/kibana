@@ -66,6 +66,18 @@ export const createLensEmbeddableFactory = (
         initialState.references
       );
 
+      const state = initialRuntimeState.attributes.state.datasourceStates.textBased as any;
+      if (state && state.layers && Object.keys(state.layers).length > 0) {
+        Object.values(state.layers).forEach((layer: any) => {
+          layer.type = 'esql';
+        });
+
+        initialRuntimeState.attributes.state.datasourceStates.formBased = {
+          ...state,
+        };
+        delete initialRuntimeState.attributes.state.datasourceStates.textBased;
+      }
+
       /**
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.
