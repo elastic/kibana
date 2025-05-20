@@ -152,5 +152,6 @@
     "@kbn/ml-client",
     "@kbn/ml-license",
     "@kbn/ml-hooks",
+    "@kbn/ml-common-utils",
   ]
 }

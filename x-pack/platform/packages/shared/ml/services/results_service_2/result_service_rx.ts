@@ -18,7 +18,7 @@ import { map } from 'rxjs';
 import { each, get } from 'lodash';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import type {
   InfluencersFilterQuery,
   MlEntityField,
