@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import fs from 'fs';
 import type { SSLSettings } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import type { Config } from '../../../../common/openai/types';
@@ -53,94 +52,63 @@ export const getRequestWithStreamOption = (
 // PKI utils
 interface SSLOverridesInput {
   logger: Logger;
-  certificateFile?: string | string[];
   certificateData?: string;
-  privateKeyFile?: string | string[];
   privateKeyData?: string;
-  caFile?: string | string[];
   caData?: string;
   verificationMode?: 'full' | 'certificate' | 'none';
 }
-
-const getFilePath = (file: string | string[]) => (Array.isArray(file) ? file[0] : file);
-
-const validateFile = (path: string, description: string) => {
-  if (!fs.existsSync(path)) {
-    throw new Error(`${description} not found: ${path}`);
-  }
-  fs.accessSync(path, fs.constants.R_OK);
-};
-
-const validateCertOrKey = (
+const validatePEMData = (
   data: string | undefined,
   type: 'CERTIFICATE' | 'PRIVATE KEY',
   description: string
-) => {
+): void => {
   if (data && !data.includes(`-----BEGIN ${type}-----`)) {
-    throw new Error(`Invalid PEM format for ${description}: Missing BEGIN ${type} header`);
+    throw new Error(
+      `Invalid ${description} file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN ${type}-----".`
+    );
   }
 };
 
 const validatePKICertificates = ({
-  certificateFile,
   certificateData,
-  privateKeyFile,
   privateKeyData,
-  caFile,
   caData,
   logger,
 }: SSLOverridesInput): void => {
   try {
-    if (certificateFile) validateFile(getFilePath(certificateFile), 'Certificate file');
-    if (privateKeyFile) validateFile(getFilePath(privateKeyFile), 'Private key file');
-    if (caFile) validateFile(getFilePath(caFile), 'CA file');
-
-    if (certificateData) validateCertOrKey(certificateData, 'CERTIFICATE', 'Certificate data');
-    if (privateKeyData) validateCertOrKey(privateKeyData, 'PRIVATE KEY', 'Private key data');
-    if (caData) validateCertOrKey(caData, 'CERTIFICATE', 'CA certificate data');
+    if (certificateData) validatePEMData(certificateData, 'CERTIFICATE', 'Certificate data');
+    if (privateKeyData) validatePEMData(privateKeyData, 'PRIVATE KEY', 'Private key data');
+    if (caData) validatePEMData(caData, 'CERTIFICATE', 'CA certificate data');
   } catch (error) {
     logger.error(`Error validating PKI certificates: ${error.message}`);
     throw new Error(`Invalid or inaccessible PKI certificates: ${error.message}`);
   }
 };
 
-const loadBuffer = (
-  file?: string | string[],
-  data?: string,
-  type?: 'CERTIFICATE' | 'PRIVATE KEY'
-) => {
-  if (file) {
-    return Buffer.from(fs.readFileSync(getFilePath(file), 'utf8'));
-  } else if (data) {
+const loadBuffer = (data?: string, type?: 'CERTIFICATE' | 'PRIVATE KEY'): Buffer => {
+  if (data) {
     return Buffer.from(formatPEMContent(data, type!));
   }
-  throw new Error(`No ${type?.toLowerCase()} file or data provided`);
+  throw new Error(`No ${type?.toLowerCase()} data provided`);
 };
 export const getPKISSLOverrides = ({
   logger,
-  certificateFile,
   certificateData,
-  privateKeyFile,
   privateKeyData,
-  caFile,
   caData,
   verificationMode,
 }: SSLOverridesInput): SSLSettings => {
   validatePKICertificates({
     logger,
-    certificateFile,
     certificateData,
-    privateKeyFile,
     privateKeyData,
+    caData,
   });
 
-  const cert = loadBuffer(certificateFile, certificateData, 'CERTIFICATE');
-  const key = loadBuffer(privateKeyFile, privateKeyData, 'PRIVATE KEY');
-  const ca = caFile
-    ? Buffer.from(fs.readFileSync(getFilePath(caFile), 'utf8'))
-    : caData
-    ? Buffer.from(formatPEMContent(caData, 'CERTIFICATE'))
-    : undefined;
+  const cert = loadBuffer(certificateData, 'CERTIFICATE');
+  const key = loadBuffer(privateKeyData, 'PRIVATE KEY');
+  // ca can be undefined for certification mode "None"
+  const ca = caData ? loadBuffer(caData, 'CERTIFICATE') : undefined;
 
   return { cert, key, ca, verificationMode };
 };
@@ -167,59 +135,35 @@ function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY
 }
 
 export const pkiErrorHandler = (error: AxiosError): string | undefined => {
-  if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
+  if (error.message.includes('UNABLE_TO_VERIFY_LEAF_SIGNATURE')) {
     return `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`;
   }
-  if (error.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || error.code === 'ERR_TLS_HANDSHAKE') {
+  if (
+    error.message.includes('ERR_TLS_CERT_ALTNAME_INVALID') ||
+    error.message.includes('ERR_TLS_HANDSHAKE')
+  ) {
     return `TLS handshake failed: ${error.message}. Verify server certificate hostname and CA configuration.`;
   }
 };
 
 export const pkiConfigValidator = (configObject: Config): void => {
   if (
-    'certificateFile' in configObject ||
-    'privateKeyFile' in configObject ||
+    'caData' in configObject ||
     'certificateData' in configObject ||
     'privateKeyData' in configObject
   ) {
-    // Ensure certificate pair is provided
-    if (!configObject.certificateFile && !configObject.certificateData) {
-      throw new Error('Either certificate file or certificate data must be provided for PKI');
+    if (!configObject.certificateData) {
+      throw new Error('Certificate data must be provided for PKI');
     }
-    if (!configObject.privateKeyFile && !configObject.privateKeyData) {
-      throw new Error('Either private key file or private key data must be provided for PKI');
+    if (!configObject.privateKeyData) {
+      throw new Error('Private key data must be provided for PKI');
     }
-
-    // Validate file extensions for file paths
-    if (configObject.certificateFile) {
-      const certFile = Array.isArray(configObject.certificateFile)
-        ? configObject.certificateFile[0]
-        : configObject.certificateFile;
-      if (!certFile.endsWith('.pem')) {
-        throw new Error('Certificate file must end with .pem');
-      }
-    }
-    if (configObject.privateKeyFile) {
-      const keyFile = Array.isArray(configObject.privateKeyFile)
-        ? configObject.privateKeyFile[0]
-        : configObject.privateKeyFile;
-      if (!keyFile.endsWith('.pem')) {
-        throw new Error('Private key file must end with .pem');
-      }
-    }
-
     // Validate PEM format for raw data
-    if (
-      configObject.certificateData &&
-      !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')
-    ) {
-      throw new Error('Certificate data must be PEM-encoded');
-    }
-    if (
-      configObject.privateKeyData &&
-      !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')
-    ) {
-      throw new Error('Private key data must be PEM-encoded');
+    validatePEMData(configObject.certificateData, 'CERTIFICATE', 'Certificate data');
+    validatePEMData(configObject.privateKeyData, 'PRIVATE KEY', 'Private key data');
+    // CA is optional, but if provided, validate its format
+    if (configObject.caData) {
+      validatePEMData(configObject.caData, 'CERTIFICATE', 'CA certificate data');
     }
   } else {
     throw new Error('PKI configuration requires certificate and private key');
