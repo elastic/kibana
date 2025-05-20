@@ -555,10 +555,9 @@ export class FleetPlugin
         const esClient = coreContext.elasticsearch.client;
         const soClient = coreContext.savedObjects.getClient();
 
-        setSoClientInfo(soClient, {
-          isUnScoped: false,
-          spaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
-        });
+        const soSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+
+        setSoClientInfo(soClient, { isUnScoped: false, spaceId: soSpaceId });
 
         const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
         const routeAuthz = routeRequiredAuthz
@@ -585,7 +584,7 @@ export class FleetPlugin
               appContextService.getEncryptedSavedObjectsStart()!.getClient({
                 includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
               }),
-              appContextService.getInternalUserSOClientForSpaceId(soClient.getCurrentNamespace())
+              appContextService.getInternalUserSOClientForSpaceId(soSpaceId)
             );
 
             return {
