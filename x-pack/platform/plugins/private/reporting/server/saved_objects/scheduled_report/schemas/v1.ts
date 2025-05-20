@@ -34,7 +34,7 @@ export const rawScheduledReportSchema = schema.object({
     layout: schema.maybe(rawLayoutIdSchema),
     objectType: schema.string(),
   }),
-  migrationVersion: schema.string(),
+  migrationVersion: schema.maybe(schema.string()),
   notification: schema.maybe(rawNotificationSchema),
   payload: schema.string(),
   schedule: scheduleRruleSchema,
