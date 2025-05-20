@@ -570,7 +570,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 },
                 userError:
                   result.userError ||
-                  result.errors.some((err) => checkErrorDetails(err).isUserError),
+                  result.errors.every((err) => checkErrorDetails(err).isUserError),
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
