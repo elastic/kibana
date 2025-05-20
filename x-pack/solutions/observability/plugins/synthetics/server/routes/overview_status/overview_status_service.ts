@@ -330,13 +330,11 @@ export class OverviewStatusService {
      * Track max period to make sure the snapshot query should reach back far enough to catch
      * latest ping for all enabled monitors.
      */
-
     const { filtersStr } = this.filterData;
 
-    return await getAllMonitors<
+    return this.routeContext.monitorConfigRepository.getAll<
       EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
     >({
-      soClient: savedObjectsClient,
       showFromAllSpaces,
       search: query ? `${query}*` : '',
       filter: filtersStr,

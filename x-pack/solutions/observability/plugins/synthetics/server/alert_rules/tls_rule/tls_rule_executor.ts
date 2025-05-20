@@ -115,11 +115,8 @@ export class TLSRuleExecutor {
       projects: this.params?.projects,
     });
 
-    this.monitors = await getAllMonitors({
-      filter: filtersStr,
-      soClient: this.soClient,
     this.monitors = await this.monitorConfigRepository.getAll({
-      filter: `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`,
+      filter: filtersStr,
     });
 
     this.debug(

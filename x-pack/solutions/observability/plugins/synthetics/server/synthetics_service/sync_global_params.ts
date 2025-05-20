@@ -34,6 +34,7 @@ export const syncSpaceGlobalParams = async ({
         spaceId,
         allPrivateLocations,
         encryptedSavedObjects,
+        soClient: savedObjectsClient,
       });
       logger.debug(`Sync of global parameters for space with id ${spaceId} succeeded`);
     });
