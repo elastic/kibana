@@ -12,7 +12,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { monitoringEntitySourceTypeName } from './saved_object/monitoring_entity_source_type';
-import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('MonitoringEntitySourceSyncDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
