@@ -44183,6 +44183,21 @@
                           "id": {
                             "type": "string"
                           },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
                           "package_name": {
                             "type": "string"
                           },
@@ -44202,7 +44217,8 @@
                           }
                         },
                         "required": [
-                          "sync_status"
+                          "sync_status",
+                          "install_status"
                         ],
                         "type": "object"
                       },
@@ -44330,6 +44346,21 @@
                           "id": {
                             "type": "string"
                           },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
                           "package_name": {
                             "type": "string"
                           },
@@ -44349,7 +44380,8 @@
                           }
                         },
                         "required": [
-                          "sync_status"
+                          "sync_status",
+                          "install_status"
                         ],
                         "type": "object"
                       },
