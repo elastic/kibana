@@ -727,7 +727,7 @@ export async function createKibanaDataView(
 
 export function getInferenceId(mappings: MappingTypeMapping) {
   for (const value of Object.values(mappings.properties ?? {})) {
-    if (value.type === 'semantic_text') {
+    if (value.type === 'semantic_text' && value.inference_id) {
       return value.inference_id;
     }
   }
