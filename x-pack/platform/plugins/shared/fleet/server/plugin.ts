@@ -564,10 +564,18 @@ export class FleetPlugin
           ? calculateRouteAuthz(authz, routeRequiredAuthz)
           : undefined;
 
-        const getInternalSoClient = (): SavedObjectsClientContract =>
-          appContextService
+        const getInternalSoClient = (): SavedObjectsClientContract => {
+          const internalSoClient = appContextService
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+
+          setSoClientInfo(internalSoClient, {
+            isUnScoped: false,
+            spaceId: internalSoClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+          });
+
+          return internalSoClient;
+        };
 
         const spacesPluginsStart = this.spacesPluginsStart;
         return {
