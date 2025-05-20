@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiButtonIcon,
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiButtonEmpty,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -23,10 +24,13 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
+import { lastValueFrom, take } from 'rxjs';
+import { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 import { OptionsListStrings } from '../options_list_strings';
+import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -46,17 +50,21 @@ export const OptionsListPopoverActionBar = ({
   const [
     searchTechnique,
     searchStringValid,
+    selectedOptions = [],
     invalidSelections,
     totalCardinality,
     field,
     allowExpensiveQueries,
+    availableOptions = [],
   ] = useBatchedPublishingSubjects(
     componentApi.searchTechnique$,
     componentApi.searchStringValid$,
+    componentApi.selectedOptions$,
     componentApi.invalidSelections$,
     componentApi.totalCardinality$,
     componentApi.field$,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.parentApi.allowExpensiveQueries$,
+    componentApi.availableOptions$
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -67,6 +75,37 @@ export const OptionsListPopoverActionBar = ({
   const defaultSearchTechnique = useMemo(
     () => searchTechnique ?? compatibleSearchTechniques[0],
     [searchTechnique, compatibleSearchTechniques]
+  );
+
+  const loadMoreOptions = useCallback(async (): Promise<OptionsListSuggestions | undefined> => {
+    componentApi.setRequestSize(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
+    componentApi.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
+    return lastValueFrom(componentApi.availableOptions$.pipe(take(2)));
+  }, [componentApi, totalCardinality]);
+
+  const hasNoOptions = availableOptions.length < 1 || totalCardinality < 1;
+  const hasTooManyOptions = showOnlySelected
+    ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
+    : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
+
+  const isBulkSelectDisabled = hasNoOptions || hasTooManyOptions;
+
+  const handleBulkAction = useCallback(
+    async (bulkAction: (keys: string[]) => void) => {
+      if (showOnlySelected) {
+        bulkAction(selectedOptions as string[]);
+        return;
+      }
+
+      if (totalCardinality > availableOptions.length) {
+        const newAvailableOptions = (await loadMoreOptions()) ?? [];
+        bulkAction(newAvailableOptions.map(({ value }) => value as string));
+        return;
+      }
+
+      bulkAction(availableOptions.map(({ value }) => value as string));
+    },
+    [availableOptions, loadMoreOptions, selectedOptions, showOnlySelected, totalCardinality]
   );
 
   return (
@@ -99,7 +138,39 @@ export const OptionsListPopoverActionBar = ({
           {allowExpensiveQueries && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
-                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
+                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)} |{' '}
+                <EuiToolTip
+                  content={
+                    hasTooManyOptions
+                      ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
+                      : undefined
+                  }
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    disabled={isBulkSelectDisabled}
+                    data-test-subj="optionsList-control-selectAll"
+                    onClick={() => handleBulkAction(componentApi.selectAll)}
+                  >
+                    {OptionsListStrings.popover.getSelectAllButtonLabel()}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+                <EuiToolTip
+                  content={
+                    hasTooManyOptions
+                      ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
+                      : undefined
+                  }
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    disabled={isBulkSelectDisabled}
+                    data-test-subj="optionsList-control-deselectAll"
+                    onClick={() => handleBulkAction(componentApi.deselectAll)}
+                  >
+                    {OptionsListStrings.popover.getDeselectAllButtonLabel()}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiText>
             </EuiFlexItem>
           )}

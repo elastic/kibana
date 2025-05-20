@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OptionsListSearchTechnique } from '../../../../common/options_list/suggestions_searching';
+import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from './constants';
 
 export const OptionsListStrings = {
   control: {
@@ -266,6 +267,19 @@ export const OptionsListStrings = {
         defaultMessage:
           'Appears in {documentCount, number} {documentCount, plural, one {document} other {documents}}',
         values: { documentCount },
+      }),
+    getSelectAllButtonLabel: () =>
+      i18n.translate('controls.optionsList.popover.selectAllButtonLabel', {
+        defaultMessage: 'Select all',
+      }),
+    getDeselectAllButtonLabel: () =>
+      i18n.translate('controls.optionsList.popover.deselectAllButtonLabel', {
+        defaultMessage: 'Deselect all',
+      }),
+    getMaximumBulkSelectionTooltip: () =>
+      i18n.translate('controls.optionsList.popover.maximumBulkSelectionTooltip', {
+        defaultMessage: 'Bulk selection is only available for fewer than {maxOptions} options',
+        values: { maxOptions: MAX_OPTIONS_LIST_BULK_SELECT_SIZE },
       }),
   },
   controlAndPopover: {

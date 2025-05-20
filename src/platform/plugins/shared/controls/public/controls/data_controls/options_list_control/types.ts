@@ -49,7 +49,11 @@ export type OptionsListComponentApi = OptionsListControlApi &
   StateManager<TemporaryState>['api'] & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
+    selectAll: (keys: string[]) => void;
+    deselectAll: (keys: string[]) => void;
     loadMoreSubject: Subject<void>;
     sort$: PublishingSubject<OptionsListSortingType | undefined>;
     setSort: (sort: OptionsListSortingType | undefined) => void;
+    selectAll: (keys: string[]) => void;
+    deselectAll: (keys: string[]) => void;
   };
