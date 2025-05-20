@@ -29,7 +29,8 @@
     "target/**/*",
     "*/plugins/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*"
+    "*/*/packages/**/*",
+    "../../../src/platform/packages/shared/kbn-repo-info/**/*",
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
