@@ -652,7 +652,7 @@ export function FormulaEditor({
       minimap: { enabled: false },
       wordWrap: isWordWrapped ? 'on' : 'off',
       // Disable suggestions that appear when we don't provide a default suggestion
-      wordBasedSuggestions: false,
+      wordBasedSuggestions: 'off',
       autoIndent: 'brackets',
       wrappingIndent: 'none',
       dimension: { width: 320, height: 200 },
