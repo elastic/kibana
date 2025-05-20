@@ -79,7 +79,7 @@
   "resolutions": {
     "**/@babel/parser": "7.24.7",
     "**/@bazel/typescript/protobufjs": "6.11.4",
-    "**/@hello-pangea/dnd": "16.6.0",
+    "**/@hello-pangea/dnd": "18.0.1",
     "**/@langchain/core": "^0.3.40",
     "**/@langchain/google-common": "^0.1.8",
     "**/@types/node": "20.10.5",
@@ -162,7 +162,7 @@
     "@hapi/hoek": "^11.0.7",
     "@hapi/inert": "^7.1.0",
     "@hapi/wreck": "^18.1.0",
-    "@hello-pangea/dnd": "16.6.0",
+    "@hello-pangea/dnd": "18.0.1",
     "@kbn/aad-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/aad",
     "@kbn/actions-plugin": "link:x-pack/platform/plugins/shared/actions",
     "@kbn/actions-simulators-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/actions_simulators",
