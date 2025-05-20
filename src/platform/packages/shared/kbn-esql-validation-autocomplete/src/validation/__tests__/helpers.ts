@@ -11,7 +11,7 @@ import { EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { ESQLCallbacks } from '../../shared/types';
 import { getCallbackMocks } from '../../__tests__/helpers';
 import { ValidationOptions } from '../types';
-import { validateQuery } from '../validation';
+import * as validation from '../validation';
 
 /** Validation test API factory, can be called at the start of each unit test. */
 export type Setup = typeof setup;
@@ -29,7 +29,7 @@ export const setup = async () => {
     opts: ValidationOptions = {},
     cb: ESQLCallbacks = callbacks
   ) => {
-    return await validateQuery(query, opts, cb);
+    return await validation.validateQuery(query, opts, cb);
   };
 
   const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
@@ -66,7 +66,7 @@ export const setup = async () => {
     opts: ValidationOptions = {},
     cb: ESQLCallbacks = callbacks
   ) => {
-    const { errors, warnings } = await validateQuery(query, opts, cb);
+    const { errors, warnings } = await validation.validateQuery(query, opts, cb);
     assertErrors(errors, expectedErrors, query);
     if (expectedWarnings) {
       assertErrors(warnings, expectedWarnings, query);

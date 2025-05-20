@@ -211,6 +211,20 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
+  rerankQueryMustBeString: {
+    message: string;
+    type: {
+      foundType: string;
+    };
+  };
+  rerankFieldMustBeNamed: {
+    message: string;
+    type: {};
+  };
+  rerankInferenceIdMustBeIdentifier: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

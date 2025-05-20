@@ -1586,7 +1586,7 @@ describe('validation logic', () => {
         expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
         expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
-          query: 'show info',
+          query: 'SHOW INFO',
         });
       });
 

@@ -508,6 +508,7 @@ export interface EditorError {
   startColumn: number;
   endColumn: number;
   message: string;
+  location: ESQLLocation;
   code?: string;
   severity: 'error' | 'warning' | number;
 }
