@@ -31,7 +31,10 @@ import { useStateSelector } from '../../../state_utils';
 
 export interface PreviewListItemProps {
   field: DocumentField;
-  toggleIsPinned?: (name: string) => void;
+  toggleIsPinned?: (
+    name: string,
+    keyboardEvent: { isKeyboardEvent: boolean; buttonId: string }
+  ) => void;
   hasScriptError?: boolean;
   /** Indicates whether the field list item comes from the Painless script */
   isFromScript?: boolean;
@@ -45,6 +48,8 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   hasScriptError,
   isFromScript = false,
 }) => {
+  const pinButtonId = `fieldPreview.pinFieldButtonLabel.${key}`;
+
   const { euiTheme } = useEuiTheme();
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
@@ -164,6 +169,8 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
         }
         gutterSize="none"
         data-test-subj="listItem"
+        onMouseEnter={() => setIsPinHovered(true)}
+        onMouseLeave={() => setIsPinHovered(false)}
       >
         <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
           <div
@@ -186,11 +193,11 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
         >
           {toggleIsPinned && (
             <EuiButtonIcon
-              onClick={() => {
-                toggleIsPinned(key);
+              onClick={(e: { detail: number }) => {
+                const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+                toggleIsPinned(key, { isKeyboardEvent, buttonId: pinButtonId });
               }}
-              onMouseEnter={() => setIsPinHovered(true)}
-              onMouseLeave={() => setIsPinHovered(false)}
+              id={pinButtonId}
               onFocus={() => setIsPinFocused(true)}
               onBlur={() => setIsPinFocused(false)}
               color="text"

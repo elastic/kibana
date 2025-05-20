@@ -87,7 +87,10 @@ describe('<PreviewListItem />', () => {
         const pinButton = screen.getByRole('button', { name: /pin field/i });
         await user.click(pinButton);
 
-        expect(toggleIsPinned).toHaveBeenCalledWith(props.field.key);
+        expect(toggleIsPinned).toHaveBeenCalledWith(props.field.key, {
+          isKeyboardEvent: false,
+          buttonId: `fieldPreview.pinFieldButtonLabel.${props.field.key}`,
+        });
       });
     });
 
@@ -101,7 +104,10 @@ describe('<PreviewListItem />', () => {
         await user.tab();
         await user.keyboard('{enter}');
 
-        expect(toggleIsPinned).toHaveBeenCalledWith(props.field.key);
+        expect(toggleIsPinned).toHaveBeenCalledWith(props.field.key, {
+          isKeyboardEvent: true,
+          buttonId: `fieldPreview.pinFieldButtonLabel.${props.field.key}`,
+        });
       });
     });
   });
