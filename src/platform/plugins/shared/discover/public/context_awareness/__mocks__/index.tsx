@@ -42,6 +42,10 @@ export const createContextAwarenessMocks = ({
         ...prev(params),
         rootProfile: () => <span data-test-subj="root-profile-renderer">root-profile</span>,
       })),
+      getRowIndicatorProvider: jest.fn(() => () => () => ({
+        label: 'root-indicator',
+        color: 'red',
+      })),
       getAdditionalCellActions: jest.fn((prev) => () => [
         ...prev(),
         {
@@ -71,6 +75,10 @@ export const createContextAwarenessMocks = ({
         dataSourceProfile: () => (
           <span data-test-subj="data-source-profile-renderer">data-source-profile</span>
         ),
+      })),
+      getRowIndicatorProvider: jest.fn(() => () => () => ({
+        label: 'data-source-indicator',
+        color: 'blue',
       })),
       getDefaultAppState: jest.fn(() => () => ({
         columns: [
@@ -126,6 +134,10 @@ export const createContextAwarenessMocks = ({
         documentProfile: () => (
           <span data-test-subj="document-profile-renderer">document-profile</span>
         ),
+      })),
+      getRowIndicatorProvider: jest.fn(() => () => () => ({
+        label: 'document-indicator',
+        color: 'green',
       })),
       getDocViewer: (prev) => (params) => {
         const recordId = params.record.id;
