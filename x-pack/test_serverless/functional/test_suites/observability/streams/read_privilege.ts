@@ -21,14 +21,18 @@ import {
 
 const STREAM_NAME = 'logs.crud';
 const request: Streams.WiredStream.UpsertRequest = {
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: [],
-    wired: {
-      routing: [],
-      fields: {
-        'attributes.numberfield': {
-          type: 'long',
+  dashboards: [],
+  queries: [],
+  stream: {
+    ingest: {
+      lifecycle: { inherit: {} },
+      processing: [],
+      wired: {
+        routing: [],
+        fields: {
+          'attributes.numberfield': {
+            type: 'long',
+          },
         },
       },
     },
