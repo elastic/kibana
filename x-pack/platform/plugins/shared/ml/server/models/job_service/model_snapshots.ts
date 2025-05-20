@@ -12,7 +12,7 @@ import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/
 import { datafeedsProvider } from './datafeeds';
 import type { FormCalendar } from '../calendar';
 import { CalendarManager } from '../calendar';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 export interface ModelSnapshotsResponse {
   count: number;
