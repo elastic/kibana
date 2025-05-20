@@ -41246,6 +41246,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -41260,6 +41270,7 @@ paths:
                           type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
                 required:
                   - integrations
@@ -41340,6 +41351,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -41354,6 +41375,7 @@ paths:
                           type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
                 required:
                   - integrations
