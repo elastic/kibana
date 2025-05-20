@@ -42,7 +42,7 @@ import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manag
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { MlClient } from '../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 function getExtendedMap(
   mlClient: MlClient,
