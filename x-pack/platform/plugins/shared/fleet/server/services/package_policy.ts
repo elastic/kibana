@@ -2286,7 +2286,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const namespaces = isSpacesEnabled ? spaceIds : undefined;
 
     logger.debug(
-      `fetching all items ids using soClient scoped to [${soClient.getCurrentNamespace()}] and kuery [${kuery}]`
+      () =>
+        `fetching all items ids using soClient scoped to [${soClient.getCurrentNamespace()}] and kuery [${kuery}] and spaceIds [${spaceIds?.join(
+          ', '
+        )}]`
     );
 
     return createSoFindIterable<{}>({

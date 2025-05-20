@@ -93,18 +93,26 @@ export class TelemetryConfigWatcher {
     do {
       try {
         response = await pRetry(
-          () =>
-            this.policyService.list(this.makeInternalSOClient(), {
-              page,
-              perPage: 100,
-              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-            }),
+          (attemptCount) =>
+            this.policyService
+              .list(this.makeInternalSOClient(), {
+                page,
+                perPage: 100,
+                kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+              })
+              .then((result) => {
+                this.logger.debug(
+                  `Retrieved page [${page}] of endpoint package policies on attempt [${attemptCount}]`
+                );
+                return result;
+              }),
           {
             onFailedAttempt: (error) =>
               this.logger.debug(
-                `Failed to read package policies on ${
-                  error.attemptNumber
-                }. attempt on page ${page}, reason: ${stringify(error)}`
+                () =>
+                  `Failed to read package policies on ${
+                    error.attemptNumber
+                  }. attempt on page ${page}, reason: ${stringify(error)}`
               ),
             ...this.retryOptions,
           }
@@ -118,12 +126,19 @@ export class TelemetryConfigWatcher {
         return;
       }
 
+      this.logger.debug(
+        () => `Processing page [${response.page}] with [${response.items.length}] policy(s)`
+      );
+
       const updates: UpdatePackagePolicy[] = [];
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
+          this.logger.debug(
+            `Endpoint policy [${policy.id}] needs update to global telemetry enabled setting (currently set to [${policyConfig.global_telemetry_enabled}])`
+          );
           policyConfig.global_telemetry_enabled = isTelemetryEnabled;
 
           updates.push({ ...updatePolicy, id: policy.id });
@@ -131,6 +146,8 @@ export class TelemetryConfigWatcher {
       }
 
       if (updates.length) {
+        this.logger.debug(`Updating [${updates.length}] policies`);
+
         try {
           const updateResult = await pRetry(
             () =>

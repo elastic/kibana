@@ -39,7 +39,7 @@ import {
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
-import { ManifestTask } from './endpoint/lib/artifacts';
+import { ManifestConstants, ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
@@ -574,7 +574,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.start(core, plugins);
 
-    const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const savedObjectsClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository([
+        ManifestConstants.SAVED_OBJECT_TYPE,
+        ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
+      ])
+    );
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(
@@ -678,12 +683,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       featureUsageService.start(plugins.licensing);
 
-      this.policyWatcher = new PolicyWatcher(
-        plugins.fleet.packagePolicyService,
-        core.savedObjects,
-        core.elasticsearch,
-        logger
-      );
+      this.policyWatcher = new PolicyWatcher(this.endpointAppContextService);
       this.policyWatcher.start(licenseService);
 
       this.telemetryWatcher = new TelemetryConfigWatcher(
