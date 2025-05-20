@@ -5,9 +5,11 @@
  * 2.0.
  */
 import {
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableOption,
@@ -38,6 +40,15 @@ export const MappingsFilter: React.FC<Props> = ({
 }) => {
   const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
   const dispatch = useDispatch();
+
+  const isClearAllFilterDisabled = !isAddingFields
+    ? state.filter.selectedOptions.filter(
+        (option) => option.checked === 'on' || option.checked === 'off'
+      ).length === 0
+    : previousState.filter.selectedOptions.filter(
+        (option) => option.checked === 'on' || option.checked === 'off'
+      ).length === 0;
+
   const setSelectedOptions = useCallback(
     (options: EuiSelectableOption[]) => {
       dispatch({
@@ -119,6 +130,7 @@ export const MappingsFilter: React.FC<Props> = ({
         closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
         anchorPosition="downCenter"
         data-test-subj="indexDetailsMappingsFilter"
+        panelPaddingSize="none"
       >
         <EuiSelectable
           searchable
@@ -154,6 +166,41 @@ export const MappingsFilter: React.FC<Props> = ({
             </div>
           )}
         </EuiSelectable>
+        <EuiPopoverFooter paddingSize="s">
+          <EuiButtonEmpty
+            color="danger"
+            iconSide="left"
+            size="s"
+            css={{ width: '100%' }}
+            iconType="cross"
+            data-test-subj="clearFilters"
+            disabled={isClearAllFilterDisabled}
+            onClick={() => {
+              if (!isAddingFields) {
+                state.filter.selectedOptions.filter((option) => {
+                  if (option.checked === 'on') {
+                    option.checked = undefined;
+                  }
+                });
+                setSelectedOptions(state.filter.selectedOptions);
+              } else {
+                previousState.filter.selectedOptions.filter((option) => {
+                  if (option.checked === 'on') {
+                    option.checked = undefined;
+                  }
+                });
+                setPreviousStateSelectedOptions(previousState.filter.selectedOptions);
+              }
+            }}
+          >
+            {i18n.translate(
+              'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.filter.clearAll',
+              {
+                defaultMessage: 'Clear all ',
+              }
+            )}
+          </EuiButtonEmpty>
+        </EuiPopoverFooter>
       </EuiPopover>
     </EuiFilterGroup>
   );
