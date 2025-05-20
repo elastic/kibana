@@ -293,7 +293,7 @@ interface HostTransformTestDocuments {
 }
 
 interface HostTransformResult {
-  host: HostTransformResult;
+  host: HostTransformResultHost;
 }
 
 interface HostTransformResultHost {
