@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from '@kbn/ml-common-types/errors';
 import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-models-utils';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
