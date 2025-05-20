@@ -218,6 +218,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                               target: 'fetchingFailedDocs',
                               cond: 'canReadFailureStore',
                             },
+                            {
+                              // If the user does not have permission to read the failure store, we don't need to fetch failed docs
+                              target: 'doneFetchingFailedDocs',
+                            },
                           ],
                         },
                         fetchingFailedDocs: {
