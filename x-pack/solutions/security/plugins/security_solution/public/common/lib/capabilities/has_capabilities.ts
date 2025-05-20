@@ -36,6 +36,9 @@ export const hasCapabilities = (
   if (!isArray(requiredCapabilities)) {
     return !!get(capabilities, requiredCapabilities, false);
   } else {
+    if (requiredCapabilities.length === 0) {
+      return true;
+    }
     return requiredCapabilities.some((requiredCapsOr) => {
       if (isArray(requiredCapsOr)) {
         return requiredCapsOr.every((requiredCapsAnd) => get(capabilities, requiredCapsAnd, false));
@@ -58,8 +61,11 @@ export const existCapabilities = (
     return true;
   }
   if (!isArray(requiredCapabilities)) {
-    return !!get(capabilities, requiredCapabilities) != null;
+    return get(capabilities, requiredCapabilities) != null;
   } else {
+    if (requiredCapabilities.length === 0) {
+      return true;
+    }
     return requiredCapabilities.some((requiredCapsOr) => {
       if (isArray(requiredCapsOr)) {
         return requiredCapsOr.every(
