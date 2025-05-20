@@ -8,7 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
-export const monitoringEntitySourceTypeName = 'monitoring-entity-source';
+export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
 
 export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'] = {
   dynamic: false,

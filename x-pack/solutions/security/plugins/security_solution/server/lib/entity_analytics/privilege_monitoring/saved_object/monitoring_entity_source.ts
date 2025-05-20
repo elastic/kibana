@@ -31,7 +31,7 @@ export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
   getSavedObjectId() {
-    return `monitoring-entity-source-sync-${this.dependencies.namespace}`;
+    return `entity-analytics-monitoring-entity-source-${this.dependencies.namespace}`;
   }
 
   async create(attributes: MonitoringEntitySourceDescriptor) {

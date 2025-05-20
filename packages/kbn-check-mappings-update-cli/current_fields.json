@@ -302,6 +302,19 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-analytics-monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "indexPattern",
+    "integrationName",
+    "managed",
+    "matchers",
+    "matchers.fields",
+    "matchers.values",
+    "name",
+    "type"
+  ],
   "entity-definition": [
     "description",
     "filter",

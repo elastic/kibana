@@ -55,7 +55,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
       } as unknown as SavedObjectsFindResponse<unknown, unknown>);
 
       defaultOpts.soClient.create.mockResolvedValue({
-        id: `monitoring-entity-source-sync-${namespace}`,
+        id: `entity-analytics-monitoring-entity-source-${namespace}`,
         type: monitoringEntitySourceTypeName,
         attributes: testDescriptor,
         references: [],
@@ -66,7 +66,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
         testDescriptor,
-        { id: `monitoring-entity-source-sync-${namespace}` }
+        { id: `entity-analytics-monitoring-entity-source-${namespace}` }
       );
 
       expect(result).toEqual(testDescriptor);
@@ -76,7 +76,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
   describe('get', () => {
     it('should get Monitoring Entity Source Sync Config Successfully', async () => {
       const getResponse = {
-        id: `monitoring-entity-source-sync-${namespace}`,
+        id: `entity-analytics-monitoring-entity-source-${namespace}`,
         type: monitoringEntitySourceTypeName,
         attributes: testDescriptor,
         references: [],
@@ -85,7 +85,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
       const result = await dataClient.get();
       expect(defaultOpts.soClient.get).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `monitoring-entity-source-sync-${namespace}`
+        `entity-analytics-monitoring-entity-source-${namespace}`
       );
       expect(result).toEqual(getResponse.attributes);
     });
@@ -103,7 +103,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
       );
 
       defaultOpts.soClient.update.mockResolvedValue({
-        id: `monitoring-entity-source-sync-${namespace}`,
+        id: `entity-analytics-monitoring-entity-source-${namespace}`,
         type: monitoringEntitySourceTypeName,
         attributes: { ...testDescriptor, name: 'Updated Source' },
         references: [],
@@ -114,7 +114,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
 
       expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `monitoring-entity-source-sync-${namespace}`,
+        `entity-analytics-monitoring-entity-source-${namespace}`,
         testDescriptor,
         { refresh: 'wait_for' }
       );
@@ -128,7 +128,7 @@ describe('MonitoringEntitySourceSyncDataClient', () => {
       await dataClient.delete();
       expect(mockSavedObjectClient.delete).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `monitoring-entity-source-sync-${namespace}`
+        `entity-analytics-monitoring-entity-source-${namespace}`
       );
     });
   });
