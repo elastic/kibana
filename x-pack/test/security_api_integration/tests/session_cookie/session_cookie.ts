@@ -16,9 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
-  const kibanaServerUrl = config.get('servers.kibana.hostname');
-  const kibanaPort = config.get('servers.kibana.port');
-
   async function adminSessionCookie() {
     const response = await supertest
       .post('/internal/security/login')
