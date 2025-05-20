@@ -49,14 +49,22 @@ export default function (providerContext: FtrProviderContext) {
       const policy2 = policy2Response.body.item;
 
       // First, install the endpoint package which is required for the endpoint package policy
-      const installPackageResponse = await supertest
+      await supertest
         .post('/api/fleet/epm/packages/endpoint')
         .set('kbn-xsrf', 'xx')
         .send({ force: true })
         .expect(200);
 
+      // Fetch the installed package to get its current version
+      const packageInfoResponse = await supertest
+        .get('/api/fleet/epm/packages/endpoint')
+        .set('kbn-xsrf', 'xx')
+        .expect(200);
+
+      const endpointPackageVersion = packageInfoResponse.body.item.version;
+
       // Create Elastic Defend package policy for policy2 with proper configuration
-      const packagePolicyResponse = await supertest
+      await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xx')
         .send({
@@ -112,13 +120,13 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '9.0.0', // Use the version from the installPackageResponse
+            version: endpointPackageVersion, // Use the actual installed version
           },
         })
         .expect(200);
 
       // Now enable tamper protection on policy2
-      const updatePolicy2Response = await supertest
+      await supertest
         .put(`/api/fleet/agent_policies/${policy2.id}`)
         .set('kbn-xsrf', 'xx')
         .send({
