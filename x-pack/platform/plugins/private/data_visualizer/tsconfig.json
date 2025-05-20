@@ -93,7 +93,5 @@
     "@kbn/discover-utils",
     "@kbn/ml-common-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

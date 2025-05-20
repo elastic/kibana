@@ -6,8 +6,17 @@
  */
 
 import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { MlClient } from '@kbn/ml-client';
+import { resultsServiceProvider } from '@kbn/ml-services/results_service';
+import { getTopInfluencers } from '@kbn/ml-services/results_service/top_influencers';
+import {
+  getScoresByBucket,
+  getInfluencerValueMaxScoreByTime,
+} from '@kbn/ml-services/results_service/view_by';
+
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
+
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -19,18 +28,11 @@ import {
   getAnomalyChartsSchema,
   getAnomalyRecordsSchema,
 } from './schemas/results_service_schema';
-import { resultsServiceProvider } from '../models/results_service';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
   getCategorizerStatsSchema,
   getCategorizerStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
-import type { MlClient } from '../lib/ml_client';
-import { getTopInfluencers } from '../models/results_service/top_influencers';
-import {
-  getScoresByBucket,
-  getInfluencerValueMaxScoreByTime,
-} from '../models/results_service/view_by';
 import {
   getTopInfluencersSchema,
   getScoresByBucketSchema,
