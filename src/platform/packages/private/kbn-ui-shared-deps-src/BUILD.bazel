@@ -16,6 +16,7 @@ webpack_cli(
     "@npm//babel-loader",
     "@npm//css-loader",
     "@npm//@babel/plugin-transform-numeric-separator",
+    "@npm//@babel/plugin-transform-class-static-block",
     "//src/platform/packages/private/kbn-ui-shared-deps-npm",
     "//src/platform/packages/shared/kbn-babel-register",
     "//packages/kbn-babel-preset",
