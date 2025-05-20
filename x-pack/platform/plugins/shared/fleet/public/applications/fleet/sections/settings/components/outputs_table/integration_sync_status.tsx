@@ -44,11 +44,11 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
     if (!error && !syncedIntegrationsStatus) {
       return 'SYNCHRONIZING';
     }
-
+    const installedSyncedIntegrations = (syncedIntegrationsStatus?.integrations ?? []).filter(
+      (integration) => integration.install_status.main === 'installed'
+    );
     const statuses = [
-      ...(syncedIntegrationsStatus?.integrations
-        ?.filter((integration) => integration.install_status.main === 'installed')
-        .map((integration) => integration.sync_status) || []),
+      ...(installedSyncedIntegrations.map((integration) => integration.sync_status) || []),
       ...Object.values(syncedIntegrationsStatus?.custom_assets ?? {}).map(
         (asset) => asset.sync_status
       ),

@@ -102,7 +102,11 @@ export const fetchAndCompareSyncedIntegrations = async (
       };
     }
     const ccrIndex = searchRes.hits.hits[0]?._source;
-    const { integrations: ccrIntegrations, custom_assets: ccrCustomAssets } = ccrIndex;
+    const {
+      integrations: ccrIntegrations,
+      custom_assets: ccrCustomAssets,
+      remote_es_hosts: remoteEsHosts,
+    } = ccrIndex;
 
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
@@ -122,7 +126,14 @@ export const fetchAndCompareSyncedIntegrations = async (
       ccrCustomAssets,
       installedIntegrationsByName
     );
-    const integrationsStatus = compareIntegrations(ccrIntegrations, installedIntegrationsByName);
+    const isSyncUninstalledEnabled = remoteEsHosts?.some(
+      (host) => host.sync_uninstalled_integrations
+    );
+    const integrationsStatus = compareIntegrations(
+      ccrIntegrations,
+      installedIntegrationsByName,
+      isSyncUninstalledEnabled
+    );
     const result = {
       ...integrationsStatus,
       ...(customAssetsStatus && { custom_assets: customAssetsStatus }),
@@ -140,7 +151,8 @@ export const fetchAndCompareSyncedIntegrations = async (
 
 const compareIntegrations = (
   ccrIntegrations: IntegrationsData[],
-  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>
+  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>,
+  isSyncUninstalledEnabled: boolean
 ): { integrations: RemoteSyncedIntegrationsStatus[] } => {
   const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
     (ccrIntegration) => {
@@ -199,6 +211,7 @@ const compareIntegrations = (
         };
       }
       if (
+        isSyncUninstalledEnabled &&
         ccrIntegration.install_status === 'not_installed' &&
         localIntegrationSO?.attributes.latest_uninstall_failed_attempts !== undefined
       ) {
