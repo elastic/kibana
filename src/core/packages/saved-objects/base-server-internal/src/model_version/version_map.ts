@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Semver from 'semver';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion, modelVersionToVirtualVersion } from './conversion';
 
@@ -44,14 +43,6 @@ export const getLatestModelVersion = (type: SavedObjectsType): number => {
   }, 0);
 };
 
-export const getLatestMigrationVersion = (type: SavedObjectsType): string => {
-  const migrationMap =
-    typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
-  return Object.keys(migrationMap).reduce<string>((memo, current) => {
-    return Semver.gt(memo, current) ? memo : current;
-  }, '0.0.0');
-};
-
 /**
  * Build a version map for the given types.
  */
@@ -68,12 +59,8 @@ export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVers
  * migration version for the type if model versions have not been declared.
  */
 export const getCurrentVirtualVersion = (type: SavedObjectsType): string => {
-  if (type.modelVersions) {
-    const modelVersion = getLatestModelVersion(type);
-    return modelVersionToVirtualVersion(modelVersion);
-  } else {
-    return getLatestMigrationVersion(type);
-  }
+  const versionNumber = getLatestModelVersion(type);
+  return modelVersionToVirtualVersion(versionNumber);
 };
 
 /**
@@ -109,12 +96,8 @@ export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number =
  * if no changed were introduced after enforcing the switch to model versions.
  */
 export const getLatestMappingsModelVersion = (type: SavedObjectsType): string => {
-  if (type.modelVersions) {
-    const modelVersion = getLatestMappingsVersionNumber(type);
-    return modelVersionToVirtualVersion(modelVersion);
-  } else {
-    return getLatestMigrationVersion(type);
-  }
+  const modelVersion = getLatestMappingsVersionNumber(type);
+  return modelVersionToVirtualVersion(modelVersion);
 };
 
 /**

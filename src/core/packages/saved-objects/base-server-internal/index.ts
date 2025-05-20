@@ -64,7 +64,6 @@ export {
   getModelVersionMapForTypes,
   getLatestModelVersion,
   getCurrentVirtualVersion,
-  getLatestMigrationVersion,
   getVirtualVersionMap,
   getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,

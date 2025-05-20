@@ -11,7 +11,6 @@ import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved
 import {
   getModelVersionMapForTypes,
   getLatestModelVersion,
-  getLatestMigrationVersion,
   getCurrentVirtualVersion,
   getVirtualVersionMap,
   getLatestMappingsVersionNumber,
@@ -142,66 +141,6 @@ describe('ModelVersion map utilities', () => {
         bar: 0,
         dolly: 3,
       });
-    });
-  });
-
-  describe('getLatestMigrationVersion', () => {
-    it('returns 0.0.0 when no migrations are registered', () => {
-      expect(getLatestMigrationVersion(buildType({ migrations: {} }))).toEqual('0.0.0');
-      expect(getLatestMigrationVersion(buildType({ migrations: undefined }))).toEqual('0.0.0');
-    });
-
-    it('throws if an invalid version is provided', () => {
-      expect(() =>
-        getLatestMigrationVersion(
-          buildType({
-            migrations: {
-              foo: dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-          })
-        )
-      ).toThrowError();
-    });
-
-    it('returns the latest registered version', () => {
-      expect(
-        getLatestMigrationVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-          })
-        )
-      ).toEqual('8.6.0');
-    });
-
-    it('accepts provider functions', () => {
-      expect(
-        getLatestMigrationVersion(
-          buildType({
-            migrations: () => ({
-              '7.17.2': dummyMigration,
-              '8.4.0': dummyMigration,
-            }),
-          })
-        )
-      ).toEqual('8.4.0');
-    });
-
-    it('supports unordered maps', () => {
-      expect(
-        getLatestMigrationVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.7.0': dummyMigration,
-              '8.2.0': dummyMigration,
-            },
-          })
-        )
-      ).toEqual('8.7.0');
     });
   });
 
