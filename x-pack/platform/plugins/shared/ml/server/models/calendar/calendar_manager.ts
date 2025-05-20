@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { difference } from 'lodash';
 import { EventManager } from './event_manager';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 type ScheduledEvent = estypes.MlCalendarEvent;
 

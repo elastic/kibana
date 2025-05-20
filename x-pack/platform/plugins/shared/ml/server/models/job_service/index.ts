@@ -13,7 +13,7 @@ import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 import { modelSnapshotProvider } from './model_snapshots';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 export function jobServiceProvider(
   client: IScopedClusterClient,

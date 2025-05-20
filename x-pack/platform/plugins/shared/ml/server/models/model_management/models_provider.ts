@@ -54,7 +54,8 @@ import {
   type TrainedModelUIItem,
   type TrainedModelWithPipelines,
 } from '@kbn/ml-common-types/trained_models';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
 import { mlLog } from '../../lib/log';

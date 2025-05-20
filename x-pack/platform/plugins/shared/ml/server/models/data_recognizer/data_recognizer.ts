@@ -45,7 +45,8 @@ import { isGeneralJobOverride } from '@kbn/ml-common-types/modules';
 import type { JobExistResult, JobStat } from '@kbn/ml-common-types/data_recognizer';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,

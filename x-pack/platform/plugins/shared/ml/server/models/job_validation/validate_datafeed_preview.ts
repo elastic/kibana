@@ -9,7 +9,7 @@ import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/co
 import type { JobValidationMessage } from '@kbn/ml-common-constants/messages';
 import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
-import type { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 export async function validateDatafeedPreviewWithMessages(
   mlClient: MlClient,
