@@ -29,5 +29,11 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/test-suites-xpack",
     "@kbn/security-solution-plugin",
+    "@kbn/dev-utils",
+    "@kbn/test-suites-src",
+    "@kbn/data-views-plugin",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/test-subj-selector",
+    "@kbn/std",
   ]
 }
