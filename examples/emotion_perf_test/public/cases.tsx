@@ -10,6 +10,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
+
 // Case A: Emotion inline styles
 export const InlineRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div
@@ -23,8 +24,6 @@ export const InlineRow = ({ disabled, index }: { disabled: boolean; index: numbe
       height: '30px',
       fontSize: '20px',
       width: '30px',
-      pointerEvents: disabled ? 'none' : 'auto',
-      userSelect: disabled ? 'none' : 'auto',
       opacity: disabled ? 0.5 : 1,
       color: disabled ? '#E2F9F7' : '#E2F8F0',
       backgroundColor: disabled ? '#C61E25' : '#008A5E',
@@ -33,6 +32,7 @@ export const InlineRow = ({ disabled, index }: { disabled: boolean; index: numbe
     {index}
   </div>
 );
+
 
 // Case A: Emotion inline styles
 export const InlineRowB = ({ disabled, index }: { disabled: boolean; index: number }) => (
@@ -48,15 +48,11 @@ export const InlineRowB = ({ disabled, index }: { disabled: boolean; index: numb
         height: '30px',
         fontSize: '20px',
         width: '30px',
-        pointerEvents: 'auto',
-        userSelect: 'auto',
         opacity: 1,
         color: '#E2F8F0',
         backgroundColor: '#008A5E',
       },
       disabled && {
-        pointerEvents: 'none',
-        userSelect: 'none',
         opacity: 0.5,
         color: '#E2F9F7',
         backgroundColor: '#C61E25',
@@ -68,7 +64,7 @@ export const InlineRowB = ({ disabled, index }: { disabled: boolean; index: numb
 );
 
 // Case B: Emotion memoized
-const useMemoStyles = (disabled: boolean) =>
+export  const useMemoStyles = (disabled: boolean) =>
   useMemo(
     () =>
       css({
@@ -81,8 +77,6 @@ const useMemoStyles = (disabled: boolean) =>
         height: '30px',
         fontSize: '20px',
         width: '30px',
-        pointerEvents: disabled ? 'none' : 'auto',
-        userSelect: disabled ? 'none' : 'auto',
         opacity: disabled ? 0.5 : 1,
         color: disabled ? '#E2F9F7' : '#E2F8F0',
         backgroundColor: disabled ? '#C61E25' : '#008A5E',
@@ -90,7 +84,7 @@ const useMemoStyles = (disabled: boolean) =>
     [disabled]
   );
 
-export const MemoRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  export const MemoRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const cls = useMemoStyles(disabled);
   return <div css={cls}> {index}</div>;
 };
@@ -106,8 +100,6 @@ const baseClass = css({
   height: '30px',
   fontSize: '20px',
   width: '30px',
-  pointerEvents: 'var(--pointer, auto)' as any,
-  userSelect: 'var(--select, auto)' as any,
   opacity: 'var(--opacity, 1)',
   color: 'var(--color, #E2F8F0)',
   background: 'var(--background, #008A5E)',
@@ -115,8 +107,6 @@ const baseClass = css({
 
 export const VarRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const vars = {
-    '--pointer': disabled ? 'none' : 'auto',
-    '--select': disabled ? 'none' : 'auto',
     '--opacity': disabled ? 0.5 : 1,
     '--color': disabled ? '#E2F9F7' : '#E2F8F0',
     '--background': disabled ? '#C61E25' : '#008A5E',
@@ -129,33 +119,11 @@ export const VarRow = ({ disabled, index }: { disabled: boolean; index: number }
 };
 
 // with the root css variables TODO: structure it right
-export const VarRowB = ({ disabled, index }: { disabled: boolean; index: number }) => {
+export const VarRowB = ({ index }: { disabled: boolean; index: number }) => {
   return <div css={baseClass}>{index}</div>;
 };
 
 // Case D: Global utility class toggle
-// (you’d define
-// .disabled {
-//   pointer-events:none;
-//   ...
-// } in your CSS)
-
 export const GlobalRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>
 );
-
-const styles = css({
-  outline: 0,
-  border: 0,
-  backgroundColor: 'transparent',
-  height: '100px',
-  pointerEvents: 'auto',
-  userSelect: 'auto',
-  opacity: 1,
-});
-
-const disabledStyles = css({
-  pointerEvents: 'none',
-  userSelect: 'none',
-  opacity: 0.5,
-});
