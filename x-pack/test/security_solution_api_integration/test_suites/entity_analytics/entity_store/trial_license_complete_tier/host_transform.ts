@@ -189,11 +189,15 @@ export default function (providerContext: FtrProviderContext) {
   });
 }
 
-function expectFieldToEqualValues(field: string[] | undefined, values: string[]) {
+function expectFieldToEqualValues(field: string[] | undefined, values: string[] | undefined) {
+  if (values === undefined) {
+    expect(field).to.not.be(undefined);
+  }
   expect(field).to.ok();
-  expect((field as string[]).length).to.eql(values.length);
+  const definedValues = values as string[];
+  expect((field as string[]).length).to.eql(definedValues.length);
   const sortedField: string[] = (field as string[]).sort((a, b) => (a > b ? 1 : -1));
-  const sortedValues: string[] = values.sort((a, b) => (a > b ? 1 : -1));
+  const sortedValues: string[] = definedValues.sort((a, b) => (a > b ? 1 : -1));
   for (let i = 0; i < sortedField.length; i++) {
     expect(sortedField[i]).to.eql(sortedValues[i]);
   }
