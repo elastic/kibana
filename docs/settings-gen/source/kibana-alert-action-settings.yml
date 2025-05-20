@@ -286,12 +286,12 @@ groups:
       - setting: xpack.actions.email.recipient_allowlist
         id: action-config-email-recipient-allowlist
         description: |
-          A list of allowed email recipient (to/cc/bcc) patterns which can be used with the email connector. When this setting is used, if any email is attempted to be sent that includes an addressee with an email address that does not match any allowed recipient pattern, it will fail with a message indicating the email is not allowed.
+          A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
         # tip: ""
-        warning: "Can not be used simultaneously with xpack.actions.email.domain_allowlist"
+        warning: "This setting cannot be used with `xpack.actions.email.domain_allowlist`."
         # important: ""
         datatype: string
         # default:
@@ -310,7 +310,7 @@ groups:
           xpack.actions.email.recipient_allowlist: ["*.doe@example.com", "*@example.org"]
           ```
           
-          Only "to", "cc" or "bcc" email addresses that matches with the listed patterns will be accepted. For example, "john.doe@example.com" or "johndoe@example.org"
+          Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "john.doe@example.com" or "johndoe@example.org".
 
       - setting: xpack.actions.enableFooterInEmail
         # id:
