@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { services as apiIntegrationServices } from '../../api_integration/services';
 
 /**
  * Load only services that support both stateful & serverless deployments (including Cloud/MKI),
  * e.g. `randomness` or `retry` are deployment agnostic
  */
-export const deploymentAgnosticServices = _.pick(apiIntegrationServices, [
-  'supertest', // TODO: review its behaviour
-  'es',
-  'esDeleteAllIndices', // TODO: review its behaviour
-  'esArchiver',
-  'esSupertest', // TODO: review its behaviour
-  'indexPatterns',
-  'ingestPipelines',
-  'kibanaServer',
-  'ml',
-  'randomness',
-  'retry',
-  'security',
-  'usageAPI',
-  'spaces',
-]);
+export const deploymentAgnosticServices = {
+  supertest: apiIntegrationServices.supertest, // TODO: review its behaviour
+  es: apiIntegrationServices.es,
+  esDeleteAllIndices: apiIntegrationServices.esDeleteAllIndices, // TODO: review its behaviour
+  esArchiver: apiIntegrationServices.esArchiver,
+  esSupertest: apiIntegrationServices.esSupertest,
+  indexPatterns: apiIntegrationServices.indexPatterns,
+  ingestPipelines: apiIntegrationServices.ingestPipelines,
+  kibanaServer: apiIntegrationServices.kibanaServer,
+  randomness: apiIntegrationServices.randomness,
+  retry: apiIntegrationServices.retry,
+  security: apiIntegrationServices.security,
+  usageAPI: apiIntegrationServices.usageAPI,
+  spaces: apiIntegrationServices.spaces,
+};
