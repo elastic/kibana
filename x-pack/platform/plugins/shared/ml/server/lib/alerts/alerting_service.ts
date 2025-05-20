@@ -38,9 +38,9 @@ import type {
   TopRecordAADDoc,
 } from '@kbn/ml-common-types/alerts';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import type { MlClient } from '@kbn/ml-client';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
-import type { MlClient } from '../ml_client';
 import type {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,

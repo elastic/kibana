@@ -14,19 +14,19 @@ import { VALIDATION_STATUS } from '@kbn/ml-validators';
 import type { MessageId, JobValidationMessage } from '@kbn/ml-common-constants/messages';
 import { getMessages } from '@kbn/ml-common-constants/messages';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import { fieldsServiceProvider } from '../fields_service';
+import type { MlClient } from '@kbn/ml-client';
+import { basicJobValidation, uniqWithIsEqual } from '@kbn/ml-common-utils/job_utils';
+import type { validateJobSchema } from '@kbn/ml-server-api-schemas/job_validation_schema';
+import { getDatafeedAggregations, getIndicesOptions } from '@kbn/ml-common-utils/datafeed_utils';
 
-import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
+import { fieldsServiceProvider } from '../fields_service';
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
 import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
-import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
-import type { MlClient } from '@kbn/ml-client';
 
-import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;

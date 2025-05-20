@@ -9,7 +9,7 @@ import { getAdminCapabilities, getUserCapabilities } from './__mocks__/ml_capabi
 import { capabilitiesProvider } from './check_capabilities';
 import type { MlLicense } from '../../../common/license';
 import { getDefaultCapabilities } from '@kbn/ml-common-types/capabilities';
-import type { MlClient } from '../ml_client';
+import type { MlClient } from '@kbn/ml-client';
 
 const mlLicense = {
   isSecurityEnabled: () => true,
