@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export type {
-  Tool,
-  ToolHandlerContext,
-  ToolProvider,
-  ToolProviderHasOptions,
-  ToolProviderGetOptions,
-  ToolProviderListOptions,
-} from './src/tools';
+export { combineToolProviders } from './combine_tool_providers';

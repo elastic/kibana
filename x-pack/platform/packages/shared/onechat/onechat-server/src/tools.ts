@@ -53,9 +53,30 @@ export interface ToolHandlerContext {
  * Common interface shared across all tool providers.
  */
 export interface ToolProvider {
-  // TODO
+  /**
+   * TODO doc
+   */
+  has(options: ToolProviderHasOptions): Promise<boolean>;
+  /**
+   * TODO doc
+   */
+  get(options: ToolProviderGetOptions): Promise<Tool>;
+  /**
+   * TODO doc
+   */
+  list(options: ToolProviderListOptions): Promise<Tool[]>;
+}
 
-  get(options: { toolId: string; request: KibanaRequest }): Promise<Tool>;
+export interface ToolProviderHasOptions {
+  toolId: string;
+  request: KibanaRequest;
+}
 
-  list(options: { request: KibanaRequest }): Promise<Tool[]>;
+export interface ToolProviderGetOptions {
+  toolId: string;
+  request: KibanaRequest;
+}
+
+export interface ToolProviderListOptions {
+  request: KibanaRequest;
 }

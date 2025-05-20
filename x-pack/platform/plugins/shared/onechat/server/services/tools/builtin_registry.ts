@@ -6,9 +6,16 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { Tool } from '@kbn/onechat-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  Tool,
+  ToolProvider,
+  ToolProviderHasOptions,
+  ToolProviderGetOptions,
+  ToolProviderListOptions,
+} from '@kbn/onechat-server';
 
-export type ToolRegistrationFn = () => MaybePromise<Tool[]>;
+export type ToolRegistrationFn = (opts: { request: KibanaRequest }) => MaybePromise<Tool[]>;
 export type ToolDirectRegistration = Tool;
 
 export type ToolRegistration = ToolDirectRegistration | ToolRegistrationFn;
@@ -23,7 +30,7 @@ export const wrapToolRegistration = (tool: ToolDirectRegistration): ToolRegistra
   };
 };
 
-export class BuiltinToolRegistry {
+export class BuiltinToolRegistry implements ToolProvider {
   private registrations: ToolRegistrationFn[] = [];
 
   constructor() {}
@@ -34,5 +41,55 @@ export class BuiltinToolRegistry {
     } else {
       this.registrations.push(wrapToolRegistration(registration));
     }
+  }
+
+  async has(options: ToolProviderHasOptions): Promise<boolean> {
+    const { toolId, request } = options;
+
+    for (const registration of this.registrations) {
+      const tools = await this.eval(registration, { request });
+      for (const tool of tools) {
+        if (tool.id === toolId) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  async get(options: ToolProviderGetOptions): Promise<Tool> {
+    const { toolId, request } = options;
+
+    for (const registration of this.registrations) {
+      const tools = await this.eval(registration, { request });
+      for (const tool of tools) {
+        if (tool.id === toolId) {
+          return tool;
+        }
+      }
+    }
+
+    // TODO: onechat error
+    throw new Error('Method not implemented.');
+  }
+
+  async list(options: ToolProviderListOptions): Promise<Tool[]> {
+    const { request } = options;
+    const matchingTools: Tool[] = [];
+
+    for (const registration of this.registrations) {
+      const tools = await this.eval(registration, { request });
+      matchingTools.push(...tools);
+    }
+
+    return matchingTools;
+  }
+
+  private async eval(
+    registration: ToolRegistrationFn,
+    { request }: { request: KibanaRequest }
+  ): Promise<Tool[]> {
+    return await registration({ request });
   }
 }

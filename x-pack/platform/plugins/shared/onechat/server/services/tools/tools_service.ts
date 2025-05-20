@@ -6,7 +6,6 @@
  */
 
 import { BuiltinToolRegistry, ToolRegistration } from './builtin_registry';
-
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 
 export class ToolsService {
