@@ -246,16 +246,20 @@ const componentStyles = {
       borderLeftWidth: 1,
       borderLeftColor: euiTheme.colors.borderBaseSubdued,
       borderLeftStyle: 'solid',
-
+      width: 0,
       '& > *': {
         width: `calc(${euiTheme.size.xxl} * 12)`,
       },
+    }),
+  flyoutVisibleStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: `calc(${euiTheme.size.xxl} * 12)`,
+      transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
     }),
 };
 
 const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) => {
   let flyoutPanel = null;
-  const { euiTheme } = useEuiTheme();
   if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
     flyoutPanel = <AddLayerPanel />;
   } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
@@ -264,16 +268,12 @@ const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) 
     flyoutPanel = <MapSettingsPanel />;
   }
   const isVisible = !!flyoutPanel;
-  const stylesVisible = isVisible
-    ? css({
-        width: `calc(${euiTheme.size.xxl} * 12)`,
-        transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
-      })
-    : css({ width: 0 });
-
-  const styles = useMemoizedStyles({ ...componentStyles, stylesVisible });
+  const styles = useMemoizedStyles(componentStyles);
   return (
-    <EuiFlexItem css={[styles.flyoutPanelWrapperStyles, styles.stylesVisible]} grow={false}>
+    <EuiFlexItem
+      css={[styles.flyoutPanelWrapperStyles, isVisible && styles.flyoutVisibleStyles]}
+      grow={false}
+    >
       {flyoutPanel}
     </EuiFlexItem>
   );
