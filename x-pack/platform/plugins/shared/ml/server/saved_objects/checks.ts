@@ -15,13 +15,9 @@ import type {
 } from '@kbn/ml-common-types/saved_objects';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { getJobDetailsFromTrainedModel, getJobsAndModels } from '@kbn/ml-client';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
 
-import type {
-  MLSavedObjectService,
-  TrainedModelJob,
-  JobObject,
-  TrainedModelObject,
-} from './service';
+import type { TrainedModelJob, JobObject, TrainedModelObject } from '@kbn/ml-saved-objects';
 
 export interface JobSavedObjectStatus {
   jobId: string;

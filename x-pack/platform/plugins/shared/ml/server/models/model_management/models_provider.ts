@@ -55,8 +55,8 @@ import {
   type TrainedModelWithPipelines,
 } from '@kbn/ml-common-types/trained_models';
 import type { MlClient } from '@kbn/ml-client';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
 
-import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
 import { mlLog } from '../../lib/log';
 import { getModelDeploymentState } from './get_model_state';
