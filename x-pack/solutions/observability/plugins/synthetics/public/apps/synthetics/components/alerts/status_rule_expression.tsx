@@ -27,9 +27,16 @@ import { LocationsValueExpression } from './common/condition_locations_value';
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  showAlertOnNoDataSwitch?: boolean;
 }
 
-export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
+export const StatusRuleExpression: React.FC<Props> = ({
+  ruleParams,
+  setRuleParams,
+  showAlertOnNoDataSwitch = false,
+}) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
   const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
 
@@ -150,15 +157,20 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         onChange={onGroupByChange}
         locationsThreshold={locationsThreshold}
       />
-      <EuiSpacer size="m" />
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          compressed
-          label={ALERT_ON_NO_DATA_SWITCH_LABEL}
-          checked={ruleParams.condition?.alertOnNoData !== undefined}
-          onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
-        />
-      </EuiFlexItem>
+      {showAlertOnNoDataSwitch ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              compressed
+              label={ALERT_ON_NO_DATA_SWITCH_LABEL}
+              checked={ruleParams.condition?.alertOnNoData !== undefined}
+              onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
+            />
+          </EuiFlexItem>
+        </>
+      ) : null}
+
       <EuiSpacer size="l" />
     </>
   );
