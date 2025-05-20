@@ -266,7 +266,7 @@ const createMiddleware = ({
   return listenerMiddleware;
 };
 
-export interface InternalStateThunkDependencies {
+export interface InternalStateDependencies {
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
@@ -276,7 +276,7 @@ export interface InternalStateThunkDependencies {
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
-export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
+export const createInternalStateStore = (options: InternalStateDependencies) => {
   return configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
@@ -291,7 +291,7 @@ export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
 export type InternalStateDispatch = ThunkDispatch<
   DiscoverInternalState,
-  InternalStateThunkDependencies,
+  InternalStateDependencies,
   AnyAction
 > &
   Dispatch<AnyAction>;

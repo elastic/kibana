@@ -121,7 +121,7 @@ export const DiscoverMainRoute = ({
 
       const userAndSpaceIds = await getUserIdAndSpaceId(services);
 
-      internalState.dispatch(internalStateActions.initiateTabs(userAndSpaceIds));
+      internalState.dispatch(internalStateActions.initializeTabs(userAndSpaceIds));
 
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
@@ -198,7 +198,7 @@ async function getUserIdAndSpaceId(services: DiscoverServices) {
   try {
     userId = (await services.core.security?.authc.getCurrentUser()).profile_uid ?? '';
   } catch {
-    // ignore as it's expected for deployments without security enabled
+    // ignore as user id might be unavailable for some deployments
   }
 
   try {

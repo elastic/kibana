@@ -144,7 +144,9 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
     );
   };
 
-export const initiateTabs: InternalStateThunkActionCreator<[{ userId: string; spaceId: string }]> =
+export const initializeTabs: InternalStateThunkActionCreator<
+  [{ userId: string; spaceId: string }]
+> =
   ({ userId, spaceId }) =>
   (dispatch, _, { tabsStorageManager }) => {
     const defaultGroupId = uuidv4();

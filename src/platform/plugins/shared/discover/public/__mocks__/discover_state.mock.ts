@@ -73,7 +73,7 @@ export function getDiscoverStateMock({
     tabsStorageManager,
   });
   internalState.dispatch(
-    internalStateActions.initiateTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
   );
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,

@@ -44,7 +44,7 @@ describe('DiscoverSavedSearchContainer', () => {
     tabsStorageManager,
   });
   internalState.dispatch(
-    internalStateActions.initiateTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
   );
 
   describe('getTitle', () => {

@@ -43,6 +43,8 @@ import {
 import { ChartPortalsRenderer } from '../chart';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
 
+const mockSearchSessionId = '123';
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
@@ -88,16 +90,14 @@ function getStateContainer({
 }
 
 const mountComponent = async ({
-  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
-  searchSessionId = '123',
+  noSearchSessionId,
 }: {
-  isEsqlMode?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
-  searchSessionId?: string | null;
+  noSearchSessionId?: boolean;
 } = {}) => {
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
@@ -134,7 +134,7 @@ const mountComponent = async ({
 
   const stateContainer = getStateContainer({
     savedSearch,
-    searchSessionId: searchSessionId || undefined,
+    searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;
   stateContainer.actions.undoSavedSearchChanges = jest.fn();
@@ -190,7 +190,7 @@ const mountComponent = async ({
 describe('Discover histogram layout component', () => {
   describe('render', () => {
     it('should not render chart if there is no search session', async () => {
-      const { component } = await mountComponent({ searchSessionId: null });
+      const { component } = await mountComponent({ noSearchSessionId: true });
       expect(component.exists(UnifiedHistogramChart)).toBe(false);
     });
 
@@ -198,11 +198,6 @@ describe('Discover histogram layout component', () => {
       const { component } = await mountComponent();
       expect(component.exists(UnifiedHistogramChart)).toBe(true);
     }, 10000);
-
-    it('should render chart if there is no search session, but isEsqlMode is true', async () => {
-      const { component } = await mountComponent({ isEsqlMode: true });
-      expect(component.exists(UnifiedHistogramChart)).toBe(true);
-    });
 
     it('should render PanelsToggle', async () => {
       const { component } = await mountComponent();

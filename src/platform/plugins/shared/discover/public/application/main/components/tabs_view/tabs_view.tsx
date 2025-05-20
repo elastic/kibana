@@ -24,11 +24,9 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const { currentTabId, recentlyClosedItems, groupId } = useInternalStateSelector((state) => ({
-    currentTabId: state.tabs.unsafeCurrentId,
-    recentlyClosedItems: state.tabs.recentlyClosedTabs,
-    groupId: state.tabs.groupId,
-  }));
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  const recentlyClosedItems = useInternalStateSelector((state) => state.tabs.recentlyClosedTabs);
+  const groupId = useInternalStateSelector((state) => state.tabs.groupId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(

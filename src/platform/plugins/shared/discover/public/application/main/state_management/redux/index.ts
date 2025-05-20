@@ -23,7 +23,7 @@ import {
   updateTabAppStateAndGlobalState,
   restoreTab,
   clearAllTabs,
-  initiateTabs,
+  initializeTabs,
 } from './actions';
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
@@ -50,7 +50,7 @@ export const internalStateActions = {
   updateTabAppStateAndGlobalState,
   restoreTab,
   clearAllTabs,
-  initiateTabs,
+  initializeTabs,
 };
 
 export {
