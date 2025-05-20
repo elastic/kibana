@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
+import { createServerlessTestConfig } from '../../default_configs/serverless.config.base';
 
 export default createServerlessTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('./oblt.ai_assistant.index.ts')],
+  testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },

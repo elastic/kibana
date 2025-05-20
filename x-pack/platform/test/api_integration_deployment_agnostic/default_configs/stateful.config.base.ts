@@ -65,7 +65,9 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
      */
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
-    const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
+    const xPackAPITestsConfig = await readConfigFile(
+      require.resolve('../../api_integration/config.ts')
+    );
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
     const idpPath = require.resolve(
@@ -73,7 +75,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     );
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../../security_api_integration/plugins/saml_provider'
+      '@kbn/test-suites-xpack/security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
