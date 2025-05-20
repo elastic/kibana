@@ -15,7 +15,7 @@ import type { Module } from '@kbn/ml-common-types/modules';
 import { DataRecognizer } from '.';
 import type { MlClient } from '@kbn/ml-client';
 
-import type { MLSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
 import { type Config, filterConfigs } from './data_recognizer';
 
 const callAs = () => Promise.resolve({ body: {} });

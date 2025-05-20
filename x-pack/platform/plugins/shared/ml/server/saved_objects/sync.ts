@@ -13,7 +13,8 @@ import type {
   InitializeSavedObjectResponse,
   MlSavedObjectType,
 } from '@kbn/ml-common-types/saved_objects';
-import type { JobObject, MLSavedObjectService, TrainedModelObject } from './service';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
+import type { JobObject, TrainedModelObject } from './service';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
 import {
