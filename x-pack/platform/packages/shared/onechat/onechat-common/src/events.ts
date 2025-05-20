@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export type {
-  Tool,
-  ToolHandlerContext,
-  ToolProvider,
-  ToolProviderHasOptions,
-  ToolProviderGetOptions,
-  ToolProviderListOptions,
-} from './src/tools';
-export type { ModelProvider, ScopedModel } from './src/model_provider';
+import { ServerSentEventBase } from '@kbn/sse-utils';
+
+/**
+ * Base type for all onechat events
+ */
+export type OnechatEvent<
+  TEventType extends string,
+  TData extends Record<string, any>
+> = ServerSentEventBase<TEventType, TData>;

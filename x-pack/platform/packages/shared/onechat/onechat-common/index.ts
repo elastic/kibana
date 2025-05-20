@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { OnechatEvent } from './src/events';
 export type { ToolDescriptor, ToolDescriptorMeta } from './src/tools';
 export {
   OnechatErrorCode,

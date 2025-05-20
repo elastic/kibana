@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-export type {
-  Tool,
-  ToolHandlerContext,
-  ToolProvider,
-  ToolProviderHasOptions,
-  ToolProviderGetOptions,
-  ToolProviderListOptions,
-} from './src/tools';
-export type { ModelProvider, ScopedModel } from './src/model_provider';
+export { getConnectorList } from './get_connector_list';
+export { getDefaultConnector } from './get_default_connector';

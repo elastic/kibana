@@ -32,6 +32,16 @@ export interface ScopedModel {
 export interface ModelProvider {
   /**
    * Returns the default model to be used for LLM tasks.
+   *
+   * Will use Elasticsearch LLMs by default if present, otherwise will pick
+   * the first GenAI compatible connector.
    */
-  getDefaultModel: () => ScopedModel;
+  getDefaultModel: () => Promise<ScopedModel>;
+  /**
+   * Returns a model using the given connectorId.
+   *
+   * Will throw if connector doesn't exist, user has no access, or connector
+   * is not a GenAI connector.
+   */
+  getModel: (options: { connectorId: string }) => Promise<ScopedModel>;
 }
