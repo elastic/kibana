@@ -7,8 +7,10 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import type { PageProps } from '../../router';

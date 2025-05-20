@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import moment, { type Moment } from 'moment';
 import { cloneDeep } from 'lodash';
+import url from 'url';
+
+import type { estypes } from '@elastic/elasticsearch';
+
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
@@ -31,26 +33,25 @@ import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { isAnomalyDetectionJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DashboardItems } from '../../../services/dashboard_service';
-import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
-import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
-
+import { getPartitioningFieldNames, getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils';
 import {
-  getPartitioningFieldNames,
-  getFiltersForDSLQuery,
-} from '../../../../../common/util/job_utils';
-import { replaceStringTokens } from '../../../util/string_utils';
+  replaceStringTokens,
+  escapeForElasticsearchQuery,
+} from '@kbn/ml-common-utils/string_utils';
+
+import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
+
+import type { DashboardItems } from '../../../services/dashboard_service';
 import {
   replaceTokensInUrlValue,
   replaceTokensInDFAUrlValue,
   isValidLabel,
 } from '../../../util/custom_url_utils';
-import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 import type { TimeRangeType } from './constants';
+import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 export interface TimeRange {
   type: TimeRangeType;

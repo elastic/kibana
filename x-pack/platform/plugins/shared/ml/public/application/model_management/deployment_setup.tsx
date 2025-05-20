@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -39,13 +40,14 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
-import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { dictionaryValidator } from '@kbn/ml-validators';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
-import useObservable from 'react-use/lib/useObservable';
 import {
   isModelDownloadItem,
   isNLPModelItem,
@@ -53,15 +55,18 @@ import {
 } from '@kbn/ml-common-types/trained_models';
 import type { NLPSettings } from '@kbn/ml-common-constants/app';
 import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { DeploymentParamsMapper } from '@kbn/ml-services/model_management/deployment_params_mapper';
+import type { HttpService } from '@kbn/ml-services/http_service';
+import type {
+  DeploymentParamsUI,
+  TrainedModelsService,
+} from '@kbn/ml-services/model_management/trained_models_service';
+import type { MlCapabilitiesService } from '@kbn/ml-services/capabilities/check_capabilities';
 
 import { getNewJobLimits } from '../services/ml_server_info';
-import { DeploymentParamsMapper } from './deployment_params_mapper';
 
-import type { HttpService } from '../services/http_service';
 import { ModelStatusIndicator } from './model_status_indicator';
-import type { TrainedModelsService } from './trained_models_service';
-import { useMlKibana } from '../contexts/kibana';
-import type { MlCapabilitiesService } from '../capabilities/check_capabilities';
 
 interface DeploymentSetupProps {
   config: DeploymentParamsUI;

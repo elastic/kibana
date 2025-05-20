@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
@@ -24,7 +24,6 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
 import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import type {
   Detector,
@@ -37,7 +36,10 @@ import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 import { JOB_TYPE, SHARED_RESULTS_INDEX_NAME } from '@kbn/ml-common-constants/new_job';
 import type { MlCalendar } from '@kbn/ml-common-types/calendars';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-import { createDatafeedId } from '../../../../../../common/util/job_utils';
+import { createDatafeedId } from '@kbn/ml-common-utils/job_utils';
+import { getDatafeedAggregations } from '@kbn/ml-common-utils/datafeed_utils';
+import { getFirstKeyInObject } from '@kbn/ml-common-utils/object_utils';
+
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
@@ -45,8 +47,6 @@ import { JobRunner, type ProgressSubscriber } from '../job_runner';
 import { collectAggs } from './util/general';
 import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { mlCalendarService } from '../../../../services/calendar_service';
-import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
-import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 export class JobCreator {

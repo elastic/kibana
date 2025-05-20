@@ -7,6 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
+
 import type { BrushEndListener, PartialTheme } from '@elastic/charts';
 import {
   HistogramBarSeries,
@@ -16,9 +18,10 @@ import {
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
-import { css } from '@emotion/react';
+
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { Axes } from '../common/axes';
 import type { LineChartPoint } from '../../../../common/chart_loader';
 import type { Anomaly } from '../../../../common/results_loader';

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
+import { LIGHT_THEME } from '@elastic/charts';
+
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { LIGHT_THEME } from '@elastic/charts';
-import type { MlCapabilities } from '../../../../../common/types/capabilities';
-import { getDefaultCapabilities } from '../../../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { getDefaultCapabilities } from '@kbn/ml-common-types/capabilities';
+
+import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 
 export const chartsServiceMock = {
   theme: {

@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { duration } from 'moment';
 
 import type { estypes } from '@elastic/elasticsearch';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -18,9 +19,8 @@ import type {
   Datafeed,
   IndicesOptions,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-
-import { isValidAggregationField } from '../../../common/util/validation_utils';
-import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
+import { isValidAggregationField } from '@kbn/ml-common-utils/validation_utils';
+import { getDatafeedAggregations, getIndicesOptions } from '@kbn/ml-common-utils/datafeed_utils';
 
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 

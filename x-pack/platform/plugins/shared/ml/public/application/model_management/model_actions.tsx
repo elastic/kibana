@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import React, { useMemo, useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import useObservable from 'react-use/lib/useObservable';
+
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { useIsWithinMaxBreakpoint } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { useIsWithinMaxBreakpoint } from '@elastic/eui';
-import React, { useMemo, useEffect, useState } from 'react';
 import { DEPLOYMENT_STATE } from '@kbn/ml-trained-models-utils';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import useMountedState from 'react-use/lib/useMountedState';
-import useObservable from 'react-use/lib/useObservable';
 import {
   type DFAModelItem,
   type TrainedModelItem,
@@ -29,12 +31,14 @@ import {
   isNLPModelItem,
 } from '@kbn/ml-common-types/trained_models';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useEnabledFeatures, useMlServerInfo } from '../contexts/ml';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
+import { useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { isTestable } from './test_models';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useCloudCheck } from '../components/node_available_warning/hooks';
 
 export function useModelActions({

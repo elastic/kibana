@@ -24,16 +24,13 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-
 import { AppStatus, type AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -69,6 +66,7 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { isFullLicense } from '@kbn/ml-license/is_full_license';
 import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { getElasticModels } from './application/services/get_elastic_models';
 import { getMlLocator } from './locator/get_ml_locator';

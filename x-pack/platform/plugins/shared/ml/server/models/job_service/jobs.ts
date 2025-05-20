@@ -12,7 +12,6 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import type { JobAction } from '@kbn/ml-common-constants/job_actions';
 import {
@@ -52,11 +51,14 @@ import {
 } from '@kbn/ml-common-utils/job_utils';
 import { datafeedsProvider } from '@kbn/ml-services/datafeeds';
 import { resultsServiceProvider } from '@kbn/ml-services/results_service';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-server-api-schemas/alerting_schema';
+
+import type { AuthorizationHeader } from '../../lib/request_authorization';
+
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
+
 import { groupsProvider } from './groups';
-import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 interface Results {
   [id: string]: {
