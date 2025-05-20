@@ -14,10 +14,10 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { MonitoringEntitySourceResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { MonitoringEntitySourceSyncDataClient } from '../monitoring_entity_source_data_client';
+import { MonitoringEntitySourceDataClient } from '../monitoring_entity_source_data_client';
 import { MonitoringEntitySourceDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 
-export const monitoringEntitySourceSyncRoute = (
+export const monitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   config: EntityAnalyticsRoutesDeps['config']
@@ -53,7 +53,7 @@ export const monitoringEntitySourceSyncRoute = (
           const soClient = coreContext.savedObjects.client;
           const clusterClient = coreContext.elasticsearch.client;
 
-          const dataClient = new MonitoringEntitySourceSyncDataClient({
+          const dataClient = new MonitoringEntitySourceDataClient({
             soClient,
             clusterClient,
             logger,
@@ -100,7 +100,7 @@ export const monitoringEntitySourceSyncRoute = (
           const soClient = coreContext.savedObjects.client;
           const clusterClient = coreContext.elasticsearch.client;
 
-          const dataClient = new MonitoringEntitySourceSyncDataClient({
+          const dataClient = new MonitoringEntitySourceDataClient({
             soClient,
             clusterClient,
             logger,
