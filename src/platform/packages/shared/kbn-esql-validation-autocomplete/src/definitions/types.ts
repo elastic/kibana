@@ -168,6 +168,8 @@ export interface Signature {
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export enum FunctionDefinitionTypes {
@@ -287,6 +289,8 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
