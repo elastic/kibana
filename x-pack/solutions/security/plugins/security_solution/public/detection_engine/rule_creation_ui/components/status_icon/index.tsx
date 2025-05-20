@@ -28,12 +28,12 @@ const RuleStatusIconStyled = styled.div`
 const RuleStatusIconComponent: React.FC<RuleStatusIconProps> = ({ name, type }) => {
   const { euiTheme } = useEuiTheme();
 
-  const color = type === 'passive' ? euiTheme.colors.lightestShade : euiTheme.colors.primary;
+  const color = type === 'passive' ? euiTheme.colors.backgroundBaseDisabled : euiTheme.colors.primary;
   return (
     <RuleStatusIconStyled>
       <EuiAvatar color={color} name={type === 'valid' ? '' : name} size="l" aria-label={name} />
       {type === 'valid' ? (
-        <EuiIcon type="check" color={euiTheme.colors.emptyShade} size="l" />
+        <EuiIcon type="check" color={euiTheme.colors.backgroundBasePlain} size="l" />
       ) : null}
     </RuleStatusIconStyled>
   );
