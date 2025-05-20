@@ -166,8 +166,9 @@ export default function (providerContext: FtrProviderContext) {
             });
             const total = result.hits.total as SearchTotalHits;
             expect(total.value).to.eql(1);
+            expect(result.hits.hits[0]._source).ok();
             expect(result.hits.hits[0]._source?.host).ok();
-            const hit = result.hits.hits[0]._source.host as EcsHost;
+            const hit = result.hits.hits[0]._source.host as HostTransformResultHost;
 
             expect(hit.name).to.eql(HOST_NAME);
             expectFieldToEqualValues(hit.domain, testDocs.domain);
@@ -290,3 +291,16 @@ interface HostTransformTestDocuments {
   ip: string[] | undefined;
 }
 
+interface HostTransformResultHost {
+  name: string;
+  domain: string | string[] | undefined;
+  hostname: string | string[] | undefined;
+  id: string | string[] | undefined;
+  ip: string | string[] | undefined;
+  mac: string | string[] | undefined;
+  architecture: string | string[] | undefined;
+  os: {
+    name: string | string[] | undefined;
+    type: string | string[] | undefined;
+  }
+}
