@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { InheritedFieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 import { addAliasesForNamespacedFields, baseMappings, baseFields } from './logs_layer';
 
 describe('logs_layer', () => {
   describe('addAliasesForNamespacedFields', () => {
-    let mockStreamDefinition: WiredStreamDefinition;
+    let mockStreamDefinition: Streams.WiredStream.Definition;
     let mockInheritedFields: InheritedFieldDefinition;
 
     beforeEach(() => {
@@ -26,7 +26,7 @@ describe('logs_layer', () => {
             },
           },
         },
-      } as unknown as WiredStreamDefinition;
+      } as unknown as Streams.WiredStream.Definition;
 
       // Mock inherited fields
       mockInheritedFields = {
@@ -119,7 +119,7 @@ describe('logs_layer', () => {
             fields: {},
           },
         },
-      } as unknown as WiredStreamDefinition;
+      } as unknown as Streams.WiredStream.Definition;
 
       const result = addAliasesForNamespacedFields(emptyStreamDefinition, {});
 

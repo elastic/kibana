@@ -74,6 +74,7 @@ export {
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
+  type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
