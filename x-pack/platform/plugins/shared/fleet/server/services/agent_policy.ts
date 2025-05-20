@@ -243,7 +243,7 @@ class AgentPolicyService {
     }
 
     // If space awareness is enabled and the soClient that was passed on input is not
-    // scoped to the space that the agnet policy is associated with, then initialize
+    // scoped to the space that the agent policy is associated with, then initialize
     // a new client for the update. This should be safe, since the `soClient` provided
     // on input was used to retrieve the agent policy, thus we know it has access to it.
     let soClientForUpdate = soClient;

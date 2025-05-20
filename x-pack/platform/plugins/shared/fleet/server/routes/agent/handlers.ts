@@ -11,6 +11,10 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { Script } from '@elastic/elasticsearch/lib/api/types';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import { setSoClientInfo } from '../..';
+
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
@@ -265,6 +269,12 @@ export const postAgentReassignHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  setSoClientInfo(soClient, {
+    isUnScoped: false,
+    spaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+  });
+
   await AgentService.reassignAgent(
     soClient,
     esClient,
