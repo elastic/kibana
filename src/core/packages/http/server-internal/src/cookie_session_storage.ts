@@ -46,7 +46,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
       // If we have more than one session, return the first one if they are all the same
       if (session.credentials.length > 1) {
         this.log.warn(
-          `Found multiple auth sessions. Found:[${session.credentials.length}] sessions`
+          `Found multiple auth sessions. Found:[${session.credentials.length}] sessions. Checking equality...`
         );
         const [firstSession] = session.credentials;
         const allEqual = session.credentials.every((s) => {
