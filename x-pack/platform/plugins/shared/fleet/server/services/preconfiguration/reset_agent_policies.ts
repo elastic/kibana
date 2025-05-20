@@ -22,7 +22,7 @@ import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
-import { AgentPolicyInvalidError } from '../../errors';
+import { AgentPolicyInvalidError, isFleetNotFoundError } from '../../errors';
 
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 
@@ -31,8 +31,8 @@ export async function resetPreconfiguredAgentPolicies(
   esClient: ElasticsearchClient,
   agentPolicyId?: string
 ) {
-  const logger = appContextService.getLogger();
-  logger.warn('Reseting Fleet preconfigured agent policies');
+  const logger = appContextService.getLogger().get('resetPreconfiguredAgentPolicies');
+  logger.warn(`Reseting Fleet preconfigured agent policy id [${agentPolicyId}]`);
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
   await _deleteGhostPackagePolicies(soClient, esClient, logger);
   await _deletePreconfigurationDeleteRecord(soClient, logger, agentPolicyId);
@@ -134,7 +134,7 @@ async function _deleteExistingData(
 
   if (agentPolicyId) {
     const policy = await agentPolicyService.get(soClient, agentPolicyId).catch((err) => {
-      if (err.output?.statusCode === 404) {
+      if (isFleetNotFoundError(err)) {
         return undefined;
       }
       throw err;

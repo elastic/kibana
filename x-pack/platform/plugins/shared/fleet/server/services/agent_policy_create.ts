@@ -22,16 +22,23 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
+import { AgentlessAgentCreateOverProvisionnedError, isFleetNotFoundError } from '../errors';
+
 import { agentPolicyService, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { agentlessAgentService } from './agents/agentless_agent';
-import { AgentlessAgentCreateOverProvisionnedError } from '../errors';
 
 async function getFleetServerAgentPolicyId(
   soClient: SavedObjectsClientContract
 ): Promise<string | undefined> {
+  const logger = appContextService.getLogger().get('getFleetServerAgentPolicyId');
+
+  logger.debug(
+    `Retrieving fleet server agent policy id using soClient scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   let agentPolicyId;
   // creating first fleet server policy with id '(space-)?fleet-server-policy'
   let agentPolicy;
@@ -42,13 +49,16 @@ async function getFleetServerAgentPolicyId(
       false
     );
   } catch (err) {
-    if (!err.isBoom || err.output.statusCode !== 404) {
+    if (!isFleetNotFoundError(err)) {
       throw err;
     }
   }
   if (!agentPolicy) {
     agentPolicyId = getDefaultFleetServerpolicyId(soClient.getCurrentNamespace());
   }
+
+  logger.debug(`Returning agent policy id [${agentPolicyId}]`);
+
   return agentPolicyId;
 }
 
@@ -79,6 +89,7 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
+  newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
@@ -115,12 +126,21 @@ export async function createAgentPolicyWithPackages({
   authorizationHeader,
   force,
 }: CreateAgentPolicyParams) {
+  const logger = appContextService.getLogger().get('createAgentPolicyWithPackages');
+
+  logger.debug(
+    `creating policy [${
+      newPolicy.name
+    }] for space [${spaceId}] using soClient scoped to [${soClient.getCurrentNamespace()}]`
+  );
+
   let agentPolicyId = newPolicy.id;
-  const packagesToInstall = [];
+  const packagesToInstall: string[] = [];
   if (hasFleetServer) {
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
     agentPolicyId = agentPolicyId || (await getFleetServerAgentPolicyId(soClient));
+
     if (agentPolicyId === getDefaultFleetServerpolicyId(spaceId)) {
       // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
       newPolicy.is_default_fleet_server = true;
@@ -133,6 +153,8 @@ export async function createAgentPolicyWithPackages({
     packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
   }
   if (packagesToInstall.length > 0) {
+    logger.debug(() => `Installing packages [${packagesToInstall.join(', ')}]`);
+
     await bulkInstallPackages({
       savedObjectsClient: soClient,
       esClient,

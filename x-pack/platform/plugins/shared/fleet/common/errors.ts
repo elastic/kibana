@@ -13,6 +13,10 @@ export class FleetError<TMeta = unknown> extends Error {
   constructor(message?: string, public readonly meta?: TMeta) {
     super(message);
     this.name = this.constructor.name; // for stack traces
+
+    if (meta instanceof Error) {
+      this.stack += `\n----- original error -----\n${meta.stack}`;
+    }
   }
 }
 
