@@ -15,10 +15,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { IBasePath, Logger } from '@kbn/core/server';
+import { IBasePath, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import { getEcsGroups, getFormattedGroupBy, getGroupByObject } from '@kbn/alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -41,9 +42,7 @@ import {
   hasAdditionalContext,
   validGroupByForContext,
   flattenAdditionalContext,
-  getFormattedGroupBy,
   getContextForRecoveredAlerts,
-  getGroupByObject,
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
@@ -125,7 +124,16 @@ export const createCustomThresholdExecutor = ({
           )
         : [];
 
-    const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+    let initialSearchSource;
+    try {
+      initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw createTaskRunError(err, TaskErrorSource.USER);
+      }
+      throw err;
+    }
+
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
     const runtimeMappings = dataView.getRuntimeMappings();
@@ -302,7 +310,7 @@ export const createCustomThresholdExecutor = ({
     alertsClient.setAlertLimitReached(hasReachedLimit);
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-    let groupingObjectForRecovered: Record<string, object> = {};
+    let groupingObjectForRecovered: Record<string, unknown> = {};
 
     // extracing group by fields from kibana.alert.rule.params,
     // since all recovered alert documents will have same group by fields,

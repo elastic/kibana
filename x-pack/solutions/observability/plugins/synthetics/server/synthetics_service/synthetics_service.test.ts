@@ -450,6 +450,7 @@ describe('SyntheticsService', () => {
         },
       });
     });
+
     it('returns the space limited params', async () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getSyntheticsParams').mockRestore();
@@ -468,6 +469,44 @@ describe('SyntheticsService', () => {
       expect(params).toEqual({
         default: {
           username: 'elastic',
+        },
+      });
+    });
+
+    it('returns the params from mixed spaces', async () => {
+      const { service } = getMockedService();
+      jest.spyOn(service, 'getSyntheticsParams').mockRestore();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['default'],
+          },
+          {
+            attributes: { key: 'username-shared', value: 'elastic' },
+            namespaces: ['*'],
+          },
+          {
+            attributes: { key: 'username-test-space', value: 'elastic' },
+            namespaces: ['test'],
+          },
+        ],
+      });
+
+      const params = await service.getSyntheticsParams({ spaceId: 'default' });
+
+      expect(params).toEqual({
+        '*': {
+          'username-shared': 'elastic',
+        },
+        default: {
+          username: 'elastic',
+          'username-shared': 'elastic',
+        },
+        test: {
+          'username-shared': 'elastic',
+          'username-test-space': 'elastic',
         },
       });
     });

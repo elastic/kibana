@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataStreamsAction, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
@@ -27,11 +27,13 @@ const { useGlobalFlyout } = GlobalFlyout;
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  index: number;
 }
 
 const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const dataStreamContext = useDataStreamMigrationContext();
@@ -57,8 +59,8 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         flyoutProps: {
           onClose: closeFlyout,
           className: 'eui-textBreakWord',
-          'data-test-subj': 'reindexDetails',
-          'aria-labelledby': 'reindexDetailsFlyoutTitle',
+          'data-test-subj': 'reindexDataStreamDetails',
+          'aria-labelledby': 'reindexDataStreamDetailsFlyoutTitle',
         },
       });
     }
@@ -71,7 +73,11 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   }, [showFlyout]);
 
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
@@ -81,7 +87,6 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={
                 <DataStreamReindexResolutionCell
@@ -92,7 +97,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };
 

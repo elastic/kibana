@@ -15,7 +15,7 @@ import {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
 import { FieldActionsCell } from './field_actions';
@@ -35,7 +35,7 @@ export function FieldsTable({
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
-  stream: IngestStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
 }) {
   // Column visibility
@@ -92,7 +92,7 @@ export function FieldsTable({
 const createCellRenderer =
   (
     fields: SchemaField[],
-    stream: IngestStreamDefinition
+    stream: Streams.ingest.all.Definition
   ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];

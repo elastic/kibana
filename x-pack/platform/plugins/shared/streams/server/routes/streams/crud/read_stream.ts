@@ -6,12 +6,9 @@
  */
 
 import {
-  StreamGetResponse,
-  WiredStreamGetResponse,
+  Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
-  isGroupStreamDefinition,
-  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { partition } from 'lodash';
@@ -35,7 +32,7 @@ export async function readStream({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<StreamGetResponse> {
+}): Promise<Streams.all.GetResponse> {
   const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
     await assetClient.getAssetLinks(name, ['dashboard', 'query']),
@@ -51,7 +48,7 @@ export async function readStream({
     return query.query;
   });
 
-  if (isGroupStreamDefinition(streamDefinition)) {
+  if (Streams.GroupStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       dashboards,
@@ -71,7 +68,7 @@ export async function readStream({
     streamsClient.getPrivileges(name),
   ]);
 
-  if (isUnwiredStreamDefinition(streamDefinition)) {
+  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
@@ -86,8 +83,7 @@ export async function readStream({
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-      inherited_fields: {},
-    };
+    } satisfies Streams.UnwiredStream.GetResponse;
   }
 
   const inheritedFields = addAliasesForNamespacedFields(
@@ -95,7 +91,7 @@ export async function readStream({
     getInheritedFieldsFromAncestors(ancestors)
   );
 
-  const body: WiredStreamGetResponse = {
+  const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
     privileges,

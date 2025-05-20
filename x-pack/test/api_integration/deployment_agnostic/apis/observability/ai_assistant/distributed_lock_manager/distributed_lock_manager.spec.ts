@@ -8,25 +8,27 @@
 import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
-import {
-  LockId,
-  LockManager,
-  LockDocument,
-  withLock,
-  runSetupIndexAssetEveryTime,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import {
+  LockId,
+  LockManager,
+  LockDocument,
+  withLock,
+  runSetupIndexAssetEveryTime,
+} from '@kbn/lock-manager/src/lock_manager_client';
+import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
   LOCKS_CONCRETE_INDEX_NAME,
   LOCKS_INDEX_TEMPLATE_NAME,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/setup_lock_manager_index';
+  setupLockManagerIndex,
+} from '@kbn/lock-manager/src/setup_lock_manager_index';
+
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getLoggerMock } from '../utils/logger';
+import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -35,8 +37,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
-    // see details: https://github.com/elastic/kibana/issues/219091
-    this.tags(['failsOnMKI']);
+    // These tests should be moved to Jest Integration tests: https://github.com/elastic/kibana/issues/216690
+    this.tags(['skipCloud']);
     before(async () => {
       // delete existing index mappings to ensure we start from a clean state
       await deleteLockIndexAssets(es, log);
@@ -50,7 +52,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('Manual locking API', function () {
-      this.tags(['failsOnMKI']);
       before(async () => {
         await clearAllLocks(es, log);
       });
@@ -234,15 +235,41 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lock?.metadata).to.eql({ attempt: 'one' });
         });
 
-        it('allows re-acquisition after expiration', async () => {
-          // Acquire with a very short TTL.
-          const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
-          expect(acquired).to.be(true);
+        describe('when a lock by "manager1" expires, and is attempted re-acquired by "manager2"', () => {
+          let expiredLock: LockDocument | undefined;
+          let reacquireResult: boolean;
+          beforeEach(async () => {
+            // Acquire with a very short TTL.
+            const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
+            expect(acquired).to.be(true);
+            await sleep(1000); // wait for lock to expire
+            expiredLock = await getLockById(es, LOCK_ID);
+            reacquireResult = await manager2.acquire({ metadata: { attempt: 'two' } });
+          });
 
-          await sleep(1000); // wait for lock to expire
+          it('can be re-acquired', async () => {
+            expect(reacquireResult).to.be(true);
+          });
 
-          const reacquired = await manager2.acquire({ metadata: { attempt: 'two' } });
-          expect(reacquired).to.be(true);
+          it('updates the token when re-acquired', async () => {
+            const reacquiredLock = await getLockById(es, LOCK_ID);
+            expect(expiredLock?.token).not.to.be(reacquiredLock?.token);
+          });
+
+          it('updates the metadata when re-acquired', async () => {
+            const reacquiredLock = await getLockById(es, LOCK_ID);
+            expect(reacquiredLock?.metadata).to.eql({ attempt: 'two' });
+          });
+
+          it('cannot be released by "manager1"', async () => {
+            const res = await manager1.release();
+            expect(res).to.be(false);
+          });
+
+          it('can be released by "manager2"', async () => {
+            const res = await manager2.release();
+            expect(res).to.be(true);
+          });
         });
       });
 
@@ -452,7 +479,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('withLock API', function () {
-      this.tags(['failsOnMKI']);
       before(async () => {
         await clearAllLocks(es, log);
       });
@@ -724,6 +750,40 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           const settingsAfter = await getSettings(es);
           expect(settingsAfter?.uuid).to.be(settingsBefore?.uuid);
+        });
+      });
+
+      describe('when setting up index assets', () => {
+        beforeEach(async () => {
+          await deleteLockIndexAssets(es, log);
+        });
+
+        it('can run in parallel', async () => {
+          try {
+            await Promise.all([
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+            ]);
+          } catch (error) {
+            expect().fail(`Parallel setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
+        });
+
+        it('can run in sequence', async () => {
+          try {
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+          } catch (error) {
+            expect().fail(`Sequential setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
         });
       });
     });

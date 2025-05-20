@@ -9,7 +9,6 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import { SECURITY_UI_APP_ID } from './constants';
 import { useNavigationContext } from './context';
-import { getAppIdsFromId } from './links';
 
 export type GetAppUrl = (param: {
   appId?: string;
@@ -82,18 +81,4 @@ export const useNavigation = () => {
   const { navigateTo } = useNavigateTo();
   const { getAppUrl } = useGetAppUrl();
   return { navigateTo, getAppUrl };
-};
-
-/**
- * Returns the appId, deepLinkId, and path from a given navigation id
- */
-export const getNavigationPropsFromId = (
-  id: string
-): {
-  appId: string;
-  deepLinkId?: string;
-  path?: string;
-} => {
-  const { appId = SECURITY_UI_APP_ID, ...options } = getAppIdsFromId(id);
-  return { appId, ...options };
 };

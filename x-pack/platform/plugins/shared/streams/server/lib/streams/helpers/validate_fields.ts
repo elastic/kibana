@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { FieldDefinition, WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
-import { keepFields, namespacePrefixes } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  Streams,
+  isRoot,
+  keepFields,
+  namespacePrefixes,
+} from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 import { baseMappings } from '../component_templates/logs_layer';
 
@@ -14,7 +19,7 @@ export function validateAncestorFields({
   ancestors,
   fields,
 }: {
-  ancestors: WiredStreamDefinition[];
+  ancestors: Streams.WiredStream.Definition[];
   fields: FieldDefinition;
 }) {
   for (const ancestor of ancestors) {
@@ -62,7 +67,7 @@ export function validateAncestorFields({
   }
 }
 
-export function validateSystemFields(definition: WiredStreamDefinition) {
+export function validateSystemFields(definition: Streams.WiredStream.Definition) {
   if (isRoot(definition.name)) {
     // the root stream is allowed to have system fields
     return;
@@ -79,7 +84,7 @@ export function validateDescendantFields({
   descendants,
   fields,
 }: {
-  descendants: WiredStreamDefinition[];
+  descendants: Streams.WiredStream.Definition[];
   fields: FieldDefinition;
 }) {
   for (const descendant of descendants) {

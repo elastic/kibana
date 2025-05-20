@@ -51,12 +51,15 @@ export async function recallAndScore({
   );
 
   if (!suggestions.length) {
+    logger.debug('No suggestions found during recall');
     return {
       relevantDocuments: [],
       llmScores: [],
       suggestions: [],
     };
   }
+
+  logger.debug(`Found ${suggestions.length} suggestions during recall`);
 
   try {
     const { llmScores, relevantDocuments } = await scoreSuggestions({
@@ -69,6 +72,10 @@ export async function recallAndScore({
       signal,
       chat,
     });
+
+    logger.debug(
+      `Found ${relevantDocuments.length} relevant documents out of ${suggestions.length} suggestions`
+    );
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
       scoredDocuments: suggestions.map((suggestion) => {

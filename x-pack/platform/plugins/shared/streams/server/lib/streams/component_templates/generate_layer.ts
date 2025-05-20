@@ -11,7 +11,7 @@ import {
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
-  WiredStreamDefinition,
+  Streams,
   getAdvancedParameters,
   isDslLifecycle,
   isIlmLifecycle,
@@ -25,7 +25,7 @@ import { baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,
-  definition: WiredStreamDefinition,
+  definition: Streams.WiredStream.Definition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
@@ -83,7 +83,7 @@ export function generateLayer(
   };
 }
 
-function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+function getTemplateLifecycle(definition: Streams.WiredStream.Definition, isServerless: boolean) {
   const lifecycle = definition.ingest.lifecycle;
   if (isServerless) {
     // dlm cannot be disabled in serverless
@@ -106,7 +106,7 @@ function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: b
   return undefined;
 }
 
-function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
+function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
   const baseSettings = isRoot(definition.name) ? logsSettings : {};
   const lifecycle = definition.ingest.lifecycle;
 
