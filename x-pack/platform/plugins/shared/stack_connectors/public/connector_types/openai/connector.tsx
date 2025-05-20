@@ -61,9 +61,9 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const hasPKI = __internal__ != null ? __internal__.hasPKI : false;
   const hasPKIDefaultValue = useMemo(
     () =>
-      !!getFieldDefaultValue<boolean | undefined>('config.certificateData') ||
-      !!getFieldDefaultValue<boolean | undefined>('config.privateKeyData') ||
-      !!getFieldDefaultValue<boolean | undefined>('config.caData'),
+      !!getFieldDefaultValue<boolean | undefined>('secrets.certificateData') ||
+      !!getFieldDefaultValue<boolean | undefined>('secrets.privateKeyData') ||
+      !!getFieldDefaultValue<boolean | undefined>('secrets.caData'),
     [getFieldDefaultValue]
   );
 
@@ -128,7 +128,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             isEdit={isEdit}
             readOnly={readOnly}
             configFormSchema={otherOpenAiConfig}
-            secretsFormSchema={otherOpenAiSecrets}
+            secretsFormSchema={hasPKI ? [] : otherOpenAiSecrets}
           />
           <EuiSpacer size="s" />
           <UseField
@@ -147,83 +147,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           />
           {hasPKI && (
             <>
-              <EuiSpacer size="s" />
-              <UseField
-                path="config.certificateData"
-                config={{
-                  label: 'CRT file',
-                  validations: [
-                    {
-                      validator: emptyField(CRT_REQUIRED),
-                    },
-                  ],
-                }}
-                component={FilePickerField}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'openAISSLCRTInput',
-                    display: 'default',
-                    accept: '.crt,.cert,.cer,.pem',
-                  },
-                }}
-                helpText={
-                  <FormattedMessage
-                    defaultMessage="Raw PKI certificate content (PEM format) for cloud or on-premise deployments."
-                    id="xpack.stackConnectors.components.genAi.certificateDataDocumentation"
-                  />
-                }
-              />
-              <UseField
-                path="config.privateKeyData"
-                config={{
-                  label: 'KEY file',
-                  validations: [
-                    {
-                      validator: emptyField(KEY_REQUIRED),
-                    },
-                  ],
-                }}
-                component={FilePickerField}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'openAISSLKEYInput',
-                    display: 'default',
-                    accept: '.key,.pem',
-                  },
-                }}
-                helpText={
-                  <FormattedMessage
-                    defaultMessage="Raw PKI private key content (PEM format) for cloud or on-premise deployments."
-                    id="xpack.stackConnectors.components.genAi.privateKeyDataDocumentation"
-                  />
-                }
-              />
-              <UseField
-                path="config.caData"
-                config={{
-                  label: 'CA CRT file',
-                }}
-                component={FilePickerField}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'openAISSLCRTInput',
-                    display: 'default',
-                    accept: '.crt,.cert,.cer,.pem',
-                  },
-                }}
-                helpText={
-                  <FormattedMessage
-                    defaultMessage="Raw CA certificate content (PEM) used to verify the server certificate."
-                    id="xpack.stackConnectors.components.genAi.caDataDocumentation"
-                  />
-                }
-              />
-              {/* <SimpleConnectorForm*/}
-              {/*  isEdit={isEdit}*/}
-              {/*  readOnly={readOnly}*/}
-              {/*  configFormSchema={pkiConfig}*/}
-              {/*  secretsFormSchema={[]}*/}
-              {/* />*/}
               <EuiSpacer size="s" />
               <UseField
                 path="config.verificationMode"
@@ -251,6 +174,77 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                     disabled: readOnly,
                   },
                 }}
+              />
+              <EuiSpacer size="s" />
+              <UseField
+                path="secrets.certificateData"
+                config={{
+                  label: 'CRT file',
+                  validations: [
+                    {
+                      validator: emptyField(CRT_REQUIRED),
+                    },
+                  ],
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'openAISSLCRTInput',
+                    display: 'default',
+                    accept: '.crt,.cert,.cer,.pem',
+                  },
+                }}
+                helpText={
+                  <FormattedMessage
+                    defaultMessage="Raw PKI certificate content (PEM format) for cloud or on-premise deployments."
+                    id="xpack.stackConnectors.components.genAi.certificateDataDocumentation"
+                  />
+                }
+              />
+              <UseField
+                path="secrets.privateKeyData"
+                config={{
+                  label: 'KEY file',
+                  validations: [
+                    {
+                      validator: emptyField(KEY_REQUIRED),
+                    },
+                  ],
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'openAISSLKEYInput',
+                    display: 'default',
+                    accept: '.key,.pem',
+                  },
+                }}
+                helpText={
+                  <FormattedMessage
+                    defaultMessage="Raw PKI private key content (PEM format) for cloud or on-premise deployments."
+                    id="xpack.stackConnectors.components.genAi.privateKeyDataDocumentation"
+                  />
+                }
+              />
+              <UseField
+                path="secrets.caData"
+                config={{
+                  label: 'CA CRT file',
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'openAISSLCRTInput',
+                    display: 'default',
+                    accept: '.crt,.cert,.cer,.pem',
+                  },
+                }}
+                helpText={
+                  <FormattedMessage
+                    defaultMessage="Raw CA certificate content (PEM) used to verify the server certificate."
+                    id="xpack.stackConnectors.components.genAi.caDataDocumentation"
+                  />
+                }
               />
             </>
           )}

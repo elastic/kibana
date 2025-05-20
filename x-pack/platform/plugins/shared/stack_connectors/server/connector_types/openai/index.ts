@@ -16,7 +16,7 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { pkiConfigValidator } from './lib/other_openai_utils';
+import { pkiSecretsValidator } from './lib/other_openai_utils';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,
@@ -35,7 +35,10 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
-  validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
+  validators: [
+    { type: ValidatorType.CONFIG, validator: configValidator },
+    { type: ValidatorType.SECRETS, validator: secretsValidator },
+  ],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
@@ -44,6 +47,17 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });
+
+const secretsValidator = (secretsObject: Secrets) => {
+  if (
+    ('certificateData' in secretsObject && secretsObject.certificateData) ||
+    ('caData' in secretsObject && secretsObject.caData) ||
+    ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
+  ) {
+    pkiSecretsValidator(secretsObject);
+  }
+  return secretsObject;
+};
 
 export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {
@@ -62,13 +76,6 @@ export const configValidator = (configObject: Config, validatorServices: Validat
           apiProvider && (apiProvider as OpenAiProviderType).length ? `: ${apiProvider}` : ``
         }`
       );
-    }
-
-    if (
-      apiProvider === OpenAiProviderType.Other &&
-      (configObject.certificateData || configObject.caData || configObject.privateKeyData)
-    ) {
-      pkiConfigValidator(configObject);
     }
 
     return configObject;

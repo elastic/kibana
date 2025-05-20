@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { SSLSettings } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import type { Config } from '../../../../common/openai/types';
+import type { Secrets } from '../../../../common/openai/types';
 
 /**
  * Sanitizes the Other (OpenAI Compatible Service) request body to set stream to false
@@ -55,10 +55,10 @@ export const getRequestWithStreamOption = (
  */
 interface SSLOverridesInput {
   logger: Logger; // Logger instance for logging errors or information.
-  certificateData?: string; // PEM-encoded certificate data as a string.
-  privateKeyData?: string; // PEM-encoded private key data as a string.
+  certificateData: string; // PEM-encoded certificate data as a string.
+  privateKeyData: string; // PEM-encoded private key data as a string.
   caData?: string; // PEM-encoded CA certificate data as a string.
-  verificationMode?: 'full' | 'certificate' | 'none'; // SSL verification mode.
+  verificationMode: 'full' | 'certificate' | 'none'; // SSL verification mode.
 }
 
 /**
@@ -94,10 +94,10 @@ const validatePKICertificates = ({
   privateKeyData,
   caData,
   logger,
-}: SSLOverridesInput): void => {
+}: Omit<SSLOverridesInput, 'verificationMode'>): void => {
   try {
-    if (certificateData) validatePEMData(certificateData, 'CERTIFICATE', 'Certificate data');
-    if (privateKeyData) validatePEMData(privateKeyData, 'PRIVATE KEY', 'Private key data');
+    validatePEMData(certificateData, 'CERTIFICATE', 'Certificate data');
+    validatePEMData(privateKeyData, 'PRIVATE KEY', 'Private key data');
     if (caData) validatePEMData(caData, 'CERTIFICATE', 'CA certificate data');
   } catch (error) {
     logger.error(`Error validating PKI certificates: ${error.message}`);
@@ -198,27 +198,27 @@ export const pkiErrorHandler = (error: AxiosError): string | undefined => {
 /**
  * Validates the PKI configuration object to ensure required fields are present and properly formatted.
  *
- * @param configObject - The configuration object containing PKI-related data.
+ * @param secretsObject - The configuration object containing PKI-related data.
  * @throws Will throw an error if required fields are missing or if the provided data is not in valid PEM format.
  */
-export const pkiConfigValidator = (configObject: Config): void => {
+export const pkiSecretsValidator = (secretsObject: Secrets): void => {
   if (
-    'caData' in configObject ||
-    'certificateData' in configObject ||
-    'privateKeyData' in configObject
+    'caData' in secretsObject ||
+    'certificateData' in secretsObject ||
+    'privateKeyData' in secretsObject
   ) {
-    if (!configObject.certificateData) {
+    if (!secretsObject.certificateData) {
       throw new Error('Certificate data must be provided for PKI');
     }
-    if (!configObject.privateKeyData) {
+    if (!secretsObject.privateKeyData) {
       throw new Error('Private key data must be provided for PKI');
     }
     // Validate PEM format for raw data
-    validatePEMData(configObject.certificateData, 'CERTIFICATE', 'Certificate data');
-    validatePEMData(configObject.privateKeyData, 'PRIVATE KEY', 'Private key data');
+    validatePEMData(secretsObject.certificateData, 'CERTIFICATE', 'Certificate data');
+    validatePEMData(secretsObject.privateKeyData, 'PRIVATE KEY', 'Private key data');
     // CA is optional, but if provided, validate its format
-    if (configObject.caData) {
-      validatePEMData(configObject.caData, 'CERTIFICATE', 'CA certificate data');
+    if (secretsObject.caData) {
+      validatePEMData(secretsObject.caData, 'CERTIFICATE', 'CA certificate data');
     }
   } else {
     throw new Error('PKI configuration requires certificate and private key');
