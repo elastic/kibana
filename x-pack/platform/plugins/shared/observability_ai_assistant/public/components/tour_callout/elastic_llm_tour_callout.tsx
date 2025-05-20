@@ -9,6 +9,10 @@ import React, { ReactElement } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK,
+  ELASTIC_MANAGED_LLM_LEARN_MORE_LINK,
+} from '../../../common';
 import { TourCallout } from './tour_callout';
 
 export const ElasticLlmTourCallout = ({
@@ -34,12 +38,22 @@ export const ElasticLlmTourCallout = ({
           defaultMessage="Elastic LLM is our new default, pre-configured LLM connector (<costLink>additional costs incur</costLink>). You can continue to use other LLM connectors as normal. <learnMoreLink>Learn more</learnMoreLink>"
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
-              <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
+              <EuiLink
+                href={ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                external
+              >
                 {chunks}
               </EuiLink>
             ),
             learnMoreLink: (...chunks: React.ReactNode[]) => (
-              <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
+              <EuiLink
+                href={ELASTIC_MANAGED_LLM_LEARN_MORE_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                external
+              >
                 {chunks}
               </EuiLink>
             ),

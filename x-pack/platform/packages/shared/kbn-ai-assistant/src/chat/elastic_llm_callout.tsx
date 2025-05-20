@@ -10,7 +10,10 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK,
+  getConnectorsManagementHref,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ElasticLlmCallout = () => {
@@ -62,7 +65,12 @@ export const ElasticLlmCallout = () => {
           defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. By default, Elastic uses its Elastic-managed LLM connector (<costLink>additional costs incur</costLink>) when no custom connectors are available. You can always configure and use your own <connectorLink>connector</connectorLink> and change the default in <settingsLink>Settings</settingsLink>."
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
-              <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
+              <EuiLink
+                href={ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                external
+              >
                 {chunks}
               </EuiLink>
             ),
