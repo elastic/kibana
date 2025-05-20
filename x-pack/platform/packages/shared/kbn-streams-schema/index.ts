@@ -47,7 +47,7 @@ export { type RoutingDefinition, routingDefinitionListSchema } from './src/model
 export { type ContentPack, contentPackSchema } from './src/content';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
-export { keepFields, namespacePrefixes } from './src/helpers/namespaced_ecs';
+export { keepFields, namespacePrefixes, isNamespacedEcsField } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 

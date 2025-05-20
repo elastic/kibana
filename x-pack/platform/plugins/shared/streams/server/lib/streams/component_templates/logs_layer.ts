@@ -9,7 +9,7 @@ import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/li
 import {
   FieldDefinition,
   InheritedFieldDefinition,
-  WiredStreamDefinition,
+  Streams,
   namespacePrefixes,
 } from '@kbn/streams-schema';
 
@@ -182,7 +182,7 @@ const createAliasesForNamespacedFields = (
 };
 
 export function addAliasesForNamespacedFields(
-  streamDefinition: WiredStreamDefinition,
+  streamDefinition: Streams.WiredStream.Definition,
   inheritedFields: InheritedFieldDefinition
 ) {
   // Create aliases for inherited fields

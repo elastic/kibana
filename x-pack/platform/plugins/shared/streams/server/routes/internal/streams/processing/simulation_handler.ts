@@ -182,7 +182,7 @@ export const simulateProcessing = async ({
     ingestSimulationResult.simulation,
     simulationData.docs,
     params.body.processing,
-    isWiredStreamDefinition(stream),
+    Streams.WiredStream.Definition.is(stream),
     streamFields
   );
 
