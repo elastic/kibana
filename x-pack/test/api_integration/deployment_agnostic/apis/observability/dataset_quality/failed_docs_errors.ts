@@ -44,7 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
-        await synthtraceLogsEsClient.createCustomPipeline(processors, 'synth.2@pipeline');
+        await synthtraceLogsEsClient.createCustomPipeline(processors, customPipelineName);
         await synthtraceLogsEsClient.createComponentTemplate({
           name: customComponentTemplateName,
           dataStreamOptions: {
