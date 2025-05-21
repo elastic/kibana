@@ -52,18 +52,6 @@ This is **especially** important if your route does any of the following:
 
 
 ### Configuring authorization on routes
-**Before migration:**
-```ts
-router.get({
-  path: '/api/path',
-  options: {
-    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
-  },
-  ...
-}, handler);
-```
-
-**After migration:**
 ```ts
 router.get({
   path: '/api/path',
