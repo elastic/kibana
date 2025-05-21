@@ -1225,7 +1225,8 @@ export class SearchSource {
   parseActiveIndexPatternFromQueryString(queryString: string): string[] {
     let m;
     const indexPatternSet: Set<string> = new Set();
-    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/g;
+    // Updated regex to capture full index names including dashes, numbers, and periods
+    const regex = /\s?(_index)\s*:\s*['"]?([^\s'"]+)['"]?/g;
 
     while ((m = regex.exec(queryString)) !== null) {
       // This is necessary to avoid infinite loops with zero-width matches
@@ -1239,7 +1240,6 @@ export class SearchSource {
         }
       });
     }
-
     return [...indexPatternSet];
   }
 }

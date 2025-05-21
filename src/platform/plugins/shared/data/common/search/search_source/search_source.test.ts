@@ -1616,4 +1616,53 @@ describe('SearchSource', () => {
       );
     });
   });
+
+  describe('parseActiveIndexPatternFromQueryString', () => {
+    beforeEach(() => {
+      // Minimal dependencies for SearchSource
+      const dependencies = {
+        aggs: { createAggConfigs: jest.fn() },
+        search: jest.fn(),
+        dataViews: {} as any,
+        scriptedFieldsEnabled: false,
+      } as any;
+      searchSource = new SearchSource({}, dependencies);
+    });
+
+    it('should extract a single index name without wildcards', () => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString('_index: logs-2024-06-27');
+      expect(result).toEqual(['logs-2024-06-27']);
+    });
+
+    it('should extract a single index name with wildcards', () => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString('_index: logs-*');
+      expect(result).toEqual(['logs-*']);
+    });
+
+    it('should extract multiple index names', () => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString(
+        '_index: logs-2024-06-27 or _index: foo-2024-06-27'
+      );
+      expect(result).toEqual(['logs-2024-06-27', 'foo-2024-06-27']);
+    });
+
+    it('should extract index names with quotes', () => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString(
+        "_index: 'logs-2024-06-27'"
+      );
+      expect(result).toEqual(['logs-2024-06-27']);
+    });
+
+    it('should extract index names with double quotes', () => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString(
+        '_index: "logs-2024-06-27"'
+      );
+      expect(result).toEqual(['logs-2024-06-27']);
+    });
+
+    it('should not extract if _index is not present', () => {
+      const result = searchSource.parseActiveIndexPatternFromQueryString('foo: bar');
+      expect(result).toEqual([]);
+    });
+  });
 });
