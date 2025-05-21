@@ -14,8 +14,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { MB } from '@kbn/file-upload-common/src/constants';
 import { getHttp } from '../kibana_services';
-import { MB } from '../../common/constants';
+
 import type {
   ImportDoc,
   ImportFailure,

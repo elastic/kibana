@@ -7,7 +7,7 @@
 
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import numeral from '@elastic/numeral';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common/constants';
+import { FILE_SIZE_DISPLAY_FORMAT } from '@kbn/file-upload-common';
 import { isTikaType } from '../../../../../common/utils/tika_utils';
 
 export class FileSizeChecker {

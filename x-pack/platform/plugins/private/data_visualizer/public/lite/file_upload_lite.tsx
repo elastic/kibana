@@ -8,13 +8,9 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import {
-  useFileUpload,
-  type OpenFileUploadLiteContext,
-  FileUploadContext,
-} from '@kbn/file-upload-common';
+import { type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { CoreStart } from '@kbn/core/public';
-import { FileUploadManager } from '@kbn/file-upload-common/src/file_manager';
+import { FileUploadManager, useFileUpload, FileUploadContext } from '@kbn/file-upload';
 import type { ResultLinks } from '../../common/app';
 import { FileUploadLiteView } from './file_upload_lite_view';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';

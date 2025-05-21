@@ -12,7 +12,8 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
+
+import { INDEX_META_DATA_CREATED_BY } from '@kbn/file-upload-common';
 import type {
   ImportResponse,
   ImportFailure,

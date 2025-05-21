@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UploadStatus, FileAnalysis } from '@kbn/file-upload-common';
-import { STATUS, CLASH_TYPE } from '@kbn/file-upload-common/src/file_manager';
+import { type UploadStatus, type FileAnalysis, CLASH_TYPE } from '@kbn/file-upload';
+import { STATUS } from '@kbn/file-upload';
 import { AnalysisSummary } from '../application/file_data_visualizer/components/analysis_summary';
 import { FileContents } from '../application/file_data_visualizer/components/file_contents';
 

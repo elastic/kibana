@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiProgress } from '@elastic/eui';
-import type { FileAnalysis } from '@kbn/file-upload-common';
+import type { FileAnalysis } from '@kbn/file-upload';
 import type { FC } from 'react';
 import React from 'react';
 

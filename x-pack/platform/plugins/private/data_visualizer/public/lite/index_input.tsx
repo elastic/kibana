@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
-import { STATUS } from '@kbn/file-upload-common/src/file_manager';
+import { STATUS } from '@kbn/file-upload';
 import { useDataVisualizerKibana } from '../application/kibana_context';
 
 interface Props {

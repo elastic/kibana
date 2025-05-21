@@ -22,9 +22,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import { useFileUploadContext } from '@kbn/file-upload-common';
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common/src/types';
-import { STATUS } from '@kbn/file-upload-common/src/file_manager';
+import { useFileUploadContext } from '@kbn/file-upload';
+import { STATUS } from '@kbn/file-upload';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';

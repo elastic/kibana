@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UploadStatus, FileAnalysis } from '@kbn/file-upload-common';
-import { CLASH_TYPE } from '@kbn/file-upload-common/src/file_manager';
+import { CLASH_TYPE } from '@kbn/file-upload';
+import type { UploadStatus, FileAnalysis } from '@kbn/file-upload';
 
 interface Props {
   uploadStatus: UploadStatus;
