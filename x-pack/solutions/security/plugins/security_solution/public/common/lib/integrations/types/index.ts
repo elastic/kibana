@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 
 export interface IntegrationCardMetadata {
-  installedIntegrationsCount: number;
   isAgentRequired: boolean;
+  activeIntegrations: GetInstalledPackagesResponse['items'];
 }
 
 export interface Tab {
@@ -37,8 +38,8 @@ export enum IntegrationTabId {
 }
 
 export type TopCalloutRenderer = React.FC<{
-  installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  activeIntegrationsCount: number;
+  isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
 }>;
 
