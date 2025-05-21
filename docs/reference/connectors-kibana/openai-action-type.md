@@ -48,20 +48,11 @@ API key
 PKI Authentication (Other provider only)
 :   When using the Other provider type, you can configure PKI authentication with the following options:
 
-    Certificate file
-    :   Path to the PKI certificate file (.pem) or array of paths.
-
     Certificate data
     :   PEM-encoded certificate content.
 
-    Private key file
-    :   Path to the PKI private key file (.pem) or array of paths.
-
     Private key data
     :   PEM-encoded private key content.
-
-    CA file
-    :   Path to the CA certificate file (.pem) or array of paths.
 
     CA data
     :   PEM-encoded CA certificate content.
