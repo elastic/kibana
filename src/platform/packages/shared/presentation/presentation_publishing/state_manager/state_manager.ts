@@ -86,9 +86,7 @@ export const initializeStateManager = <StateType extends object>(
    *
    * if a key is not present in the new state, it will be set to the default value.
    */
-  const reinitializeState = (
-    newState?: Partial<StateType>
-  ) => {
+  const reinitializeState = (newState?: Partial<StateType>) => {
     const latestState = comparators ? getLatestState() : undefined;
     for (const [key, subject] of Object.entries<SubjectOf<StateType>>(
       keyToSubjectMap as { [key: string]: SubjectOf<StateType> }
