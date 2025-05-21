@@ -530,7 +530,6 @@ export interface DocLinks {
     httpMonitoring: string;
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
-
   }>;
   readonly integrationDeveloper: {
     upload: string;
