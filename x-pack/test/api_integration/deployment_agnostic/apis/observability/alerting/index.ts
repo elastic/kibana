@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./es_query'));
     loadTestFile(require.resolve('./custom_threshold'));
     loadTestFile(require.resolve('./synthetics/synthetics_default_rule'));
+    loadTestFile(require.resolve('./synthetics/custom_status_rule'));
   });
 }
