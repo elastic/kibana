@@ -145,6 +145,8 @@ export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as con
 
 // AI SOC exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
+export const CONFIGURATIONS_INTEGRATIONS_PATH =
+  `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
