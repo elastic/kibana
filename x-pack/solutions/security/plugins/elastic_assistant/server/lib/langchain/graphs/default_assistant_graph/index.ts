@@ -229,6 +229,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
+    telemetry,
+    telemetryParams,
     contentReferencesStore,
   });
   const inputs: GraphInputs = {
@@ -265,9 +267,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     return streamGraph({
       assistantGraph,
       inputs,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
       onLlmResponse,
       request,
+      telemetry,
       traceOptions,
       callbacks
     });

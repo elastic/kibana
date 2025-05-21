@@ -206,6 +206,7 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   isEnabledKnowledgeBase: boolean;
   actionTypeId: string;
+  errorLocation: string;
   model?: string;
 }> = {
   eventType: 'invoke_assistant_error',
@@ -239,6 +240,12 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Is knowledge base enabled',
+      },
+    },
+    errorLocation: {
+      type: 'keyword',
+      _meta: {
+        description: 'Location of error in code',
       },
     },
   },
