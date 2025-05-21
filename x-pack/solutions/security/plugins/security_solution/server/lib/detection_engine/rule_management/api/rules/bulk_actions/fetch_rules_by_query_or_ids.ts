@@ -7,6 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { gapStatus } from '@kbn/alerting-plugin/common';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../../common/constants';
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
@@ -20,12 +21,14 @@ export const fetchRulesByQueryOrIds = async ({
   rulesClient,
   abortSignal,
   maxRules,
+  gapRange,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
   abortSignal: AbortSignal;
   maxRules: number;
+  gapRange?: { start: string; end: string };
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
     return initPromisePool({
@@ -42,6 +45,23 @@ export const fetchRulesByQueryOrIds = async ({
     });
   }
 
+  let ruleIdsWithGaps: string[] | undefined;
+  // If there is a gap range, we need to find the rules that have gaps in that range
+  if (gapRange) {
+    const ruleIdsWithGapsResponse = await rulesClient.getRuleIdsWithGaps({
+      start: gapRange.start,
+      end: gapRange.end,
+      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+    });
+    ruleIdsWithGaps = ruleIdsWithGapsResponse.ruleIds;
+    if (ruleIdsWithGaps.length === 0) {
+      return {
+        results: [],
+        errors: [],
+      };
+    }
+  }
+
   const { data, total } = await findRules({
     rulesClient,
     perPage: maxRules,
@@ -50,6 +70,7 @@ export const fetchRulesByQueryOrIds = async ({
     sortField: undefined,
     sortOrder: undefined,
     fields: undefined,
+    ruleIds: ruleIdsWithGaps,
   });
 
   if (total > maxRules) {

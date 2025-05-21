@@ -113,6 +113,14 @@ export const BulkActionBase = z.object({
    * Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
    */
   ids: z.array(z.string()).min(1).optional(),
+  /**
+   * Gaps range start, valid only when query is provided
+   */
+  gaps_range_start: z.string().optional(),
+  /**
+   * Gaps range end, valid only when query is provided
+   */
+  gaps_range_end: z.string().optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;
