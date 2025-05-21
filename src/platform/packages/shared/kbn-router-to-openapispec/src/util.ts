@@ -186,26 +186,18 @@ export const setXState = (
   operation: CustomOperationObject
 ): void => {
   if (availability) {
+    let state = '';
     if (availability.stability === 'stable') {
-      if (availability.since) {
-        operation['x-state'] = `Generally available; added in ${availability.since}`;
-      } else {
-        // since is mandatory for stable, but handle the case if it's missing
-        operation['x-state'] = 'Generally available';
-      }
+      state = 'Generally available';
     } else if (availability.stability === 'experimental') {
-      if (availability.since) {
-        operation['x-state'] = `Technical Preview; added in ${availability.since}`;
-      } else {
-        operation['x-state'] = 'Technical Preview';
-      }
+      state = 'Technical Preview';
     } else if (availability.stability === 'beta') {
-      if (availability.since) {
-        operation['x-state'] = `Beta; added in ${availability.since}`;
-      } else {
-        operation['x-state'] = 'Beta';
-      }
+      state = 'Beta';
     }
+    if (availability.since) {
+      state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;
+    }
+    operation['x-state'] = state;
   }
 };
 

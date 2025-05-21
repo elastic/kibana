@@ -387,6 +387,11 @@ describe('setXState', () => {
       availability: undefined,
       expected: undefined,
     },
+    {
+      name: 'only since',
+      availability: { since: '8.0.0' },
+      expected: 'Added in 8.0.0',
+    },
   ])('$name', ({ availability, expected }) => {
     // Create a minimal valid CustomOperationObject with required responses property
     const operation: CustomOperationObject = {
