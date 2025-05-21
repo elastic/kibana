@@ -45,13 +45,14 @@ export class PolicyWatcher {
     const fleetServices = this.endpointServices.getInternalFleetServices();
     const esClient = this.endpointServices.getInternalEsClient();
     const soClient = isSpacesEnabled
-      ? this.endpointServices.savedObjects.createInternalUnscopedSoClient()
+      ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
       : this.endpointServices.savedObjects.createInternalScopedSoClient({ readonly: false });
 
     this.logger.debug(
       `Checking endpoint policies for compliance with license level [${license.type}]`
     );
 
+    let totalUpdates = 0;
     let page = 1;
     let response: {
       items: PackagePolicy[];
@@ -59,13 +60,13 @@ export class PolicyWatcher {
       page: number;
       perPage: number;
     };
-
     do {
       try {
         response = await fleetServices.packagePolicy.list(soClient, {
           page: page++,
           perPage: 100,
           kuery: fleetServices.endpointPolicyKuery,
+          spaceId: isSpacesEnabled ? '*' : undefined,
         });
       } catch (e) {
         this.logger.warn(
@@ -107,6 +108,8 @@ export class PolicyWatcher {
                 policy.id,
                 updatePolicy
               );
+
+              totalUpdates++;
             } catch (e) {
               // try again for transient issues
               this.logger.debug(
@@ -119,6 +122,7 @@ export class PolicyWatcher {
                   policy.id,
                   updatePolicy
                 );
+                totalUpdates++;
               } catch (ee) {
                 this.logger.warn(`Unable to remove platinum features from policy ${policy.id}`);
                 this.logger.warn(ee);
@@ -135,7 +139,9 @@ export class PolicyWatcher {
     } while (response.page * response.perPage < response.total);
 
     this.logger.debug(
-      `Checks of endpoint policies for compliance with License [${license.type}] done`
+      `Checks of endpoint policies for compliance with License [${license.type}] done.${
+        totalUpdates > 0 ? ` [${totalUpdates}] policies were updated` : ''
+      }`
     );
   }
 }
