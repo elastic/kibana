@@ -7,6 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { throttle } from 'lodash';
+import moment from 'moment';
+import { css } from '@emotion/react';
 
 import {
   useEuiFontSize,
@@ -18,8 +21,6 @@ import {
   EuiText,
   transparentize,
 } from '@elastic/eui';
-
-import { throttle } from 'lodash';
 import type {
   BrushEndListener,
   ElementClickListener,
@@ -33,24 +34,24 @@ import type {
   TooltipValue,
 } from '@elastic/charts';
 import { Chart, Heatmap, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
-import moment from 'moment';
+
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { css } from '@emotion/react';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer';
+import { mlEscape } from '@kbn/ml-common-utils/string_utils';
+
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
   AppStateSelectedCells,
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
-import type { SwimlaneType } from './explorer_constants';
-import { SWIMLANE_TYPE } from './explorer_constants';
-import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';

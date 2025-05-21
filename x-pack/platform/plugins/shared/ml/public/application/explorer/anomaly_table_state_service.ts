@@ -38,6 +38,8 @@ import {
 } from '@kbn/ml-common-utils/job_utils';
 import type { MlJobService } from '@kbn/ml-services/job_service';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
+import { MAX_CATEGORY_EXAMPLES } from '@kbn/ml-common-constants/explorer';
+
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { TableSeverityState } from '../components/controls/select_severity';
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
@@ -50,7 +52,6 @@ import {
   getSelectionJobIds,
   getSelectionTimeRange,
 } from './explorer_utils';
-import { MAX_CATEGORY_EXAMPLES } from './explorer_constants';
 import { StateService } from '../services/state_service';
 import type { Refresh } from '../routing/use_refresh';
 

@@ -46,12 +46,16 @@ import {
   isModelPlotEnabled,
   isTimeSeriesViewJob,
 } from '@kbn/ml-common-utils/job_utils';
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
+<<<<<<< HEAD
+=======
+import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+>>>>>>> c56471fc18c (fix imports: explorer_constants)
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import {
   MAX_CATEGORY_EXAMPLES,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
-} from '@kbn/ml-common-constants/explorer_constants';
+} from '@kbn/ml-common-constants/explorer';
 
 import type { GroupObj } from '../components/job_selector/job_selector';
 import type { TableSeverityState } from '../components/controls/select_severity';
