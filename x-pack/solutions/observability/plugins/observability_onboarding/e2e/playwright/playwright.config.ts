@@ -54,19 +54,19 @@ export default defineConfig({
   },
 
   projects: [
-    {
-      name: 'auth',
-      testMatch: '*stateful/auth.ts',
-      use: {
-        viewport: { width: 1920, height: 1080 },
-        launchOptions: {
-          logger: {
-            isEnabled: () => true,
-            log: (name, severity, message) => log.info(`[${severity}] ${name} ${message}`),
-          },
-        },
-      },
-    },
+    // {
+    //   name: 'auth',
+    //   testMatch: '*stateful/auth.ts',
+    //   use: {
+    //     viewport: { width: 1920, height: 1080 },
+    //     launchOptions: {
+    //       logger: {
+    //         isEnabled: () => true,
+    //         log: (name, severity, message) => log.info(`[${severity}] ${name} ${message}`),
+    //       },
+    //     },
+    //   },
+    // },
     {
       name: 'stateful',
       testMatch: '*stateful/*.spec.ts',
@@ -74,22 +74,6 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1200 },
         storageState: STORAGE_STATE,
-        launchOptions: {
-          logger: {
-            isEnabled: () => true,
-            log: (name, severity, message) => log.info(`[${severity}] ${name} ${message}`),
-          },
-        },
-      },
-      dependencies: ['auth'],
-    },
-    {
-      name: 'teardown',
-      testMatch: 'teardown.setup.ts',
-      use: {
-        viewport: { width: 1920, height: 1080 },
-        storageState: STORAGE_STATE,
-        testIdAttribute: 'data-test-subj',
         launchOptions: {
           logger: {
             isEnabled: () => true,
