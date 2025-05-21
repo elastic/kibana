@@ -18,7 +18,7 @@ import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import type { FilterAction } from '@kbn/ml-common-constants/explorer_constants';
+import type { FilterAction } from '@kbn/ml-common-constants/explorer';
 
 import type {
   AnomaliesTableData,
