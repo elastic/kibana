@@ -32,11 +32,5 @@ const defaultEditorState = {
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {
-  return initializeStateManager<EditorState>(
-    {
-      ...initialState,
-      searchTechnique: initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE,
-    },
-    defaultEditorState
-  );
+  return initializeStateManager<EditorState>(initialState, defaultEditorState);
 };
