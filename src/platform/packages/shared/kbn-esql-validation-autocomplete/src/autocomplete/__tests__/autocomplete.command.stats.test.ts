@@ -25,7 +25,7 @@ const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any',
   agg: true,
 });
 
-const allEvaFunctions = getFunctionSignaturesByReturnType(
+const allEvalFunctions = getFunctionSignaturesByReturnType(
   Location.STATS,
   'any',
   {
@@ -55,7 +55,7 @@ export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   'col0 = ',
   ...allAggFunctions,
   ...allGroupingFunctions,
-  ...allEvaFunctions,
+  ...allEvalFunctions,
 ];
 
 describe('autocomplete.suggest', () => {
@@ -85,7 +85,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=/', [
           ...allAggFunctions,
           ...allGroupingFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
         ]);
       });
 
@@ -216,13 +216,13 @@ describe('autocomplete.suggest', () => {
           'col2 = ',
           // TODO verify that this change is ok
           ...allAggFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats col0=min(b),col1=c,/', [
           'col2 = ',
           ...allAggFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
       });
@@ -329,7 +329,7 @@ describe('autocomplete.suggest', () => {
           'col0 = ',
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any'),
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ];
 
@@ -342,7 +342,7 @@ describe('autocomplete.suggest', () => {
         const expected = [
           'col0 = ',
           getDateHistogramCompletionItem(),
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ];
 
@@ -390,13 +390,13 @@ describe('autocomplete.suggest', () => {
           'col0 = ',
           getDateHistogramCompletionItem(),
           ...fields,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats a=min(b),/', [
           'col0 = ',
           ...allAggFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
@@ -422,13 +422,13 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats avg(b) by col0 = /', [
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any'),
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, col0 = /', [
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any'),
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
       });

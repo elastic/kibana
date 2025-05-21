@@ -1037,11 +1037,11 @@ export function isExpressionComplete(
   );
 }
 
-export function getSourceSuggestions(sources: ESQLSourceResult[], ignored: string[]) {
+export function getSourceSuggestions(sources: ESQLSourceResult[], alreadyUsed: string[]) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
     sources
-      .filter(({ hidden, name }) => !hidden && !ignored.includes(name))
+      .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
       .map(({ name, dataStreams, title, type }) => {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
       })

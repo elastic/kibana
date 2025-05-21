@@ -52,6 +52,9 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
       return 'grouping_expression_after_assignment';
     }
 
+    // check if the cursor follows a comma or the BY keyword
+    // optionally followed by a fragment of a word
+    // e.g. ", field/"
     if (/\,\s+\S*$/.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'by')) {
       return 'grouping_expression_without_assignment';
     } else {

@@ -14,7 +14,7 @@ import {
   additionalSourcesSuggestions,
 } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
-import { isRestartingExpression } from '../../../shared/helpers';
+import { isRestartingExpression, withinQuotes } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { metadataSuggestion, getMetadataSuggestions } from '../metadata';
 
@@ -25,15 +25,7 @@ export async function suggest({
   getSources,
   getSourcesFromQuery,
 }: CommandSuggestParams<'ts'>): Promise<SuggestionRawDefinition[]> {
-  let quoteCount = 0;
-  for (const char of innerText) {
-    if (char === '"') {
-      quoteCount++;
-    }
-  }
-
-  // if the number of quotes is odd, we are in a quoted string
-  if (quoteCount % 2 === 1) {
+  if (withinQuotes(innerText)) {
     return [];
   }
 

@@ -122,7 +122,7 @@ export async function suggest({
     case 'grouping_expression_without_assignment': {
       const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
 
-      const ignored = getIgnoredColumns(command);
+      const ignored = alreadyUsedColumns(command);
 
       const columnSuggestions = pushItUpInTheList(
         await getColumnsByType('any', ignored, { openSuggestions: true }),
@@ -155,7 +155,7 @@ export async function suggest({
   }
 }
 
-function getIgnoredColumns(command: ESQLCommand<'stats'>) {
+function alreadyUsedColumns(command: ESQLCommand<'stats'>) {
   const byOption = command.args.find((arg) => isSingleItem(arg) && arg.name === 'by') as
     | ESQLCommandOption
     | undefined;

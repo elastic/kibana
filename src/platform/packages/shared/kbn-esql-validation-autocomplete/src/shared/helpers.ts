@@ -640,6 +640,11 @@ export function findPreviousWord(text: string) {
   return words[words.length - 2];
 }
 
+export function withinQuotes(text: string) {
+  const quoteCount = (text.match(/"/g) || []).length;
+  return quoteCount % 2 === 1;
+}
+
 export function endsInWhitespace(text: string) {
   return /\s$/.test(text);
 }

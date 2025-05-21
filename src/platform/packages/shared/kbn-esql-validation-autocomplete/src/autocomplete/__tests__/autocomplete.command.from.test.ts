@@ -40,7 +40,6 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from /index', visibleIndices);
       });
 
-      // TODO — not sure if this is the best behavior
       test("doesn't create suggestions after an open quote", async () => {
         const { assertSuggestions } = await setup();
 

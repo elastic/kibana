@@ -260,6 +260,7 @@ export const suggest: CommandSuggestFunction<'join'> = async ({
 
     case 'condition': {
       if (/(?<!\,)\s+$/.test(innerText)) {
+        // this trailing whitespace was not proceeded by a comma
         return [commaCompleteItem, pipeCompleteItem];
       }
 
