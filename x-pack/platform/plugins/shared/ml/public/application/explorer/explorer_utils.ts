@@ -13,6 +13,7 @@ import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
 
+import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -46,15 +47,15 @@ import {
   isModelPlotEnabled,
   isTimeSeriesViewJob,
 } from '@kbn/ml-common-utils/job_utils';
-import type { MlResultsService } from '@kbn/ml-services/results_service/results_service';
-
-import type { SwimlaneType } from './explorer_constants';
+import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
+} from '@kbn/ml-common-constants/explorer_constants';
+
 import type { GroupObj } from '../components/job_selector/job_selector';
 
 export interface ExplorerJob {

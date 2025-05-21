@@ -35,8 +35,9 @@ import {
   isSourceDataChartableForDetector,
 } from '@kbn/ml-common-utils/job_utils';
 import type { MlJobService } from '@kbn/ml-services/job_service';
-
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
+import { MAX_CATEGORY_EXAMPLES } from '@kbn/ml-common-constants/explorer_constants';
+
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { TableSeverity } from '../components/controls/select_severity/select_severity';
 import type { TableInterval } from '../components/controls/select_interval/select_interval';
@@ -48,7 +49,6 @@ import {
   getSelectionJobIds,
   getSelectionTimeRange,
 } from './explorer_utils';
-import { MAX_CATEGORY_EXAMPLES } from './explorer_constants';
 import { StateService } from '../services/state_service';
 import type { Refresh } from '../routing/use_refresh';
 
