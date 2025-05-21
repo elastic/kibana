@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiButtonEmpty,
@@ -15,8 +16,27 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
+import { CHART_TYPE } from '@kbn/ml-common-constants/explorer';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils';
+
+import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
+import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
+import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
+import { getInitialAnomaliesLayers } from '../../../maps/util';
+import { MlTooltipComponent } from '../../components/chart_tooltip';
 import {
   getChartType,
   getExploreSeriesLink,
@@ -25,26 +45,6 @@ import {
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
-
-import { CHART_TYPE } from '../explorer_constants';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { i18n } from '@kbn/i18n';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { MlTooltipComponent } from '../../components/chart_tooltip';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { useMlKibana } from '@kbn/ml-kibana-context';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
-import { getInitialAnomaliesLayers } from '../../../maps/util';
-import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
-import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
-import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
-import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
-import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
-import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { BarSeries, Chart, Settings } from '@elastic/charts';
-import { escapeKueryForFieldValuePair } from '../../util/string_utils';
-import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
