@@ -12,7 +12,7 @@ export interface MonitoringEntitySourceDependencies {
   namespace: string;
 }
 
-interface MonitoringEntitySourceDescriptor {
+export interface MonitoringEntitySourceDescriptor {
   type: string;
   name: string;
   managed?: boolean;
