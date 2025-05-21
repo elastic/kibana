@@ -77,11 +77,11 @@ export function getDashboardApi({
     // fall back to passing all references in these cases to preserve backwards compatability
     return panelReferences.length > 0 ? panelReferences : references$.value ?? [];
   };
-  console.log(initialState.panels, initialState.sections);
+
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
-    initialState.sections ?? {},
+    initialState.sections,
     trackPanel,
     getReferences
   );

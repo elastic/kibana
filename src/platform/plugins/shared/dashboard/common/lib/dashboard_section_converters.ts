@@ -12,8 +12,8 @@ import { type DashboardSections } from '../../server/content_management';
 
 export const convertSectionArrayToSectionMap = (
   sections?: DashboardSections
-): DashboardSectionMap | undefined => {
-  if ((sections ?? []).length === 0) return undefined;
+): DashboardSectionMap => {
+  if ((sections ?? []).length === 0) return {};
   const sectionsMap: DashboardSectionMap = {};
   sections?.forEach((section, idx) => {
     const sectionId = section.id ?? String(idx);

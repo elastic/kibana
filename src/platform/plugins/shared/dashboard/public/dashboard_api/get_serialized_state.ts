@@ -60,7 +60,6 @@ export const getSerializedState = ({
       timefilter: { timefilter },
     },
   } = dataService;
-  console.log({ dashboardState });
   const {
     tags,
     query,

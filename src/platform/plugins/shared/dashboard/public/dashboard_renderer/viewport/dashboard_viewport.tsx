@@ -14,15 +14,14 @@ import { EuiPortal } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DashboardGrid } from '../grid';
+import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
+import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
-import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
-import { isDashboardSection } from '../../dashboard_api/types';
 
 export const DashboardViewport = ({
   dashboardContainerRef,
@@ -56,31 +55,15 @@ export const DashboardViewport = ({
   }, [dashboardApi]);
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
-    let visiblePanels = 0;
-    let panels = 0;
-    let sections = 0;
-    Object.values(layout).forEach((widget) => {
-      if (isDashboardSection(widget)) {
-        sections++;
-      } else {
-        const { sectionId } = widget.gridData;
-        const section = sectionId && layout[sectionId];
-        if (section && isDashboardSection(section) && !section.collapsed) visiblePanels++;
-        panels++;
-      }
+    const panels = Object.values(layout.panels);
+    const visiblePanels = panels.filter(({ gridData }) => {
+      return !gridData.sectionId || !layout.sections[gridData.sectionId].collapsed;
+      // return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
     });
-    console.log({
-      layout,
-      panelCount: panels,
-      visiblePanelCount: visiblePanels,
-      sectionCount: sections,
-    });
-    debugger;
-
     return {
-      panelCount: panels,
-      visiblePanelCount: visiblePanels,
-      sectionCount: sections,
+      panelCount: panels.length,
+      visiblePanelCount: visiblePanels.length,
+      sectionCount: Object.keys(layout.sections).length,
     };
   }, [layout]);
 

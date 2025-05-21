@@ -10,13 +10,12 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
-import { DashboardLayout, isDashboardSection } from '../../dashboard_api/types';
+import { DashboardLayout } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
@@ -51,39 +50,40 @@ export const DashboardGrid = ({
 
   const currentLayout: GridLayoutData = useMemo(() => {
     const newLayout: GridLayoutData = {};
-    Object.keys(layout).forEach((widgetId) => {
-      const widget = layout[widgetId];
-      if (isDashboardSection(widget)) {
-        newLayout[widgetId] = {
-          id: widgetId,
-          type: 'section',
-          row: widget.gridData.y,
-          isCollapsed: widget.collapsed,
-          title: widget.title,
-          panels: {},
-        };
+    Object.keys(layout.sections).forEach((sectionId) => {
+      const section = layout.sections[sectionId];
+      newLayout[sectionId] = {
+        id: sectionId,
+        type: 'section',
+        row: section.gridData.y,
+        isCollapsed: section.collapsed,
+        title: section.title,
+        panels: {},
+      };
+    });
+    Object.keys(layout.panels).forEach((panelId) => {
+      const gridData = layout.panels[panelId].gridData;
+      const basePanel = {
+        id: panelId,
+        row: gridData.y,
+        column: gridData.x,
+        width: gridData.w,
+        height: gridData.h,
+      } as GridPanelData;
+      if (gridData.sectionId) {
+        (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
       } else {
-        const gridData = widget.gridData;
-        if (gridData.sectionId) {
-          //
-        }
-
-        newLayout[widgetId] = {
-          id: widgetId,
+        newLayout[panelId] = {
+          ...basePanel,
           type: 'panel',
-          row: gridData.y,
-          column: gridData.x,
-          width: gridData.w,
-          height: gridData.h,
         };
-        // update `data-grid-row` attribute for all panels because it is used for some styling
-        const panelRef = panelRefs.current[widgetId];
-        if (typeof panelRef !== 'function' && panelRef?.current) {
-          panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
-        }
+      }
+      // update `data-grid-row` attribute for all panels because it is used for some styling
+      const panelRef = panelRefs.current[panelId];
+      if (typeof panelRef !== 'function' && panelRef?.current) {
+        panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
       }
     });
-    console.log({ newLayout });
     return newLayout;
   }, [layout]);
 
@@ -91,52 +91,64 @@ export const DashboardGrid = ({
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
-      const currentPanels = dashboardInternalApi.layout$.getValue();
-      const updatedPanels: DashboardLayout = Object.values(newLayout).reduce(
-        (updatedPanelsAcc, widget) => {
-          if (widget.type === 'section') {
-            updatedPanelsAcc[widget.id] = {
-              type: 'section',
-              collapsed: widget.isCollapsed,
-              title: widget.title,
+      const currLayout = dashboardInternalApi.layout$.getValue();
+      const updatedLayout: DashboardLayout = {
+        sections: {},
+        panels: {},
+      };
+      Object.values(newLayout).forEach((widget) => {
+        if (widget.type === 'section') {
+          updatedLayout.sections[widget.id] = {
+            collapsed: widget.isCollapsed,
+            title: widget.title,
+            gridData: {
+              i: widget.id,
+              y: widget.row,
+            },
+          };
+          Object.values(widget.panels).forEach((panel) => {
+            updatedLayout.panels[panel.id] = {
+              ...currLayout.panels[widget.id],
               gridData: {
-                i: widget.id,
-                y: widget.row,
+                i: panel.id,
+                y: panel.row,
+                x: panel.column,
+                w: panel.width,
+                h: panel.height,
+                sectionId: widget.id,
               },
             };
-          } else {
-            updatedPanelsAcc[widget.id] = {
-              ...currentPanels[widget.id],
-              gridData: {
-                i: widget.id,
-                y: widget.row,
-                x: widget.column,
-                w: widget.width,
-                h: widget.height,
-              },
-            };
-          }
-          return updatedPanelsAcc;
-        },
-        {} as DashboardLayout
-      );
+          });
+        } else {
+          updatedLayout.panels[widget.id] = {
+            ...currLayout.panels[widget.id],
+            gridData: {
+              i: widget.id,
+              y: widget.row,
+              x: widget.column,
+              w: widget.width,
+              h: widget.height,
+            },
+          };
+        }
+      });
       // if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
-      dashboardInternalApi.layout$.next(updatedPanels);
-      // }
+      dashboardInternalApi.layout$.next(updatedLayout);
+      // }a
     },
     [dashboardInternalApi.layout$, viewMode]
   );
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      const currLayout = dashboardInternalApi.layout$.getValue();
-      if (!currLayout[id] || isDashboardSection(currLayout[id])) return;
+      const panels = dashboardInternalApi.layout$.getValue().panels;
+      if (!panels[id]) return;
 
       if (!panelRefs.current[id]) {
         panelRefs.current[id] = React.createRef();
       }
 
-      const type = currLayout[id].type;
+      const type = panels[id].type;
       return (
         <DashboardGridItem
           ref={panelRefs.current[id]}
@@ -146,7 +158,7 @@ export const DashboardGrid = ({
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainerRef={dashboardContainerRef}
-          data-grid-row={currLayout[id].gridData.y} // initialize data-grid-row
+          data-grid-row={panels[id].gridData.y} // initialize data-grid-row
         />
       );
     },

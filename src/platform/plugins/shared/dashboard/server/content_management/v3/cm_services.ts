@@ -347,19 +347,10 @@ export const searchResultsAttributesSchema = schema.object({
 });
 
 export const sectionSchema = sectionSavedObjectSchema.extends({
-  // make ID and order optional for CM schema
+  // make ID optional for CM schema
   id: schema.maybe(
     schema.string({
       meta: { description: 'The unique ID of the section.' },
-    })
-  ),
-  order: schema.maybe(
-    schema.number({
-      min: 1,
-      meta: {
-        description:
-          'The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.',
-      },
     })
   ),
 });

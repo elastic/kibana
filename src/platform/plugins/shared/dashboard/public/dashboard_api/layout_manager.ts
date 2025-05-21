@@ -49,12 +49,9 @@ import {
   DashboardChildState,
   DashboardChildren,
   DashboardLayout,
-  DashboardLayoutItem,
   DashboardPanel,
   DashboardSection,
-  ReservedLayoutItemTypeError,
   ReservedLayoutItemTypes,
-  isDashboardSection,
 } from './types';
 
 export function initializeLayoutManager(
@@ -68,7 +65,6 @@ export function initializeLayoutManager(
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
-  console.log({ initialPanels, initialSections });
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     initialSections
@@ -77,18 +73,20 @@ export function initializeLayoutManager(
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
   function deserializeLayout(panelMap: DashboardPanelMap, sectionMap: DashboardSectionMap) {
-    console.log({ panelMap, sectionMap });
-    const layout: DashboardLayout = {};
+    const layout: DashboardLayout = {
+      panels: {},
+      sections: {},
+    };
     const childState: DashboardChildState = {};
-    Object.keys(sectionMap).forEach((uuid) => {
-      layout[uuid] = { collapsed: false, ...sectionMap[uuid], type: 'section' };
+    Object.keys(sectionMap).forEach((sectionId) => {
+      layout.sections[sectionId] = { collapsed: false, ...sectionMap[sectionId] };
     });
-    Object.keys(panelMap).forEach((uuid) => {
-      const { gridData, explicitInput, type } = panelMap[uuid];
-      layout[uuid] = { type, gridData } as DashboardPanel;
-      childState[uuid] = {
+    Object.keys(panelMap).forEach((panelId) => {
+      const { gridData, explicitInput, type } = panelMap[panelId];
+      layout.panels[panelId] = { type, gridData } as DashboardPanel;
+      childState[panelId] = {
         rawState: explicitInput,
-        references: getReferences(uuid),
+        references: getReferences(panelId),
       };
     });
     Object.keys(sectionMap).forEach((uuid) => {});
@@ -104,19 +102,17 @@ export function initializeLayoutManager(
     const panels: DashboardPanelMap = {};
     const sections: DashboardSectionMap = {};
     const layout = layout$.value;
-    for (const uuid of Object.keys(layout)) {
-      const widget = layout[uuid];
-      if (isDashboardSection(widget)) {
-        sections[uuid] = { ...widget, id: uuid };
-      } else {
-        references.push(
-          ...prefixReferencesFromPanel(uuid, currentChildState[uuid]?.references ?? [])
-        );
-        panels[uuid] = {
-          ...widget,
-          explicitInput: currentChildState[uuid]?.rawState ?? {},
-        };
-      }
+    for (const sectionId of Object.keys(layout.sections)) {
+      sections[sectionId] = { ...layout.sections[sectionId], id: sectionId };
+    }
+    for (const panelId of Object.keys(layout.panels)) {
+      references.push(
+        ...prefixReferencesFromPanel(panelId, currentChildState[panelId]?.references ?? [])
+      );
+      panels[panelId] = {
+        ...layout.panels[panelId],
+        explicitInput: currentChildState[panelId]?.rawState ?? {},
+      };
     }
     return { panels, sections, references };
   };
@@ -135,11 +131,7 @@ export function initializeLayoutManager(
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (isDashboardSection(lastSavedLayout[uuid])) {
-        // sections do not have children APIs that need updating
-        continue;
-      }
-      if (lastSavedLayout[uuid]) {
+      if (lastSavedLayout.panels[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {
@@ -161,7 +153,7 @@ export function initializeLayoutManager(
       {
         width: size?.width ?? DEFAULT_PANEL_WIDTH,
         height: size?.height ?? DEFAULT_PANEL_HEIGHT,
-        currentPanels: layout$.value,
+        currentPanels: layout$.value.panels,
       }
     );
     return { ...newPanelPlacement, i: uuid };
@@ -170,13 +162,16 @@ export function initializeLayoutManager(
   const placeNewPanel = async (
     uuid: string,
     panelPackage: PanelPackage,
-    gridData?: DashboardLayoutItem['gridData']
+    gridData?: DashboardPanel['gridData']
   ): Promise<DashboardLayout> => {
     const { panelType: type, serializedState } = panelPackage;
     if (gridData) {
       return {
         ...layout$.value,
-        [uuid]: { gridData: { ...gridData, i: uuid }, type } as DashboardPanel,
+        panels: {
+          ...layout$.value.panels,
+          [uuid]: { gridData: { ...gridData, i: uuid }, type } as DashboardPanel,
+        },
       };
     }
     const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
@@ -186,14 +181,17 @@ export function initializeLayoutManager(
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
       customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
       {
-        currentPanels: layout$.value,
+        currentPanels: layout$.value.panels,
         height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
         width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
       }
     );
     return {
-      ...otherPanels,
-      [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type } as DashboardPanel,
+      ...layout$.value,
+      panels: {
+        ...otherPanels,
+        [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type } as DashboardPanel,
+      },
     };
   };
 
@@ -203,7 +201,7 @@ export function initializeLayoutManager(
   if (incomingEmbeddable) {
     const { serializedState, size, type } = incomingEmbeddable;
     const uuid = incomingEmbeddable.embeddableId ?? v4();
-    const existingPanel: DashboardLayoutItem | undefined = layout$.value[uuid];
+    const existingPanel: DashboardPanel | undefined = layout$.value.panels[uuid];
     const sameType = existingPanel?.type === type;
 
     const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
@@ -217,17 +215,19 @@ export function initializeLayoutManager(
 
     layout$.next({
       ...layout$.value,
-      [uuid]: { gridData, type } as DashboardPanel,
+      panels: {
+        ...layout$.value.panels,
+        [uuid]: { gridData, type } as DashboardPanel,
+      },
     });
     trackPanel.setScrollToPanelId(uuid);
     trackPanel.setHighlightPanelId(uuid);
   }
 
   function getDashboardPanelFromId(panelId: string) {
-    const childLayout = layout$.value[panelId];
+    const childLayout = layout$.value.panels[panelId];
     const childApi = children$.value[panelId];
-    if (!childApi || !childLayout || isDashboardSection(childLayout))
-      throw new PanelNotFoundError();
+    if (!childApi || !childLayout) throw new PanelNotFoundError();
     return {
       type: childLayout.type,
       gridData: childLayout.gridData,
@@ -256,14 +256,10 @@ export function initializeLayoutManager(
   const addNewPanel = async <ApiType>(
     panelPackage: PanelPackage,
     displaySuccessMessage?: boolean,
-    gridData?: DashboardLayoutItem['gridData']
+    gridData?: DashboardPanel['gridData']
   ) => {
     const uuid = v4();
     const { panelType: type, serializedState } = panelPackage;
-    if (ReservedLayoutItemTypes.includes(type)) {
-      throw new ReservedLayoutItemTypeError();
-    }
-
     usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
 
     if (serializedState) currentChildState[uuid] = serializedState;
@@ -283,10 +279,10 @@ export function initializeLayoutManager(
   };
 
   const removePanel = (uuid: string) => {
-    const layout = { ...layout$.value };
-    if (layout[uuid]) {
-      delete layout[uuid];
-      layout$.next(layout);
+    const panels = { ...layout$.value.panels };
+    if (panels[uuid]) {
+      delete panels[uuid];
+      layout$.next({ ...layout$.value, panels });
     }
     const children = { ...children$.value };
     if (children[uuid]) {
@@ -299,9 +295,8 @@ export function initializeLayoutManager(
   };
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
-    const existingGridData = layout$.value[idToRemove]?.gridData;
-    if (!existingGridData || isDashboardSection(layout$.value[idToRemove]))
-      throw new PanelNotFoundError();
+    const existingGridData = layout$.value.panels[idToRemove]?.gridData;
+    if (!existingGridData) throw new PanelNotFoundError();
 
     removePanel(idToRemove);
     const newPanel = await addNewPanel<DefaultEmbeddableApi>(panelPackage, false, existingGridData);
@@ -309,10 +304,9 @@ export function initializeLayoutManager(
   };
 
   const duplicatePanel = async (uuidToDuplicate: string) => {
-    const layoutItemToDuplicate = layout$.value[uuidToDuplicate];
+    const layoutItemToDuplicate = layout$.value.panels[uuidToDuplicate];
     const apiToDuplicate = children$.value[uuidToDuplicate];
-    if (!apiToDuplicate || !layoutItemToDuplicate || isDashboardSection(layoutItemToDuplicate))
-      throw new PanelNotFoundError();
+    if (!apiToDuplicate || !layoutItemToDuplicate) throw new PanelNotFoundError();
 
     const allTitles = await getPanelTitles();
     const lastTitle = apiPublishesTitle(apiToDuplicate) ? getTitle(apiToDuplicate) ?? '' : '';
@@ -330,7 +324,7 @@ export function initializeLayoutManager(
       width: layoutItemToDuplicate.gridData.w,
       height: layoutItemToDuplicate.gridData.h,
       sectionId: layoutItemToDuplicate.gridData.sectionId,
-      currentPanels: layout$.value,
+      currentPanels: layout$.value.panels,
       placeBesideId: uuidToDuplicate,
     });
     layout$.next({
@@ -352,8 +346,7 @@ export function initializeLayoutManager(
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
-    if (!layout$.value[uuid] || isDashboardSection(layout$.value[uuid]))
-      throw new PanelNotFoundError();
+    if (!layout$.value.panels[uuid]) throw new PanelNotFoundError();
     if (children$.value[uuid]) return children$.value[uuid];
 
     return new Promise((resolve) => {
@@ -364,7 +357,7 @@ export function initializeLayoutManager(
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
-        if (layout$.value[uuid] === undefined) {
+        if (layout$.value.panels[uuid] === undefined) {
           subscription.unsubscribe();
           resolve(undefined);
         }
@@ -421,28 +414,27 @@ export function initializeLayoutManager(
       replacePanel,
       duplicatePanel,
       getDashboardPanelFromId,
-      getPanelCount: () =>
-        Object.keys(layout$.value).filter((uuid) => {
-          return !isDashboardSection(layout$.value[uuid]);
-        }).length,
+      getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
       /** Sectionss */
       addNewSection: () => {
-        const oldLayout = layout$.getValue();
+        const oldLayout = cloneDeep(layout$.getValue());
         const newId = v4();
         const newLayout = {
-          ...cloneDeep(oldLayout),
-          [newId]: {
-            type: 'section',
-            gridData: { i: newId, y: 0 },
-            title: i18n.translate('dashboard.defaultSectionTitle', {
-              defaultMessage: 'New collapsible section',
-            }),
-            collapsed: false,
-          } as DashboardSection,
+          ...oldLayout,
+          sections: {
+            ...oldLayout.sections,
+            [newId]: {
+              type: 'section',
+              gridData: { i: newId, y: 0 },
+              title: i18n.translate('dashboard.defaultSectionTitle', {
+                defaultMessage: 'New collapsible section',
+              }),
+              collapsed: false,
+            },
+          },
         };
-        console.log({ newLayout });
         layout$.next(newLayout);
 
         // setSections({

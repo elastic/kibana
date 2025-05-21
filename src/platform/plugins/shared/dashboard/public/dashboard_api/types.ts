@@ -62,36 +62,16 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
-export interface DashboardPanel
-  extends HasType<Exclude<string, (typeof ReservedLayoutItemTypes)[number]>> {
-  gridData: GridData;
-}
-export interface DashboardSection extends HasType<'section'> {
+export type DashboardPanel = { gridData: GridData } & HasType;
+export interface DashboardSection {
   gridData: Pick<GridData, 'i' | 'y'>; // sections only have a vertical position for grid data
   title: string;
   collapsed: boolean;
 }
 
-export const isDashboardSection = (widget: DashboardLayoutItem): widget is DashboardSection => {
-  return widget.type === 'section';
-};
-
-export class ReservedLayoutItemTypeError extends Error {
-  code = 'RESERVED_LAYOUT_ITEM_TYPE';
-
-  constructor() {
-    super(
-      i18n.translate('dashboard.errors.reservedLayoutItemType', {
-        defaultMessage: 'This layout item type is reserved',
-      })
-    );
-  }
-}
-
-export type DashboardLayoutItem = DashboardSection | DashboardPanel;
-
 export interface DashboardLayout {
-  [uuid: string]: DashboardLayoutItem;
+  panels: { [uuid: string]: DashboardPanel };
+  sections: { [uuid: string]: DashboardSection };
 }
 
 export interface DashboardChildState {
