@@ -180,6 +180,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const stream = await getStream(apiClient, 'logs');
         await expectIndexPatternsFromDashboard(stream.dashboards[0], ['logs']);
       });
+
+      it('fails if an object is too large', async () => {
+        const twoMB = 2 * 1024 * 1024;
+        const archive = await generateArchive(
+          {
+            name: 'content_pack',
+            description: 'with objects too big',
+            version: '1.0.0',
+          },
+          [
+            {
+              type: 'index-pattern',
+              id: 'regular_data_view',
+              references: [],
+              attributes: {
+                title: 'logs*',
+                name: 'logs*',
+              },
+            },
+            {
+              type: 'index-pattern',
+              id: 'big_data_view',
+              references: [],
+              attributes: {
+                title: 'a'.repeat(twoMB),
+                name: 'big data view',
+              },
+            },
+          ]
+        );
+
+        const response = await importContent(
+          apiClient,
+          'logs.importstream',
+          {
+            include: { all: {} },
+            content: Readable.from(archive),
+            filename: 'content_pack-1.0.0.zip',
+          },
+          400
+        );
+
+        expect((response as unknown as { message: string }).message).to.match(
+          /^Object \[content_pack-1.0.0\/kibana\/index_pattern\/big_data_view.json\] exceeds the limit of \d+ bytes/
+        );
+      });
     });
   });
 }
