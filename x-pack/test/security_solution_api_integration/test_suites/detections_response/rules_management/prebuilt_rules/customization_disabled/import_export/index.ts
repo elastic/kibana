@@ -8,7 +8,5 @@
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Export and Import', function () {
-    loadTestFile(require.resolve('./export_prebuilt_rules'));
-  });
+  loadTestFile(require.resolve('./export_prebuilt_rules'));
 };

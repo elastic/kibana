@@ -8,11 +8,11 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Rules Management - Prebuilt Rules - Prebuilt Rule Customization Enabled', function () {
-    loadTestFile(require.resolve('./prebuilt_rules_package'));
-    loadTestFile(require.resolve('./crud'));
+  describe('Rules Management - Prebuilt Rules - Prebuilt Rule (Customization Enabled)', function () {
     loadTestFile(require.resolve('./customization'));
-    loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
     loadTestFile(require.resolve('./import_export'));
+    loadTestFile(require.resolve('./install_prebuilt_rules'));
+    loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
   });
 };
