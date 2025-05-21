@@ -27,7 +27,7 @@ export enum DocumentType {
 /**
  * The document profile interface
  */
-export type DocumentProfile = Pick<Profile, 'getDocViewer'>;
+export type DocumentProfile = Pick<Profile, 'getDocViewer' | 'getCellRenderers'>;
 
 /**
  * Parameters for the document profile provider `resolve` method

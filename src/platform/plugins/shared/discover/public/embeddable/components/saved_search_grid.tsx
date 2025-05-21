@@ -25,7 +25,7 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../../context_awareness';
+import { useCustomCellRenderers } from '../../context_awareness';
 
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
@@ -109,10 +109,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     [props.totalHitCount, props.isPlainRecord]
   );
 
-  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers({
+  const cellRendererParams = useMemo(
+    () => ({
       actions: { addFilter: props.onFilter },
       dataView: props.dataView,
       density:
@@ -123,16 +121,17 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
-    });
-  }, [
-    getCellRenderersAccessor,
-    props.onFilter,
-    props.dataView,
-    props.services.storage,
-    props.configRowHeight,
-    gridProps.dataGridDensityState,
-    gridProps.rowHeightState,
-  ]);
+    }),
+    [
+      gridProps.dataGridDensityState,
+      gridProps.rowHeightState,
+      props.configRowHeight,
+      props.dataView,
+      props.onFilter,
+      props.services.storage,
+    ]
+  );
+  const getCustomCellRenderer = useCustomCellRenderers(cellRendererParams);
 
   return (
     <SavedSearchEmbeddableBase
@@ -151,7 +150,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
-        externalCustomRenderers={cellRenderers}
+        getCustomCellRenderer={getCustomCellRenderer}
         enableComparisonMode
         showColumnTokens
         showFullScreenButton={false}

@@ -26,7 +26,11 @@ import {
 } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer } from '../types';
+import type {
+  CellRendererColumnMap,
+  DataGridCellValueElementProps,
+  GetCustomCellRenderer,
+} from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
@@ -42,7 +46,7 @@ export const getRenderCellValueFn = ({
   closePopover,
   fieldFormats,
   maxEntries,
-  externalCustomRenderers,
+  getCustomCellRenderer,
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
@@ -53,20 +57,13 @@ export const getRenderCellValueFn = ({
   closePopover: () => void;
   fieldFormats: FieldFormatsStart;
   maxEntries: number;
-  externalCustomRenderers?: CustomCellRenderer;
+  getCustomCellRenderer?: GetCustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
 }) => {
-  const UnifiedDataTableRenderCellValue = ({
-    rowIndex,
-    columnId,
-    isDetails,
-    setCellProps,
-    colIndex,
-    isExpandable,
-    isExpanded,
-  }: EuiDataGridCellValueElementProps) => {
+  const UnifiedDataTableRenderCellValue = (props: EuiDataGridCellValueElementProps) => {
+    const { rowIndex, columnId, isDetails, setCellProps } = props;
     const row = rows ? rows[rowIndex] : undefined;
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
@@ -96,25 +93,20 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
-    const CustomCellRenderer = externalCustomRenderers?.[columnId];
+    const extendedProps: DataGridCellValueElementProps = {
+      ...props,
+      row,
+      dataView,
+      fieldFormats,
+      closePopover,
+      isCompressed,
+    };
+    const CustomCellRenderer = getCustomCellRenderer?.(extendedProps);
 
     if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
-          <CustomCellRenderer
-            rowIndex={rowIndex}
-            columnId={columnId}
-            isDetails={isDetails}
-            setCellProps={setCellProps}
-            isExpandable={isExpandable}
-            isExpanded={isExpanded}
-            colIndex={colIndex}
-            row={row}
-            dataView={dataView}
-            fieldFormats={fieldFormats}
-            closePopover={closePopover}
-            isCompressed={isCompressed}
-          />
+          <CustomCellRenderer {...extendedProps} />
         </span>
       );
     }
@@ -247,3 +239,8 @@ function renderPopoverContent({
     </EuiFlexGroup>
   );
 }
+
+export const getCellRendererFromColumnMap =
+  (columnMap: CellRendererColumnMap): GetCustomCellRenderer =>
+  ({ columnId }) =>
+    columnMap[columnId];

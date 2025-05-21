@@ -73,7 +73,7 @@ import type { CellRenderersExtensionParams } from '../../../../context_awareness
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
-  useProfileAccessor,
+  useCustomCellRenderers,
 } from '../../../../context_awareness';
 import {
   internalStateActions,
@@ -94,19 +94,21 @@ export const onResize = (
   stateContainer.appState.update({ grid: newGrid });
 };
 
+export interface DiscoverDocumentsProps {
+  viewModeToggle: React.ReactElement | undefined;
+  dataView: DataView;
+  onAddFilter?: DocViewFilterFn;
+  stateContainer: DiscoverStateContainer;
+  onFieldEdited?: () => void;
+}
+
 function DiscoverDocumentsComponent({
   viewModeToggle,
   dataView,
   onAddFilter,
   stateContainer,
   onFieldEdited,
-}: {
-  viewModeToggle: React.ReactElement | undefined;
-  dataView: DataView;
-  onAddFilter?: DocViewFilterFn;
-  stateContainer: DiscoverStateContainer;
-  onFieldEdited?: () => void;
-}) {
+}: DiscoverDocumentsProps) {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
@@ -347,13 +349,7 @@ function DiscoverDocumentsComponent({
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations(cellRendererParams) || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
-
-  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    return getCellRenderers(cellRendererParams);
-  }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
-
+  const getCustomCellRenderer = useCustomCellRenderers(cellRendererParams, customCellRenderer);
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
   const callouts = useMemo(
@@ -467,7 +463,7 @@ function DiscoverDocumentsComponent({
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
-            externalCustomRenderers={cellRenderers}
+            getCustomCellRenderer={getCustomCellRenderer}
             customGridColumnsConfiguration={customGridColumnsConfiguration}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             additionalFieldGroups={additionalFieldGroups}

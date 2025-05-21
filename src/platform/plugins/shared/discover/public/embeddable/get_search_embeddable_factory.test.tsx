@@ -17,7 +17,7 @@ import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__m
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
@@ -281,11 +281,11 @@ describe('saved search embeddable', () => {
       expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
     });
 
-    it('should pass cell renderers from profile', async () => {
+    it('should use cell renderers from profile', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { columns: ['rootProfile', 'message', 'extension'] },
+        partialState: { columns: ['rootProfile', 'dataSourceProfile', 'documentProfile'] },
       });
       const { Component, api } = await factory.buildEmbeddable({
         initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
@@ -295,7 +295,7 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick(); // wait for build to complete
 
-      const discoverComponent = render(<Component />);
+      render(<Component />);
 
       // wait for data fetching
       expect(api.dataLoading$.getValue()).toBe(true);
@@ -304,9 +304,9 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading$.getValue()).toBe(false);
 
       await waitFor(() => {
-        const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');
-        expect(discoverGridComponent).toBeInTheDocument();
-        expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
+        expect(screen.queryByText('root-profile')).toBeInTheDocument();
+        expect(screen.queryByText('data-source-profile')).toBeInTheDocument();
+        expect(screen.queryByText('document-profile')).toBeInTheDocument();
       });
     });
   });

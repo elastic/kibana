@@ -48,7 +48,7 @@ import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
-  useProfileAccessor,
+  useCustomCellRenderers,
 } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
 
@@ -172,10 +172,8 @@ export function ContextAppContent({
   );
 
   const configRowHeight = services.uiSettings.get(ROW_HEIGHT_OPTION);
-  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers({
+  const cellRendererParams = useMemo(
+    () => ({
       actions: { addFilter },
       dataView,
       density: getDataGridDensity(services.storage, 'discover'),
@@ -184,8 +182,10 @@ export function ContextAppContent({
         consumer: 'discover',
         configRowHeight,
       }),
-    });
-  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+    }),
+    [addFilter, configRowHeight, dataView, services.storage]
+  );
+  const getCustomCellRenderer = useCustomCellRenderers(cellRendererParams);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });
@@ -251,7 +251,7 @@ export function ContextAppContent({
             configHeaderRowHeight={3}
             settings={grid}
             onResize={onResize}
-            externalCustomRenderers={cellRenderers}
+            getCustomCellRenderer={getCustomCellRenderer}
           />
         </CellActionsProvider>
       </div>
