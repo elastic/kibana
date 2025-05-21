@@ -26,6 +26,7 @@ import {
   LEVEL_2_RESOURCE_FIELDS,
   PROMINENT_LOG_ECS_FIELDS,
 } from './constants';
+import { reduceAsyncChunks } from '../../utils/reduce_async_chunks';
 
 /**
  * Retrieves all indices and data streams for each stream of logs.
@@ -234,13 +235,13 @@ export function getIndexBasicStats({
   const indexNames = indices.map((info) => info.name);
 
   return from(
-    esClient.indices.stats({
-      index: indexNames,
-    })
+    reduceAsyncChunks(indexNames, (indexChunk) =>
+      esClient.indices.stats({ index: indexChunk, metric: ['docs'] })
+    )
   ).pipe(
     delay(breatheDelay),
     concatMap((allIndexStats) => {
-      return from(getFailureStoreStats({ esClient, indexName: indexNames.join(',') })).pipe(
+      return from(getFailureStoreStats({ esClient, indexNames })).pipe(
         map((allFailureStoreStats) => {
           return indices.map((info) =>
             getIndexStats(allIndexStats.indices, allFailureStoreStats, info)
@@ -364,22 +365,23 @@ function getIndexNamespace(indexInfo: IndexBasicInfo): string | undefined {
 
 async function getFailureStoreStats({
   esClient,
-  indexName,
+  indexNames,
 }: {
   esClient: ElasticsearchClient;
-  indexName: string;
+  indexNames: string[];
 }): Promise<IndicesStatsResponse['indices']> {
   try {
-    // TODO: Use the failure store API when it is available
-    const resp = await esClient.transport.request<ReturnType<typeof esClient.indices.stats>>({
-      method: 'GET',
-      path: `/${indexName}/_stats`,
-      querystring: {
-        failure_store: 'only',
-      },
-    });
+    const { indices } = await reduceAsyncChunks(indexNames, (chunk) =>
+      esClient.transport.request<ReturnType<typeof esClient.indices.stats>>({
+        method: 'GET',
+        path: `/${chunk.join(',')}/_stats`,
+        querystring: {
+          failure_store: 'only',
+        },
+      })
+    );
 
-    return (await resp).indices;
+    return indices;
   } catch (e) {
     // Failure store API may not be available
     return {};
