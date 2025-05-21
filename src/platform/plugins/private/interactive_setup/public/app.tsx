@@ -89,13 +89,13 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
       </header>
       <div
         css={css`
-          position: 'relative';
-          zindex: 10;
-          margin: 'auto';
-          marginbottom: euiTheme.size.xl;
-          maxwidth: calc(${euiTheme.breakpoint.s} - ${euiTheme.size.xl});
-          paddingleft: euiTheme.size.xl;
-          paddingright: euiTheme.size.xl;
+          position: relative;
+          z-index: 10;
+          margin: auto;
+          margin-bottom: ${euiTheme.size.xl};
+          max-width: calc(${euiTheme.breakpoint.s}px - ${euiTheme.size.xl});
+          padding-left: ${euiTheme.size.xl};
+          padding-right: ${euiTheme.size.xl};
         `}
       >
         <EuiPanel paddingSize="l">
