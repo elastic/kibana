@@ -7,7 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { monitoringEntitySourceTypeName } from './monitoring_entity_source_type';
 
-interface MonitoringEntitySourceDependencies {
+export interface MonitoringEntitySourceDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
