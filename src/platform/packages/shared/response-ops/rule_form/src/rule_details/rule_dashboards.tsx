@@ -10,16 +10,17 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiComboBox,
-  EuiSplitPanel,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
-  EuiTitle,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { OptionalFieldLabel } from '../optional_field_label';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
+import { ALERT_LINK_DASHBOARDS_TITLE, ALERT_LINK_DASHBOARDS_PLACEHOLDER } from '../translations';
 
 export interface Props {
   contentManagement: ContentManagementPublicStart;
@@ -135,21 +136,25 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
 
   return (
     <>
-      <EuiSplitPanel.Inner>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h6>{ALERT_LINK_DASHBOARDS_TITLE}</h6>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiComboBox
+          <EuiFormRow
+            label={ALERT_LINK_DASHBOARDS_TITLE}
             fullWidth
-            options={dashboardList}
-            selectedOptions={selectedDashboards}
-            onChange={onChange}
-            data-test-subj="ruleLinkedDashboards"
-          />
+            labelAppend={OptionalFieldLabel}
+          >
+            <EuiComboBox
+              fullWidth
+              options={dashboardList}
+              selectedOptions={selectedDashboards}
+              placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}
+              onChange={onChange}
+              data-test-subj="ruleLinkedDashboards"
+            />
+          </EuiFormRow>
         </EuiFlexItem>
-      </EuiSplitPanel.Inner>
+      </EuiFlexGroup>
     </>
   );
 };

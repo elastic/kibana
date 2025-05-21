@@ -73,7 +73,7 @@ describe('RuleDashboards', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByText('Link dashboards')).toBeInTheDocument();
+    expect(screen.getByText('Related dashboards')).toBeInTheDocument();
     expect(useRuleFormState).toHaveBeenCalledTimes(1);
     expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
     expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);

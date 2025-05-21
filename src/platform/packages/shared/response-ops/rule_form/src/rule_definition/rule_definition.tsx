@@ -57,7 +57,6 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import { RuleDashboards } from './rule_dashboards';
 
 export const RuleDefinition = () => {
   const {
@@ -73,7 +72,6 @@ export const RuleDefinition = () => {
     canShowConsumerSelection = false,
     flappingSettings,
   } = useRuleFormState();
-  const { contentManagement } = plugins;
 
   const { colorMode, euiTheme } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
@@ -291,7 +289,6 @@ export const RuleDefinition = () => {
           </Suspense>
         )}
       </EuiSplitPanel.Inner>
-      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
       <EuiSplitPanel.Inner>
         <EuiDescribedFormGroup
           fullWidth

@@ -106,7 +106,14 @@ export const ALERT_FLAPPING_DETECTION_DESCRIPTION = i18n.translate(
 export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
   {
-    defaultMessage: 'Link dashboards',
+    defaultMessage: 'Related dashboards',
+  }
+);
+
+export const ALERT_LINK_DASHBOARDS_PLACEHOLDER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Link related dashboards for investigation',
   }
 );
 
