@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, logicalCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
@@ -32,9 +32,9 @@ export const AlertsCount = ({ count }: { count: number }) => {
       css={css`
         font-size: ${euiTheme.size.m};
         font-weight: ${euiTheme.font.weight.semiBold};
-        border-right: ${euiTheme.border.thin};
-        margin-right: ${euiTheme.size.s};
-        padding-right: ${euiTheme.size.m};
+        // Replicate the sizing of neighbouring buttons
+        line-height: ${euiTheme.size.l};
+        ${logicalCSS('padding-horizontal', euiTheme.size.s)}
         align-self: center;
       `}
     >
