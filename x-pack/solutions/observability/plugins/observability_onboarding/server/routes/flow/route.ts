@@ -162,22 +162,8 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
   options: { tags: [] },
-  params: t.type({
-    body: t.type({
-      name: t.string,
-    }),
-  }),
   async handler(resources) {
-    const {
-      context,
-      params: {
-        body: { name },
-      },
-      core,
-      request,
-      plugins,
-      kibanaVersion,
-    } = resources;
+    const { context, core, request, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
@@ -201,10 +187,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
             progress: {},
           },
         }),
-        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
         (
           await context.resolve(['core'])
-        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
         getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       ]);
 
