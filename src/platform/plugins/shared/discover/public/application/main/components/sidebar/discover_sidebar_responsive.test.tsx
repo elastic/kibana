@@ -34,6 +34,7 @@ import type { DiscoverCustomizationId } from '../../../../customizations/customi
 import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
 import { RuntimeStateProvider } from '../../state_management/redux';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -211,12 +212,12 @@ async function mountComponent(
       <EuiProvider>
         <KibanaContextProvider services={mockedServices}>
           <DiscoverMainProvider value={stateContainer}>
-            <RuntimeStateProvider
-              scopedProfilesManager={mockedServices.profilesManager.createScopedProfilesManager()}
-              currentDataView={props.selectedDataView!}
-              adHocDataViews={[]}
-            >
-              <DiscoverSidebarResponsive {...props} />{' '}
+            <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
+              <ScopedProfilesManagerProvider
+                scopedProfilesManager={mockedServices.profilesManager.createScopedProfilesManager()}
+              >
+                <DiscoverSidebarResponsive {...props} />
+              </ScopedProfilesManagerProvider>
             </RuntimeStateProvider>
           </DiscoverMainProvider>
         </KibanaContextProvider>

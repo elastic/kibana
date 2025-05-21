@@ -22,6 +22,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { ScopedProfilesManagerProvider } from '../../context_awareness';
 
 const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
@@ -75,9 +76,13 @@ describe('ContextAppContent test', () => {
 
     const component = mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <EuiProvider highContrastMode={false}>
-          <ContextAppContent {...props} />
-        </EuiProvider>
+        <ScopedProfilesManagerProvider
+          scopedProfilesManager={discoverServiceMock.profilesManager.createScopedProfilesManager()}
+        >
+          <EuiProvider highContrastMode={false}>
+            <ContextAppContent {...props} />
+          </EuiProvider>
+        </ScopedProfilesManagerProvider>
       </KibanaContextProvider>
     );
     await act(async () => {

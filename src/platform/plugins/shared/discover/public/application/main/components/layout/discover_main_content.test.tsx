@@ -40,6 +40,7 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { CurrentTabProvider } from '../../state_management/redux';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 const mountComponent = async ({
   hideChart = false,
@@ -133,7 +134,11 @@ const mountComponent = async ({
       <KibanaContextProvider services={services}>
         <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
           <DiscoverMainProvider value={stateContainer}>
-            <DiscoverMainContent {...props} />
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+            >
+              <DiscoverMainContent {...props} />
+            </ScopedProfilesManagerProvider>
           </DiscoverMainProvider>
         </CurrentTabProvider>
       </KibanaContextProvider>

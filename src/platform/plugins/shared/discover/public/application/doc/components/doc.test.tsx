@@ -21,6 +21,7 @@ import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/publ
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { ScopedProfilesManagerProvider } from '../../../context_awareness';
 
 const discoverServices = createDiscoverServicesMock();
 const mockSearchApi = jest.fn();
@@ -78,7 +79,11 @@ async function mountDoc(update = false) {
   await act(async () => {
     comp = mountWithIntl(
       <KibanaContextProvider services={services}>
-        <Doc {...props} />
+        <ScopedProfilesManagerProvider
+          scopedProfilesManager={discoverServices.profilesManager.createScopedProfilesManager()}
+        >
+          <Doc {...props} />
+        </ScopedProfilesManagerProvider>
       </KibanaContextProvider>
     );
     if (update) comp.update();

@@ -76,19 +76,18 @@ export const useCurrentTabRuntimeState = <T,>(
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
+type CombinedRuntimeState = DiscoverRuntimeState & Omit<TabRuntimeState, 'scopedProfilesManager'>;
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
 export const RuntimeStateProvider = ({
-  scopedProfilesManager,
   currentDataView,
   adHocDataViews,
   children,
 }: PropsWithChildren<CombinedRuntimeState>) => {
   const runtimeState = useMemo<CombinedRuntimeState>(
-    () => ({ scopedProfilesManager, currentDataView, adHocDataViews }),
-    [adHocDataViews, currentDataView, scopedProfilesManager]
+    () => ({ currentDataView, adHocDataViews }),
+    [adHocDataViews, currentDataView]
   );
 
   return (
@@ -106,6 +105,5 @@ const useRuntimeStateContext = () => {
   return context;
 };
 
-export const useScopedProfilesManager = () => useRuntimeStateContext().scopedProfilesManager;
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;

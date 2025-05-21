@@ -17,6 +17,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RuntimeStateProvider } from '../../state_management/redux';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 describe('useTopNavLinks', () => {
   const services = {
@@ -38,12 +39,12 @@ describe('useTopNavLinks', () => {
     return (
       <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={state}>
-          <RuntimeStateProvider
-            scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
-            currentDataView={dataViewMock}
-            adHocDataViews={[]}
-          >
-            {children}
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+            >
+              {children}
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </KibanaContextProvider>

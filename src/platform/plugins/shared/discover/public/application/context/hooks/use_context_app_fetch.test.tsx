@@ -26,6 +26,8 @@ import { createContextSearchSourceStub } from '../services/_stubs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ScopedProfilesManagerProvider } from '../../../context_awareness';
+import { createContextAwarenessMocks } from '../../../context_awareness/__mocks__';
 
 const mockInterceptedWarning = {
   originalWarning: searchResponseIncompleteWarningLocalCluster,
@@ -67,6 +69,7 @@ jest.mock('../services/anchor', () => ({
 const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id') => {
   const dangerNotification = jest.fn();
   const mockSearchSource = createContextSearchSourceStub('timestamp');
+  const { profilesManagerMock } = createContextAwarenessMocks();
 
   const services = {
     data: {
@@ -90,6 +93,7 @@ const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id
         }
       },
     },
+    profilesManager: profilesManagerMock,
   } as unknown as DiscoverServices;
 
   const props = {
@@ -107,7 +111,13 @@ const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id
   return {
     result: renderHook(() => useContextAppFetch(props.props), {
       wrapper: ({ children }: React.PropsWithChildren) => (
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        <KibanaContextProvider services={services}>
+          <ScopedProfilesManagerProvider
+            scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+          >
+            {children}
+          </ScopedProfilesManagerProvider>
+        </KibanaContextProvider>
       ),
     }).result,
     dangerNotification,

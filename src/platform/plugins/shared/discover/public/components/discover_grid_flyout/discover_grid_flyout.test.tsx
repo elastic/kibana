@@ -29,6 +29,7 @@ import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/pub
 import type { FlyoutCustomization } from '../../customizations';
 import { useDiscoverCustomization } from '../../customizations';
 import { discoverServiceMock } from '../../__mocks__/services';
+import { ScopedProfilesManagerProvider } from '../../context_awareness';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
   id: 'flyout',
@@ -123,7 +124,11 @@ describe('Discover flyout', function () {
 
     const Proxy = (newProps: DiscoverGridFlyoutProps) => (
       <KibanaContextProvider services={services}>
-        <DiscoverGridFlyout {...newProps} />
+        <ScopedProfilesManagerProvider
+          scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+        >
+          <DiscoverGridFlyout {...newProps} />
+        </ScopedProfilesManagerProvider>
       </KibanaContextProvider>
     );
 

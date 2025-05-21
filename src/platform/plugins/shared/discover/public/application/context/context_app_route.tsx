@@ -16,7 +16,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useRootProfile } from '../../context_awareness';
+import { ScopedProfilesManagerProvider, useRootProfile } from '../../context_awareness';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -80,13 +80,10 @@ export function ContextAppRoute() {
   }
 
   return (
-    <rootProfileState.AppWrapper>
-      <ContextApp
-        anchorId={anchorId}
-        dataView={dataView}
-        referrer={locationState?.referrer}
-        scopedProfilesManager={scopedProfilesManager}
-      />
-    </rootProfileState.AppWrapper>
+    <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+      <rootProfileState.AppWrapper>
+        <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
+      </rootProfileState.AppWrapper>
+    </ScopedProfilesManagerProvider>
   );
 }

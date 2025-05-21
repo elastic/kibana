@@ -19,7 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import type { DocHistoryLocationState } from './locator';
-import { useRootProfile } from '../../context_awareness';
+import { ScopedProfilesManagerProvider, useRootProfile } from '../../context_awareness';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -98,14 +98,10 @@ export const SingleDocRoute = () => {
   }
 
   return (
-    <rootProfileState.AppWrapper>
-      <Doc
-        id={id}
-        index={index}
-        dataView={dataView}
-        referrer={locationState?.referrer}
-        scopedProfilesManager={scopedProfilesManager}
-      />
-    </rootProfileState.AppWrapper>
+    <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+      <rootProfileState.AppWrapper>
+        <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
+      </rootProfileState.AppWrapper>
+    </ScopedProfilesManagerProvider>
   );
 };

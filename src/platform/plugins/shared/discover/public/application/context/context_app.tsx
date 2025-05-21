@@ -40,7 +40,6 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
-import type { ScopedProfilesManager } from '../../context_awareness';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -48,15 +47,9 @@ export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
   referrer?: string;
-  scopedProfilesManager: ScopedProfilesManager;
 }
 
-export const ContextApp = ({
-  dataView,
-  anchorId,
-  referrer,
-  scopedProfilesManager,
-}: ContextAppProps) => {
+export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const {
@@ -124,7 +117,6 @@ export const ContextApp = ({
       anchorId,
       dataView,
       appState,
-      scopedProfilesManager,
     });
 
   /**

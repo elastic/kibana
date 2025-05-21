@@ -10,8 +10,8 @@
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { discoverServiceMock } from '../../__mocks__/services';
-import type { GetProfilesOptions } from '../profiles_manager';
+import { createDiscoverServicesMock } from '../../__mocks__/services';
+import { ScopedProfilesManagerProvider, type GetProfilesOptions } from '../profiles_manager';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { useProfiles } from './use_profiles';
 import type { CellRenderersExtensionParams } from '../types';
@@ -46,11 +46,12 @@ rootProfileServiceMock.registerProvider(rootProfileProviderMock);
 dataSourceProfileServiceMock.registerProvider(dataSourceProfileProviderMock);
 documentProfileServiceMock.registerProvider(documentProfileProviderMock);
 
-const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
 const record = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock });
 const record2 = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock2 });
+const services = createDiscoverServicesMock();
 
-discoverServiceMock.profilesManager = profilesManagerMock;
+services.profilesManager = profilesManagerMock;
 
 const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
 const getProfiles$Spy = jest.spyOn(scopedProfilesManager, 'getProfiles$');
@@ -59,7 +60,11 @@ const render = () => {
   return renderHook((props) => useProfiles(props), {
     initialProps: { record } as React.PropsWithChildren<GetProfilesOptions>,
     wrapper: ({ children }) => (
-      <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+      <KibanaContextProvider services={services}>
+        <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+          {children}
+        </ScopedProfilesManagerProvider>
+      </KibanaContextProvider>
     ),
   });
 };

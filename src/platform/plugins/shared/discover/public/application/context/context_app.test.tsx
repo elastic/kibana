@@ -25,6 +25,7 @@ import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createSearchSessionMock } from '../../__mocks__/search_session';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
+import { ScopedProfilesManagerProvider } from '../../context_awareness';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
@@ -80,7 +81,6 @@ describe('ContextApp test', () => {
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
-    scopedProfilesManager: discoverServices.profilesManager.createScopedProfilesManager(),
   };
 
   const topNavProps = {
@@ -96,9 +96,13 @@ describe('ContextApp test', () => {
   const mountComponent = () => {
     return mountWithIntl(
       <KibanaContextProvider services={services}>
-        <EuiThemeProvider>
-          <ContextApp {...defaultProps} />
-        </EuiThemeProvider>
+        <ScopedProfilesManagerProvider
+          scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+        >
+          <EuiThemeProvider>
+            <ContextApp {...defaultProps} />
+          </EuiThemeProvider>
+        </ScopedProfilesManagerProvider>
       </KibanaContextProvider>
     );
   };

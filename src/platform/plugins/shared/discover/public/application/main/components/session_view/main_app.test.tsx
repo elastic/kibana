@@ -26,6 +26,7 @@ import {
   RuntimeStateProvider,
   internalStateActions,
 } from '../../state_management/redux';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -54,12 +55,12 @@ describe('DiscoverMainApp', () => {
             <KibanaContextProvider services={discoverServiceMock}>
               <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
                 <DiscoverMainProvider value={stateContainer}>
-                  <RuntimeStateProvider
-                    scopedProfilesManager={discoverServiceMock.profilesManager.createScopedProfilesManager()}
-                    currentDataView={dataViewMock}
-                    adHocDataViews={[]}
-                  >
-                    <DiscoverMainApp {...props} />
+                  <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+                    <ScopedProfilesManagerProvider
+                      scopedProfilesManager={discoverServiceMock.profilesManager.createScopedProfilesManager()}
+                    >
+                      <DiscoverMainApp {...props} />
+                    </ScopedProfilesManagerProvider>
                   </RuntimeStateProvider>
                 </DiscoverMainProvider>
               </CurrentTabProvider>

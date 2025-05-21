@@ -42,6 +42,7 @@ import {
 } from '../../state_management/redux';
 import { ChartPortalsRenderer } from '../chart';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -165,12 +166,12 @@ const mountComponent = async ({
         <InternalStateProvider store={stateContainer.internalState}>
           <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
             <DiscoverMainProvider value={stateContainer}>
-              <RuntimeStateProvider
-                scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
-                currentDataView={dataView}
-                adHocDataViews={[]}
-              >
-                <DiscoverHistogramLayout {...props} />
+              <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+                <ScopedProfilesManagerProvider
+                  scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+                >
+                  <DiscoverHistogramLayout {...props} />
+                </ScopedProfilesManagerProvider>
               </RuntimeStateProvider>
             </DiscoverMainProvider>
           </ChartPortalsRenderer>

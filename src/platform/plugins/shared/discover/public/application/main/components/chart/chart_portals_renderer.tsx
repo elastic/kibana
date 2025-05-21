@@ -25,6 +25,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -108,15 +109,13 @@ const UnifiedHistogramGuard = ({
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
-          <RuntimeStateProvider
-            scopedProfilesManager={currentScopedProfilesManager}
-            currentDataView={currentDataView}
-            adHocDataViews={adHocDataViews}
-          >
-            <UnifiedHistogramChartWrapper
-              stateContainer={currentStateContainer}
-              panelsToggle={panelsToggle}
-            />
+          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+            <ScopedProfilesManagerProvider scopedProfilesManager={currentScopedProfilesManager}>
+              <UnifiedHistogramChartWrapper
+                stateContainer={currentStateContainer}
+                panelsToggle={panelsToggle}
+              />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>

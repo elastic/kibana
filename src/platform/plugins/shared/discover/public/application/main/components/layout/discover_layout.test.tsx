@@ -45,6 +45,7 @@ import {
   internalStateActions,
 } from '../../state_management/redux';
 import { ChartPortalsRenderer } from '../chart';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -141,14 +142,14 @@ async function mountComponent(
       <InternalStateProvider store={stateContainer.internalState}>
         <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
           <DiscoverMainProvider value={stateContainer}>
-            <RuntimeStateProvider
-              scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
-              currentDataView={dataView}
-              adHocDataViews={[]}
-            >
-              <EuiProvider highContrastMode={false}>
-                <DiscoverLayout {...props} />
-              </EuiProvider>
+            <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+              <ScopedProfilesManagerProvider
+                scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+              >
+                <EuiProvider highContrastMode={false}>
+                  <DiscoverLayout {...props} />
+                </EuiProvider>
+              </ScopedProfilesManagerProvider>
             </RuntimeStateProvider>
           </DiscoverMainProvider>
         </ChartPortalsRenderer>

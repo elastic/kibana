@@ -31,7 +31,7 @@ import {
 } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { ScopedProfilesManager } from '../profiles_manager';
+import { ScopedProfilesManagerProvider, type ScopedProfilesManager } from '../profiles_manager';
 
 let mockScopedProfilesManager: ScopedProfilesManager;
 let mockUuid = 0;
@@ -81,7 +81,11 @@ describe('useAdditionalCellActions', () => {
     return renderHook(useAdditionalCellActions, {
       initialProps,
       wrapper: ({ children }) => (
-        <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+        <KibanaContextProvider services={discoverServiceMock}>
+          <ScopedProfilesManagerProvider scopedProfilesManager={mockScopedProfilesManager}>
+            {children}
+          </ScopedProfilesManagerProvider>
+        </KibanaContextProvider>
       ),
     });
   };

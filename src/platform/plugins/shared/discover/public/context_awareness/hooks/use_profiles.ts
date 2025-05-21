@@ -8,8 +8,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { GetProfilesOptions } from '../profiles_manager';
-import { useScopedProfilesManager } from '../../application/main/state_management/redux/runtime_state';
+import { useScopedProfilesManager, type GetProfilesOptions } from '../profiles_manager';
 
 /**
  * Hook to retreive the resolved profiles

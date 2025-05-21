@@ -23,6 +23,7 @@ import type { DiscoverCustomizationId } from '../../../../customizations/customi
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -116,12 +117,12 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <RuntimeStateProvider
-          scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-          currentDataView={dataViewMock}
-          adHocDataViews={[]}
-        >
-          <DiscoverTopNav {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <ScopedProfilesManagerProvider
+            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
+          >
+            <DiscoverTopNav {...props} />
+          </ScopedProfilesManagerProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
@@ -134,12 +135,12 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <RuntimeStateProvider
-          scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-          currentDataView={dataViewMock}
-          adHocDataViews={[]}
-        >
-          <DiscoverTopNav {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <ScopedProfilesManagerProvider
+            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
+          >
+            <DiscoverTopNav {...props} />
+          </ScopedProfilesManagerProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
@@ -162,12 +163,12 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider
-            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            currentDataView={dataViewMock}
-            adHocDataViews={[]}
-          >
-            <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
+            >
+              <DiscoverTopNav {...props} />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
@@ -188,12 +189,12 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider
-            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            currentDataView={dataViewMock}
-            adHocDataViews={[]}
-          >
-            <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
+            >
+              <DiscoverTopNav {...props} />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
@@ -206,12 +207,12 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider
-            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            currentDataView={dataViewMock}
-            adHocDataViews={[]}
-          >
-            <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
+            >
+              <DiscoverTopNav {...props} />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
@@ -233,12 +234,12 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider
-            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            currentDataView={dataViewMock}
-            adHocDataViews={[]}
-          >
-            <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
+            >
+              <DiscoverTopNav {...props} />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       );

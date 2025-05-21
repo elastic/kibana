@@ -29,7 +29,7 @@ import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import type { ProfilesManager } from '../../../../context_awareness';
+import { ScopedProfilesManagerProvider, type ProfilesManager } from '../../../../context_awareness';
 import { CurrentTabProvider, internalStateActions } from '../../state_management/redux';
 
 const customisationService = createCustomizationService();
@@ -78,16 +78,20 @@ async function mountComponent(
     onFieldEdited: jest.fn(),
   };
 
+  profilesManager = profilesManager ?? services.profilesManager;
+
   const component = mountWithIntl(
-    <KibanaContextProvider
-      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
-    >
+    <KibanaContextProvider services={{ ...services, profilesManager }}>
       <DiscoverCustomizationProvider value={customisationService}>
         <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
           <DiscoverMainProvider value={stateContainer}>
-            <EuiProvider highContrastMode={false}>
-              <DiscoverDocuments {...props} />
-            </EuiProvider>
+            <ScopedProfilesManagerProvider
+              scopedProfilesManager={profilesManager.createScopedProfilesManager()}
+            >
+              <EuiProvider highContrastMode={false}>
+                <DiscoverDocuments {...props} />
+              </EuiProvider>
+            </ScopedProfilesManagerProvider>
           </DiscoverMainProvider>
         </CurrentTabProvider>
       </DiscoverCustomizationProvider>

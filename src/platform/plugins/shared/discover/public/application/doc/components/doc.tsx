@@ -19,18 +19,18 @@ import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
 import { createDataViewDataSource } from '../../../../common/data_sources';
-import type { ScopedProfilesManager } from '../../../context_awareness';
+import { useScopedProfilesManager } from '../../../context_awareness';
 
 export interface DocProps extends EsDocSearchProps {
   /**
    * Discover main view url
    */
   referrer?: string;
-  scopedProfilesManager: ScopedProfilesManager;
 }
 
 export function Doc(props: DocProps) {
-  const { dataView, scopedProfilesManager } = props;
+  const { dataView } = props;
+  const scopedProfilesManager = useScopedProfilesManager();
   const services = useDiscoverServices();
   const { locator, chrome, docLinks } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
