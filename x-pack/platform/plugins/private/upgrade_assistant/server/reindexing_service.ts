@@ -7,7 +7,6 @@
 
 import {
   CoreSetup,
-  CoreStart,
   Logger,
   SavedObjectsClient,
   LoggerFactory,
