@@ -48,14 +48,11 @@ export const getActionsColumn = ({
     columnWidth += DEFAULT_CONTROL_COLUMN_WIDTH * additionalRowControColumns.length;
   }
 
-  const gutterSize = 4 * (extraColumns.length - 1);
-  columnWidth += gutterSize;
-
   return {
     id: 'actions',
     width: columnWidth,
     rowCellRender: (props: EuiDataGridCellValueElementProps) => (
-      <EuiFlexGroup data-test-subj="actions-control-column" alignItems="center" gutterSize="xs">
+      <EuiFlexGroup data-test-subj="actions-control-column" alignItems="center" gutterSize="none">
         {extraColumns.map((Content, idx) => (
           <Content key={idx} {...props} />
         ))}

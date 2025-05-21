@@ -8,12 +8,9 @@
  */
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-
-const ICON_SIZE = 16;
-const GUTTER_SIZE = 4;
 
 export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   const textRef = useRef<HTMLSpanElement>(null);
@@ -22,8 +19,7 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   useLayoutEffect(() => {
     if (!textRef.current) return;
     const textWidth = textRef.current.getBoundingClientRect().width;
-    const textAndIconWidth = textWidth + ICON_SIZE + GUTTER_SIZE;
-    setShowText(textAndIconWidth < maxWidth);
+    setShowText(textWidth < maxWidth);
   }, [textRef, maxWidth, setShowText]);
 
   const actionsText = i18n.translate('unifiedDataTable.controlColumnsActionHeader', {
@@ -40,15 +36,15 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
         </span>
       </EuiScreenReaderOnly>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {showText && (
-          <EuiFlexItem grow={false}>
+        {showText ? (
+          <EuiFlexItem data-test-subj="actions-text" grow={false}>
             <span>{actionsText}</span>
           </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type="iInCircle" content={actionsText} />
+          </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="iInCircle" />
-        </EuiFlexItem>
-
         {/* Hidden measurement span */}
         <span
           ref={textRef}

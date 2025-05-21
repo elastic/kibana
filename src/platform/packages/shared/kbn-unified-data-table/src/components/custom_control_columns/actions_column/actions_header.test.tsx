@@ -21,19 +21,16 @@ describe('<ActionsHeader />', () => {
       const maxWidth = 500;
       setup({ maxWidth });
 
-      // There are 2 elements with the text "Actions" - 1 is the hidden measurement span and
-      // the other is the visible text. We need to check that the visible one is actually visible.
-      const actionsTexts = screen.getAllByText('Actions');
-      expect(actionsTexts[0]).toBeVisible();
-      expect(actionsTexts[1]).not.toBeVisible();
+      expect(screen.getByTestId('actions-text')).toBeVisible();
     });
   });
 
   describe('when the maxWidth is less than the text width', () => {
     it('should not show the text', () => {
-      const maxWidth = 10;
+      const maxWidth = 0;
       setup({ maxWidth });
-      expect(screen.getByText('Actions')).not.toBeVisible();
+
+      expect(screen.queryByTestId('actions-text')).not.toBeInTheDocument();
     });
   });
 });
