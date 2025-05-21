@@ -218,6 +218,7 @@ export interface InsightProps {
   messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
+  showElasticLlmCallout?: boolean;
 }
 
 enum FETCH_STATUS {
@@ -231,6 +232,7 @@ export function Insight({
   messages: initialMessagesOrCallback,
   title,
   dataTestSubj,
+  showElasticLlmCallout = true,
 }: InsightProps) {
   const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
     messages: [],
@@ -452,7 +454,7 @@ export function Insight({
         setInsightOpen(isOpen);
       }}
       controls={
-        !!elasticManagedLlm ? (
+        !!elasticManagedLlm && showElasticLlmCallout ? (
           <ElasticLlmTourCallout isOpen={isTourCalloutOpen} zIndex={999}>
             <ActionsMenu
               connectors={connectors}
