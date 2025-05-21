@@ -71,7 +71,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   // This test verifies that it's still possible to read an existing stream definition without
   // error. If it fails, it indicates that the migration logic is not working as expected.
   describe('read existing stream definition format', function () {
-    // see details: https://github.com/elastic/kibana/issues/220895
+    // This test can't run on MKI because there is no way to create a stream definition document that doesn't match the
+    // currently valid format. The test is designed to verify that the migration logic is working correctly.
     this.tags(['failsOnMKI']);
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
