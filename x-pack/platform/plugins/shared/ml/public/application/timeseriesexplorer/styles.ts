@@ -10,8 +10,6 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
 
-import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
-
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';
 const mlAnnotationRectDefaultStrokeOpacity = 0.2;
@@ -116,26 +114,37 @@ export const useTimeseriesExplorerStyles = () => {
 
           '.anomaly-marker': {
             strokeWidth: 1,
-            stroke: euiTheme.colors.mediumShade,
+            // stroke: euiTheme.colors.mediumShade,
 
             '&.critical': {
-              fill: ML_SEVERITY_COLORS.CRITICAL,
+              fill: euiTheme.colors.severity.danger,
+              // TODO: RED80
+              stroke: '#DA3737',
             },
 
             '&.major': {
-              fill: ML_SEVERITY_COLORS.MAJOR,
+              fill: euiTheme.colors.severity.risk,
+              // TODO: ORANGE60
+              stroke: '#FC8544',
             },
 
             '&.minor': {
-              fill: ML_SEVERITY_COLORS.MINOR,
+              fill: euiTheme.colors.severity.warning,
+              // TODO: YELLOW40
+              stroke: '#FACB3D',
             },
 
             '&.warning': {
-              fill: ML_SEVERITY_COLORS.WARNING,
+              // TODO: SKY40
+              fill: '#94D8EB',
+              // TODO: SKY50
+              stroke: '#63C8E3',
             },
 
             '&.low': {
-              fill: ML_SEVERITY_COLORS.LOW,
+              // TODO: SKY20
+              fill: '#CFEEF7',
+              stroke: euiTheme.colors.severity.neutral,
             },
           },
 

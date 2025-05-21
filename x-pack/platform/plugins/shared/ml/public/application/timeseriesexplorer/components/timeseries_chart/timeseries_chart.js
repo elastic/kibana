@@ -88,21 +88,20 @@ const ZOOM_INTERVAL_OPTIONS = [
 ];
 
 // Set up the color scale to use for indicating score.
-const anomalyColorScale = d3.scale
-  .threshold()
-  .domain([3, 25, 50, 75, 100])
-  .range([
-    ML_SEVERITY_COLORS.LOW,
-    ML_SEVERITY_COLORS.WARNING,
-    ML_SEVERITY_COLORS.MINOR,
-    ML_SEVERITY_COLORS.MAJOR,
-    ML_SEVERITY_COLORS.CRITICAL,
-  ]);
+const anomalyColorScale = d3.scale.threshold().domain([3, 25, 50, 75, 100]).range([
+  // TODO: Figure out colors here
+  ML_SEVERITY_COLORS.LOW,
+  ML_SEVERITY_COLORS.WARNING,
+  ML_SEVERITY_COLORS.MINOR,
+  ML_SEVERITY_COLORS.MAJOR,
+  ML_SEVERITY_COLORS.CRITICAL,
+]);
 
 // Create a gray-toned version of the color scale to use under the context chart mask.
 const anomalyGrayScale = d3.scale
   .threshold()
   .domain([3, 25, 50, 75, 100])
+  // TODO: Figure out colors here
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
 function getChartHeights(height) {
