@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RunEventHandlerFn } from './events';
 
 /**
  * Represents a runner, which is the entry point to execute all onechat primitives,
@@ -28,10 +29,10 @@ export type ScopedRunToolFn = <TResult = unknown>(
 /**
  * Params for {@link ScopedRunner.runTool}
  */
-export interface ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> {
-  toolId: string;
-  toolParams: TParams;
-}
+export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
+  RunToolParams<TParams>,
+  'request'
+>;
 
 export interface RunContext {
   runId: string;
@@ -58,6 +59,10 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    * Parameters to call the tool with.
    */
   toolParams: TParams;
+  /**
+   * Optional event handler
+   */
+  onEvent?: RunEventHandlerFn;
   /**
    * The request that initiated that run.
    */

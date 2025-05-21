@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptor } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner } from './runner';
+import type { RunEventEmitter } from './events';
 
 /**
  * Represents a onechat tool.
@@ -56,8 +57,10 @@ export interface ToolHandlerContext {
    * Can be used to run other workchat primitive as part of the tool execution.
    */
   runner: ScopedRunner;
-
-  // TODO: event system
+  /**
+   * Event emitter that can be used to emits custom events
+   */
+  events: RunEventEmitter;
 }
 
 /**

@@ -24,3 +24,18 @@ export type {
   RunToolFn,
   Runner,
 } from './src/runner';
+export {
+  OnechatRunEventType,
+  isToolResponseEvent,
+  isToolCallEvent,
+  type OnechatRunEvent,
+  type RunEventHandlerFn,
+  type ToolResponseEventData,
+  type RunEventEmitter,
+  type RunEventEmitterFn,
+  type InternalRunEvent,
+  type OnechatRunEventMeta,
+  type ToolCallEventData,
+  type ToolResponseEvent,
+  type ToolCallEvent,
+} from './src/events';

@@ -21,6 +21,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { ToolsServiceStart } from '../tools';
 import { createModelProvider } from './model_provider';
 import { creatEmptyRunContext, createChildContextForToolRun } from './utils/run_context';
+import { createEventEmitter, createNoopEventEmitter } from './utils/events';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -76,24 +77,34 @@ const runTool = async <TResult = unknown>({
   const { toolsService, request } = manager.deps;
 
   const tool = await toolsService.provider.get({ toolId, request });
+
+  // TODO: send toolCall event
+
   const toolHandlerContext = createToolHandlerContext({ toolExecutionParams, manager });
 
   const toolResult = await tool.handler(toolParams, toolHandlerContext);
+
+  // TODO: send toolResult event
 
   return toolResult as TResult;
 };
 
 export const createToolHandlerContext = ({
   manager,
+  toolExecutionParams,
 }: {
   toolExecutionParams: ScopedRunnerRunToolsParams;
   manager: RunnerManager;
 }): ToolHandlerContext => {
+  const { onEvent } = toolExecutionParams;
   const { inference, actions, request, defaultConnectorId, elasticsearch } = manager.deps;
   return {
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: createModelProvider({ inference, actions, request, defaultConnectorId }),
     runner: manager.getRunner(),
+    events: onEvent
+      ? createEventEmitter({ eventHandler: onEvent, context: manager.context })
+      : createNoopEventEmitter(),
   };
 };
 

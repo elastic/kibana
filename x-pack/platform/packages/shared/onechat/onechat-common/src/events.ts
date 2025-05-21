@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { ServerSentEventBase } from '@kbn/sse-utils';
-
 /**
  * Base type for all onechat events
  */
-export type OnechatEvent<
+export interface OnechatEvent<
   TEventType extends string,
-  TData extends Record<string, any>
-> = ServerSentEventBase<TEventType, TData>;
+  TData extends Record<string, any>,
+  TMeta extends Record<string, any>
+> {
+  type: TEventType;
+  data: TData;
+  meta: TMeta;
+}
