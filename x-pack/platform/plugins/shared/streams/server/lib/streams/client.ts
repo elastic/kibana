@@ -26,6 +26,7 @@ import { SecurityError } from './errors/security_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { migrateOnRead } from './helpers/migrate_on_read';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -339,7 +340,7 @@ export class StreamsClient {
     try {
       const response = await this.dependencies.storageClient.get({ id: name });
 
-      const streamDefinition = response._source!;
+      const streamDefinition = migrateOnRead(response._source!);
 
       Streams.all.Definition.asserts(streamDefinition);
 
@@ -419,14 +420,16 @@ export class StreamsClient {
    * include the dashboard links.
    */
   async getPrivileges(name: string) {
+    const REQUIRED_MANAGE_PRIVILEGES = [
+      'manage_index_templates',
+      'manage_ingest_pipelines',
+      'manage_pipeline',
+      'read_pipeline',
+    ];
+
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [
-          'manage_index_templates',
-          'manage_ingest_pipelines',
-          'manage_pipeline',
-          'read_pipeline',
-        ],
+        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
         index: [
           {
             names: [name],
@@ -445,12 +448,13 @@ export class StreamsClient {
 
     return {
       manage:
-        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
         Object.values(privileges.index[name]).every((privilege) => privilege === true),
       monitor: privileges.index[name].monitor,
       lifecycle:
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
+      text_structure: privileges.cluster.monitor_text_structure,
     };
   }
 
