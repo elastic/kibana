@@ -30,14 +30,36 @@ To validate that your connectivity problems are caused by using a proxy, you can
 
 OpenAI connectors have the following configuration properties:
 
-Name
-:   The name of the connector.
+| Field            | Required for         | Description                                                                                 |
+|------------------|---------------------|---------------------------------------------------------------------------------------------|
+| Name             | All                 | The name of the connector.                                                                  |
+| OpenAI provider  | All                 | The API provider: `OpenAI`, `Azure OpenAI`, or `Other` (OpenAI-compatible service).         |
+| URL              | All                 | The API endpoint URL for the selected provider.                                             |
+| Default model    | OpenAI/Other        | The default model for requests. **Required** for `Other`, optional for `OpenAI`.            |
+| Headers          | Optional            | Custom HTTP headers to include in requests.                                                 |
+| Verification mode| Other (PKI only)    | SSL verification mode for PKI authentication. Default: `full`.                              |
+| API key          | OpenAI/Azure/Other  | The API key for authentication. **Required** for `OpenAI` and `Azure OpenAI`. For `Other`, required unless PKI authentication is used. |
+| PKI fields       | Other (PKI only)    | See below. Only available for `Other` provider.                                             |
 
-OpenAI provider
-:   The OpenAI API provider, either OpenAI, Azure OpenAI, or Other (OpenAI-compatible service).
+#### PKI Authentication (Other provider only)
 
-URL
-:   The OpenAI request URL.
+When using the `Other` provider, you can use PKI (certificate-based) authentication. With PKI, you can also optionally include an API key if your OpenAI-compatible service supports or requires one. The following fields are supported for PKI:
+
+- **Certificate data** (`certificateData`): PEM-encoded certificate content, base64-encoded. (**Required for PKI**)
+- **Private key data** (`privateKeyData`): PEM-encoded private key content, base64-encoded. (**Required for PKI**)
+- **CA data** (`caData`, optional): PEM-encoded CA certificate content, base64-encoded.
+- **API key** (`apiKey`, optional): The API key for authentication, if required by your service.
+- **Verification mode** (`verificationMode`): SSL verification mode for PKI authentication. Options:
+  - `full` (default): Verify server's certificate and hostname
+  - `certificate`: Verify only the server's certificate
+  - `none`: Skip verification (not recommended for production)
+
+**Note:**
+- All PKI fields must be PEM-encoded and base64-encoded when sent via API.
+- If any PKI field is provided, both `certificateData` and `privateKeyData` are required and must be valid PEM.
+- With PKI, you may also include an API key if your provider supports or requires it.
+- If PKI is not used, `apiKey` is required for the `Other` provider.
+- For `OpenAI` and `Azure OpenAI`, only `apiKey` is supported for authentication.
 
 Default model
 :   The default model to use for requests. This is required when the provider is `Other` and optional when the provider is `OpenAI`.
