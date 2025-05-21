@@ -17,47 +17,14 @@ properties:
   defaultModel:
     type: string
     description: The default model to use for requests.
-  certificateFile:
-    oneOf:
-      - type: string
-        description: Path to the PKI certificate file (.pem).
-        minLength: 1
-      - type: array
-        items:
-          type: string
-          minLength: 1
-        minItems: 1
-        description: Array of paths to PKI certificate files (.pem).
   certificateData:
     type: string
     description: PEM-encoded certificate content.
     minLength: 1
-  privateKeyFile:
-    oneOf:
-      - type: string
-        description: Path to the PKI private key file (.pem).
-        minLength: 1
-      - type: array
-        items:
-          type: string
-          minLength: 1
-        minItems: 1
-        description: Array of paths to PKI private key files (.pem).
   privateKeyData:
     type: string
     description: PEM-encoded private key content.
     minLength: 1
-  caFile:
-    oneOf:
-      - type: string
-        description: Path to the CA certificate file (.pem).
-        minLength: 1
-      - type: array
-        items:
-          type: string
-          minLength: 1
-        minItems: 1
-        description: Array of paths to CA certificate files (.pem).
   caData:
     type: string
     description: PEM-encoded CA certificate content.
