@@ -16,7 +16,7 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { pkiSecretsValidator } from './lib/other_openai_utils';
+import { nonPkiSecretsValidator, pkiSecretsValidator } from './lib/other_openai_utils';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,
@@ -49,13 +49,12 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
 });
 
 const secretsValidator = (secretsObject: Secrets) => {
-  if (
-    ('certificateData' in secretsObject && secretsObject.certificateData) ||
-    ('caData' in secretsObject && secretsObject.caData) ||
-    ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
-  ) {
-    pkiSecretsValidator(secretsObject);
-  }
+  const validatorFn =
+    'certificateData' in secretsObject && secretsObject.certificateData
+      ? pkiSecretsValidator
+      : nonPkiSecretsValidator;
+  validatorFn(secretsObject);
+
   return secretsObject;
 };
 

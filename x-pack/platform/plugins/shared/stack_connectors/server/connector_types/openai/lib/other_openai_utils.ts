@@ -224,3 +224,17 @@ export const pkiSecretsValidator = (secretsObject: Secrets): void => {
     throw new Error('PKI configuration requires certificate and private key');
   }
 };
+/**
+ * Validates the apiKey in the secrets object for non-PKI authentication.
+ * @param secretsObject
+ */
+export const nonPkiSecretsValidator = (secretsObject: Secrets): void => {
+  if (!secretsObject.apiKey) {
+    throw Object.assign(
+      new Error('[apiKey]: expected value of type [string] but got [undefined]'),
+      {
+        statusCode: 400,
+      }
+    );
+  }
+};
