@@ -51,9 +51,9 @@ export function getDefaultSourceFields(
   return indexFields;
 }
 
-export function getIndicesWithNoSourceFields(
+export const getIndicesWithNoSourceFields = (
   fields: QueryGenerationFieldDescriptors
-): string | undefined {
+): string[] | undefined => {
   const defaultSourceFields = getDefaultSourceFields(fields);
   const indices = Object.keys(defaultSourceFields).reduce<string[]>((result, index: string) => {
     if (defaultSourceFields[index].length === 0) {
@@ -63,8 +63,8 @@ export function getIndicesWithNoSourceFields(
     return result;
   }, []);
 
-  return indices.length === 0 ? undefined : indices.join();
-}
+  return indices.length === 0 ? undefined : indices;
+};
 
 export function getDefaultQueryFields(
   fieldDescriptors: QueryGenerationFieldDescriptors

@@ -260,7 +260,7 @@ describe('fields', () => {
   });
 
   describe('getIndicesWithNoSourceFields', () => {
-    it('should return undefined if all indices have source fields', () => {
+    it('should return list of empty indices', () => {
       const fieldDescriptors: QueryGenerationFieldDescriptors = {
         empty_index: {
           elser_query_fields: [],
@@ -279,7 +279,20 @@ describe('fields', () => {
           semantic_fields: [],
         },
       };
-      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toBe('empty_index');
+      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toEqual(['empty_index']);
+    });
+    it('should return undefined if all indices have source fields', () => {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
+        index1: {
+          elser_query_fields: [],
+          dense_vector_query_fields: [],
+          bm25_query_fields: ['field2'],
+          source_fields: ['field1'],
+          skipped_fields: 0,
+          semantic_fields: [],
+        },
+      };
+      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toEqual(undefined);
     });
   });
 });
