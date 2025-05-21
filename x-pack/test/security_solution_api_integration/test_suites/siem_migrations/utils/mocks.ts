@@ -21,6 +21,7 @@ import { generateAssistantComment } from '@kbn/security-solution-plugin/server/l
 
 const SIEM_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;
+const SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-resources-default`;
 const SOME_USER_ID = 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0';
 
 export const defaultOriginalRule: OriginalRule = {
@@ -189,7 +190,7 @@ export const createMigrationRules = async (
   return ids;
 };
 
-export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
+export const deleteAllRuleMigrations = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [SIEM_MIGRATIONS_INDEX_PATTERN],
     query: {
@@ -206,5 +207,88 @@ export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
     },
     ignore_unavailable: true,
     refresh: true,
+  });
+  await es.deleteByQuery({
+    index: [SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN],
+    query: {
+      match_all: {},
+    },
+    ignore_unavailable: true,
+    refresh: true,
+  });
+};
+
+export const defaultMacroResource = {
+  type: 'macro',
+  name: 'host_event_count',
+  '@timestamp': '2025-05-21T15:23:15.505Z',
+  updated_by: SOME_USER_ID,
+  updated_at: '2025-05-21T15:23:15.505Z',
+  content: '`host_eventcount` | `daysago($lessThan$)` | `hoursago($greaterThan$,' > ')`',
+};
+
+export const defaultSplunkLookupResource = {
+  type: 'lookup',
+  name: 'splunk_lookup',
+  '@timestamp': '2025-05-21T15:23:15.505Z',
+  updated_by: SOME_USER_ID,
+  updated_at: '2025-05-21T15:23:15.505Z',
+};
+
+export const createMacrosForMigrationId = async ({
+  es,
+  migrationId,
+  count,
+}: {
+  es: Client;
+  migrationId: string;
+  count: number;
+}) => {
+  const macros = [];
+  for (let i = 0; i < count; i++) {
+    macros.push({
+      ...defaultMacroResource,
+      migration_id: migrationId,
+      name: `macro_${i}`,
+    });
+  }
+
+  const createMacroOperations = macros.flatMap((macro) => [
+    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
+    macro,
+  ]);
+
+  await es.bulk({
+    refresh: 'wait_for',
+    operations: [...createMacroOperations],
+  });
+};
+
+export const createLookupsForMigrationId = async ({
+  es,
+  migrationId,
+  count,
+}: {
+  es: Client;
+  migrationId: string;
+  count: number;
+}) => {
+  const lookups = [];
+  for (let i = 0; i < count; i++) {
+    lookups.push({
+      ...defaultSplunkLookupResource,
+      migration_id: migrationId,
+      name: `lookup_${i}`,
+    });
+  }
+
+  const createLookupOperations = lookups.flatMap((lookup) => [
+    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
+    lookup,
+  ]);
+
+  await es.bulk({
+    refresh: 'wait_for',
+    operations: [...createLookupOperations],
   });
 };

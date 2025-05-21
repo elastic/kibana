@@ -7,12 +7,18 @@
 
 import expect from 'expect';
 import {
-  deleteAllMigrationRules,
+  createLookupsForMigrationId,
+  createMacrosForMigrationId,
+  deleteAllRuleMigrations,
   ruleMigrationRouteHelpersFactory,
   splunkRuleWithResources,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getRuleMigrationFromES, getRulesPerMigrationFromES } from '../../utils/es_queries';
+import {
+  getResoucesPerMigrationFromES,
+  getRuleMigrationFromES,
+  getRulesPerMigrationFromES,
+} from '../../utils/es_queries';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -22,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Delete API', () => {
     let migrationId: string;
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
       const response = await ruleMigrationRoutes.create({});
       migrationId = response.body.migration_id;
     });
@@ -46,6 +52,18 @@ export default ({ getService }: FtrProviderContext) => {
           payload: [splunkRuleWithResources],
         });
 
+        await createMacrosForMigrationId({
+          es,
+          migrationId,
+          count: 40,
+        });
+
+        await createLookupsForMigrationId({
+          es,
+          migrationId,
+          count: 40,
+        });
+
         let migrationsFromES = await getRuleMigrationFromES({
           es,
           migrationId,
@@ -58,6 +76,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(rulesFromES.hits.hits).toHaveLength(1);
 
+        let resourcesFromES = await getResoucesPerMigrationFromES({
+          es,
+          migrationId,
+        });
+
+        expect(resourcesFromES.hits.hits).toHaveLength(83);
+
         await ruleMigrationRoutes.delete({
           migrationId,
           expectStatusCode: 200,
@@ -67,6 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           migrationId,
         });
+
         expect(rulesFromES.hits.hits).toHaveLength(0);
 
         migrationsFromES = await getRuleMigrationFromES({
@@ -74,6 +100,12 @@ export default ({ getService }: FtrProviderContext) => {
           migrationId,
         });
         expect(migrationsFromES.hits.hits).toHaveLength(0);
+
+        resourcesFromES = await getResoucesPerMigrationFromES({
+          es,
+          migrationId,
+        });
+        expect(resourcesFromES.hits.hits).toHaveLength(0);
       });
 
       describe('Error handling', () => {

@@ -59,6 +59,7 @@ export class RuleMigrationSpaceIndexMigrator {
     const index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
     const result = await this.esClient.search<StoredSiemMigration>({
       index,
+      size: MAX_ES_SIZE,
       query: {
         match_all: {},
       },

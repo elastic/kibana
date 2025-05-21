@@ -424,7 +424,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    * */
   async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
     const index = await this.getIndexName();
-    const rulesToBeDeleted = await this.get(migrationId);
+    const rulesToBeDeleted = await this.get(migrationId, { size: 10000 });
     const rulesToBeDeletedDocIds = rulesToBeDeleted.data.map((rule) => rule.id);
 
     return rulesToBeDeletedDocIds.map((docId) => ({

@@ -37,13 +37,10 @@ export const getRulesPerMigrationFromES = async ({
 }) => {
   return await es.search({
     index: RULES_INDEX_PATTERN,
+    size: 10000,
     query: {
-      bool: {
-        filter: {
-          term: {
-            migration_id: migrationId,
-          },
-        },
+      term: {
+        migration_id: migrationId,
       },
     },
   });
@@ -58,13 +55,10 @@ export const getResoucesPerMigrationFromES = async ({
 }) => {
   return await es.search({
     index: RESOURCES_INDEX_PATTERN,
+    size: 10000,
     query: {
-      bool: {
-        filter: {
-          term: {
-            migration_id: migrationId,
-          },
-        },
+      term: {
+        migration_id: migrationId,
       },
     },
   });
