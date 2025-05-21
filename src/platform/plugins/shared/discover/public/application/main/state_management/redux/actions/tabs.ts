@@ -8,7 +8,6 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
@@ -60,11 +59,8 @@ export const setTabs: InternalStateThunkActionCreator<
     );
   };
 
-export const updateTabs: InternalStateThunkActionCreator<
-  [TabbedContentState & { groupId?: string }],
-  Promise<void>
-> =
-  ({ items, selectedItem, groupId }) =>
+export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
+  ({ items, selectedItem }) =>
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
@@ -73,7 +69,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       return {
         ...defaultTabState,
         ...existingTab,
-        ...pick(item, 'id', 'label', 'closedAt'),
+        ...pick(item, 'id', 'label'),
       };
     });
 
@@ -127,7 +123,6 @@ export const updateTabs: InternalStateThunkActionCreator<
         allTabs: updatedTabs,
         selectedTabId: selectedItem?.id ?? currentTab.id,
         recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
-        groupId: groupId ?? currentState.tabs.groupId,
       })
     );
   };
@@ -149,12 +144,10 @@ export const initializeTabs: InternalStateThunkActionCreator<
 > =
   ({ userId, spaceId }) =>
   (dispatch, _, { tabsStorageManager }) => {
-    const defaultGroupId = uuidv4();
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
       defaultTabState,
-      defaultGroupId,
     });
 
     dispatch(setTabs(initialTabsState));
@@ -166,10 +159,7 @@ export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) =>
     ...createTabItem([]),
   };
 
-  const newTabsGroupId = uuidv4();
-  return dispatch(
-    updateTabs({ items: [defaultTab], selectedItem: defaultTab, groupId: newTabsGroupId })
-  );
+  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab }));
 };
 
 export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string }]> =
@@ -199,10 +189,8 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
       }
     }
 
-    const newTabsGroupId = uuidv4();
     return dispatch(
       updateTabs({
-        groupId: newTabsGroupId,
         items,
         selectedItem: selectedItem || currentTab,
       })

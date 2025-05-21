@@ -24,10 +24,9 @@ import { usePreviewData } from './use_preview_data';
 export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const allTabs = useInternalStateSelector(selectAllTabs);
+  const items = useInternalStateSelector(selectAllTabs);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const groupId = useInternalStateSelector((state) => state.tabs.groupId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
@@ -36,8 +35,8 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   );
 
   const createItem: UnifiedTabsProps['createItem'] = useCallback(
-    () => createTabItem(allTabs),
-    [allTabs]
+    () => createTabItem(items),
+    [items]
   );
 
   const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
@@ -47,10 +46,9 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
 
   return (
     <UnifiedTabs
-      key={groupId}
       services={services}
-      initialItems={allTabs}
-      initialSelectedItemId={currentTabId}
+      items={items}
+      selectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
       createItem={createItem}
       getPreviewData={getPreviewData}

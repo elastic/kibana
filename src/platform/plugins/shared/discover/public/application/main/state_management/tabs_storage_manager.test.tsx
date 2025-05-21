@@ -123,7 +123,6 @@ describe('TabsStorageManager', () => {
     tabsStorageManager.loadLocally({
       userId: mockUserId, // register userId and spaceId in tabsStorageManager
       spaceId: mockSpaceId,
-      defaultGroupId: 'test',
       defaultTabState,
     });
 
@@ -131,7 +130,6 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'set');
 
     const props: TabsInternalStatePayload = {
-      groupId: 'group1',
       allTabs: [mockTab1, mockTab2],
       selectedTabId: 'tab1',
       recentlyClosedTabs: [mockRecentlyClosedTab],
@@ -174,7 +172,6 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'get');
 
     const props: TabsInternalStatePayload = {
-      groupId: 'group2',
       allTabs: [mockTab1, mockTab2],
       selectedTabId: 'tab2',
       recentlyClosedTabs: [mockRecentlyClosedTab],
@@ -200,7 +197,6 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultGroupId: props.groupId,
       defaultTabState,
     });
 
@@ -224,7 +220,6 @@ describe('TabsStorageManager', () => {
     jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
 
     const props: TabsInternalStatePayload = {
-      groupId: 'group3',
       allTabs: [omit(mockRecentlyClosedTab, 'closedAt'), omit(mockRecentlyClosedTab2, 'closedAt')],
       selectedTabId: mockRecentlyClosedTab2.id,
       recentlyClosedTabs: [
@@ -260,7 +255,6 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultGroupId: props.groupId,
       defaultTabState,
     });
 
@@ -281,7 +275,6 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'get');
 
     const props: TabsInternalStatePayload = {
-      groupId: 'group2',
       allTabs: [mockTab1, mockTab2],
       selectedTabId: 'tab2',
       recentlyClosedTabs: [mockRecentlyClosedTab],
@@ -307,7 +300,6 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: 'different',
       spaceId: mockSpaceId,
-      defaultGroupId: props.groupId,
       defaultTabState,
     });
 
@@ -355,13 +347,11 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultGroupId: 'test',
       defaultTabState,
     });
 
     expect(loadedProps).toEqual(
       expect.objectContaining({
-        groupId: 'test',
         recentlyClosedTabs: [
           { ...mockTab1, closedAt: newClosedAt },
           { ...mockTab2, closedAt: newClosedAt },

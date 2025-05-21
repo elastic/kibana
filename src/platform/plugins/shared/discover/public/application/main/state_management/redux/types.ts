@@ -78,7 +78,6 @@ export interface DiscoverInternalState {
   initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
-    groupId: string;
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
     recentlyClosedTabIds: string[];

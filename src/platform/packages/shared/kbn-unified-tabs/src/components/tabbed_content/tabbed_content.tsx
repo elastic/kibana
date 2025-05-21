@@ -27,8 +27,8 @@ import {
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
-  initialItems: TabItem[];
-  initialSelectedItemId?: string;
+  items: TabItem[];
+  selectedItemId?: string;
   recentlyClosedItems: TabItem[];
   'data-test-subj'?: string;
   services: TabsServices;
@@ -44,8 +44,8 @@ export interface TabbedContentState {
 }
 
 export const TabbedContent: React.FC<TabbedContentProps> = ({
-  initialItems,
-  initialSelectedItemId,
+  items: managedItems,
+  selectedItemId: managedSelectedItemId,
   recentlyClosedItems,
   maxItemsCount,
   services,
@@ -56,14 +56,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
-  const [state, _setState] = useState<TabbedContentState>(() => {
-    return {
-      items: initialItems,
-      selectedItem:
-        (initialSelectedItemId && initialItems.find((item) => item.id === initialSelectedItemId)) ||
-        initialItems[0],
-    };
-  });
+  const state = useMemo(
+    () => prepareStateFromProps(managedItems, managedSelectedItemId),
+    [managedItems, managedSelectedItemId]
+  );
   const { items, selectedItem } = state;
   const stateRef = React.useRef<TabbedContentState>();
   stateRef.current = state;
@@ -75,10 +71,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       }
 
       const nextState = getNextState(stateRef.current);
-      _setState(nextState);
       onChanged(nextState);
     },
-    [_setState, onChanged]
+    [onChanged]
   );
 
   const onLabelEdited = useCallback(
@@ -215,3 +210,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 };
+
+function prepareStateFromProps(items: TabItem[], selectedItemId?: string): TabbedContentState {
+  const selectedItem = selectedItemId && items.find((item) => item.id === selectedItemId);
+  return {
+    items,
+    selectedItem: selectedItem || items[0],
+  };
+}

@@ -46,7 +46,6 @@ const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
 };
 
 export interface TabsInternalStatePayload {
-  groupId: string;
   allTabs: TabState[];
   selectedTabId: string;
   recentlyClosedTabs: RecentlyClosedTabState[];
@@ -78,7 +77,6 @@ export interface TabsStorageManager {
     userId: string;
     spaceId: string;
     defaultTabState: Omit<TabState, keyof TabItem>;
-    defaultGroupId: string;
   }) => TabsInternalStatePayload;
   loadTabAppStateFromLocalCache: (tabId: string) => TabStateInLocalStorage['appState'];
   loadTabGlobalStateFromLocalCache: (tabId: string) => TabStateInLocalStorage['globalState'];
@@ -353,12 +351,7 @@ export const createTabsStorageManager = ({
     return globalState;
   };
 
-  const loadLocally: TabsStorageManager['loadLocally'] = ({
-    userId,
-    spaceId,
-    defaultTabState,
-    defaultGroupId,
-  }) => {
+  const loadLocally: TabsStorageManager['loadLocally'] = ({ userId, spaceId, defaultTabState }) => {
     const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
@@ -393,7 +386,6 @@ export const createTabsStorageManager = ({
         // restore previously opened tabs
         if (openTabs.find((tab) => tab.id === selectedTabId)) {
           return {
-            groupId: defaultGroupId,
             allTabs: openTabs,
             selectedTabId,
             recentlyClosedTabs: closedTabs,
@@ -405,7 +397,6 @@ export const createTabsStorageManager = ({
         if (storedClosedTab) {
           // restore previously closed tabs, for example when only the default tab was shown
           return {
-            groupId: defaultGroupId,
             allTabs: storedTabsState.closedTabs
               .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
               .map((tab) => toTabState(tab, defaultTabState)),
@@ -427,7 +418,6 @@ export const createTabsStorageManager = ({
     );
 
     return {
-      groupId: defaultGroupId,
       allTabs: [defaultTab],
       selectedTabId: defaultTab.id,
       recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
