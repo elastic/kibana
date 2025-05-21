@@ -157,7 +157,9 @@ export const useHostsTable = () => {
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
 
-  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
+  const { value: formulas } = useAsync(() =>
+    inventoryModel.metrics.getFormulas({ schemas: ['ecs', 'semconv'] })
+  );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {

@@ -46,7 +46,7 @@ export const useKubernetesCharts = ({
   const model = useMemo(() => findInventoryModel('host'), []);
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kibernetesNode } = await model.metrics.getCharts();
+    const { kibernetesNode } = await model.metrics.getCharts({ schemas: ['ecs', 'semconv'] });
 
     const items = overview
       ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
@@ -92,7 +92,7 @@ export const useHostKpiCharts = ({
 
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, memory, disk } = await model.metrics.getCharts();
+    const { cpu, memory, disk } = await model.metrics.getCharts({ schemas: ['semconv', 'ecs'] });
 
     return [
       cpu.metric.cpuUsage,
@@ -123,7 +123,9 @@ const getHostsCharts = async ({
   overview?: boolean;
 }) => {
   const model = findInventoryModel('host');
-  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();
+  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
+    schemas: ['semconv'],
+  });
 
   switch (metric) {
     case 'cpu':

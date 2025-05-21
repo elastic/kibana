@@ -14,6 +14,7 @@ import {
   LOAD_5M_LABEL,
   NORMALIZED_LOAD_LABEL,
 } from '../../../shared/charts/constants';
+import { getFormulaForSchema } from '../../../shared/formulas/get_formula_for_schema';
 
 export const cpuUsageIowait: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.iowaitLabel', {
@@ -120,14 +121,22 @@ export const cpuUsageUser: LensBaseLayer = {
   decimals: 1,
 };
 
-export const cpuUsage: LensBaseLayer = {
-  label: CPU_USAGE_LABEL,
-  value: `defaults(
-        average(system.cpu.total.norm.pct), 
-        1-(average(metrics.system.cpu.utilization,kql='state: idle') + average(metrics.system.cpu.utilization,kql='state: wait'))
-    )`,
-  format: 'percent',
-  decimals: 0,
+export const cpuUsage: {
+  get: ({ schemas }: { schemas: Array<'ecs' | 'semconv'> }) => LensBaseLayer;
+} = {
+  get: ({ schemas }) => ({
+    label: CPU_USAGE_LABEL,
+    value: getFormulaForSchema({
+      formulaBySchema: {
+        ecs: 'average(system.cpu.total.norm.pct)',
+        semconv: `1-(average(metrics.system.cpu.utilization,kql='attributes.state: idle') + average(metrics.system.cpu.utilization,kql='attributes.state: wait'))`,
+        hybrid: `defaults(average(system.cpu.total.norm.pct), 1-(average(metrics.system.cpu.utilization,kql='attributes.state: idle') + average(metrics.system.cpu.utilization,kql='attributes.state: wait')))`,
+      },
+      schemas,
+    }),
+    format: 'percent',
+    decimals: 0,
+  }),
 };
 
 export const load1m: LensBaseLayer = {

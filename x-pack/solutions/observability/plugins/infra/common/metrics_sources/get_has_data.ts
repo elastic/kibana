@@ -14,6 +14,12 @@ export const getHasDataQueryParamsRT = rt.partial({
 
 export const getHasDataResponseRT = rt.partial({
   hasData: rt.boolean,
+  schemas: rt.array(
+    rt.keyof({
+      ecs: null,
+      semconv: null,
+    })
+  ),
 });
 
 export type GetHasDataQueryParams = rt.TypeOf<typeof getHasDataQueryParamsRT>;

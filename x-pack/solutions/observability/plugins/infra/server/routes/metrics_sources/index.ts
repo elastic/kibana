@@ -8,9 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { castArray } from 'lodash';
-import { EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
+import {
+  EVENT_DATASET,
+  EVENT_MODULE,
+  METRICSET_MODULE,
+  OTEL_RECEIVER_DATASET_VALUE,
+} from '../../../common/constants';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
@@ -222,29 +227,53 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const results = await infraMetricsClient.search({
-          allow_no_indices: true,
-          ignore_unavailable: true,
-          track_total_hits: true,
-          terminate_after: 1,
-          size: 0,
-          ...(modules.length > 0
-            ? {
-                query: {
-                  bool: {
-                    should: [
-                      ...termsQuery(EVENT_MODULE, ...modules),
-                      ...termsQuery(METRICSET_MODULE, ...modules),
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              }
-            : {}),
-        });
+        const [ecsResponse, otelResponse] = (
+          await infraMetricsClient.msearch([
+            {
+              track_total_hits: true,
+              terminate_after: 1,
+              size: 0,
+              ...(modules.length > 0
+                ? {
+                    query: {
+                      bool: {
+                        should: [
+                          ...termsQuery(EVENT_MODULE, ...modules),
+                          ...termsQuery(METRICSET_MODULE, ...modules),
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  }
+                : {}),
+            },
+            {
+              track_total_hits: true,
+              terminate_after: 1,
+              size: 0,
+              ...(modules.length > 0
+                ? {
+                    query: {
+                      bool: {
+                        must: [...termQuery(EVENT_DATASET, OTEL_RECEIVER_DATASET_VALUE)],
+                      },
+                    },
+                  }
+                : {}),
+            },
+          ])
+        ).responses;
+
+        const hasEcsData = ecsResponse.hits.total.value !== 0;
+        const hasOtelData = otelResponse.hits.total.value !== 0;
 
         return response.ok({
-          body: getHasDataResponseRT.encode({ hasData: results.hits.total.value !== 0 }),
+          body: getHasDataResponseRT.encode({
+            hasData: hasEcsData || hasOtelData,
+            schemas: (['ecs', 'semconv'] as const).filter((key) => {
+              return (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData);
+            }),
+          }),
         });
       } catch (err) {
         if (Boom.isBoom(err)) {

@@ -18,8 +18,11 @@ export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) a
 
 export const metrics: InventoryMetricsWithCharts<HostFormulas, HostCharts> = {
   snapshot,
-  getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
-  getCharts: async () => await import('./charts').then(({ charts }) => charts),
+  getFormulas: async ({ schemas }) =>
+    import('./formulas').then(({ formulas }) => formulas.get({ schemas })),
+
+  getCharts: async ({ schemas }) =>
+    import('./charts').then(({ charts }) => charts.get({ schemas })),
   defaultSnapshot: 'cpuV2',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

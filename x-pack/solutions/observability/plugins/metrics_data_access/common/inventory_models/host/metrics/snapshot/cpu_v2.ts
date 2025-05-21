@@ -13,4 +13,30 @@ export const cpuV2: MetricsUIAggregation = {
       field: 'system.cpu.total.norm.pct',
     },
   },
+  cpuIdleOtel: {
+    terms: {
+      field: 'attributes.state',
+      include: ['wait', 'idle'],
+    },
+    aggs: {
+      avg: {
+        avg: {
+          field: 'metrics.system.cpu.utilization',
+        },
+      },
+    },
+  },
+  cpuIdleTotalOtel: {
+    sum_bucket: {
+      buckets_path: 'cpuIdleOtel.avg',
+    },
+  },
+  cpuV2Otel: {
+    bucket_script: {
+      buckets_path: {
+        cpuIdleTotal: 'cpuIdleTotalOtel',
+      },
+      script: '1 - params.cpuIdleTotal',
+    },
+  },
 };

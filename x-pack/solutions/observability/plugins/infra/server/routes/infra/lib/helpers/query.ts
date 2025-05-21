@@ -11,7 +11,12 @@ import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-pl
 import type { estypes } from '@elastic/elasticsearch';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import type { SYSTEM_INTEGRATION } from '../../../../../common/constants';
-import { EVENT_MODULE, EVENT_DATASET, OTEL_RECEIVER_DATASET_VALUE, METRICSET_MODULE } from '../../../../../common/constants';
+import {
+  EVENT_MODULE,
+  EVENT_DATASET,
+  OTEL_RECEIVER_DATASET_VALUE,
+  METRICSET_MODULE,
+} from '../../../../../common/constants';
 import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
 export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {
@@ -27,16 +32,16 @@ export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) =
 };
 
 export const getOTelHostmetricsOrSystemIntegrationFilter = () => {
-    return {
-        bool: {
-        should: [
-            ...termQuery(EVENT_MODULE, 'system'),
-            ...termQuery(METRICSET_MODULE, 'system'),
-            ...termQuery(EVENT_DATASET, OTEL_RECEIVER_DATASET_VALUE),
-        ],
-        minimum_should_match: 1,
-        },
-    };
+  return {
+    bool: {
+      should: [
+        ...termQuery(EVENT_MODULE, 'system'),
+        ...termQuery(METRICSET_MODULE, 'system'),
+        ...termQuery(EVENT_DATASET, OTEL_RECEIVER_DATASET_VALUE),
+      ],
+      minimum_should_match: 1,
+    },
+  };
 };
 
 const getApmDocumentsFilter = async ({
