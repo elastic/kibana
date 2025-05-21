@@ -51,7 +51,6 @@ describe('streamGraph', () => {
   } as unknown as DefaultAssistantGraph;
   const mockOnLlmResponse = jest.fn().mockResolvedValue(null);
   const requestArgs = {
-    apmTracer: mockApmTracer,
     assistantGraph: mockAssistantGraph,
     inputs: {
       input: 'input',
@@ -68,6 +67,9 @@ describe('streamGraph', () => {
     telemetry: {
       reportEvent: jest.fn(),
     } as unknown as AnalyticsServiceSetup,
+    callbacks: [
+      mockApmTracer,
+    ]
   };
 
   beforeEach(() => {
