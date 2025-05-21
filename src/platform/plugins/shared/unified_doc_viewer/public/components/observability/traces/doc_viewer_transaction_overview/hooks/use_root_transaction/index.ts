@@ -10,7 +10,12 @@
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PARENT_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_DURATION_FIELD } from '@kbn/discover-utils';
+import {
+  PARENT_ID_FIELD,
+  SPAN_ID_FIELD,
+  TRACE_ID_FIELD,
+  TRANSACTION_DURATION_FIELD,
+} from '@kbn/discover-utils';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
@@ -41,7 +46,7 @@ async function getRootTransaction({
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_DURATION_FIELD],
+            fields: [TRANSACTION_DURATION_FIELD, SPAN_ID_FIELD],
             query: {
               bool: {
                 should: [
@@ -68,6 +73,7 @@ async function getRootTransaction({
 
 export interface Transaction {
   duration: number;
+  [SPAN_ID_FIELD]: string;
 }
 
 const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams) => {
@@ -92,9 +98,11 @@ const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams)
 
         const fields = result.rawResponse.hits.hits[0]?.fields;
         const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
+        const spanId = fields?.[SPAN_ID_FIELD];
 
         setTransaction({
           duration: transactionDuration || null,
+          [SPAN_ID_FIELD]: spanId || null,
         });
       } catch (err) {
         if (!signal.aborted) {

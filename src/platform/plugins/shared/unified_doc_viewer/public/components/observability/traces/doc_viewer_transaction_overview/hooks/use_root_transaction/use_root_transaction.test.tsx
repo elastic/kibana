@@ -12,7 +12,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 import { RootTransactionProvider, useRootTransactionContext } from '.';
-import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
+import {
+  SPAN_ID_FIELD,
+  TRANSACTION_DURATION_FIELD,
+  TRANSACTION_NAME_FIELD,
+} from '@kbn/discover-utils';
 
 jest.mock('../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -69,6 +73,7 @@ describe('useRootTransaction hook', () => {
   it('should update transaction when data is fetched successfully', async () => {
     const transactionName = 'Test Transaction';
     const transactionDuration = 1;
+    const spanId = 'spanId';
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
@@ -77,6 +82,7 @@ describe('useRootTransaction hook', () => {
               fields: {
                 [TRANSACTION_NAME_FIELD]: transactionName,
                 [TRANSACTION_DURATION_FIELD]: transactionDuration,
+                [SPAN_ID_FIELD]: spanId,
               },
             },
           ],
@@ -90,6 +96,7 @@ describe('useRootTransaction hook', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.transaction?.duration).toBe(transactionDuration);
+    expect(result.current.transaction?.[SPAN_ID_FIELD]).toBe(spanId);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
