@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  StateComparators,
+  diffComparators,
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
-import { StateComparators, initializeTitleManager } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
 import { DashboardSettings, DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
+// SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export function initializeSettingsManager(initialState?: DashboardState) {
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors
@@ -50,14 +56,17 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
   }
 
-  function getSettings() {
+  function getSettings(): DashboardSettings {
+    const titleState = titleManager.getLatestState();
     return {
-      ...titleManager.serialize(),
+      title: titleState.title ?? '',
+      description: titleState.description,
+      hidePanelTitles: titleState.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,
       tags: tags$.value,
-      timeRestore: timeRestore$.value,
+      timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
       useMargins: useMargins$.value,
     };
   }
@@ -74,6 +83,18 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     titleManager.api.setTitle(settings.title);
   }
 
+  const comparators: StateComparators<DashboardSettings> = {
+    title: titleComparators.title,
+    description: titleComparators.description,
+    hidePanelTitles: 'referenceEquality',
+    syncColors: 'referenceEquality',
+    syncCursor: 'referenceEquality',
+    syncTooltips: 'referenceEquality',
+    timeRestore: 'referenceEquality',
+    useMargins: 'referenceEquality',
+    tags: 'deepEquality',
+  };
+
   return {
     api: {
       ...titleManager.api,
@@ -88,23 +109,25 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       setTags,
       timeRestore$,
     },
-    comparators: {
-      ...titleManager.comparators,
-      syncColors: [syncColors$, setSyncColors],
-      syncCursor: [syncCursor$, setSyncCursor],
-      syncTooltips: [syncTooltips$, setSyncTooltips],
-      timeRestore: [timeRestore$, setTimeRestore],
-      useMargins: [useMargins$, setUseMargins],
-    } as StateComparators<Omit<DashboardSettings, 'tags'>>,
     internalApi: {
-      getState: (): DashboardSettings => {
-        const settings = getSettings();
-        return {
-          ...settings,
-          title: settings.title ?? '',
-          timeRestore: settings.timeRestore ?? DEFAULT_DASHBOARD_STATE.timeRestore,
-          hidePanelTitles: settings.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
-        };
+      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+        return combineLatest([
+          syncColors$,
+          syncCursor$,
+          syncTooltips$,
+          tags$,
+          timeRestore$,
+          useMargins$,
+
+          titleManager.anyStateChange$,
+        ]).pipe(
+          debounceTime(100),
+          map(() => getSettings()),
+          combineLatestWith(lastSavedState$),
+          map(([latestState, lastSavedState]) =>
+            diffComparators(comparators, lastSavedState, latestState)
+          )
+        );
       },
       reset: (lastSavedState: DashboardState) => {
         setSettings(lastSavedState);

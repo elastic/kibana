@@ -101,7 +101,6 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
-export const RULES_MANAGEMENT_PATH = `${RULES_PATH}/management` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -150,6 +149,8 @@ export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as con
 
 // AI SOC exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
+export const CONFIGURATIONS_INTEGRATIONS_PATH =
+  `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];

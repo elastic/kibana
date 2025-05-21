@@ -2948,7 +2948,7 @@ const kqlDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: ['FROM books\n| WHERE KQL("author: Faulkner")'],
   customParametersSnippet: '"""$0"""',
@@ -4662,7 +4662,7 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")',
@@ -8362,7 +8362,7 @@ const qstrDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
