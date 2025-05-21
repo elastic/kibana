@@ -16,7 +16,7 @@ import {
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
 import { CoreSetup } from '@kbn/core/server';
-import { KnowledgeBaseState } from '../../common';
+import { EIS_PRECONFIGURED_INFERENCE_IDS, KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 import {
   getConcreteWriteIndex,
@@ -128,12 +128,28 @@ export async function getKbModelStatus({
     inferenceId = currentInferenceId;
   }
 
+  // check if inference ID is an EIS inference ID
+  const isPreConfiguredInferenceIdInEIS = EIS_PRECONFIGURED_INFERENCE_IDS.includes(inferenceId);
+
   let endpoint: InferenceInferenceEndpointInfo;
   try {
     endpoint = await getInferenceEndpoint({ esClient, inferenceId });
     logger.debug(
       `Inference endpoint "${inferenceId}" found with model id "${endpoint?.service_settings?.model_id}"`
     );
+
+    // if the endpoint is in EIS, the model doesn't have to be downloaded and deployed
+    // Therefore, return the KB state as READY if the endpoint exists
+    if (isPreConfiguredInferenceIdInEIS && endpoint.service === 'elastic') {
+      return {
+        endpoint,
+        enabled,
+        kbState: KnowledgeBaseState.READY,
+        currentInferenceId,
+        concreteWriteIndex,
+        isReIndexing,
+      };
+    }
   } catch (error) {
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
@@ -242,6 +258,8 @@ export async function waitForKbModel({
         logger.debug('Knowledge base model is not yet ready. Retrying...');
         throw new Error('Knowledge base model is not yet ready');
       }
+
+      logger.debug('Knowledge base model is ready.');
     },
     { retries: 30, factor: 2, maxTimeout: 30_000 }
   );
