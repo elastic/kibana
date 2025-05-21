@@ -180,6 +180,38 @@ describe('single line query', () => {
       });
     });
 
+    describe('RERANK', () => {
+      test('single field', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      });
+
+      test('two fields', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      });
+
+      test('param as query', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+      });
+
+      test('param as field part', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+      });
+
+      test('param as inference ID', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+      });
+    });
+
     describe('FORK', () => {
       test('from single line', () => {
         const { text } =
