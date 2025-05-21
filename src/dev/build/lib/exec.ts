@@ -30,7 +30,6 @@ export async function exec(
   { level = 'debug', cwd, env, exitAfter, build }: Options = {}
 ) {
   const bufferLogs = build && build?.getBufferLogs();
-  const logFn = (line: string) => log[level](line);
 
   const proc = execa(cmd, args, {
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -48,19 +47,19 @@ export async function exec(
       .pipe(takeUntil(close$), toArray())
       .toPromise()
       .then((logs) => {
-        log.info(`--- ${build.buildDesc}`);
+        log.write(`--- ${build.buildDesc}`);
 
         log.indent(4, () => {
           log[level](chalk.dim('$'), cmd, ...args);
 
           if (logs?.length) {
-            logs.forEach(logFn);
+            logs.forEach((line: string) => log[level](line.trimStart()));
           }
         });
       });
   } else {
     log[level](chalk.dim('$'), cmd, ...args);
 
-    await watchStdioForLine(proc, logFn, exitAfter);
+    await watchStdioForLine(proc, (line: string) => log[level](line), exitAfter);
   }
 }
