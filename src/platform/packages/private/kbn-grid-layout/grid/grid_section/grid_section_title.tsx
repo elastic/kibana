@@ -18,22 +18,23 @@ import {
   EuiTitle,
   UseEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import type { CollapsibleSection } from './types';
 
-export const GridRowTitle = React.memo(
+export const GridSectionTitle = React.memo(
   ({
     readOnly,
-    rowId,
+    sectionId,
     editTitleOpen,
     setEditTitleOpen,
     toggleIsCollapsed,
     collapseButtonRef,
   }: {
     readOnly: boolean;
-    rowId: string;
+    sectionId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
     toggleIsCollapsed: () => void;
@@ -42,8 +43,15 @@ export const GridRowTitle = React.memo(
     const { gridLayoutStateManager } = useGridLayoutContext();
 
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowId];
-    const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
+    /**
+     * This element should never be rendered for "main" sections, so casting to CollapsibleSection
+     * is safe; however, if this somehow **did** happen for a main section, we would fall back to
+     * an empty string for the title (which should be fine)
+     */
+    const currentSection = gridLayoutStateManager.gridLayout$.value[sectionId] as
+      | CollapsibleSection
+      | undefined;
+    const [sectionTitle, setSectionTitle] = useState<string>(currentSection?.title ?? '');
 
     useEffect(() => {
       /**
@@ -51,17 +59,21 @@ export const GridRowTitle = React.memo(
        */
       const titleSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
-          map((gridLayout) => gridLayout[rowId]?.title ?? ''),
+          map((gridLayout) => {
+            const section = gridLayout[sectionId];
+            if (!section || section.isMainSection) return ''; // main sections cannot have titles
+            return section.title;
+          }),
           distinctUntilChanged()
         )
         .subscribe((title) => {
-          setRowTitle(title);
+          setSectionTitle(title);
         });
 
       return () => {
         titleSubscription.unsubscribe();
       };
-    }, [rowId, gridLayoutStateManager]);
+    }, [sectionId, gridLayoutStateManager]);
 
     useEffect(() => {
       /**
@@ -75,11 +87,13 @@ export const GridRowTitle = React.memo(
     const updateTitle = useCallback(
       (title: string) => {
         const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
-        newLayout[rowId].title = title;
+        const section = newLayout[sectionId];
+        if (section.isMainSection) return; // main sections cannot have titles
+        section.title = title;
         gridLayoutStateManager.gridLayout$.next(newLayout);
         setEditTitleOpen(false);
       },
-      [rowId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
+      [sectionId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
 
     return (
@@ -88,22 +102,22 @@ export const GridRowTitle = React.memo(
           <EuiButtonEmpty
             buttonRef={collapseButtonRef}
             color="text"
-            aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+            aria-label={i18n.translate('kbnGridLayout.section.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
             iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
             size="m"
-            id={`kbnGridRowTitle-${rowId}`}
-            aria-controls={`kbnGridRow-${rowId}`}
-            data-test-subj={`kbnGridRowTitle-${rowId}`}
+            id={`kbnGridSectionTitle-${sectionId}`}
+            aria-controls={`kbnGridSection-${sectionId}`}
+            data-test-subj={`kbnGridSectionTitle-${sectionId}`}
             textProps={false}
-            className={'kbnGridRowTitle--button'}
+            className={'kbnGridSectionTitle--button'}
             flush="both"
           >
             {editTitleOpen ? null : (
               <EuiTitle size="xs">
-                <h2>{rowTitle}</h2>
+                <h2>{sectionTitle}</h2>
               </EuiTitle>
             )}
           </EuiButtonEmpty>
@@ -114,17 +128,17 @@ export const GridRowTitle = React.memo(
             <EuiInlineEditTitle
               size="xs"
               heading="h2"
-              defaultValue={rowTitle}
+              defaultValue={sectionTitle}
               onSave={updateTitle}
               onCancel={() => setEditTitleOpen(false)}
               startWithEditOpen
               editModeProps={{
                 inputProps: { inputRef },
               }}
-              inputAriaLabel={i18n.translate('kbnGridLayout.row.editTitleAriaLabel', {
+              inputAriaLabel={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
               })}
-              data-test-subj={`kbnGridRowTitle-${rowId}--editor`}
+              data-test-subj={`kbnGridSectionTitle-${sectionId}--editor`}
             />
           </EuiFlexItem>
         ) : (
@@ -135,10 +149,10 @@ export const GridRowTitle = React.memo(
                   iconType="pencil"
                   onClick={() => setEditTitleOpen(true)}
                   color="text"
-                  aria-label={i18n.translate('kbnGridLayout.row.editRowTitle', {
+                  aria-label={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
                     defaultMessage: 'Edit section title',
                   })}
-                  data-test-subj={`kbnGridRowTitle-${rowId}--edit`}
+                  data-test-subj={`kbnGridSectionTitle-${sectionId}--edit`}
                 />
               </EuiFlexItem>
             )}
@@ -164,7 +178,7 @@ const styles = {
         svg: {
           transition: `transform ${euiTheme.animation.fast} ease`,
           transform: 'rotate(0deg)',
-          '.kbnGridRowContainer--collapsed &': {
+          '.kbnGridSectionHeader--collapsed &': {
             transform: 'rotate(-90deg) !important',
           },
         },
@@ -185,4 +199,4 @@ const styles = {
   }),
 };
 
-GridRowTitle.displayName = 'GridRowTitle';
+GridSectionTitle.displayName = 'GridSectionTitle';
