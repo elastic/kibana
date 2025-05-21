@@ -19,6 +19,10 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
+
 const lastRunDate = '2025-10-01T02:10:23.000Z';
 const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
   http.get.mockClear();

@@ -291,7 +291,7 @@ export const AlertDeleteModal = ({
   };
 
   if (!isVisible) {
-    return null;
+    return <div data-test-subj="alert-delete-modal-loaded" />;
   }
 
   return (
