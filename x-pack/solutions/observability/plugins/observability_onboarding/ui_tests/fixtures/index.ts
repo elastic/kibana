@@ -54,5 +54,3 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
 });
 
 export const generateIntegrationName = (name: string) => `${name}_${uuidv4().slice(0, 5)}`;
-
-export * as assertionMessages from './assertion_messages';
