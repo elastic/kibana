@@ -6,7 +6,7 @@
  */
 
 import { parseAddressList } from 'email-addresses';
-import { escapeRegExp } from 'lodash';
+import { matchWildcardPattern } from '@kbn/std/src/match_wildcard_pattern';
 import type { ValidatedEmail } from './types';
 import { InvalidEmailReason } from './types';
 import { hasMustacheTemplate } from './mustache_template';
@@ -20,13 +20,7 @@ export interface ValidateEmailAddressesOptions {
 }
 
 export const isAddressMatchingSomePattern = (address: string, patterns: string[]): boolean => {
-  return patterns.some((pattern) => {
-    // Escape special regex characters in the pattern except for '*'
-    const regexStr = '^' + pattern.split('*').map(escapeRegExp).join('.*') + '$';
-    const regex = new RegExp(regexStr, 'i');
-    const result = regex.test(address);
-    return result;
-  });
+  return patterns.some((pattern) => matchWildcardPattern({ pattern, str: address }));
 };
 
 // this can be useful for cases where a plugin needs this function,

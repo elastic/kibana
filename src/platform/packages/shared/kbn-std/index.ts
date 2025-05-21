@@ -32,3 +32,4 @@ export {
 export { ensureDeepObject, ensureValidObjectPath } from './src/ensure_deep_object';
 export { Semaphore } from './src/semaphore';
 export { stripVersionQualifier } from './src/strip_version_qualifier';
+export { matchWildcardPattern } from './src/match_wildcard_pattern';
