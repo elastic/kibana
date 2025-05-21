@@ -13,14 +13,11 @@ import { Config } from './config';
 import { Platform } from './platform';
 
 export class Build {
+  public buildDesc: string = '';
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
 
-  constructor(
-    private config: Config,
-    private bufferLogs = false,
-    private logBuffer: string[] = []
-  ) {}
+  constructor(private config: Config, private bufferLogs = false) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
@@ -61,11 +58,7 @@ export class Build {
     return this.bufferLogs;
   }
 
-  getLogBuffer() {
-    return this.logBuffer;
-  }
-
-  pushToLogBuffer(log: string) {
-    this.logBuffer.push(log);
+  setBuildDesc(desc: string) {
+    this.buildDesc = desc;
   }
 }

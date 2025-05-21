@@ -37,7 +37,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   async function execTask(desc: string, task: Task, build: Build): Promise<void>;
   async function execTask(desc: string, task: GlobalTask | Task, build?: Build): Promise<void> {
     if (!task.global && build && bufferLogs) {
-      build.pushToLogBuffer(desc);
+      build.setBuildDesc(desc);
       log.info(`Buffering logs for Task: ${desc}`);
     } else {
       log.info(desc);
@@ -80,7 +80,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   }
 
   const builds: Build[] = [];
-  builds.push(new Build(config, bufferLogs, []));
+  builds.push(new Build(config, bufferLogs));
 
   /**
    * Run a task by calling its `run()` method with three arguments:

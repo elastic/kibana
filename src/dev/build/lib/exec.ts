@@ -30,12 +30,7 @@ export async function exec(
   { level = 'debug', cwd, env, exitAfter, build }: Options = {}
 ) {
   const bufferLogs = build && build?.getBufferLogs();
-
-  if (bufferLogs) {
-    build.pushToLogBuffer(`${chalk.dim('$')} ${cmd} ${args.join(' ')}`);
-  } else {
-    log[level](chalk.dim('$'), cmd, ...args);
-  }
+  const logFn = (line: string) => log[level](line);
 
   const proc = execa(cmd, args, {
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -43,8 +38,6 @@ export async function exec(
     env,
     preferLocal: true,
   });
-
-  const logFn = (line: string) => log[level](line);
 
   if (bufferLogs) {
     const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe(map((chunk) => chunk.toString()));
@@ -55,14 +48,19 @@ export async function exec(
       .pipe(takeUntil(close$), toArray())
       .toPromise()
       .then((logs) => {
-        log.info('---------- START LOG BUFFER\n\n');
-        build.getLogBuffer().forEach(logFn);
-        log.info('---------- END LOG BUFFER\n\n');
-        if (logs?.length) {
-          log.indent(4, () => logs.forEach(logFn));
-        }
+        log.info(`--- ${build.buildDesc}`);
+
+        log.indent(4, () => {
+          log[level](chalk.dim('$'), cmd, ...args);
+
+          if (logs?.length) {
+            logs.forEach(logFn);
+          }
+        });
       });
   } else {
+    log[level](chalk.dim('$'), cmd, ...args);
+
     await watchStdioForLine(proc, logFn, exitAfter);
   }
 }
