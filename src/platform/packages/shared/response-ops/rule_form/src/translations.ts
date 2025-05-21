@@ -255,17 +255,6 @@ export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
-export const RULE_DETAILS_TITLE = i18n.translate('responseOpsRuleForm.ruleForm.ruleDetails.title', {
-  defaultMessage: 'Rule name and tags',
-});
-
-export const RULE_DETAILS_DESCRIPTION = i18n.translate(
-  'responseOpsRuleForm.ruleForm.ruleDetails.description',
-  {
-    defaultMessage: 'Define a name and tags for your rule.',
-  }
-);
-
 export const RULE_NAME_INPUT_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleNameInputTitle',
   {
@@ -564,7 +553,7 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinitionTitle',
   {
-    defaultMessage: 'Rule definition',
+    defaultMessage: 'Definition',
   }
 );
 
@@ -599,7 +588,7 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
-    defaultMessage: 'Rule details',
+    defaultMessage: 'Details',
   }
 );
 
