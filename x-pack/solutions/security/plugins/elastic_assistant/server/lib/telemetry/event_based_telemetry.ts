@@ -85,6 +85,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     OpenAndAcknowledgedAlertsTool?: number;
     SecurityLabsKnowledgeBaseTool?: number;
     ProductDocumentationTool?: number;
+    GenerateESQLTool?: number;
     CustomTool?: number;
   };
   model?: string;
@@ -175,6 +176,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
           },
         },
         SecurityLabsKnowledgeBaseTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        GenerateESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',

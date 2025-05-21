@@ -3,18 +3,18 @@ import { BaseTracer, Run } from "@langchain/core/tracers/base";
 import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { ESQL_GENERATION_VALIDATION_RESULT } from "../../../telemetry/event_based_telemetry";
 
-export interface TelemetryParams {
+export interface EsqlTelemetryParams {
     actionTypeId: string;
     model?: string;
 }
 
 export interface LangChainTracerFields extends BaseCallbackHandlerInput {
     telemetry: AnalyticsServiceSetup;
-    telemetryParams: TelemetryParams;
+    telemetryParams: EsqlTelemetryParams;
 }
 
-const SUCCESS_REPORT_NODE = 'buildSuccessReportFromLastMessage';
-const UNVALIDATED_REPORT_NODE = 'buildUnvalidatedReportFromLastMessage';
+export const SUCCESS_REPORT_NODE = 'buildSuccessReportFromLastMessage';
+export const UNVALIDATED_REPORT_NODE = 'buildUnvalidatedReportFromLastMessage';
 
 /**
  * Telemetry tracer that instruments ESQL generation.
@@ -23,11 +23,11 @@ export class EsqlTelemetryTracer extends BaseTracer implements LangChainTracerFi
     logger: Logger;
     name: string = 'esql_telemetry_tracer';
     telemetry: AnalyticsServiceSetup;
-    telemetryParams: TelemetryParams;
+    telemetryParams: EsqlTelemetryParams;
 
     constructor(fields: LangChainTracerFields, logger: Logger) {
         super(fields);
-        this.logger = logger.get('telemetryTracer');
+        this.logger = logger.get('esqlTelemetryTracer');
         this.telemetry = fields.telemetry;
         this.telemetryParams = fields.telemetryParams;
     }

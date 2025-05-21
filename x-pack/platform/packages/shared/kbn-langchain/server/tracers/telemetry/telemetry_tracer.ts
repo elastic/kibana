@@ -49,6 +49,7 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
 
 async onChainEnd(run: Run): Promise<void> {
     if (run.parent_run_id) {
+      // Don't report telemetry for child runs
       return;
     }
     const { eventType, ...telemetryParams } = this.telemetryParams;
