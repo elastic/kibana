@@ -43,7 +43,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   const mockSetSelectedSubCategory = jest.fn();
   const mockSetSearchTerm = jest.fn();
   const props = {
-    installedIntegrationsCount: 1,
+    activeIntegrationsCount: 1,
     isAgentRequired: false,
     availablePackagesResult: {
       isLoading: false,
