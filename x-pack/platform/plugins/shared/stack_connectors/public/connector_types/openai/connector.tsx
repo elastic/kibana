@@ -32,7 +32,6 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
@@ -157,12 +156,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                     },
                   ],
                   defaultValue: 'full',
-                  helpText: (
-                    <FormattedMessage
-                      defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
-                      id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
-                    />
-                  ),
+                  helpText: i18n.VERIFICATION_MODE_DESC,
                 }}
                 componentProps={{
                   euiFieldProps: {
@@ -177,7 +171,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
               <UseField
                 path="secrets.certificateData"
                 config={{
-                  label: 'CRT file',
+                  label: i18n.CERT_DATA_LABEL,
                   validations: [
                     {
                       validator: emptyField(CRT_REQUIRED),
@@ -192,17 +186,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                     accept: '.crt,.cert,.cer,.pem',
                   },
                 }}
-                helpText={
-                  <FormattedMessage
-                    defaultMessage="Raw PKI certificate content (PEM format) for cloud or on-premise deployments."
-                    id="xpack.stackConnectors.components.genAi.certificateDataDocumentation"
-                  />
-                }
+                helpText={i18n.CERT_DATA_DESC}
               />
               <UseField
                 path="secrets.privateKeyData"
                 config={{
-                  label: 'KEY file',
+                  label: i18n.KEY_DATA_LABEL,
                   validations: [
                     {
                       validator: emptyField(KEY_REQUIRED),
@@ -217,17 +206,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                     accept: '.key,.pem',
                   },
                 }}
-                helpText={
-                  <FormattedMessage
-                    defaultMessage="Raw PKI private key content (PEM format) for cloud or on-premise deployments."
-                    id="xpack.stackConnectors.components.genAi.privateKeyDataDocumentation"
-                  />
-                }
+                helpText={i18n.KEY_DATA_DESC}
               />
               <UseField
                 path="secrets.caData"
                 config={{
-                  label: 'CA CRT file',
+                  label: i18n.CA_DATA_LABEL,
                 }}
                 component={FilePickerField}
                 componentProps={{
@@ -237,12 +221,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                     accept: '.crt,.cert,.cer,.pem',
                   },
                 }}
-                helpText={
-                  <FormattedMessage
-                    defaultMessage="Raw CA certificate content (PEM) used to verify the server certificate."
-                    id="xpack.stackConnectors.components.genAi.caDataDocumentation"
-                  />
-                }
+                helpText={i18n.CA_DATA_DESC}
               />
             </>
           )}

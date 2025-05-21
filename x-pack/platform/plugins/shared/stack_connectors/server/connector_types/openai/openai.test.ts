@@ -241,6 +241,19 @@ describe('OpenAIConnector', () => {
           connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
         ).rejects.toThrow('API Error');
       });
+
+      it('passes timeout and signal to runApi', async () => {
+        const signal = jest.fn();
+        const timeout = 12345;
+        await connector.runApi(
+          { body: JSON.stringify({ messages: [] }), signal, timeout },
+          new ConnectorUsageCollector({ logger, connectorId: 'test' })
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ signal, timeout }),
+          expect.anything()
+        );
+      });
     });
 
     describe('streamApi', () => {
@@ -1552,6 +1565,32 @@ describe('OpenAIConnector', () => {
         });
       }).toThrow();
     });
+    it('should call runApi with sslOverrides when they exist', async () => {
+      const connector = new OpenAIConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        config,
+        secrets,
+        logger,
+        services: actionsMock.createServices(),
+      });
+      // @ts-ignore
+      connector.request = jest.fn().mockResolvedValue({ data: {} });
+      // @ts-ignore
+      connector.request = mockRequest;
+      await connector.runApi(
+        { body: JSON.stringify({ messages: [] }) },
+        new ConnectorUsageCollector({ logger, connectorId: 'test' })
+      );
+      expect(mockRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sslOverrides: expect.objectContaining({
+            verificationMode: 'full',
+          }),
+        }),
+        expect.anything()
+      );
+    });
   });
 
   describe('Organization/Project headers', () => {
@@ -1627,36 +1666,6 @@ describe('OpenAIConnector', () => {
       };
       // @ts-ignore
       expect(connector.getResponseErrorMessage(err)).toContain('Unauthorized API Error');
-    });
-  });
-
-  describe('Timeout and Signal propagation', () => {
-    it('passes timeout and signal to runApi', async () => {
-      const connector = new OpenAIConnector({
-        configurationUtilities: actionsConfigMock.create(),
-        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
-        config: {
-          apiUrl: 'https://api.openai.com/v1/chat/completions',
-          apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
-          headers: {},
-        },
-        secrets: { apiKey: '123' },
-        logger,
-        services: actionsMock.createServices(),
-      });
-      // @ts-ignore
-      connector.request = mockRequest;
-      const signal = jest.fn();
-      const timeout = 12345;
-      await connector.runApi(
-        { body: JSON.stringify({ messages: [] }), signal, timeout },
-        new ConnectorUsageCollector({ logger, connectorId: 'test' })
-      );
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ signal, timeout }),
-        expect.anything()
-      );
     });
   });
 });

@@ -75,14 +75,28 @@ export const DOCUMENTATION = i18n.translate(
 export const CERT_DATA_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.certificateDataLabel',
   {
-    defaultMessage: 'Certificate Content',
+    defaultMessage: 'Certificate file',
+  }
+);
+
+export const CERT_DATA_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certificateDataDocumentation',
+  {
+    defaultMessage: 'Raw PKI certificate content (PEM format) for cloud or on-premise deployments.',
   }
 );
 
 export const KEY_DATA_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.privateKeyDataLabel',
   {
-    defaultMessage: 'Private Key Content',
+    defaultMessage: 'Private Key file',
+  }
+);
+
+export const KEY_DATA_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.privateKeyDataDocumentation',
+  {
+    defaultMessage: 'Raw PKI private key content (PEM format) for cloud or on-premise deployments.',
   }
 );
 
@@ -90,6 +104,14 @@ export const VERIFICATION_MODE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.verificationModeLabel',
   {
     defaultMessage: 'SSL Verification Mode',
+  }
+);
+
+export const VERIFICATION_MODE_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeDocumentation',
+  {
+    defaultMessage:
+      "Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing).",
   }
 );
 
@@ -111,20 +133,6 @@ export const VERIFICATION_MODE_NONE = i18n.translate(
   'xpack.stackConnectors.components.genAi.verificationModeNoneLabel',
   {
     defaultMessage: 'None (Skip Verification)',
-  }
-);
-
-export const MISSING_CERTIFICATE = i18n.translate(
-  'xpack.stackConnectors.components.genAi.error.missingCertificate',
-  {
-    defaultMessage: 'Either certificate file or certificate data must be provided.',
-  }
-);
-
-export const MISSING_PRIVATE_KEY = i18n.translate(
-  'xpack.stackConnectors.components.genAi.error.missingPrivateKey',
-  {
-    defaultMessage: 'Either private key file or private key data must be provided.',
   }
 );
 
@@ -180,5 +188,12 @@ export const PKI_MODE_LABEL = i18n.translate('xpack.stackConnectors.genAi.pkiMod
 });
 
 export const CA_DATA_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.caDataLabel', {
-  defaultMessage: 'CA Certificate Data',
+  defaultMessage: 'CA certificate file',
 });
+
+export const CA_DATA_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.caDataDocumentation',
+  {
+    defaultMessage: 'Raw CA certificate content (PEM) used to verify the server certificate.',
+  }
+);

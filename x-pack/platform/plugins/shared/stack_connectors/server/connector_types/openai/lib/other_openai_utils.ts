@@ -113,9 +113,9 @@ const validatePKICertificates = ({
  * @returns A Buffer containing the PEM data.
  * @throws Will throw an error if no data is provided.
  */
-const loadBuffer = (data?: string, type?: 'CERTIFICATE' | 'PRIVATE KEY'): Buffer => {
+const loadBuffer = (data: string, type: 'CERTIFICATE' | 'PRIVATE KEY'): Buffer => {
   if (data) {
-    return Buffer.from(formatPEMContent(Buffer.from(data, 'base64').toString(), type!));
+    return Buffer.from(formatPEMContent(Buffer.from(data, 'base64').toString(), type));
   }
   throw new Error(`No ${type?.toLowerCase()} data provided`);
 };
