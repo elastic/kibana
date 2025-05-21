@@ -15,10 +15,9 @@ import { DashboardAttributes } from '../../types';
 export function transformSectionsIn(
   sections: DashboardAttributes['sections']
 ): DashboardSavedObjectAttributes['sections'] {
-  const updatedSections = sections?.map(({ id, order, ...rest }, index) => {
+  const updatedSections = sections?.map(({ id, ...rest }) => {
     return {
       ...rest,
-      order: order ?? index + 1,
       id: id ?? uuidv4(),
     };
   });

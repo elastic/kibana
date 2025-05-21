@@ -20,7 +20,6 @@ export const convertSectionArrayToSectionMap = (
     sectionsMap[sectionId] = {
       ...section,
       id: sectionId,
-      order: section.order ?? idx + 1,
     };
   });
   return sectionsMap;

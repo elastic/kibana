@@ -103,6 +103,7 @@ export const getSerializedState = ({
   };
   const savedPanels = convertPanelMapToPanelsArray(panels, true);
   const savedSections = convertSectionMapToSectionArray(sections);
+  console.log({ sections, savedSections });
   /**
    * Parse global time filter settings
    */

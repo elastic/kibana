@@ -102,6 +102,7 @@ export function initializeLayoutManager(
     const panels: DashboardPanelMap = {};
     const sections: DashboardSectionMap = {};
     const layout = layout$.value;
+    console.log('SERIALIZE', { layout });
     for (const sectionId of Object.keys(layout.sections)) {
       sections[sectionId] = { ...layout.sections[sectionId], id: sectionId };
     }

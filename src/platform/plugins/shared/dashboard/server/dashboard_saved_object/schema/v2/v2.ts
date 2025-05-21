@@ -13,12 +13,22 @@ import {
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
 
+const sectionGridDataSchema = schema.object({
+  y: schema.number(),
+  i: schema.string(),
+});
+
+// this is used for panels
+export const gridDataSchema = sectionGridDataSchema.extends({
+  x: schema.number(),
+  w: schema.number(),
+  h: schema.number(),
+  sectionId: schema.maybe(schema.string()),
+});
+
 export const sectionSchema = schema.object({
   id: schema.string({
     meta: { description: 'The unique ID of the section.' },
-  }),
-  y: schema.number({
-    min: 1,
   }),
   title: schema.string({
     meta: { description: 'The title of the section.' },
@@ -29,6 +39,7 @@ export const sectionSchema = schema.object({
       defaultValue: false,
     })
   ),
+  gridData: sectionGridDataSchema,
 });
 
 export const controlGroupInputSchema = controlGroupInputSchemaV1.extends(
@@ -45,12 +56,3 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   },
   { unknowns: 'ignore' }
 );
-
-export const gridDataSchema = schema.object({
-  x: schema.number(),
-  y: schema.number(),
-  w: schema.number(),
-  h: schema.number(),
-  i: schema.string(),
-  sectionId: schema.maybe(schema.string()),
-});

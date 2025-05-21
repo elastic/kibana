@@ -103,6 +103,8 @@ export const loadDashboardState = async ({
     }
   }
 
+  console.log({ rawDashboardContent });
+
   if (!rawDashboardContent || !rawDashboardContent.version) {
     return {
       dashboardInput: newDashboardState,
@@ -150,7 +152,7 @@ export const loadDashboardState = async ({
   const query = migrateLegacyQuery(
     searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
-
+  console.log({ attributes });
   const {
     refreshInterval,
     description,
