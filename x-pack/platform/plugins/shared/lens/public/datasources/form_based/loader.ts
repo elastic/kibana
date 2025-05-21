@@ -18,7 +18,15 @@ import {
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import {
+  FormBasedPersistedState,
+  FormBasedLayer,
+  CombinedFormBasedPersistedState,
+  isPersistedFormBasedLayer,
+  CombinedFormBasedPrivateState,
+  isFormBasedLayer,
+  TextBasedLayer,
+} from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
@@ -47,37 +55,45 @@ function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
 }
 
-export function extractReferences({ layers }: FormBasedPrivateState) {
+export function extractReferences({ layers }: CombinedFormBasedPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableState: FormBasedPersistedState = {
     layers: {},
   };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
-    persistableState.layers[layerId] = persistableLayer;
-    savedObjectReferences.push({
-      type: 'index-pattern',
-      id: indexPatternId,
-      name: getLayerReferenceName(layerId),
-    });
+    if (isPersistedFormBasedLayer(persistableLayer)) {
+      persistableState.layers[layerId] = persistableLayer;
+      savedObjectReferences.push({
+        type: 'index-pattern',
+        id: indexPatternId!,
+        name: getLayerReferenceName(layerId),
+      });
+    } else {
+      throw new Error('`Layer ${layerId} is not a persisted form-based layer`);');
+    }
   });
   return { savedObjectReferences, state: persistableState };
 }
 
 export function injectReferences(
-  state: FormBasedPersistedState,
+  state: CombinedFormBasedPersistedState,
   references: SavedObjectReference[]
 ) {
-  const layers: Record<string, FormBasedLayer> = {};
+  const layers: Record<string, FormBasedLayer | TextBasedLayer> = {};
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     const indexPatternId = references.find(
       ({ name }) => name === getLayerReferenceName(layerId)
     )?.id;
 
-    if (indexPatternId) {
-      layers[layerId] = {
-        ...persistedLayer,
-        indexPatternId,
-      };
+    if (isPersistedFormBasedLayer(persistedLayer)) {
+      if (indexPatternId) {
+        layers[layerId] = {
+          ...persistedLayer,
+          indexPatternId,
+        };
+      }
+    } else {
+      layers[layerId] = persistedLayer;
     }
   });
   return {
@@ -89,7 +105,7 @@ function createStateFromPersisted({
   persistedState,
   references,
 }: {
-  persistedState?: FormBasedPersistedState;
+  persistedState?: CombinedFormBasedPersistedState;
   references?: SavedObjectReference[];
 }) {
   return persistedState && references ? injectReferences(persistedState, references) : undefined;
@@ -103,7 +119,7 @@ function getUsedIndexPatterns({
   defaultIndexPatternId,
 }: {
   state?: {
-    layers: Record<string, FormBasedLayer>;
+    layers: Record<string, FormBasedLayer | TextBasedLayer>;
   };
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
@@ -143,14 +159,14 @@ export function loadInitialState({
   indexPatternRefs = [],
   indexPatterns = {},
 }: {
-  persistedState?: FormBasedPersistedState;
+  persistedState?: CombinedFormBasedPersistedState;
   references?: SavedObjectReference[];
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   indexPatternRefs?: IndexPatternRef[];
   indexPatterns?: Record<string, IndexPattern>;
-}): FormBasedPrivateState {
+}): CombinedFormBasedPrivateState {
   const state = createStateFromPersisted({ persistedState, references });
   const { usedPatterns, allIndexPatternIds: indexPatternIds } = getUsedIndexPatterns({
     state,
@@ -179,6 +195,7 @@ export function loadInitialState({
   return {
     layers: {},
     ...state,
+    indexPatternRefs: [],
     currentIndexPatternId,
   };
 }
@@ -190,11 +207,12 @@ export function changeIndexPattern({
   indexPatterns,
 }: {
   indexPatternId: string;
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
 }) {
   setLastUsedIndexPatternId(storage, indexPatternId);
+
   return {
     ...state,
     layers: isSingleEmptyLayer(state.layers)
@@ -213,7 +231,7 @@ export function renameIndexPattern({
 }: {
   oldIndexPatternId: string;
   newIndexPatternId: string;
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
 }) {
   return {
     ...state,
@@ -235,7 +253,7 @@ export async function triggerActionOnIndexPatternChange({
 }: {
   indexPatternId: string;
   layerId: string;
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   uiActions: UiActionsStart;
 }) {
   const fromDataView = state.layers[layerId]?.indexPatternId;
@@ -264,7 +282,7 @@ export function changeLayerIndexPattern({
 }: {
   indexPatternId: string;
   layerIds: string[];
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   replaceIfPossible?: boolean;
   storage: IStorageWrapper;
   indexPatterns: Record<string, IndexPattern>;
@@ -289,7 +307,7 @@ export function changeLayerIndexPattern({
   };
 }
 
-function isSingleEmptyLayer(layerMap: FormBasedPrivateState['layers']) {
+function isSingleEmptyLayer(layerMap: CombinedFormBasedPrivateState['layers']) {
   const layers = Object.values(layerMap);
-  return layers.length === 1 && layers[0].columnOrder.length === 0;
+  return layers.length === 1 && isFormBasedLayer(layers[0]) && layers[0].columnOrder.length === 0;
 }

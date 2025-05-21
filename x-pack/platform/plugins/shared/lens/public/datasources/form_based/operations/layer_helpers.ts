@@ -30,7 +30,13 @@ import {
   type TermsIndexPatternColumn,
   type FieldBasedOperationErrorMessage,
 } from './definitions';
-import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
+import {
+  type CombinedFormBasedPrivateState,
+  isFormBasedLayer,
+  type DataViewDragDropOperation,
+  type FormBasedLayer,
+  type TextBasedLayer,
+} from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
 import {
@@ -71,24 +77,35 @@ interface ColumnChange {
 }
 
 interface ColumnCopy {
-  layers: Record<string, FormBasedLayer>;
+  layers: Record<string, FormBasedLayer | TextBasedLayer>;
   target: DataViewDragDropOperation;
   source: DataViewDragDropOperation;
   shouldDeleteSource?: boolean;
 }
 
-export function copyColumn({ layers, source, target }: ColumnCopy): Record<string, FormBasedLayer> {
+export function copyColumn({
+  layers,
+  source,
+  target,
+}: ColumnCopy): Record<string, FormBasedLayer | TextBasedLayer> {
   return createCopiedColumn(layers, target, source);
 }
 
 function createCopiedColumn(
-  layers: Record<string, FormBasedLayer>,
+  layers: Record<string, FormBasedLayer | TextBasedLayer>,
   target: DataViewDragDropOperation,
   source: DataViewDragDropOperation
-): Record<string, FormBasedLayer> {
+): Record<string, FormBasedLayer | TextBasedLayer> {
   const sourceLayer = layers[source.layerId];
+  if (!sourceLayer || !isFormBasedLayer(sourceLayer)) {
+    return layers;
+  }
+
   const sourceColumn = sourceLayer.columns[source.columnId];
   const targetLayer = layers[target.layerId];
+  if (!targetLayer || !isFormBasedLayer(targetLayer)) {
+    return layers;
+  }
   let columns = { ...targetLayer.columns };
   if ('references' in sourceColumn) {
     const def = operationDefinitionMap[sourceColumn.operationType];
@@ -350,7 +367,11 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
+    previousColumn: {
+      ...incompleteParams,
+      ...initialParams,
+      ...(layer.columns[columnId] as GenericIndexPatternColumn),
+    },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -1444,7 +1465,7 @@ export function deleteColumn({
   );
 
   extraDeletions.forEach((id) => {
-    newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern });
+    newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern }) as FormBasedLayer;
   });
 
   const newIncomplete = { ...(newLayer.incompleteColumns || {}) };
@@ -1516,9 +1537,12 @@ export function isColumnTransferable(
 }
 
 export function updateLayerIndexPattern(
-  layer: FormBasedLayer,
+  layer: FormBasedLayer | TextBasedLayer,
   newIndexPattern: IndexPattern
-): FormBasedLayer {
+): FormBasedLayer | TextBasedLayer {
+  if (!isFormBasedLayer(layer)) {
+    return layer;
+  }
   const keptColumns: FormBasedLayer['columns'] = pickBy(layer.columns, (column) => {
     return isColumnTransferable(column, newIndexPattern, layer);
   });
@@ -1539,7 +1563,7 @@ export function updateLayerIndexPattern(
 }
 
 type LayerErrorMessage = FieldBasedOperationErrorMessage & {
-  fixAction: DatasourceFixAction<FormBasedPrivateState>;
+  fixAction: DatasourceFixAction<CombinedFormBasedPrivateState>;
 };
 
 /**
@@ -1552,13 +1576,16 @@ type LayerErrorMessage = FieldBasedOperationErrorMessage & {
  * - If timeshift is used, only a single date histogram can be used
  */
 export function getErrorMessages(
-  layer: FormBasedLayer,
+  layer: FormBasedLayer | TextBasedLayer,
   indexPattern: IndexPattern,
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   layerId: string,
   core: CoreStart,
   data: DataPublicPluginStart
 ): LayerErrorMessage[] | undefined {
+  if (!isFormBasedLayer(layer)) {
+    return;
+  }
   const columns = Object.entries(layer.columns);
   const visibleManagedReferences = columns.filter(
     ([columnId, column]) =>

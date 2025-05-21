@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { FormBasedPrivateState, FormBasedLayer } from './types';
+import { CombinedFormBasedPrivateState, FormBasedLayer, TextBasedLayer } from './types';
 
 export function mergeLayer({
   state,
   layerId,
   newLayer,
 }: {
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   layerId: string;
-  newLayer: Partial<FormBasedLayer>;
-}) {
+  newLayer: Partial<FormBasedLayer | TextBasedLayer>;
+}): CombinedFormBasedPrivateState {
   return {
     ...state,
     layers: {
       ...state.layers,
       [layerId]: { ...state.layers[layerId], ...newLayer },
-    },
+    } as Record<string, FormBasedLayer | TextBasedLayer>,
   };
 }
 
@@ -29,8 +29,8 @@ export function mergeLayers({
   state,
   newLayers,
 }: {
-  state: FormBasedPrivateState;
-  newLayers: Record<string, FormBasedLayer>;
+  state: CombinedFormBasedPrivateState;
+  newLayers: Record<string, FormBasedLayer | TextBasedLayer>;
 }) {
   return {
     ...state,

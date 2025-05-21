@@ -35,7 +35,13 @@ import type {
   VisualizationInfo,
 } from '../../types';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
+import {
+  isFormBasedLayer,
+  type CombinedFormBasedPersistedState,
+  type CombinedFormBasedPrivateState,
+  type FormBasedLayer,
+  type TextBasedLayer,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -106,7 +112,10 @@ export function isSamplingValueEnabled(layer: FormBasedLayer) {
  * @param layer
  * @returns
  */
-export function getSamplingValue(layer: FormBasedLayer) {
+export function getSamplingValue(layer: FormBasedLayer | TextBasedLayer) {
+  if (!isFormBasedLayer(layer)) {
+    return 1;
+  }
   return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
 }
 
@@ -270,7 +279,7 @@ const accuracyModeEnabledWarning = (
 });
 
 export function getSearchWarningMessages(
-  state: FormBasedPersistedState,
+  state: CombinedFormBasedPersistedState,
   warning: SearchResponseWarning,
   request: estypes.SearchRequest,
   response: estypes.SearchResponse,
@@ -330,7 +339,7 @@ export function getSearchWarningMessages(
 }
 
 export function getUnsupportedOperationsWarningMessage(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   { dataViews }: FramePublicAPI,
   docLinks: DocLinksStart
 ) {
@@ -339,8 +348,11 @@ export function getUnsupportedOperationsWarningMessage(
     [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
   > = Object.values(state.layers)
     // filter layers without dataView loaded yet
-    .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
+    .filter(({ indexPatternId }) => indexPatternId && dataViews.indexPatterns[indexPatternId])
     .flatMap((layer) => {
+      if (!isFormBasedLayer(layer)) {
+        return [];
+      }
       const dataView = dataViews.indexPatterns[layer.indexPatternId];
       const columnsEntries = Object.entries(layer.columns);
       return columnsEntries
@@ -443,10 +455,10 @@ export function getUnsupportedOperationsWarningMessage(
 
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
-  setState?: StateSetter<FormBasedPrivateState>
+  setState?: StateSetter<CombinedFormBasedPrivateState>
 ) {
   const warningMessages: UserMessage[] = [];
 
@@ -458,6 +470,9 @@ export function getPrecisionErrorWarningMessages(
       }, [] as Array<{ layerId: string; column: DatatableColumn }>)
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
+        if (!currentLayer || !isFormBasedLayer(currentLayer)) {
+          return;
+        }
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
           const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
@@ -616,7 +631,7 @@ export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
 }
 
 export function getNotifiableFeatures(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   frame: FramePublicAPI,
   visualizationInfo?: VisualizationInfo
 ): UserMessage[] {
@@ -626,8 +641,8 @@ export function getNotifiableFeatures(
   const features: UserMessage[] = [];
   const layers = Object.entries(state.layers);
   const layersWithCustomSamplingValues = layers.filter(
-    ([, layer]) => getSamplingValue(layer) !== 1
-  );
+    ([, layer]) => isFormBasedLayer(layer) && getSamplingValue(layer) !== 1
+  ) as Array<[string, FormBasedLayer]>;
   if (layersWithCustomSamplingValues.length) {
     features.push({
       uniqueId: LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
@@ -646,7 +661,9 @@ export function getNotifiableFeatures(
       displayLocations: [{ id: 'embeddableBadge' }],
     });
   }
-  const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => layer.ignoreGlobalFilters);
+  const layersWithIgnoreGlobalFilters = layers.filter(
+    ([, layer]) => isFormBasedLayer(layer) && layer.ignoreGlobalFilters
+  ) as Array<[string, FormBasedLayer]>;
   if (layersWithIgnoreGlobalFilters.length) {
     features.push({
       uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
@@ -934,7 +951,7 @@ export function getFiltersInLayer(
 }
 
 export const cloneLayer = (
-  layers: Record<string, FormBasedLayer>,
+  layers: Record<string, FormBasedLayer | TextBasedLayer>,
   layerId: string,
   newLayerId: string,
   getNewId: (id: string) => string

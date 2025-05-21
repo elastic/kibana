@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { RandomSamplingIcon } from '@kbn/random-sampling';
 import type { DatasourceLayerPanelProps } from '../../types';
-import type { FormBasedPrivateState } from './types';
+import { isFormBasedLayer, type CombinedFormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getSamplingValue } from './utils';
 import { getIgnoreGlobalFilterIcon } from '../../shared_components/ignore_global_filter';
 
-export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {
-  state: FormBasedPrivateState;
+export interface FormBasedLayerPanelProps
+  extends DatasourceLayerPanelProps<CombinedFormBasedPrivateState> {
+  state: CombinedFormBasedPrivateState;
   onChangeIndexPattern: (newId: string) => void;
 }
 
@@ -27,7 +28,12 @@ export function LayerPanel({
   dataViews,
 }: FormBasedLayerPanelProps) {
   const layer = state.layers[layerId];
+
   const { euiTheme } = useEuiTheme();
+
+  if (!layer || !isFormBasedLayer(layer)) {
+    return null;
+  }
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {

@@ -25,6 +25,7 @@ describe('getAlertSummaryLensAttributes', () => {
           textBased: {
             layers: {
               '094d6c10-a28a-4780-8a0c-5789b73e4cef': {
+                type: 'esql',
                 columns: [
                   {
                     columnId: 'tableStackBy0',

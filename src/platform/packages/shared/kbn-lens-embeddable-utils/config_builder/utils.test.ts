@@ -210,6 +210,7 @@ describe('buildDatasourceStates', () => {
                 "esql": "from test | limit 10",
               },
               "timeField": undefined,
+              "type": "esql",
             },
           },
         },

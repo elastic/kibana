@@ -110,6 +110,7 @@ test('generates metric chart config', async () => {
                   "esql": "from test | count=count()",
                 },
                 "timeField": undefined,
+                "type": "esql",
               },
             },
           },

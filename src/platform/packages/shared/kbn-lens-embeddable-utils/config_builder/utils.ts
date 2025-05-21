@@ -176,6 +176,7 @@ function buildDatasourceStatesLayer(
   ): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
     const newLayer = {
+      type: 'esql' as const,
       table,
       columns: getValueColumns(layer, i),
       allColumns: table.columns.map(
@@ -199,6 +200,7 @@ function buildDatasourceStatesLayer(
     const columns = getValueColumns(layer, i);
 
     const newLayer = {
+      type: 'esql' as const,
       index: dataView!.id!,
       query: { esql: (dataset as LensESQLDataset).esql } as AggregateQuery,
       timeField: dataView!.timeFieldName,
