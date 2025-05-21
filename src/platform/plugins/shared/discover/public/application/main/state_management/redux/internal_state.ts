@@ -244,7 +244,6 @@ const createMiddleware = ({
       (action) => {
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
-        // console.log('persistLocally', action.payload);
         void tabsStorageManager.persistLocally(action.payload, getTabAppState);
       },
       MIDDLEWARE_THROTTLE_MS,
