@@ -43,12 +43,13 @@ xpack.features.overrides:
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
+          ## We need limited read access to fleet (v1) in order to use integrations
+        - feature: "fleet"
+          privileges: [ "read" ]
       read.composedOf:
         - feature: "discover_v2"
           privileges: [ "read" ]
-        - feature: "dashboard_v2"
+        - feature: "fleet"
           privileges: [ "read" ]
   siem:
     privileges:
@@ -57,14 +58,10 @@ xpack.features.overrides:
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard_v2"
-          privileges: [ "all" ]
         - feature: "savedQueryManagement"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
           privileges: [ "read" ]
         - feature: "savedQueryManagement"
           privileges: [ "read" ]
