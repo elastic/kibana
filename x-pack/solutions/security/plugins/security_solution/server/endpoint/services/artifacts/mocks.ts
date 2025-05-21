@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
 import {
@@ -18,9 +22,15 @@ import {
   createArtifactsClientMock,
 } from '@kbn/fleet-plugin/server/mocks';
 
-import type { EndpointArtifactClientInterface } from './artifact_client';
-import { EndpointArtifactClient } from './artifact_client';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ManifestManagerMockOptions } from './manifest_manager/manifest_manager.mock';
+import { buildManifestManagerMockOptions } from './manifest_manager/manifest_manager.mock';
+import type { ManifestManagerContext } from '..';
+import { createMockEndpointAppContextService } from '../../mocks';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { ManifestClient } from './manifest_client';
+import { EndpointArtifactClient } from './artifact_client';
+import type { EndpointArtifactClientInterface } from './artifact_client';
 
 export const getManifestClientMock = (
   savedObjectsClient?: SavedObjectsClientContract
@@ -67,5 +77,26 @@ export const createEndpointArtifactClientMock = (
     ),
     fetchAll: jest.fn((...args) => endpointArtifactClientMocked.fetchAll(...args)),
     _esClient: esClient,
+  };
+};
+
+export const buildManifestManagerContextMock = (
+  opts: Partial<ManifestManagerMockOptions>,
+  customProductFeatures?: ProductFeatureKeys
+): ManifestManagerContext => {
+  // FYI: this mock was moved in order to avoid circular dependencies between mocks for
+  //      EndpointAppContextService and Manifest Manager
+
+  const fullOpts = buildManifestManagerMockOptions(opts, customProductFeatures);
+
+  return {
+    ...fullOpts,
+    endpointService: createMockEndpointAppContextService(),
+    artifactClient: createEndpointArtifactClientMock(),
+    logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
+    experimentalFeatures: parseExperimentalConfigValue([...(opts.experimentalFeatures ?? [])])
+      .features,
+    packagerTaskPackagePolicyUpdateBatchSize: 10,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
 };

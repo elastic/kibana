@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import type { Logger } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -24,13 +19,10 @@ import {
   getMockArtifactsWithDiff,
   getMockManifest,
 } from '../../../lib/artifacts/mocks';
-import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
-import type { ManifestManagerContext } from './manifest_manager';
+import { buildManifestManagerContextMock, getManifestClientMock } from '../mocks';
 import { ManifestManager } from './manifest_manager';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
-import { createMockEndpointAppContextService } from '../../../mocks';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -87,24 +79,6 @@ export const buildManifestManagerMockOptions = (
     savedObjectsClient: savedObjectMock,
     productFeaturesService: createProductFeaturesServiceMock(customProductFeatures),
     ...opts,
-  };
-};
-
-export const buildManifestManagerContextMock = (
-  opts: Partial<ManifestManagerMockOptions>,
-  customProductFeatures?: ProductFeatureKeys
-): ManifestManagerContext => {
-  const fullOpts = buildManifestManagerMockOptions(opts, customProductFeatures);
-
-  return {
-    ...fullOpts,
-    endpointService: createMockEndpointAppContextService(),
-    artifactClient: createEndpointArtifactClientMock(),
-    logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
-    experimentalFeatures: parseExperimentalConfigValue([...(opts.experimentalFeatures ?? [])])
-      .features,
-    packagerTaskPackagePolicyUpdateBatchSize: 10,
-    esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
 };
 
