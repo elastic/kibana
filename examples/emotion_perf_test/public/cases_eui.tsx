@@ -10,9 +10,8 @@
 import React, { useMemo } from 'react';
 import { css, cx } from '@emotion/css';
 
-
 // Case A: Emotion inline styles
-export const InlineRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
+export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div
     css={{
       outline: 0,
@@ -46,28 +45,21 @@ const base = {
   opacity: 1,
   color: '#E2F8F0',
   backgroundColor: '#008A5E',
-}
+};
 
 const disabledBase = {
   opacity: 0.5,
   color: '#E2F9F7',
   backgroundColor: '#C61E25',
-}
+};
 
 // Case A: Emotion inline styles
-export const InlineRowB = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div
-    className={cx(
-      css(base),
-      css(disabled && disabledBase),
-    )}
-  >
-    {index}
-  </div>
+export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
+  <div className={cx(css(base), css(disabled && disabledBase))}>{index}</div>
 );
 
 // Case B: Emotion memoized
-export  const useMemoStyles = (disabled: boolean) =>
+export const useMemoStyles = (disabled: boolean) =>
   useMemo(
     () =>
       css({
@@ -87,7 +79,7 @@ export  const useMemoStyles = (disabled: boolean) =>
     [disabled]
   );
 
-  export const MemoRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+export const MemoizedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const cls = useMemoStyles(disabled);
   return <div className={cls}> {index}</div>;
 };
@@ -108,25 +100,25 @@ const baseClass = css({
   background: 'var(--background, #008A5E)',
 });
 
-export const VarRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+export const ScopedCSSVarRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const vars = {
     '--opacity': disabled ? 0.5 : 1,
     '--color': disabled ? '#E2F9F7' : '#E2F8F0',
     '--background': disabled ? '#C61E25' : '#008A5E',
   } as React.CSSProperties;
   return (
-    <div className={baseClass} style={vars}>
+    <div css={baseClass} style={vars}>
       {index}
     </div>
   );
 };
 
 // with the root css variables TODO: structure it right
-export const VarRowB = ({ index }: { disabled: boolean; index: number }) => {
-  return <div className={baseClass}>{index}</div>;
+export const RootCSSVarRow = ({ index }: { disabled: boolean; index: number }) => {
+  return <div css={baseClass}>{index}</div>;
 };
 
 // Case D: Global utility class toggle
-export const GlobalRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
+export const ClassNameRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
   <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>
 );
