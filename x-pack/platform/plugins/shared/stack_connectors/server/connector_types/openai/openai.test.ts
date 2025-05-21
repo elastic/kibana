@@ -1573,7 +1573,6 @@ describe('OpenAIConnector', () => {
       });
       // @ts-ignore
       connector.request = jest.fn().mockResolvedValue({ data: {} });
-      const mockRequest = jest.fn().mockResolvedValue({ data: {} });
       // @ts-ignore
       connector.request = mockRequest;
       await connector.runApi(
@@ -1601,7 +1600,7 @@ describe('OpenAIConnector', () => {
       services: actionsMock.createServices(),
     });
     it('returns Azure function error message', () => {
-      const err = { message: '404 Unrecognized request argument supplied: functions' } as any;
+      const err = { message: '404 Unrecognized request argument supplied: functions' };
       // @ts-ignore
       expect(connector.getResponseErrorMessage(err)).toContain(
         'Function support with Azure OpenAI API was added'
@@ -1614,7 +1613,7 @@ describe('OpenAIConnector', () => {
           statusText: 'Bad Request',
           data: { error: 'LM Studio error' },
         },
-      } as any;
+      };
       // @ts-ignore
       expect(connector.getResponseErrorMessage(err)).toContain('LM Studio error');
     });
@@ -1625,7 +1624,7 @@ describe('OpenAIConnector', () => {
           statusText: 'Unauthorized',
           data: { error: { message: 'Invalid key' } },
         },
-      } as any;
+      };
       // @ts-ignore
       expect(connector.getResponseErrorMessage(err)).toContain('Unauthorized API Error');
     });
@@ -1633,7 +1632,6 @@ describe('OpenAIConnector', () => {
 
   describe('Timeout and Signal propagation', () => {
     it('passes timeout and signal to runApi', async () => {
-      const logger = loggingSystemMock.createLogger();
       const connector = new OpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
         connector: { id: '1', type: OPENAI_CONNECTOR_ID },
@@ -1647,7 +1645,6 @@ describe('OpenAIConnector', () => {
         logger,
         services: actionsMock.createServices(),
       });
-      const mockRequest = jest.fn().mockResolvedValue({ data: {} });
       // @ts-ignore
       connector.request = mockRequest;
       const signal = jest.fn();
