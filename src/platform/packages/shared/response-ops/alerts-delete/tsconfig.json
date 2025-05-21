@@ -14,5 +14,6 @@
     "@kbn/i18n-react",
     "@kbn/alerting-types",
     "@kbn/core-notifications-browser",
+    "@kbn/kibana-react-plugin",
   ]
 }
