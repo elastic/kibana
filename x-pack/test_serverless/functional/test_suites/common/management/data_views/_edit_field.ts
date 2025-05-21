@@ -8,29 +8,23 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
   describe('edit field', function () {
-    before(async () => {
-      const es = getService('es');
-      await es.index({
-        index: 'data-view-edit-field',
-        id: '1',
-        document: {
-          extension: 'css',
-        },
-        refresh: true,
-      });
+    // see details: https://github.com/elastic/kibana/issues/200869#issuecomment-2511234473
+    this.tags(['failsOnMKI']);
+    before(async function () {
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
-    after(async function () {
-      // Delete the index after tests
-      const es = getService('es');
-      await es.indices.delete({
-        index: 'data-view-edit-field',
-        ignore_unavailable: true,
-      });
+    after(async function afterAll() {
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     describe('field preview', function fieldPreview() {
@@ -38,14 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // TODO: Navigation to Data View Management is different in Serverless
         await PageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-dataViews');
-        await PageObjects.settings.createIndexPattern('data-view-edit-field', null);
-      });
-      after(async function () {
-        // Delete the data view (index pattern) after the test
-        await PageObjects.common.navigateToApp('management');
-        await testSubjects.click('app-card-dataViews');
-        await PageObjects.settings.clickIndexPatternByName('data-view-edit-field');
-        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.settings.clickIndexPatternLogstash();
       });
 
       it('should show preview for fields in _source', async function () {
@@ -58,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show preview for fields not in _source', async function () {
         await PageObjects.settings.changeAndValidateFieldFormat({
-          name: 'extension.keyword',
+          name: 'extension.raw',
           fieldType: 'keyword',
           expectedPreviewText: 'css',
         });
