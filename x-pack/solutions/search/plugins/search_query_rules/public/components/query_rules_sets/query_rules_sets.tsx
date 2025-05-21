@@ -23,6 +23,12 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useQueryRulesSetsTableData } from '../../hooks/use_query_rules_sets_table_data';
 import { QueryRulesSetsSearch } from './query_rules_sets_search';
 import { DeleteRulesetModal } from './delete_ruleset_modal';
+import { useRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
+
+// Create a separate component for the Run button
+const RunQueryRulesetButton = ({ rulesetId }: { rulesetId: string }) => {
+  return useRunQueryRuleset(rulesetId);
+};
 
 export const QueryRulesSets = () => {
   const {
@@ -76,6 +82,11 @@ export const QueryRulesSets = () => {
     },
     {
       actions: [
+        {
+          render: (item: QueryRulesListRulesetsQueryRulesetListItem, enabled: boolean) => {
+            return <RunQueryRulesetButton rulesetId={item.ruleset_id} />;
+          },
+        },
         {
           name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.edit', {
             defaultMessage: 'Edit',
