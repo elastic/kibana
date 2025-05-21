@@ -204,6 +204,17 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
             data-test-subj={`${testSubj}Options`}
             items={availableFieldTypes.map((type) => (
               <EuiContextMenuItem
+                aria-label={i18n.translate(
+                  'unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel',
+                  {
+                    defaultMessage: '{type} field count: {count}',
+                    values: {
+                      type: getFieldTypeName(type),
+                      count: typeCounts?.get(type) ?? 0,
+                    },
+                  }
+                )}
+                aria-describedby={`unifiedFieldList.fieldTypeFilter.${type}.descriptionTooltip`}
                 key={type}
                 icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
                 data-test-subj={`typeFilter-${type}`}
@@ -218,7 +229,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
               >
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <FieldIcon type={type} />
+                    <FieldIcon aria-hidden type={type} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -227,6 +238,8 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
+                          id={`unifiedFieldList.fieldTypeFilter.${type}.descriptionTooltip`}
+                          aria-label={getFieldTypeDescription(type)}
                           type="questionInCircle"
                           color="subdued"
                           content={getFieldTypeDescription(type)}
@@ -235,7 +248,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiNotificationBadge color="subdued" size="m">
+                    <EuiNotificationBadge aria-hidden color="subdued" size="m">
                       {typeCounts?.get(type) ?? 0}
                     </EuiNotificationBadge>
                   </EuiFlexItem>
