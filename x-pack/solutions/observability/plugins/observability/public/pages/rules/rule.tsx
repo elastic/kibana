@@ -25,6 +25,7 @@ export function RulePage() {
     application,
     notifications,
     charts,
+    serverless,
     settings,
     data,
     dataViews,

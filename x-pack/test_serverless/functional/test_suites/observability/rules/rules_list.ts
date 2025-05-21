@@ -121,7 +121,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResults[0].name).toEqual('ES QueryElasticsearch query');
     });
 
-    it('should create an ES Query rule but not display it when consumer is stackAlerts', async () => {
+    it('should create an ES Query rule and display it when consumer is stackAlerts', async () => {
       const esQuery = await alertingApi.helpers.createEsQueryRule({
         roleAuthc,
         name: 'ES Query',
@@ -141,7 +141,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ruleIdList = [esQuery.id];
 
       await refreshRulesList();
-      await testSubjects.missingOrFail('rule-row');
+      await testSubjects.existsOrFail('rule-row');
     });
 
     it('should create and display an APM latency rule', async () => {
