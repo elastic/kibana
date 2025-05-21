@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from './config';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    allowByValueEmbeddables: true,
-  },
-  schema: configSchema,
-};
+import { PluginInitializerContext } from '@kbn/core/server';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
