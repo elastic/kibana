@@ -9,7 +9,9 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RuleMigrationIndexMigrator } from '.';
 import * as RuleMigrationSpaceIndexMigratorModule from './rule_migrations_per_space_index_migrator';
 import type { Adapters } from '../types';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
 
+const rulesIndexName = '.kibana-siem-rule-migrations-rules';
 const esClientMock = {
   indices: {
     get: jest.fn().mockResolvedValue({
@@ -21,7 +23,9 @@ const esClientMock = {
 } as unknown as ElasticsearchClient;
 
 const ruleMigrationIndexAdapters = {
-  rules: { name: '.kibana-siem-rule-migrations-rules-*' },
+  rules: new IndexPatternAdapter(rulesIndexName, {
+    kibanaVersion: '9.0.0',
+  }),
 } as unknown as Adapters;
 
 const loggerMock = {

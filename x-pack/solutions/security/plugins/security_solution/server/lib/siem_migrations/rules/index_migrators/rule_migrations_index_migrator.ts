@@ -17,16 +17,14 @@ export class RuleMigrationIndexMigrator {
   ) {}
 
   private async getSpaceListForMigrations() {
-    const rulesIndexPattern = this.ruleMigrationIndexAdapters.rules.name;
-    this.logger.info(`Rule index pattern: ${rulesIndexPattern}`);
     const rulesIndicesAcrossSpaces = await this.esClient.indices.get({
-      index: rulesIndexPattern,
+      index: this.ruleMigrationIndexAdapters.rules.getIndexName('*'),
       allow_no_indices: true,
     });
 
+    const rulesIndexPatternPrefix = this.ruleMigrationIndexAdapters.rules.getIndexName('');
     const spaceList = Object.keys(rulesIndicesAcrossSpaces).map((index) => {
-      const indexPatternPrefix = rulesIndexPattern.replace('*', '');
-      return index.replace(`${indexPatternPrefix}`, '');
+      return index.replace(rulesIndexPatternPrefix, '');
     });
 
     return spaceList;
