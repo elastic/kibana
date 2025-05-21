@@ -204,16 +204,13 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
             data-test-subj={`${testSubj}Options`}
             items={availableFieldTypes.map((type) => (
               <EuiContextMenuItem
-                aria-label={i18n.translate(
-                  'unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel',
-                  {
-                    defaultMessage: '{type} field count: {count}',
-                    values: {
-                      type: getFieldTypeName(type),
-                      count: typeCounts?.get(type) ?? 0,
-                    },
-                  }
-                )}
+                aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.typeButtonAriaLabel', {
+                  defaultMessage: '{type} field count: {count}',
+                  values: {
+                    type: getFieldTypeName(type),
+                    count: typeCounts?.get(type) ?? 0,
+                  },
+                })}
                 aria-describedby={`unifiedFieldList.fieldTypeFilter.${type}.descriptionTooltip`}
                 key={type}
                 icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
