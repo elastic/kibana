@@ -42,6 +42,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
     } else {
       log.info(desc);
     }
+
     try {
       await log.indent(bufferLogs ? 0 : 4, async () => {
         const start = Date.now();
