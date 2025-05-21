@@ -36,6 +36,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MultiValueCellPopover, type CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { css } from '@emotion/css';
+import { COPY_ARIA_LABEL } from '../../../components/copy_button';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 import { TruncatedCopyableText } from './findings_right/header';
@@ -61,10 +62,11 @@ const renderValue = (item: string) => (
       <EuiCopy textToCopy={item}>
         {(copy) => (
           <EuiIcon
-            css={css`
-              :hover {
+            aria-label={COPY_ARIA_LABEL}
+            className={css`
+              &:hover {
                 cursor: pointer;
-              },
+              }
             `}
             onClick={copy}
             type="copy"
