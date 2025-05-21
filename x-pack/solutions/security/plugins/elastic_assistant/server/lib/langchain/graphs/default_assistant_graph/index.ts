@@ -222,6 +222,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
+    telemetry,
+    telemetryParams,
   });
   const inputs: GraphInputs = {
     responseLanguage,
@@ -239,9 +241,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
       onLlmResponse,
       request,
+      telemetry,
       telemetryTracer,
       traceOptions,
     });

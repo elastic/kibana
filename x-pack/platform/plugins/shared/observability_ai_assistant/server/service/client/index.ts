@@ -678,7 +678,7 @@ export class ObservabilityAIAssistantClient {
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
-    this.dependencies.logger.debug('Adding user instruction entry');
+
     const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
       isPublic: entry.public,
       namespace: this.dependencies.namespace,
@@ -686,8 +686,14 @@ export class ObservabilityAIAssistantClient {
     });
 
     if (existingId) {
+      this.dependencies.logger.debug(
+        `Updating user instruction. id = "${existingId}", user = "${this.dependencies.user?.name}"`
+      );
       entry.id = existingId;
-      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    } else {
+      this.dependencies.logger.debug(
+        `Creating user instruction. id = "${entry.id}", user = "${this.dependencies.user?.name}"`
+      );
     }
 
     return this.dependencies.knowledgeBaseService.addEntry({
