@@ -48,18 +48,12 @@ describe('withExistingMigrationId', () => {
     beforeEach(() => {
       mockRuleMigrationsClient.data.migrations.get.mockResolvedValue(mockMigration);
     });
-    it('should call the handler with the migration', async () => {
+    it('should call the handler', async () => {
       const handler = jest.fn();
       const wrappedHandler = withExistingMigration(handler);
       await wrappedHandler(mockContext, mockReq, mockRes);
 
-      expect(handler).toHaveBeenCalledWith(
-        expect.objectContaining({
-          migration: mockMigration,
-        }),
-        mockReq,
-        mockRes
-      );
+      expect(handler).toHaveBeenCalledWith(mockContext, mockReq, mockRes);
     });
   });
 

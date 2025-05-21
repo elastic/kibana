@@ -8,7 +8,6 @@
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export const MIGRATION_ID_NOT_FOUND = (id: string) =>
   i18n.translate('xpack.securitySolution.api.migrationIdNotFound', {
@@ -17,8 +16,6 @@ export const MIGRATION_ID_NOT_FOUND = (id: string) =>
       id,
     },
   });
-
-type WithMigration<T> = T & { migration: RuleMigration };
 
 /**
  * Checks the existence of a valid migration before proceeding with the request.
@@ -33,7 +30,7 @@ export const withExistingMigration = <
   B = unknown,
   Method extends RouteMethod = never
 >(
-  handler: RequestHandler<P, Q, B, WithMigration<SecuritySolutionRequestHandlerContext>, Method>
+  handler: RequestHandler<P, Q, B, SecuritySolutionRequestHandlerContext, Method>
 ): RequestHandler<P, Q, B, SecuritySolutionRequestHandlerContext, Method> => {
   return async (context, req, res) => {
     const { migration_id: migrationId } = req.params;
@@ -49,10 +46,6 @@ export const withExistingMigration = <
       });
     }
 
-    Object.defineProperty(context, 'migration', {
-      value: storedMigration,
-    });
-
-    return handler(context as WithMigration<SecuritySolutionRequestHandlerContext>, req, res);
+    return handler(context, req, res);
   };
 };
