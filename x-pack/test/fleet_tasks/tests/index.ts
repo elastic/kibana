@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const InstalledIntegrationsCallout = () => (
-  <div data-test-subj="installedIntegrationsCallout" />
-);
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Fleet packages test', function () {
+    loadTestFile(require.resolve('./automatic_upgrades'));
+  });
+}
