@@ -7,7 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+
+export const configSchema = schema.object({
+  allowByValueEmbeddables: schema.boolean({ defaultValue: true }),
+});
+
+export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+  exposeToBrowser: {
+    /**
+     * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
+     * This can be removed in 10.0. https://github.com/elastic/kibana/issues/221197
+     */
+    allowByValueEmbeddables: true,
+  },
+  schema: configSchema,
+  deprecations: ({ deprecate }) => {
+    return [deprecate('allowByValueEmbeddables', '9.3.0', { level: 'warning' })];
+  },
+};
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
