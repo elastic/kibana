@@ -10,7 +10,6 @@
 import { useCallback, useRef } from 'react';
 
 import { useGridLayoutContext } from '../../use_grid_layout_context';
-import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import {
   getSensorPosition,
   isKeyboardEvent,
@@ -20,20 +19,21 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from '../sensors';
-import { PointerPosition, UserInteractionEvent } from '../types';
 import {
   hasRowInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPosition } from './utils';
 
 /*
- * This hook sets up and manages interaction logic for dragging grid rows.
+ * This hook sets up and manages interaction logic for dragging grid sections.
  * It initializes event handlers to start, move, and commit the interaction,
  * ensuring responsive updates to the panel's position and grid layout state.
  * The interaction behavior is dynamic and adapts to the input type (mouse, touch, or keyboard).
  */
-export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
+export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startingPointer = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
@@ -44,10 +44,12 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   );
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
-      if (!isLayoutInteractive(gridLayoutStateManager)) return;
+      if (!isLayoutInteractive(gridLayoutStateManager)) {
+        return;
+      }
       const onStart = () => {
         startingPointer.current = getSensorPosition(e);
-        startAction(e, gridLayoutStateManager, rowId);
+        startAction(e, gridLayoutStateManager, sectionId);
       };
 
       const onMove = (ev: UserInteractionEvent) => {
@@ -60,8 +62,8 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
           const pointerPixel = getNextKeyboardPosition(
             ev,
             gridLayoutStateManager,
-            getSensorPosition(e),
-            rowId
+            getSensorPosition(ev),
+            sectionId
           );
           moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel);
         }
@@ -83,19 +85,19 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
-        const isEventActive = gridLayoutStateManager.activeRowEvent$.value !== undefined;
+        if (gridLayoutStateManager.activeSectionEvent$.getValue()) return; // interaction has already happened, so don't start again
         startKeyboardInteraction({
           e,
-          isEventActive,
           onStart,
           onMove,
           onEnd,
+          onBlur: onEnd,
           onCancel,
         });
       }
     },
-    [gridLayoutStateManager, rowId, onEnd, onCancel]
+    [gridLayoutStateManager, sectionId, onEnd, onCancel]
   );
 
-  return { startDrag: startInteraction, onBlur: onEnd };
+  return startInteraction;
 };
