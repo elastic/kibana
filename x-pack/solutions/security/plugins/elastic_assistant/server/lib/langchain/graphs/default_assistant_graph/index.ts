@@ -12,6 +12,7 @@ import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
+import { Callbacks } from '@langchain/core/callbacks/manager';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
@@ -27,7 +28,6 @@ import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { agentRunnableFactory } from './agentRunnable';
-import { Callbacks } from '@langchain/core/callbacks/manager';
 import { EsqlTelemetryTracer } from '../../tracers/esql_telemetry_tracer/esql_telemetry_tracer';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
@@ -203,9 +203,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
-        connectorId,
-        actionsClient,
-      })
+          connectorId,
+          actionsClient,
+        })
       : { provider: llmType };
 
   const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
@@ -248,20 +248,26 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger),
     ...(traceOptions?.tracers ?? []),
     ...(telemetryParams
-      ? [new TelemetryTracer(
-        {
-          elasticTools: tools.map(({ name }) => name),
-          totalTools: tools.length,
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      ), new EsqlTelemetryTracer({
-        telemetry,
-        telemetryParams
-      }, logger)]
-      : [])
-  ]
+      ? [
+          new TelemetryTracer(
+            {
+              elasticTools: tools.map(({ name }) => name),
+              totalTools: tools.length,
+              telemetry,
+              telemetryParams,
+            },
+            logger
+          ),
+          new EsqlTelemetryTracer(
+            {
+              telemetry,
+              telemetryParams,
+            },
+            logger
+          ),
+        ]
+      : []),
+  ];
 
   if (isStream) {
     return streamGraph({
@@ -273,7 +279,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       request,
       telemetry,
       traceOptions,
-      callbacks
+      callbacks,
     });
   }
 
@@ -282,7 +288,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     inputs,
     onLlmResponse,
     traceOptions,
-    callbacks
+    callbacks,
   });
 
   const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(
