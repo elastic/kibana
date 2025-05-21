@@ -142,6 +142,7 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/presentation-containers",
     "@kbn/object-utils",
+    "@kbn/storybook",
   ],
   "exclude": ["target/**/*"]
 }
