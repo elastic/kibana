@@ -30,6 +30,7 @@ import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
+import { createMockEndpointAppContextService } from '../../../mocks';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -97,6 +98,7 @@ export const buildManifestManagerContextMock = (
 
   return {
     ...fullOpts,
+    endpointService: createMockEndpointAppContextService(),
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     experimentalFeatures: parseExperimentalConfigValue([...(opts.experimentalFeatures ?? [])])
