@@ -1,6 +1,7 @@
 project: 'Kibana reference'
 toc:
   - file: index.md
+  - file: kibana-accessibility-statement.md
   - file: configuration-reference.md
     children:
       - file: cloud/elastic-cloud-kibana-settings.md
