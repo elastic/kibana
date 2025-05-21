@@ -1,0 +1,6 @@
+# Observability Logs Essentials tier config
+
+## Disable xpack plugins
+xpack.slo.enabled: false
+
+    

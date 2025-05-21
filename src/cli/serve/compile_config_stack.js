@@ -73,6 +73,15 @@ export function compileConfigStack({
     }
   }
 
+  // Pricing specific tier configs
+  const pricingTier = getPricingTierFromConfig(configs);
+  if (pricingTier) {
+    configs.push(resolveConfig(`serverless.${serverlessMode}.${pricingTier}.yml`));
+    if (dev && devConfig !== false) {
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${pricingTier}.dev.yml`));
+    }
+  }
+
   return configs.filter(isNotNull);
 }
 
@@ -98,6 +107,18 @@ function getSecurityTierFromCfg(configs) {
   // and is the only element in the array, which is why we can access the first element for product type/tier
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
   return productType?.product_tier;
+}
+
+/** @typedef {'essentials' | 'complete'} ServerlessObservabilityTier */
+/**
+ * @param {string[]} configs List of configuration file paths
+ * @returns {ServerlessObservabilityTier|undefined} The serverless observability tier in the summed configs
+ */
+function getPricingTierFromConfig(configs) {
+  const config = getConfigFromFiles(configs.filter(isNotNull));
+
+  const product = _.get(config, 'pricing.tiers.products', [])[0];
+  return product?.tier;
 }
 
 /**
