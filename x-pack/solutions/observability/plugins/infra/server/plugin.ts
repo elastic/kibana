@@ -20,7 +20,7 @@ import {
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { LOGS_FEATURE, METRICS_FEATURE } from './features';
+import { getLogsAlertingFeatures, getMetricsAlertingFeatures } from './features';
 import { registerRoutes } from './infra_server';
 import type {
   InfraServerPluginSetupDeps,
@@ -81,11 +81,12 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
+  private isServerlessEnv: boolean;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
-
+    this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
       LOGS_RULES_ALERT_CONTEXT,
@@ -105,7 +106,6 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
-
     const metricsClient = plugins.metricsDataAccess.client;
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
       const sourceConfiguration = await sources.getInfraSourceConfiguration(
@@ -181,8 +181,8 @@ export class InfraServerPlugin
       plugins: libsPlugins,
     };
 
-    plugins.features.registerKibanaFeature(METRICS_FEATURE);
-    plugins.features.registerKibanaFeature(LOGS_FEATURE);
+    plugins.features.registerKibanaFeature(getMetricsAlertingFeatures(this.isServerlessEnv));
+    plugins.features.registerKibanaFeature(getLogsAlertingFeatures(this.isServerlessEnv));
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
