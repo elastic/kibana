@@ -11,7 +11,6 @@ import ReactDOM from 'react-dom';
 
 import type { AppMountParameters, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { parseNextURL } from '@kbn/std';
 
@@ -58,12 +57,7 @@ export function renderOverwrittenSessionPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <OverwrittenSessionPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<OverwrittenSessionPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }
