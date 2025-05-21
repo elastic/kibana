@@ -8,18 +8,16 @@
 import { useRef, useCallback, useMemo } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
-
 import {
   type CategorizationAdditionalFilter,
   createCategoryRequest,
 } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
-
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import type { RandomSamplerStorage } from './sampling_menu';
 import { RandomSampler } from './sampling_menu';

@@ -16,6 +16,7 @@ import {
 } from '@kbn/aiops-log-rate-analysis/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -35,7 +36,6 @@ import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { getDataviewReferences } from '../../../embeddables/get_dataview_references';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);

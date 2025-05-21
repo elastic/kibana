@@ -33,10 +33,10 @@ import {
   PATTERN_ANALYSIS_DATA_VIEW_REF_NAME,
 } from '@kbn/aiops-log-pattern-analysis/constants';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import type { PatternAnalysisEmbeddableState } from '../../embeddables/pattern_analysis/types';
 import type { RandomSamplerOption, RandomSamplerProbability } from './sampling_menu/random_sampler';
 import { useCasesModal } from '../../hooks/use_cases_modal';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 

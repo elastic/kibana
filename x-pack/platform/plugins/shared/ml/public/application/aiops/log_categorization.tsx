@@ -51,6 +51,7 @@ export const LogCategorizationPage: FC = () => {
               'application',
               'charts',
               'data',
+              'eventBus',
               'executionContext',
               'fieldFormats',
               'http',
