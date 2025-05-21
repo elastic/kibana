@@ -39,16 +39,14 @@ export type SelectionsState = Pick<
   'exclude' | 'existsSelected' | 'selectedOptions'
 >;
 
-export function initializeSelectionsManager(
-  initialState: SelectionsState,
-  onSelectionChange: () => void
-) {
+export function initializeSelectionsManager(initialState: SelectionsState) {
   const selectionsManager = initializeStateManager<SelectionsState>(
     {
       ...initialState,
       selectedOptions: initialState.selectedOptions ?? [],
     },
-    defaultSelectionState
+    defaultSelectionState,
+    selectionComparators
   );
 
   return {
@@ -56,24 +54,6 @@ export function initializeSelectionsManager(
     api: {
       ...selectionsManager.api,
       hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
-      setExclude: (next: boolean | undefined) => {
-        if (selectionsManager.api.exclude$.value !== next) {
-          selectionsManager.api.setExclude(next);
-          onSelectionChange();
-        }
-      },
-      setExistsSelected: (next: boolean | undefined) => {
-        if (selectionsManager.api.existsSelected$.value !== next) {
-          selectionsManager.api.setExistsSelected(next);
-          onSelectionChange();
-        }
-      },
-      setSelectedOptions: (next: OptionsListSelection[] | undefined) => {
-        if (!areSelectedOptionsEqual(selectionsManager.api.selectedOptions$.value, next)) {
-          selectionsManager.api.setSelectedOptions(next);
-          onSelectionChange();
-        }
-      },
     },
   };
 }

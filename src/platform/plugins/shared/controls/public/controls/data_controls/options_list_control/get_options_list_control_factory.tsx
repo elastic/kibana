@@ -93,14 +93,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         OPTIONS_LIST_CONTROL,
         initialState,
         editorStateManager.getLatestState,
-        (nextState: Partial<EditorState>) => {
-          editorStateManager.reinitializeState(nextState, editorComparators);
-        },
+        editorStateManager.reinitializeState,
         controlGroupApi
       );
 
-      const selectionsManager = initializeSelectionsManager(
-        initialState,
+      const selectionsManager = initializeSelectionsManager(initialState);
+
+      const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
       );
 
@@ -418,6 +417,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               singleSelectSubscription.unsubscribe();
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
+              selectionsSubscription.unsubscribe();
             };
           }, []);
 

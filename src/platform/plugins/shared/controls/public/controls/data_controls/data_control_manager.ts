@@ -66,12 +66,16 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   getLatestState: () => DefaultDataControlState;
   reinitializeState: (lastState?: DefaultDataControlState) => void;
 } => {
-  const dataControlManager = initializeStateManager<DefaultDataControlState>(state, {
-    ...defaultControlDefaultValues,
-    dataViewId: '',
-    fieldName: '',
-    title: undefined,
-  });
+  const dataControlManager = initializeStateManager<DefaultDataControlState>(
+    state,
+    {
+      ...defaultControlDefaultValues,
+      dataViewId: '',
+      fieldName: '',
+      title: undefined,
+    },
+    defaultDataControlComparators
+  );
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
@@ -162,7 +166,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     openDataControlEditor<DefaultDataControlState & EditorState>({
       onSave: ({ type: newType, state: newState }) => {
         if (newType === controlType) {
-          dataControlManager.reinitializeState(newState, defaultDataControlComparators);
+          dataControlManager.reinitializeState(newState);
           setEditorState(newState);
         } else {
           // replace the control with a new one of the updated type

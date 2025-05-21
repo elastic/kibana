@@ -32,5 +32,5 @@ const defaultEditorState = {
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {
-  return initializeStateManager<EditorState>(initialState, defaultEditorState);
+  return initializeStateManager<EditorState>(initialState, defaultEditorState, editorComparators);
 };
