@@ -22,7 +22,7 @@ import { initializeEditorStateManager } from '../options_list_control/editor_sta
 
 export const getOptionsListContextMock = () => {
   const editorStateManager = initializeEditorStateManager({});
-  const selectionsManager = initializeSelectionsManager({}, () => {});
+  const selectionsManager = initializeSelectionsManager({});
   const temporaryStateManager = initializeTemporayStateManager();
   const field$ = new BehaviorSubject<DataViewField | undefined>({
     type: 'string',
