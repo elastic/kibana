@@ -17,7 +17,6 @@ import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
 import { DashboardSettings, DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { logUnsavedChange } from './unsaved_changes_logger';
 
 // SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export function initializeSettingsManager(initialState?: DashboardState) {
@@ -126,7 +125,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
           map(() => getSettings()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
-            diffComparators(comparators, lastSavedState, latestState, logUnsavedChange)
+            diffComparators(comparators, lastSavedState, latestState)
           )
         );
       },

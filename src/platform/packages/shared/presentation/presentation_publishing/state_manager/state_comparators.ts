@@ -9,6 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { StateComparators } from './types';
+import { logStateDiff, shouldLogStateDiff } from './state_diff_logger';
 
 const referenceEquality = <T>(a: T, b: T) => a === b;
 const deepEquality = <T>(a: T, b: T) => deepEqual(a, b);
@@ -35,8 +36,7 @@ export const runComparator = <StateType extends object = object>(
 export const diffComparators = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
   lastSavedState?: StateType,
-  latestState?: StateType,
-  onStateDiff?: (key: string, lastValue: unknown, currentValue: unknown) => void
+  latestState?: StateType
 ): Partial<StateType> => {
   return Object.keys(comparators).reduce((acc, key) => {
     const comparator = comparators[key as keyof StateType];
@@ -45,9 +45,7 @@ export const diffComparators = <StateType extends object = object>(
 
     if (!runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue)) {
       acc[key as keyof StateType] = currentValue;
-      if (onStateDiff) {
-        onStateDiff(key, lastSavedValue, currentValue);
-      }
+      logStateDiff(key, lastSavedValue, currentValue);
     }
 
     return acc;
@@ -62,7 +60,7 @@ export const areComparatorsEqual = <StateType extends object = object>(
   lastSavedState?: StateType,
   currentState?: StateType,
   defaultState?: Partial<StateType>,
-  onStateDiff?: (key: string, lastValue: unknown, currentValue: unknown) => void
+  getCustomLogLabel?: (key: string) => string
 ): boolean => {
   return Object.keys(comparators).every((key) => {
     const comparator = comparators[key as keyof StateType];
@@ -79,8 +77,8 @@ export const areComparatorsEqual = <StateType extends object = object>(
       currentValue
     );
 
-    if (onStateDiff && !areEqual) onStateDiff(key, lastSavedValue, currentValue);
-
+    if (!areEqual && shouldLogStateDiff())
+      logStateDiff(getCustomLogLabel ? getCustomLogLabel(key) : key, lastSavedValue, currentValue);
     return areEqual;
   });
 };

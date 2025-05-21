@@ -52,7 +52,6 @@ import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
-import { logUnsavedChange } from './unsaved_changes_logger';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -355,7 +354,7 @@ export function initializeUnifiedSearchManager(
           })),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
-            diffComparators(comparators, lastSavedState, latestState, logUnsavedChange)
+            diffComparators(comparators, lastSavedState, latestState)
           )
         );
       },

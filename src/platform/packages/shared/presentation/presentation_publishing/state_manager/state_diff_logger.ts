@@ -12,18 +12,18 @@ const options = {
   omitAnnotationLines: true,
 };
 
-export function shouldLogUnsavedChanges() {
+export function shouldLogStateDiff() {
   // @ts-expect-error
-  return Boolean(window?.ELASTIC_DASHBOARD_LOGGER);
+  return Boolean(window?.ELASTIC_PRESENTATION_LOGGER);
 }
 
 /**
- * Conditional (window.ELASTIC_DASHBOARD_LOGGER needs to be set to true) logger function
+ * Conditional (window.ELASTIC_PRESENTATION_LOGGER needs to be set to true) logger function
  */
-export async function logUnsavedChange(label: string, lastValue: unknown, currentValue: unknown) {
-  if (!shouldLogUnsavedChanges()) return;
+export async function logStateDiff(label: string, lastValue: unknown, currentValue: unknown) {
+  if (!shouldLogStateDiff()) return;
 
   const { diff } = await import('jest-diff');
   // eslint-disable-next-line no-console
-  console.log(`[Dashboard] ${label} unsaved changes\n${diff(lastValue, currentValue, options)}`);
+  console.log(`[Embeddable] ${label} state diff\n${diff(lastValue, currentValue, options)}`);
 }

@@ -28,6 +28,8 @@ import {
   apiPublishesTitle,
   apiPublishesUnsavedChanges,
   getTitle,
+  logStateDiff,
+  shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import { filter, map as lodashMap, max } from 'lodash';
@@ -54,7 +56,6 @@ import {
   DashboardLayout,
   DashboardLayoutItem,
 } from './types';
-import { logUnsavedChange, shouldLogUnsavedChanges } from './unsaved_changes_logger';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -348,9 +349,9 @@ export function initializePanelsManager(
           map(([, lastSavedPanels]) => {
             const panels = serializePanels().panels;
             if (!arePanelLayoutsEqual(lastSavedPanels, panels)) {
-              if (shouldLogUnsavedChanges()) {
-                logUnsavedChange(
-                  'layout',
+              if (shouldLogStateDiff()) {
+                logStateDiff(
+                  'dashboard layout',
                   deserializePanels(lastSavedPanels).layout,
                   deserializePanels(panels).layout
                 );
