@@ -165,7 +165,9 @@ export class SecurityPageObject extends FtrService {
         if (alert && alert.accept) {
           await alert.accept();
         }
-        return await this.find.byCssSelector('[data-test-subj="login-form"]');
+        // return await this.find.existsByDisplayedByCssSelector('.login-form');
+
+        return await this.isLoginFormVisible();
       }
     );
   }
