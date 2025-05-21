@@ -68,11 +68,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
             }
 
             reference = contentReferencesStore.add((p) =>
-              hrefReference(
-                p.id,
-                `${SECURITY_LABS_BASE_URL}${slug}`,
-                `Security Labs: ${title}`
-              )
+              hrefReference(p.id, `${SECURITY_LABS_BASE_URL}${slug}`, `Security Labs: ${title}`)
             );
           } catch (_error) {
             reference = contentReferencesStore.add((p) =>
