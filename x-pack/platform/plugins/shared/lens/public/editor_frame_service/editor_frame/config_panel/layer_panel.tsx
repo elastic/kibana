@@ -451,7 +451,6 @@ export function LayerPanel(props: LayerPanelProps) {
               datasourceMap={datasourceMap}
               layerId={layerId}
               visualizationMap={visualizationMap}
-              esqlVariables={esqlVariables}
               {...editorProps}
             />
             {activeVisualization.LayerPanelComponent && (
