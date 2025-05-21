@@ -9,17 +9,18 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ObservedSize } from 'use-resize-observer/polyfilled';
-import {
-  ActivePanel,
-  ActiveRowEvent,
+import type { ObservedSize } from 'use-resize-observer/polyfilled';
+
+import type { ActivePanelEvent } from '../grid_panel';
+import type { ActiveSectionEvent } from '../grid_section';
+import type {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
-  PanelInteractionEvent,
+  OrderedLayout,
   RuntimeGridSettings,
 } from '../types';
-import { getSampleLayout } from './sample_layout';
+import { getSampleOrderedLayout } from './sample_layout';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -39,7 +40,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     layoutRef: { current: {} },
     expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
     isMobileView$: new BehaviorSubject<boolean>(false),
-    gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),
+    gridLayout$: new BehaviorSubject<OrderedLayout>(getSampleOrderedLayout()),
     proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
     runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
@@ -47,12 +48,11 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
       keyboardDragTopLimit: 0,
     }),
     panelRefs: { current: {} },
-    rowRefs: { current: {} },
+    sectionRefs: { current: {} },
     headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
-    interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
-    activePanel$: new BehaviorSubject<ActivePanel | undefined>(undefined),
-    activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
+    activePanelEvent$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
+    activeSectionEvent$: new BehaviorSubject<ActiveSectionEvent | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
     ...overrides,
   } as GridLayoutStateManager;
