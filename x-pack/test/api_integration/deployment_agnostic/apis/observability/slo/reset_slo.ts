@@ -64,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // reset
       const resetResponse = await sloApi.reset(sloId, adminRoleAuthc);
       expect(resetResponse).property('version', SLO_MODEL_VERSION);
-      expect(resetResponse).property('revision', 1);
+      expect(resetResponse).property('revision', 2);
 
       // assert the pipeline is re-created
       await retry.tryForTime(60 * 1000, async () => {
