@@ -55,7 +55,7 @@ describe('validation', () => {
             fields.filter((v) => v.name !== '@timestamp')
           );
 
-          await expectErrors('FROM index | CHANGE_POINT longField', [
+          await expectErrors('FROM a_index | CHANGE_POINT longField', [
             `[CHANGE_POINT] Default @timestamp column is missing`,
           ]);
         });

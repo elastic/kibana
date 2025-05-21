@@ -29,6 +29,9 @@ export type {
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
+  ESQLAstRenameExpression,
+  ESQLAstBaseItem,
+  ESQLAstChangePointCommand,
 } from './src/types';
 
 export {
@@ -49,7 +52,6 @@ export {
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
-  getParser,
   createParser,
   getLexer,
   parse,

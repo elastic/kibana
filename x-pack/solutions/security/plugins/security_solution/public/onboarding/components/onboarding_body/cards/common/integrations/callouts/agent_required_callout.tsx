@@ -20,16 +20,16 @@ export const AgentRequiredCallout = React.memo(() => {
   const { getAppUrl, navigateTo } = useNavigation();
   const addAgentLink = getAppUrl(fleetAgentLinkProps);
   const {
-    telemetry: { trackLinkClick },
+    telemetry: { reportLinkClick },
   } = useIntegrationContext();
 
   const onAddAgentClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
-      trackLinkClick?.(TELEMETRY_AGENT_REQUIRED);
+      reportLinkClick?.(TELEMETRY_AGENT_REQUIRED);
       navigateTo(fleetAgentLinkProps);
     },
-    [navigateTo, trackLinkClick]
+    [navigateTo, reportLinkClick]
   );
 
   return (

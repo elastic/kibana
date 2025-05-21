@@ -8,7 +8,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export async function FleetAndAgents({ getService }: FtrProviderContext) {
+export async function FleetAndAgentsProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 

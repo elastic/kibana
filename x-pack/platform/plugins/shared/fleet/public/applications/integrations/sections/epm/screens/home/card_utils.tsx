@@ -45,6 +45,7 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
   installStatus?: EpmPackageInstallStatus;
@@ -55,6 +56,7 @@ export interface IntegrationCardItem {
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   maxCardHeight?: number;
+  minCardHeight?: number;
   name: string;
   onCardClick?: () => void;
   release?: IntegrationCardReleaseLabel;

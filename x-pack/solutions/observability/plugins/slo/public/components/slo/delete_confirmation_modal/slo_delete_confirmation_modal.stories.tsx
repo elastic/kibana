@@ -7,7 +7,7 @@
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
-import { SloDeleteModal as Component } from './slo_delete_confirmation_modal';
+import { SloDeleteConfirmationModal as Component } from './slo_delete_confirmation_modal';
 
 export default {
   component: Component,

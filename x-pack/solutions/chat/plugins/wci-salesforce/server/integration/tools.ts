@@ -185,7 +185,7 @@ export async function getById({
     query,
   };
 
-  logger.info(`Retrieving document from ${indexName} with id: ${JSON.stringify(id)}`);
+  logger.debug(`Retrieving document from ${indexName} with id: ${JSON.stringify(id)}`);
 
   const response = await esClient.search<SearchResponse<BaseObject>>(searchRequest);
 
@@ -270,7 +270,7 @@ export async function getCases({
     size,
   };
 
-  logger.info(
+  logger.debug(
     `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
   );
 
@@ -288,6 +288,7 @@ export async function getCases({
     { field: 'metadata.account_name', type: 'keyword' },
     { field: 'owner.email', type: 'keyword' },
     { field: 'owner.name', type: 'keyword' },
+    { field: 'content', type: 'text' },
   ];
 
   const createRef = contentRefBuilder({
@@ -386,7 +387,7 @@ export async function getAccounts({
     size,
   };
 
-  logger.info(
+  logger.debug(
     `Retrieving accounts from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
   );
 

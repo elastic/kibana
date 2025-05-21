@@ -172,9 +172,10 @@ export class StatusRuleExecutor {
     const queryLocations = this.params?.locations;
 
     // Account for locations filter
-    const listOfLocationAfterFilter = queryLocations
-      ? intersection(monitorLocationIds, queryLocations)
-      : monitorLocationIds;
+    const listOfLocationAfterFilter =
+      queryLocations && queryLocations.length
+        ? intersection(monitorLocationIds, queryLocations)
+        : monitorLocationIds;
 
     const currentStatus = await queryMonitorStatusAlert({
       esClient: this.esClient,
@@ -295,7 +296,7 @@ export class StatusRuleExecutor {
             statusConfig,
           });
 
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation,
             alertId,
             monitorSummary,
@@ -323,7 +324,7 @@ export class StatusRuleExecutor {
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
           });
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation: configId,
             alertId,
             monitorSummary,

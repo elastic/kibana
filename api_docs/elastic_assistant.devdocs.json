@@ -1822,29 +1822,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "elasticAssistant",
-        "id": "def-server.featureFlags",
-        "type": "Array",
-        "tags": [],
-        "label": "featureFlags",
-        "description": [],
-        "signature": [
-          "(",
-          "FeatureFlagDefinition",
-          "<\"boolean\"> | ",
-          "FeatureFlagDefinition",
-          "<\"string\"> | ",
-          "FeatureFlagDefinition",
-          "<\"number\">)[]"
-        ],
-        "path": "x-pack/solutions/security/plugins/elastic_assistant/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "elasticAssistant",

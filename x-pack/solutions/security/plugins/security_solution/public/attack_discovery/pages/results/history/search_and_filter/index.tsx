@@ -30,8 +30,9 @@ import { ConnectorFilter } from './connector_filter';
 import { getCommonTimeRanges } from '../../../settings_flyout/alert_selection/helpers/get_common_time_ranges';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
-import type { ConnectorFilterOptionData } from '../types';
 import { VisibilityFilter } from './visibility_filter';
+import { useInvalidateGetAttackDiscoveryGenerations } from '../../../use_get_attack_discovery_generations';
+import { useInvalidateFindAttackDiscoveries } from '../../../use_find_attack_discoveries';
 
 const updateButtonProps: EuiSuperUpdateButtonProps = {
   fill: false,
@@ -49,19 +50,18 @@ const box = {
 
 interface Props {
   aiConnectors: AIConnector[] | undefined;
-  connectorFilterItems: Array<EuiSelectableOption<ConnectorFilterOptionData>>;
   connectorNames: string[] | undefined;
   end: string | undefined;
   filterByAlertIds: string[];
   isLoading?: boolean;
   onRefresh: () => void;
   query: string | undefined;
-  setConnectorFilterItems: React.Dispatch<
-    React.SetStateAction<Array<EuiSelectableOption<ConnectorFilterOptionData>>>
-  >;
+  selectedConnectorNames: string[];
   setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
   setFilterByAlertIds: (ids: string[]) => void;
   setQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  setSelectedConnectorNames: React.Dispatch<React.SetStateAction<string[]>>;
   setShared: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setStart: React.Dispatch<React.SetStateAction<string | undefined>>;
   setStatusItems: React.Dispatch<React.SetStateAction<EuiSelectableOption[]>>;
@@ -75,17 +75,18 @@ interface Props {
 
 const SearchAndFilterComponent: React.FC<Props> = ({
   aiConnectors,
-  connectorFilterItems,
   connectorNames,
   end,
   filterByAlertIds,
   isLoading = false,
   onRefresh,
   query,
-  setConnectorFilterItems,
+  selectedConnectorNames,
   setEnd,
   setFilterByAlertIds,
   setQuery,
+  setSelectedAttackDiscoveries,
+  setSelectedConnectorNames,
   setShared,
   setStart,
   setStatusItems,
@@ -93,6 +94,8 @@ const SearchAndFilterComponent: React.FC<Props> = ({
   start,
   statusItems,
 }) => {
+  const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { euiTheme } = useEuiTheme();
 
   // Users accumulate an "unsubmitted" query as they type in the search bar,
@@ -125,8 +128,17 @@ const SearchAndFilterComponent: React.FC<Props> = ({
 
       setStart(startDate);
       setEnd(endDate);
+      invalidateFindAttackDiscoveries();
+      invalidateGetAttackDiscoveryGenerations();
     },
-    [setEnd, setQuery, setStart, unSubmittedQuery]
+    [
+      invalidateFindAttackDiscoveries,
+      invalidateGetAttackDiscoveryGenerations,
+      setEnd,
+      setQuery,
+      setStart,
+      unSubmittedQuery,
+    ]
   );
 
   /**
@@ -140,8 +152,18 @@ const SearchAndFilterComponent: React.FC<Props> = ({
 
   const localOnRefresh = useCallback(() => {
     setQuery(unSubmittedQuery);
+    setSelectedAttackDiscoveries({});
     onRefresh();
-  }, [onRefresh, setQuery, unSubmittedQuery]);
+    invalidateFindAttackDiscoveries();
+    invalidateGetAttackDiscoveryGenerations();
+  }, [
+    invalidateFindAttackDiscoveries,
+    invalidateGetAttackDiscoveryGenerations,
+    onRefresh,
+    setQuery,
+    setSelectedAttackDiscoveries,
+    unSubmittedQuery,
+  ]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -153,8 +175,11 @@ const SearchAndFilterComponent: React.FC<Props> = ({
   );
 
   const removeAlertIdFromFilter = useCallback(
-    (id: string) => setFilterByAlertIds(filterByAlertIds.filter((alertId) => alertId !== id)),
-    [filterByAlertIds, setFilterByAlertIds]
+    (id: string) => {
+      setFilterByAlertIds(filterByAlertIds.filter((alertId) => alertId !== id));
+      invalidateFindAttackDiscoveries();
+    },
+    [filterByAlertIds, invalidateFindAttackDiscoveries, setFilterByAlertIds]
   );
 
   return (
@@ -193,10 +218,10 @@ const SearchAndFilterComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           <ConnectorFilter
             aiConnectors={aiConnectors}
-            connectorFilterItems={connectorFilterItems}
             connectorNames={connectorNames}
             isLoading={isLoading}
-            setConnectorFilterItems={setConnectorFilterItems}
+            selectedConnectorNames={selectedConnectorNames}
+            setSelectedConnectorNames={setSelectedConnectorNames}
           />
         </EuiFlexItem>
 
