@@ -568,6 +568,7 @@ async function installPackageFromRegistry({
       error: e,
       installType,
       installSource,
+      pkgName,
     };
   }
 }
@@ -668,6 +669,7 @@ export async function installPackageWithStateMachine(options: {
           status: 'already_installed',
           installType,
           installSource,
+          pkgName,
         };
       }
     }
@@ -679,7 +681,7 @@ export async function installPackageWithStateMachine(options: {
         ...telemetryEvent,
         errorMessage: err.message,
       });
-      return { error: err, installType, installSource };
+      return { error: err, installType, installSource, pkgName };
     }
 
     // Saved object client need to be scopped with the package space for saved object tagging
@@ -722,14 +724,20 @@ export async function installPackageWithStateMachine(options: {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
         await removeOldAssets({
           soClient: savedObjectsClient,
-          pkgName: packageInfo.name,
+          pkgName,
           currentVersion: packageInfo.version,
         });
         sendEvent({
           ...telemetryEvent!,
           status: 'success',
         });
-        return { assets, status: 'installed' as InstallResultStatus, installType, installSource };
+        return {
+          assets,
+          status: 'installed' as InstallResultStatus,
+          installType,
+          installSource,
+          pkgName,
+        };
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
@@ -750,7 +758,7 @@ export async function installPackageWithStateMachine(options: {
           ...telemetryEvent!,
           errorMessage: err.message,
         });
-        return { error: err, installType, installSource };
+        return { error: err, installType, installSource, pkgName };
       });
   } catch (e) {
     sendEvent({
@@ -761,6 +769,7 @@ export async function installPackageWithStateMachine(options: {
       error: e,
       installType,
       installSource,
+      pkgName,
     };
   } finally {
     span?.end();
@@ -784,6 +793,7 @@ async function installPackageByUpload({
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+  let pkgName = 'unknown';
   const installSource = isBundledPackage ? 'bundled' : 'upload';
 
   const timeToWaitString = moment
@@ -806,7 +816,7 @@ async function installPackageByUpload({
       }
     }
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
-    const pkgName = packageInfo.name;
+    pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
     // Allow for overriding the version in the manifest for cases where we install
@@ -825,7 +835,7 @@ async function installPackageByUpload({
     deleteVerificationResult(packageInfo);
 
     setPackageInfo({
-      name: packageInfo.name,
+      name: pkgName,
       version: pkgVersion,
       packageInfo,
     });
@@ -866,6 +876,7 @@ async function installPackageByUpload({
       error: e,
       installType,
       installSource,
+      pkgName,
     };
   }
 }
