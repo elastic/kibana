@@ -24,6 +24,7 @@ export {
   getValuesFromQueryField,
   getESQLQueryVariables,
   fixESQLQueryWithVariables,
+  getCategorizeColumns,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export {
