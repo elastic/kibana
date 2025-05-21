@@ -22,28 +22,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestEditorWithApiKey: SupertestWithRoleScopeType;
+  let supertestAdminWithApiKey: SupertestWithRoleScopeType;
 
   describe('SyntheticsCustomStatusRule', () => {
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {
-      // TODO: the role here should be 'editor' but doing that makes some tests fail, investigate why
-      supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
-        withInternalHeaders: true,
-      });
+      [supertestEditorWithApiKey, supertestAdminWithApiKey] = await Promise.all([
+        roleScopedSupertest.getSupertestWithRoleScope('editor', {
+          withInternalHeaders: true,
+          useCookieHeader: true,
+        }),
+        roleScopedSupertest.getSupertestWithRoleScope('admin', {
+          withInternalHeaders: true,
+          useCookieHeader: true,
+        }),
+      ]);
 
-      ruleHelper = new SyntheticsRuleHelper(getService, supertestEditorWithApiKey);
+      ruleHelper = new SyntheticsRuleHelper(
+        getService,
+        supertestEditorWithApiKey,
+        supertestAdminWithApiKey
+      );
       await server.savedObjects.cleanStandardList();
       await ruleHelper.createIndexAction();
       await esClient.deleteByQuery({
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
       });
-      await supertestEditorWithApiKey.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
+      await supertestAdminWithApiKey.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
     });
 
     after(async () => {
       await supertestEditorWithApiKey.destroy();
+      await supertestAdminWithApiKey.destroy();
       await server.savedObjects.cleanStandardList();
       await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
     });

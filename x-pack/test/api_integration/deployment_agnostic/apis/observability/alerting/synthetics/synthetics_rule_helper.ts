@@ -23,6 +23,7 @@ import { createIndexConnector, createRule } from '../helpers/alerting_api_helper
 export const SYNTHETICS_ALERT_ACTION_INDEX = 'alert-action-synthetics';
 export class SyntheticsRuleHelper {
   supertestEditorWithApiKey: SupertestWithRoleScope;
+  supertestAdminWithApiKey: SupertestWithRoleScope;
   logger: ToolingLog;
   esClient: Client;
   retryService: RetryService;
@@ -31,10 +32,12 @@ export class SyntheticsRuleHelper {
 
   constructor(
     getService: DeploymentAgnosticFtrProviderContext['getService'],
-    supertestEditorWithApiKey: SupertestWithRoleScope
+    supertestEditorWithApiKey: SupertestWithRoleScope,
+    supertestAdminWithApiKey: SupertestWithRoleScope
   ) {
     this.esClient = getService('es');
     this.supertestEditorWithApiKey = supertestEditorWithApiKey;
+    this.supertestAdminWithApiKey = supertestAdminWithApiKey;
     this.logger = getService('log');
     this.retryService = getService('retry');
     this.alertActionIndex = SYNTHETICS_ALERT_ACTION_INDEX;
@@ -52,7 +55,7 @@ export class SyntheticsRuleHelper {
       },
     });
     const actionId = await createIndexConnector({
-      supertest: this.supertestEditorWithApiKey,
+      supertest: this.supertestAdminWithApiKey,
       name: 'Index Connector: Synthetics API test',
       indexName: this.alertActionIndex,
       logger: this.logger,
@@ -76,7 +79,7 @@ export class SyntheticsRuleHelper {
       name: name ?? 'Custom status rule',
       ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
       consumer: 'alerts',
-      supertest: this.supertestEditorWithApiKey,
+      supertest: this.supertestAdminWithApiKey,
       esClient: this.esClient,
       logger: this.logger,
       schedule: { interval: '15s' },
