@@ -389,7 +389,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('data_view_id field', async () => {
           const { body } = await securitySolutionApi
             .patchRule({
-              body: { rule_id: 'rule_1', data_view_id: 'new-data-view', index: undefined },
+              body: { rule_id: 'rule_1', data_view_id: 'new-data-view', index: [] },
             })
             .expect(200);
 
