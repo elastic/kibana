@@ -45,6 +45,7 @@ export const ConfigSchema = schema.oneOf([
 export const SecretsSchema = schema.oneOf([
   schema.object({ apiKey: schema.string() }),
   schema.object({
+    apiKey: schema.maybe(schema.string({ minLength: 1 })),
     certificateData: schema.maybe(schema.string({ minLength: 1 })),
     privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
     caData: schema.maybe(schema.string({ minLength: 1 })),

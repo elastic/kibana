@@ -41,7 +41,7 @@ import {
   azureAiConfig,
   azureAiSecrets,
   otherOpenAiConfig,
-  otherOpenAiSecrets,
+  getOtherOpenAiSecrets,
   openAiSecrets,
   providerOptions,
   openAiConfig,
@@ -74,6 +74,8 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
     { value: 'certificate', text: i18n.VERIFICATION_MODE_CERTIFICATE },
     { value: 'none', text: i18n.VERIFICATION_MODE_NONE },
   ];
+
+  const otherOpenAiSecrets = useMemo(() => getOtherOpenAiSecrets(!hasPKI), [hasPKI]);
 
   return (
     <>
@@ -124,7 +126,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             isEdit={isEdit}
             readOnly={readOnly}
             configFormSchema={otherOpenAiConfig}
-            secretsFormSchema={hasPKI ? [] : otherOpenAiSecrets}
+            secretsFormSchema={otherOpenAiSecrets}
           />
           <EuiSpacer size="s" />
           <UseField

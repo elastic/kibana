@@ -193,63 +193,6 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
   },
 ];
 
-export const pkiConfig: ConfigFieldSchema[] = [
-  {
-    id: 'certificateData',
-    label: i18n.CERT_DATA_LABEL,
-    isRequired: false,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Raw PKI certificate content (PEM format) for cloud or on-premise deployments."
-        id="xpack.stackConnectors.components.genAi.certificateDataDocumentation"
-      />
-    ),
-    euiFieldProps: {
-      append: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
-      ),
-    },
-  },
-  {
-    id: 'privateKeyData',
-    label: i18n.KEY_DATA_LABEL,
-    isRequired: false,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Raw PKI private key content (PEM format) for cloud or on-premise deployments."
-        id="xpack.stackConnectors.components.genAi.privateKeyDataDocumentation"
-      />
-    ),
-    euiFieldProps: {
-      append: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
-      ),
-    },
-  },
-  {
-    id: 'caData',
-    label: 'CA Certificate Data',
-    isRequired: false,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Raw CA certificate content (PEM) used to verify the server certificate."
-        id="xpack.stackConnectors.components.genAi.caDataDocumentation"
-      />
-    ),
-    euiFieldProps: {
-      append: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
-      ),
-    },
-  },
-];
-
 export const openAiSecrets: SecretsFieldSchema[] = [
   {
     id: 'apiKey',
@@ -300,11 +243,12 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
-export const otherOpenAiSecrets: SecretsFieldSchema[] = [
+export const getOtherOpenAiSecrets = (isRequired = true): SecretsFieldSchema[] => [
   {
     id: 'apiKey',
     label: i18n.API_KEY_LABEL,
     isPasswordField: true,
+    isRequired,
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) API key for HTTP Basic authentication. For more details about generating Other model API keys, refer to the {genAiAPIKeyDocs}."
