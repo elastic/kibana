@@ -8,11 +8,14 @@
 import React from 'react';
 import dedent from 'dedent';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { i18n } from '@kbn/i18n';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
 
-export const useRunQueryRuleset = (rulesetId: string) => {
+export const useRunQueryRuleset = (
+  rulesetId: string,
+  type: 'link' | 'button' | 'emptyButton' | 'contextMenuItem',
+  content?: string
+) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
   const indecesRuleset = queryRulesetData?.rules?.[0]?.actions?.docs?.[0]?._index || 'my_index';
@@ -47,10 +50,8 @@ GET ${indecesRuleset}/_search
       sharePlugin={share ?? undefined}
       consolePlugin={consolePlugin ?? undefined}
       request={TEST_QUERY_RULESET_API_SNIPPET}
-      type="contextMenuItem"
-      content={i18n.translate('xpack.queryRules.RunInConsoleLabel', {
-        defaultMessage: 'Test in Console',
-      })}
+      type={type}
+      content={content ?? content}
       showIcon
     />
   );

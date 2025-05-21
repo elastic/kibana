@@ -26,8 +26,16 @@ import { DeleteRulesetModal } from './delete_ruleset_modal';
 import { useRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
 
 // Create a separate component for the Run button
-const RunQueryRulesetButton = ({ rulesetId }: { rulesetId: string }) => {
-  return useRunQueryRuleset(rulesetId);
+const RunQueryRulesetButton = ({
+  rulesetId,
+  type,
+  content,
+}: {
+  rulesetId: string;
+  type: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
+  content: string;
+}) => {
+  return useRunQueryRuleset(rulesetId, type, content);
 };
 
 export const QueryRulesSets = () => {
@@ -84,7 +92,15 @@ export const QueryRulesSets = () => {
       actions: [
         {
           render: (item: QueryRulesListRulesetsQueryRulesetListItem, enabled: boolean) => {
-            return <RunQueryRulesetButton rulesetId={item.ruleset_id} />;
+            return (
+              <RunQueryRulesetButton
+                rulesetId={item.ruleset_id}
+                type="contextMenuItem"
+                content={i18n.translate('xpack.queryRules.queryRulesSetTable.actions.run', {
+                  defaultMessage: 'Test in Console',
+                })}
+              />
+            );
           },
         },
         {
