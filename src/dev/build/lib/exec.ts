@@ -38,15 +38,10 @@ export async function exec(
   }
 
   const proc = execa(cmd, args, {
+    stdio: ['ignore', 'pipe', 'pipe'],
     cwd,
     env,
     preferLocal: true,
-    ...(bufferLogs
-      ? {
-          stdio: ['ignore', 'pipe', 'pipe'],
-          buffer: false,
-        }
-      : { stdio: ['ignore', 'pipe', 'pipe'] }),
   });
 
   const logFn = (line: string) => log[level](line);
