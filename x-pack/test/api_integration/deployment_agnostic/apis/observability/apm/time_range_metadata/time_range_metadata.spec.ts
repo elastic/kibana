@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { omit, sortBy } from 'lodash';
@@ -39,7 +39,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         query: {
           start: overrides.start.toISOString(),
           end: overrides.end.toISOString(),
-          enableContinuousRollups: true,
           useSpanName: false,
           kuery: '',
           ...omit(overrides, 'start', 'end'),
@@ -332,37 +331,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('with continuous rollups disabled', () => {
-        it('returns only 1m intervals', async () => {
-          const response = await getTimeRangeMetadata({
-            start,
-            end,
-            enableContinuousRollups: false,
-          });
-
-          expect(response.sources).to.eql([
-            {
-              documentType: ApmDocumentType.ServiceTransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionEvent,
-              rollupInterval: RollupInterval.None,
-              hasDocs: true,
-              hasDurationSummaryField: false,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-          ]);
-        });
-      });
-
       describe('when data is available before the time range', () => {
         it('marks all those sources as available', async () => {
           const response = await getTimeRangeMetadata({
@@ -629,7 +597,9 @@ function getTransactionEvents({
   ];
 
   const apmPipeline = (base: Readable) => {
-    return synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(base);
+    return synthtrace.resolvePipelineType(ApmSynthtracePipelineSchema.Default, {
+      versionOverride: '8.5.0',
+    })(base);
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
