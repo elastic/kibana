@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  SavedObjectsClient,
+  LoggerFactory,
+  SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
+} from '@kbn/core/server';
+import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { ReindexWorker } from './lib/reindexing';
+import { createReindexWorker } from './routes/reindex_indices';
+import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
+import { hiddenTypes } from './saved_object_types';
+// import { defaultExclusions } from './lib/data_source_exclusions';
+
+interface PluginsStart {
+  security: SecurityPluginStart;
+}
+
+interface PluginsSetup {
+  // usageCollection: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
+  // features: FeaturesPluginSetup;
+  // logsShared: LogsSharedPluginSetup;
+  security?: SecurityPluginSetup;
+}
+
+export class ReindexingService {
+  private reindexWorker: ReindexWorker | null = null;
+
+  // Properties set at setup
+  private licensing?: LicensingPluginSetup;
+
+  private readonly logger: Logger;
+  private readonly credentialStore: CredentialStore;
+  // private readonly kibanaVersion: string;
+
+  constructor({ logger }: { logger: LoggerFactory }) {
+    this.logger = logger.get();
+    // used by worker and passed to routes
+    this.credentialStore = credentialStoreFactory(this.logger);
+    // this.kibanaVersion = env.packageInfo.version;
+
+    // const { featureSet, dataSourceExclusions } = config.get();
+    // this.initialFeatureSet = featureSet;
+    // this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
+  }
+
+  public setup({}: CoreSetup, { licensing }: PluginsSetup) {
+    this.licensing = licensing;
+    // todo routing
+  }
+
+  public start(
+    {
+      savedObjects,
+      elasticsearch,
+    }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
+    { security }: PluginsStart
+  ) {
+    this.reindexWorker = createReindexWorker({
+      credentialStore: this.credentialStore,
+      licensing: this.licensing!,
+      elasticsearchService: elasticsearch,
+      logger: this.logger,
+      savedObjects: new SavedObjectsClient(savedObjects.createInternalRepository(hiddenTypes)),
+      // security: this.securityPluginStart,
+      security,
+    });
+
+    this.reindexWorker.start();
+  }
+  public async stop() {
+    if (this.reindexWorker) {
+      await this.reindexWorker.stop();
+      this.reindexWorker = null;
+    }
+  }
+}

@@ -17,6 +17,7 @@ import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from './reindex_handler';
 
+// todo move
 export function registerReindexIndicesRoutes(
   {
     credentialStore,

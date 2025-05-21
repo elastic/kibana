@@ -12,7 +12,6 @@ import {
   CoreStart,
   PluginInitializerContext,
   Logger,
-  SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -27,18 +26,14 @@ import { CredentialStore, credentialStoreFactory } from './lib/reindexing/creden
 import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
-import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
-import {
-  reindexOperationSavedObjectType,
-  mlSavedObjectType,
-  hiddenTypes,
-} from './saved_object_types';
+import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { defaultExclusions } from './lib/data_source_exclusions';
+import { ReindexingService } from './reindexing_service';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -59,22 +54,23 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly initialFeatureSet: FeatureSet;
   private readonly initialDataSourceExclusions: DataSourceExclusions;
 
-  // Properties set at setup
-  private licensing?: LicensingPluginSetup;
-
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
 
+  private reindexingService?: ReindexingService;
+
   constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
+    // used by worker and passed to routes
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
 
     const { featureSet, dataSourceExclusions } = config.get();
     this.initialFeatureSet = featureSet;
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
+    this.reindexingService = new ReindexingService({ logger: this.logger });
   }
 
   private getWorker() {
@@ -84,14 +80,14 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     return this.worker;
   }
 
-  setup(
-    { http, deprecations, getStartServices, savedObjects, docLinks }: CoreSetup,
-    { usageCollection, features, licensing, logsShared, security }: PluginsSetup
-  ) {
-    this.licensing = licensing;
+  setup(coreSetup: CoreSetup, pluginSetup: PluginsSetup) {
+    const { http, getStartServices, savedObjects } = coreSetup;
+    const { usageCollection, features, licensing, logsShared, security } = pluginSetup;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
     savedObjects.registerType(mlSavedObjectType);
+
+    this.reindexingService?.setup(coreSetup, pluginSetup);
 
     features.registerElasticsearchFeature({
       id: 'upgrade_assistant',
@@ -162,8 +158,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   start({ savedObjects, elasticsearch }: CoreStart, { security }: PluginsStart) {
-    this.savedObjectsServiceStart = savedObjects;
-    this.securityPluginStart = security;
+    // this might be for routes
+    // this.savedObjectsServiceStart = savedObjects;
+    // this.securityPluginStart = security;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
@@ -172,23 +169,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // process jobs without the browser staying on the page, but will require that jobs go into
     // a paused state if no Kibana nodes have the required credentials.
 
-    this.worker = createReindexWorker({
-      credentialStore: this.credentialStore,
-      licensing: this.licensing!,
-      elasticsearchService: elasticsearch,
-      logger: this.logger,
-      savedObjects: new SavedObjectsClient(
-        this.savedObjectsServiceStart.createInternalRepository(hiddenTypes)
-      ),
-      security: this.securityPluginStart,
-    });
+    // The ReindexWorker will use the credentials stored in the cache to reindex the data
 
-    this.worker.start();
+    this.reindexingService?.start({ savedObjects, elasticsearch }, { security });
   }
 
   stop(): void {
-    if (this.worker) {
-      this.worker.stop();
-    }
+    this.reindexingService?.stop();
   }
 }

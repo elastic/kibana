@@ -37,6 +37,7 @@ interface ReindexHandlerArgs {
   security?: SecurityPluginStart;
 }
 
+// todo move
 export const reindexHandler = async ({
   credentialStore,
   dataClient,
