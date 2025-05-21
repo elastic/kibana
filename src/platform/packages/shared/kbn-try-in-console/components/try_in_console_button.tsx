@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -100,7 +100,7 @@ export const TryInConsoleButton = ({
   };
   const iconType = showIcon ? 'play' : undefined;
 
-  const contextMenuItemCss = css({
+  const noPadding = css({
     padding: 0,
   });
 
@@ -115,12 +115,7 @@ export const TryInConsoleButton = ({
       );
     case 'contextMenuItem':
       return (
-        <EuiContextMenuItem
-          icon={iconType}
-          hasPanel={false}
-          css={contextMenuItemCss}
-          {...commonProps}
-        >
+        <EuiContextMenuItem icon={iconType} hasPanel={false} css={noPadding} {...commonProps}>
           {content}
         </EuiContextMenuItem>
       );
