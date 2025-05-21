@@ -487,6 +487,7 @@ Alerting::
 [[fixes-v8.17.7]]
 === Fixes
 Dashboards and Visualizations::
+* Correctly applies default timezone in **TSVB** when the timezone parameter is set to default in **Advanced Settings** ({kibana-pull}220658[#220658]).
 * Removes extra icon from map visualization tooltips ({kibana-pull}220134[#220134]).
 Discover::
 * Fixes drill-down state not saving in by-value **Discover** sessions ({kibana-pull}219857[#219857]).
