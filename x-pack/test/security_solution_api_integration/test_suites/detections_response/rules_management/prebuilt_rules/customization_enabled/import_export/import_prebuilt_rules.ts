@@ -318,6 +318,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect.objectContaining({
               rule_id: 'rule-1',
               version: 2,
+              name: 'Customized prebuilt rule',
               rule_source: { type: 'external', is_customized: true },
               immutable: true,
             }),

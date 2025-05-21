@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('exports a set of custom installed rules via the _export API', async () => {
+    it('exports a set of custom rules via the _export API', async () => {
       await Promise.all([
         securitySolutionApi
           .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-1' }) })
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await installPrebuiltRules(es, supertest);
       });
 
-      it('exports a set of prebuilt installed rules via the _export API', async () => {
+      it('exports a set of non-customized prebuilt rules via the _export API', async () => {
         const { body: exportResult } = await securitySolutionApi
           .exportRules({ query: {}, body: null })
           .expect(200)
@@ -124,17 +124,18 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ])
         );
+      });
 
-        const [firstExportedRule, secondExportedRule] = parsedExportResult as Array<{
-          id: string;
-          rule_id: string;
-        }>;
+      it('exports a set of customized prebuilt rules via the _export API', async () => {
+        const {
+          body: { data: rules },
+        } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
         const { body: bulkEditResult } = await securitySolutionApi
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: [firstExportedRule.id],
+              ids: [rules[0].id],
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
                 {
@@ -164,14 +165,14 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(parseNdJson(secondExportResult)).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              rule_id: firstExportedRule.rule_id,
+              rule_id: rules[0].rule_id,
               rule_source: {
                 type: 'external',
                 is_customized: true,
               },
             }),
             expect.objectContaining({
-              rule_id: secondExportedRule.rule_id,
+              rule_id: rules[1].rule_id,
               rule_source: {
                 type: 'external',
                 is_customized: false,
@@ -181,7 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('exports a set of custom and prebuilt installed rules via the _export API', async () => {
+      it('exports a set of custom and prebuilt rules via the _export API', async () => {
         await Promise.all([
           securitySolutionApi
             .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-1' }) })
@@ -276,7 +277,74 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('exports a set of custom and prebuilt installed rules via the bulk_actions API', async () => {
+      it('exports all prebuilt rules via _export API', async () => {
+        const { body } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportJson = parseNdJson(body);
+
+        expect(exportJson).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: ruleAssets[0]['security-rule'].rule_id,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
+            }),
+            expect.objectContaining({
+              rule_id: ruleAssets[1]['security-rule'].rule_id,
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+              },
+            }),
+          ])
+        );
+
+        const exportStats = exportJson.at(-1);
+
+        expect(exportStats).toMatchObject({
+          exported_rules_count: 2,
+          missing_rules: [],
+        });
+      });
+
+      it('exports a set of prebuilt rules via the bulk_actions API', async () => {
+        const ruleAsset = createRuleAssetSavedObject({ rule_id: 'prebuilt-rule-1', version: 1 });
+
+        await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+        await installPrebuiltRules(es, supertest);
+
+        const findResponse = await securitySolutionApi.findRules({ query: {} });
+        const installedRule = findResponse.body.data[0];
+
+        const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: {},
+            body: { action: BulkActionTypeEnum.export, ids: [installedRule.id] },
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const [ruleJson, exportDetailsJson] = parseNdJson(body);
+
+        expect(ruleJson).toMatchObject({
+          id: installedRule.id,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        });
+
+        expect(exportDetailsJson).toMatchObject({
+          missing_rules: [],
+        });
+      });
+
+      it('exports a set of custom and prebuilt rules via the bulk_actions API', async () => {
         await Promise.all([
           securitySolutionApi
             .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-1' }) })

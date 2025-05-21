@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Prebuilt Rule (Customization Enabled) Integration Tests - Serverless Env',
+      'Rules Management - Prebuilt Rules (Customization Enabled) Integration Tests - Serverless Env',
   },
 });
