@@ -12,6 +12,7 @@ import { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import {
   Column,
   DataSourceSelectionPlain,
@@ -51,7 +52,7 @@ export const hydrateDataSourceSelection = (
 ): DataViewSpecWithId => {
   if (dataSourceSelection.selectionType === 'all') {
     return {
-      id: 'discover-observability-solution-all-logs',
+      id: ALL_LOGS_DATA_VIEW_ID,
     };
   } else if (dataSourceSelection.selectionType === 'single' && dataSourceSelection.selection) {
     const selection = dataSourceSelection.selection as SingleDatasetSelectionPayload;
