@@ -22,6 +22,7 @@ import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
+import { visStyles } from '../_vis_types';
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -101,7 +102,7 @@ function TopNVisualization(props) {
   const closeExternalUrlErrorModal = useCallback(() => setAccessDeniedDrilldownUrl(null), []);
 
   return (
-    <div className="tvbVis" style={style}>
+    <div className="tvbVis" style={style} css={visStyles}>
       <TopN {...params} initialRender={props.initialRender} />
       {accessDeniedDrilldownUrl && (
         <ExternalUrlErrorModal

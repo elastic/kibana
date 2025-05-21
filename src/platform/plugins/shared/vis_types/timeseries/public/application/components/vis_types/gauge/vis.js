@@ -18,6 +18,7 @@ import { Gauge } from '../../../visualizations/views/gauge';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { visStyles } from '../_vis_types';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -84,7 +85,7 @@ function GaugeVisualization(props) {
   if (model.gauge_max != null) params.max = model.gauge_max;
 
   return (
-    <div className="tvbVis" style={style}>
+    <div className="tvbVis" css={visStyles} style={style}>
       <Gauge {...params} />
     </div>
   );
