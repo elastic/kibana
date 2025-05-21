@@ -49,7 +49,8 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete migrations, rules and resources associated with the migration', async () => {
         await ruleMigrationRoutes.addRulesToMigration({
           migrationId,
-          payload: [splunkRuleWithResources],
+          /** adding bulk rules so that deletion of all rules can be tested */
+          payload: Array.from({ length: 40 }, () => splunkRuleWithResources),
         });
 
         await createMacrosForMigrationId({
@@ -74,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           es,
           migrationId,
         });
-        expect(rulesFromES.hits.hits).toHaveLength(1);
+        expect(rulesFromES.hits.hits).toHaveLength(40);
 
         let resourcesFromES = await getResoucesPerMigrationFromES({
           es,
