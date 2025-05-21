@@ -131,7 +131,6 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
-    "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
