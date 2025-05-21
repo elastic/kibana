@@ -6,11 +6,9 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CSPM_FINDINGS_STATS_INTERVAL,
-} from '../../../common/constants';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types_old';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 
@@ -45,11 +43,31 @@ export type Trends = Array<{
   clusters: Record<string, Stats>;
   benchmarks: Record<string, Stats>;
 }>;
-
-export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
+export interface ScoreTrendAggregateResponse {
+  by_namespace: {
+    buckets: Array<{
+      key: string; // namespace name, e.g., "default"
+      doc_count: number;
+      all_scores: {
+        hits: {
+          hits: Array<{
+            _source: {
+              '@timestamp': string;
+              total_findings: number;
+              passed_findings: number;
+              failed_findings: number;
+              score_by_cluster_id: ScoreByClusterId;
+              score_by_benchmark_id: ScoreByBenchmarkId;
+            };
+          }>;
+        };
+      };
+    }>;
+  };
+}
+export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate): SearchRequest => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  // Amount of samples of the last 24 hours (accounting that we take a sample every 5 minutes)
-  size: (24 * 60) / CSPM_FINDINGS_STATS_INTERVAL,
+  size: 0,
   sort: '@timestamp:desc',
   query: {
     bool: {
@@ -67,6 +85,31 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
           term: { is_enabled_rules_score: true },
         },
       ],
+    },
+  },
+  aggs: {
+    by_namespace: {
+      terms: {
+        field: 'namespace',
+      },
+      aggs: {
+        all_scores: {
+          top_hits: {
+            size: 100, // size: 100, // Maximum top hits result window is 100 which represents > 8 hours of scores samples (CSPM_FINDINGS_STATS_INTERVAL)
+            sort: [{ '@timestamp': { order: 'desc' } }],
+            _source: {
+              includes: [
+                '@timestamp',
+                'total_findings',
+                'passed_findings',
+                'failed_findings',
+                'score_by_cluster_id',
+                'score_by_benchmark_id',
+              ],
+            },
+          },
+        },
+      },
     },
   },
 });
@@ -123,16 +166,28 @@ export const getTrends = async (
   logger: Logger
 ): Promise<Trends> => {
   try {
-    const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(policyTemplate));
+    const trendsQueryResult = await esClient.search<unknown, ScoreTrendAggregateResponse>(
+      getTrendsQuery(policyTemplate)
+    );
+    if (!trendsQueryResult.aggregations?.by_namespace?.buckets)
+      throw new Error('missing trend results from score index');
 
-    if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
+    const scoreTrendDocs =
+      trendsQueryResult.aggregations.by_namespace.buckets.map((bucket) => {
+        const namespace = bucket.key;
+        const documents = bucket.all_scores?.hits?.hits?.map((hit) => hit._source) || [];
+        return { [namespace]: { documents } };
+      }) ?? [];
 
-    const scoreTrendDocs = trendsQueryResult.hits.hits.map((hit) => {
-      if (!hit._source) throw new Error('missing _source data for one or more of trend results');
-      return hit._source;
-    });
+    if (!scoreTrendDocs.length) return []; // No trends data available
+    const result = Object.fromEntries(
+      scoreTrendDocs.map((entry) => {
+        const [key, value] = Object.entries(entry)[0];
+        return [key, value.documents];
+      })
+    );
 
-    return formatTrends(scoreTrendDocs);
+    return formatTrends(result.default); // Return the trends for the default namespace until namespace support will be visible to users.
   } catch (err) {
     logger.error(`Failed to fetch trendlines data ${err.message}`);
     logger.error(err);
