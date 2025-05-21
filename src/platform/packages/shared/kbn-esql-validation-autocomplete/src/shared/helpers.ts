@@ -716,11 +716,11 @@ export function getBracketsToClose(text: string) {
       }
 
       const substr = text.slice(i, i + openBracket.length);
-      if (substr === openBracket) {
-        stack.push(substr);
-        break;
-      } else if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
         break;
       }
     }
