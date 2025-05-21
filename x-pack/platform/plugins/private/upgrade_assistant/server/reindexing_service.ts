@@ -78,10 +78,9 @@ export class ReindexingService {
 
     this.reindexWorker.start();
   }
-  public async stop() {
+  public stop() {
     if (this.reindexWorker) {
-      await this.reindexWorker.stop();
-      this.reindexWorker = null;
+      this.reindexWorker.stop();
     }
   }
 }
