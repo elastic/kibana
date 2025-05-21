@@ -60,10 +60,7 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
 
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(
-      client.asCurrentUser,
-      `otel-host`
-    );
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, `otel-host`);
 
     return {
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
