@@ -931,26 +931,18 @@ describe('Datatable Visualization', () => {
         DataGridDensity.NORMAL,
       ]);
 
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          density: DataGridDensity.NORMAL,
-        }).density
-      ).toEqual([DataGridDensity.NORMAL]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          density: DataGridDensity.COMPACT,
-        }).density
-      ).toEqual([DataGridDensity.COMPACT]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          density: DataGridDensity.EXPANDED,
-        }).density
-      ).toEqual([DataGridDensity.EXPANDED]);
+      for (const DENSITY of [
+        DataGridDensity.COMPACT,
+        DataGridDensity.NORMAL,
+        DataGridDensity.EXPANDED,
+      ]) {
+        expect(
+          getDatatableExpressionArgs({
+            ...defaultExpressionTableState,
+            density: DENSITY,
+          }).density
+        ).toEqual([DENSITY]);
+      }
     });
 
     describe('palette/colorMapping/colorMode', () => {

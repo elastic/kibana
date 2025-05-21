@@ -2070,5 +2070,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const option = await settings.findByTestSubject(value);
       await option.click();
     },
+
+    async checkDataTableDensity(size: 'l' | 'm' | 's') {
+      return find.existsByCssSelector(
+        `[data-test-subj="lnsDataTable"][class*="cellPadding-${size}-fontSize-${size}"]`
+      );
+    },
   });
 }
