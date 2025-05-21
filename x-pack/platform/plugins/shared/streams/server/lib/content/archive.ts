@@ -98,6 +98,8 @@ async function extractManifest(rootDir: string, zip: AdmZip): Promise<ContentPac
     throw new InvalidContentPackError(`Expected manifest at [${manifestPath}]`);
   }
 
+  assertUncompressedSize(entry);
+
   const { data: manifest, success } = contentPackManifestSchema.safeParse(
     YAML.parse((await readEntry(entry)).toString())
   );
