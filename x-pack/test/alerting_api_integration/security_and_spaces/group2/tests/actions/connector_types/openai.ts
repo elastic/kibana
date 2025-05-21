@@ -197,7 +197,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should return 400 Bad Request when creating the connector without secrets', async () => {
+      it('should return 400 Bad Request when creating the connector without apiKey secret', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -216,7 +216,31 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             });
           });
       });
-    });
+      it('should return error when creating the connector with PKI auth that has bad crt', async () => {{
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: {
+              pkiC
+            }
+          }
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
+      });
 
     describe('executor', () => {
       describe('validation', () => {

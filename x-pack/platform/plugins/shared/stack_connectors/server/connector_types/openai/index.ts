@@ -50,7 +50,8 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
 
 const secretsValidator = (secretsObject: Secrets) => {
   const validatorFn =
-    'certificateData' in secretsObject && secretsObject.certificateData
+    ('certificateData' in secretsObject && secretsObject.certificateData) ||
+    ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
       ? pkiSecretsValidator
       : nonPkiSecretsValidator;
   validatorFn(secretsObject);
