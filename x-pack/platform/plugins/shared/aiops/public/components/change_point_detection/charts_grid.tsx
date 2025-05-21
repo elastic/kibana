@@ -26,7 +26,6 @@ import {
   useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { ChartComponent } from './chart_component';
-import { hasRealChangePoints } from './types';
 
 const CHARTS_PER_PAGE = 6;
 
@@ -66,8 +65,6 @@ export const ChartsGrid: FC<{
     },
     [onRenderComplete]
   );
-
-  const containsChangePoints = useMemo(() => hasRealChangePoints(changePoints), [changePoints]);
 
   return (
     <EuiFlexGrid
