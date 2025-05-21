@@ -52,8 +52,10 @@ export function generateLayer(
     }
 
     properties[field] = property;
-    if (namespacePrefixes.some((prefix) => field.startsWith(prefix))) {
-      properties[field.replace(new RegExp(`^(${namespacePrefixes.join('|')})`), '')] = {
+    const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
+    if (matchingPrefix) {
+      const aliasName = field.substring(matchingPrefix.length);
+      properties[aliasName] = {
         type: 'alias',
         path: field,
       };

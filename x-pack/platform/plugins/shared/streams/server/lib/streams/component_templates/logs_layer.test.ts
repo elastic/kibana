@@ -159,7 +159,7 @@ describe('logs_layer', () => {
         conflictingFields
       );
 
-      // 'user' should point to 'attributes.user' as 'attributes.' comes later in the namespacePrefixes array
+      // 'user' should point to 'resource.attributes.user' as 'resource.attributes.' comes later in the namespacePrefixes array
       expect(result.user).toEqual({
         type: 'keyword',
         from: 'service-a',
