@@ -41,6 +41,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
   const REPORTING_ROLE = 'test_reporting_user';
+  const MANAGE_REPORTING_USER_USERNAME = 'manage_reporting_user';
+  const MANAGE_REPORTING_USER_PASSWORD = 'manage_reporting_user-password';
+  const MANAGE_REPORTING_ROLE = 'manage_reporting_role';
 
   const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
@@ -128,6 +131,36 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const createManageReportingUserRole = async () => {
+    await security.role.create(MANAGE_REPORTING_ROLE, {
+      metadata: {},
+      elasticsearch: {
+        cluster: [],
+        indices: [
+          {
+            names: ['ecommerce'],
+            privileges: ['read', 'view_index_metadata'],
+            allow_restricted_indices: false,
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            manageReporting: ['all'],
+            dashboard: ['minimal_read', 'download_csv_report', 'generate_report'],
+            discover: ['minimal_read', 'generate_report'],
+            canvas: ['minimal_read', 'generate_report'],
+            visualize: ['minimal_read', 'generate_report'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+  };
+
   const createDataAnalyst = async () => {
     await security.user.create('data_analyst', {
       password: 'data_analyst-password',
@@ -141,6 +174,14 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       password: REPORTING_USER_PASSWORD,
       roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
+    });
+  };
+
+  const createManageReportingUser = async () => {
+    await security.user.create(MANAGE_REPORTING_USER_USERNAME, {
+      password: MANAGE_REPORTING_USER_PASSWORD,
+      roles: [MANAGE_REPORTING_ROLE],
+      full_name: 'Manage Reporting User',
     });
   };
 
@@ -214,6 +255,32 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams, schedule });
   };
 
+  const listScheduledReports = async (
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .get(INTERNAL_ROUTES.SCHEDULED.LIST)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
+    return body;
+  };
+
+  const disableScheduledReports = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .patch(INTERNAL_ROUTES.SCHEDULED.BULK_DISABLE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
   const postJob = async (
     apiPath: string,
     username = 'elastic',
@@ -250,7 +317,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send()
       .expect(200);
     return job?.output?.error_code;
   };
@@ -313,7 +379,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const deleteScheduledReportSOs = async (ids: string[]) => {
     return await Promise.all(
-      ids.map((id) => esSupertest.delete(`/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/${id}`))
+      ids.map((id) =>
+        esSupertest.delete(`/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/scheduled_report:${id}`)
+      )
     );
   };
 
@@ -338,10 +406,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
     REPORTING_ROLE,
+    MANAGE_REPORTING_USER_USERNAME,
+    MANAGE_REPORTING_USER_PASSWORD,
+    MANAGE_REPORTING_ROLE,
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
     createTestReportingUser,
+    createManageReportingUserRole,
+    createManageReportingUser,
     generatePdf,
     generatePng,
     generateCsv,
@@ -360,5 +433,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     deleteScheduledReportSOs,
     getTask,
     deleteTasks,
+    listScheduledReports,
+    disableScheduledReports,
   };
 }

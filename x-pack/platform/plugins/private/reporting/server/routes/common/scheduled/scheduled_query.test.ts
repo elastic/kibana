@@ -312,7 +312,7 @@ describe('scheduledQueryFactory', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
-        filter: 'createdBy: "somebody"',
+        filter: 'scheduled_report.attributes.createdBy: "somebody"',
       });
       expect(client.search).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledWith({

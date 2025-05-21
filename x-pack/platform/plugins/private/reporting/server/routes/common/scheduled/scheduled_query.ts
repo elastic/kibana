@@ -129,7 +129,9 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
           page,
           perPage: size,
-          ...(!canManageReporting ? { filter: `createdBy: "${username}"` } : {}),
+          ...(!canManageReporting
+            ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
+            : {}),
         });
 
         if (!response) {
@@ -277,91 +279,3 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
     },
   };
 }
-
-// {
-//   "saved_objects": [
-//       {
-//           "id": "aa8b6fb3-cf61-4903-bce3-eec9ddc823ca",
-//           "type": "scheduled_report",
-//           "namespaces": [
-//               "default"
-//           ],
-//           "updated_at": "2025-05-06T21:10:17.137Z",
-//           "created_at": "2025-05-06T21:10:17.137Z",
-//           "version": "WzEsMV0=",
-//           "attributes": {
-//               "createdAt": "2025-05-06T21:10:17.137Z",
-//               "createdBy": "elastic",
-//               "enabled": true,
-//               "jobType": "printable_pdf_v2",
-//               "meta": {
-//                   "isDeprecated": false,
-//                   "layout": "preserve_layout",
-//                   "objectType": "dashboard"
-//               },
-//               "migrationVersion": "9.1.0",
-//               "title": "[Logs] Web Traffic",
-//               "payload": "{\"browserTimezone\":\"America/New_York\",\"layout\":{\"dimensions\":{\"height\":2220,\"width\":1364},\"id\":\"preserve_layout\"},\"objectType\":\"dashboard\",\"title\":\"[Logs] Web Traffic\",\"version\":\"9.1.0\",\"locatorParams\":[{\"id\":\"DASHBOARD_APP_LOCATOR\",\"params\":{\"dashboardId\":\"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b\",\"preserveSavedFilters\":true,\"timeRange\":{\"from\":\"now-7d/d\",\"to\":\"now\"},\"useHash\":false,\"viewMode\":\"view\"}}],\"isDeprecated\":false}",
-//               "schedule": {
-//                   "rrule": {
-//                       "freq": 3,
-//                       "interval": 3,
-//                       "byhour": [
-//                           12
-//                       ],
-//                       "byminute": [
-//                           0
-//                       ],
-//                       "tzid": "UTC"
-//                   }
-//               }
-//           },
-//           "references": [],
-//           "managed": false,
-//           "coreMigrationVersion": "8.8.0",
-//           "typeMigrationVersion": "10.1.0"
-//       },
-//       {
-//           "id": "2da1cb75-04c7-4202-a9f0-f8bcce63b0f4",
-//           "type": "scheduled_report",
-//           "namespaces": [
-//               "default"
-//           ],
-//           "updated_at": "2025-05-06T21:12:06.584Z",
-//           "created_at": "2025-05-06T21:12:06.584Z",
-//           "version": "WzIsMV0=",
-//           "attributes": {
-//               "createdAt": "2025-05-06T21:12:06.584Z",
-//               "createdBy": "elastic",
-//               "enabled": true,
-//               "jobType": "PNGV2",
-//               "meta": {
-//                   "isDeprecated": false,
-//                   "layout": "preserve_layout",
-//                   "objectType": "dashboard"
-//               },
-//               "migrationVersion": "9.1.0",
-//               "notification": {
-//                   "email": {
-//                       "to": [
-//                           "ying.mao@elastic.co"
-//                       ]
-//                   }
-//               },
-//               "title": "[Logs] Web Traffic",
-//               "payload": "{\"browserTimezone\":\"America/New_York\",\"layout\":{\"dimensions\":{\"height\":2220,\"width\":1364},\"id\":\"preserve_layout\"},\"objectType\":\"dashboard\",\"title\":\"[Logs] Web Traffic\",\"version\":\"9.1.0\",\"locatorParams\":[{\"id\":\"DASHBOARD_APP_LOCATOR\",\"params\":{\"dashboardId\":\"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b\",\"preserveSavedFilters\":true,\"timeRange\":{\"from\":\"now-7d/d\",\"to\":\"now\"},\"useHash\":false,\"viewMode\":\"view\"}}],\"isDeprecated\":false}",
-//               "schedule": {
-//                   "rrule": {
-//                       "freq": 1,
-//                       "interval": 3,
-//                       "tzid": "UTC"
-//                   }
-//               }
-//           },
-//           "references": [],
-//           "managed": false,
-//           "coreMigrationVersion": "8.8.0",
-//           "typeMigrationVersion": "10.1.0"
-//       }
-//   ]
-// }
