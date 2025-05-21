@@ -38,7 +38,13 @@ export default ({ getService }: FtrProviderContext): void => {
       },
       {
         type: BulkActionEditTypeEnum.delete_tags,
-        value: ['new-tag'],
+        value: ['test-tag'],
+      },
+      {
+        type: BulkActionEditTypeEnum.delete_index_patterns,
+        // Testing index pattern removal requires as minimum of two index patterns
+        // to have a valid rule after the edit.
+        value: ['index-1'],
       },
       {
         type: BulkActionEditTypeEnum.add_index_patterns,
@@ -47,12 +53,6 @@ export default ({ getService }: FtrProviderContext): void => {
       {
         type: BulkActionEditTypeEnum.set_index_patterns,
         value: ['test-*'],
-      },
-      {
-        type: BulkActionEditTypeEnum.delete_index_patterns,
-        // Prebuilt rules should have two index patterns
-        // Removing one of them should be successful
-        value: ['index-1'],
       },
       {
         type: BulkActionEditTypeEnum.set_timeline,
@@ -67,6 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
     bulkEditingCases.forEach(({ type, value }) => {
       it(`applies "${type}" bulk edit action to prebuilt rules`, async () => {
         await installMockPrebuiltRules(supertest, es);
+
         const {
           body: {
             data: [prebuiltRule],
