@@ -17,10 +17,10 @@ import {
   EuiPagination,
   EuiText,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { type RefreshInterval } from '@kbn/data-plugin/common';
-import { NoChangePointsWarningTooltip } from './no_change_points_warning_tooltip';
 import {
   type SelectedChangePoint,
   useChangePointDetectionContext,
@@ -90,10 +90,6 @@ export const ChartsGrid: FC<{
                       type="inline"
                       listItems={[{ title: v.group.name, description: v.group.value }]}
                     />
-                  ) : null}
-
-                  {!containsChangePoints ? (
-                    <NoChangePointsWarningTooltip reason={v.reason} />
                   ) : null}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

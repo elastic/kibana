@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { buildEsQuery } from '@kbn/es-query';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ChangePointDetectionProps } from '../../shared_components/change_point_detection';
 import { ChangePointsTable } from '../../components/change_point_detection/change_points_table';
 import {
@@ -24,6 +24,8 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
 import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
 import { NoDataFoundWarning } from '../../components/change_point_detection/no_data_warning';
+import { NoChangePointsCallout } from '../../components/change_point_detection/no_change_points_callout';
+import { hasRealChangePoints } from '../../components/change_point_detection/types';
 
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,
@@ -61,6 +63,7 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
 
   const { dataView } = useDataSource();
   const { uiSettings } = useAiopsAppContext();
+  const { euiTheme } = useEuiTheme();
 
   const combinedQuery = useMemo(() => {
     const mergedQuery = buildEsQuery(
@@ -125,6 +128,9 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     return <EuiLoadingSpinner size="m" />;
   }
 
+  const containsChangePoints = hasRealChangePoints(changePoints);
+  const showCallout = changePoints.length > 0 && !containsChangePoints;
+
   return (
     <div
       css={css`
@@ -132,6 +138,11 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
         width: 100%;
       `}
     >
+      {showCallout && (
+        <div css={css({ padding: `${euiTheme.size.s}` })}>
+          <NoChangePointsCallout reason={changePoints[0]?.reason} />
+        </div>
+      )}
       {changePoints.length > 0 ? (
         viewType === CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS ? (
           <ChartsGrid

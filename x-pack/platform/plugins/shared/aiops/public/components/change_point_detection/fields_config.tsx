@@ -60,6 +60,7 @@ import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import { hasRealChangePoints } from './types';
 import { getDataviewReferences } from '../../embeddables/get_dataview_references';
+import { NoChangePointsCallout } from './no_change_points_callout';
 
 const selectControlCss = { width: '350px' };
 
@@ -737,7 +738,8 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 
-  const containsChangePoints = useMemo(() => hasRealChangePoints(annotations), [annotations]);
+  const containsChangePoints = hasRealChangePoints(annotations);
+  const showNoChangePointsCallout = !containsChangePoints && annotations.length > 0;
 
   return (
     <>
@@ -768,27 +770,12 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
         </>
       ) : null}
 
-      {!containsChangePoints && annotations.length > 0 ? (
+      {showNoChangePointsCallout && (
         <>
-          <EuiSpacer size="s" />
-          <EuiCallOut
-            data-test-subj="aiopsNoChangePointsWarningCallout"
-            title={i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundTitle', {
-              defaultMessage: 'No change points found',
-            })}
-            color="warning"
-            iconType="warning"
-          >
-            <p data-test-subj="aiopsNoChangePointsWarningCalloutText">
-              {annotations[0].reason ??
-                i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundMessage', {
-                  defaultMessage: 'No change points detected - showing sample metric data',
-                })}
-            </p>
-          </EuiCallOut>
+          <NoChangePointsCallout reason={annotations[0]?.reason} />
           <EuiSpacer size="m" />
         </>
-      ) : null}
+      )}
 
       <ChangePointsTable
         annotations={annotations}
