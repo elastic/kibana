@@ -18,6 +18,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const alertingApi = getService('alertingApi');
   const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
   const isServerless = config.get('serverless');
 
   let editorRoleAuthc: RoleCredentials;
@@ -31,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = samlAuth.getInternalRequestHeader();
     });

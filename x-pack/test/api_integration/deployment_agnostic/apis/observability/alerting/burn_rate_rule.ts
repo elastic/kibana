@@ -27,6 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const sloApi = getService('sloApi');
   const config = getService('config');
   const isServerless = config.get('serverless');
+  const kibanaServer = getService('kibanaServer');
   const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   describe('Burn rate rule', () => {
@@ -42,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let sloId: string;
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       currentRoleAuthc = isServerless ? editorRoleAuthc : adminRoleAuthc;

@@ -21,6 +21,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   const samlAuth = getService('samlAuth');
+  const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
   const config = getService('config');
@@ -40,6 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let alertId: string;
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
