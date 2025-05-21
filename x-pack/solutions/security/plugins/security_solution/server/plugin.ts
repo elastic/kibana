@@ -610,6 +610,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures('management', features);
 
     const manifestManager = new ManifestManager({
+      endpointService: this.endpointAppContextService,
       savedObjectsClient,
       exceptionListClient,
       artifactClient: new EndpointArtifactClient(
