@@ -946,15 +946,15 @@ x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-invest
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/test
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
-x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-genai-utils @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana
-x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana
-x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
-x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
+x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-genai-utils @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/workchat-eng
@@ -1445,6 +1445,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
 /x-pack/test/fleet_packages @elastic/fleet
+/x-pack/test/fleet_tasks @elastic/fleet
 /src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
@@ -2130,13 +2131,13 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
 /x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json @elastic/kibana-management
-/x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-core
+/x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/test/functional/services/ace_editor.js @elastic/kibana-management
 /x-pack/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-core
+/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
@@ -2156,10 +2157,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
-/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-core
+/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
-/x-pack/test/upgrade_assistant_integration @elastic/kibana-core
+/x-pack/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/*.ts @elastic/kibana-management
 /src/platform/test/functional/page_objects/embedded_console.ts @elastic/kibana-management
@@ -2180,7 +2181,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/api_integration/services/ingest_pipelines @elastic/kibana-management
 /x-pack/test/functional/apps/watcher @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/watcher @elastic/kibana-management
-/x-pack/platform/test/api_integration/apis/upgrade_assistant @elastic/kibana-core
+/x-pack/platform/test/api_integration/apis/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/searchprofiler @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
