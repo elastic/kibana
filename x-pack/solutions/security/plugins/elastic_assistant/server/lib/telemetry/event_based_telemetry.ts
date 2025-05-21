@@ -85,6 +85,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     OpenAndAcknowledgedAlertsTool?: number;
     SecurityLabsKnowledgeBaseTool?: number;
     ProductDocumentationTool?: number;
+    GenerateESQLTool?: number;
     CustomTool?: number;
   };
   model?: string;
@@ -175,6 +176,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
           },
         },
         SecurityLabsKnowledgeBaseTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        GenerateESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',
@@ -571,6 +579,37 @@ export const DEFEND_INSIGHT_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+export const ESQL_GENERATION_VALIDATION_RESULT: EventTypeOpts<{
+  actionTypeId: string;
+  model?: string;
+  validated: boolean;
+}> = {
+  eventType: 'esql_generation_validation_result',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    validated: {
+      type: 'boolean',
+      _meta: {
+        description: 'Was the ESQL query validated or not',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
@@ -578,6 +617,7 @@ export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
   INVOKE_ASSISTANT_ERROR_EVENT,
+  ESQL_GENERATION_VALIDATION_RESULT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
   ATTACK_DISCOVERY_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
