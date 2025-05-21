@@ -18,8 +18,6 @@ import type { CustomizationCallback, DiscoverCustomizationContext } from '../../
 import {
   type DiscoverInternalState,
   InternalStateProvider,
-  createInternalStateStore,
-  createRuntimeStateManager,
   internalStateActions,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
@@ -33,10 +31,10 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { createTabsStorageManager } from './state_management/tabs_storage_manager';
 import { TABS_ENABLED } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
-import type { DiscoverServices } from '../../build_services';
+import { useStataManagers } from './state_management/hooks/use_state_managers';
+import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -69,57 +67,24 @@ export const DiscoverMainRoute = ({
       })
   );
 
-  // syncing with the _t part URL
-  const [tabsStorageManager] = useState(() =>
-    createTabsStorageManager({
-      urlStateStorage,
-      storage: services.storage,
-      enabled: TABS_ENABLED,
-    })
-  );
-
-  const [runtimeStateManager] = useState(() => createRuntimeStateManager());
-  const [internalState] = useState(() =>
-    createInternalStateStore({
-      services,
-      customizationContext,
-      runtimeStateManager,
-      urlStateStorage,
-      tabsStorageManager,
-    })
-  );
-
-  useEffect(() => {
-    const stopUrlSync = tabsStorageManager.startUrlSync({
-      // if `_t` in URL changes (for example via browser history), try to restore the previous state
-      onChanged: (urlState) => {
-        const { tabId: restoreTabId } = urlState;
-        if (restoreTabId) {
-          internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
-        } else {
-          // if tabId is  not present in `_t`, clear all tabs
-          internalState.dispatch(internalStateActions.clearAllTabs());
-        }
-      },
-    });
-    return () => {
-      stopUrlSync();
-    };
-  }, [tabsStorageManager, internalState]);
-
+  const { internalState, runtimeStateManager } = useStataManagers({
+    services,
+    urlStateStorage,
+    customizationContext,
+  });
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
       const { dataViews } = services;
-      const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
-        dataViews.hasData.hasESData().catch(() => false),
-        dataViews.hasData.hasUserDataView().catch(() => false),
-        dataViews.defaultDataViewExists().catch(() => false),
-        internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-      ]);
-
-      const userAndSpaceIds = await getUserIdAndSpaceId(services);
+      const [hasESData, hasUserDataView, defaultDataViewExists, userAndSpaceIds] =
+        await Promise.all([
+          dataViews.hasData.hasESData().catch(() => false),
+          dataViews.hasData.hasUserDataView().catch(() => false),
+          dataViews.defaultDataViewExists().catch(() => false),
+          getUserAndSpaceIds(services),
+          internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+        ]);
 
       internalState.dispatch(internalStateActions.initializeTabs(userAndSpaceIds));
 
@@ -190,22 +155,3 @@ export const DiscoverMainRoute = ({
     </InternalStateProvider>
   );
 };
-
-async function getUserIdAndSpaceId(services: DiscoverServices) {
-  let userId = '';
-  let spaceId = '';
-
-  try {
-    userId = (await services.core.security?.authc.getCurrentUser()).profile_uid ?? '';
-  } catch {
-    // ignore as user id might be unavailable for some deployments
-  }
-
-  try {
-    spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
-  } catch {
-    // ignore
-  }
-
-  return { userId, spaceId };
-}
