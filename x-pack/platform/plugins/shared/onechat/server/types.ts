@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RunToolFn, ScopedRunToolFn, ToolProvider } from '@kbn/onechat-server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ToolsServiceSetup, ScopedPublicToolRegistryFactoryFn } from './services/tools';
+import type { ToolsServiceSetup, ScopedPublicToolRegistry } from './services/tools';
 
 export interface OnechatSetupDependencies {
   actions: ActionsPluginSetup;
@@ -39,9 +41,31 @@ export interface ToolsSetup {
  */
 export interface ToolsStart {
   /**
-   * Returns a version of the registry scoped to a given request.
+   * Access the tool registry's APIs.
    */
-  getScopedRegistry: ScopedPublicToolRegistryFactoryFn;
+  registry: ToolProvider;
+  /**
+   * Execute a tool.
+   */
+  execute: RunToolFn;
+  /**
+   * Return a version of the tool APIs scoped to the provided request.
+   */
+  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart;
+}
+
+/**
+ * Scoped tools APIs.
+ */
+export interface ScopedToolsStart {
+  /**
+   * scoped tools registry
+   */
+  registry: ScopedPublicToolRegistry;
+  /**
+   * Scoped tool runner
+   */
+  execute: ScopedRunToolFn;
 }
 
 /**

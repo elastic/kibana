@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { ToolsService, ToolsServiceSetup, ToolsServiceStart } from './tools';
-
-export interface InternalServices {
-  tools: ToolsService;
-}
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
+import type { RunnerFactory } from './runner';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -17,4 +19,15 @@ export interface InternalSetupServices {
 
 export interface InternalStartServices {
   tools: ToolsServiceStart;
+  runnerFactory: RunnerFactory;
+}
+
+export interface ServicesStartDeps {
+  // core services
+  logger: Logger;
+  elasticsearch: ElasticsearchServiceStart;
+  security: SecurityServiceStart;
+  // plugin deps
+  inference: InferenceServerStart;
+  actions: ActionsPluginStart;
 }

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { InternalSetupServices, InternalStartServices } from './types';
-export { ServiceManager } from './create_services';
+export type { RunnerFactory, RunnerFactoryDeps, CreateScopedRunnerExtraParams } from './types';
+export { RunnerFactoryImpl } from './runner_factory';

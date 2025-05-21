@@ -14,3 +14,13 @@ export type {
   ToolProviderListOptions,
 } from './src/tools';
 export type { ModelProvider, ScopedModel } from './src/model_provider';
+export type {
+  ScopedRunner,
+  ScopedRunToolFn,
+  ScopedRunnerRunToolsParams,
+  RunContext,
+  RunContextStackEntry,
+  RunToolParams,
+  RunToolFn,
+  Runner,
+} from './src/runner';

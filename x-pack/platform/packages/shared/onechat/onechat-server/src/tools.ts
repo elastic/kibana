@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
-import { MaybePromise } from '@kbn/utility-types';
+import type { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptor } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
+import type { ScopedRunner } from './runner';
 
 /**
  * Represents a onechat tool.
@@ -24,11 +25,16 @@ export interface Tool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = un
   /**
    * Handler to call to execute the tool.
    */
-  handler: (
-    args: z.objectOutputType<RunInput, ZodTypeAny>,
-    context: ToolHandlerContext
-  ) => MaybePromise<RunOutput>;
+  handler: ToolHandlerFn<RunInput, RunOutput>;
 }
+
+/**
+ * Tool handler function for {@link Tool} handlers.
+ */
+export type ToolHandlerFn<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown> = (
+  args: z.objectOutputType<RunInput, ZodTypeAny>,
+  context: ToolHandlerContext
+) => MaybePromise<RunOutput>;
 
 /**
  * Scoped context which can be used during tool execution to access
@@ -37,14 +43,19 @@ export interface Tool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = un
 export interface ToolHandlerContext {
   /**
    * A cluster client scoped to the current user.
+   * Can be used to access ES on behalf of either the current user or the system user.
    */
   esClient: IScopedClusterClient;
   /**
    * Inference model provider scoped to the current user.
+   * Can be used to access the inference APIs or chatModel.
    */
   modelProvider: ModelProvider;
-
-  // TODO: tool executor
+  /**
+   * Onechat runner scoped to the current execution.
+   * Can be used to run other workchat primitive as part of the tool execution.
+   */
+  runner: ScopedRunner;
 
   // TODO: event system
 }

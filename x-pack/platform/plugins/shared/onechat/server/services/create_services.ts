@@ -5,37 +5,56 @@
  * 2.0.
  */
 
-import type { InternalServices, InternalSetupServices, InternalStartServices } from './types';
+import type { InternalSetupServices, InternalStartServices, ServicesStartDeps } from './types';
 import { ToolsService } from './tools';
+import { RunnerFactoryImpl } from './runner';
 
-export const createServices = (): InternalServices => {
-  const toolsService = new ToolsService();
+interface ServiceInstances {
+  tools: ToolsService;
+}
 
-  return {
-    tools: toolsService,
-  };
-};
+export class ServiceManager {
+  private services?: ServiceInstances;
+  private internalSetup?: InternalSetupServices;
+  private internalStart?: InternalStartServices;
 
-export const setupServices = ({
-  services,
-}: {
-  services: InternalServices;
-}): InternalSetupServices => {
-  const toolsSetup = services.tools.setup();
+  setupServices(): InternalSetupServices {
+    this.services = {
+      tools: new ToolsService(),
+    };
 
-  return {
-    tools: toolsSetup,
-  };
-};
+    this.internalSetup = {
+      tools: this.services.tools.setup(),
+    };
 
-export const startServices = ({
-  services,
-}: {
-  services: InternalServices;
-}): InternalStartServices => {
-  const toolsStart = services.tools.start();
+    return this.internalSetup;
+  }
+  startServices({
+    logger,
+    security,
+    elasticsearch,
+    actions,
+    inference,
+  }: ServicesStartDeps): InternalStartServices {
+    if (!this.services) {
+      throw new Error('#startServices called before #setupServices');
+    }
 
-  return {
-    tools: toolsStart,
-  };
-};
+    const tools = this.services.tools.start();
+    const runnerFactory = new RunnerFactoryImpl({
+      logger: logger.get('runnerFactory'),
+      security,
+      elasticsearch,
+      actions,
+      inference,
+      toolsService: tools,
+    });
+
+    this.internalStart = {
+      tools,
+      runnerFactory,
+    };
+
+    return this.internalStart;
+  }
+}

@@ -15,14 +15,7 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { registerRoutes } from './routes';
-import {
-  createServices,
-  setupServices,
-  startServices,
-  type InternalServices,
-  type InternalSetupServices,
-  type InternalStartServices,
-} from './services';
+import { ServiceManager } from './services';
 
 export class OnechatPlugin
   implements
@@ -36,10 +29,7 @@ export class OnechatPlugin
   private logger: Logger;
   // @ts-expect-error unused for now
   private config: OnechatConfig;
-
-  private services?: InternalServices;
-  private serviceSetups?: InternalSetupServices;
-  private serviceStarts?: InternalStartServices;
+  private serviceManager = new ServiceManager();
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -50,11 +40,9 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    this.services = createServices();
-    this.serviceSetups = setupServices({ services: this.services });
+    const serviceSetups = this.serviceManager.setupServices();
 
     const router = coreSetup.http.createRouter();
-
     registerRoutes({
       router,
       coreSetup,
@@ -63,21 +51,38 @@ export class OnechatPlugin
 
     return {
       tools: {
-        register: this.serviceSetups!.tools.register.bind(this.serviceSetups!.tools),
+        register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
     };
   }
 
-  start(core: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
-    if (!this.services) {
-      throw new Error('#start called before #setup');
-    }
+  start(
+    { elasticsearch, security }: CoreStart,
+    { actions, inference }: OnechatStartDependencies
+  ): OnechatPluginStart {
+    const startServices = this.serviceManager.startServices({
+      logger: this.logger.get('services'),
+      security,
+      elasticsearch,
+      actions,
+      inference,
+    });
 
-    this.serviceStarts = startServices({ services: this.services });
+    const { tools, runnerFactory } = startServices;
+    const runner = runnerFactory.getRunner();
 
     return {
       tools: {
-        getScopedRegistry: (opts) => this.serviceStarts!.tools.public.asScoped(opts),
+        registry: tools.provider,
+        execute: runner.runTool.bind(runner),
+        asScoped: ({ request }) => {
+          return {
+            registry: tools.public.asScoped({ request }),
+            execute: (args) => {
+              return runner.runTool({ ...args, request });
+            },
+          };
+        },
       },
     };
   }

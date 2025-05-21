@@ -26,8 +26,6 @@ export interface ScopedModel {
 
 /**
  * Provider, allowing to select various models depending on the needs.
- *
- * (For now, only exposes a single default model type)
  */
 export interface ModelProvider {
   /**

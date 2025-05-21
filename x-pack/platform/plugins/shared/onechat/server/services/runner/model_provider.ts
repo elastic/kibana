@@ -11,49 +11,44 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorList, getDefaultConnector } from './utils';
 
-export interface ModelProviderFactoryArgs {
+/**
+ * Utility function to creates a {@link ModelProvider}
+ */
+export const createModelProvider = ({
+  inference,
+  actions,
+  request,
+  defaultConnectorId,
+}: {
+  inference: InferenceServerStart;
+  actions: ActionsPluginStart;
   request: KibanaRequest;
   defaultConnectorId?: string;
-}
+}): ModelProvider => {
+  const getDefaultConnectorId = async () => {
+    if (defaultConnectorId) {
+      return defaultConnectorId;
+    }
+    const connectors = await getConnectorList({ actions, request });
+    const defaultConnector = getDefaultConnector({ connectors });
+    return defaultConnector.connectorId;
+  };
 
-export type ModelProviderFactory = (args: ModelProviderFactoryArgs) => ModelProvider;
-
-/**
- * Utility HOF function to bind the dependencies to create a {@link ModelProviderFactory}.
- */
-export const createModelProviderFactory =
-  ({
-    inference,
-    actions,
-  }: {
-    inference: InferenceServerStart;
-    actions: ActionsPluginStart;
-  }): ModelProviderFactory =>
-  ({ request, defaultConnectorId }) => {
-    const getDefaultConnectorId = async () => {
-      if (defaultConnectorId) {
-        return defaultConnectorId;
-      }
-      const connectors = await getConnectorList({ actions, request });
-      const defaultConnector = getDefaultConnector({ connectors });
-      return defaultConnector.connectorId;
-    };
-
-    const getModel = async (connectorId: string): Promise<ScopedModel> => {
-      const chatModel = await inference.getChatModel({
-        request,
-        connectorId,
-        chatModelOptions: {},
-      });
-      const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
-      return {
-        chatModel,
-        inferenceClient,
-      };
-    };
-
+  const getModel = async (connectorId: string): Promise<ScopedModel> => {
+    const chatModel = await inference.getChatModel({
+      request,
+      connectorId,
+      chatModelOptions: {},
+    });
+    const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
     return {
-      getDefaultModel: async () => getModel(await getDefaultConnectorId()),
-      getModel: ({ connectorId }) => getModel(connectorId),
+      chatModel,
+      inferenceClient,
     };
   };
+
+  return {
+    getDefaultModel: async () => getModel(await getDefaultConnectorId()),
+    getModel: ({ connectorId }) => getModel(connectorId),
+  };
+};
