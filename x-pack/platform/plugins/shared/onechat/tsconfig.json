@@ -23,6 +23,9 @@
     "@kbn/onechat-server",
     "@kbn/core-http-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/onechat-common"
+    "@kbn/onechat-common",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-security-server",
+    "@kbn/inference-common"
   ]
 }
