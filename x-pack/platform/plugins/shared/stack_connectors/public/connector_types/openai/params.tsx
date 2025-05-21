@@ -53,6 +53,15 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
     [editAction, index, subActionParams]
   );
 
+  useEffect(() => {
+    return () => {
+      // if we do not reset subActionParams on dismount (switching tabs between test and config)
+      // connector does not get updates from config tab
+      editAction('subActionParams', undefined, index);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}

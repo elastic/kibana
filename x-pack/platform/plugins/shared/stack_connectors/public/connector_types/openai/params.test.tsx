@@ -133,4 +133,32 @@ describe('Gen AI Params Fields renders', () => {
       0
     );
   });
+
+  it('resets subActionParams to undefined on component unmount', () => {
+    const editAction = jest.fn();
+    const { unmount } = render(
+      <ParamsFields
+        actionParams={{ subAction: SUB_ACTION.RUN, subActionParams: undefined }}
+        editAction={editAction}
+        index={0}
+        messageVariables={messageVariables}
+        errors={{}}
+        actionConnector={{
+          actionTypeId: '.gen-ai',
+          config: {
+            defaultMode: 'gpt-4o',
+          },
+          id: 'test',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          secrets: {},
+          name: 'OpenAI Connector',
+        }}
+      />
+    );
+    expect(editAction).toHaveBeenCalledWith('subActionParams', { body: getDefaultBody() }, 0);
+    unmount();
+    expect(editAction).toHaveBeenCalledWith('subActionParams', undefined, 0);
+  });
 });
