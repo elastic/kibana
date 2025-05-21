@@ -1,0 +1,24 @@
+title: Find SLO response
+description: >
+  A paginated response of SLOs matching the query.
+type: object
+properties:
+  size:
+    type: number
+    example: 25
+    description: Size provided for cursor based pagination
+  searchAfter:
+    type: string
+  page:
+    type: number
+    example: 1
+  perPage:
+    type: number
+    example: 25
+  total:
+    type: number
+    example: 34
+  results:
+    type: array
+    items:
+      $ref: 'slo_with_summary_response.yaml'

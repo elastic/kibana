@@ -48,12 +48,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -63,7 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
@@ -273,49 +279,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
       });
 
-      it('should show field list groups excluding subfields when searched from source', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
-        await browser.refresh();
-
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
-
-        // Initial Available fields
-        const availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
-          'available'
-        );
-        expect(availableFields.length).to.be(48);
-        expect(
-          availableFields
-            .join(', ')
-            .startsWith(
-              '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates'
-            )
-        ).to.be(true);
-
-        // Available fields after scrolling down
-        const metaSectionButton = await find.byCssSelector(
-          PageObjects.unifiedFieldList.getSidebarSectionSelector('meta', true)
-        );
-        await metaSectionButton.scrollIntoViewIfNecessary();
-
-        // Expand Meta section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('meta')).join(', ')
-        ).to.be('_id, _ignored, _index, _score');
-
-        // Expand Unmapped section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('unmapped')).join(', ')
-        ).to.be('relatedContent');
-
-        await expectFieldListDescription(
-          '48 available fields. 1 unmapped field. 5 empty fields. 4 meta fields.'
-        );
-      });
-
       it('should show selected and popular fields', async function () {
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -362,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should work correctly for a data view for a missing index', async function () {
         // but we are skipping importing the index itself
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
         await browser.refresh();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
@@ -382,16 +345,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
       });
 
       it('should work correctly when switching data views', async function () {
         await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
 
         await browser.refresh();
@@ -416,11 +379,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
 
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
       });
 
@@ -444,9 +407,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should work for many fields', async () => {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/many_fields');
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/many_fields'
+        );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+          'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'
         );
         await dataViews.switchToAndValidate('logstash-*');
         await browser.refresh();
@@ -460,9 +425,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+          'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'
         );
-        await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/many_fields');
       });
 
       it('should work with ad-hoc data views and runtime fields', async () => {
@@ -542,10 +507,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should work correctly when time range is updated', async function () {
         await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
         await browser.refresh();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
@@ -566,11 +531,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription('7 available fields. 4 meta fields.');
 
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
 
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
       });
 

@@ -25,11 +25,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await objectRemover.removeAll();
     });
 
-    it('should should cancel a running maintenance window', async () => {
+    it('should cancel a running maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.not.eql('Running');
     });
 
-    it('should should archive finished maintenance window', async () => {
+    it('should archive finished maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.eql('Archived');
     });
 
-    it('should should cancel and archive a running maintenance window', async () => {
+    it('should cancel and archive a running maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -124,7 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list[0].status).to.eql('Archived');
     });
 
-    it('should should unarchive a maintenance window', async () => {
+    it('should unarchive a maintenance window', async () => {
       const name = generateUniqueKey();
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name,
@@ -208,6 +208,115 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(upcomingList.length).to.equal(1);
         expect(upcomingList[0].status).to.equal('Upcoming');
       });
+    });
+
+    it('should filter maintenance windows by the archived status', async () => {
+      const finished = await createMaintenanceWindow({
+        name: 'finished-maintenance-window',
+        startDate: new Date('05-01-2023'),
+        notRecurring: true,
+        getService,
+      });
+      objectRemover.add(finished.id, 'rules/maintenance_window', 'alerting', true);
+
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
+      const upcoming = await createMaintenanceWindow({
+        name: 'upcoming-maintenance-window',
+        startDate: date,
+        getService,
+      });
+      objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
+
+      const archived = await createMaintenanceWindow({
+        name: 'archived-maintenance-window',
+        getService,
+      });
+      objectRemover.add(archived.id, 'rules/maintenance_window', 'alerting', true);
+      await browser.refresh();
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('window');
+
+      const list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(list.length).to.eql(3);
+      expect(list[0].status).to.eql('Running');
+
+      await testSubjects.click('table-actions-popover');
+      await testSubjects.click('table-actions-cancel-and-archive');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql(
+          `Cancelled and archived running maintenance window 'archived-maintenance-window'`
+        );
+      });
+
+      await testSubjects.click('status-filter-button');
+      await testSubjects.click('status-filter-archived'); // select Archived status filter
+
+      await retry.try(async () => {
+        const archivedList = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+        expect(archivedList.length).to.equal(1);
+        expect(archivedList[0].status).to.equal('Archived');
+      });
+    });
+
+    it('paginates maintenance windows correctly', async () => {
+      new Array(12).fill(null).map(async (_, index) => {
+        const mw = await createMaintenanceWindow({
+          name: index + '-pagination',
+          getService,
+        });
+        objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
+      });
+      await browser.refresh();
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('pagination');
+      await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-25-rows');
+      await testSubjects.missingOrFail('pagination-button-1');
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-10-rows');
+      const listedOnFirstPageMWs = await testSubjects.findAll('list-item');
+      expect(listedOnFirstPageMWs.length).to.be(10);
+
+      await testSubjects.isEnabled('pagination-button-1');
+      await testSubjects.click('pagination-button-1');
+      await testSubjects.isEnabled('pagination-button-0');
+      const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
+      expect(listedOnSecondPageMWs.length).to.be(2);
+    });
+
+    it('should delete a maintenance window', async () => {
+      const name = generateUniqueKey();
+      await createMaintenanceWindow({
+        name,
+        getService,
+      });
+
+      await browser.refresh();
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
+      const listBefore = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(listBefore.length).to.eql(1);
+
+      await testSubjects.click('table-actions-popover');
+      await testSubjects.click('table-actions-delete');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql('Deleted maintenance window');
+      });
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
+      const listAfter = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(listAfter.length).to.eql(0);
     });
   });
 };

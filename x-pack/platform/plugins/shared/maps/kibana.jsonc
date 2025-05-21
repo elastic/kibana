@@ -1,0 +1,65 @@
+{
+  "type": "plugin",
+  "id": "@kbn/maps-plugin",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "maps",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "maps"
+    ],
+    "requiredPlugins": [
+      "controls",
+      "unifiedSearch",
+      "licensing",
+      "features",
+      "inspector",
+      "data",
+      "fieldFormats",
+      "fileUpload",
+      "uiActions",
+      "navigation",
+      "expressions",
+      "embeddable",
+      "mapsEms",
+      "share",
+      "presentationUtil",
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "customIntegrations",
+      "embeddableEnhanced",
+      "home",
+      "lens",
+      "savedObjectsTagging",
+      "charts",
+      "screenshotMode",
+      "security",
+      "spaces",
+      "usageCollection",
+      "serverless",
+      "visualizations"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "usageCollection",
+      "unifiedSearch",
+      "fieldFormats",
+      "esql",
+      "savedObjects",
+      "visualizations"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

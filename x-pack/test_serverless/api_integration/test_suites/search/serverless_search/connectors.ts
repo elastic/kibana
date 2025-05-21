@@ -6,29 +6,27 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestViewerWithCookieCredentials: SupertestWithRoleScope;
+  let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('Connectors routes', function () {
     describe('GET connectors', function () {
       before(async () => {
-        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
-          'viewer',
-          {
+        supertestDeveloperWithCookieCredentials =
+          await roleScopedSupertest.getSupertestWithRoleScope('developer', {
             useCookieHeader: true,
             withInternalHeaders: true,
-          }
-        );
+          });
       });
 
       it('returns list of connectors', async () => {
-        const { body } = await supertestViewerWithCookieCredentials
+        const { body } = await supertestDeveloperWithCookieCredentials
           .get(`${API_BASE_PATH}/connectors`)
           .expect(200);
 

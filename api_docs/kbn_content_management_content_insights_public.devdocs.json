@@ -28,7 +28,7 @@
             "text": "ContentInsightsClientPublic"
           }
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,7 +53,7 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -65,15 +65,29 @@
                     "label": "http",
                     "description": [],
                     "signature": [
+                      "HttpSetup"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-management-content-insights-public",
+                    "id": "def-public.ContentInsightsClient.Unnamed.$1.logger",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "logger",
+                    "description": [],
+                    "signature": [
                       {
-                        "pluginId": "@kbn/core-http-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-public.HttpSetup",
-                        "text": "HttpSetup"
+                        "pluginId": "@kbn/logging",
+                        "scope": "common",
+                        "docId": "kibKbnLoggingPluginApi",
+                        "section": "def-common.Logger",
+                        "text": "Logger"
                       }
                     ],
-                    "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                    "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -86,7 +100,7 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -97,7 +111,7 @@
                     "tags": [],
                     "label": "domainId",
                     "description": [],
-                    "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                    "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -116,7 +130,7 @@
             "signature": [
               "(id: string, eventType: \"viewed\") => void"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -130,7 +144,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -145,7 +159,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -171,7 +185,7 @@
               },
               ">"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -185,7 +199,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -200,7 +214,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -221,7 +235,7 @@
         "label": "ActivityView",
         "description": [],
         "signature": [
-          "({ item }: ",
+          "({ item, entityNamePlural }: ",
           {
             "pluginId": "@kbn/content-management-content-insights-public",
             "scope": "public",
@@ -231,7 +245,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,7 +254,7 @@
             "id": "def-public.ActivityView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ item }",
+            "label": "{ item, entityNamePlural }",
             "description": [],
             "signature": [
               {
@@ -251,7 +265,7 @@
                 "text": "ActivityViewProps"
               }
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -280,7 +294,7 @@
           },
           ">>) => React.JSX.Element"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -302,7 +316,7 @@
               },
               ">>"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -329,7 +343,7 @@
           },
           " | null"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -354,7 +368,7 @@
           },
           "; }) => React.JSX.Element"
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,7 +379,7 @@
             "tags": [],
             "label": "{ item }",
             "description": [],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -385,7 +399,7 @@
                     "text": "UserContentCommonSchema"
                   }
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -404,7 +418,7 @@
         "tags": [],
         "label": "ActivityViewProps",
         "description": [],
-        "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -418,7 +432,21 @@
             "signature": [
               "{ createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; }"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ActivityViewProps.entityNamePlural",
+            "type": "string",
+            "tags": [],
+            "label": "entityNamePlural",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -434,7 +462,7 @@
         "description": [
           "\nPublic interface of the Content Management Insights service."
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -448,7 +476,7 @@
             "signature": [
               "(id: string, eventType: \"viewed\") => void"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -462,7 +490,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -477,7 +505,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -503,7 +531,7 @@
               },
               ">"
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -517,7 +545,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -532,7 +560,7 @@
                 "signature": [
                   "\"viewed\""
                 ],
-                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -552,7 +580,7 @@
         "description": [
           "\nAbstract external services for this component."
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -572,7 +600,20 @@
                 "text": "ContentInsightsClientPublic"
               }
             ],
-            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsServices.isKibanaVersioningEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isKibanaVersioningEnabled",
+            "description": [
+              "\nWhether versioning is enabled for the current kibana instance. (aka is Serverless)\nThis is used to determine if we should show the version mentions in the help text."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -592,7 +633,7 @@
         "signature": [
           "\"viewed\""
         ],
-        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "path": "src/platform/packages/shared/content-management/content_insights/content_insights_public/src/client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

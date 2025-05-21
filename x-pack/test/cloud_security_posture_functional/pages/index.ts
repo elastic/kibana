@@ -19,7 +19,9 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
       await cspSecurity.createUsers();
     });
 
-    loadTestFile(require.resolve('./rules'));
+    loadTestFile(require.resolve('./rules/rules_counters'));
+    loadTestFile(require.resolve('./rules/rules_table'));
+    loadTestFile(require.resolve('./rules/rules_table_headers'));
     loadTestFile(require.resolve('./findings_onboarding'));
     loadTestFile(require.resolve('./findings'));
     loadTestFile(require.resolve('./findings_grouping'));
@@ -37,5 +39,6 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./vulnerabilities_grouping'));
     loadTestFile(require.resolve('./benchmark'));
     loadTestFile(require.resolve('./alerts_flyout'));
+    loadTestFile(require.resolve('./events_flyout'));
   });
 }

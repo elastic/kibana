@@ -11,8 +11,8 @@ import {
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {
@@ -96,6 +96,50 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({ ...getConfigurationOutput(true), customFields });
+    });
+
+    it('should patch a configuration with observableTypes', async () => {
+      const observableTypes = [
+        {
+          key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
+          label: 'type 1',
+        },
+      ] as ConfigurationPatchRequest['observableTypes'];
+      const configuration = await createConfiguration(supertest);
+      expect(configuration.observableTypes.length).to.be(0);
+
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        observableTypes,
+      });
+
+      expect(updatedConfiguration.observableTypes.length).to.be.greaterThan(0);
+      expect(updatedConfiguration.observableTypes[0].key).to.equal(observableTypes?.[0].key);
+      expect(updatedConfiguration.observableTypes[0].label).to.equal(observableTypes?.[0].label);
+    });
+
+    it('should not patch a configuration with duplicated observableTypes', async () => {
+      const observableTypes = [
+        {
+          key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
+          label: 'duplicate',
+        },
+        {
+          key: 'fc3ff698-589a-44fd-bbc4-ffaa0b7211f7',
+          label: 'duplicate',
+        },
+      ] as ConfigurationPatchRequest['observableTypes'];
+      const configuration = await createConfiguration(supertest);
+
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          version: configuration.version,
+          observableTypes,
+        },
+        400
+      );
     });
 
     it('should update mapping when changing connector', async () => {

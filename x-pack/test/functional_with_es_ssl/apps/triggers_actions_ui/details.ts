@@ -47,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
-    objectRemover.add(createdRule.id, 'alert', 'alerts');
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
     return createdRule;
   }
 
@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         })
       )
       .expect(200);
-    objectRemover.add(createdRule.id, 'alert', 'alerts');
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
     return createdRule;
   }
 
@@ -499,8 +499,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // bug with legacy notify_when values https://github.com/elastic/kibana/issues/199494
-    describe.skip('Edit rule with legacy rule-level notify values', function () {
+    describe('Edit rule with legacy rule-level notify values', function () {
       const testRunUuid = uuidv4();
 
       afterEach(async () => {
@@ -556,7 +555,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated '${rule.name}'`);
+        expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
       });
     });
 

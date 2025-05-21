@@ -45,7 +45,7 @@ const babelTester = [
 const invalid: RuleTester.InvalidTestCase[] = [
   {
     name: 'A JSX element with a string literal should be translated with i18n',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 
@@ -76,7 +76,7 @@ function TestComponent() {
   },
   {
     name: 'A JSX element with a string literal that are inside an Eui component should take the component name of the parent into account',
-    filename: '/x-pack/plugins/observability_solution/observability/public/another_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/another_component.tsx',
     code: `
 import React from 'react';
 
@@ -120,7 +120,7 @@ function AnotherComponent() {
   {
     name: 'When no import of the translation module is present, the import line should be added',
     filename:
-      '/x-pack/plugins/observability_solution/observability/public/yet_another_component.tsx',
+      '/x-pack/solutions/observability/plugins/observability/public/yet_another_component.tsx',
     code: `
 import React from 'react';
 
@@ -155,7 +155,7 @@ function YetAnotherComponent() {
   },
   {
     name: 'Import lines without the necessary translation module should be updated to include i18n',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 import { SomeOtherModule } from '@kbn/i18n-react';
@@ -183,7 +183,7 @@ function TestComponent() {
   },
   {
     name: 'JSX elements that have a label, aria-label or title prop with a string value should be translated with FormattedMessage',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -239,7 +239,7 @@ function TestComponent3() {
   },
   {
     name: 'JSX elements that have a label, aria-label or title prop with a string value with quotes in it should be correctly translated with FormattedMessage',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -295,7 +295,7 @@ function TestComponent3() {
   },
   {
     name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string should be translated with FormattedMessage',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
   import React from 'react';
   import { FormattedMessage } from '@kbn/i18n-react';
@@ -351,7 +351,7 @@ function TestComponent3() {
   },
   {
     name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string with quotes in it should be correctly translated with FormattedMessage',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
   import React from 'react';
   import { FormattedMessage } from '@kbn/i18n-react';
@@ -410,7 +410,7 @@ function TestComponent3() {
 const valid: RuleTester.ValidTestCase[] = [
   {
     name: 'A JSXText element inside a EuiCode component should not be translated',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 
@@ -422,7 +422,7 @@ function TestComponent() {
   },
   {
     name: 'A JSXText element that contains anything other than alpha characters should not be translated',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 
@@ -434,7 +434,7 @@ function TestComponent() {
   },
   {
     name: 'A JSXText element that is wrapped in three backticks (markdown) should not be translated',
-    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
     code: `
 import React from 'react';
 

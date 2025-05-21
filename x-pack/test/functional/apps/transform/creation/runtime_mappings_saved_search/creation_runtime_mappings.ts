@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         legend: '1 category',
         colorStats: [
           { color: '#000000', percentage: 10 },
-          { color: '#54B399', percentage: 90 },
+          { color: '#16C5C0', percentage: 90 },
         ],
       },
       {
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         legend: '19 categories',
         colorStats: [
           { color: '#000000', percentage: 49 },
-          { color: '#54B399', percentage: 50 },
+          { color: '#16C5C0', percentage: 50 },
         ],
       },
       {
@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
         legend: '19 categories',
         colorStats: [
           { color: '#000000', percentage: 49 },
-          { color: '#54B399', percentage: 50 },
+          { color: '#16C5C0', percentage: 50 },
         ],
       },
       {
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         legend: '1 category',
         colorStats: [
           { color: '#000000', percentage: 10 },
-          { color: '#54B399', percentage: 90 },
+          { color: '#16C5C0', percentage: 90 },
         ],
       },
     ];

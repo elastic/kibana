@@ -7,7 +7,7 @@
   "include": ["index.d.ts"],
   "kbn_references": [
     {
-      "path": "../../plugins/security_solution/tsconfig.json",
+      "path": "../../solutions/security/plugins/security_solution/tsconfig.json",
       "force": true
     },
   ],

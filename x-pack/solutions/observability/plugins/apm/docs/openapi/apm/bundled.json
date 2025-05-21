@@ -1,0 +1,1959 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "APM UI",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "APM agent keys",
+      "description": "Configure APM agent keys to authorize requests from APM agents to the APM Server.\n"
+    },
+    {
+      "name": "APM agent configuration",
+      "description": "Adjust APM agent configuration without need to redeploy your application.\n"
+    },
+    {
+      "name": "APM sourcemaps",
+      "description": "Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.\nFor best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.\n"
+    },
+    {
+      "name": "APM annotations",
+      "description": "Annotate visualizations in the APM app with significant events. Annotations enable you to easily see how events are impacting the performance of your applications.\n"
+    },
+    {
+      "name": "APM server schema",
+      "description": "Create APM fleet server schema."
+    }
+  ],
+  "paths": {
+    "/api/apm/agent_keys": {
+      "post": {
+        "summary": "Create an APM agent key",
+        "description": "Create a new agent key for APM.\nThe user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.\nAfter it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.\n",
+        "operationId": "createAgentKey",
+        "tags": [
+          "APM agent keys"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agent_keys_object"
+              },
+              "examples": {
+                "createAgentKeyRequest1": {
+                  "$ref": "#/components/examples/agent_keys_object_post_request1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent key created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/agent_keys_response"
+                },
+                "examples": {
+                  "createAgentKeyResponse1": {
+                    "$ref": "#/components/examples/agent_keys_object_post_200_response1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/services/{serviceName}/annotation/search": {
+      "get": {
+        "summary": "Search for annotations",
+        "description": "Search for annotations related to a specific service.",
+        "operationId": "getAnnotation",
+        "tags": [
+          "APM annotations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "name": "serviceName",
+            "in": "path",
+            "required": true,
+            "description": "The name of the service",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "required": false,
+            "description": "The environment to filter annotations by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "description": "The start date for the search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "description": "The end date for the search",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/annotation_search_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/services/{serviceName}/annotation": {
+      "post": {
+        "summary": "Create a service annotation",
+        "description": "Create a new annotation for a specific service.",
+        "operationId": "createAnnotation",
+        "tags": [
+          "APM annotations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "name": "serviceName",
+            "in": "path",
+            "required": true,
+            "description": "The name of the service",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_annotation_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Annotation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/create_annotation_response"
+                },
+                "examples": {
+                  "createAnnotationResponse1": {
+                    "$ref": "#/components/examples/annotation_object_post_200_response1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X POST \\\nhttp://localhost:5601/api/apm/services/opbeans-java/annotation \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \\\n-d '{\n    \"@timestamp\": \"2020-05-08T10:31:30.452Z\",\n    \"service\": {\n        \"version\": \"1.2\"\n    },\n    \"message\": \"Deployment 1.2\"\n    }'\n"
+          }
+        ]
+      }
+    },
+    "/api/apm/settings/agent-configuration": {
+      "get": {
+        "summary": "Get a list of agent configurations",
+        "operationId": "getAgentConfigurations",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/agent_configurations_response"
+                },
+                "examples": {
+                  "getAgentConfigurationsResponseExample1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_get_200_response1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete agent configuration",
+        "operationId": "deleteAgentConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/service_object"
+              },
+              "examples": {
+                "deleteAgentConfigurationRequest1": {
+                  "$ref": "#/components/examples/agent_configuration_intake_object_delete_request1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/delete_agent_configurations_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Create or update agent configuration",
+        "operationId": "createUpdateAgentConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "name": "overwrite",
+            "in": "query",
+            "description": "If the config exists ?overwrite=true is required",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agent_configuration_intake_object"
+              },
+              "examples": {
+                "createUpdateAgentConfigurationRequestExample1": {
+                  "$ref": "#/components/examples/agent_configuration_intake_object_put_request1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/view": {
+      "get": {
+        "summary": "Get single agent configuration",
+        "operationId": "getSingleAgentConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Service name",
+            "schema": {
+              "type": "string"
+            },
+            "example": "node"
+          },
+          {
+            "name": "environment",
+            "in": "query",
+            "description": "Service environment",
+            "schema": {
+              "type": "string"
+            },
+            "example": "prod"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/single_agent_configuration_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/search": {
+      "post": {
+        "summary": "Lookup single agent configuration",
+        "description": "This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.\n",
+        "operationId": "searchSingleConfiguration",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/search_agent_configuration_object"
+              },
+              "examples": {
+                "searchSingleConfigurationRequest1": {
+                  "$ref": "#/components/examples/agent_configuration_intake_object_search_request1"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/search_agent_configuration_response"
+                },
+                "examples": {
+                  "searchSingleConfigurationResponse1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_search_200_response1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/environments": {
+      "get": {
+        "summary": "Get environments for service",
+        "operationId": "getEnvironmentsForService",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "name": "serviceName",
+            "in": "query",
+            "description": "The name of the service",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/service_environments_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/settings/agent-configuration/agent_name": {
+      "get": {
+        "summary": "Get agent name for service",
+        "description": "Retrieve `agentName` for a service.",
+        "operationId": "getAgentNameForService",
+        "tags": [
+          "APM agent configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "name": "serviceName",
+            "in": "query",
+            "description": "The name of the service",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "node"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/service_agent_name_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apm/sourcemaps": {
+      "get": {
+        "summary": "Get source maps",
+        "description": "Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.\n",
+        "operationId": "getSourceMaps",
+        "tags": [
+          "APM sourcemaps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of records per page",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/source_maps_response"
+                },
+                "examples": {
+                  "getSourceMapsResponse1": {
+                    "$ref": "#/components/examples/source_maps_get_200_response1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/501_response"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X GET \"http://localhost:5601/api/apm/sourcemaps\" \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}'\n"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Upload a source map",
+        "description": "Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.\nThe maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.\n",
+        "operationId": "uploadSourceMap",
+        "tags": [
+          "APM sourcemaps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/upload_source_map_object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/upload_source_maps_response"
+                },
+                "examples": {
+                  "uploadSourceMapResponse1": {
+                    "$ref": "#/components/examples/source_maps_upload_200_response1"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/501_response"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X POST \"http://localhost:5601/api/apm/sourcemaps\" \\\n-H 'Content-Type: multipart/form-data' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}' \\\n-F 'service_name=\"foo\"' \\\n-F 'service_version=\"1.0.0\"' \\\n-F 'bundle_filepath=\"/test/e2e/general-usecase/bundle.js\"' \\\n-F 'sourcemap=\"{\\\"version\\\":3,\\\"file\\\":\\\"static/js/main.chunk.js\\\",\\\"sources\\\":[\\\"fleet-source-map-client/src/index.css\\\",\\\"fleet-source-map-client/src/App.js\\\",\\\"webpack:///./src/index.css?bb0a\\\",\\\"fleet-source-map-client/src/index.js\\\",\\\"fleet-source-map-client/src/reportWebVitals.js\\\"],\\\"sourcesContent\\\":[\\\"content\\\"],\\\"mappings\\\":\\\"mapping\\\",\\\"sourceRoot\\\":\\\"\\\"}\"' \n"
+          }
+        ]
+      }
+    },
+    "/api/apm/sourcemaps/{id}": {
+      "delete": {
+        "summary": "Delete source map",
+        "description": "Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.\n",
+        "operationId": "deleteSourceMap",
+        "tags": [
+          "APM sourcemaps"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Source map identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/500_response"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/501_response"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X DELETE \"http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9\" \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}'\n"
+          }
+        ]
+      }
+    },
+    "/api/apm/fleet/apm_server_schema": {
+      "post": {
+        "summary": "Save APM server schema",
+        "operationId": "saveApmServerSchema",
+        "tags": [
+          "APM server schema"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/elastic_api_version"
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "Schema object",
+                    "additionalProperties": true,
+                    "example": {
+                      "foo": "bar"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "elastic_api_version": {
+        "description": "The version of the API to use",
+        "in": "header",
+        "name": "elastic-api-version",
+        "required": true,
+        "schema": {
+          "default": "2023-10-31",
+          "enum": [
+            "2023-10-31"
+          ],
+          "type": "string"
+        }
+      },
+      "kbn_xsrf": {
+        "description": "A required header to protect against CSRF attacks",
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true,
+        "schema": {
+          "example": "true",
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "agent_keys_object": {
+        "type": "object",
+        "required": [
+          "name",
+          "privileges"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the APM agent key."
+          },
+          "privileges": {
+            "type": "array",
+            "description": "The APM agent key privileges. It can take one or more of the following values:\n* `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.\n",
+            "items": {
+              "type": "string",
+              "enum": [
+                "event:write",
+                "config_agent:read"
+              ]
+            }
+          }
+        }
+      },
+      "agent_keys_response": {
+        "type": "object",
+        "properties": {
+          "agentKey": {
+            "type": "object",
+            "description": "Agent key",
+            "required": [
+              "id",
+              "name",
+              "api_key",
+              "encoded"
+            ],
+            "properties": {
+              "expiration": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "api_key": {
+                "type": "string"
+              },
+              "encoded": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "400_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 400,
+            "description": "Error status code"
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Found",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Found",
+            "description": "Error message"
+          }
+        }
+      },
+      "401_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 401,
+            "description": "Error status code"
+          },
+          "error": {
+            "type": "string",
+            "example": "Unauthorized",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "403_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 403,
+            "description": "Error status code"
+          },
+          "error": {
+            "type": "string",
+            "example": "Forbidden",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "500_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 500,
+            "description": "Error status code"
+          },
+          "error": {
+            "type": "string",
+            "example": "Internal Server Error",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "annotation_search_response": {
+        "type": "object",
+        "properties": {
+          "annotations": {
+            "type": "array",
+            "description": "Annotations",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "version"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "@timestamp": {
+                  "type": "number"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "create_annotation_object": {
+        "type": "object",
+        "required": [
+          "@timestamp",
+          "service"
+        ],
+        "properties": {
+          "@timestamp": {
+            "type": "string",
+            "description": "The date and time of the annotation. It must be in ISO 8601 format."
+          },
+          "service": {
+            "type": "object",
+            "description": "The service that identifies the configuration to create or update.",
+            "required": [
+              "version"
+            ],
+            "properties": {
+              "version": {
+                "type": "string",
+                "description": "The version of the service."
+              },
+              "environment": {
+                "type": "string",
+                "description": "The environment of the service."
+              }
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "The message displayed in the annotation. It defaults to `service.version`."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags are used by the Applications UI to distinguish APM annotations from other annotations. Tags may have additional functionality in future releases. It defaults to `[apm]`. While you can add additional tags, you cannot remove the `apm` tag.\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "create_annotation_response": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Identifier"
+          },
+          "_index": {
+            "type": "string",
+            "description": "Index"
+          },
+          "_source": {
+            "type": "object",
+            "description": "Response",
+            "properties": {
+              "annotation": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "message": {
+                "type": "string"
+              },
+              "service": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "environment": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                }
+              },
+              "event": {
+                "type": "object",
+                "properties": {
+                  "created": {
+                    "type": "string"
+                  }
+                }
+              },
+              "@timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "404_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 404,
+            "description": "Error status code"
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Found",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Found",
+            "description": "Error message"
+          }
+        }
+      },
+      "service_object": {
+        "type": "object",
+        "description": "Service",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "node",
+            "description": "The name of the service."
+          },
+          "environment": {
+            "type": "string",
+            "example": "prod",
+            "description": "The environment of the service."
+          }
+        }
+      },
+      "settings_object": {
+        "type": "object",
+        "description": "Agent configuration settings",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "agent_configuration_object": {
+        "type": "object",
+        "required": [
+          "service",
+          "settings",
+          "@timestamp",
+          "etag"
+        ],
+        "description": "Agent configuration",
+        "properties": {
+          "agent_name": {
+            "type": "string",
+            "description": "Agent name"
+          },
+          "service": {
+            "$ref": "#/components/schemas/service_object"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings_object"
+          },
+          "@timestamp": {
+            "type": "number",
+            "example": 1730194190636,
+            "description": "Timestamp"
+          },
+          "applied_by_agent": {
+            "type": "boolean",
+            "example": true,
+            "description": "Applied by agent"
+          },
+          "etag": {
+            "type": "string",
+            "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85",
+            "description": "`etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration. If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.\n"
+          }
+        }
+      },
+      "agent_configurations_response": {
+        "type": "object",
+        "properties": {
+          "configurations": {
+            "type": "array",
+            "description": "Agent configuration",
+            "items": {
+              "$ref": "#/components/schemas/agent_configuration_object"
+            }
+          }
+        }
+      },
+      "agent_configuration_intake_object": {
+        "type": "object",
+        "required": [
+          "service",
+          "settings"
+        ],
+        "properties": {
+          "agent_name": {
+            "type": "string",
+            "description": "The agent name is used by the UI to determine which settings to display."
+          },
+          "service": {
+            "$ref": "#/components/schemas/service_object"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings_object"
+          }
+        }
+      },
+      "delete_agent_configurations_response": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Result"
+          }
+        }
+      },
+      "single_agent_configuration_response": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/agent_configuration_object"
+          }
+        ]
+      },
+      "search_agent_configuration_object": {
+        "type": "object",
+        "required": [
+          "service"
+        ],
+        "properties": {
+          "service": {
+            "$ref": "#/components/schemas/service_object"
+          },
+          "etag": {
+            "type": "string",
+            "description": "If etags match then `applied_by_agent` field will be set to `true`",
+            "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85"
+          },
+          "mark_as_applied_by_agent": {
+            "type": "boolean",
+            "description": "`markAsAppliedByAgent=true` means \"force setting it to true regardless of etag\".\nThis is needed for Jaeger agent that doesn't have etags\n"
+          }
+        }
+      },
+      "search_agent_configuration_response": {
+        "type": "object",
+        "properties": {
+          "_index": {
+            "type": "string",
+            "description": "Index"
+          },
+          "_id": {
+            "type": "string",
+            "description": "Identifier"
+          },
+          "_score": {
+            "type": "number",
+            "description": "Score"
+          },
+          "_source": {
+            "$ref": "#/components/schemas/agent_configuration_object"
+          }
+        }
+      },
+      "service_environment_object": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "ALL_OPTION_VALUE",
+            "description": "Service environment name"
+          },
+          "alreadyConfigured": {
+            "type": "boolean",
+            "description": "Already configured"
+          }
+        }
+      },
+      "service_environments_response": {
+        "type": "object",
+        "properties": {
+          "environments": {
+            "type": "array",
+            "description": "Service environment list",
+            "items": {
+              "$ref": "#/components/schemas/service_environment_object"
+            }
+          }
+        }
+      },
+      "service_agent_name_response": {
+        "type": "object",
+        "properties": {
+          "agentName": {
+            "type": "string",
+            "description": "Agent name",
+            "example": "nodejs"
+          }
+        }
+      },
+      "base_source_map_object": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type"
+          },
+          "identifier": {
+            "type": "string",
+            "description": "Identifier"
+          },
+          "relative_url": {
+            "type": "string",
+            "description": "Relative URL"
+          },
+          "created": {
+            "type": "string",
+            "description": "Created date"
+          },
+          "id": {
+            "type": "string",
+            "description": "Identifier"
+          },
+          "compressionAlgorithm": {
+            "type": "string",
+            "description": "Compression Algorithm"
+          },
+          "decodedSha256": {
+            "type": "string",
+            "description": "Decoded SHA-256"
+          },
+          "decodedSize": {
+            "type": "number",
+            "description": "Decoded size"
+          },
+          "encodedSha256": {
+            "type": "string",
+            "description": "Encoded SHA-256"
+          },
+          "encodedSize": {
+            "type": "number",
+            "description": "Encoded size"
+          },
+          "encryptionAlgorithm": {
+            "type": "string",
+            "description": "Encryption Algorithm"
+          },
+          "packageName": {
+            "type": "string",
+            "description": "Package name"
+          }
+        }
+      },
+      "source_maps_response": {
+        "type": "object",
+        "properties": {
+          "artifacts": {
+            "type": "array",
+            "description": "Artifacts",
+            "items": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "serviceName": {
+                          "type": "string"
+                        },
+                        "serviceVersion": {
+                          "type": "string"
+                        },
+                        "bundleFilepath": {
+                          "type": "string"
+                        },
+                        "sourceMap": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number"
+                            },
+                            "file": {
+                              "type": "string"
+                            },
+                            "sources": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "sourcesContent": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "mappings": {
+                              "type": "string"
+                            },
+                            "sourceRoot": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "$ref": "#/components/schemas/base_source_map_object"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "501_response": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 501,
+            "description": "Error status code"
+          },
+          "error": {
+            "type": "string",
+            "example": "Not Implemented",
+            "description": "Error type"
+          },
+          "message": {
+            "type": "string",
+            "example": "Not Implemented",
+            "description": "Error message"
+          }
+        }
+      },
+      "upload_source_map_object": {
+        "type": "object",
+        "required": [
+          "service_name",
+          "service_version",
+          "bundle_filepath",
+          "sourcemap"
+        ],
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "description": "The name of the service that the service map should apply to."
+          },
+          "service_version": {
+            "type": "string",
+            "description": "The version of the service that the service map should apply to."
+          },
+          "bundle_filepath": {
+            "type": "string",
+            "description": "The absolute path of the final bundle as used in the web application."
+          },
+          "sourcemap": {
+            "type": "string",
+            "format": "binary",
+            "description": "The source map. It can be a string or file upload. It must follow the\n[source map format specification](https://tc39.es/ecma426/).\n"
+          }
+        }
+      },
+      "upload_source_maps_response": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "body": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/base_source_map_object"
+          }
+        ]
+      }
+    },
+    "examples": {
+      "agent_keys_object_post_request1": {
+        "description": "Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.",
+        "value": "{\n    \"name\": \"apm-key\",\n    \"privileges\": [\"event:write\", \"config_agent:read\"]\n}\n"
+      },
+      "agent_keys_object_post_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.",
+        "value": "{\n  \"agentKey\": {\n    \"id\": \"3DCLmn0B3ZMhLUa7WBG9\",\n    \"name\": \"apm-key\",\n    \"api_key\": \"PjGloCGOTzaZr8ilUPvkjA\",\n    \"encoded\": \"M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==\"\n  }\n}\n"
+      },
+      "annotation_object_post_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.",
+        "value": "{\n  \"_index\": \"observability-annotations\",\n  \"_id\": \"Lc9I93EBh6DbmkeV7nFX\",\n  \"_version\": 1,\n  \"_seq_no\": 12,\n  \"_primary_term\": 1,\n  \"found\": true,\n  \"_source\": {\n    \"message\": \"Deployment 1.2\",\n    \"@timestamp\": \"2020-05-08T10:31:30.452Z\",\n    \"service\": {\n      \"version\": \"1.2\",\n      \"name\": \"opbeans-java\"\n    },\n    \"tags\": [\n      \"apm\",\n      \"elastic.co\",\n      \"customer\"\n    ],\n    \"annotation\": {\n      \"type\": \"deployment\"\n    },\n    \"event\": {\n      \"created\": \"2020-05-09T02:34:43.937Z\"\n    }\n  }\n}\n"
+      },
+      "agent_configuration_intake_object_get_200_response1": {
+        "description": "An example of a successful response from `GET /api/apm/settings/agent-configuration`.",
+        "value": "[\n  {\n      \"agent_name\": \"go\",\n      \"service\": {\n      \"name\": \"opbeans-go\",\n      \"environment\": \"production\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      \"capture_body\": \"off\",\n      \"transaction_max_spans\": \"200\"\n      },\n      \"@timestamp\": 1581934104843,\n      \"applied_by_agent\": false,\n      \"etag\": \"1e58c178efeebae15c25c539da740d21dee422fc\"\n  },\n  {\n      \"agent_name\": \"go\",\n      \"service\": {\n      \"name\": \"opbeans-go\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      \"capture_body\": \"off\",\n      \"transaction_max_spans\": \"300\"\n      },\n      \"@timestamp\": 1581934111727,\n      \"applied_by_agent\": false,\n      \"etag\": \"3eed916d3db434d9fb7f039daa681c7a04539a64\"\n  },\n  {\n      \"agent_name\": \"nodejs\",\n      \"service\": {\n      \"name\": \"frontend\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      },\n      \"@timestamp\": 1582031336265,\n      \"applied_by_agent\": false,\n      \"etag\": \"5080ed25785b7b19f32713681e79f46996801a5b\"\n  }\n]\n"
+      },
+      "agent_configuration_intake_object_put_request1": {
+        "description": "Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.",
+        "value": "{\n    \"service\": {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    },\n    \"settings\": {\n        \"transaction_sample_rate\": \"0.4\",\n        \"capture_body\": \"off\",\n        \"transaction_max_spans\": \"500\"\n    },\n    \"agent_name\": \"nodejs\"\n}\n"
+      },
+      "agent_configuration_intake_object_delete_request1": {
+        "description": "Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.",
+        "value": "{\n    \"service\" : {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    }\n}\n"
+      },
+      "agent_configuration_intake_object_search_request1": {
+        "description": "Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.",
+        "value": "{\n    \"etag\": \"1e58c178efeebae15c25c539da740d21dee422fc\",\n    \"service\" : {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    }\n}\n"
+      },
+      "agent_configuration_intake_object_search_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.",
+        "value": "{\n  \"_index\": \".apm-agent-configuration\",\n  \"_id\": \"CIaqXXABmQCdPphWj8EJ\",\n  \"_score\": 2,\n  \"_source\": {\n    \"agent_name\": \"nodejs\",\n    \"service\": {\n      \"name\": \"frontend\"\n    },\n    \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n    },\n    \"@timestamp\": 1582031336265,\n    \"applied_by_agent\": false,\n    \"etag\": \"5080ed25785b7b19f32713681e79f46996801a5b\"\n  }\n}\n"
+      },
+      "source_maps_get_200_response1": {
+        "description": "A successful response from `GET /api/apm/sourcemaps`.",
+        "value": "{\n  \"artifacts\": [\n    {\n      \"type\": \"sourcemap\",\n      \"identifier\": \"foo-1.0.0\",\n      \"relative_url\": \"/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"body\": {\n        \"serviceName\": \"foo\",\n        \"serviceVersion\": \"1.0.0\",\n        \"bundleFilepath\": \"/test/e2e/general-usecase/bundle.js\",\n        \"sourceMap\": {\n          \"version\": 3,\n          \"file\": \"static/js/main.chunk.js\",\n          \"sources\": [\n            \"fleet-source-map-client/src/index.css\",\n            \"fleet-source-map-client/src/App.js\",\n            \"webpack:///./src/index.css?bb0a\",\n            \"fleet-source-map-client/src/index.js\",\n            \"fleet-source-map-client/src/reportWebVitals.js\"\n          ],\n          \"sourcesContent\": [\n            \"content\"\n          ],\n          \"mappings\": \"mapping\",\n          \"sourceRoot\": \"\"\n        }\n      },\n      \"created\": \"2021-07-09T20:47:44.812Z\",\n      \"id\": \"apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"compressionAlgorithm\": \"zlib\",\n      \"decodedSha256\": \"644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"decodedSize\": 441,\n      \"encodedSha256\": \"024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24\",\n      \"encodedSize\": 237,\n      \"encryptionAlgorithm\": \"none\",\n      \"packageName\": \"apm\"\n    }\n  ]\n}\n"
+      },
+      "source_maps_upload_200_response1": {
+        "description": "A successful response from `POST /api/apm/sourcemaps`.",
+        "value": {
+          "type": "sourcemap",
+          "identifier": "foo-1.0.0",
+          "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "body": "eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI",
+          "created": "2021-07-09T20:47:44.812Z",
+          "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "compressionAlgorithm": "zlib",
+          "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "decodedSize": 441,
+          "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+          "encodedSize": 237,
+          "encryptionAlgorithm": "none",
+          "packageName": "apm"
+        }
+      }
+    }
+  }
+}

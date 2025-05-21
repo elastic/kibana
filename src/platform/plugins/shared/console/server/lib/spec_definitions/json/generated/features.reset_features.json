@@ -1,0 +1,26 @@
+{
+  "features.reset_features": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_features/_reset"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

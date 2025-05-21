@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
+import type { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
 } from '@kbn/cases-plugin/server/common/types/case';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
   getCase,
@@ -21,6 +21,7 @@ import {
   findCases,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
+import { findAttachments } from '../../../../common/lib/api/attachments';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -128,6 +129,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           totalComment: 1,
           updated_at: null,
           updated_by: null,
+          observables: [],
         });
       });
     });
@@ -387,14 +389,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           it('should preserve the comment', async () => {
-            const { case: theCase } = await resolveCase({
+            const { comments } = await findAttachments({
               supertest,
-              caseId: 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed',
+              caseId: 'f3a43e72-4b37-55b0-bc51-eceb8616a5ce',
               auth,
-              includeComments: true,
             });
 
-            const comment = theCase.comments![0] as UserCommentAttachmentAttributes;
+            const comment = comments[0] as UserCommentAttachmentAttributes;
+
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });

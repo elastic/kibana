@@ -29,7 +29,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-es-errors/src/errors.ts",
+        "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,40 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-es-errors/src/errors.ts",
+            "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-errors",
+        "id": "def-common.isNotFoundError",
+        "type": "Function",
+        "tags": [],
+        "label": "isNotFoundError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-errors",
+            "id": "def-common.isNotFoundError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,7 +97,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-es-errors/src/errors.ts",
+        "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,7 +111,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-es-errors/src/errors.ts",
+            "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -99,7 +132,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-es-errors/src/errors.ts",
+        "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,7 +146,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-es-errors/src/errors.ts",
+            "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,7 +167,7 @@
         "signature": [
           "(error: unknown) => boolean"
         ],
-        "path": "packages/kbn-es-errors/src/errors.ts",
+        "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +181,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-es-errors/src/errors.ts",
+            "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,7 +201,7 @@
         "description": [
           "\nDetail information about an elasticsearch error."
         ],
-        "path": "packages/kbn-es-errors/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-es-errors/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,7 +215,7 @@
             "signature": [
               "{ type: string; reason?: string | undefined; } | undefined"
             ],
-            "path": "packages/kbn-es-errors/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-es-errors/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -205,7 +238,7 @@
           "ResponseError",
           " & { statusCode: 401; }"
         ],
-        "path": "packages/kbn-es-errors/src/errors.ts",
+        "path": "src/platform/packages/shared/kbn-es-errors/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

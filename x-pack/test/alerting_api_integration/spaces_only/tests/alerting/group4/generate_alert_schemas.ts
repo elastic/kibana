@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import execa from 'execa';
-import { RuleType } from '@kbn/alerting-plugin/server';
+import type { RuleType } from '@kbn/alerting-plugin/server';
 import {
   alertFieldMap,
   ecsFieldMap,
@@ -15,7 +15,7 @@ import {
   createSchemaFromFieldMap,
 } from '@kbn/alerts-as-data-utils';
 import { contextToSchemaName } from '@kbn/alerting-plugin/common';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function checkAlertSchemasTest({ getService }: FtrProviderContext) {
@@ -30,7 +30,7 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
   // node scripts/functional_tests_server.js --config x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   // node scripts/functional_test_runner --config=x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts --grep "check alert schemas"
   //
-  // and commit the changed schema files in packages/kbn-alerts-as-data-utils/src/schemas/generated/
+  // and commit the changed schema files in src/platform/packages/shared/kbn-alerts-as-data-utils/src/schemas/generated/
 
   describe('check alert schemas', function () {
     this.tags('skipFIPS');
@@ -92,7 +92,9 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
         '--exclude-standard',
       ]);
 
-      expect(stdout).not.to.contain('packages/kbn-alerts-as-data-utils/src/schemas/generated');
+      expect(stdout).not.to.contain(
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/src/schemas/generated'
+      );
     });
   });
 }

@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/core-rendering-browser"
+  ]
+}

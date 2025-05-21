@@ -16,7 +16,7 @@ import {
   AlertUtils,
   getEventLog,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
@@ -373,78 +373,6 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
             flapping: false,
             tracked: true,
             maintenanceWindowIds: [createdMaintenanceWindow.id],
-          },
-          alertD: {
-            status: 'OK',
-            muted: true,
-            flapping: false,
-            tracked: true,
-          },
-        };
-        expect(actualAlerts).to.eql(expectedAlerts);
-      });
-    });
-
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('handles multi-alert status', async () => {
-        // wait so cache expires
-        await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
-
-        // pattern of when the alert should fire
-        const pattern = {
-          alertA: [true, true, true, true],
-          alertB: [true, true, false, false],
-          alertC: [true, true, true, true],
-        };
-
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              rule_type_id: 'test.patternFiring',
-              params: { pattern },
-              schedule: { interval: '1s' },
-            })
-          )
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        await alertUtils.muteInstance(createdRule.id, 'alertC');
-        await alertUtils.muteInstance(createdRule.id, 'alertD');
-        await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdRule.id}/_instance_summary`
-        );
-
-        const actualAlerts = checkAndCleanActualAlerts(response.body.instances, [
-          'alertA',
-          'alertB',
-          'alertC',
-        ]);
-        const expectedAlerts = {
-          alertA: {
-            status: 'Active',
-            muted: false,
-            actionGroupId: 'default',
-            activeStartDate: actualAlerts.alertA.activeStartDate,
-            flapping: false,
-            tracked: true,
-          },
-          alertB: {
-            status: 'OK',
-            muted: false,
-            flapping: false,
-            tracked: true,
-          },
-          alertC: {
-            status: 'Active',
-            muted: true,
-            actionGroupId: 'default',
-            activeStartDate: actualAlerts.alertC.activeStartDate,
-            flapping: false,
-            tracked: true,
           },
           alertD: {
             status: 'OK',

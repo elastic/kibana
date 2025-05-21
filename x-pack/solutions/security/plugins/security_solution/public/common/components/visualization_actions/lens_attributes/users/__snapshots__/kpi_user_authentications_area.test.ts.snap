@@ -1,0 +1,279 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getKpiUserAuthenticationsAreaLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-layout-event-outcome-failure-id-generated-uuid",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-layout-event-outcome-success-id-generated-uuid",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "layout-event-outcome-failure-id-generated-uuid": Object {
+            "columnOrder": Array [
+              "column-event-outcome-failure-timestamp-id-generated-uuid",
+              "column-event-outcome-failure-id-generated-uuid",
+            ],
+            "columns": Object {
+              "column-event-outcome-failure-id-generated-uuid": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "event.outcome: \\"failure\\" ",
+                },
+                "isBucketed": false,
+                "label": "Fail",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "column-event-outcome-failure-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+          "layout-event-outcome-success-id-generated-uuid": Object {
+            "columnOrder": Array [
+              "column-event-outcome-success-timestamp-id-generated-uuid",
+              "column-event-outcome-success-id-generated-uuid",
+            ],
+            "columns": Object {
+              "column-event-outcome-success-id-generated-uuid": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "event.outcome : \\"success\\" ",
+                },
+                "isBucketed": false,
+                "label": "Succ.",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "column-event-outcome-success-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "indexRefName": "filter-index-pattern-0",
+          "key": "query",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"term\\":{\\"event.category\\":\\"authentication\\"}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "event.category": "authentication",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "user.name",
+          "negate": false,
+          "params": Object {
+            "query": "elastic",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "user.name": "elastic",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"user.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "user.name",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "fittingFunction": "None",
+      "gridlinesVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "column-event-outcome-success-id-generated-uuid",
+          ],
+          "layerId": "layout-event-outcome-success-id-generated-uuid",
+          "layerType": "data",
+          "seriesType": "area",
+          "xAccessor": "column-event-outcome-success-timestamp-id-generated-uuid",
+          "yConfig": Array [
+            Object {
+              "color": "#16C5C0",
+              "forAccessor": "column-event-outcome-success-id-generated-uuid",
+            },
+          ],
+        },
+        Object {
+          "accessors": Array [
+            "column-event-outcome-failure-id-generated-uuid",
+          ],
+          "layerId": "layout-event-outcome-failure-id-generated-uuid",
+          "layerType": "data",
+          "seriesType": "area",
+          "xAccessor": "column-event-outcome-failure-timestamp-id-generated-uuid",
+          "yConfig": Array [
+            Object {
+              "color": "#EE72A6",
+              "forAccessor": "column-event-outcome-failure-id-generated-uuid",
+            },
+          ],
+        },
+      ],
+      "legend": Object {
+        "isVisible": false,
+        "position": "right",
+        "showSingleSeries": false,
+      },
+      "preferredSeriesType": "area",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "[Host] User authentications - area ",
+  "visualizationType": "lnsXY",
+}
+`;

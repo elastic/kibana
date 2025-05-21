@@ -32,7 +32,7 @@
         "signature": [
           "100"
         ],
-        "path": "packages/content-management/favorites/favorites_common/index.ts",
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

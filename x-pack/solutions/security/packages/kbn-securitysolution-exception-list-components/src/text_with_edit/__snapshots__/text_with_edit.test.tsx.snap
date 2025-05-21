@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextWithEdit should not render the edit icon when isReadonly is true 1`] = `
+<div>
+  <span
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row-textWithEditContainerCss"
+  >
+    <span
+      class="euiFlexItem emotion-euiFlexItem-grow-10"
+    >
+      <span
+        class="css-0"
+        data-test-subj="TextWithEditTestText"
+      >
+        Test
+      </span>
+    </span>
+    <span
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    />
+  </span>
+</div>
+`;
+
+exports[`TextWithEdit should render the edit icon  when isReadonly is false 1`] = `
+<div>
+  <span
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row-textWithEditContainerCss"
+  >
+    <span
+      class="euiFlexItem emotion-euiFlexItem-grow-10"
+    >
+      <span
+        class="css-0"
+        data-test-subj="TextWithEditTestText"
+      >
+        Test
+      </span>
+    </span>
+    <span
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        aria-label="Edit Text List Header"
+        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+        data-test-subj="TextWithEditTestEditIcon"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="pencil"
+        />
+      </button>
+    </span>
+  </span>
+</div>
+`;

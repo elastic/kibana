@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 async function createAlert(
   objectRemover: ObjectRemover,
@@ -337,56 +337,33 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('should handle find alert request appropriately', async () => {
+    describe('artifacts', () => {
+      it('does not return artifacts when present', async () => {
+        const expectedArtifacts = {
+          artifacts: {
+            investigation_guide: { blob: 'Sample investigation guide' },
+            dashboards: [{ id: 'dashboard-1' }],
+          },
+        };
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
+          .send(getTestRuleData(expectedArtifacts))
           .expect(200);
+
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
+        const { id } = createdAlert;
+
         const response = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find`
         );
 
         expect(response.status).to.eql(200);
-        expect(response.body.page).to.equal(1);
-        expect(response.body.perPage).to.be.greaterThan(0);
-        expect(response.body.total).to.be.greaterThan(0);
-        const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
-        expect(match).to.eql({
-          id: createdAlert.id,
-          name: 'abc',
-          tags: ['foo'],
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          schedule: { interval: '1m' },
-          enabled: true,
-          actions: [],
-          params: {},
-          createdBy: null,
-          apiKeyOwner: null,
-          apiKeyCreatedByUser: null,
-          scheduledTaskId: match.scheduledTaskId,
-          updatedBy: null,
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
-          muteAll: false,
-          mutedInstanceIds: [],
-          createdAt: match.createdAt,
-          updatedAt: match.updatedAt,
-          executionStatus: match.executionStatus,
-          revision: 0,
-          running: false,
-          ...(match.nextRun ? { nextRun: match.nextRun } : {}),
-          ...(match.lastRun ? { lastRun: match.lastRun } : {}),
-        });
-        expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
-        expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+
+        const foundAlert = response.body.data.find((obj: any) => obj.id === id);
+        expect(foundAlert).not.to.be(undefined);
+        expect(foundAlert.artifacts).to.be(undefined);
       });
     });
   });

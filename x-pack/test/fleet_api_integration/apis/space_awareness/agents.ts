@@ -21,6 +21,7 @@ import {
   createFleetAgent,
   makeAgentsUpgradeable,
 } from './helpers';
+import { pollResult } from '../agents/update_agent_tags';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -299,7 +300,7 @@ export default function (providerContext: FtrProviderContext) {
         await verifyNoAgentActions(TEST_SPACE_1);
 
         // Add tag
-        await apiClient.bulkUpdateAgentTags(
+        let { actionId } = await apiClient.bulkUpdateAgentTags(
           {
             agents: '*',
             tagsToAdd: ['space1'],
@@ -307,43 +308,54 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        await verifyAgentsTags({
-          [defaultSpaceAgent1]: ['tag1'],
-          [defaultSpaceAgent2]: ['tag1'],
-        });
-        await verifyAgentsTags(
-          {
-            [testSpaceAgent1]: ['tag1', 'space1'],
-            [testSpaceAgent2]: ['tag1', 'space1'],
-            [testSpaceAgent3]: ['tag1', 'space1'],
-          },
-          TEST_SPACE_1
-        );
+        let verifyActionResult = async () => {
+          await verifyAgentsTags(
+            {
+              [testSpaceAgent1]: ['tag1', 'space1'],
+              [testSpaceAgent2]: ['tag1', 'space1'],
+              [testSpaceAgent3]: ['tag1', 'space1'],
+            },
+            TEST_SPACE_1
+          );
+        };
+
+        await pollResult(supertest, actionId, 3, verifyActionResult, TEST_SPACE_1);
+
         await verifyNoAgentActions();
         let actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatus.items.length).to.eql(1);
 
+        await verifyAgentsTags({
+          [defaultSpaceAgent1]: ['tag1'],
+          [defaultSpaceAgent2]: ['tag1'],
+        });
+
         // Remove tag
-        await apiClient.bulkUpdateAgentTags(
+        ({ actionId } = await apiClient.bulkUpdateAgentTags(
           {
             agents: '',
             tagsToRemove: ['space1'],
           },
           TEST_SPACE_1
-        );
+        ));
+
+        verifyActionResult = async () => {
+          await verifyAgentsTags(
+            {
+              [testSpaceAgent1]: ['tag1'],
+              [testSpaceAgent2]: ['tag1'],
+              [testSpaceAgent3]: ['tag1'],
+            },
+            TEST_SPACE_1
+          );
+        };
+
+        await pollResult(supertest, actionId, 3, verifyActionResult, TEST_SPACE_1);
 
         await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        await verifyAgentsTags(
-          {
-            [testSpaceAgent1]: ['tag1'],
-            [testSpaceAgent2]: ['tag1'],
-            [testSpaceAgent3]: ['tag1'],
-          },
-          TEST_SPACE_1
-        );
         await verifyNoAgentActions();
         actionStatus = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatus.items.length).to.eql(2);

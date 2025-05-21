@@ -18,10 +18,11 @@
       "uiActionsEnhanced",
       "data",
       "discover",
-      "dashboard",
       "dashboardEnhanced",
       "developerExamples",
-      "unifiedSearch"
+      "unifiedSearch",
+      "embeddable",
+      "share"
     ],
     "requiredBundles": [
       "dashboardEnhanced",

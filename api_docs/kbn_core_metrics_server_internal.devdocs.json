@@ -19,7 +19,7 @@
         "tags": [],
         "label": "MetricsServiceSetupDeps",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+        "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,7 +33,7 @@
             "signature": [
               "InternalHttpServiceSetup"
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47,7 +47,7 @@
             "signature": [
               "InternalElasticsearchServiceSetup"
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -65,7 +65,7 @@
         "tags": [],
         "label": "opsConfig",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+        "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,7 +79,7 @@
             "signature": [
               "\"ops\""
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+            "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,7 +132,7 @@
               },
               "<string | undefined>; }>; }>"
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+            "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }

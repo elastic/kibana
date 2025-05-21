@@ -23,7 +23,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/index.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -65,7 +65,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -107,7 +107,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer_flyout.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -147,9 +147,11 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
+          "StreamsFeatureRenderDeps",
           ") => JSX.Element) | undefined; } & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -157,6 +159,74 @@
           {
             "parentPluginId": "unifiedDocViewer",
             "id": "def-public.UnifiedDocViewerLogsOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerObservabilityTracesSpanOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerObservabilityTracesSpanOverview",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DocViewRenderProps",
+          " & { transactionIndexPattern: string; } & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_span_overview/lazy_doc_viewer_obs_traces_span_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerObservabilityTracesSpanOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerObservabilityTracesTransactionOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerObservabilityTracesTransactionOverview",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DocViewRenderProps",
+          " & { tracesIndexPattern: string; } & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerObservabilityTracesTransactionOverview.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -181,7 +251,7 @@
           "\nCustom react hook for querying a single doc in ElasticSearch"
         ],
         "signature": [
-          "({\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
+          "({\n  id,\n  index,\n  dataView,\n  esqlHit,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
           "EsDocSearchProps",
           ") => [",
           {
@@ -201,7 +271,7 @@
           },
           " | null, () => void]"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,12 +280,12 @@
             "id": "def-public.useEsDocSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  index,\n  dataView,\n  requestSource,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}",
+            "label": "{\n  id,\n  index,\n  dataView,\n  esqlHit,\n  onBeforeFetch,\n  onProcessRecord,\n}",
             "description": [],
             "signature": [
               "EsDocSearchProps"
             ],
-            "path": "src/plugins/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_es_doc_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -245,9 +315,11 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
+          "StreamsFeatureRenderDeps",
           ") => JSX.Element) | undefined; }"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -261,7 +333,7 @@
       "tags": [],
       "label": "UnifiedDocViewerSetup",
       "description": [],
-      "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+      "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -281,7 +353,7 @@
               "text": "DocViewsRegistry"
             }
           ],
-          "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -296,7 +368,7 @@
       "tags": [],
       "label": "UnifiedDocViewerStart",
       "description": [],
-      "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+      "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -316,7 +388,7 @@
               "text": "DocViewsRegistry"
             }
           ],
-          "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/unified_doc_viewer/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
         }

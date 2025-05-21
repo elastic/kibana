@@ -13,35 +13,25 @@
           "\nGets the cloud_defend link properties of a Cloud Defend page for navigation in the security solution."
         ],
         "signature": [
-          "<TId extends string = ",
-          {
-            "pluginId": "cloudDefend",
-            "scope": "public",
-            "docId": "kibCloudDefendPluginApi",
-            "section": "def-public.CloudDefendPageId",
-            "text": "CloudDefendPageId"
-          },
-          ">(cloudDefendPage: ",
-          "CloudDefendPage",
-          ") => CloudDefendLinkItem<TId>"
+          "<TId extends string = \"cloud_defend-policies\">(cloudDefendPage: \"policies\") => CloudDefendLinkItem<TId>"
         ],
-        "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cloudDefend",
             "id": "def-public.getSecuritySolutionLink.$1",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "cloudDefendPage",
             "description": [
               "the name of the cloud defend page."
             ],
             "signature": [
-              "CloudDefendPage"
+              "\"policies\""
             ],
-            "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,7 +49,7 @@
         "tags": [],
         "label": "CloudDefendSecuritySolutionContext",
         "description": [],
-        "path": "x-pack/plugins/cloud_defend/public/types.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,7 +65,7 @@
             "signature": [
               "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
-            "path": "x-pack/plugins/cloud_defend/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -91,17 +81,9 @@
               "Gets the `SpyRoute` component for navigation highlighting and breadcrumbs."
             ],
             "signature": [
-              "() => React.ComponentType<{ pageName: ",
-              {
-                "pluginId": "cloudDefend",
-                "scope": "public",
-                "docId": "kibCloudDefendPluginApi",
-                "section": "def-public.CloudDefendPageId",
-                "text": "CloudDefendPageId"
-              },
-              "; state?: Record<string, string | undefined> | undefined; }>"
+              "() => React.ComponentType<{ pageName: \"cloud_defend-policies\"; state?: Record<string, string | undefined> | undefined; }>"
             ],
-            "path": "x-pack/plugins/cloud_defend/public/types.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -115,34 +97,17 @@
     "misc": [
       {
         "parentPluginId": "cloudDefend",
-        "id": "def-public.CLOUD_DEFEND_BASE_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "CLOUD_DEFEND_BASE_PATH",
-        "description": [
-          "The base path for all cloud defend pages."
-        ],
-        "signature": [
-          "\"/cloud_defend\""
-        ],
-        "path": "x-pack/plugins/cloud_defend/public/common/navigation/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cloudDefend",
         "id": "def-public.CloudDefendPageId",
         "type": "Type",
         "tags": [],
         "label": "CloudDefendPageId",
         "description": [
-          "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
+          "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/solutions/security/plugins/security_solution/common/constants.ts`."
         ],
         "signature": [
-          "\"cloud_defend-policies\" | \"kubernetes_security-dashboard\""
+          "\"cloud_defend-policies\""
         ],
-        "path": "x-pack/plugins/cloud_defend/public/common/navigation/types.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -158,7 +123,7 @@
       "description": [
         "\ncloud_defend plugin types"
       ],
-      "path": "x-pack/plugins/cloud_defend/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -172,7 +137,7 @@
       "tags": [],
       "label": "CloudDefendPluginStart",
       "description": [],
-      "path": "x-pack/plugins/cloud_defend/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -190,7 +155,7 @@
             "CloudDefendRouterProps",
             ">"
           ],
-          "path": "x-pack/plugins/cloud_defend/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -215,7 +180,7 @@
       "tags": [],
       "label": "CloudDefendPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/cloud_defend/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/cloud_defend/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -229,7 +194,7 @@
       "tags": [],
       "label": "CloudDefendPluginStart",
       "description": [],
-      "path": "x-pack/plugins/cloud_defend/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/cloud_defend/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -248,7 +213,7 @@
         "tags": [],
         "label": "CloudDefendPolicy",
         "description": [],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -268,7 +233,7 @@
                 "text": "PackagePolicy"
               }
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -290,7 +255,7 @@
               },
               ", \"id\" | \"name\"> & { agents: number; }"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -304,7 +269,7 @@
         "tags": [],
         "label": "IndexDetails",
         "description": [],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -315,7 +280,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -329,7 +294,7 @@
             "signature": [
               "\"empty\" | \"not-empty\" | \"unprivileged\""
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -343,7 +308,7 @@
         "tags": [],
         "label": "Response",
         "description": [],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -357,7 +322,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,7 +336,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -392,7 +357,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +371,7 @@
             "signature": [
               "\"process\" | \"file\""
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -420,7 +385,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -434,7 +399,7 @@
         "tags": [],
         "label": "Selector",
         "description": [],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -445,7 +410,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -459,7 +424,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -473,7 +438,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,7 +452,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -501,7 +466,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -515,7 +480,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -529,7 +494,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,7 +508,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -557,7 +522,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -571,7 +536,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -585,7 +550,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,7 +564,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,7 +578,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -627,7 +592,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,7 +606,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -655,7 +620,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,7 +634,7 @@
             "signature": [
               "\"process\" | \"file\""
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -683,7 +648,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -711,7 +676,7 @@
           },
           ", \"id\" | \"name\"> & { agents: number; }"
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -726,7 +691,7 @@
         "signature": [
           "CloudDefendSetupInstalledStatus | CloudDefendSetupNotInstalledStatus"
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -739,9 +704,9 @@
         "label": "CloudDefendStatusCode",
         "description": [],
         "signature": [
-          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
+          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -756,7 +721,7 @@
         "signature": [
           "\"empty\" | \"not-empty\" | \"unprivileged\""
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -771,7 +736,7 @@
         "signature": [
           "{ readonly policy_name?: string | undefined; readonly per_page: number; readonly page: number; readonly sort_field: \"package_policy.id\" | \"package_policy.name\" | \"package_policy.policy_id\" | \"package_policy.namespace\" | \"package_policy.updated_at\" | \"package_policy.updated_by\" | \"package_policy.created_at\" | \"package_policy.created_by\" | \"package_policy.package.name\" | \"package_policy.package.title\"; readonly sort_order: \"asc\" | \"desc\"; }"
         ],
-        "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/schemas/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -786,7 +751,7 @@
         "signature": [
           "\"log\" | \"alert\" | \"block\""
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -801,7 +766,7 @@
         "signature": [
           "\"operation\" | \"containerImageFullName\" | \"containerImageName\" | \"containerImageTag\" | \"kubernetesClusterId\" | \"kubernetesClusterName\" | \"kubernetesNamespace\" | \"kubernetesPodLabel\" | \"kubernetesPodName\" | \"targetFilePath\" | \"ignoreVolumeFiles\" | \"ignoreVolumeMounts\" | \"processExecutable\" | \"processName\" | \"sessionLeaderInteractive\""
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -818,7 +783,7 @@
         "signature": [
           "\"process\" | \"file\""
         ],
-        "path": "x-pack/plugins/cloud_defend/common/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -882,7 +847,7 @@
           },
           "<string | undefined>; }>"
         ],
-        "path": "x-pack/plugins/cloud_defend/common/schemas/v1.ts",
+        "path": "x-pack/solutions/security/plugins/cloud_defend/common/schemas/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

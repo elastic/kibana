@@ -22,7 +22,7 @@
         "tags": [],
         "label": "deprecationsServiceMock",
         "description": [],
-        "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+        "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<DeprecationsServiceContract>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -51,16 +51,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationRegistryProvider",
-                "text": "DeprecationRegistryProvider"
-              },
+              "DeprecationRegistryProvider",
               ">"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -75,16 +69,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsServiceSetup",
-                "text": "DeprecationsServiceSetup"
-              },
+              "DeprecationsServiceSetup",
               ">"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -99,16 +87,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerInternalPluginApi",
-                "section": "def-server.InternalDeprecationsServiceStart",
-                "text": "InternalDeprecationsServiceStart"
-              },
+              "InternalDeprecationsServiceStart",
               ">"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -123,16 +105,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsClient",
-                "text": "DeprecationsClient"
-              },
+              "DeprecationsClient",
               ">"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
+            "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -279,6 +279,17 @@ export default function (providerContext: FtrProviderContext) {
           resOsquerySavedQuery = err;
         }
         expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
+        let securityAiPrompt;
+        try {
+          securityAiPrompt = await kibanaServer.savedObjects.get({
+            type: 'security-ai-prompt',
+            id: 'sample_security_ai_prompt',
+          });
+        } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
+          securityAiPrompt = err;
+        }
+        expect(securityAiPrompt.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -483,6 +494,12 @@ const expectAssetsInstalled = ({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
     });
+    const resSecurityAiPrompt = await kibanaServer.savedObjects.get({
+      type: 'security-ai-prompt',
+      id: 'sample_security_ai_prompt',
+    });
+    expect(resSecurityAiPrompt.id).equal('sample_security_ai_prompt');
+    expect(resSecurityAiPrompt.managed).be(true);
     expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
     expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
     const resTag = await kibanaServer.savedObjects.get({
@@ -542,6 +559,7 @@ const expectAssetsInstalled = ({
       installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
+
     expect(sortedRes).eql({
       installed_kibana: [
         {
@@ -581,6 +599,10 @@ const expectAssetsInstalled = ({
           type: 'search',
         },
         {
+          id: 'sample_security_ai_prompt',
+          type: 'security-ai-prompt',
+        },
+        {
           id: 'sample_security_rule',
           type: 'security-rule',
         },
@@ -601,6 +623,10 @@ const expectAssetsInstalled = ({
         },
         {
           id: 'logs@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'all_assets@custom',
           type: 'component_template',
         },
         {
@@ -663,114 +689,147 @@ const expectAssetsInstalled = ({
       package_assets: [
         {
           id: '333a22a1-e639-5af5-ae62-907ffc83d603',
+          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ilm_policy/all_assets.json',
           type: 'epm-packages-assets',
         },
         {
           id: '256f3dad-6870-56c3-80a1-8dfa11e2d568',
+          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/default.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '3fa0512f-bc01-5c2e-9df1-bc2f2a8259c8',
+          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline1.yml',
           type: 'epm-packages-assets',
         },
         {
           id: 'ea334ad8-80c2-5acd-934b-2a377290bf97',
+          path: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline2.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '96c6eb85-fe2e-56c6-84be-5fda976796db',
+          path: 'all_assets-0.1.0/data_stream/test_logs/fields/ecs.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb',
+          path: 'all_assets-0.1.0/data_stream/test_logs/fields/fields.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362',
+          path: 'all_assets-0.1.0/data_stream/test_logs/manifest.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '691f0505-18c5-57a6-9f40-06e8affbdf7a',
+          path: 'all_assets-0.1.0/data_stream/test_metrics/elasticsearch/ilm_policy/all_assets.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274',
+          path: 'all_assets-0.1.0/data_stream/test_metrics/fields/ecs.yml',
           type: 'epm-packages-assets',
         },
         {
           id: 'f839c76e-d194-555a-90a1-3265a45789e4',
+          path: 'all_assets-0.1.0/data_stream/test_metrics/fields/fields.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2',
+          path: 'all_assets-0.1.0/data_stream/test_metrics/manifest.yml',
           type: 'epm-packages-assets',
         },
         {
           id: '1e97a20f-9d1c-529b-8ff2-da4e8ba8bb71',
+          path: 'all_assets-0.1.0/docs/README.md',
           type: 'epm-packages-assets',
         },
         {
           id: 'ed5d54d5-2516-5d49-9e61-9508b0152d2b',
+          path: 'all_assets-0.1.0/elasticsearch/ml_model/test/default.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad',
+          path: 'all_assets-0.1.0/img/logo_overrides_64_color.svg',
           type: 'epm-packages-assets',
         },
         {
           id: '943d5767-41f5-57c3-ba02-48e0f6a837db',
+          path: 'all_assets-0.1.0/kibana/csp_rule_template/sample_csp_rule_template.json',
           type: 'epm-packages-assets',
         },
         {
           id: '0954ce3b-3165-5c1f-a4c0-56eb5f2fa487',
+          path: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard.json',
           type: 'epm-packages-assets',
         },
         {
           id: '60d6d054-57e4-590f-a580-52bf3f5e7cca',
+          path: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard2.json',
           type: 'epm-packages-assets',
         },
         {
           id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43',
+          path: 'all_assets-0.1.0/kibana/index_pattern/invalid.json',
           type: 'epm-packages-assets',
         },
         {
           id: '318959c9-997b-5a14-b328-9fc7355b4b74',
+          path: 'all_assets-0.1.0/kibana/index_pattern/test_index_pattern.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197',
+          path: 'all_assets-0.1.0/kibana/lens/sample_lens.json',
           type: 'epm-packages-assets',
         },
         {
           id: '4c758d70-ecf1-56b3-b704-6d8374841b34',
+          path: 'all_assets-0.1.0/kibana/ml_module/sample_ml_module.json',
           type: 'epm-packages-assets',
         },
         {
           id: '313ddb31-e70a-59e8-8287-310d4652a9b7',
+          path: 'all_assets-0.1.0/kibana/osquery_pack_asset/sample_osquery_pack_asset.json',
           type: 'epm-packages-assets',
         },
         {
           id: '24a74223-5fdb-52ca-9cb5-b2cdd2a42b07',
+          path: 'all_assets-0.1.0/kibana/osquery_saved_query/sample_osquery_saved_query.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
+          path: 'all_assets-0.1.0/kibana/search/sample_search.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '5d12ad91-0624-5dce-800d-b1f9a7732f7c',
+          path: 'all_assets-0.1.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2',
+          path: 'all_assets-0.1.0/kibana/security_rule/sample_security_rule.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'b265a5e0-c00b-5eda-ac44-2ddbd36d9ad0',
+          path: 'all_assets-0.1.0/kibana/tag/sample_tag.json',
           type: 'epm-packages-assets',
         },
         {
           id: '53c94591-aa33-591d-8200-cd524c2a0561',
+          path: 'all_assets-0.1.0/kibana/visualization/sample_visualization.json',
           type: 'epm-packages-assets',
         },
         {
           id: 'b658d2d4-752e-54b8-afc2-4c76155c1466',
+          path: 'all_assets-0.1.0/manifest.yml',
           type: 'epm-packages-assets',
         },
       ],

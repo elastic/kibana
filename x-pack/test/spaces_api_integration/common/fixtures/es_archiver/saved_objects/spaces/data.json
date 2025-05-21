@@ -68,11 +68,11 @@
 {
   "type": "_doc",
   "value": {
-    "id": "isolatedtype:my_isolated_object",
+    "id": "url:my_isolated_object",
     "index": ".kibana",
     "source": {
       "namespace": "space_2",
-      "type": "isolatedtype",
+      "type": "url",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
     "type": "_doc"
@@ -82,11 +82,11 @@
 {
   "type": "_doc",
   "value": {
-    "id": "isolatedtype:my_isolated_object",
+    "id": "url:my_isolated_object",
     "index": ".kibana",
     "source": {
       "namespace": "space_1",
-      "type": "isolatedtype",
+      "type": "url",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
     "type": "_doc"
@@ -96,10 +96,10 @@
 {
   "type": "_doc",
   "value": {
-    "id": "isolatedtype:my_isolated_object",
+    "id": "url:my_isolated_object",
     "index": ".kibana",
     "source": {
-      "type": "isolatedtype",
+      "type": "url",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
     "type": "_doc"
@@ -411,16 +411,16 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:default_only",
-    "index": ".kibana",
+    "id": "index-pattern:default_only",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in one space"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default"],
       "references": [
-        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+        { "type": "index-pattern", "id": "each_space", "name": "refname" }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -431,7 +431,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:default:sharedtype:space_1_only",
+    "id": "legacy-url-alias:default:index-pattern:space_1_only",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
@@ -439,7 +439,7 @@
       "legacy-url-alias": {
         "sourceId": "space_1_only",
         "targetNamespace": "default",
-        "targetType": "sharedtype",
+        "targetType": "index-pattern",
         "targetId": "default_only"
       },
       "coreMigrationVersion": "8.8.0",
@@ -451,16 +451,16 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:space_1_only",
-    "index": ".kibana",
+    "id": "index-pattern:space_1_only",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in one space"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_1"],
       "references": [
-        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+        { "type": "index-pattern", "id": "each_space", "name": "refname" }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -471,14 +471,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:space_1_only_matching_origin",
-    "index": ".kibana",
+    "id": "index-pattern:space_1_only_matching_origin",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "space_1_only",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This object only exists to test the second assertion for spacesWithMatchingOrigins in get_shareable_references"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["other_space"],
       "references": [],
       "updated_at": "2017-09-21T18:59:16.270Z"
@@ -490,16 +490,16 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:space_2_only",
-    "index": ".kibana",
+    "id": "index-pattern:space_2_only",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in one space"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_2"],
       "references": [
-        { "type": "sharedtype", "id": "each_space", "name": "refname" }
+        { "type": "index-pattern", "id": "each_space", "name": "refname" }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -510,14 +510,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:space_2_only_matching_origin",
-    "index": ".kibana",
+    "id": "index-pattern:space_2_only_matching_origin",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "space_2_only",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["*"],
       "references": [],
       "updated_at": "2017-09-21T18:59:16.270Z"
@@ -529,7 +529,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:space_2:sharedtype:space_1_only",
+    "id": "legacy-url-alias:space_2:index-pattern:space_1_only",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
@@ -537,7 +537,7 @@
       "legacy-url-alias": {
         "sourceId": "space_1_only",
         "targetNamespace": "space_2",
-        "targetType": "sharedtype",
+        "targetType": "index-pattern",
         "targetId": "space_2_only"
       },
       "coreMigrationVersion": "8.8.0",
@@ -549,7 +549,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:other_space:sharedtype:default_only",
+    "id": "legacy-url-alias:other_space:index-pattern:default_only",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
@@ -557,7 +557,7 @@
       "legacy-url-alias": {
         "sourceId": "default_only",
         "targetNamespace": "other_space",
-        "targetType": "sharedtype",
+        "targetType": "index-pattern",
         "targetId": "other_id",
         "disabled": true
       }
@@ -568,13 +568,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:default_and_space_1",
-    "index": ".kibana",
+    "id": "index-pattern:default_and_space_1",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in the default and space_1 spaces"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default", "space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -585,13 +585,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:default_and_space_2",
-    "index": ".kibana",
+    "id": "index-pattern:default_and_space_2",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in the default and space_2 spaces"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -602,13 +602,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:space_1_and_space_2",
-    "index": ".kibana",
+    "id": "index-pattern:space_1_and_space_2",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in the space_1 and space_2 spaces"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -619,19 +619,19 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:each_space",
-    "index": ".kibana",
+    "id": "index-pattern:each_space",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in the default, space_1, and space_2 spaces"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default", "space_1", "space_2"],
       "references": [
-        { "type": "sharedtype", "id": "default_only", "name": "refname" },
-        { "type": "sharedtype", "id": "space_1_only", "name": "refname" },
-        { "type": "sharedtype", "id": "space_2_only", "name": "refname" },
-        { "type": "sharedtype", "id": "all_spaces", "name": "refname" }
+        { "type": "index-pattern", "id": "default_only", "name": "refname" },
+        { "type": "index-pattern", "id": "space_1_only", "name": "refname" },
+        { "type": "index-pattern", "id": "space_2_only", "name": "refname" },
+        { "type": "index-pattern", "id": "all_spaces", "name": "refname" }
       ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -642,13 +642,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:all_spaces",
-    "index": ".kibana",
+    "id": "index-pattern:all_spaces",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in all spaces"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["*"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -659,13 +659,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:alias_delete_inclusive",
-    "index": ".kibana",
+    "id": "index-pattern:alias_delete_inclusive",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -676,7 +676,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:default:sharedtype:doesnt-matter",
+    "id": "legacy-url-alias:default:index-pattern:doesnt-matter",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
@@ -684,7 +684,7 @@
       "legacy-url-alias": {
         "sourceId": "doesnt-matter",
         "targetNamespace": "default",
-        "targetType": "sharedtype",
+        "targetType": "index-pattern",
         "targetId": "alias_delete_inclusive"
       }
     }
@@ -694,7 +694,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:space_2:sharedtype:doesnt-matter",
+    "id": "legacy-url-alias:space_2:index-pattern:doesnt-matter",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
@@ -702,7 +702,7 @@
       "legacy-url-alias": {
         "sourceId": "doesnt-matter",
         "targetNamespace": "space_2",
-        "targetType": "sharedtype",
+        "targetType": "index-pattern",
         "targetId": "alias_delete_inclusive"
       }
     }
@@ -712,13 +712,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:alias_delete_exclusive",
-    "index": ".kibana",
+    "id": "index-pattern:alias_delete_exclusive",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["*"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -729,7 +729,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "legacy-url-alias:other_space:sharedtype:doesnt-matter",
+    "id": "legacy-url-alias:other_space:index-pattern:doesnt-matter",
     "index": ".kibana",
     "source": {
       "type": "legacy-url-alias",
@@ -737,7 +737,7 @@
       "legacy-url-alias": {
         "sourceId": "doesnt-matter",
         "targetNamespace": "other_space",
-        "targetType": "sharedtype",
+        "targetType": "index-pattern",
         "targetId": "alias_delete_exclusive"
       }
     }
@@ -747,14 +747,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1a_default",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1a_default",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1a",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> originId match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -765,14 +765,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1a_space_1",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1a_space_1",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1a",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> originId match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -783,14 +783,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1a_space_2",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1a_space_2",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1a",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> originId match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -801,14 +801,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1b_default",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1b_default",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1b_space_2",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> id match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -819,14 +819,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1b_space_1",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1b_space_1",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1b_space_2",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> id match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -837,13 +837,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1b_space_2",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1b_space_2",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an originId -> id match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -854,13 +854,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1c_default_and_space_1",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1c_default_and_space_1",
+    "index": ".kibana_analytics",
     "source": {
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an id -> originId match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default", "space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -871,14 +871,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_1c_space_2",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_1c_space_2",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_1c_default_and_space_1",
-      "sharedtype": {
+      "index-pattern": {
         "title": "This is used to test an inexact match conflict for an id -> originId match"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -889,14 +889,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_2_default",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_2_default",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in one space"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -907,14 +907,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_2_space_1",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_2_space_1",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in one space"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_1"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -925,14 +925,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_2_space_2",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_2_space_2",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in one space"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
@@ -943,14 +943,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "sharedtype:conflict_2_all",
-    "index": ".kibana",
+    "id": "index-pattern:conflict_2_all",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "conflict_2",
-      "sharedtype": {
+      "index-pattern": {
         "title": "A shared saved-object in all spaces"
       },
-      "type": "sharedtype",
+      "type": "index-pattern",
       "namespaces": ["default", "space_1", "space_2"],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },

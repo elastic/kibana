@@ -14,6 +14,8 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import type { Filter } from '@kbn/es-query';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+import { calcDateMathDiff } from '@kbn/securitysolution-utils/date_math';
+import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import {
   ALERT_SUPPRESSION_DURATION_TITLE,
   ALERT_SUPPRESSION_DURATION_VALUE,
@@ -42,8 +44,8 @@ import {
   FILTERS_TITLE,
   FILTERS_VALUE_ITEM,
   FLYOUT_CLOSE_BTN,
-  FROM_TITLE,
-  FROM_VALUE,
+  LOOK_BACK_TITLE,
+  LOOK_BACK_VALUE,
   INDEX_TITLE,
   INDEX_VALUE_ITEM,
   INSTALL_PREBUILT_RULE_PREVIEW,
@@ -140,7 +142,7 @@ export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsse
   cy.get(BUILDING_BLOCK_TITLE).should('have.text', 'Building block');
   cy.get(BUILDING_BLOCK_VALUE).should(
     'have.text',
-    'All generated alerts will be marked as "building block" alerts'
+    'All generated alerts will be marked as building block alerts'
   );
 
   cy.get(SEVERITY_TITLE).should('have.text', 'Severity');
@@ -227,8 +229,15 @@ export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsse
   cy.get(INTERVAL_TITLE).should('have.text', 'Runs every');
   cy.get(INTERVAL_VALUE).should('contain.text', properties.interval);
 
-  cy.get(FROM_TITLE).should('have.text', 'Additional look-back time');
-  cy.get(FROM_VALUE).invoke('attr', 'data-test-subj').should('contain', properties.from);
+  cy.get(LOOK_BACK_TITLE).should('have.text', 'Additional look-back time');
+  cy.get(LOOK_BACK_VALUE)
+    .invoke('attr', 'data-test-subj')
+    .should(
+      'contain',
+      TimeDuration.fromMilliseconds(
+        calcDateMathDiff(properties.from ?? 'now-6m', `now-${properties.interval}`) ?? 0
+      ).toString()
+    );
 };
 
 export const assertIndexPropertyShown = (index: string[]) => {

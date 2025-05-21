@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   createComment,
@@ -233,12 +233,12 @@ export default ({ getService }: FtrProviderContext): void => {
           '48bdf505176b47705da896fb58bc2070768c072778f5412f162abec2ff6ca67b',
         ],
         index: [
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
-          '.siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
+          'siem-signals-default-000001',
         ],
       },
     });

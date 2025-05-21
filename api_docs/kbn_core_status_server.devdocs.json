@@ -21,7 +21,7 @@
         "description": [
           "\nStatus of core services.\n"
         ],
-        "path": "packages/core/status/core-status-common/src/core_status.ts",
+        "path": "src/core/packages/status/common/src/core_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,16 +33,10 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>"
             ],
-            "path": "packages/core/status/core-status-common/src/core_status.ts",
+            "path": "src/core/packages/status/common/src/core_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,16 +48,10 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>"
             ],
-            "path": "packages/core/status/core-status-common/src/core_status.ts",
+            "path": "src/core/packages/status/common/src/core_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -80,16 +68,10 @@
           "\nThe current status of a service at a point in time.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-status-common",
-            "scope": "common",
-            "docId": "kibKbnCoreStatusCommonPluginApi",
-            "section": "def-common.ServiceStatus",
-            "text": "ServiceStatus"
-          },
+          "ServiceStatus",
           "<Meta>"
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +87,7 @@
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,7 +100,7 @@
             "description": [
               "\nA high-level summary of the service status."
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -134,7 +116,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -150,7 +132,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,7 +148,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -182,7 +164,7 @@
         "description": [
           "\nAPI for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.\n"
         ],
-        "path": "packages/core/status/core-status-server/src/contracts.ts",
+        "path": "src/core/packages/status/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,16 +180,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.CoreStatus",
-                "text": "CoreStatus"
-              },
+              "CoreStatus",
               ">"
             ],
-            "path": "packages/core/status/core-status-server/src/contracts.ts",
+            "path": "src/core/packages/status/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -223,16 +199,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>"
             ],
-            "path": "packages/core/status/core-status-server/src/contracts.ts",
+            "path": "src/core/packages/status/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -249,16 +219,10 @@
               "(status$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>) => void"
             ],
-            "path": "packages/core/status/core-status-server/src/contracts.ts",
+            "path": "src/core/packages/status/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -272,16 +236,10 @@
                 "signature": [
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-status-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreStatusCommonPluginApi",
-                    "section": "def-common.ServiceStatus",
-                    "text": "ServiceStatus"
-                  },
+                  "ServiceStatus",
                   "<unknown>>"
                 ],
-                "path": "packages/core/status/core-status-server/src/contracts.ts",
+                "path": "src/core/packages/status/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,16 +259,10 @@
             "signature": [
               "Observable",
               "<Record<string, ",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>>"
             ],
-            "path": "packages/core/status/core-status-server/src/contracts.ts",
+            "path": "src/core/packages/status/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,16 +278,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>>"
             ],
-            "path": "packages/core/status/core-status-server/src/contracts.ts",
+            "path": "src/core/packages/status/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,7 +297,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/core/status/core-status-server/src/contracts.ts",
+            "path": "src/core/packages/status/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -375,7 +321,7 @@
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -392,7 +338,7 @@
         "signature": [
           "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -411,7 +357,7 @@
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Client, Transport } from '@elastic/elasticsearch';
+import { Transport } from '@elastic/elasticsearch';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import type {
   TransportRequestParams,
   TransportRequestOptions,
   TransportResult,
+  Client,
 } from '@elastic/elasticsearch';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 /*
  registers Kibana-specific @elastic/elasticsearch client instance.

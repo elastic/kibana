@@ -17,7 +17,7 @@
         "tags": [],
         "label": "License",
         "description": [],
-        "path": "x-pack/plugins/license_api_guard/server/license.ts",
+        "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,7 +31,7 @@
             "signature": [
               "({ pluginName, logger }: SetupSettings) => void"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -45,7 +45,7 @@
                 "signature": [
                   "SetupSettings"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -63,7 +63,7 @@
             "signature": [
               "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -77,7 +77,7 @@
                 "signature": [
                   "StartSettings"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,58 +94,22 @@
             "description": [],
             "signature": [
               "<Context extends ",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ", Params, Query, Body>(handler: ",
               "RequestHandler",
               "<Params, Query, Body, Context, any, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
-                "text": "KibanaResponseFactory"
-              },
+              "KibanaResponseFactory",
               ">) => (ctx: Context, request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<Params, Query, Body, any>, response: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
-                "text": "KibanaResponseFactory"
-              },
+              "KibanaResponseFactory",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any> | Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>"
             ],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -159,16 +123,10 @@
                 "signature": [
                   "RequestHandler",
                   "<Params, Query, Body, Context, any, ",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaResponseFactory",
-                    "text": "KibanaResponseFactory"
-                  },
+                  "KibanaResponseFactory",
                   ">"
                 ],
-                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +141,7 @@
             "tags": [],
             "label": "isEsSecurityEnabled",
             "description": [],
-            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "path": "x-pack/platform/plugins/private/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false
           }

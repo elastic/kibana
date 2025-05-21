@@ -9,14 +9,12 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
-import { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
-import {
-  ExternalReferenceSOAttachmentPayload,
-  CaseStatuses,
-  ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { Case } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -37,7 +35,7 @@ import {
   createCaseAndBulkCreateAttachments,
   bulkCreateAttachments,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createAndUploadFile,
   deleteAllFiles,
@@ -68,7 +66,7 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import { arraysToEqual } from '../../../../common/lib/validation';
 
@@ -148,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: theCase.id });
 
         userActions.slice(1).forEach((userAction, index) => {
           const userActionWithoutServerGeneratedAttributes =
@@ -163,7 +161,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...attachments[index],
               },
             },
-            case_id: theCase.id,
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
             owner: 'securitySolutionFixture',

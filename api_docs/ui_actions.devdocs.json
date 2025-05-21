@@ -19,7 +19,7 @@
           },
           " extends Error"
         ],
-        "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
             "tags": [],
             "label": "code",
             "description": [],
-            "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,7 +44,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -60,7 +60,7 @@
         "tags": [],
         "label": "UiActionsService",
         "description": [],
-        "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -74,7 +74,7 @@
             "signature": [
               "UiActionsExecutionService"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -90,7 +90,7 @@
               "TriggerInternal",
               "<object>>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,11 +102,11 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Map<string, ",
+              "Map<string, () => Promise<",
               "ActionInternal",
-              "<object>>"
+              "<object>>>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -120,7 +120,7 @@
             "signature": [
               "Map<string, string[]>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -134,7 +134,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,7 +154,7 @@
                     "text": "UiActionsServiceParams"
                   }
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -180,7 +180,7 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -200,7 +200,7 @@
                     "text": "Trigger"
                   }
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -218,7 +218,7 @@
             "signature": [
               "(triggerId: string) => boolean"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -232,7 +232,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -252,7 +252,7 @@
               "TriggerContract",
               "<object>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -266,7 +266,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -278,7 +278,9 @@
             "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.registerAction",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "registerAction",
             "description": [],
             "signature": [
@@ -300,9 +302,47 @@
               },
               "<Context>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "uiActionsEnhanced",
+                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/context_awareness/hooks/use_additional_cell_actions.ts"
+              },
+              {
+                "plugin": "imageEmbeddable",
+                "path": "src/platform/plugins/private/image_embeddable/public/actions/create_image_action.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register_discover_histogram_actions.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "uiActions",
@@ -321,7 +361,70 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.registerActionAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "registerActionAsync",
+            "description": [],
+            "signature": [
+              "<Context extends object>(id: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>>) => void"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.registerActionAsync.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.registerActionAsync.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "getDefinition",
+                "description": [],
+                "signature": [
+                  "() => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<Context>>"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -339,7 +442,7 @@
             "signature": [
               "(actionId: string) => void"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -353,7 +456,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -371,7 +474,7 @@
             "signature": [
               "(actionId: string) => boolean"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -385,7 +488,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -403,7 +506,7 @@
             "signature": [
               "(triggerId: string, actionId: string) => void"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -417,7 +520,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -432,7 +535,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -450,7 +553,7 @@
             "signature": [
               "(triggerId: string, actionId: string) => void"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -464,7 +567,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -479,7 +582,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -491,11 +594,11 @@
             "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.addTriggerAction",
             "type": "Function",
-            "tags": [],
-            "label": "addTriggerAction",
-            "description": [
-              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
+            "tags": [
+              "deprecated"
             ],
+            "label": "addTriggerAction",
+            "description": [],
             "signature": [
               "(triggerId: string, action: ",
               {
@@ -507,9 +610,159 @@
               },
               "<any>) => void"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/plugin.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/plugin.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/plugin.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/visualizations/actions/register.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/public/plugin.ts"
+              },
+              {
+                "plugin": "discoverEnhanced",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
+              },
+              {
+                "plugin": "discoverEnhanced",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
+              },
+              {
+                "plugin": "dashboardEnhanced",
+                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/platform/plugins/private/input_control_vis/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "uiActions",
@@ -521,7 +774,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -543,7 +796,87 @@
                   },
                   "<any>"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.UiActionsService.addTriggerActionAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "addTriggerActionAsync",
+            "description": [
+              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
+            ],
+            "signature": [
+              "(triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.addTriggerActionAsync.$1",
+                "type": "string",
+                "tags": [],
+                "label": "triggerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.addTriggerActionAsync.$2",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.UiActionsService.addTriggerActionAsync.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "getDefinition",
+                "description": [],
+                "signature": [
+                  "() => Promise<",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.ActionDefinition",
+                    "text": "ActionDefinition"
+                  },
+                  "<any>>"
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -559,7 +892,7 @@
             "label": "getAction",
             "description": [],
             "signature": [
-              "(id: string) => ",
+              "(id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -567,9 +900,9 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>"
+              "<object>>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -583,7 +916,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -599,7 +932,7 @@
             "label": "getTriggerActions",
             "description": [],
             "signature": [
-              "(triggerId: string) => ",
+              "(triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -607,9 +940,9 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]"
+              "<object>[]>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -623,7 +956,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -649,7 +982,7 @@
               },
               "<object>[]>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -663,7 +996,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -678,7 +1011,7 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -694,7 +1027,7 @@
             "label": "getFrequentlyChangingActionsForTrigger",
             "description": [],
             "signature": [
-              "(triggerId: string, context: object) => ",
+              "(triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -702,9 +1035,9 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]"
+              "<object>[]>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -718,7 +1051,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -733,7 +1066,7 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -753,45 +1086,25 @@
             "signature": [
               "(triggerId: string, context: object) => Promise<void>"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
+                "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/public/utils/table_inspector_view/components/data_table.tsx"
+                "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/plugin.tsx"
+                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
               },
               {
                 "plugin": "imageEmbeddable",
-                "path": "src/plugins/image_embeddable/public/components/image_embeddable.tsx"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/helpers.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/container.test.ts"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
+                "path": "src/platform/plugins/private/image_embeddable/public/components/image_embeddable.tsx"
               }
             ],
             "children": [
@@ -805,7 +1118,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -820,7 +1133,7 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -840,7 +1153,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -865,7 +1178,7 @@
                 "text": "UiActionsService"
               }
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -892,7 +1205,7 @@
           "EuiContextMenuPanelDescriptor",
           "[]>"
         ],
-        "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+        "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -906,7 +1219,7 @@
             "signature": [
               "BuildContextMenuParams"
             ],
-            "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+            "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -941,7 +1254,7 @@
           },
           "<Context>"
         ],
-        "path": "src/plugins/ui_actions/public/actions/create_action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -962,7 +1275,7 @@
               },
               "<Context>"
             ],
-            "path": "src/plugins/ui_actions/public/actions/create_action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1006,7 +1319,7 @@
           },
           "<Context>>>"
         ],
-        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1022,7 +1335,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1035,7 +1348,7 @@
             "description": [
               "\nA unique identifier for this action instance."
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1048,7 +1361,7 @@
             "description": [
               "\nThe action type is what determines the context shape."
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1072,7 +1385,7 @@
               },
               "<Context>) => string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1093,7 +1406,7 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1121,7 +1434,7 @@
               },
               "<Context>) => string"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1142,7 +1455,7 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1170,7 +1483,7 @@
               },
               "<Context>) => Promise<boolean>"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1191,7 +1504,7 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1219,7 +1532,7 @@
               },
               "<Context>) => Promise<void>"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1240,7 +1553,7 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1268,7 +1581,7 @@
               },
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1289,7 +1602,7 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1317,7 +1630,7 @@
               },
               "<Context>) => Promise<boolean>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1338,7 +1651,7 @@
                   },
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1348,33 +1661,23 @@
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.Action.subscribeToCompatibilityChanges",
+            "id": "def-public.Action.getCompatibilityChangesSubject",
             "type": "Function",
             "tags": [],
-            "label": "subscribeToCompatibilityChanges",
-            "description": [
-              "\nAllows this action to call a method when its compatibility changes."
-            ],
+            "label": "getCompatibilityChangesSubject",
+            "description": [],
             "signature": [
-              "((context: Context, onChange: (isCompatible: boolean, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>) => void) => ",
-              "Subscription",
-              " | undefined) | undefined"
+              "((context: Context) => ",
+              "Observable",
+              "<undefined> | undefined) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActions",
-                "id": "def-public.Action.subscribeToCompatibilityChanges.$1",
+                "id": "def-public.Action.getCompatibilityChangesSubject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -1382,37 +1685,14 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.Action.subscribeToCompatibilityChanges.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(isCompatible: boolean, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context>) => void"
-                ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "a subscription that can be used to unsubscribe from the changes."
+              "an Observable that emits when this action's compatibility changes."
             ]
           },
           {
@@ -1427,7 +1707,7 @@
             "signature": [
               "((context: Context) => boolean) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1441,7 +1721,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1461,7 +1741,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1477,7 +1757,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1513,7 +1793,7 @@
           "ActionDefinitionContext",
           "<Context>>>"
         ],
-        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1526,7 +1806,7 @@
             "description": [
               "\nID of the action that uniquely identifies this action in the actions registry."
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1542,7 +1822,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1560,7 +1840,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1575,7 +1855,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1597,7 +1877,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<void>"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1612,7 +1892,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1634,7 +1914,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<boolean>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1649,7 +1929,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1671,7 +1951,7 @@
               "ActionDefinitionContext",
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1686,7 +1966,7 @@
                   "ActionDefinitionContext",
                   "<Context>"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1706,7 +1986,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1722,39 +2002,29 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges",
+            "id": "def-public.ActionDefinition.getCompatibilityChangesSubject",
             "type": "Function",
             "tags": [],
-            "label": "subscribeToCompatibilityChanges",
-            "description": [
-              "\nAllows this action to call a method when its compatibility changes."
-            ],
+            "label": "getCompatibilityChangesSubject",
+            "description": [],
             "signature": [
-              "((context: Context, onChange: (isCompatible: boolean, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>) => void) => ",
-              "Subscription",
-              " | undefined) | undefined"
+              "((context: Context) => ",
+              "Observable",
+              "<undefined> | undefined) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$1",
+                "id": "def-public.ActionDefinition.getCompatibilityChangesSubject.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -1762,37 +2032,14 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.subscribeToCompatibilityChanges.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "onChange",
-                "description": [],
-                "signature": [
-                  "(isCompatible: boolean, action: ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Action",
-                    "text": "Action"
-                  },
-                  "<Context>) => void"
-                ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "a subscription that can be used to unsubscribe from the changes."
+              "an Observable that emits when this action's compatibility should be recalculated."
             ]
           },
           {
@@ -1807,7 +2054,7 @@
             "signature": [
               "((context: Context) => boolean) | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1821,7 +2068,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "src/plugins/ui_actions/public/actions/action.ts",
+                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1841,7 +2088,7 @@
         "description": [
           "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
         ],
-        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1863,7 +2110,7 @@
                 "text": "Trigger"
               }
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1887,7 +2134,7 @@
           },
           "<Context>"
         ],
-        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1908,7 +2155,7 @@
                 "text": "ActionExecutionMeta"
               }
             ],
-            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1934,7 +2181,7 @@
           },
           "<Context>"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1947,7 +2194,7 @@
             "description": [
               "\nID that uniquely identifies this object."
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1960,7 +2207,7 @@
             "description": [
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1976,7 +2223,7 @@
             "signature": [
               "React.FC<{ context: Context; }> | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1992,7 +2239,7 @@
             "signature": [
               "(context: Context) => string | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2006,7 +2253,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2026,7 +2273,7 @@
             "signature": [
               "(context: Context) => string"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2040,7 +2287,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2060,7 +2307,7 @@
             "signature": [
               "((context: Context) => string) | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2074,7 +2321,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2094,7 +2341,7 @@
             "signature": [
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2108,7 +2355,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2128,7 +2375,7 @@
             "signature": [
               "(context: Context) => Promise<boolean>"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2142,7 +2389,7 @@
                 "signature": [
                   "Context"
                 ],
-                "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+                "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2169,7 +2416,7 @@
               },
               "<Context> | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2201,7 +2448,7 @@
           },
           "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2212,7 +2459,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2228,7 +2475,7 @@
         "description": [
           "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2241,7 +2488,7 @@
             "description": [
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2257,7 +2504,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2273,7 +2520,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2287,7 +2534,7 @@
         "tags": [],
         "label": "UiActionsServiceParams",
         "description": [],
-        "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2302,7 +2549,7 @@
               "TriggerRegistry",
               " | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2317,7 +2564,7 @@
               "ActionRegistry",
               " | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2334,7 +2581,7 @@
               "TriggerToActionsRegistry",
               " | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2348,7 +2595,7 @@
         "tags": [],
         "label": "VisualizeFieldContext",
         "description": [],
-        "path": "src/plugins/ui_actions/public/types.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2359,7 +2606,7 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "path": "src/plugins/ui_actions/public/types.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2423,7 +2670,7 @@
               "FieldAttrsAsObject",
               " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
             ],
-            "path": "src/plugins/ui_actions/public/types.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2437,7 +2684,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/types.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2458,7 +2705,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/types.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2472,7 +2719,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/types.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2493,7 +2740,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/ui_actions/public/types.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2513,7 +2760,7 @@
         "signature": [
           "\"ACTION_VISUALIZE_FIELD\""
         ],
-        "path": "src/plugins/ui_actions/public/types.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2528,7 +2775,7 @@
         "signature": [
           "\"ACTION_VISUALIZE_GEO_FIELD\""
         ],
-        "path": "src/plugins/ui_actions/public/types.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2543,7 +2790,7 @@
         "signature": [
           "\"ACTION_VISUALIZE_LENS_FIELD\""
         ],
-        "path": "src/plugins/ui_actions/public/types.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2567,7 +2814,7 @@
             "text": "ActionExecutionMeta"
           }
         ],
-        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2582,7 +2829,7 @@
         "signature": [
           "\"ADD_PANEL_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2610,9 +2857,9 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>, \"subscribeToCompatibilityChanges\" | \"couldBecomeCompatible\">>"
+          "<Context>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
-        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2634,7 +2881,7 @@
           },
           "<Context>[]"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2649,7 +2896,7 @@
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2680,7 +2927,7 @@
           },
           "; columns?: string[] | undefined; }; }"
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2695,7 +2942,7 @@
         "signature": [
           "\"VISUALIZE_FIELD_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2710,7 +2957,7 @@
         "signature": [
           "\"VISUALIZE_GEO_FIELD_TRIGGER\""
         ],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2724,7 +2971,7 @@
         "tags": [],
         "label": "addPanelMenuTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2735,7 +2982,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2746,7 +2993,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2757,7 +3004,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2771,7 +3018,7 @@
         "tags": [],
         "label": "rowClickTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2782,7 +3029,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2793,7 +3040,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2804,7 +3051,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2818,7 +3065,7 @@
         "tags": [],
         "label": "visualizeFieldTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2829,7 +3076,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2840,7 +3087,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2851,7 +3098,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2865,7 +3112,7 @@
         "tags": [],
         "label": "visualizeGeoFieldTrigger",
         "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2876,7 +3123,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2887,7 +3134,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2898,7 +3145,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2938,7 +3185,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2946,9 +3193,25 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; }"
+        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>>) => void; }"
       ],
-      "path": "src/plugins/ui_actions/public/plugin.ts",
+      "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2988,7 +3251,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2996,7 +3259,23 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; readonly getAction: (id: string) => ",
+        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any>>) => void; readonly getAction: (id: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3004,7 +3283,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>; readonly getTriggerActions: (triggerId: string) => ",
+        "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3012,7 +3291,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+        "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3020,7 +3299,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3028,7 +3307,7 @@
           "section": "def-public.FrequentCompatibilityChangeAction",
           "text": "FrequentCompatibilityChangeAction"
         },
-        "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3038,7 +3317,7 @@
         },
         "; }"
       ],
-      "path": "src/plugins/ui_actions/public/plugin.ts",
+      "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

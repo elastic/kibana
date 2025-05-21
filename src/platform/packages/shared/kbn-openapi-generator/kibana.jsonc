@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/openapi-generator",
+  "owner": [
+    "@elastic/security-detection-rule-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

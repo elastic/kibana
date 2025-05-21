@@ -18,20 +18,14 @@
         "label": "HttpResourcesService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-resources-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpResourcesServerInternalPluginApi",
-            "section": "def-server.HttpResourcesService",
-            "text": "HttpResourcesService"
-          },
+          "HttpResourcesService",
           " implements ",
           "CoreService",
           "<",
           "InternalHttpResourcesPreboot",
           ", void>"
         ],
-        "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+        "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -59,7 +53,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -78,32 +72,14 @@
               "(deps: ",
               "PrebootDeps",
               ") => { createRegistrar: (router: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IRouter",
-                "text": "IRouter"
-              },
+              "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-server.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -117,7 +93,7 @@
                 "signature": [
                   "PrebootDeps"
                 ],
-                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -136,32 +112,14 @@
               "(deps: ",
               "SetupDeps",
               ") => { createRegistrar: (router: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IRouter",
-                "text": "IRouter"
-              },
+              "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-server.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-server.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -175,7 +133,7 @@
                 "signature": [
                   "SetupDeps"
                 ],
-                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,7 +151,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -209,7 +167,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

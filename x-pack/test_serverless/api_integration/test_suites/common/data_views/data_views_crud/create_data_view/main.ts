@@ -109,13 +109,13 @@ export default function ({ getService }: FtrProviderContext) {
         describe('creating fields', () => {
           before(async () => {
             await esArchiver.load(
-              'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+              'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
             );
           });
 
           after(async () => {
             await esArchiver.unload(
-              'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+              'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
             );
           });
 

@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/securitysolution-list-constants",
+  "version": "1.0.0",
+  "description": "security solution list constants to use across plugins such lists, security_solution, cases, etc...",
+  "license": "Elastic License 2.0",
+  "private": true
+}

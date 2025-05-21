@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { ModuleId } from '@kbn/repo-source-classifier';
 
 /**
@@ -33,7 +33,7 @@ export function isImportableFrom(
  * Checks whether the given module is supposed to be used at dev/build/test time only
  * @param module The module to check
  * @returns true if the module is a dev-only module, false otherwise
- * @see Package#isDevOnly (packages/kbn-repo-packages/modern/package.js)
+ * @see Package#isDevOnly (src/platform/packages/private/kbn-repo-packages/modern/package.js)
  */
 function isDevOnly(module: ModuleId) {
   return (

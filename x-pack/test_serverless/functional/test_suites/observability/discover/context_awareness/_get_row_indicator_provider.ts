@@ -27,11 +27,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('extension getRowIndicatorProvider', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     it('should not render log.level row indicators for logs data source without a log.level field', async () => {
@@ -85,9 +89,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const firstColorIndicator = await firstCell.findByTestSubject(
         'unifiedDataTableRowColorIndicatorCell'
       );
-      expect(await firstColorIndicator.getComputedStyle('background-color')).to.be(
-        'rgba(190, 207, 227, 1)'
-      );
       expect(await firstColorIndicator.getAttribute('title')).to.be('Debug');
     });
 
@@ -105,18 +106,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'unifiedDataTableRowColorIndicatorCell'
       );
       expect(await anchorColorIndicator.getAttribute('title')).to.be('Debug');
-      expect(await anchorColorIndicator.getComputedStyle('background-color')).to.be(
-        'rgba(190, 207, 227, 1)'
-      );
 
       let nextCell = await dataGrid.getCellElement(1, 0);
       let nextColorIndicator = await nextCell.findByTestSubject(
         'unifiedDataTableRowColorIndicatorCell'
       );
       expect(await nextColorIndicator.getAttribute('title')).to.be('Error');
-      expect(await nextColorIndicator.getComputedStyle('background-color')).to.be(
-        'rgba(223, 147, 82, 1)'
-      );
 
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -127,18 +122,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'unifiedDataTableRowColorIndicatorCell'
       );
       expect(await anchorColorIndicator.getAttribute('title')).to.be('Debug');
-      expect(await anchorColorIndicator.getComputedStyle('background-color')).to.be(
-        'rgba(190, 207, 227, 1)'
-      );
 
       nextCell = await dataGrid.getCellElement(1, 0);
       nextColorIndicator = await nextCell.findByTestSubject(
         'unifiedDataTableRowColorIndicatorCell'
       );
       expect(await nextColorIndicator.getAttribute('title')).to.be('Error');
-      expect(await nextColorIndicator.getComputedStyle('background-color')).to.be(
-        'rgba(223, 147, 82, 1)'
-      );
     });
   });
 }

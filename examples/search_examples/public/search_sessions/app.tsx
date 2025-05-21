@@ -56,6 +56,7 @@ interface SearchSessionsExampleAppDeps {
   analytics: CoreStart['analytics'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -674,6 +675,7 @@ function doSearch(
     analytics: CoreStart['analytics'];
     i18n: CoreStart['i18n'];
     theme: CoreStart['theme'];
+    userProfile: CoreStart['userProfile'];
   }
 ): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
   if (!dataView) return Promise.reject('Select a data view');
@@ -705,10 +707,8 @@ function doSearch(
   const req = {
     params: {
       index: dataView.title,
-      body: {
-        aggs: aggsDsl,
-        query,
-      },
+      aggs: aggsDsl,
+      query,
     },
   };
 

@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: SIEM Rule Migration common components
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ConnectorId:
+      type: string
+      description: The GenAI connector id to use.
+
+    LangSmithOptions:
+      type: object
+      description: The LangSmith options object.
+      required:
+        - project_name
+        - api_key
+      properties:
+        project_name:
+          type: string
+          description: The project name.
+        api_key:
+          type: string
+          description: The API key to use for tracing.
+
+    LangSmithEvaluationSettings:
+      description: The LangSmith settings object for evaluations.
+      allOf:
+        - $ref: '#/components/schemas/LangSmithOptions'
+        - type: object
+          required:
+            - dataset
+          properties:
+            dataset:
+              type: string
+              description: The dataset name to use for evaluations.

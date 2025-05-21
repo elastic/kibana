@@ -8,11 +8,11 @@
 import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_PATTERN,
   ALERTS_INDEX_PATTERN,
-  FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -89,7 +89,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siem: ['read'],
+            siemV2: ['read'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],
@@ -107,7 +107,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siem: ['read'],
+            siemV2: ['read'],
             fleet: ['all'],
             fleetv2: ['all'],
           },
@@ -140,7 +140,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siem: ['all'],
+            siemV2: ['all'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],

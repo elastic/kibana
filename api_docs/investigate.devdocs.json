@@ -23,7 +23,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/public/util/get_es_filters_from_global_parameters.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/public/util/get_es_filters_from_global_parameters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
               "GlobalWidgetParameters",
               ">"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/public/util/get_es_filters_from_global_parameters.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/public/util/get_es_filters_from_global_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -58,7 +58,7 @@
         "signature": [
           "(t1: T1) => T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,7 +72,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
         "signature": [
           "(t1: T1, t2: T2) => [T2] extends Mergable[] ? DeepOverwrite<T1, T2> : T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +105,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,7 +120,7 @@
             "signature": [
               "T2"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -139,7 +139,7 @@
         "signature": [
           "(t1: T1, t2: T2, t3: T3) => [T2, T3] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> : T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,7 +168,7 @@
             "signature": [
               "T2"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,7 +183,7 @@
             "signature": [
               "T3"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,7 +202,7 @@
         "signature": [
           "(t1: T1, t2: T2, t3: T4) => [T2, T3, T4] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> | DeepOverwrite<T1, T4> : T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,7 +216,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -231,7 +231,7 @@
             "signature": [
               "T2"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -246,7 +246,7 @@
             "signature": [
               "T4"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -265,7 +265,7 @@
         "signature": [
           "(sources: Record<string, any>[]) => any"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,7 +279,7 @@
             "signature": [
               "Record<string, any>[]"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -297,7 +297,7 @@
         "tags": [],
         "label": "GlobalWidgetParameters",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -311,7 +311,7 @@
             "signature": [
               "{ from: string; to: string; }"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -329,7 +329,7 @@
       "tags": [],
       "label": "InvestigatePublicSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -349,7 +349,7 @@
             "ItemDefinition",
             "<Params, Data>) => void"
           ],
-          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -364,7 +364,7 @@
                 "ItemDefinition",
                 "<Params, Data>"
               ],
-              "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+              "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -383,7 +383,7 @@
       "tags": [],
       "label": "InvestigatePublicStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -399,7 +399,7 @@
             "ItemDefinition",
             "<{}, {}>[]"
           ],
-          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -417,7 +417,7 @@
             "ItemDefinition",
             "<{}, {}> | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -431,7 +431,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
+              "path": "x-pack/solutions/observability/plugins/investigate/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -458,7 +458,7 @@
       "tags": [],
       "label": "InvestigateServerSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/investigate/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/investigate/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -472,7 +472,7 @@
       "tags": [],
       "label": "InvestigateServerStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/investigate/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/investigate/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -493,7 +493,7 @@
         "signature": [
           "(t1: T1) => T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -507,7 +507,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -526,7 +526,7 @@
         "signature": [
           "(t1: T1, t2: T2) => [T2] extends Mergable[] ? DeepOverwrite<T1, T2> : T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -540,7 +540,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -555,7 +555,7 @@
             "signature": [
               "T2"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -574,7 +574,7 @@
         "signature": [
           "(t1: T1, t2: T2, t3: T3) => [T2, T3] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> : T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -588,7 +588,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -603,7 +603,7 @@
             "signature": [
               "T2"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -618,7 +618,7 @@
             "signature": [
               "T3"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -637,7 +637,7 @@
         "signature": [
           "(t1: T1, t2: T2, t3: T4) => [T2, T3, T4] extends Mergable[] ? DeepOverwrite<T1, T2> | DeepOverwrite<T1, T3> | DeepOverwrite<T1, T4> : T1"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -651,7 +651,7 @@
             "signature": [
               "T1"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -666,7 +666,7 @@
             "signature": [
               "T2"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -681,7 +681,7 @@
             "signature": [
               "T4"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -700,7 +700,7 @@
         "signature": [
           "(sources: Record<string, any>[]) => any"
         ],
-        "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+        "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -714,7 +714,7 @@
             "signature": [
               "Record<string, any>[]"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/utils/merge_plain_objects.ts",
+            "path": "x-pack/solutions/observability/plugins/investigate/common/utils/merge_plain_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

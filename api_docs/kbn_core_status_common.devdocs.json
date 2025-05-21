@@ -29,7 +29,7 @@
         "description": [
           "\nStatus of core services.\n"
         ],
-        "path": "packages/core/status/core-status-common/src/core_status.ts",
+        "path": "src/core/packages/status/common/src/core_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,16 +41,10 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>"
             ],
-            "path": "packages/core/status/core-status-common/src/core_status.ts",
+            "path": "src/core/packages/status/common/src/core_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -62,16 +56,10 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
+              "ServiceStatus",
               "<unknown>"
             ],
-            "path": "packages/core/status/core-status-common/src/core_status.ts",
+            "path": "src/core/packages/status/common/src/core_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -85,7 +73,7 @@
         "tags": [],
         "label": "ServerVersion",
         "description": [],
-        "path": "packages/core/status/core-status-common/src/status.ts",
+        "path": "src/core/packages/status/common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +84,7 @@
             "tags": [],
             "label": "number",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,7 +95,7 @@
             "tags": [],
             "label": "build_hash",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,7 +106,7 @@
             "tags": [],
             "label": "build_number",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -129,7 +117,7 @@
             "tags": [],
             "label": "build_snapshot",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,7 +131,7 @@
             "signature": [
               "\"serverless\" | \"traditional\""
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -154,7 +142,7 @@
             "tags": [],
             "label": "build_date",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -171,16 +159,10 @@
           "\nThe current status of a service at a point in time.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-status-common",
-            "scope": "common",
-            "docId": "kibKbnCoreStatusCommonPluginApi",
-            "section": "def-common.ServiceStatus",
-            "text": "ServiceStatus"
-          },
+          "ServiceStatus",
           "<Meta>"
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -196,7 +178,7 @@
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,7 +191,7 @@
             "description": [
               "\nA high-level summary of the service status."
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -225,7 +207,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,7 +223,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -257,7 +239,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "packages/core/status/core-status-common/src/service_status.ts",
+            "path": "src/core/packages/status/common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -271,7 +253,7 @@
         "tags": [],
         "label": "StatusInfo",
         "description": [],
-        "path": "packages/core/status/core-status-common/src/status.ts",
+        "path": "src/core/packages/status/common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,15 +265,9 @@
             "label": "overall",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.StatusInfoServiceStatus",
-                "text": "StatusInfoServiceStatus"
-              }
+              "StatusInfoServiceStatus"
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -304,24 +280,12 @@
             "description": [],
             "signature": [
               "{ elasticsearch: ",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.StatusInfoServiceStatus",
-                "text": "StatusInfoServiceStatus"
-              },
+              "StatusInfoServiceStatus",
               "; savedObjects: ",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.StatusInfoServiceStatus",
-                "text": "StatusInfoServiceStatus"
-              },
+              "StatusInfoServiceStatus",
               "; }"
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -334,16 +298,10 @@
             "description": [],
             "signature": [
               "{ [x: string]: ",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.StatusInfoServiceStatus",
-                "text": "StatusInfoServiceStatus"
-              },
+              "StatusInfoServiceStatus",
               "; }"
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -358,24 +316,12 @@
         "label": "StatusInfoServiceStatus",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-status-common",
-            "scope": "common",
-            "docId": "kibKbnCoreStatusCommonPluginApi",
-            "section": "def-common.StatusInfoServiceStatus",
-            "text": "StatusInfoServiceStatus"
-          },
+          "StatusInfoServiceStatus",
           " extends Omit<",
-          {
-            "pluginId": "@kbn/core-status-common",
-            "scope": "common",
-            "docId": "kibKbnCoreStatusCommonPluginApi",
-            "section": "def-common.ServiceStatus",
-            "text": "ServiceStatus"
-          },
+          "ServiceStatus",
           "<unknown>, \"level\">"
         ],
-        "path": "packages/core/status/core-status-common/src/status.ts",
+        "path": "src/core/packages/status/common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -389,7 +335,7 @@
             "signature": [
               "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -403,7 +349,7 @@
         "tags": [],
         "label": "StatusResponse",
         "description": [],
-        "path": "packages/core/status/core-status-common/src/status.ts",
+        "path": "src/core/packages/status/common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -414,7 +360,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -425,7 +371,7 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -437,15 +383,9 @@
             "label": "version",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServerVersion",
-                "text": "ServerVersion"
-              }
+              "ServerVersion"
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,15 +397,9 @@
             "label": "status",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.StatusInfo",
-                "text": "StatusInfo"
-              }
+              "StatusInfo"
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,16 +412,10 @@
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "server",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-server.OpsMetrics",
-                "text": "OpsMetrics"
-              },
+              "OpsMetrics",
               ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
             ],
-            "path": "packages/core/status/core-status-common/src/status.ts",
+            "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -506,16 +434,10 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "server",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-server.OpsMetrics",
-            "text": "OpsMetrics"
-          },
+          "OpsMetrics",
           ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
         ],
-        "path": "packages/core/status/core-status-common/src/status.ts",
+        "path": "src/core/packages/status/common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -532,7 +454,7 @@
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -549,7 +471,7 @@
         "signature": [
           "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -565,24 +487,12 @@
         ],
         "signature": [
           "{ elasticsearch: ",
-          {
-            "pluginId": "@kbn/core-status-common",
-            "scope": "common",
-            "docId": "kibKbnCoreStatusCommonPluginApi",
-            "section": "def-common.StatusInfoServiceStatus",
-            "text": "StatusInfoServiceStatus"
-          },
+          "StatusInfoServiceStatus",
           "; savedObjects: ",
-          {
-            "pluginId": "@kbn/core-status-common",
-            "scope": "common",
-            "docId": "kibKbnCoreStatusCommonPluginApi",
-            "section": "def-common.StatusInfoServiceStatus",
-            "text": "StatusInfoServiceStatus"
-          },
+          "StatusInfoServiceStatus",
           "; }"
         ],
-        "path": "packages/core/status/core-status-common/src/status.ts",
+        "path": "src/core/packages/status/common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -601,7 +511,7 @@
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
-        "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

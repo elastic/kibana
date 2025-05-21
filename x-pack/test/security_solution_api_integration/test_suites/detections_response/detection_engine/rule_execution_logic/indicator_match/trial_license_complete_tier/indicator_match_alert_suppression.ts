@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from 'expect';
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 
 import {
   ALERT_SUPPRESSION_START,
@@ -1250,7 +1250,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           await indexGeneratedSourceDocuments({
             docsCount: 60000,
-            interval: [firstTimestamp, '2020-10-28T05:35:50.000Z'],
+            interval: [firstTimestamp, '2020-10-28T05:45:50.000Z'],
             seed: (index, _, timestamp) => ({
               id,
               '@timestamp': timestamp,

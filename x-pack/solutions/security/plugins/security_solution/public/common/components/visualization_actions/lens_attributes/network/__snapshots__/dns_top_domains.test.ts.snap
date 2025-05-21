@@ -1,0 +1,258 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getDnsTopDomainsLensAttributes should render 1`] = `
+Object {
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "layer-id-generated-uuid": Object {
+            "columnOrder": Array [
+              "column-top-value-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-dns-question-name-id-generated-uuid",
+            ],
+            "columns": Object {
+              "column-dns-question-name-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Unique count of dns.question.name",
+                "operationType": "unique_count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "dns.question.name",
+              },
+              "column-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "column-top-value-id-generated-uuid": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.dataset",
+                "operationType": "terms",
+                "params": Object {
+                  "accuracyMode": true,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "column-dns-question-name-id-generated-uuid",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "secondaryFields": Array [],
+                  "size": 10,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.dataset",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "indexRefName": "filter-index-pattern-0",
+          "key": "dns.question.type",
+          "negate": true,
+          "params": Object {
+            "query": "PTR",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "dns.question.type": "PTR",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "source.ip",
+          "negate": false,
+          "params": Object {
+            "query": "192.168.1.1",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"source.ip\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"destination.ip\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": false,
+      },
+      "fittingFunction": "None",
+      "gridlinesVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "column-dns-question-name-id-generated-uuid",
+          ],
+          "layerId": "layer-id-generated-uuid",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "splitAccessor": "column-top-value-id-generated-uuid",
+          "xAccessor": "column-timestamp-id-generated-uuid",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
+      },
+      "preferredSeriesType": "bar_stacked",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "Top domains by dns.question.registered_domain",
+  "visualizationType": "lnsXY",
+}
+`;

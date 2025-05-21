@@ -22,7 +22,7 @@
         "tags": [],
         "label": "uiSettingsServiceMock",
         "description": [],
-        "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+        "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
               "InternalUiSettingsServicePreboot",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -53,16 +53,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceSetup",
-                "text": "UiSettingsServiceSetup"
-              },
+              "UiSettingsServiceSetup",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -77,16 +71,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.UiSettingsServiceStart",
-                "text": "UiSettingsServiceStart"
-              },
+              "UiSettingsServiceStart",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -101,16 +89,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "server",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               ">"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -126,7 +108,7 @@
             "signature": [
               "() => jest.Mocked<UiSettingsServiceContract>"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
+            "path": "src/core/packages/ui-settings/server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

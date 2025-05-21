@@ -89,6 +89,10 @@
       "name": "APM - Cypress"
     },
     {
+      "key": "cypress/profiling_cypress",
+      "name": "Profiling - Cypress"
+    },
+    {
       "key": "cypress/inventory_cypress",
       "name": "Inventory - Cypress"
     },
@@ -99,6 +103,10 @@
     {
       "key": "cypress/cloud_security_posture_serverless",
       "name": "[Serverless] Cloud Security Posture - Cypress"
+    },
+    {
+      "key": "elastic_synthetics/synthetics_plugin",
+      "name": "Synthetics plugin e2e tests - Elastic/Synthetics"
     }
   ]
 }

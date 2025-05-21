@@ -48,7 +48,7 @@
         "signature": [
           "\"cloud-saml-kibana\""
         ],
-        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

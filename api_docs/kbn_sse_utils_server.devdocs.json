@@ -29,10 +29,17 @@
         "signature": [
           "(source$: ",
           "Observable",
-          "<Record<string, unknown> & { type: string; }>) => ",
-          "PassThrough"
+          "<Record<string, unknown> & { type: string; }>, {\n    logger,\n    signal,\n    flushThrottleMs = 100,\n  }: { logger: Pick<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", \"error\" | \"debug\">; signal: AbortSignal; flushThrottleMs?: number | undefined; }) => ResponseStream"
         ],
-        "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +54,153 @@
               "Observable",
               "<Record<string, unknown> & { type: string; }>"
             ],
-            "path": "packages/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/sse-utils-server",
+            "id": "def-common.observableIntoEventSourceStream.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    logger,\n    signal,\n    flushThrottleMs = 100,\n  }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/sse-utils-server",
+                "id": "def-common.observableIntoEventSourceStream.$2.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  "{ error: <Meta extends ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMeta",
+                    "text": "LogMeta"
+                  },
+                  " = ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMeta",
+                    "text": "LogMeta"
+                  },
+                  ">(errorOrMessage: Error | ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  },
+                  ", meta?: Meta | undefined) => void; debug: <Meta extends ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMeta",
+                    "text": "LogMeta"
+                  },
+                  " = ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMeta",
+                    "text": "LogMeta"
+                  },
+                  ">(message: ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  },
+                  ", meta?: Meta | undefined) => void; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils-server",
+                "id": "def-common.observableIntoEventSourceStream.$2.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/sse-utils-server",
+                "id": "def-common.observableIntoEventSourceStream.$2.flushThrottleMs",
+                "type": "number",
+                "tags": [
+                  "default"
+                ],
+                "label": "flushThrottleMs",
+                "description": [
+                  "\nThe minimum time in milliseconds between flushes of the stream.\nThis is to avoid flushing too often if the source emits events in quick succession.\n"
+                ],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/sse-utils-server",
+        "id": "def-common.supertestToObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "supertestToObservable",
+        "description": [
+          "\nConvert a supertest response to an SSE observable.\n\nNote: the supertest response should *NOT* be awaited when using that utility,\nor at least not before calling it.\n"
+        ],
+        "signature": [
+          "(response: ",
+          "Test",
+          ") => ",
+          "Observable",
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sse-utils-server",
+            "id": "def-common.supertestToObservable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Test"
+            ],
+            "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

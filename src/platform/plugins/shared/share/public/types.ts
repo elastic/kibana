@@ -1,0 +1,328 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ComponentType, ReactNode } from 'react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { Capabilities, ToastsSetup } from '@kbn/core/public';
+import type { EuiIconProps } from '@elastic/eui';
+import type { UrlService, LocatorPublic } from '../common/url_service';
+import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+import { AnonymousAccessServiceContract } from '../common/anonymous_access';
+
+export interface ShareRegistryApiStart {
+  urlService: BrowserUrlService;
+  anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+}
+
+export type ShareTypes = 'link' | 'embed' | 'legacy' | 'integration';
+
+export type InternalShareActionIntent = Exclude<ShareTypes, 'integration' | 'legacy'>;
+
+type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string, unknown>> = {
+  /**
+   * The title of the share action
+   */
+  draftModeCallOut?: ReactNode;
+  helpText?: ReactNode;
+  CTAButtonConfig?: {
+    id: string;
+    dataTestSubj: string;
+    label: string;
+  };
+  disabled?: boolean;
+} & E;
+
+export interface ShareMenuProviderLegacy {
+  readonly id: string;
+  getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
+}
+
+type ShareImplementationFactory<
+  T extends Omit<ShareTypes, 'legacy'>,
+  C extends Record<string, unknown> = Record<string, unknown>
+> = T extends 'integration'
+  ? {
+      id: string;
+      groupId?: string;
+      shareType: T;
+      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
+    }
+  : {
+      shareType: T;
+      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
+    };
+
+// New type definition to extract the config return type
+type ShareImplementation<T> = Omit<T, 'config'> & {
+  config: T extends ShareImplementationFactory<any, infer R> ? R : never;
+};
+
+/**
+ * @description implementation definition for creating a share action for sharing object links
+ */
+export type LinkShare = ShareImplementationFactory<
+  'link',
+  {
+    shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
+  }
+>;
+
+/**
+ * @description implementation definition for creating a share action for sharing embed links
+ */
+export type EmbedShare = ShareImplementationFactory<
+  'embed',
+  {
+    anonymousAccess: AnonymousAccessServiceContract;
+    shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
+  }
+>;
+
+/**
+ * @description skeleton definition for implementing a share action integration
+ */
+export type ShareIntegration<
+  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
+> = ShareImplementationFactory<'integration', IntegrationParameters>;
+
+/**
+ * @description implementation definition to support legacy share implementation
+ */
+export interface ShareLegacy {
+  shareType: 'legacy';
+  id: ShareMenuProviderLegacy['id'];
+  config: ShareMenuProviderLegacy['getShareMenuItemsLegacy'];
+}
+
+/**
+ * @description Share integration implementation definition for performing exports within kibana
+ */
+export interface ExportShare
+  extends ShareIntegration<{
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    name?: string;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    icon?: EuiIconProps['type'];
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    sortOrder?: number;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    toolTipContent?: string;
+    label: string;
+    exportType: string;
+    /**
+     * allows disabling the export action based on there factors, for instance licensing
+     */
+    disabled?: boolean;
+    helpText?: ReactNode;
+    generateExportButton?: ReactNode;
+    generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
+    generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
+    renderCopyURIButton?: boolean;
+    warnings?: Array<{ title: string; message: string }>;
+    requiresSavedState?: boolean;
+    supportedLayoutOptions?: Array<'print'>;
+    renderLayoutOptionSwitch?: boolean;
+  }> {
+  groupId: 'export';
+}
+
+export type ShareActionIntents = LinkShare | EmbedShare | ShareLegacy | ShareIntegration;
+
+export type LinkShareConfig = ShareImplementation<LinkShare>;
+export type EmbedShareConfig = ShareImplementation<EmbedShare>;
+export type ExportShareConfig = ShareImplementation<ExportShare>;
+export type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
+
+export type LegacyIntegrationConfig = Omit<ShareLegacy, 'config'> & {
+  config: ReturnType<ShareLegacy['config']>;
+};
+
+export type ShareConfigs =
+  | LinkShareConfig
+  | EmbedShareConfig
+  | ExportShareConfig
+  | LegacyIntegrationConfig
+  | ShareIntegrationConfig;
+
+export type LinkShareUIConfig = ShareActionUserInputBase<{
+  /**
+   *
+   * @description allows a consumer to provide a custom method which when invoked
+   * handles providing a share url in the context of said consumer
+   */
+  delegatedShareUrlHandler?: () => Promise<string>;
+}>;
+
+export type EmbedShareUIConfig = ShareActionUserInputBase<{
+  embedUrlParamExtensions?: UrlParamExtension[];
+  computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
+  /**
+   * @deprecated use computeAnonymousCapabilities defined on objectTypeMeta config
+   */
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+}>;
+
+type ExportShareUIConfig = ShareActionUserInputBase<{}>;
+
+export interface ShareUIConfig {
+  link: LinkShareUIConfig;
+  embed: EmbedShareUIConfig;
+  integration: {
+    [key: string]: ShareActionUserInputBase;
+    export: ExportShareUIConfig;
+  };
+}
+
+export interface SharingData {
+  title: string;
+  locatorParams: {
+    id: string;
+    params: Record<string, unknown>;
+  };
+}
+
+interface ShareRegistryInternalApi {
+  registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
+  registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+
+  resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+}
+
+export abstract class ShareRegistryPublicApi {
+  abstract setup(): {
+    /**
+     * @description registers a share menu provider for a specific object type
+     */
+    registerShareIntegration: ShareRegistryInternalApi['registerShareIntegration'];
+  };
+
+  abstract start(args: ShareRegistryApiStart): {
+    resolveShareItemsForShareContext: ShareRegistryInternalApi['resolveShareItemsForShareContext'];
+  };
+}
+
+export type BrowserUrlService = UrlService<
+  BrowserShortUrlClientFactoryCreateParams,
+  BrowserShortUrlClient
+>;
+
+/**
+ * @public
+ * Properties of the current object to share. Registered share
+ * menu providers will provide suitable items which have to
+ * be rendered in an appropriate place by the caller.
+ *
+ * It is possible to use the static function `toggleShareContextMenu`
+ * to render the menu as a popover.
+ * */
+export interface ShareContext {
+  /**
+   * The type of the object to share. for example lens, dashboard, etc.
+   */
+  objectType: string;
+  /**
+   * Allows for passing contextual information that each consumer can provide to customize the share menu
+   */
+  objectTypeMeta: {
+    title: string;
+    config: Partial<{
+      [T in Exclude<ShareTypes, 'legacy'>]: ShareUIConfig[T];
+    }>;
+  };
+  /**
+   * Id of the object that's been attempted to be shared
+   */
+  objectId?: string;
+  /**
+   * Current url for sharing. This can be set in cases where `window.location.href`
+   * does not contain a shareable URL (e.g. if using session storage to store the current
+   * app state is enabled). In these cases the property should contain the URL in a
+   * format which makes it possible to use it without having access to any other state
+   * like the current session.
+   *
+   * If not set it will default to `window.location.href`
+   */
+  shareableUrl?: string;
+  /**
+   * @deprecated prefer {@link delegatedShareUrlHandler}
+   */
+  shareableUrlForSavedObject?: string;
+  shareableUrlLocatorParams?: {
+    locator: LocatorPublic<any>;
+    params: any;
+  };
+  sharingData: { [key: string]: unknown };
+  isDirty: boolean;
+  onClose: () => void;
+  toasts: ToastsSetup;
+}
+
+/**
+ * @public
+ * Eui context menu entry shown directly in the context menu. `sortOrder` is
+ * used to order the individual items in a flat list returned by all registered
+ * menu providers.
+ * */
+export interface ShareContextMenuPanelItem
+  extends Omit<EuiContextMenuPanelItemDescriptorEntry, 'name'> {
+  name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
+  sortOrder?: number;
+}
+
+/**
+ * @public
+ * Definition of a menu item rendered in the share menu. In the redesign, the
+ * `shareMenuItem` is shown in a modal. However, Canvas
+ * uses the legacy panel implementation.
+ * */
+
+interface ShareMenuItemBase {
+  shareMenuItem?: ShareContextMenuPanelItem;
+}
+
+export interface ShareMenuItemLegacy extends ShareMenuItemBase {
+  panel?: EuiContextMenuPanelDescriptor;
+}
+
+export interface ExportGenerationOpts {
+  optimizedForPrinting?: boolean;
+  intl: InjectedIntl;
+}
+
+interface UrlParamExtensionProps {
+  setParamValue: (values: {}) => void;
+}
+
+export interface UrlParamExtension {
+  paramName: string;
+  component: ComponentType<UrlParamExtensionProps>;
+}
+
+/** @public */
+export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
+  anchorElement?: HTMLElement;
+  allowShortUrl: boolean;
+  onClose?: () => void;
+  publicAPIEnabled?: boolean;
+}
+
+export interface ClientConfigType {
+  new_version: { enabled: boolean };
+}

@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-metrics-server",
+    "@kbn/core-metrics-collectors-server-internal"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

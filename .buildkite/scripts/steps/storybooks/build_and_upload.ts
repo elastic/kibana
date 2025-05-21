@@ -10,54 +10,8 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { storybookAliases } from '../../../../src/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
-
-// TODO - how to generate this dynamically?
-const STORYBOOKS = [
-  'apm',
-  'canvas',
-  'cases',
-  'cell_actions',
-  'chart_icons',
-  'cloud_security_posture_packages',
-  'coloring',
-  'content_management_examples',
-  'custom_integrations',
-  'dashboard_enhanced',
-  'dashboard',
-  'data',
-  'embeddable',
-  'esql_editor',
-  'expression_error',
-  'expression_image',
-  'expression_metric',
-  'expression_repeat_image',
-  'expression_reveal_image',
-  'expression_shape',
-  'expression_tagcloud',
-  'fleet',
-  'grouping',
-  'home',
-  'infra',
-  'kibana_react',
-  'language_documentation_popover',
-  'lists',
-  'logs_explorer',
-  'management',
-  'observability_ai_assistant',
-  'observability_inventory',
-  'observability_shared',
-  'observability',
-  'presentation',
-  'random_sampling',
-  'security_solution_packages',
-  'security_solution',
-  'serverless',
-  'shared_ux',
-  'triggers_actions_ui',
-  'ui_actions_enhanced',
-  'unified_search',
-];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 
@@ -67,7 +21,7 @@ const STORYBOOK_DIRECTORY =
     : (process.env.BUILDKITE_BRANCH ?? '').replace('/', '__');
 const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks';
 const STORYBOOK_BUCKET_URL = `https://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}`;
-const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}/${process.env.BUILDKITE_COMMIT}`;
+const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}`;
 
 const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
 
@@ -84,8 +38,12 @@ const ghStatus = (state: string, description: string) =>
 const build = () => {
   console.log('--- Building Storybooks');
 
-  for (const storybook of STORYBOOKS) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
+  for (const storybook of Object.keys(storybookAliases)) {
+    exec(
+      `STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`,
+      `NODE_OPTIONS=--max-old-space-size=6144`,
+      `yarn storybook --site ${storybook}`
+    );
   }
 };
 
@@ -126,7 +84,7 @@ const upload = () => {
     );
     exec(`
       ${activateScript} gs://ci-artifacts.kibana.dev
-      gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
 

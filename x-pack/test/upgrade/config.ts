@@ -24,7 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/graph'),
-      require.resolve('./apps/logs'),
       require.resolve('./apps/maps'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/rules'),

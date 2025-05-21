@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createRegisteredConnectorTypeTests({ getService }: FtrProviderContext) {
@@ -31,6 +31,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.d3security',
           '.email',
           '.index',
+          '.inference',
           '.pagerduty',
           '.swimlane',
           '.server-log',
@@ -56,6 +57,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.sentinelone',
           '.cases',
           '.crowdstrike',
+          '.microsoft_defender_endpoint',
         ].sort()
       );
     });

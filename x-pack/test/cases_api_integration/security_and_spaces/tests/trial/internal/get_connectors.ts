@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 import expect from '@kbn/expect';
 
 import {
@@ -26,7 +26,7 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createCase,
   createComment,
@@ -40,7 +40,7 @@ import {
   getServiceNowConnector,
   getServiceNowSimulationServer,
 } from '../../../../common/lib/api';
-import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
+import { findCaseUserActions } from '../../../../common/lib/api/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
@@ -297,8 +297,8 @@ export default ({ getService }: FtrProviderContext): void => {
             connectorId: serviceNow2.id,
           });
 
-          const [userActions, connectors] = await Promise.all([
-            getCaseUserActions({ supertest, caseID: postedCase.id }),
+          const [{ userActions }, connectors] = await Promise.all([
+            findCaseUserActions({ supertest, caseID: postedCase.id }),
             getConnectors({ caseId: postedCase.id, supertest }),
           ]);
 
@@ -365,8 +365,8 @@ export default ({ getService }: FtrProviderContext): void => {
             connectorId: connector.id,
           });
 
-          const [userActions, connectors] = await Promise.all([
-            getCaseUserActions({ supertest, caseID: postedCase.id }),
+          const [{ userActions }, connectors] = await Promise.all([
+            findCaseUserActions({ supertest, caseID: postedCase.id }),
             getConnectors({ caseId: postedCase.id, supertest }),
           ]);
 

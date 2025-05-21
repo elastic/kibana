@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
@@ -51,6 +51,14 @@ const getTestUtils = (
           scheduled_task_id: response.body.scheduled_task_id,
           updated_by: null,
           api_key_owner: null,
+          ...(describeType === 'internal'
+            ? {
+                artifacts: {
+                  dashboards: [],
+                  investigation_guide: { blob: '' },
+                },
+              }
+            : {}),
           api_key_created_by_user: null,
           throttle: '1m',
           notify_when: 'onThrottleInterval',
@@ -112,6 +120,63 @@ const getTestUtils = (
         });
     });
   });
+
+  describe('Artifacts', () => {
+    it('should return the artifacts correctly', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            ...(describeType === 'internal'
+              ? {
+                  artifacts: {
+                    dashboards: [
+                      {
+                        id: 'dashboard-1',
+                      },
+                      {
+                        id: 'dashboard-2',
+                      },
+                    ],
+                    investigation_guide: {
+                      blob: '# Summary',
+                    },
+                  },
+                }
+              : {}),
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/${
+          describeType === 'public' ? 'api' : 'internal'
+        }/alerting/rule/${createdAlert.id}`
+      );
+
+      if (describeType === 'public') {
+        expect(response.body.artifacts).to.be(undefined);
+      } else if (describeType === 'internal') {
+        expect(response.body.artifacts).to.eql({
+          dashboards: [
+            {
+              id: 'dashboard-1',
+            },
+            {
+              id: 'dashboard-2',
+            },
+          ],
+          investigation_guide: {
+            blob: '# Summary',
+          },
+        });
+      }
+    });
+  });
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -124,55 +189,5 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     getTestUtils('public', objectRemover, supertest);
     getTestUtils('internal', objectRemover, supertest);
-
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('should handle get alert request appropriately', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`
-        );
-
-        expect(response.status).to.eql(200);
-        expect(response.body).to.eql({
-          id: createdAlert.id,
-          name: 'abc',
-          tags: ['foo'],
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          schedule: { interval: '1m' },
-          enabled: true,
-          actions: [],
-          params: {},
-          createdBy: null,
-          scheduledTaskId: response.body.scheduledTaskId,
-          updatedBy: null,
-          apiKeyOwner: null,
-          apiKeyCreatedByUser: null,
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
-          muteAll: false,
-          mutedInstanceIds: [],
-          createdAt: response.body.createdAt,
-          updatedAt: response.body.updatedAt,
-          executionStatus: response.body.executionStatus,
-          revision: 0,
-          running: false,
-          ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
-          ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
-        });
-        expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
-        if (response.body.nextRun) {
-          expect(Date.parse(response.body.nextRun)).to.be.greaterThan(0);
-        }
-      });
-    });
   });
 }

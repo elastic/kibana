@@ -29,7 +29,7 @@
           },
           " | undefined) => any"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +50,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -72,7 +72,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -115,7 +115,7 @@
           },
           " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,7 +136,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -158,7 +158,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -180,7 +180,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -195,7 +195,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -238,7 +238,7 @@
           },
           " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -259,7 +259,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -281,7 +281,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -303,7 +303,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -318,7 +318,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -345,7 +345,7 @@
           },
           " | undefined) => any"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,7 +359,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -381,7 +381,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -424,7 +424,7 @@
             "text": "GaugeExpressionFunctionDefinition"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/expression_functions/gauge_function.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/expression_functions/gauge_function.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -440,7 +440,7 @@
         "tags": [],
         "label": "Accessors",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -454,7 +454,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,7 +468,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,7 +482,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -496,7 +496,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -510,7 +510,7 @@
         "tags": [],
         "label": "GaugeExpressionProps",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -530,7 +530,7 @@
                 "text": "Datatable"
               }
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -569,7 +569,7 @@
               },
               "> | undefined; ariaLabel?: string | undefined; }"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -580,7 +580,7 @@
             "tags": [],
             "label": "canNavigateToLens",
             "description": [],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -594,7 +594,7 @@
         "tags": [],
         "label": "GaugeState",
         "description": [],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -616,7 +616,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -638,7 +638,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -660,7 +660,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,7 +682,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -696,7 +696,7 @@
             "signature": [
               "\"hidden\" | \"auto\" | \"bands\""
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -710,7 +710,7 @@
             "signature": [
               "\"none\" | \"custom\" | \"auto\""
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -724,7 +724,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -738,7 +738,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -753,7 +753,7 @@
               "GaugeColorMode",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -782,7 +782,7 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,7 +796,7 @@
             "signature": [
               "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\" | \"semiCircle\""
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -810,7 +810,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -824,7 +824,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -841,7 +841,7 @@
               "GaugeCentralMajorMode",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": []
@@ -858,7 +858,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": []
@@ -877,17 +877,17 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "visTypeGauge",
-                "path": "src/plugins/vis_types/gauge/public/to_ast.ts"
+                "path": "src/platform/plugins/private/vis_types/gauge/public/to_ast.ts"
               },
               {
                 "plugin": "visTypeGauge",
-                "path": "src/plugins/vis_types/gauge/public/to_ast.ts"
+                "path": "src/platform/plugins/private/vis_types/gauge/public/to_ast.ts"
               }
             ]
           }
@@ -917,13 +917,13 @@
           },
           "<",
           "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; centralMajor?: string | ",
           "GoalLabelAccessor",
-          " | undefined; centralMinor?: string | ",
+          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
           {
@@ -935,7 +935,7 @@
           },
           "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; } | undefined; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -950,7 +950,7 @@
         "signature": [
           "\"gauge\""
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -988,7 +988,7 @@
             "text": "FieldFormat"
           }
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1018,7 +1018,7 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1060,7 +1060,7 @@
           },
           "> | undefined; ariaLabel?: string | undefined; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1130,7 +1130,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1145,7 +1145,7 @@
         "signature": [
           "\"none\" | \"custom\" | \"auto\""
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1203,13 +1203,13 @@
           },
           "<",
           "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; centralMajor?: string | ",
           "GoalLabelAccessor",
-          " | undefined; centralMinor?: string | ",
+          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
           {
@@ -1229,33 +1229,33 @@
           "RecursivePartial",
           "<",
           "Theme",
-          ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+          ">[] | undefined>; rendering?: ",
+          "Rendering",
+          " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
           "Position",
           " | ",
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; debug?: boolean | undefined; locale?: string | undefined; rendering?: ",
-          "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; pointBuffer?: ",
+          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
           " | undefined; brushAxis?: ",
           "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; dow?: number | undefined; legendValues?: ",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; ariaDescription?: string | undefined; ariaLabel?: string | undefined; xDomain?: ",
+          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined; setChartSize: (d: ",
           {
@@ -1267,7 +1267,7 @@
           },
           ") => void; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1282,7 +1282,7 @@
         "signature": [
           "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\" | \"semiCircle\""
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1297,7 +1297,7 @@
         "signature": [
           "\"hidden\" | \"auto\" | \"bands\""
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1312,7 +1312,7 @@
         "signature": [
           "\"expressionGauge\""
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/index.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1327,7 +1327,7 @@
         "signature": [
           "\"expressionGauge\""
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/index.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1344,7 +1344,7 @@
         "signature": [
           "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1359,7 +1359,7 @@
         "signature": [
           "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1374,7 +1374,7 @@
         "signature": [
           "{ readonly HORIZONTAL_BULLET: \"horizontalBullet\"; readonly VERTICAL_BULLET: \"verticalBullet\"; readonly SEMI_CIRCLE: \"semiCircle\"; readonly ARC: \"arc\"; readonly CIRCLE: \"circle\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1389,7 +1389,7 @@
         "signature": [
           "{ readonly HIDDEN: \"hidden\"; readonly AUTO: \"auto\"; readonly BANDS: \"bands\"; }"
         ],
-        "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
