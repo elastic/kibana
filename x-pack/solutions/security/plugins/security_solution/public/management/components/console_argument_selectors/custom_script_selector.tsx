@@ -9,13 +9,15 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiPanel,
   EuiPopover,
-  EuiText,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
+  EuiToolTip,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -23,6 +25,17 @@ import type { ResponseActionAgentType } from '../../../../common/endpoint/servic
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 import type { CustomScript } from '../../../../common/endpoint/types/custom_scripts';
+
+// Css to have a tooltip in place with a one line description
+const truncationStyle = css({
+  display: '-webkit-box',
+  overflow: 'hidden',
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 1,
+  lineClamp: 1, // standardized fallback for modern Firefox
+  textOverflow: 'ellipsis',
+  whiteSpace: 'normal',
+});
 
 const INITIAL_DISPLAY_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.initialDisplayLabel',
@@ -80,16 +93,16 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     const renderOption = (option: SelectableOption) => {
       return (
         <>
-          <EuiTitle size="xxs">
-            <p data-test-subj={`${option.label}-label`}>{option.label}</p>
-          </EuiTitle>
-          <EuiText
-            data-test-subj={`${option.label}-description`}
-            size="s"
-            className="eui-textTruncate"
-          >
-            {option?.description}
+          <EuiText size="s" css={truncationStyle}>
+            <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
           </EuiText>
+          {option?.description && (
+            <EuiToolTip position="right" content={option.description}>
+              <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
+                <small css={truncationStyle}>{option.description}</small>
+              </EuiText>
+            </EuiToolTip>
+          )}
         </>
       );
     };
