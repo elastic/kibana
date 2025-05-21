@@ -9,8 +9,11 @@ import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
+  QueryDslQueryContainer,
   StoredScript,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
 import {
   CAI_NUMBER_OF_SHARDS,
@@ -18,11 +21,12 @@ import {
   CAI_REFRESH_INTERVAL,
   CAI_INDEX_MODE,
   CAI_DEFAULT_TIMEOUT,
-} from '../constants';
-import { fullJitterBackoffFactory } from '../../common/retry_service/full_jitter_backoff';
-import { CasesAnalyticsRetryService } from '../cases_analytics_retry_service';
+} from './constants';
+import { fullJitterBackoffFactory } from '../common/retry_service/full_jitter_backoff';
+import { scheduleCAIBackfillTask } from './tasks/backfill_task';
+import { CasesAnalyticsRetryService } from './retry_service';
 
-interface AnalyticsIndexFactoryParams {
+interface AnalyticsIndexParams {
   logger: Logger;
   isServerless: boolean;
   esClient: ElasticsearchClient;
@@ -30,17 +34,25 @@ interface AnalyticsIndexFactoryParams {
   mappings: MappingTypeMapping;
   painlessScriptId: string;
   painlessScript: StoredScript;
+  taskId: string;
+  sourceIndex: string;
+  sourceQuery: QueryDslQueryContainer;
+  taskManager: TaskManagerStartContract;
 }
 
-export class AnalyticsIndexFactory {
-  protected readonly logger: Logger;
-  protected readonly indexName: string;
+export class AnalyticsIndex {
+  private readonly logger: Logger;
+  private readonly indexName: string;
   private readonly esClient: ElasticsearchClient;
   private readonly mappings: MappingTypeMapping;
   private readonly indexSettings?: IndicesIndexSettings;
   private readonly painlessScriptId: string;
   private readonly painlessScript: StoredScript;
   private readonly retryService: CasesAnalyticsRetryService;
+  private readonly taskManager: TaskManagerStartContract;
+  private readonly taskId: string;
+  private readonly sourceIndex: string;
+  private readonly sourceQuery: QueryDslQueryContainer;
 
   constructor({
     logger,
@@ -50,13 +62,21 @@ export class AnalyticsIndexFactory {
     mappings,
     painlessScriptId,
     painlessScript,
-  }: AnalyticsIndexFactoryParams) {
+    taskManager,
+    taskId,
+    sourceIndex,
+    sourceQuery,
+  }: AnalyticsIndexParams) {
     this.logger = logger;
     this.esClient = esClient;
     this.indexName = indexName;
     this.mappings = mappings;
     this.painlessScriptId = painlessScriptId;
     this.painlessScript = painlessScript;
+    this.taskManager = taskManager;
+    this.taskId = taskId;
+    this.sourceIndex = sourceIndex;
+    this.sourceQuery = sourceQuery;
     this.indexSettings = {
       // settings are not supported on serverless ES
       ...(isServerless
@@ -177,8 +197,14 @@ export class AnalyticsIndexFactory {
     }
   }
 
-  // Needs to be implemented by child class
-  protected async scheduleBackfillTask() {
-    this.logger.error(`[${this.indexName}] scheduleBackfillTask not implemented`);
+  private async scheduleBackfillTask() {
+    await scheduleCAIBackfillTask({
+      taskId: this.taskId,
+      sourceIndex: this.sourceIndex,
+      sourceQuery: this.sourceQuery,
+      destIndex: this.indexName,
+      taskManager: this.taskManager,
+      logger: this.logger,
+    });
   }
 }

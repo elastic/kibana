@@ -10,15 +10,13 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
-  CasesAnalyticsIndexFactory,
-  CasesCommentsAnalyticsIndexFactory,
-  CasesAttachmentsAnalyticsIndexFactory,
-} from './index_factory';
 import type { CasesServerStartDependencies } from '../types';
 import { registerCAIBackfillTask } from './tasks/backfill_task';
+import { createCasesAnalyticsIndex } from './cases_index';
+import { createCommentsAnalyticsIndex } from './comments_index';
+import { createAttachmentsAnalyticsIndex } from './attachments_index';
 
-export const createCasesAnalyticsIndices = async ({
+export const createCasesAnalyticsIndexes = async ({
   esClient,
   logger,
   isServerless,
@@ -30,19 +28,19 @@ export const createCasesAnalyticsIndices = async ({
   taskManager: TaskManagerStartContract;
 }) => {
   logger.debug('initializing factories');
-  const casesIndexFactory = new CasesAnalyticsIndexFactory({
+  const casesIndex = createCasesAnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
   });
-  const casesAttachmentsIndexFactory = new CasesAttachmentsAnalyticsIndexFactory({
+  const casesAttachmentsIndex = createCommentsAnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
   });
-  const casesCommentsIndexFactory = new CasesCommentsAnalyticsIndexFactory({
+  const casesCommentsIndex = createAttachmentsAnalyticsIndex({
     logger,
     esClient,
     isServerless,
@@ -50,9 +48,9 @@ export const createCasesAnalyticsIndices = async ({
   });
 
   return Promise.all([
-    casesIndexFactory.createIndex(),
-    casesAttachmentsIndexFactory.createIndex(),
-    casesCommentsIndexFactory.createIndex(),
+    casesIndex.createIndex(),
+    casesAttachmentsIndex.createIndex(),
+    casesCommentsIndex.createIndex(),
   ]);
 };
 

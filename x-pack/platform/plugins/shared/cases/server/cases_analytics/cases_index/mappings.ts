@@ -6,11 +6,7 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import {
-  CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
-  CAI_CASES_INDEX_SCRIPT_ID,
-  CAI_COMMENTS_INDEX_SCRIPT_ID,
-} from './painless_scripts';
+import { CAI_CASES_INDEX_SCRIPT_ID } from './painless_scripts';
 
 export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
@@ -166,126 +162,6 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
     // },
     total_assignees: {
       type: 'integer',
-    },
-    owner: {
-      type: 'keyword',
-    },
-    // Where does this come from?
-    // spaceId: {
-    //   type: 'keyword',
-    // },
-  },
-};
-
-export const CAI_ATTACHMENTS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  _meta: {
-    mapping_version: 1,
-    painless_script_id: CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
-  },
-  properties: {
-    '@timestamp': {
-      type: 'date',
-    },
-    case_id: {
-      type: 'keyword',
-    },
-    type: {
-      type: 'keyword',
-    },
-    created_at: {
-      type: 'date',
-    },
-    created_by: {
-      properties: {
-        username: {
-          type: 'keyword',
-        },
-        profile_uid: {
-          type: 'keyword',
-        },
-        full_name: {
-          type: 'keyword',
-        },
-        email: {
-          type: 'keyword',
-        },
-      },
-    },
-    payload: {
-      properties: {
-        alerts: {
-          properties: {
-            id: {
-              type: 'keyword',
-            },
-            index: {
-              type: 'keyword',
-            },
-          },
-        },
-        file: {
-          properties: {
-            id: {
-              type: 'keyword',
-            },
-            extension: {
-              type: 'keyword',
-            },
-            mimeType: {
-              type: 'keyword',
-            },
-            name: {
-              type: 'keyword',
-            },
-          },
-        },
-      },
-    },
-    owner: {
-      type: 'keyword',
-    },
-    // Where does this come from?
-    // spaceId: {
-    //   type: 'keyword',
-    // },
-  },
-};
-
-export const CAI_COMMENTS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  _meta: {
-    mapping_version: 1,
-    painless_script_id: CAI_COMMENTS_INDEX_SCRIPT_ID,
-  },
-  properties: {
-    '@timestamp': {
-      type: 'date',
-    },
-    case_id: {
-      type: 'keyword',
-    },
-    comment: {
-      type: 'keyword',
-    },
-    created_at: {
-      type: 'date',
-    },
-    created_by: {
-      properties: {
-        username: {
-          type: 'keyword',
-        },
-        profile_uid: {
-          type: 'keyword',
-        },
-        full_name: {
-          type: 'keyword',
-        },
-        email: {
-          type: 'keyword',
-        },
-      },
     },
     owner: {
       type: 'keyword',
