@@ -16,7 +16,7 @@ import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
-import { DashboardLayout } from '../../dashboard_api/types';
+import { DashboardLayout, isDashboardSection } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
@@ -43,7 +43,6 @@ export const DashboardGrid = ({
   const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
     dashboardInternalApi.layout$,
-    //// ADD SECTIONS
     dashboardApi.settings.useMargins$,
     dashboardApi.viewMode$
   );
@@ -51,26 +50,41 @@ export const DashboardGrid = ({
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData = {};
+    const newLayout: GridLayoutData = {};
+    Object.keys(layout).forEach((widgetId) => {
+      const widget = layout[widgetId];
+      if (isDashboardSection(widget)) {
+        newLayout[widgetId] = {
+          id: widgetId,
+          type: 'section',
+          row: widget.gridData.y,
+          isCollapsed: widget.collapsed,
+          title: widget.title,
+          panels: {},
+        };
+      } else {
+        const gridData = widget.gridData;
+        if (gridData.sectionId) {
+          //
+        }
 
-    Object.keys(layout).forEach((panelId) => {
-      const gridData = layout[panelId].gridData;
-      singleRow[panelId] = {
-        id: panelId,
-        row: gridData.y,
-        column: gridData.x,
-        width: gridData.w,
-        height: gridData.h,
-        type: 'panel',
-      };
-      // update `data-grid-row` attribute for all panels because it is used for some styling
-      const panelRef = panelRefs.current[panelId];
-      if (typeof panelRef !== 'function' && panelRef?.current) {
-        panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
+        newLayout[widgetId] = {
+          id: widgetId,
+          type: 'panel',
+          row: gridData.y,
+          column: gridData.x,
+          width: gridData.w,
+          height: gridData.h,
+        };
+        // update `data-grid-row` attribute for all panels because it is used for some styling
+        const panelRef = panelRefs.current[widgetId];
+        if (typeof panelRef !== 'function' && panelRef?.current) {
+          panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
+        }
       }
     });
-
-    return singleRow;
+    console.log({ newLayout });
+    return newLayout;
   }, [layout]);
 
   const onLayoutChange = useCallback(
@@ -81,18 +95,27 @@ export const DashboardGrid = ({
       const updatedPanels: DashboardLayout = Object.values(newLayout).reduce(
         (updatedPanelsAcc, widget) => {
           if (widget.type === 'section') {
-            return updatedPanelsAcc; // sections currently aren't supported
+            updatedPanelsAcc[widget.id] = {
+              type: 'section',
+              collapsed: widget.isCollapsed,
+              title: widget.title,
+              gridData: {
+                i: widget.id,
+                y: widget.row,
+              },
+            };
+          } else {
+            updatedPanelsAcc[widget.id] = {
+              ...currentPanels[widget.id],
+              gridData: {
+                i: widget.id,
+                y: widget.row,
+                x: widget.column,
+                w: widget.width,
+                h: widget.height,
+              },
+            };
           }
-          updatedPanelsAcc[widget.id] = {
-            ...currentPanels[widget.id],
-            gridData: {
-              i: widget.id,
-              y: widget.row,
-              x: widget.column,
-              w: widget.width,
-              h: widget.height,
-            },
-          };
           return updatedPanelsAcc;
         },
         {} as DashboardLayout
@@ -106,13 +129,14 @@ export const DashboardGrid = ({
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      const currentPanels = dashboardInternalApi.layout$.getValue().panels;
-      if (!currentPanels[id]) return;
+      const currLayout = dashboardInternalApi.layout$.getValue();
+      if (!currLayout[id] || isDashboardSection(currLayout[id])) return;
 
       if (!panelRefs.current[id]) {
         panelRefs.current[id] = React.createRef();
       }
-      const type = currentPanels[id].type;
+
+      const type = currLayout[id].type;
       return (
         <DashboardGridItem
           ref={panelRefs.current[id]}
@@ -122,7 +146,7 @@ export const DashboardGrid = ({
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainerRef={dashboardContainerRef}
-          data-grid-row={currentPanels[id].gridData.y} // initialize data-grid-row
+          data-grid-row={currLayout[id].gridData.y} // initialize data-grid-row
         />
       );
     },
@@ -135,29 +159,29 @@ export const DashboardGrid = ({
      * element; we want to ignore this first call and scroll to the bottom on the **second**
      * callback - i.e. after the row is actually added to the DOM
      */
-    let first = false;
-    const scrollToBottomOnResize = new ResizeObserver(() => {
-      if (first) {
-        first = false;
-      } else {
-        dashboardInternalApi.scrollToBottom();
-        scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
-      }
-    });
+    // let first = false;
+    // const scrollToBottomOnResize = new ResizeObserver(() => {
+    //   if (first) {
+    //     first = false;
+    //   } else {
+    //     dashboardInternalApi.scrollToBottom();
+    //     scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
+    //   }
+    // });
 
     /**
      * When `scrollToBottom$` emits, wait for the `layoutRef` size to change then scroll
      * to the bottom of the screen
      */
-    const scrollToBottomSubscription = dashboardInternalApi.scrollToBottom$.subscribe(() => {
-      if (!layoutRef.current) return;
-      first = true; // ensure that only the second resize callback actually triggers scrolling
-      scrollToBottomOnResize.observe(layoutRef.current);
-    });
+    // const scrollToBottomSubscription = dashboardInternalApi.scrollToBottom$.subscribe(() => {
+    //   if (!layoutRef.current) return;
+    //   first = true; // ensure that only the second resize callback actually triggers scrolling
+    //   scrollToBottomOnResize.observe(layoutRef.current);
+    // });
 
     return () => {
-      scrollToBottomOnResize.disconnect();
-      scrollToBottomSubscription.unsubscribe();
+      // scrollToBottomOnResize.disconnect();
+      // scrollToBottomSubscription.unsubscribe();
     };
   }, [dashboardInternalApi]);
 

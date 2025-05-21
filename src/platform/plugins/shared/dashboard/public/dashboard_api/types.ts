@@ -13,6 +13,7 @@ import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
@@ -56,7 +57,6 @@ import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { i18n } from '@kbn/i18n';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -66,7 +66,7 @@ export interface DashboardPanel
   extends HasType<Exclude<string, (typeof ReservedLayoutItemTypes)[number]>> {
   gridData: GridData;
 }
-interface DashboardSection extends HasType<'section'> {
+export interface DashboardSection extends HasType<'section'> {
   gridData: Pick<GridData, 'i' | 'y'>; // sections only have a vertical position for grid data
   title: string;
   collapsed: boolean;

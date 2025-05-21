@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep, filter, map as lodashMap, max } from 'lodash';
+import { BehaviorSubject, Observable, combineLatestWith, debounceTime, map, merge } from 'rxjs';
+import { v4 } from 'uuid';
+
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
 import {
@@ -14,6 +18,7 @@ import {
   EmbeddablePackageState,
   PanelNotFoundError,
 } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { PanelPackage } from '@kbn/presentation-containers';
 import {
   SerializedPanelState,
@@ -25,9 +30,7 @@ import {
   getTitle,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
-import { filter, map as lodashMap, max } from 'lodash';
-import { BehaviorSubject, Observable, combineLatestWith, debounceTime, map, merge } from 'rxjs';
-import { v4 } from 'uuid';
+
 import type { DashboardSectionMap, DashboardState } from '../../common';
 import { DashboardPanelMap } from '../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
@@ -48,6 +51,7 @@ import {
   DashboardLayout,
   DashboardLayoutItem,
   DashboardPanel,
+  DashboardSection,
   ReservedLayoutItemTypeError,
   ReservedLayoutItemTypes,
   isDashboardSection,
@@ -64,14 +68,16 @@ export function initializeLayoutManager(
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
-  const { layout: initialLayout, childState: initialChildState } = deserializePanels(
+  console.log({ initialPanels, initialSections });
+  const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     initialSections
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
-  function deserializePanels(panelMap: DashboardPanelMap, sectionMap: DashboardSectionMap) {
+  function deserializeLayout(panelMap: DashboardPanelMap, sectionMap: DashboardSectionMap) {
+    console.log({ panelMap, sectionMap });
     const layout: DashboardLayout = {};
     const childState: DashboardChildState = {};
     Object.keys(sectionMap).forEach((uuid) => {
@@ -115,11 +121,11 @@ export function initializeLayoutManager(
     return { panels, sections, references };
   };
 
-  const resetLayout = (
-    lastSavedPanels: DashboardPanelMap,
-    lastSavedSections: DashboardSectionMap
-  ) => {
-    const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializePanels(
+  const resetLayout = ({
+    panels: lastSavedPanels,
+    sections: lastSavedSections,
+  }: DashboardState) => {
+    const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
       lastSavedPanels,
       lastSavedSections
     );
@@ -211,11 +217,7 @@ export function initializeLayoutManager(
 
     layout$.next({
       ...layout$.value,
-      panels: {
-        ...layout$.value.panels,
-        [uuid]: { gridData, type },
-      },
-      // sections: {},
+      [uuid]: { gridData, type } as DashboardPanel,
     });
     trackPanel.setScrollToPanelId(uuid);
     trackPanel.setHighlightPanelId(uuid);
@@ -374,8 +376,8 @@ export function initializeLayoutManager(
     internalApi: {
       getSerializedStateForPanel: (uuid: string) => currentChildState[uuid],
       layout$,
-      resetPanels: resetLayout,
-      serializePanels: serializeLayout,
+      reset: resetLayout,
+      serializeLayout,
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{ panels?: DashboardPanelMap; sections?: DashboardSectionMap }> => {
@@ -409,10 +411,6 @@ export function initializeLayoutManager(
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
         currentChildState[uuid] = state;
       },
-      isSectionCollapsed: (id?: string) => {
-        if (!id) return false; // this is the first section and it cannot be collapsed
-        // return Boolean(sections$.getValue()?.[id]?.collapsed);
-      },
     },
     api: {
       /** Panels */
@@ -423,28 +421,45 @@ export function initializeLayoutManager(
       replacePanel,
       duplicatePanel,
       getDashboardPanelFromId,
-      getPanelCount: () => Object.keys(layout$.value.panels).length,
+      getPanelCount: () =>
+        Object.keys(layout$.value).filter((uuid) => {
+          return !isDashboardSection(layout$.value[uuid]);
+        }).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
       /** Sectionss */
-      // addNewSection: () => {
-      //   const oldSections = sections$.getValue() ?? {};
-      //   const newId = uuidv4();
-      //   setSections({
-      //     ...oldSections,
-      //     [newId]: {
-      //       id: newId,
-      //       order: Object.keys(oldSections).length + 1,
-      //       title: i18n.translate('dashboard.defaultSectionTitle', {
-      //         defaultMessage: 'New collapsible section',
-      //       }),
-      //       collapsed: false,
-      //     },
-      //   });
+      addNewSection: () => {
+        const oldLayout = layout$.getValue();
+        const newId = v4();
+        const newLayout = {
+          ...cloneDeep(oldLayout),
+          [newId]: {
+            type: 'section',
+            gridData: { i: newId, y: 0 },
+            title: i18n.translate('dashboard.defaultSectionTitle', {
+              defaultMessage: 'New collapsible section',
+            }),
+            collapsed: false,
+          } as DashboardSection,
+        };
+        console.log({ newLayout });
+        layout$.next(newLayout);
 
-      //   // scroll to bottom after row is added
-      //   scrollToBottom$.next();
-      // },
+        // setSections({
+        //   ...oldSections,
+        //   [newId]: {
+        //     id: newId,
+        //     order: Object.keys(oldSections).length + 1,
+        // title: i18n.translate('dashboard.defaultSectionTitle', {
+        //   defaultMessage: 'New collapsible section',
+        // }),
+        //     collapsed: false,
+        //   },
+        // });
+
+        //   // scroll to bottom after row is added
+        //   scrollToBottom$.next();
+      },
       // setSections,
     },
   };

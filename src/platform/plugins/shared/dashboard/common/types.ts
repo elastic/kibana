@@ -94,7 +94,7 @@ export type SharedDashboardState = Partial<
 
     panels: DashboardPanel[];
 
-    sections: DashboardSectionState[];
+    sections: DashboardSectionState[] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;
   }

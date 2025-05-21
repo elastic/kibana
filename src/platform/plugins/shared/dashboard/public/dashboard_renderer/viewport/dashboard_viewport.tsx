@@ -22,6 +22,7 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
+import { isDashboardSection } from '../../dashboard_api/types';
 
 export const DashboardViewport = ({
   dashboardContainerRef,
@@ -55,16 +56,33 @@ export const DashboardViewport = ({
   }, [dashboardApi]);
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
-    console.log(layout);
-    const visiblePanels = Object.values(layout).filter(({ gridData }) => {
-      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    let visiblePanels = 0;
+    let panels = 0;
+    let sections = 0;
+    Object.values(layout).forEach((widget) => {
+      if (isDashboardSection(widget)) {
+        sections++;
+      } else {
+        const { sectionId } = widget.gridData;
+        const section = sectionId && layout[sectionId];
+        if (section && isDashboardSection(section) && !section.collapsed) visiblePanels++;
+        panels++;
+      }
     });
+    console.log({
+      layout,
+      panelCount: panels,
+      visiblePanelCount: visiblePanels,
+      sectionCount: sections,
+    });
+    debugger;
+
     return {
-      panelCount: Object.keys(layout).length,
-      visiblePanelCount: visiblePanels.length,
-      sectionCount: Object.keys(sections ?? {}).length,
+      panelCount: panels,
+      visiblePanelCount: visiblePanels,
+      sectionCount: sections,
     };
-  }, [dashboardInternalApi, layout]);
+  }, [layout]);
 
   const classes = classNames({
     dshDashboardViewport: true,

@@ -14,9 +14,9 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import {
   convertPanelMapToPanelsArray,
-  convertSectionMapToSectionArray,
   generateNewPanelIds,
 } from '../../common/lib/dashboard_panel_converters';
+import { convertSectionMapToSectionArray } from '../../common/lib/dashboard_section_converters';
 import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardAttributes } from '../../server';
 
@@ -60,7 +60,7 @@ export const getSerializedState = ({
       timefilter: { timefilter },
     },
   } = dataService;
-
+  console.log({ dashboardState });
   const {
     tags,
     query,
