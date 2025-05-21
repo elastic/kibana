@@ -67,9 +67,7 @@ describe('streamGraph', () => {
     telemetry: {
       reportEvent: jest.fn(),
     } as unknown as AnalyticsServiceSetup,
-    callbacks: [
-      mockApmTracer,
-    ]
+    callbacks: [mockApmTracer],
   };
 
   beforeEach(() => {
