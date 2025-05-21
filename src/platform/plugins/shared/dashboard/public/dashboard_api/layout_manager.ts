@@ -102,7 +102,6 @@ export function initializeLayoutManager(
     const panels: DashboardPanelMap = {};
     const sections: DashboardSectionMap = {};
     const layout = layout$.value;
-    console.log('SERIALIZE', { layout });
     for (const sectionId of Object.keys(layout.sections)) {
       sections[sectionId] = { ...layout.sections[sectionId], id: sectionId };
     }
@@ -329,14 +328,17 @@ export function initializeLayoutManager(
       placeBesideId: uuidToDuplicate,
     });
     layout$.next({
-      ...otherPanels,
-      [uuidOfDuplicate]: {
-        gridData: {
-          ...newPanelPlacement,
-          i: uuidOfDuplicate,
-          sectionId: layoutItemToDuplicate.gridData.sectionId,
+      ...layout$.value,
+      panels: {
+        ...otherPanels,
+        [uuidOfDuplicate]: {
+          gridData: {
+            ...newPanelPlacement,
+            i: uuidOfDuplicate,
+            sectionId: layoutItemToDuplicate.gridData.sectionId,
+          },
+          type: layoutItemToDuplicate.type,
         },
-        type: layoutItemToDuplicate.type,
       },
     });
 
@@ -422,13 +424,22 @@ export function initializeLayoutManager(
       addNewSection: () => {
         const oldLayout = cloneDeep(layout$.getValue());
         const newId = v4();
+
+        const maxPanelY = Math.max(
+          ...Object.values(oldLayout.panels)
+            .filter(({ gridData }) => !Boolean(gridData.sectionId)) // filter out panels in sections
+            .map(({ gridData }) => gridData.y + gridData.h)
+        ); // calculate the bottom coordinate of the panel
+        const maxSectionY = Math.max(
+          ...Object.values(oldLayout.sections).map(({ gridData }) => gridData.y)
+        );
         const newLayout = {
           ...oldLayout,
           sections: {
             ...oldLayout.sections,
             [newId]: {
               type: 'section',
-              gridData: { i: newId, y: 0 },
+              gridData: { i: newId, y: Math.max(maxPanelY, maxSectionY) + 1 },
               title: i18n.translate('dashboard.defaultSectionTitle', {
                 defaultMessage: 'New collapsible section',
               }),
@@ -437,18 +448,6 @@ export function initializeLayoutManager(
           },
         };
         layout$.next(newLayout);
-
-        // setSections({
-        //   ...oldSections,
-        //   [newId]: {
-        //     id: newId,
-        //     order: Object.keys(oldSections).length + 1,
-        // title: i18n.translate('dashboard.defaultSectionTitle', {
-        //   defaultMessage: 'New collapsible section',
-        // }),
-        //     collapsed: false,
-        //   },
-        // });
 
         //   // scroll to bottom after row is added
         //   scrollToBottom$.next();

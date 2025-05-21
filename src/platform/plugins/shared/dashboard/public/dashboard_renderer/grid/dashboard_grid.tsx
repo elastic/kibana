@@ -108,7 +108,7 @@ export const DashboardGrid = ({
           };
           Object.values(widget.panels).forEach((panel) => {
             updatedLayout.panels[panel.id] = {
-              ...currLayout.panels[widget.id],
+              ...currLayout.panels[panel.id],
               gridData: {
                 i: panel.id,
                 y: panel.row,

@@ -57,7 +57,6 @@ export async function loadDashboardApi({
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };
-  console.log({ test: savedObjectResult?.dashboardInput, sessionStorageInput });
   combinedSessionState.references = sessionStorageInput?.references?.length
     ? sessionStorageInput?.references
     : savedObjectResult?.references;

@@ -57,7 +57,6 @@ export function getDashboardApi({
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
-  console.log({ initialState, savedObjectResult });
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
