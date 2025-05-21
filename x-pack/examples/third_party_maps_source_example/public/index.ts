@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
-
 import { MapsCustomRasterSourcePlugin } from './plugin';
 
 // This exports static code and TypeScript types,
