@@ -216,7 +216,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                 component={FilePickerField}
                 componentProps={{
                   euiFieldProps: {
-                    'data-test-subj': 'openAISSLCRTInput',
+                    'data-test-subj': 'openAISSLCAInput',
                     display: 'default',
                     accept: '.crt,.cert,.cer,.pem',
                   },
