@@ -6,33 +6,33 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { InstalledIntegrationsCallout } from './installed_integrations_callout';
+import { ActiveIntegrationsCallout } from './active_integrations_callout';
 jest.mock('./agent_required_callout');
 jest.mock('./manage_integrations_callout');
 
-describe('InstalledIntegrationsCallout', () => {
+describe('ActiveIntegrationsCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the callout and available packages when integrations are installed', () => {
     const mockMetadata = {
-      installedIntegrationsCount: 3,
+      activeIntegrationsCount: 3,
       isAgentRequired: false,
     };
 
-    const { getByTestId } = render(<InstalledIntegrationsCallout {...mockMetadata} />);
+    const { getByTestId } = render(<ActiveIntegrationsCallout {...mockMetadata} />);
 
     expect(getByTestId('manageIntegrationsCallout')).toBeInTheDocument();
   });
 
   it('renders the warning callout when an agent is still required', () => {
     const mockMetadata = {
-      installedIntegrationsCount: 2,
+      activeIntegrationsCount: 2,
       isAgentRequired: true,
     };
 
-    const { getByTestId } = render(<InstalledIntegrationsCallout {...mockMetadata} />);
+    const { getByTestId } = render(<ActiveIntegrationsCallout {...mockMetadata} />);
 
     expect(getByTestId('agentRequiredCallout')).toBeInTheDocument();
   });
