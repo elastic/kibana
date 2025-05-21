@@ -16,14 +16,14 @@ import { HighlightField } from '../../components/highlight_field.tsx';
 export interface SpanSummaryTitleProps {
   spanName?: string;
   formattedSpanName?: string;
-  id: string;
-  formattedId: string;
+  spanId: string;
+  formattedSpanId: string;
 }
 
 export const SpanSummaryTitle = ({
   spanName,
-  id,
-  formattedId,
+  spanId,
+  formattedSpanId,
   formattedSpanName,
 }: SpanSummaryTitleProps) => {
   return spanName ? (
@@ -42,14 +42,14 @@ export const SpanSummaryTitle = ({
           </EuiTitle>
         </FieldHoverActionPopover>
       </div>
-      <FieldHoverActionPopover title={id} value={id} field={SPAN_ID_FIELD}>
-        <HighlightField value={id} formattedValue={formattedId} />
+      <FieldHoverActionPopover title={spanId} value={spanId} field={SPAN_ID_FIELD}>
+        <HighlightField value={spanId} formattedValue={formattedSpanId} />
       </FieldHoverActionPopover>
     </>
   ) : (
-    <FieldHoverActionPopover title={id} value={id} field={SPAN_ID_FIELD}>
+    <FieldHoverActionPopover title={spanId} value={spanId} field={SPAN_ID_FIELD}>
       <EuiTitle size="xs">
-        <HighlightField value={id} formattedValue={formattedId} as="h2" />
+        <HighlightField value={spanId} formattedValue={formattedSpanId} as="h2" />
       </EuiTitle>
     </FieldHoverActionPopover>
   );

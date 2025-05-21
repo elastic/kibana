@@ -72,8 +72,8 @@ export function SpanOverview({
           <SpanSummaryTitle
             spanName={flattenedDoc[SPAN_NAME_FIELD]}
             formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
-            id={flattenedDoc[SPAN_ID_FIELD]}
-            formattedId={formattedDoc[SPAN_ID_FIELD]}
+            spanId={flattenedDoc[SPAN_ID_FIELD]}
+            formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
           />
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => (

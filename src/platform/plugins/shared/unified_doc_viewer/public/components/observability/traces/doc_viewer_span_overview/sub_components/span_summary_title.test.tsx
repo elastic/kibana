@@ -38,8 +38,8 @@ describe('SpanSummaryTitle', () => {
       <SpanSummaryTitle
         spanName="Test Span"
         formattedSpanName="<mark>Test Span</mark>"
-        id="123"
-        formattedId="<mark>123</mark>"
+        spanId="123"
+        formattedSpanId="<mark>123</mark>"
       />
     );
 
@@ -52,7 +52,7 @@ describe('SpanSummaryTitle', () => {
 
   it('renders only id with formattedId when spanName is not provided', () => {
     const { getByText, container } = render(
-      <SpanSummaryTitle id="123" formattedId="<mark>123</mark>" />
+      <SpanSummaryTitle spanId="123" formattedSpanId="<mark>123</mark>" />
     );
 
     expect(getByText('123')).toBeInTheDocument();
@@ -64,8 +64,8 @@ describe('SpanSummaryTitle', () => {
       <SpanSummaryTitle
         spanName="Test Span"
         formattedSpanName="<mark>Test Span</mark>"
-        id="123"
-        formattedId="<mark>123</mark>"
+        spanId="123"
+        formattedSpanId="<mark>123</mark>"
       />
     );
 
