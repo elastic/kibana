@@ -154,7 +154,7 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    logger.error(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
+    logger.warn(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
 
     return {
       enabled,
