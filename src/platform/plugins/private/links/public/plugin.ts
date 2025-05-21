@@ -64,10 +64,13 @@ export class LinksPlugin
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
           const initialState = await deserializeLinksSavedObject(savedObject);
-          container.addNewPanel<LinksRuntimeState>({
-            panelType: CONTENT_ID,
-            initialState,
-          });
+          container.addNewPanel<LinksRuntimeState>(
+            {
+              panelType: CONTENT_ID,
+              initialState,
+            },
+            true
+          );
         },
         savedObjectType: CONTENT_ID,
         savedObjectName: APP_NAME,
