@@ -36,10 +36,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let ruleId: string;
     let dependencyRuleId: string;
     let editorRoleAuthc: RoleCredentials;
+    let adminRoleAuthc: RoleCredentials;
+    let currentRoleAuthc: RoleCredentials;
     let internalHeaders: InternalRequestHeader;
+    let sloId: string;
 
     before(async () => {
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      currentRoleAuthc = isServerless ? editorRoleAuthc : adminRoleAuthc;
       internalHeaders = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
@@ -67,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         docCountTarget: 360,
       });
       await dataViewApi.create({
-        roleAuthc: editorRoleAuthc,
+        roleAuthc: currentRoleAuthc,
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
@@ -77,11 +82,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await supertestWithoutAuth
         .delete(`/api/alerting/rule/${ruleId}`)
-        .set(editorRoleAuthc.apiKeyHeader)
+        .set(currentRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
       await supertestWithoutAuth
         .delete(`/api/actions/connector/${actionId}`)
-        .set(editorRoleAuthc.apiKeyHeader)
+        .set(currentRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
       if (ruleId) {
         await esClient.deleteByQuery({
@@ -106,29 +111,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       }
       await dataViewApi.delete({
-        roleAuthc: editorRoleAuthc,
+        roleAuthc: currentRoleAuthc,
         id: DATA_VIEW_ID,
       });
       await supertestWithoutAuth
-        .delete('/api/observability/slos/my-custom-id')
-        .set(editorRoleAuthc.apiKeyHeader)
+        .delete(`/api/observability/slos/${sloId}`)
+        .set(currentRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(editorRoleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(currentRoleAuthc);
     });
 
     describe('Rule creation', function () {
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
         await sloApi.create(
           {
-            id: 'my-custom-id',
+            id: sloId,
             name: 'my custom name',
             description: 'my custom description',
             indicator: {
@@ -150,11 +156,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          editorRoleAuthc
+          currentRoleAuthc
         );
 
         const dependencyRule = await alertingApi.createRule({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'SLO Burn Rate rule - Dependency',
@@ -163,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             interval: '1m',
           },
           params: {
-            sloId: 'my-custom-id',
+            sloId,
             windows: [
               {
                 id: '1',
@@ -228,7 +234,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         dependencyRuleId = dependencyRule.id;
         const createdRule = await alertingApi.createRule({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'SLO Burn Rate rule',
@@ -237,7 +243,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             interval: '1m',
           },
           params: {
-            sloId: 'my-custom-id',
+            sloId,
             dependencies: [
               {
                 ruleId: dependencyRule.id,
@@ -311,7 +317,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -331,7 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
+        const match = await alertingApi.findInRules(currentRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(expectedConsumer);
       });
@@ -340,10 +346,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Burn rate rule - slo consumer', function () {
       this.tags(['skipMKI']);
       const consumer = 'slo';
-      const sloId = uuidv4();
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -372,11 +378,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          editorRoleAuthc
+          currentRoleAuthc
         );
 
         const createdRule = await alertingApi.createRule({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
             sloId,
             consumer,
@@ -387,14 +393,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
+        const match = await alertingApi.findInRules(currentRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(consumer);
       });
 
       it('should be active and visible from editor role', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -439,10 +445,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Burn rate rule - consumer alerts', function () {
       this.tags(['skipMKI']);
       const consumer = 'alerts';
-      const sloId = uuidv4();
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -471,11 +477,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          editorRoleAuthc
+          currentRoleAuthc
         );
 
         const createdRule = await alertingApi.createRule({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
             sloId,
             consumer,
@@ -486,14 +492,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
+        const match = await alertingApi.findInRules(currentRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(consumer);
       });
 
       it('should be active and visible from editor role', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -538,11 +544,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Burn rate rule - consumer observability', function () {
       this.tags(['skipMKI']);
       const consumer = 'observability';
-      const sloId = uuidv4();
 
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
@@ -571,11 +577,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          editorRoleAuthc
+          currentRoleAuthc
         );
 
         const createdRule = await alertingApi.createRule({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
             sloId,
             consumer,
@@ -586,14 +592,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
+        const match = await alertingApi.findInRules(currentRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(consumer);
       });
 
       it('should be active and visible from editor role', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -638,10 +644,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Burn rate rule - can create - slo only role', function () {
       this.tags(['skipMKI']);
       const consumer = 'slo';
-      const sloId = uuidv4();
       let sloOnlyRole: RoleCredentials;
 
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         await samlAuth.setCustomRole(ROLES.slo_only);
         sloOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
@@ -669,11 +675,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          editorRoleAuthc
+          currentRoleAuthc
         );
 
         const createdRule = await alertingApi.createRule({
-          roleAuthc: editorRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
             sloId,
             consumer,
@@ -684,7 +690,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(editorRoleAuthc, ruleId);
+        const match = await alertingApi.findInRules(currentRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(consumer);
       });
@@ -705,10 +711,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Burn rate rule - can NOT create - synthetics only role', function () {
       this.tags(['skipMKI']);
       const consumer = 'slo';
-      const sloId = uuidv4();
       let syntheticsOnlyRole: RoleCredentials;
 
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         await samlAuth.setCustomRole(ROLES.synthetics_only);
         syntheticsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
@@ -737,7 +743,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          editorRoleAuthc
+          currentRoleAuthc
         );
 
         // verify that synthetics only role cannot create the rule
