@@ -15,11 +15,12 @@ import { Platform } from './platform';
 export class Build {
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
-  private logBuffer: string[];
 
-  constructor(private config: Config, private bufferLogs = false) {
-    this.logBuffer = [];
-  }
+  constructor(
+    private config: Config,
+    private bufferLogs = false,
+    private logBuffer: string[] = []
+  ) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);

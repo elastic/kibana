@@ -80,7 +80,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   }
 
   const builds: Build[] = [];
-  builds.push(new Build(config, bufferLogs));
+  builds.push(new Build(config, bufferLogs, []));
 
   /**
    * Run a task by calling its `run()` method with three arguments:
