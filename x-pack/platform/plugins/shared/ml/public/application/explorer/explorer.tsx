@@ -41,6 +41,8 @@ import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import { ML_ANOMALY_EXPLORER_PANELS } from '@kbn/ml-common-types/storage';
 import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { FilterAction } from '@kbn/ml-common-constants/explorer';
+import { FILTER_ACTION } from '@kbn/ml-common-constants/explorer';
 
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
@@ -72,8 +74,6 @@ import {
   getDataViewsAndIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
-import type { FilterAction } from './explorer_constants';
-import { FILTER_ACTION } from './explorer_constants';
 // Anomalies Table
 // @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
