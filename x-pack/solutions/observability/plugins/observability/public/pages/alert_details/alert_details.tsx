@@ -101,7 +101,7 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-    dashboard: dashboardService,
+    contentManagement,
   } = useKibana().services;
   const { onPageReady } = usePerformanceContext();
 
@@ -200,14 +200,14 @@ export function AlertDetails() {
   useEffect(() => {
     const fetchValidDashboards = async () => {
       const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
-      const findDashboardsService = dashboardServiceProvider(dashboardService);
+      const findDashboardsService = dashboardServiceProvider(contentManagement);
       const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
 
       setValidDashboards(existingDashboards.length ? existingDashboards : []);
     };
 
     fetchValidDashboards();
-  }, [rule, dashboardService, linkedDashboards]);
+  }, [rule, contentManagement, linkedDashboards]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;

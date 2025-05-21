@@ -22,9 +22,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   MinimumScheduleInterval,
   Rule,
@@ -72,7 +72,7 @@ export interface RuleFormPlugins {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
-  dashboard?: DashboardStart;
+  contentManagement?: ContentManagementPublicStart;
 }
 
 export interface RuleFormState<
@@ -111,4 +111,4 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'dashboard'>;
+export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'contentManagement'>;

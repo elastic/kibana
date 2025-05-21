@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { RuleDashboards } from './rule_dashboards';
 
 const mockOnChange = jest.fn();
@@ -25,16 +26,19 @@ jest.mock('../common/services/dashboard_service', () => ({
     fetchDashboard: jest.fn().mockImplementation(async (id: string) => {
       return {
         attributes: { title: `Dashboard ${id}` },
+        status: 'success',
       };
     }),
     fetchDashboards: jest.fn().mockResolvedValue([
       {
         id: '1',
         attributes: { title: 'Dashboard 1' },
+        status: 'success',
       },
       {
         id: '2',
         attributes: { title: 'Dashboard 2' },
+        status: 'success',
       },
     ]),
   }),
@@ -46,12 +50,7 @@ const { dashboardServiceProvider: mockDashboardServiceProvider } = jest.requireM
 );
 
 describe('RuleDashboards', () => {
-  const plugins = {
-    dashboard: {
-      findDashboardsService: jest.fn(),
-      registerDashboardPanelPlacementSetting: jest.fn(),
-    },
-  };
+  const contentManagement = contentManagementMock.createStartContract();
   beforeEach(() => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     useRuleFormState.mockReturnValue({
@@ -70,7 +69,7 @@ describe('RuleDashboards', () => {
   it('renders linked dashboards combo box', async () => {
     render(
       <IntlProvider locale="en">
-        <RuleDashboards plugins={plugins} />
+        <RuleDashboards contentManagement={contentManagement} />
       </IntlProvider>
     );
 
@@ -97,7 +96,7 @@ describe('RuleDashboards', () => {
 
     render(
       <IntlProvider locale="en">
-        <RuleDashboards plugins={plugins} />
+        <RuleDashboards contentManagement={contentManagement} />
       </IntlProvider>
     );
 
@@ -124,7 +123,7 @@ describe('RuleDashboards', () => {
 
     render(
       <IntlProvider locale="en">
-        <RuleDashboards plugins={plugins} />
+        <RuleDashboards contentManagement={contentManagement} />
       </IntlProvider>
     );
 

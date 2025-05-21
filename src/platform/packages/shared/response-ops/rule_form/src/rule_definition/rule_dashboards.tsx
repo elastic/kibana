@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiComboBox,
   EuiSplitPanel,
@@ -16,13 +16,13 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
-import { type RuleDashboardsPlugins } from '../types';
 
-export interface RuleDashboardsPluginsProps {
-  plugins: RuleDashboardsPlugins;
+export interface Props {
+  contentManagement: ContentManagementPublicStart;
 }
 
 interface DashboardOption {
@@ -30,8 +30,7 @@ interface DashboardOption {
   label: string;
 }
 
-export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
-  const { dashboard: dashboardService } = plugins;
+export const RuleDashboards = ({ contentManagement }: Props) => {
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
   const dashboardsFormData = useMemo(
@@ -45,51 +44,55 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
     Array<EuiComboBoxOptionOption<string>> | undefined
   >();
 
-  useEffect(() => {
-    if (!dashboardsFormData?.length || !dashboardService) {
+  const fetchDashboardTitles = useCallback(async () => {
+    if (!dashboardsFormData?.length || !contentManagement) {
       return;
     }
 
-    const fetchDashboardTitles = async () => {
-      try {
-        const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
-          try {
-            const fetchedDashboard = await dashboardServiceProvider(
-              dashboardService
-            ).fetchDashboard(dashboard.id);
+    try {
+      const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
+        try {
+          const fetchedDashboard = await dashboardServiceProvider(contentManagement).fetchDashboard(
+            dashboard.id
+          );
 
-            // Only return the dashboard if it exists and has a title
-            if (fetchedDashboard?.attributes?.title) {
-              return {
-                label: fetchedDashboard.attributes.title,
-                value: dashboard.id,
-              };
-            }
-            // Return null if dashboard doesn't have required data
-            return null;
-          } catch (dashboardError) {
-            /**
-             * Swallow the error that is thrown, since this just means the selected dashboard was deleted
-             * Return null when dashboard fetch fails
-             */
-            return null;
+          // Only return the dashboard if it exists, fetch was successful, and has a title
+          if (
+            fetchedDashboard &&
+            fetchedDashboard.status === 'success' &&
+            fetchedDashboard.attributes?.title
+          ) {
+            return {
+              label: fetchedDashboard.attributes.title,
+              value: dashboard.id,
+            };
           }
-        });
+          // Return null if dashboard doesn't have required data
+          return null;
+        } catch (dashboardError) {
+          /**
+           * Swallow the error that is thrown, since this just means the selected dashboard was deleted
+           * Return null when dashboard fetch fails
+           */
+          return null;
+        }
+      });
 
-        const results = await Promise.all(dashboardPromises);
+      const results = await Promise.all(dashboardPromises);
 
-        // Filter out null results and cast to the expected type
-        const validDashboards = results.filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
+      // Filter out null results and cast to the expected type
+      const validDashboards = results.filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
 
-        setSelectedDashboards(validDashboards);
-      } catch (error) {
-        // Set empty array or handle the error appropriately
-        setSelectedDashboards([]);
-      }
-    };
+      setSelectedDashboards(validDashboards);
+    } catch (error) {
+      // Set empty array or handle the error appropriately
+      setSelectedDashboards([]);
+    }
+  }, [dashboardsFormData, contentManagement]);
 
+  useMemo(() => {
     fetchDashboardTitles();
-  }, [dashboardsFormData, dashboardService]);
+  }, [fetchDashboardTitles]);
 
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const artifacts = {
@@ -115,16 +118,18 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   });
 
   const loadDashboards = useCallback(async () => {
-    if (dashboardService) {
-      const dashboards = await dashboardServiceProvider(dashboardService).fetchDashboards();
+    if (contentManagement) {
+      const dashboards = await dashboardServiceProvider(contentManagement)
+        .fetchDashboards()
+        .catch(() => {});
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
       );
       setDashboardList(dashboardOptions);
     }
-  }, [dashboardService]);
+  }, [contentManagement]);
 
-  useEffect(() => {
+  useMemo(() => {
     loadDashboards();
   }, [loadDashboards]);
 

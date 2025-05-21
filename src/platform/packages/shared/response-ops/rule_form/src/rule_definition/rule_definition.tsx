@@ -73,9 +73,7 @@ export const RuleDefinition = () => {
     canShowConsumerSelection = false,
     flappingSettings,
   } = useRuleFormState();
-
-  const { dashboard } = plugins;
-  const ruleDashboardsPlugins = { dashboard };
+  const { contentManagement } = plugins;
 
   const { colorMode, euiTheme } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
@@ -293,7 +291,7 @@ export const RuleDefinition = () => {
           </Suspense>
         )}
       </EuiSplitPanel.Inner>
-      <RuleDashboards plugins={ruleDashboardsPlugins} />
+      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
       <EuiSplitPanel.Inner>
         <EuiDescribedFormGroup
           fullWidth
