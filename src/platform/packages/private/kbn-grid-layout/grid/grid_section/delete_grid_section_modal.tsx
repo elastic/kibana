@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import {
@@ -20,13 +21,14 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow, movePanelsToRow } from '../utils/row_management';
+import { deleteSection, isCollapsibleSection, resolveSections } from '../utils/section_management';
+import { MainSection } from './types';
 
-export const DeleteGridRowModal = ({
-  rowId,
+export const DeleteGridSectionModal = ({
+  sectionId,
   setDeleteModalVisible,
 }: {
-  rowId: string;
+  sectionId: string;
   setDeleteModalVisible: (visible: boolean) => void;
 }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -39,13 +41,13 @@ export const DeleteGridRowModal = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.title', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.title', {
             defaultMessage: 'Delete section',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {i18n.translate('kbnGridLayout.deleteGridRowModal.body', {
+        {i18n.translate('kbnGridLayout.deleteGridSectionModal.body', {
           defaultMessage:
             'Choose to remove the section, including its contents, or only the section.',
         })}
@@ -56,7 +58,7 @@ export const DeleteGridRowModal = ({
             setDeleteModalVisible(false);
           }}
         >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.cancelButton', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.cancelButton', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
@@ -64,33 +66,45 @@ export const DeleteGridRowModal = ({
           onClick={() => {
             setDeleteModalVisible(false);
             const layout = gridLayoutStateManager.gridLayout$.getValue();
-            const firstRowId = Object.values(layout).find(({ order }) => order === 0)?.id;
-            if (!firstRowId) return;
-            let newLayout = movePanelsToRow(layout, rowId, firstRowId);
-            newLayout = deleteRow(newLayout, rowId);
-            gridLayoutStateManager.gridLayout$.next(newLayout);
+            const section = layout[sectionId];
+            if (!isCollapsibleSection(section)) return; // main sections are not user deletable
+
+            // convert collapsible section to main section so that panels remain in place
+            const newLayout = cloneDeep(layout);
+            const { title, isCollapsed, ...baseSectionProps } = section;
+            const sectionAsMain: MainSection = {
+              ...baseSectionProps,
+              isMainSection: true,
+            };
+            newLayout[sectionId] = sectionAsMain;
+
+            gridLayoutStateManager.gridLayout$.next(resolveSections(newLayout));
           }}
           color="danger"
         >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteSection', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.confirmDeleteSection', {
             defaultMessage: 'Delete section only',
           })}
         </EuiButton>
         <EuiButton
           onClick={() => {
             setDeleteModalVisible(false);
-            const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowId);
+            const newLayout = deleteSection(
+              gridLayoutStateManager.gridLayout$.getValue(),
+              sectionId
+            );
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
           fill
           color="danger"
         >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteAllPanels', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.confirmDeleteAllPanels', {
             defaultMessage:
               'Delete section and {panelCount} {panelCount, plural, one {panel} other {panels}}',
             values: {
-              panelCount: Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels)
-                .length,
+              panelCount: Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[sectionId].panels
+              ).length,
             },
           })}
         </EuiButton>
