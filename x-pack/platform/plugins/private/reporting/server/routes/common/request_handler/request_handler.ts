@@ -55,6 +55,7 @@ interface ConstructorOpts<
 export interface RequestParams {
   exportTypeId: string;
   jobParams: BaseParams;
+  id?: string;
   schedule?: RruleSchedule;
   notification?: RawNotification;
 }

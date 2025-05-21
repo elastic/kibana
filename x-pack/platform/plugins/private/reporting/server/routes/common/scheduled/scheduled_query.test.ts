@@ -6,6 +6,7 @@
  */
 
 import {
+  AuditLogger,
   ElasticsearchClient,
   KibanaRequest,
   KibanaResponseFactory,
@@ -169,6 +170,7 @@ const mockLogger = loggingSystemMock.createLogger();
 describe('scheduledQueryFactory', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let core: ReportingCore;
+  let auditLogger: AuditLogger;
   let soClient: SavedObjectsClientContract;
   let taskManager: TaskManagerStartContract;
   let scheduledQuery: ReturnType<typeof scheduledQueryFactory>;
@@ -177,6 +179,9 @@ describe('scheduledQueryFactory', () => {
   beforeEach(async () => {
     const schema = createMockConfigSchema();
     core = await createMockReportingCore(schema);
+
+    auditLogger = await core.getAuditLogger(fakeRawRequest);
+    auditLogger.log = jest.fn();
 
     soClient = await core.getSoClient();
     soClient.find = jest.fn().mockImplementation(async () => {
@@ -245,6 +250,33 @@ describe('scheduledQueryFactory', () => {
         },
         size: 10,
         sort: [{ created_at: { order: 'desc' } }],
+      });
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_list',
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+        },
+        message: 'User has accessed scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
+
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'scheduled_report_list',
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+        },
+        message: 'User has accessed scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4]',
       });
 
       expect(result).toEqual({
@@ -427,6 +459,43 @@ describe('scheduledQueryFactory', () => {
         '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
       ]);
 
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is disabling scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=[Logs] Web Traffic]',
+      });
+
       expect(result).toEqual({
         scheduled_report_ids: [
           'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
@@ -477,6 +546,25 @@ describe('scheduledQueryFactory', () => {
       expect(taskManager.bulkDisable).toHaveBeenCalledWith([
         'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
       ]);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is disabling scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
 
       expect(result).toEqual({
         scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
@@ -547,6 +635,25 @@ describe('scheduledQueryFactory', () => {
         '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
       ]);
 
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=[Logs] Web Traffic]',
+      });
+
       expect(result).toEqual({
         scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         errors: [
@@ -595,6 +702,7 @@ describe('scheduledQueryFactory', () => {
         { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
       ]);
       expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
       expect(taskManager.bulkDisable).not.toHaveBeenCalled();
       expect(result).toEqual({
         scheduled_report_ids: [],
@@ -666,6 +774,25 @@ describe('scheduledQueryFactory', () => {
         'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
       ]);
 
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=[Logs] Web Traffic]',
+      });
+
       expect(result).toEqual({
         scheduled_report_ids: [
           'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
@@ -725,6 +852,28 @@ describe('scheduledQueryFactory', () => {
       expect(taskManager.bulkDisable).toHaveBeenCalledWith([
         '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
       ]);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(3);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
+        error: {
+          code: 'Error',
+          message: 'Error updating saved object',
+        },
+        event: {
+          action: 'scheduled_report_disable',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'Failed attempt to disable scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
 
       expect(result).toEqual({
         scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],

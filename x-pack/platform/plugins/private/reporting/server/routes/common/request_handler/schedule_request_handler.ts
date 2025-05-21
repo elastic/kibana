@@ -10,6 +10,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
 import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import {
@@ -23,6 +24,7 @@ import {
   transformRawScheduledReportToReport,
   transformRawScheduledReportToTaskParams,
 } from './lib';
+import { ScheduledReportAuditAction, scheduledReportAuditEvent } from '../audit_events';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
@@ -108,11 +110,21 @@ export class ScheduleRequestHandler extends RequestHandler<
   }
 
   public async enqueueJob(params: RequestParams) {
-    const { exportTypeId, jobParams, schedule, notification } = params;
+    const { id, exportTypeId, jobParams, schedule, notification } = params;
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getSoClient(req);
+    const auditLogger = await reporting.getAuditLogger(req);
     const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
+
+    const reportId = id || SavedObjectsUtils.generateId();
+    auditLogger.log(
+      scheduledReportAuditEvent({
+        action: ScheduledReportAuditAction.SCHEDULE,
+        savedObject: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id: reportId, name },
+        outcome: 'unknown',
+      })
+    );
 
     const payload = {
       ...job,
@@ -146,7 +158,8 @@ export class ScheduleRequestHandler extends RequestHandler<
     // Create a scheduled report saved object
     const report = await soClient.create<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-      attributes
+      attributes,
+      { id: reportId }
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
@@ -164,7 +177,7 @@ export class ScheduleRequestHandler extends RequestHandler<
 
   public async handleRequest(params: RequestParams) {
     const { exportTypeId, jobParams } = params;
-    const { reporting, res } = this.opts;
+    const { reporting, req, res } = this.opts;
 
     const checkErrorResponse = await this.checkLicenseAndTimezone(
       exportTypeId,
@@ -187,9 +200,12 @@ export class ScheduleRequestHandler extends RequestHandler<
       });
     }
 
+    const auditLogger = await reporting.getAuditLogger(req);
+
     let report: ScheduledReportApiJSON | undefined;
+    const id = SavedObjectsUtils.generateId();
     try {
-      report = await this.enqueueJob(params);
+      report = await this.enqueueJob({ ...params, id });
       return res.ok<ScheduledReportingJobResponse>({
         headers: { 'content-type': 'application/json' },
         body: {
@@ -197,6 +213,13 @@ export class ScheduleRequestHandler extends RequestHandler<
         },
       });
     } catch (err) {
+      auditLogger.log(
+        scheduledReportAuditEvent({
+          action: ScheduledReportAuditAction.SCHEDULE,
+          savedObject: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id },
+          error: err,
+        })
+      );
       return this.handleError(err, undefined, report?.jobtype);
     }
   }
