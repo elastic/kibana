@@ -21,6 +21,7 @@ export interface OpenFileUploadLiteContext {
   indexSettings?: IndicesIndexSettings;
   autoAddInference?: string;
   autoCreateDataView?: boolean;
+  existingIndex?: string;
   initialIndexName?: string;
   flyoutContent?: FlyoutContent;
 }
