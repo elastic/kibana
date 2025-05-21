@@ -349,7 +349,7 @@ export const getNewTermsRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   new_terms_fields: ['host.name'],
-  window_history_start: '1900-01-01T00:00:00.000Z',
+  history_window_start: '1900-01-01T00:00:00.000Z',
   interval: '100m',
   from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
