@@ -109,33 +109,44 @@ export class UpdateSLO {
     const updatedSummaryTransformId = getSLOSummaryTransformId(updatedSlo.id, updatedSlo.revision);
 
     try {
-      await this.createPipeline(getSLIPipelineTemplate(updatedSlo, this.spaceId));
+      const sloPipelinePromise = this.createPipeline(
+        getSLIPipelineTemplate(updatedSlo, this.spaceId)
+      );
       rollbackOperations.push(() =>
         this.deletePipeline(getSLOPipelineId(updatedSlo.id, updatedSlo.revision))
       );
 
-      await this.transformManager.install(updatedSlo);
+      const rollupTransformPromise = this.transformManager.install(updatedSlo);
       rollbackOperations.push(() => this.transformManager.uninstall(updatedRollupTransformId));
 
-      await this.transformManager.start(updatedRollupTransformId);
-      rollbackOperations.push(() => this.transformManager.stop(updatedRollupTransformId));
-
-      await this.createPipeline(
+      const summaryPipelinePromise = this.createPipeline(
         getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
       );
       rollbackOperations.push(() =>
         this.deletePipeline(getSLOSummaryPipelineId(updatedSlo.id, updatedSlo.revision))
       );
 
-      await this.summaryTransformManager.install(updatedSlo);
+      const summaryTransformPromise = this.summaryTransformManager.install(updatedSlo);
       rollbackOperations.push(() =>
         this.summaryTransformManager.uninstall(updatedSummaryTransformId)
       );
 
-      await this.summaryTransformManager.start(updatedSummaryTransformId);
-      rollbackOperations.push(() => this.summaryTransformManager.stop(updatedSummaryTransformId));
+      const tempDocPromise = this.createTempSummaryDocument(updatedSlo);
+      rollbackOperations.push(() => this.deleteTempSummaryDocument(updatedSlo));
 
-      await this.createTempSummaryDocument(updatedSlo);
+      await Promise.all([
+        sloPipelinePromise,
+        rollupTransformPromise,
+        summaryPipelinePromise,
+        summaryTransformPromise,
+        tempDocPromise,
+      ]);
+
+      // transforms can only be started after the pipelines are created
+      await Promise.all([
+        this.transformManager.start(updatedRollupTransformId),
+        this.summaryTransformManager.start(updatedSummaryTransformId),
+      ]);
     } catch (err) {
       this.logger.debug(
         `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back. ${err}`
@@ -250,6 +261,18 @@ export class UpdateSLO {
           index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
+          refresh: true,
+        }),
+      { logger: this.logger }
+    );
+  }
+
+  private async deleteTempSummaryDocument(slo: SLODefinition) {
+    return retryTransientEsErrors(
+      () =>
+        this.scopedClusterClient.asCurrentUser.delete({
+          index: SUMMARY_TEMP_INDEX_NAME,
+          id: `slo-${slo.id}`,
           refresh: true,
         }),
       { logger: this.logger }
