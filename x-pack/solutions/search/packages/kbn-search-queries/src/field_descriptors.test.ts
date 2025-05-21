@@ -132,5 +132,87 @@ describe('field_descriptors', () => {
         },
       });
     });
+    it('should parse nested fields', () => {
+      expect(
+        buildFieldDescriptorForIndex(indexName, {
+          mappings: {
+            properties: {
+              field1: {
+                type: 'text',
+                fields: {
+                  semanticField: {
+                    type: 'semantic_text',
+                    inference_id: 'elser-endpoint',
+                    // @ts-ignore - type is wrong currently
+                    model_settings: {
+                      service: 'elasticsearch',
+                      task_type: 'sparse_embedding',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })
+      ).toEqual({
+        test: {
+          ...emptyFieldsDescriptor,
+          source_fields: ['field1', 'field1.semanticField'],
+          bm25_query_fields: ['field1'],
+          semantic_fields: [
+            {
+              field: 'field1.semanticField',
+              inferenceId: 'elser-endpoint',
+              embeddingType: 'sparse_vector',
+              indices: [indexName],
+            },
+          ],
+        },
+      });
+    });
+    it('should parse nested properties', () => {
+      expect(
+        buildFieldDescriptorForIndex(indexName, {
+          mappings: {
+            properties: {
+              field1: { type: 'text' },
+              field2: {
+                type: 'object',
+                properties: {
+                  field3: {
+                    type: 'text',
+                    fields: {
+                      semanticField: {
+                        type: 'semantic_text',
+                        inference_id: 'elser-endpoint',
+                        // @ts-ignore - type is wrong currently
+                        model_settings: {
+                          service: 'elasticsearch',
+                          task_type: 'sparse_embedding',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })
+      ).toEqual({
+        test: {
+          ...emptyFieldsDescriptor,
+          bm25_query_fields: ['field1', 'field2.field3'],
+          source_fields: ['field1', 'field2.field3', 'field2.field3.semanticField'],
+          semantic_fields: [
+            {
+              field: 'field2.field3.semanticField',
+              inferenceId: 'elser-endpoint',
+              embeddingType: 'sparse_vector',
+              indices: [indexName],
+            },
+          ],
+        },
+      });
+    });
   });
 });

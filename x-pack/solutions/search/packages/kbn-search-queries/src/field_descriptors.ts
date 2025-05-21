@@ -31,7 +31,26 @@ export function buildFieldDescriptorForIndex(
     return result;
   }
   for (const [fieldName, fieldDescriptor] of Object.entries(indexMappings.mappings.properties)) {
-    if (!parseField(fieldName, fieldDescriptor, indexFields, indexName)) {
+    const fieldParsed = parseField(fieldName, fieldDescriptor, indexFields, indexName);
+    let nestedPropertiesParsed = false;
+    let nestedFieldsParsed = false;
+    if (hasMappingsProperties(fieldDescriptor)) {
+      nestedPropertiesParsed = parseNestedFields(
+        fieldName,
+        fieldDescriptor.properties,
+        indexFields,
+        indexName
+      );
+    }
+    if (hasMappingsFields(fieldDescriptor)) {
+      nestedFieldsParsed = parseNestedFields(
+        fieldName,
+        fieldDescriptor.fields,
+        indexFields,
+        indexName
+      );
+    }
+    if (!fieldParsed && !nestedPropertiesParsed && !nestedFieldsParsed) {
       indexFields.skipped_fields++;
     }
   }
@@ -81,6 +100,34 @@ function parseField(
   return false;
 }
 
+function parseNestedFields(
+  parentFieldName: string,
+  fields: Record<string, MappingProperty>,
+  indexFields: IndexQueryFields,
+  indexName: string
+) {
+  const parsedFields = [];
+  for (const [fieldName, fieldDescriptor] of Object.entries(fields)) {
+    const fullFieldName = `${parentFieldName}.${fieldName}`;
+    if (parseField(fullFieldName, fieldDescriptor, indexFields, indexName)) {
+      parsedFields.push(fullFieldName);
+    }
+    if (
+      hasMappingsProperties(fieldDescriptor) &&
+      parseNestedFields(fullFieldName, fieldDescriptor.properties, indexFields, indexName)
+    ) {
+      parsedFields.push(fullFieldName);
+    }
+    if (
+      hasMappingsFields(fieldDescriptor) &&
+      parseNestedFields(fullFieldName, fieldDescriptor.fields, indexFields, indexName)
+    ) {
+      parsedFields.push(fullFieldName);
+    }
+  }
+  return parsedFields.length > 0;
+}
+
 function embeddingTypeFromTaskType(taskType: string): 'dense_vector' | 'sparse_vector' {
   switch (taskType) {
     case 'sparse_embedding':
@@ -90,4 +137,15 @@ function embeddingTypeFromTaskType(taskType: string): 'dense_vector' | 'sparse_v
     default:
       return 'dense_vector';
   }
+}
+
+function hasMappingsProperties(
+  fieldDescriptor: MappingProperty
+): fieldDescriptor is MappingProperty & { properties: Record<string, MappingProperty> } {
+  return 'properties' in fieldDescriptor;
+}
+function hasMappingsFields(
+  fieldDescriptor: MappingProperty
+): fieldDescriptor is MappingProperty & { fields: Record<string, MappingProperty> } {
+  return 'fields' in fieldDescriptor;
 }
