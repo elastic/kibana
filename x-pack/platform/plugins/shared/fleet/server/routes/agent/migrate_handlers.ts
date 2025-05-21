@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetRequestHandler, MigrateSingleAgentRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
-import { AgentRequestInvalidError } from '../../errors';
+import { FleetUnauthorizedError } from '../../errors';
 
 export const migrateSingleAgentHandler: FleetRequestHandler<
   TypeOf<typeof MigrateSingleAgentRequestSchema.params>,
@@ -31,7 +31,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
 
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
   if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
-    throw new AgentRequestInvalidError(`Agent is protected and cannot be migrated`);
+    throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
   }
   const body = await AgentService.migrateSingleAgent(esClient, request.params.agentId, {
     ...options,

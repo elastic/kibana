@@ -189,7 +189,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return a 400 if the agent is tamper protected', async () => {
+      it('should return a 403 if the agent is tamper protected', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/agent2/migrate`)
           .set('kbn-xsrf', 'xx')
@@ -197,10 +197,10 @@ export default function (providerContext: FtrProviderContext) {
             enrollment_token: '1234',
             uri: 'https://example.com',
           })
-          .expect(400);
+          .expect(403);
       });
 
-      it('should return a 400 if the agent is a fleet-agent', async () => {
+      it('should return a 403 if the agent is a fleet-agent', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/agent3/migrate`)
           .set('kbn-xsrf', 'xx')
@@ -208,7 +208,7 @@ export default function (providerContext: FtrProviderContext) {
             enrollment_token: '1234',
             uri: 'https://example.com',
           })
-          .expect(400);
+          .expect(403);
       });
 
       it('should return a 404 when agent does not exist', async () => {
