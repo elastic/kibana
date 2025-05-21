@@ -29,6 +29,9 @@ const toolDetails = {
   id: 'security-labs-knowledge-base-tool',
   name: 'SecurityLabsKnowledgeBaseTool',
 };
+
+const SECURITY_LABS_BASE_URL = 'https://www.elastic.co/security-labs/';
+
 export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
@@ -67,7 +70,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
             reference = contentReferencesStore.add((p) =>
               hrefReference(
                 p.id,
-                `https://www.elastic.co/security-labs/${slug}`,
+                `${SECURITY_LABS_BASE_URL}${slug}`,
                 `Security Labs: ${title}`
               )
             );

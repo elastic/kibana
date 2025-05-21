@@ -25,11 +25,9 @@ export const HrefReference: React.FC<Props> = ({ contentReferenceNode }) => {
       <EuiLink
         href={contentReferenceNode.contentReference.href}
         target="_blank"
-        css={[
-          css`
+        css={css`
             ${euiTextTruncate(`300px`)}
-          `,
-        ]}
+          `,}
       >
         {contentReferenceNode.contentReference.label ?? contentReferenceNode.contentReference.href}
       </EuiLink>
