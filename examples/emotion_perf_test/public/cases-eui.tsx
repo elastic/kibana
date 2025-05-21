@@ -115,7 +115,7 @@ export const VarRow = ({ disabled, index }: { disabled: boolean; index: number }
     '--background': disabled ? '#C61E25' : '#008A5E',
   } as React.CSSProperties;
   return (
-    <div className={baseClass} style={vars}>
+    <div css={baseClass} style={vars}>
       {index}
     </div>
   );
@@ -123,7 +123,7 @@ export const VarRow = ({ disabled, index }: { disabled: boolean; index: number }
 
 // with the root css variables TODO: structure it right
 export const VarRowB = ({ index }: { disabled: boolean; index: number }) => {
-  return <div className={baseClass}>{index}</div>;
+  return <div css={baseClass}>{index}</div>;
 };
 
 // Case D: Global utility class toggle

@@ -17,8 +17,8 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from
 import { GlobalRow, InlineRow, InlineRowB, MemoRow, VarRow, VarRowB } from './cases';
 
 export const PerfTest = () => {
-  const [rowCount, setRowCount] = useState(2000);
-  const [renderCount, setRenderCount] = useState(3);
+  const [rowCount, setRowCount] = useState(200);
+  const [renderCount, setRenderCount] = useState(2);
   return (
     <div>
       <EuiFlexGroup gutterSize="s">
