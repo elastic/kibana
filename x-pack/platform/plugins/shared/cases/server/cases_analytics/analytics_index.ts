@@ -14,7 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
+import { isRetryableEsClientError } from './utils';
 import {
   CAI_NUMBER_OF_SHARDS,
   CAI_AUTO_EXPAND_REPLICAS,
@@ -27,16 +27,16 @@ import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 import { CasesAnalyticsRetryService } from './retry_service';
 
 interface AnalyticsIndexParams {
-  logger: Logger;
-  isServerless: boolean;
   esClient: ElasticsearchClient;
+  logger: Logger;
   indexName: string;
+  isServerless: boolean;
   mappings: MappingTypeMapping;
-  painlessScriptId: string;
   painlessScript: StoredScript;
-  taskId: string;
+  painlessScriptId: string;
   sourceIndex: string;
   sourceQuery: QueryDslQueryContainer;
+  taskId: string;
   taskManager: TaskManagerStartContract;
 }
 
@@ -96,7 +96,13 @@ export class AnalyticsIndex {
   }
 
   public async createIndex() {
-    await this.retryService.retryWithBackoff(() => this._createIndex());
+    try {
+      await this.retryService.retryWithBackoff(() => this._createIndex());
+    } catch (error) {
+      // We do not throw because errors should not break execution
+      this.logger.error(`[${this.indexName}] Failed to create index.`);
+      this.logger.error(error.message);
+    }
   }
 
   private async _createIndex() {
@@ -111,7 +117,7 @@ export class AnalyticsIndex {
         await this.updateIndexMapping();
       }
     } catch (error) {
-      this.handleError(error);
+      this.handleError('Failed to create the index.', error);
     }
   }
 
@@ -122,10 +128,10 @@ export class AnalyticsIndex {
       if (shouldUpdateMapping) {
         await this.updateMapping();
       } else {
-        this.logger.debug(`${this.indexName} mapping version is up to date. Skipping update.`);
+        this.logger.debug(`[${this.indexName}] Mapping version is up to date. Skipping update.`);
       }
     } catch (error) {
-      this.handleError(error);
+      this.handleError('Failed to update the index mapping.', error);
     }
   }
 
@@ -188,8 +194,8 @@ export class AnalyticsIndex {
     );
   }
 
-  private handleError(error: EsErrors.ElasticsearchClientError) {
-    this.logger.error(`[${this.indexName}] Failed to create the index template.`);
+  private handleError(message: string, error: EsErrors.ElasticsearchClientError) {
+    this.logger.error(`[${this.indexName}] ${message}`);
     this.logger.error(error.message);
 
     if (isRetryableEsClientError(error)) {

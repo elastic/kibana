@@ -27,7 +27,6 @@ export const createCasesAnalyticsIndexes = async ({
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
 }) => {
-  logger.debug('initializing factories');
   const casesIndex = createCasesAnalyticsIndex({
     logger,
     esClient,

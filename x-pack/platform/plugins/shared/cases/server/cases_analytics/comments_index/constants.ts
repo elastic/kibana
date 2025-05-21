@@ -27,3 +27,5 @@ export const CAI_COMMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
 };
 
 export const CAI_COMMENTS_SOURCE_INDEX = '.kibana_alerting_cases';
+
+export const CAI_COMMENTS_BACKFILL_TASK_ID = 'cai_comments_backfill_task';

@@ -12,6 +12,7 @@ import {
   CAI_ATTACHMENTS_INDEX_NAME,
   CAI_ATTACHMENTS_SOURCE_INDEX,
   CAI_ATTACHMENTS_SOURCE_QUERY,
+  CAI_ATTACHMENTS_BACKFILL_TASK_ID,
 } from './constants';
 import { CAI_ATTACHMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_ATTACHMENTS_INDEX_SCRIPT, CAI_ATTACHMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -36,7 +37,7 @@ export const createAttachmentsAnalyticsIndex = ({
     mappings: CAI_ATTACHMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_ATTACHMENTS_INDEX_SCRIPT,
-    taskId: 'cai_attachments_backfill_task',
+    taskId: CAI_ATTACHMENTS_BACKFILL_TASK_ID,
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
     sourceQuery: CAI_ATTACHMENTS_SOURCE_QUERY,
   });

@@ -16,3 +16,5 @@ export const CAI_CASES_SOURCE_QUERY: QueryDslQueryContainer = {
 };
 
 export const CAI_CASES_SOURCE_INDEX = '.kibana_alerting_cases';
+
+export const CAI_CASES_BACKFILL_TASK_ID = 'cai_cases_backfill_task';

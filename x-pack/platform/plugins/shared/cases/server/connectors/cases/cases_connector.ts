@@ -23,7 +23,7 @@ import {
 } from './cases_connector_error';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesConnectorRetryService } from './cases_connector_retry_service';
-import { fullJitterBackoffFactory } from './full_jitter_backoff';
+import { fullJitterBackoffFactory } from '../../common/retry_service';
 import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
 
 interface CasesConnectorParams {

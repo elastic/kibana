@@ -7,7 +7,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { CaseAnalyticsIndexBackfillTaskRunner } from './backfill_task_runner';
+import { BackfillTaskRunner } from './backfill_task_runner';
 
 interface CaseAnalyticsIndexBackfillTaskFactoryParams {
   logger: Logger;
@@ -24,7 +24,7 @@ export class CaseAnalyticsIndexBackfillTaskFactory {
   }
 
   public create(context: RunContext) {
-    return new CaseAnalyticsIndexBackfillTaskRunner({
+    return new BackfillTaskRunner({
       taskInstance: context.taskInstance,
       logger: this.logger,
       getESClient: this.getESClient,
