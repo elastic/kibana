@@ -170,3 +170,8 @@ xpack.task_manager.capacity: 20
 
 ## Enable uiSettings validations
 xpack.securitySolution.enableUiSettingsValidations: true
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: attack-discovery
+    timeout: 10m
