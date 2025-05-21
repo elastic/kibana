@@ -40,6 +40,9 @@ jest.mock('../../../common/get_experimental_features', () => ({
 jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
 
 const queryClient = new QueryClient({
   defaultOptions: {

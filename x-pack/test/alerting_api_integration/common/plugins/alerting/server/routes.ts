@@ -887,34 +887,4 @@ export function defineRoutes(
       }
     }
   );
-
-  // Remove when we have real routes
-  router.get(
-    {
-      path: '/api/alerts_fixture/last_run_alert_deletion',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {},
-    },
-    async (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> => {
-      const alerting = await alertingStart;
-
-      try {
-        const result = await alerting.getLastRunAlertDeletion(req);
-        return res.ok({
-          body: { lastRun: result },
-        });
-      } catch (err) {
-        return res.notFound();
-      }
-    }
-  );
 }

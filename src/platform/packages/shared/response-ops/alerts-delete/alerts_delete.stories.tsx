@@ -16,7 +16,8 @@ import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_g
 import { AlertDeleteModal } from './components/modal';
 
 const http = {
-  get: (path: string, { query }: { query?: Record<string, string> }) => {
+  get: async (path: string, { query }: { query?: Record<string, string> } = { query: {} }) => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
     if (path.includes('_alert_delete_preview')) {
       if (query && parseInt(query.active_alert_delete_threshold, 10) > 30) {
         return Promise.resolve({
@@ -27,9 +28,15 @@ const http = {
         affected_alert_count: 0,
       });
     }
+    if (path.includes('_alert_delete_last_run')) {
+      return Promise.resolve({
+        last_run: new Date().toISOString(),
+      });
+    }
     throw new Error('Not implemented');
   },
-  post: (path: string, { body }: { body?: Record<string, unknown> }) => {
+  post: async (path: string, { body }: { body?: Record<string, unknown> }) => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
     if (path.includes('_alert_delete')) {
       return Promise.resolve();
     }

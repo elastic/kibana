@@ -28,3 +28,12 @@ export {
   type CreateAlertDeleteScheduleParams,
   createAlertDeleteSchedule,
 } from './api/schedule/create_alert_delete_schedule';
+
+export {
+  type UseAlertDeleteLastRunParams,
+  useAlertDeleteLastRun,
+} from './api/last_run/use_alert_delete_last_run';
+export {
+  type GetAlertDeleteLastRunParams,
+  getAlertDeleteLastRun,
+} from './api/last_run/get_alert_delete_last_run';

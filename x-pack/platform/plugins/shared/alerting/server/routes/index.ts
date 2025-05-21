@@ -77,6 +77,7 @@ import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
 import { alertDeletePreviewRoute } from './alert_delete/apis/preview/get_alert_delete_preview_route';
 import { alertDeleteScheduleRoute } from './alert_delete/apis/schedule/create_alert_delete_schedule_route';
+import { alertDeleteLastRunRoute } from './alert_delete/apis/last_run/get_alert_delete_last_run_route';
 
 // backfill API
 import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
@@ -157,6 +158,7 @@ export function defineRoutes(opts: RouteOptions) {
   unmuteAlertRoute(router, licenseState);
   alertDeletePreviewRoute(router, licenseState);
   alertDeleteScheduleRoute(router, licenseState, core);
+  alertDeleteLastRunRoute(router, licenseState);
 
   if (alertingConfig.maintenanceWindow.enabled) {
     // Maintenance Window - Internal APIs

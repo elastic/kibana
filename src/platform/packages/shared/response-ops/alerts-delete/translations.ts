@@ -107,3 +107,9 @@ export const ALERT_DELETE_FAILURE = i18n.translate('responseOpsAlertDelete.alert
 export const UNKNOWN_ERROR = i18n.translate('responseOpsAlertDelete.unknownError', {
   defaultMessage: 'Unknown error',
 });
+
+export const ALERT_DELETE_LAST_RUN = (date?: string) =>
+  i18n.translate('responseOpsAlertDelete.alertDeleteLastRun', {
+    defaultMessage: 'Last cleanup task: {date, select, undefined {Loading...} other {{date}}}',
+    values: { date },
+  });

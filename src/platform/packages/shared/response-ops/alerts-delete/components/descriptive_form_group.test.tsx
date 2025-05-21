@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteDescriptiveFormGroup } from './descriptive_form_group';
 import * as i18n from '../translations';
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
@@ -18,7 +18,22 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
+}));
+
 describe('AlertDeleteRuleSettingsSection', () => {
+  const lastRunDate = '2025-10-01T02:10:23.000Z';
+  const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 } = {}) => {
+    http.get.mockClear();
+    http.get.mockImplementation(async (path: any) => {
+      if (path.includes('_last_run')) {
+        return { last_run: lastRun };
+      }
+      throw new Error(`No mock implementation for path: ${path}`);
+    });
+  };
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -37,13 +52,21 @@ describe('AlertDeleteRuleSettingsSection', () => {
     </IntlProvider>
   );
 
-  it('renders the described form group with the correct title and description', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHttpGet();
+  });
+
+  it('renders the described form group with the correct title and description', async () => {
     render(
       <AlertDeleteDescriptiveFormGroup services={servicesMock} categoryIds={['management']} />,
       {
         wrapper,
       }
     );
+    await waitFor(() => {
+      expect(screen.getByTestId('alert-delete-modal-loaded')).toBeInTheDocument();
+    });
     expect(screen.getByText(i18n.RULE_SETTINGS_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.RULE_SETTINGS_DESCRIPTION)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: i18n.RUN_CLEANUP_TASK })).toBeInTheDocument();
