@@ -255,6 +255,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables banner for informing users about changes in data collection.
    */
   eventCollectionDataReductionBannerEnabled: true,
+
+  /**
+   * Automatically installs the security AI prompts package
+   */
+  securityAIPromptsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
