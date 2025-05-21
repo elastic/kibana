@@ -38,7 +38,7 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
 
   return (
     <EuiConfirmModal
-      buttonColor="risk"
+      buttonColor="danger"
       data-test-subj="sloBulkPurgeConfirmationModal"
       title={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.title', {
         defaultMessage: 'Purge {count} SLOs',
