@@ -76,7 +76,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { groupId: uuidv4(), byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabs: [] },
+  tabs: { groupId: uuidv4(), byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -116,7 +116,7 @@ export const internalStateSlice = createSlice({
       }>
     ) => {
       state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
-        Record<string, TabState>
+        Record<string, TabState | RecentlyClosedTabState>
       >(
         (acc, tab) => ({
           ...acc,
@@ -126,7 +126,7 @@ export const internalStateSlice = createSlice({
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
-      state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
+      state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
       state.tabs.groupId = action.payload.groupId;
     },
 
@@ -244,7 +244,6 @@ const createMiddleware = ({
       (action) => {
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
-        // console.log('persistLocally', action.payload);
         void tabsStorageManager.persistLocally(action.payload, getTabAppState);
       },
       MIDDLEWARE_THROTTLE_MS,

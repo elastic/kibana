@@ -79,9 +79,9 @@ export interface DiscoverInternalState {
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
     groupId: string;
-    byId: Record<string, TabState>;
+    byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
-    recentlyClosedTabs: RecentlyClosedTabState[];
+    recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,

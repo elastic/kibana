@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
-import { selectAllTabs, selectTab } from '../selectors';
+import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
   internalStateSlice,
@@ -126,7 +126,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       setTabs({
         allTabs: updatedTabs,
         selectedTabId: selectedItem?.id ?? currentTab.id,
-        recentlyClosedTabs: currentState.tabs.recentlyClosedTabs,
+        recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
         groupId: groupId ?? currentState.tabs.groupId,
       })
     );
@@ -190,7 +190,7 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
 
     if (!selectedItem) {
       // search among recently closed tabs
-      const recentlyClosedTabs = currentState.tabs.recentlyClosedTabs;
+      const recentlyClosedTabs = selectRecentlyClosedTabs(currentState);
       const closedTab = recentlyClosedTabs.find((tab) => tab.id === restoreTabId);
       if (closedTab) {
         // reopening one of the closed tabs

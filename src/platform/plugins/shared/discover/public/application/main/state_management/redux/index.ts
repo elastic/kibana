@@ -64,7 +64,7 @@ export {
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectTab } from './selectors';
+export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors';
 
 export {
   type RuntimeStateManager,
