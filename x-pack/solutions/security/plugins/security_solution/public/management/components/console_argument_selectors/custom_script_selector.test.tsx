@@ -89,27 +89,26 @@ describe('CustomScriptSelector', () => {
   test('displays script options in the popover when open', () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     render(<SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />);
-
-    // Check that the combobox is rendered
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    // Check that the searchbox is rendered
+    expect(screen.getByRole('searchbox', { name: 'Filter options' })).toBeInTheDocument();
+    expect(screen.getByRole('listbox', { name: 'Filter options' })).toBeInTheDocument();
   });
 
   test('calls onChange with selected script when user makes selection', async () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     render(<SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />);
 
-    // Find the combobox input
-    const combobox = screen.getByRole('combobox');
+    const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
 
     // Click on the input to show options
     act(() => {
-      fireEvent.click(combobox);
+      fireEvent.click(searchbox);
     });
 
     // Wait for options to appear and click the first one
     await waitFor(() => {
       // Try to find the option by test ID
-      const option = screen.getByTestId('script1-label');
+      const option = screen.getByRole('option', { name: /Script 1/i });
       fireEvent.click(option);
     });
 
@@ -127,16 +126,15 @@ describe('CustomScriptSelector', () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     render(<SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />);
 
-    // Find the combobox input
-    const combobox = screen.getByRole('combobox');
+    const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
 
     // Click on the input to show options
-    fireEvent.click(combobox);
+    fireEvent.click(searchbox);
 
     // Wait for options to appear and click the first one
     await waitFor(() => {
       // Try to find the option by test ID
-      const option = screen.getByTestId('script1-label');
+      const option = screen.getByRole('option', { name: /Script 1/i });
       fireEvent.click(option);
     });
 
@@ -159,20 +157,17 @@ describe('CustomScriptSelector', () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     render(<SelectorComponent {...defaultProps} store={{ isPopoverOpen: true }} />);
 
-    // Find the combobox input
-    const combobox = screen.getByRole('combobox');
+    const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
 
-    // Click on the input to show options using act
+    // Click on the input to show options
     act(() => {
-      fireEvent.click(combobox);
+      fireEvent.click(searchbox);
     });
 
-    // Wait for the popover content to be rendered
+    // The descriptions should be contained within the option elements
     await waitFor(() => {
-      const optionOneDescription = screen.getByTestId('script1-description');
-      const optionTwoDescription = screen.getByTestId('script2-description');
-      expect(optionOneDescription.textContent).toContain('Test script 1');
-      expect(optionTwoDescription.textContent).toContain('Test script 2');
+      expect(screen.getByText('Test script 1')).toBeInTheDocument();
+      expect(screen.getByText('Test script 2')).toBeInTheDocument();
     });
   });
 });
