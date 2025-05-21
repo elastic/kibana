@@ -59,7 +59,7 @@ export async function exec(
         build.getLogBuffer().forEach(logFn);
         log.info('---------- END LOG BUFFER\n\n');
         if (logs?.length) {
-          logs.forEach(logFn);
+          log.indent(4, () => logs.forEach(logFn));
         }
       });
   } else {
