@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,6 +23,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   composeValidators,
   requiredValidator,
@@ -31,7 +33,8 @@ import {
 } from '@kbn/ml-validators';
 import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '@kbn/ml-common-types/alerts';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '@kbn/ml-common-constants/alerts';
-import type { AlertingApiService } from '../../application/services/ml_api_service/alerting';
+import type { AlertingApiService } from '@kbn/ml-services/ml_api_service/alerting';
+
 import { invalidTimeIntervalMessage } from '../../application/jobs/new_job/common/job_validator/util';
 
 export interface PreviewAlertConditionProps {
