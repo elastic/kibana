@@ -8,11 +8,25 @@
 import { OnechatPluginSetup, OnechatPluginStart } from './types';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
-  return {};
+  return {
+    tools: {
+      register: jest.fn(),
+    },
+  };
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
-  return {};
+  return {
+    tools: {
+      registry: {
+        has: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      },
+      execute: jest.fn(),
+      asScoped: jest.fn(),
+    },
+  };
 };
 
 export const onechatMocks = {
