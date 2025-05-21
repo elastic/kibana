@@ -30,53 +30,58 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFormContext, Controller, useWatch, useFieldArray } from 'react-hook-form';
-import { isCriteriaAlways } from '../../../utils/query_rules_utils';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useFetchQueryRule } from '../../../hooks/use_fetch_query_rule';
+import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../types';
+import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
-import { QueryRuleEditorForm } from '../../../types';
 
 export interface QueryRuleFlyoutProps {
+  rules: SearchQueryRulesQueryRule[];
   onClose: () => void;
+  onSave: (rule: SearchQueryRulesQueryRule) => void;
   ruleId: string;
   rulesetId: string;
 }
 
-export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({ onClose, ruleId, rulesetId }) => {
-  const { control, reset, getValues } = useFormContext<QueryRuleEditorForm>();
-  const { fields, remove, update, append } = useFieldArray<QueryRuleEditorForm>({
+export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
+  rules,
+  onClose,
+  onSave,
+  ruleId,
+  rulesetId,
+}) => {
+  const { control, getValues, reset } = useFormContext<QueryRuleEditorForm>();
+  const { fields, remove, replace, update, append } = useFieldArray({
     control,
     name: 'criteria',
   });
 
   const { euiTheme } = useEuiTheme();
 
-  const { data } = useFetchQueryRule(rulesetId, ruleId);
+  const ruleFromRuleset = rules.find((rule) => rule.rule_id === ruleId);
+  const { isLoading } = useFetchQueryRule(rulesetId, ruleId);
+  const data = ruleFromRuleset;
   const [isAlways, setIsAlways] = useState<boolean>(
     (data?.criteria && isCriteriaAlways(data?.criteria)) ?? false
   );
 
   useEffect(() => {
-    if (data) {
+    if (ruleFromRuleset) {
       reset({
         ...getValues(),
-        rulesetId,
+        criteria: ruleFromRuleset.criteria,
+        type: ruleFromRuleset.type,
+        actions: ruleFromRuleset.actions,
         mode: 'edit',
         ruleId,
-        criteria: data.criteria,
-        type: data.type,
-        actions: data.actions,
       });
-
-      setIsAlways(isCriteriaAlways(data.criteria));
+      setIsAlways(
+        (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
+      );
     }
-  }, [data, reset, getValues, rulesetId, ruleId]);
-
-  const actionType = useWatch({
-    control,
-    name: 'type',
-  });
+  }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
 
   // const isUpdateEnabled =
   //   // TODO: add if has documents and they are valid &&
@@ -88,6 +93,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({ onClose, ruleI
   //       })
   //     : false);
 
+  if (isLoading) {
+    return <></>;
+  }
   return (
     <EuiFlyout onClose={onClose} ownFocus={false} size="l" aria-labelledby="flyoutTitle">
       <EuiFlyoutHeader hasBorder>
@@ -176,7 +184,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({ onClose, ruleI
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
                     <p>
-                      {actionType === 'pinned' ? (
+                      {getValues('type') === 'pinned' ? (
                         <FormattedMessage
                           id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionType.pinned.description"
                           defaultMessage="Pin documents to the top of the search results."
@@ -330,7 +338,11 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({ onClose, ruleI
                 <EuiButton
                   data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                   onClick={() => {
-                    append({ metadata: '', operator: 'exact', values: [] });
+                    append({
+                      type: 'exact',
+                      metadata: '',
+                      values: [],
+                    });
                   }}
                   iconType="plusInCircle"
                   iconSide="left"
@@ -364,7 +376,26 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({ onClose, ruleI
             <EuiButton
               data-test-subj="searchQueryRulesQueryRuleFlyoutUpdateButton"
               fill
-              onClick={() => {}}
+              onClick={() => {
+                const index = rules.findIndex((rule) => rule.rule_id === ruleId);
+                if (index !== -1) {
+                  if (isAlways) {
+                    replace([
+                      {
+                        metadata: 'always',
+                        type: 'always',
+                        values: ['always'],
+                      },
+                    ]);
+                  }
+                  onSave({
+                    rule_id: ruleId,
+                    criteria: getValues('criteria'),
+                    type: getValues('type'),
+                    actions: getValues('actions'),
+                  });
+                }
+              }}
             >
               <FormattedMessage
                 id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"

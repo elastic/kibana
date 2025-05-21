@@ -5,42 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useParams } from 'react-router-dom';
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
-import { ErrorPrompt } from '../error_prompt/error_prompt';
-import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
+import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
+import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { QueryRuleDetailPanel } from './query_rule_detail_panel';
+import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
 export const QueryRulesetDetail: React.FC = () => {
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
   }>();
 
-  const {
-    data: queryRulesetData,
-    isInitialLoading,
-    isError,
-    error,
-  } = useFetchQueryRuleset(rulesetId);
+  const { queryRuleset } = useQueryRulesetDetailState({ rulesetId });
 
-  const [rules, setRules] = useState<QueryRulesQueryRule[]>(queryRulesetData?.rules ?? []);
-
-  useEffect(() => {
-    if (queryRulesetData?.rules) {
-      setRules(queryRulesetData.rules);
-    }
-  }, [queryRulesetData?.rules]);
+  const { isInitialLoading, isError, error } = useFetchQueryRuleset(rulesetId);
 
   return (
     <QueryRulesPageTemplate>
-      {!isInitialLoading && !isError && !!queryRulesetData && (
+      {!isInitialLoading && !isError && !!queryRuleset && (
         <KibanaPageTemplate.Header
           pageTitle={rulesetId}
           restrictWidth
@@ -48,21 +37,6 @@ export const QueryRulesetDetail: React.FC = () => {
           data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="database"
-                  color="primary"
-                  data-test-subj="queryRulesetDetailHeaderDataButton"
-                  onClick={() => {
-                    // Logic to handle data button click
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.queryRules.queryRulesetDetail.dataButton"
-                    defaultMessage="Data"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="save"
@@ -83,7 +57,7 @@ export const QueryRulesetDetail: React.FC = () => {
           ]}
         />
       )}
-      {!isError && <QueryRuleDetailPanel rules={rules} setRules={setRules} rulesetId={rulesetId} />}
+      {!isError && <QueryRuleDetailPanel rulesetId={rulesetId} />}
       {isError && (
         <ErrorPrompt
           errorType={

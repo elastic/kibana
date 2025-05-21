@@ -26,6 +26,7 @@ import {
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { SearchQueryRulesQueryRule } from '../../../../common/types';
 import { DroppableContainer } from '../styles';
 import { QueryRuleDraggableListHeader } from './query_rule_draggable_list_header';
 import { QueryRuleDraggableListItemActionTypeBadge } from './query_rule_draggable_item_action_type_badge';
@@ -178,9 +179,10 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
     </>
   );
 };
+
 export interface QueryRuleDraggableListProps {
-  rules: QueryRulesQueryRule[];
-  onReorder: (queryRules: QueryRulesQueryRule[]) => void;
+  rules: SearchQueryRulesQueryRule[];
+  onReorder: (queryRules: SearchQueryRulesQueryRule[]) => void;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
 }
 export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({

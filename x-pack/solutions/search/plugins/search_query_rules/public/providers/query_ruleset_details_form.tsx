@@ -8,25 +8,22 @@
 import React from 'react';
 
 import { FormProvider, useForm } from 'react-hook-form';
-import { QueryRuleEditorForm } from '../types';
+import { QueryRulesetDetailForm } from '../types';
 
-export interface UnsavedFormProviderProps {
+interface QueryRulesetDetailFormProvider {
   children: React.ReactNode;
 }
-export const QueryRuleFormProvider: React.FC<React.PropsWithChildren<UnsavedFormProviderProps>> = ({
-  children,
-}) => {
-  const form = useForm<QueryRuleEditorForm>({
+
+export const QueryRulesetDetailsForm: React.FC<
+  React.PropsWithChildren<QueryRulesetDetailFormProvider>
+> = ({ children }) => {
+  const form = useForm<QueryRulesetDetailForm>({
     defaultValues: {
       mode: 'create',
-      ruleId: '',
       rulesetId: '',
-      criteria: [],
-      type: 'pinned',
-      actions: {
-        docs: [],
-      },
+      rules: [],
     },
   });
-  return <FormProvider {...form}>{children}</FormProvider>;
+
+  return <FormProvider {...form}> {children}</FormProvider>;
 };

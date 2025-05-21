@@ -10,6 +10,7 @@ import React from 'react';
 import {
   EuiButtonIcon,
   EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -30,9 +31,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   criteria,
   onChange,
 }) => {
-  const [metadataField, setMetadataField] = React.useState(criteria.metadata);
-  const [operator, setOperator] = React.useState(criteria.type);
-  const [values, setValues] = React.useState(criteria.values);
+  const [metadataField, setMetadataField] = React.useState<string>(criteria.metadata || '');
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="row">
@@ -46,29 +45,25 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
               }
             )}
           >
-            <EuiComboBox
+            <EuiFieldText
+              data-test-subj="searchQueryRulesQueryRuleMetadataEditorField"
               fullWidth
               aria-label={i18n.translate(
                 'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorLabel',
                 {
-                  defaultMessage: 'Select or create a new metadata field',
+                  defaultMessage: 'Enter metadata field name',
                 }
               )}
-              options={criteria.metadata ? [{ label: criteria.metadata }] : []}
-              selectedOptions={criteria.metadata ? [{ label: criteria.metadata }] : []}
-              onCreateOption={(newOption) => {
+              value={metadataField}
+              onChange={(e) => {
+                setMetadataField(e.target.value);
+              }}
+              onBlur={() => {
                 onChange({
                   ...criteria,
-                  metadata: newOption,
+                  metadata: metadataField,
                 });
               }}
-              customOptionText={i18n.translate(
-                'xpack.search.queryRulesetDetail.queryRuleFlyout.createNewMetadata',
-                {
-                  defaultMessage: 'Create new metadata field: {newMetadata}',
-                  values: { newMetadata: 'New Metadata' },
-                }
-              )}
             />
           </EuiFormRow>
           <EuiFormRow fullWidth>
