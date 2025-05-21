@@ -15,7 +15,7 @@ import { useKibana } from './use_kibana';
 export const useRunQueryRuleset = (rulesetId: string) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
-  const indecesRuleset = queryRulesetData?.rules?.[0]?.actions?.docs?.[0]?._index;
+  const indecesRuleset = queryRulesetData?.rules?.[0]?.actions?.docs?.[0]?._index || 'my_index';
   const TEST_QUERY_RULESET_API_SNIPPET = dedent`
 # Test your query ruleset
 GET ${indecesRuleset}/_search
@@ -26,16 +26,16 @@ GET ${indecesRuleset}/_search
         "standard": {
           "query": {
             "query_string": {
-              "query": "puggles" # The query to test
+              "query": "puggles"
             }
           }
         }
       },
       "match_criteria": {
-         "query_string": "puggles", # Your custom match criteria 1
-         "user_country": "us" # Your custom match criteria 2 ...
+         "query_string": "puggles",
+         "user_country": "us"
       },
-      "ruleset_ids": [ "${rulesetId}" ] # Your ruleset ID
+      "ruleset_ids": [ "${rulesetId}" ]
     }
   }
 }
