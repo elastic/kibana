@@ -102,6 +102,11 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/storybooks/storybook_tests.sh
+    label: 'Run Storybook Tests'
+    env:
+      STORYBOOK_URL: 'http://localhost:9001'
+
   - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
@@ -145,8 +150,3 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-
-  - command: .buildkite/scripts/steps/storybooks/storybook_tests.sh
-    label: "Run Storybook Tests"
-    env:
-      STORYBOOK_URL: 'http://localhost:9001'
