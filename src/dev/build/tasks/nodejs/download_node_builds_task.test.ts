@@ -77,7 +77,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
 it('downloads node builds for each platform', async () => {
   const { config } = await setup();
 
-  await DownloadNodeBuilds.run(config, log, []);
+  await DownloadNodeBuilds.run(config, log);
 
   expect(downloadToDisk.mock.calls).toMatchInlineSnapshot(`
     Array [
@@ -119,7 +119,7 @@ it('downloads node builds for each platform', async () => {
 it('rejects if any download fails', async () => {
   const { config } = await setup({ failOnUrl: 'linux:url' });
 
-  await expect(DownloadNodeBuilds.run(config, log, [])).rejects.toMatchInlineSnapshot(
+  await expect(DownloadNodeBuilds.run(config, log)).rejects.toMatchInlineSnapshot(
     `[Error: Download failed for reasons]`
   );
   expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
