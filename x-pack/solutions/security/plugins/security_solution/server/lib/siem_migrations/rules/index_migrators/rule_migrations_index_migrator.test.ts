@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RuleMigrationIndexMigrator } from '.';
-import * as RuleMigrationSpaceIndexMigratorModule from './per_space';
+import * as RuleMigrationSpaceIndexMigratorModule from './rule_migrations_per_space_index_migrator';
 import type { Adapters } from '../types';
 
 const esClientMock = {

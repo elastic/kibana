@@ -13,9 +13,9 @@ import { Subject } from 'rxjs';
 import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
 import type { SetupParams } from './rule_migrations_data_service';
 import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
-import { RuleMigrationIndexMigrator } from '../index_migrator';
+import { RuleMigrationIndexMigrator } from '../index_migrators';
 
-jest.mock('../index_migrator');
+jest.mock('../index_migrators');
 
 jest.mock('@kbn/index-adapter');
 

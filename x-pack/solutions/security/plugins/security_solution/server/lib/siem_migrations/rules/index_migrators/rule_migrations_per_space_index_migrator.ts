@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import assert from 'assert';
 import type {
   AggregationsAggregationContainer,
   AggregationsMinAggregate,
@@ -12,7 +13,6 @@ import type {
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Adapters, StoredSiemMigration } from '../types';
-import { processResponseHits } from '../../common';
 
 const MAX_ES_SIZE = 10000;
 
@@ -64,7 +64,11 @@ export class RuleMigrationSpaceIndexMigrator {
       },
       _source: true,
     });
-    return processResponseHits(result);
+
+    return result.hits.hits.map(({ _id }) => {
+      assert(_id, 'document should have _id');
+      return _id;
+    });
   }
 
   private async indexMigrationDocs(docs: StoredSiemMigration[]) {
@@ -108,7 +112,7 @@ export class RuleMigrationSpaceIndexMigrator {
       await this.getExistingMigrationFromMigrationsIndex();
 
     const migrationsToIndex = existingMigrationsFromRulesIndex.filter(
-      (migration) => !existingMigrationsFromMigrationsIndex.some((m) => m.id === migration.id)
+      (migration) => !existingMigrationsFromMigrationsIndex.some((id) => id === migration.id)
     );
 
     if (migrationsToIndex.length > 0) {

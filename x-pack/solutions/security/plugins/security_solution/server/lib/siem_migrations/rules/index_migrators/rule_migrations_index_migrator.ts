@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { RuleMigrationSpaceIndexMigrator } from './per_space';
+import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
 import type { Adapters } from '../types';
 
 export class RuleMigrationIndexMigrator {
@@ -18,6 +18,7 @@ export class RuleMigrationIndexMigrator {
 
   private async getSpaceListForMigrations() {
     const rulesIndexPattern = this.ruleMigrationIndexAdapters.rules.name;
+    this.logger.info(`Rule index pattern: ${rulesIndexPattern}`);
     const rulesIndicesAcrossSpaces = await this.esClient.indices.get({
       index: rulesIndexPattern,
       allow_no_indices: true,
@@ -37,7 +38,9 @@ export class RuleMigrationIndexMigrator {
       this.logger.info('No spaces or index found for index migration');
       return;
     }
-    this.logger.info('Starting index migration for rule migrations');
+    this.logger.info(
+      `Starting index migration for rule migrations for spaces :${allSpaces.join(', ')}`
+    );
     for (const spaceId of allSpaces) {
       const migrator = new RuleMigrationSpaceIndexMigrator(
         spaceId,

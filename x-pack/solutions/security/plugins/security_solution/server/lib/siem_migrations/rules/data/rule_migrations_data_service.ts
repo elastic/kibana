@@ -32,7 +32,7 @@ import {
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
 } from './rule_migrations_field_maps';
-import { RuleMigrationIndexMigrator } from '../index_migrator';
+import { RuleMigrationIndexMigrator } from '../index_migrators';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
