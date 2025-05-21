@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Global } from '@emotion/react';
+import { css } from '@emotion/css';
 import {
   ClassNameRow,
   InlineStylesRow,
@@ -16,32 +17,8 @@ import {
   MemoizedStylesRow,
   ScopedCSSVarRow,
   RootCSSVarRow,
-} from './cases_emotion_react';
+} from './cases_eui';
 import { Stats } from './stats';
-
-const styles = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  '.perfTest': {
-    outline: 0,
-    border: 0,
-    margin: '2px 2px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'anchor-center',
-    height: '30px',
-    fontSize: '20px',
-    width: '30px',
-    opacity: 1,
-    color: '#E2F8F0',
-    backgroundColor: '#008A5E',
-  },
-  '.perfTestDisabled': {
-    opacity: 0.5,
-    color: '#E2F9F7',
-    backgroundColor: '#C61E25',
-  },
-};
 
 interface TestCase {
   component: ({ disabled, index }: { disabled: boolean; index: number }) => JSX.Element;
@@ -50,12 +27,12 @@ interface TestCase {
 }
 
 const test: TestCase[] = [
-  { component: InlineStylesRow, description: 'Styles inlined inside the component' },
+  { component: InlineStylesRow, description: 'Styles inlined in the component' },
   {
     component: ComposedStylesRow,
-    description: 'Styles inlines inside the component with the conditions outside of the css prop',
+    description: 'Styles declared outside of the component but composed inside as an array',
   },
-  { component: MemoizedStylesRow, description: 'Styles memoized inside the component' },
+  { component: MemoizedStylesRow, description: 'Styles memoized in the component' },
   { component: ScopedCSSVarRow, description: 'Css variables scoped to the component' },
   {
     component: RootCSSVarRow,
@@ -67,7 +44,7 @@ const test: TestCase[] = [
 
 export const HarnessWrapper = (props: { renderCount: number; rowCount: number }) => {
   return (
-    <div css={styles}>
+    <div className="perfTest__harnessWrapper">
       {test.map(({ component, description, mountRootVars }) => (
         <Harness
           key={component.name}

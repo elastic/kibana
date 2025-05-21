@@ -8,15 +8,16 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { HarnessWrapper } from './harness';
 
 export const PerfTest = () => {
   const [rowCount, setRowCount] = useState(2000);
   const [renderCount, setRenderCount] = useState(3);
+  const euiThemeContext = useEuiTheme();
   return (
-    <div className={perfTestStyles}>
+    <div className={perfTestStyles(euiThemeContext)}>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow label="Component count" helpText="How many components to render">
@@ -44,7 +45,31 @@ export const PerfTest = () => {
   );
 };
 
-const perfTestStyles = css({
+
+const perfTestStyles = ({euiTheme}: UseEuiTheme) => css({
+  '.perfTest__harnessWrapper': {
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  '.perfTest': {
+    outline: 0,
+    border: 0,
+    margin: euiTheme.size.xxs,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'anchor-center',
+    height: '30px',
+    fontSize: '20px',
+    width: '30px',
+    opacity: 1,
+    color: '#E2F8F0',
+    backgroundColor: '#008A5E',
+  },
+  '.perfTestDisabled': {
+    opacity: 0.5,
+    color: '#E2F9F7',
+    backgroundColor: '#C61E25',
+  },
   '.perfTest__harness': {
     padding: '4px',
     borderRight: '1px solid #AEE8D2',

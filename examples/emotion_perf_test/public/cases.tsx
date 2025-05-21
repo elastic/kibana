@@ -11,26 +11,28 @@ import React, { useMemo } from 'react';
 import { css, cx } from '@emotion/css';
 
 // Case A: Emotion inline styles
-export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div
-    css={{
-      outline: 0,
-      border: 0,
-      margin: '2px 2px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'anchor-center',
-      height: '30px',
-      fontSize: '20px',
-      width: '30px',
-      opacity: disabled ? 0.5 : 1,
-      color: disabled ? '#E2F9F7' : '#E2F8F0',
-      backgroundColor: disabled ? '#C61E25' : '#008A5E',
-    }}
-  >
-    {index}
-  </div>
-);
+export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  return (
+    <div
+      css={{
+        outline: 0,
+        border: 0,
+        margin: '2px 2px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'anchor-center',
+        height: '30px',
+        fontSize: '20px',
+        width: '30px',
+        opacity: disabled ? 0.5 : 1,
+        color: disabled ? '#E2F9F7' : '#E2F8F0',
+        backgroundColor: disabled ? '#C61E25' : '#008A5E',
+      }}
+    >
+      {index}
+    </div>
+  );
+};
 
 const base = {
   outline: 0,
@@ -54,9 +56,9 @@ const disabledBase = {
 };
 
 // Case B: The condition is outside of the css prop
-export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div className={cx(css(base), css(disabled && disabledBase))}>{index}</div>
-);
+export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  return <div className={cx(css(base), css(disabled && disabledBase))}>{index}</div>;
+};
 
 // Case C: Styles are memoized
 export const useMemoStyles = (disabled: boolean) =>
@@ -119,6 +121,6 @@ export const RootCSSVarRow = ({ index }: { disabled: boolean; index: number }) =
 };
 
 // Case F: Styling through setting a classname and adding styles to the parent
-export const ClassNameRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>
-);
+export const ClassNameRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  return <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>;
+};

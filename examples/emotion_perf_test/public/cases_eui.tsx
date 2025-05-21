@@ -8,29 +8,33 @@
  */
 
 import React, { useMemo } from 'react';
-import { css, cx } from '@emotion/css';
+import { css } from '@emotion/css';
+import { useEuiTheme } from '@elastic/eui';
 
 // Case A: Emotion inline styles
-export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div
-    css={{
-      outline: 0,
-      border: 0,
-      margin: '2px 2px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'anchor-center',
-      height: '30px',
-      fontSize: '20px',
-      width: '30px',
-      opacity: disabled ? 0.5 : 1,
-      color: disabled ? '#E2F9F7' : '#E2F8F0',
-      backgroundColor: disabled ? '#C61E25' : '#008A5E',
-    }}
-  >
-    {index}
-  </div>
-);
+export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  const {euiTheme} = useEuiTheme();
+  return (
+    <div
+      css={{
+        outline: 0,
+        border: 0,
+        margin: euiTheme.size.xxs,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'anchor-center',
+        height: '30px',
+        fontSize: '20px',
+        width: '30px',
+        opacity: disabled ? 0.5 : 1,
+        color: disabled ? '#E2F9F7' : '#E2F8F0',
+        backgroundColor: disabled ? '#C61E25' : '#008A5E',
+      }}
+    >
+      {index}
+    </div>
+  );
+};
 
 const base = {
   outline: 0,
@@ -53,19 +57,20 @@ const disabledBase = {
   backgroundColor: '#C61E25',
 };
 
-// Case A: Emotion inline styles
-export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div className={cx(css(base), css(disabled && disabledBase))}>{index}</div>
-);
+// Case B: The condition is outside of the css prop
+export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  return <div css={[css(base), css(disabled && disabledBase)]}>{index}</div>;
+};
 
-// Case B: Emotion memoized
-export const useMemoStyles = (disabled: boolean) =>
+// Case C: Styles are memoized
+export const useMemoStyles = (disabled: boolean) =>{
+  const {euiTheme} = useEuiTheme();
   useMemo(
     () =>
       css({
         outline: 0,
         border: 0,
-        margin: '2px 2px',
+        margin: euiTheme.size.xxs,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'anchor-center',
@@ -78,13 +83,13 @@ export const useMemoStyles = (disabled: boolean) =>
       }),
     [disabled]
   );
-
+}
 export const MemoizedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   const cls = useMemoStyles(disabled);
-  return <div className={cls}> {index}</div>;
+  return <div css={cls}> {index}</div>;
 };
 
-// Case C: CSS variables + single base class
+// Case D: CSS variables scoped to the component + single base class
 const baseClass = css({
   outline: 0,
   border: 0,
@@ -113,12 +118,12 @@ export const ScopedCSSVarRow = ({ disabled, index }: { disabled: boolean; index:
   );
 };
 
-// with the root css variables TODO: structure it right
+// Case E: CSS variables added to the root + single base class
 export const RootCSSVarRow = ({ index }: { disabled: boolean; index: number }) => {
   return <div css={baseClass}>{index}</div>;
 };
 
-// Case D: Global utility class toggle
-export const ClassNameRow = ({ disabled, index }: { disabled: boolean; index: number }) => (
-  <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>
-);
+// Case F: Styling through setting a classname and adding styles to the parent
+export const ClassNameRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  return <div className={disabled ? 'perfTestDisabled perfTest' : 'perfTest'}>{index}</div>;
+};
