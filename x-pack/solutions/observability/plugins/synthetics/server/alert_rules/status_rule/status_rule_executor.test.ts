@@ -128,8 +128,10 @@ describe('StatusRuleExecutor', () => {
         } as any
       );
 
-      // Mock the getAllMonitors function to return test monitors with a location
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
+      // Mock the getAll method to return test monitors with a location
+      jest
+        .spyOn(statusRuleWithEmptyLocations.monitorConfigRepository, 'getAll')
+        .mockResolvedValue(testMonitors);
 
       // Execute
       await statusRuleWithEmptyLocations.getDownChecks({});
