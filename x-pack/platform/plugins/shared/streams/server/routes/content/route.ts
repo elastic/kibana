@@ -8,32 +8,31 @@
 import { Readable } from 'stream';
 import { isNotFoundError } from '@kbn/es-errors';
 import { z } from '@kbn/zod';
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { createListStream } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
   ContentPack,
   contentPackIncludedObjectsSchema,
-  isIncludeAll,
+  isConfigurationEntry,
   isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
-import type { SavedObject } from '@kbn/core/server';
+import { Streams } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { Asset } from '../../../common';
-import { DashboardAsset, DashboardLink } from '../../../common/assets';
+import { DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
-import { StatusError } from '../../lib/streams/errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import {
-  CONTENT_NAME,
-  STREAM_NAME,
   generateArchive,
+  getFieldsEntry,
+  getProcessorsEntry,
+  getSavedObjectEntries,
   parseArchive,
-  prepareForExport,
   prepareForImport,
   referenceManagedIndexPattern,
   savedObjectLinks,
 } from '../../lib/content';
-import { StoredContentPack } from '../../lib/content/content_client';
+import { CONTENT_NAME, STREAM_NAME, StoredContentPack } from '../../lib/content/content_client';
+import { buildUpsertRequest } from '../../lib/content/configuration';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -64,46 +63,34 @@ const exportContentRoute = createServerRoute({
   async handler({ params, request, response, getScopedClients, context }) {
     const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
 
-    await streamsClient.ensureStream(params.path.name);
-
-    if (!isIncludeAll(params.body.include) && params.body.include.objects.dashboards.length === 0) {
-      throw new StatusError(`Content pack must include at least one object`, 400);
-    }
-
-    function isDashboard(asset: Asset): asset is DashboardAsset {
-      return asset[ASSET_TYPE] === 'dashboard';
-    }
-
-    const dashboards = (await assetClient.getAssets(params.path.name))
-      .filter(isDashboard)
-      .filter(
-        (dashboard) =>
-          isIncludeAll(params.body.include) ||
-          params.body.include.objects.dashboards.includes(dashboard['asset.id'])
-      );
-    if (dashboards.length === 0) {
-      throw new StatusError('No included objects were found', 400);
-    }
-
+    const stream = await streamsClient.getStream(params.path.name);
     const exporter = (await context.core).savedObjects.getExporter(soClient);
-    const exportStream = await exporter.exportByObjects({
+
+    const savedObjectsEntries = await getSavedObjectEntries({
+      stream,
+      exporter,
       request,
-      objects: dashboards.map((dashboard) => ({ id: dashboard[ASSET_ID], type: 'dashboard' })),
-      includeReferencesDeep: true,
+      assetClient,
+      includedObjects: params.body.include,
+      replacedPatterns: params.body.replaced_patterns,
     });
 
-    const savedObjects: SavedObject[] = await createPromiseFromStreams([
-      exportStream,
-      createConcatStream([]),
+    const fieldsEntry = await getFieldsEntry({
+      stream,
+      streamsClient,
+      includedObjects: params.body.include,
+    });
+
+    const processorsEntry = await getProcessorsEntry({
+      stream,
+      includedObjects: params.body.include,
+    });
+
+    const archive = await generateArchive(params.body, [
+      ...savedObjectsEntries,
+      ...(fieldsEntry ? [fieldsEntry] : []),
+      ...(processorsEntry ? [processorsEntry] : []),
     ]);
-    const archive = await generateArchive(
-      params.body,
-      prepareForExport({
-        savedObjects,
-        source: params.path.name,
-        replacedPatterns: params.body.replaced_patterns,
-      })
-    );
 
     return response.ok({
       body: archive,
@@ -150,7 +137,7 @@ const importContentRoute = createServerRoute({
     });
     const importer = (await context.core).savedObjects.getImporter(soClient);
 
-    await streamsClient.ensureStream(params.path.name);
+    const stream = await streamsClient.getStream(params.path.name);
 
     const contentPack = await parseArchive(params.body.filename, params.body.content);
     const storedContentPack = await contentClient
@@ -190,6 +177,18 @@ const importContentRoute = createServerRoute({
       createNewCopies: false,
       overwrite: true,
     });
+
+    const configurationEntries = contentPack.entries.filter(isConfigurationEntry);
+    if (Streams.WiredStream.Definition.is(stream) && configurationEntries.length > 0) {
+      const request = await buildUpsertRequest({
+        stream,
+        streamsClient,
+        assetClient,
+        entries: configurationEntries,
+      });
+
+      await streamsClient.upsertStream({ name: stream.name, request });
+    }
 
     await contentClient.upsertStoredContentPack(params.path.name, {
       name: contentPack.name,

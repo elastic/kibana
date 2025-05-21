@@ -14,6 +14,7 @@ import {
   ContentPackManifest,
   findConfiguration,
   isIndexPlaceholder,
+  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import {
   EuiButton,
@@ -90,7 +91,9 @@ export function ExportContentPackFlyout({
       });
 
       const indexPatterns = uniq(
-        contentPack.entries.flatMap((object) => findConfiguration(object).patterns)
+        contentPack.entries
+          .filter(isSupportedSavedObjectType)
+          .flatMap((object) => findConfiguration(object).patterns)
       ).filter((index) => !isIndexPlaceholder(index));
 
       setManifest({
@@ -224,7 +227,21 @@ export function ExportContentPackFlyout({
                           ...manifest,
                           replaced_patterns: replacedPatterns,
                           include: {
-                            objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
+                            objects: {
+                              dashboards: selectedContentPackObjects
+                                .filter(({ type }) => type === 'dashboard')
+                                .map(({ id }) => id),
+                              fields: selectedContentPackObjects.some(
+                                ({ type }) => type === 'fields'
+                              )
+                                ? { all: {} }
+                                : { none: {} },
+                              processors: selectedContentPackObjects.some(
+                                ({ type }) => type === 'processors'
+                              )
+                                ? { all: {} }
+                                : { none: {} },
+                            },
                           },
                         },
                       },

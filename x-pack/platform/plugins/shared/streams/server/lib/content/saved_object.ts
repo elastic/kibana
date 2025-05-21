@@ -17,7 +17,13 @@ import {
   replaceIndexPatterns,
 } from '@kbn/content-packs-schema';
 import { compact, uniqBy } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
+import { ISavedObjectsExporter, KibanaRequest, SavedObject } from '@kbn/core/server';
+import { Asset } from '@kbn/streams-plugin/common';
+import { DashboardAsset } from '@kbn/streams-plugin/common/assets';
+import { ASSET_ID, ASSET_TYPE } from '../streams/assets/fields';
+import { AssetClient } from '../streams/assets/asset_client';
+import { createConcatStream, createPromiseFromStreams } from '@kbn/utils';
+import { Streams } from '@kbn/streams-schema';
 
 export function prepareForExport({
   savedObjects,
@@ -155,4 +161,49 @@ export function referenceManagedIndexPattern(savedObjects: ContentPackSavedObjec
       (ref) => ref.type === 'index-pattern' && (ref.id === 'metrics-*' || ref.id === 'logs-*')
     )
   );
+}
+
+export async function getSavedObjectEntries({
+  stream,
+  includedObjects,
+  assetClient,
+  exporter,
+  request,
+  replacedPatterns,
+}: {
+  stream: Streams.all.Definition;
+  includedObjects: ContentPackIncludedObjects;
+  assetClient: AssetClient;
+  exporter: ISavedObjectsExporter;
+  request: KibanaRequest;
+  replacedPatterns: string[];
+}) {
+  if (!isIncludeAll(includedObjects) && includedObjects.objects.dashboards.length === 0) {
+    return [];
+  }
+
+  function isDashboard(asset: Asset): asset is DashboardAsset {
+    return asset[ASSET_TYPE] === 'dashboard';
+  }
+
+  const dashboards = (await assetClient.getAssets(stream.name))
+    .filter(isDashboard)
+    .filter(
+      (dashboard) =>
+        isIncludeAll(includedObjects) ||
+        includedObjects.objects.dashboards.includes(dashboard['asset.id'])
+    );
+
+  const exportStream = await exporter.exportByObjects({
+    request,
+    objects: dashboards.map((dashboard) => ({ id: dashboard[ASSET_ID], type: 'dashboard' })),
+    includeReferencesDeep: true,
+  });
+
+  const savedObjects: SavedObject[] = await createPromiseFromStreams([
+    exportStream,
+    createConcatStream([]),
+  ]);
+
+  return prepareForExport({ source: stream.name, savedObjects, replacedPatterns });
 }

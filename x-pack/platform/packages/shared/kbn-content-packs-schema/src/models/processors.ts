@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export const STREAM_NAME = 'stream.name';
-export const CONTENT_NAME = 'content.name';
+import { ProcessorDefinition } from '@kbn/streams-schema';
+
+export type ContentPackProcessors = {
+  id: string;
+  type: 'processors';
+  content: ProcessorDefinition[];
+};

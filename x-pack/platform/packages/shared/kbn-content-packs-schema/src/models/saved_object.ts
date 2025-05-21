@@ -12,10 +12,10 @@ import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/dat
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { ContentPackEntry } from '.';
 
-export const SUPPORTED_SAVED_OBJECT_TYPE: Record<ContentPackSavedObject['type'], string> = {
-  dashboard: 'dashboard',
-  'index-pattern': 'index_pattern',
-  lens: 'lens',
+export const SUPPORTED_SAVED_OBJECT_TYPE: Record<ContentPackSavedObject['type'], string[]> = {
+  dashboard: ['kibana', 'dashboard'],
+  'index-pattern': ['kibana', 'index_pattern'],
+  lens: ['kibana', 'lens'],
 };
 
 export const isSupportedSavedObjectType = (
@@ -25,8 +25,8 @@ export const isSupportedSavedObjectType = (
 };
 
 export const isDashboardFile = (rootDir: string, filepath: string) => {
-  const subDir = SUPPORTED_SAVED_OBJECT_TYPE.dashboard;
-  return path.dirname(filepath) === path.join(rootDir, 'kibana', subDir);
+  const subDirs = SUPPORTED_SAVED_OBJECT_TYPE.dashboard;
+  return path.dirname(filepath) === path.join(rootDir, ...subDirs);
 };
 
 export const isSupportedReferenceType = (type: string) => {

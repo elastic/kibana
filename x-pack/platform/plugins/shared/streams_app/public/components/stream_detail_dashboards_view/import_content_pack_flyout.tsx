@@ -141,7 +141,17 @@ export function ImportContentPackFlyout({
                     file,
                     definition,
                     include: {
-                      objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
+                      objects: {
+                        dashboards: selectedContentPackObjects.map(({ id }) => id),
+                        fields: selectedContentPackObjects.some(({ type }) => type === 'fields')
+                          ? { all: {} }
+                          : { none: {} },
+                        processors: selectedContentPackObjects.some(
+                          ({ type }) => type === 'processors'
+                        )
+                          ? { all: {} }
+                          : { none: {} },
+                      },
                     },
                   });
 

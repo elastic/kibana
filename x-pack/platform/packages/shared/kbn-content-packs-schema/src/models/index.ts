@@ -8,25 +8,37 @@
 import path from 'path';
 import { z } from '@kbn/zod';
 import { ContentPackSavedObject, SUPPORTED_SAVED_OBJECT_TYPE } from './saved_object';
+import { ContentPackFields } from './fields';
+import { ContentPackProcessors } from './processors';
 
 export * from './api';
 export * from './saved_object';
+export * from './fields';
+export * from './processors';
 
-export const SUPPORTED_ENTRY_TYPE: Record<ContentPackEntry['type'], string> = {
+export const SUPPORTED_ENTRY_TYPE: Record<ContentPackEntry['type'], string[]> = {
   ...SUPPORTED_SAVED_OBJECT_TYPE,
+  fields: ['fields'],
+  processors: ['processors'],
 };
+
+export type ContentPackConfiguration = ContentPackFields | ContentPackProcessors;
+
+export function isConfigurationEntry(entry: ContentPackEntry): entry is ContentPackConfiguration {
+  return ['fields', 'processors'].includes(entry.type);
+}
 
 export type SupportedEntryType = keyof typeof SUPPORTED_ENTRY_TYPE;
 
 export const isSupportedFile = (rootDir: string, filepath: string) => {
   return Object.values(SUPPORTED_ENTRY_TYPE).some(
-    (dir) => path.dirname(filepath) === path.join(rootDir, 'kibana', dir)
+    (dirs) => path.dirname(filepath) === path.join(rootDir, ...dirs)
   );
 };
 
 export const getEntryTypeByFile = (rootDir: string, filepath: string): SupportedEntryType => {
   const entry = Object.entries(SUPPORTED_ENTRY_TYPE).find(
-    ([t, dir]) => path.dirname(filepath) === path.join(rootDir, 'kibana', dir)
+    ([t, dirs]) => path.dirname(filepath) === path.join(rootDir, ...dirs)
   ) as [SupportedEntryType, string] | undefined;
 
   if (!entry) {
@@ -52,7 +64,7 @@ export const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object
   version: z.string(),
 });
 
-export type ContentPackEntry = ContentPackSavedObject;
+export type ContentPackEntry = ContentPackSavedObject | ContentPackConfiguration;
 
 export interface ContentPack extends ContentPackManifest {
   entries: ContentPackEntry[];

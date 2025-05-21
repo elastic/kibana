@@ -9,6 +9,7 @@ import React from 'react';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { capitalize } from 'lodash';
 import { ContentPackEntry } from '@kbn/content-packs-schema';
+import { isViewableEntry } from './content/util';
 
 export function ContentPackObjectsList({
   objects,
@@ -19,7 +20,7 @@ export function ContentPackObjectsList({
 }) {
   return (
     <EuiBasicTable
-      items={objects.filter(({ type }) => type === 'dashboard')}
+      items={objects.filter(isViewableEntry)}
       itemId={(entry: ContentPackEntry) => entry.id}
       columns={[
         {
@@ -29,14 +30,19 @@ export function ContentPackObjectsList({
               return (entry.attributes as DashboardAttributes).title;
             }
 
-            return 'unknown object type';
+            return entry.id;
           },
           truncateText: true,
         },
         {
           name: 'Type',
           render: (entry: ContentPackEntry) => {
-            const iconType = 'dashboardApp';
+            const iconType =
+              entry.type === 'dashboard'
+                ? 'dashboardApp'
+                : entry.type === 'fields'
+                ? 'indexMapping'
+                : 'questionInCircle';
             return (
               <EuiBadge color="hollow" iconType={iconType} iconSide="left">
                 {capitalize(entry.type)}
