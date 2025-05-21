@@ -8,13 +8,13 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import { createEsqlDataSource } from '../../common/data_sources';
-import { addLog } from '../utils/add_log';
-import { SolutionType } from './profiles/root_profile';
-import { createContextAwarenessMocks } from './__mocks__';
-import type { ComposableProfile } from './composable_profile';
+import { createEsqlDataSource } from '../../../common/data_sources';
+import { addLog } from '../../utils/add_log';
+import { SolutionType } from '../profiles/root_profile';
+import { createContextAwarenessMocks } from '../__mocks__';
+import type { ComposableProfile } from '../composable_profile';
 
-jest.mock('../utils/add_log');
+jest.mock('../../utils/add_log');
 
 let mocks = createContextAwarenessMocks();
 
