@@ -31,9 +31,10 @@ import {
 } from '../constants';
 import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
 
-const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
+const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
   query,
   filters,
+  pageFilters,
   sort: [['@timestamp', 'desc']],
 });
 

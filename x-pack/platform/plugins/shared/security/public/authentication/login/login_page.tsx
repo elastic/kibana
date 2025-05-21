@@ -34,7 +34,6 @@ import { fullScreenGraphicsMixinStyles } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
@@ -407,12 +406,7 @@ export function renderLoginPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <LoginPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<LoginPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }
