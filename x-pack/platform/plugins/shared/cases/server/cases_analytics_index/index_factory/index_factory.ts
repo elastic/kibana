@@ -5,11 +5,13 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
   StoredScript,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
 import {
   CAI_NUMBER_OF_SHARDS,
   CAI_AUTO_EXPAND_REPLICAS,
@@ -17,6 +19,8 @@ import {
   CAI_INDEX_MODE,
   CAI_DEFAULT_TIMEOUT,
 } from '../constants';
+import { fullJitterBackoffFactory } from '../../common/retry_service/full_jitter_backoff';
+import { CasesAnalyticsRetryService } from '../cases_analytics_retry_service';
 
 interface AnalyticsIndexFactoryParams {
   logger: Logger;
@@ -36,6 +40,7 @@ export class AnalyticsIndexFactory {
   private readonly indexSettings?: IndicesIndexSettings;
   private readonly painlessScriptId: string;
   private readonly painlessScript: StoredScript;
+  private readonly retryService: CasesAnalyticsRetryService;
 
   constructor({
     logger,
@@ -63,9 +68,18 @@ export class AnalyticsIndexFactory {
             mode: CAI_INDEX_MODE,
           }),
     };
+    /**
+     * We should wait at least 5ms before retrying and no more that 2sec
+     */
+    const backOffFactory = fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: 2000 });
+    this.retryService = new CasesAnalyticsRetryService(this.logger, backOffFactory);
   }
 
   public async createIndex() {
+    await this.retryService.retryWithBackoff(() => this._createIndex());
+  }
+
+  private async _createIndex() {
     try {
       const indexExists = await this.indexExists();
 
@@ -76,9 +90,8 @@ export class AnalyticsIndexFactory {
         this.logger.info(`[${this.indexName}] Index exists. Updating mapping.`);
         await this.updateIndexMapping();
       }
-    } catch (err) {
-      this.logger.error(`[${this.indexName}] Failed to create the index template.`);
-      this.logger.error(err.message);
+    } catch (error) {
+      this.handleError(error);
     }
   }
 
@@ -91,9 +104,8 @@ export class AnalyticsIndexFactory {
       } else {
         this.logger.debug(`${this.indexName} mapping version is up to date. Skipping update.`);
       }
-    } catch (err) {
-      this.logger.error(`[${this.indexName}] Failed to create the index template.`);
-      this.logger.error(err.message);
+    } catch (error) {
+      this.handleError(error);
     }
   }
 
@@ -154,6 +166,15 @@ export class AnalyticsIndexFactory {
       currentMapping[this.indexName].mappings._meta?.mapping_version <
       this.mappings._meta?.mapping_version
     );
+  }
+
+  private handleError(error: EsErrors.ElasticsearchClientError) {
+    this.logger.error(`[${this.indexName}] Failed to create the index template.`);
+    this.logger.error(error.message);
+
+    if (isRetryableEsClientError(error)) {
+      throw error;
+    }
   }
 
   // Needs to be implemented by child class
