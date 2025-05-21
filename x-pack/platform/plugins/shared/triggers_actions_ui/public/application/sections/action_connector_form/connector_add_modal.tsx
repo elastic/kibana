@@ -324,13 +324,13 @@ const ConnectorAddModal = ({
           {canSave ? (
             <EuiButton
               fill
-            color="primary"
-            data-test-subj="saveActionButtonModal"
-            type="submit"
-            iconType="check"
-            isLoading={isSaving}
-            disabled={hasErrors}
-            onClick={onSubmit}
+              color="primary"
+              data-test-subj="saveActionButtonModal"
+              type="submit"
+              iconType="check"
+              isLoading={isSaving}
+              disabled={hasErrors}
+              onClick={onSubmit}
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
