@@ -45,7 +45,7 @@ xpack.features.overrides:
           privileges: [ "all" ]
           ## We need limited read access to fleet (v1) in order to use integrations
         - feature: "fleet"
-          privileges: [ "read" ]
+          privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
           privileges: [ "read" ]
