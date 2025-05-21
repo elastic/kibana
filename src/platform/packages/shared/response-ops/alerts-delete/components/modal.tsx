@@ -31,7 +31,8 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
-import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import * as translations from '../translations';
 
 import { ModalThresholdSelector as ThresholdSelector } from './modal_threshold_selector';
@@ -61,17 +62,6 @@ const getThresholdInDays = (threshold: number, thresholdUnit: EuiSelectOption) =
     default:
       return 0;
   }
-};
-
-const dateTimeFormat = (locale: string) => {
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
 };
 
 interface PreviewMessageProps {
@@ -151,6 +141,7 @@ export const AlertDeleteModal = ({
   isVisible,
   isDisabled = false,
 }: AlertDeleteProps) => {
+  const dateFormat = useUiSetting<string>('dateFormat');
   const [activeState, setActiveState] = useState({
     checked: DEFAULT_THRESHOLD_ENABLED,
     threshold: DEFAULT_THRESHOLD,
@@ -314,9 +305,7 @@ export const AlertDeleteModal = ({
           {!isLoadingLastRun && lastRun && (
             <>
               <EuiText color="subdued" size="s" data-test-subj="alert-delete-last-run">
-                {translations.ALERT_DELETE_LAST_RUN(
-                  lastRun && dateTimeFormat(i18n.getLocale()).format(new Date(lastRun))
-                )}
+                {translations.ALERT_DELETE_LAST_RUN(lastRun && moment(lastRun).format(dateFormat))}
               </EuiText>
               <EuiSpacer size="l" />
             </>
