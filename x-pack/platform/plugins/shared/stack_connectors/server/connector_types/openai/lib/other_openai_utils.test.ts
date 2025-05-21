@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import {
   sanitizeRequest,
   getRequestWithStreamOption,
   pkiSecretsValidator,
   pkiErrorHandler,
+  getPKISSLOverrides,
 } from './other_openai_utils';
 import type { AxiosError } from 'axios';
 import type { Secrets } from '../../../../common/openai/types';
@@ -165,7 +167,9 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
     });
 
     it('returns a friendly message for UNABLE_TO_VERIFY_LEAF_SIGNATURE', () => {
-      const error = { message: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE: certificate problem' } as AxiosError;
+      const error = {
+        message: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE: certificate problem',
+      } as AxiosError;
       const result = pkiErrorHandler(error);
       expect(result).toMatch(
         /Certificate error: UNABLE_TO_VERIFY_LEAF_SIGNATURE: certificate problem. Please check if your PKI certificates are valid or adjust SSL verification mode./
@@ -173,7 +177,9 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
     });
 
     it('returns a TLS handshake message for ERR_TLS_CERT_ALTNAME_INVALID', () => {
-      const error = { message: 'ERR_TLS_CERT_ALTNAME_INVALID: Hostname/IP does not match certificate' } as AxiosError;
+      const error = {
+        message: 'ERR_TLS_CERT_ALTNAME_INVALID: Hostname/IP does not match certificate',
+      } as AxiosError;
       const result = pkiErrorHandler(error);
       expect(result).toMatch(
         /TLS handshake failed: ERR_TLS_CERT_ALTNAME_INVALID: Hostname\/IP does not match certificate. Verify server certificate hostname and CA configuration./
@@ -214,25 +220,39 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
 
     it('validates successfully with valid certificateData and privateKeyData PEM', () => {
       const secretsObject = {
-        certificateData: Buffer.from('-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----').toString('base64'),
-        privateKeyData: Buffer.from('-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----').toString('base64'),
+        certificateData: Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----'
+        ).toString('base64'),
+        privateKeyData: Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----'
+        ).toString('base64'),
       } as Secrets;
       expect(() => pkiSecretsValidator(secretsObject)).not.toThrow();
     });
 
     it('validates successfully with valid certificateData, privateKeyData, and caData PEM', () => {
       const secretsObject = {
-        certificateData: Buffer.from('-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----').toString('base64'),
-        privateKeyData: Buffer.from('-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----').toString('base64'),
-        caData: Buffer.from('-----BEGIN CERTIFICATE-----\nca\n-----END CERTIFICATE-----').toString('base64'),
+        certificateData: Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----'
+        ).toString('base64'),
+        privateKeyData: Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----'
+        ).toString('base64'),
+        caData: Buffer.from('-----BEGIN CERTIFICATE-----\nca\n-----END CERTIFICATE-----').toString(
+          'base64'
+        ),
       } as Secrets;
       expect(() => pkiSecretsValidator(secretsObject)).not.toThrow();
     });
 
     it('throws an error if caData is not valid PEM in pkiSecretsValidator', () => {
       const secretsObject = {
-        certificateData: Buffer.from('-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----').toString('base64'),
-        privateKeyData: Buffer.from('-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----').toString('base64'),
+        certificateData: Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----'
+        ).toString('base64'),
+        privateKeyData: Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----'
+        ).toString('base64'),
         caData: Buffer.from('not a valid cert').toString('base64'),
       } as Secrets;
       expect(() => pkiSecretsValidator(secretsObject)).toThrow(
@@ -248,13 +268,19 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
     });
 
     describe('getPKISSLOverrides', () => {
-      const logger = { error: jest.fn() } as any;
-      const validCert = Buffer.from('-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----').toString('base64');
-      const validKey = Buffer.from('-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----').toString('base64');
-      const validCA = Buffer.from('-----BEGIN CERTIFICATE-----\nca\n-----END CERTIFICATE-----').toString('base64');
+      const logger = { error: jest.fn() } as unknown as Logger;
+      const validCert = Buffer.from(
+        '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----'
+      ).toString('base64');
+      const validKey = Buffer.from(
+        '-----BEGIN PRIVATE KEY-----\nxyz\n-----END PRIVATE KEY-----'
+      ).toString('base64');
+      const validCA = Buffer.from(
+        '-----BEGIN CERTIFICATE-----\nca\n-----END CERTIFICATE-----'
+      ).toString('base64');
 
       it('returns expected SSLSettings with valid cert, key, and ca', () => {
-        const result = require('./other_openai_utils').getPKISSLOverrides({
+        const result = getPKISSLOverrides({
           logger,
           certificateData: validCert,
           privateKeyData: validKey,
@@ -270,7 +296,7 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
       });
 
       it('returns expected SSLSettings with valid cert and key, ca undefined', () => {
-        const result = require('./other_openai_utils').getPKISSLOverrides({
+        const result = getPKISSLOverrides({
           logger,
           certificateData: validCert,
           privateKeyData: validKey,
@@ -284,33 +310,39 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
       });
 
       it('throws if cert is invalid', () => {
-        expect(() => require('./other_openai_utils').getPKISSLOverrides({
-          logger,
-          certificateData: Buffer.from('not a cert').toString('base64'),
-          privateKeyData: validKey,
-          caData: validCA,
-          verificationMode: 'full',
-        })).toThrow();
+        expect(() =>
+          getPKISSLOverrides({
+            logger,
+            certificateData: Buffer.from('not a cert').toString('base64'),
+            privateKeyData: validKey,
+            caData: validCA,
+            verificationMode: 'full',
+          })
+        ).toThrow();
       });
 
       it('throws if key is invalid', () => {
-        expect(() => require('./other_openai_utils').getPKISSLOverrides({
-          logger,
-          certificateData: validCert,
-          privateKeyData: Buffer.from('not a key').toString('base64'),
-          caData: validCA,
-          verificationMode: 'full',
-        })).toThrow();
+        expect(() =>
+          getPKISSLOverrides({
+            logger,
+            certificateData: validCert,
+            privateKeyData: Buffer.from('not a key').toString('base64'),
+            caData: validCA,
+            verificationMode: 'full',
+          })
+        ).toThrow();
       });
 
       it('throws if ca is invalid', () => {
-        expect(() => require('./other_openai_utils').getPKISSLOverrides({
-          logger,
-          certificateData: validCert,
-          privateKeyData: validKey,
-          caData: Buffer.from('not a ca').toString('base64'),
-          verificationMode: 'full',
-        })).toThrow();
+        expect(() =>
+          getPKISSLOverrides({
+            logger,
+            certificateData: validCert,
+            privateKeyData: validKey,
+            caData: Buffer.from('not a ca').toString('base64'),
+            verificationMode: 'full',
+          })
+        ).toThrow();
       });
     });
   });

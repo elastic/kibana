@@ -78,7 +78,7 @@ const validatePEMData = (
 
   if (decodedData && !decodedData.includes(`-----BEGIN ${type}-----`)) {
     throw new Error(
-      `Invalid ${description} file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN ${type}-----".`
+      `Invalid ${description} file format: The file must be a PEM-encoded ${type.toLowerCase()} beginning with "-----BEGIN ${type}-----".`
     );
   }
 };
