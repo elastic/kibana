@@ -47,7 +47,6 @@ import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 const DATAVIEW = 'auditbeat-exceptions-*';
 
-// Failing: See https://github.com/elastic/kibana/issues/207913
 describe(
   'Add exception using data views from rule details',
   { tags: ['@ess', '@serverless'] },
