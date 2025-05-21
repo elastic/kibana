@@ -170,13 +170,11 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
     const index = await this.getIndexName();
     const resourcesToBeDeleted = await this.get(migrationId);
     const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
-    const resourcesDeleteOperations = resourcesToBeDeletedDocIds.map((docId) => ({
+    return resourcesToBeDeletedDocIds.map((docId) => ({
       delete: {
         _id: docId,
         _index: index,
       },
     }));
-
-    return resourcesDeleteOperations;
   }
 }

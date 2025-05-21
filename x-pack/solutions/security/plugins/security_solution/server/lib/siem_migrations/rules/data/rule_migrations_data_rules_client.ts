@@ -427,12 +427,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const rulesToBeDeleted = await this.get(migrationId);
     const rulesToBeDeletedDocIds = rulesToBeDeleted.data.map((rule) => rule.id);
 
-    const rulesDeleteOperations = rulesToBeDeletedDocIds.map((docId) => ({
+    return rulesToBeDeletedDocIds.map((docId) => ({
       delete: {
         _id: docId,
         _index: index,
       },
     }));
-    return rulesDeleteOperations;
   }
 }

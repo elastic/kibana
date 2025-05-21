@@ -149,7 +149,7 @@ export class SiemRulesMigrationsService {
       await this.addRulesToMigration(migrationId, data);
 
       this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
-      return migrationId as string;
+      return migrationId;
     } catch (error) {
       this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
       throw error;
