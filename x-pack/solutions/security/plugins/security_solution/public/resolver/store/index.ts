@@ -7,7 +7,7 @@
 
 import type { Store, AnyAction } from 'redux';
 import { createStore, applyMiddleware } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { composeWithDevTools } from '@redux-devtools/extension';
 import type { AnalyzerById, DataAccessLayer } from '../types';
 import { analyzerReducer } from './reducer';
 import { resolverMiddlewareFactory } from './middleware';
