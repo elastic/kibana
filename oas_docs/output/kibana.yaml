@@ -28127,8 +28127,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -28797,8 +28800,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -29722,8 +29728,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:

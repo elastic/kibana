@@ -24360,10 +24360,14 @@
                       "properties": {
                         "install_source": {
                           "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "install_source"
+                        "install_source",
+                        "name"
                       ],
                       "type": "object"
                     },
@@ -25355,10 +25359,14 @@
                       "properties": {
                         "install_source": {
                           "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "install_source"
+                        "install_source",
+                        "name"
                       ],
                       "type": "object"
                     },
@@ -27115,10 +27123,14 @@
                       "properties": {
                         "install_source": {
                           "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "install_source"
+                        "install_source",
+                        "name"
                       ],
                       "type": "object"
                     },
