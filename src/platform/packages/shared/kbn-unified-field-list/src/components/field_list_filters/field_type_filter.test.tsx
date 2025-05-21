@@ -86,7 +86,7 @@ describe('<FieldTypeFilter />', () => {
         const onSupportedFieldFilter = jest.fn((field) => ['number', 'date'].includes(field.type));
 
         // When
-        const { user, props } = setup({
+        const { user } = setup({
           onSupportedFieldFilter,
         });
 
