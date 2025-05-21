@@ -12,14 +12,14 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { AgentFinish } from 'langchain/agents';
+import { Callbacks } from '@langchain/core/callbacks/manager';
+import { AnalyticsServiceSetup } from '@kbn/core/server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
-import { Callbacks } from '@langchain/core/callbacks/manager';
-import { AnalyticsServiceSetup } from '@kbn/core/server';
 
 interface StreamGraphParams {
   assistantGraph: DefaultAssistantGraph;
@@ -28,9 +28,9 @@ interface StreamGraphParams {
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-  telemetry: AnalyticsServiceSetup
+  telemetry: AnalyticsServiceSetup;
   traceOptions?: TraceOptions;
-  callbacks: Callbacks | undefined 
+  callbacks: Callbacks | undefined;
 }
 
 /**
@@ -54,7 +54,7 @@ export const streamGraph = async ({
   request,
   telemetry,
   traceOptions,
-  callbacks
+  callbacks,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
   let streamingSpan: Span | undefined;
   if (agent.isStarted()) {
@@ -202,7 +202,7 @@ interface InvokeGraphParams {
   inputs: GraphInputs;
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
-  callbacks: Callbacks | undefined 
+  callbacks: Callbacks | undefined;
 }
 interface InvokeGraphResponse {
   output: string;
@@ -225,7 +225,7 @@ export const invokeGraph = async ({
   inputs,
   onLlmResponse,
   traceOptions,
-  callbacks
+  callbacks,
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
   return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
     let traceData: TraceData = {};

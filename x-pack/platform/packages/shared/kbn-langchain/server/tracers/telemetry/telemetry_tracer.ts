@@ -47,7 +47,7 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
     this.totalTools = fields.totalTools;
   }
 
-async onChainEnd(run: Run): Promise<void> {
+  async onChainEnd(run: Run): Promise<void> {
     if (run.parent_run_id) {
       // Don't report telemetry for child runs
       return;
@@ -56,34 +56,30 @@ async onChainEnd(run: Run): Promise<void> {
     const toolsInvoked =
       run?.outputs && run?.outputs.steps.length
         ? run.outputs.steps.reduce((acc: { [k: string]: number }, event: ToolRunStep | never) => {
-          if ('action' in event && event?.action?.tool) {
-            if (this.elasticTools.includes(event.action.tool)) {
-              return {
-                ...acc,
-                ...(event.action.tool in acc
-                  ? { [event.action.tool]: acc[event.action.tool] + 1 }
-                  : { [event.action.tool]: 1 }),
-              };
-            } else {
-              // Custom tool names are user data, so we strip them out
-              return {
-                ...acc,
-                ...('CustomTool' in acc
-                  ? { CustomTool: acc.CustomTool + 1 }
-                  : { CustomTool: 1 }),
-              };
+            if ('action' in event && event?.action?.tool) {
+              if (this.elasticTools.includes(event.action.tool)) {
+                return {
+                  ...acc,
+                  ...(event.action.tool in acc
+                    ? { [event.action.tool]: acc[event.action.tool] + 1 }
+                    : { [event.action.tool]: 1 }),
+                };
+              } else {
+                // Custom tool names are user data, so we strip them out
+                return {
+                  ...acc,
+                  ...('CustomTool' in acc ? { CustomTool: acc.CustomTool + 1 } : { CustomTool: 1 }),
+                };
+              }
             }
-          }
-          return acc;
-        }, {})
+            return acc;
+          }, {})
         : {};
     const telemetryValue = {
       ...telemetryParams,
       durationMs: (run.end_time ?? 0) - (run.start_time ?? 0),
       toolsInvoked,
-      ...(telemetryParams.actionTypeId === '.gen-ai'
-        ? { isOssModel: run.inputs.isOssModel }
-        : {}),
+      ...(telemetryParams.actionTypeId === '.gen-ai' ? { isOssModel: run.inputs.isOssModel } : {}),
     };
     this.logger.debug(
       () => `Invoke ${eventType} telemetry:\n${JSON.stringify(telemetryValue, null, 2)}`
@@ -92,5 +88,5 @@ async onChainEnd(run: Run): Promise<void> {
   }
 
   // everything below is required for type only
-  protected async persistRun(_run: Run): Promise<void> { }
+  protected async persistRun(_run: Run): Promise<void> {}
 }
