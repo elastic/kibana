@@ -45,7 +45,7 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
       return 'SYNCHRONIZING';
     }
     const installedSyncedIntegrations = (syncedIntegrationsStatus?.integrations ?? []).filter(
-      (integration) => integration.install_status.main === 'installed'
+      (integration) => integration.install_status?.remote !== undefined
     );
     const statuses = [
       ...(installedSyncedIntegrations.map((integration) => integration.sync_status) || []),
@@ -86,6 +86,9 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
               : syncedIntegrationsStatus
           }
           outputName={output.name}
+          syncUninstalledIntegrations={
+            output.type === 'remote_elasticsearch' && output?.sync_uninstalled_integrations
+          }
         />
       )}
     </>

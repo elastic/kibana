@@ -31,12 +31,13 @@ import { IntegrationStatus } from './integration_status';
 
 interface Props {
   onClose: () => void;
-  syncedIntegrationsStatus?: GetRemoteSyncedIntegrationsStatusResponse;
   outputName: string;
+  syncedIntegrationsStatus?: GetRemoteSyncedIntegrationsStatusResponse;
+  syncUninstalledIntegrations?: boolean;
 }
 
 export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
-  ({ onClose, syncedIntegrationsStatus, outputName }) => {
+  ({ onClose, syncedIntegrationsStatus, outputName, syncUninstalledIntegrations }) => {
     const { docLinks } = useStartServices();
     return (
       <EuiFlyout onClose={onClose}>
@@ -90,7 +91,8 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
             {(syncedIntegrationsStatus?.integrations ?? [])
-              .filter((integration) => integration.install_status.main === 'installed')
+              // don't show integrations that have no remote install_status, as they were likely uninstalled
+              .filter((integration) => integration.install_status?.remote !== undefined)
               .map((integration) => {
                 const customAssets = Object.values(
                   syncedIntegrationsStatus?.custom_assets ?? {}
@@ -101,6 +103,7 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
                       data-test-subj={`${integration.package_name}-accordion`}
                       integration={integration}
                       customAssets={customAssets}
+                      syncUninstalledIntegrations={syncUninstalledIntegrations}
                     />
                   </EuiFlexItem>
                 );
