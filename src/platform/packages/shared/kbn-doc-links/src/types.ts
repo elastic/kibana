@@ -481,6 +481,7 @@ export interface DocLinks {
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
+    fingerprint: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
