@@ -47,7 +47,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('should create a new custom threshold rule', async () => {
       const input = await testSubjects.find('ruleDetailsNameInput');
-      input.clearValueWithKeyboard();
+      await input.clearValueWithKeyboard();
       await testSubjects.setValue('ruleDetailsNameInput', ruleName);
       await retry.try(async () => {
         await testSubjects.click('rulePageFooterSaveButton');

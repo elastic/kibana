@@ -46,7 +46,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('queryFormType_searchSource');
       await testSubjects.exists('selectDataViewExpression');
       const input = await testSubjects.find('ruleDetailsNameInput');
-      input.clearValueWithKeyboard();
+      await input.clearValueWithKeyboard();
       await testSubjects.setValue('ruleDetailsNameInput', ruleName);
       await retry.try(async () => {
         await testSubjects.click('rulePageFooterSaveButton');
