@@ -9,6 +9,8 @@
 
 import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
+import { getCategorizeColumns } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiButtonIcon,
@@ -16,6 +18,7 @@ import {
   EuiFlexItem,
   EuiDataGridCellValueElementProps,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
@@ -35,6 +38,33 @@ export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
+/**
+ * Extracts "keywords" from a regex string by stripping leading/trailing '.*?'
+ * and splitting the remainder by '.+?'.
+ *
+ * @param {string} regexString The regular expression string.
+ * @returns {string[]} An array of extracted "keywords".
+ */
+function extractGenericKeywords(regexString: string) {
+  let cleanedString = regexString;
+
+  // Strip leading '.*?'
+  if (cleanedString.startsWith('.*?')) {
+    cleanedString = cleanedString.substring('.*?'.length);
+  }
+
+  // Strip trailing '.*?'
+  if (cleanedString.endsWith('.*?')) {
+    cleanedString = cleanedString.substring(0, cleanedString.length - '.*?'.length);
+  }
+
+  // Split by '.+?'
+  // Escape the '.' so it's treated as a literal dot, not a wildcard
+  // '.+?' as a literal string to split by.
+  const keywords = cleanedString.split(/\.\+\?/);
+  return keywords.map((keyword) => keyword.trim()).filter((keyword) => keyword.length > 0);
+}
+
 export const getRenderCellValueFn = ({
   dataView,
   rows,
@@ -46,6 +76,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
+  query,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -57,6 +88,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
+  query?: Query | AggregateQuery;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -153,6 +185,28 @@ export const getRenderCellValueFn = ({
           isCompressed={isCompressed}
         />
       );
+    }
+
+    if (isOfAggregateQueryType(query)) {
+      const categorizeColumns = getCategorizeColumns(query.esql);
+      if (categorizeColumns?.includes(columnId)) {
+        const keywords = extractGenericKeywords(String(row.flattened[columnId]));
+        return (
+          <>
+            {keywords.map((keyword, index) => {
+              return (
+                <EuiBadge
+                  key={index}
+                  color="hollow"
+                  css={{ marginRight: euiTheme.size.xs, marginBottom: euiTheme.size.xs }}
+                >
+                  {keyword}
+                </EuiBadge>
+              );
+            })}
+          </>
+        );
+      }
     }
 
     return (
