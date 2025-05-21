@@ -731,6 +731,7 @@
     "@kbn/osquery-plugin": "link:x-pack/platform/plugins/shared/osquery",
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
     "@kbn/painless-lab-plugin": "link:x-pack/platform/plugins/private/painless_lab",
+    "@kbn/palettes": "link:src/platform/packages/shared/kbn-palettes",
     "@kbn/panel-loader": "link:src/platform/packages/private/kbn-panel-loader",
     "@kbn/portable-dashboards-example": "link:examples/portable_dashboards_example",
     "@kbn/preboot-example-plugin": "link:examples/preboot_example",

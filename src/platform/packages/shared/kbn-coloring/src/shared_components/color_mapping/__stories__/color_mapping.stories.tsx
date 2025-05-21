@@ -8,11 +8,11 @@
  */
 
 import React, { FC, useState } from 'react';
+import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
 import type { StoryFn, StoryObj } from '@storybook/react';
 import { css } from '@emotion/react';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
-import { AVAILABLE_PALETTES, getPalette, NeutralPalette } from '../palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
 import { ColorMapping } from '../config';
 import { getColorFactory } from '../color/color_handling';
@@ -30,9 +30,8 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
     DEFAULT_COLOR_MAPPING_CONFIG
   );
 
-  const getPaletteFn = getPalette(AVAILABLE_PALETTES, NeutralPalette);
-
-  const colorFactory = getColorFactory(updatedModel, getPaletteFn, false, args.data);
+  const palettes = getKbnPalettes({ darkMode: false });
+  const colorFactory = getColorFactory(updatedModel, palettes, false, args.data);
 
   return (
     <EuiPage>
@@ -71,7 +70,7 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
         ownFocus={false}
       >
         <EuiForm>
-          <CategoricalColorMapping {...args} onModelUpdate={setUpdateModel} />
+          <CategoricalColorMapping {...args} palettes={palettes} onModelUpdate={setUpdateModel} />
         </EuiForm>
       </EuiFlyout>
     </EuiPage>
@@ -80,7 +79,6 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
 
 export const Default: StoryObj<typeof Template> = {
   render: Template,
-
   args: {
     model: {
       ...DEFAULT_COLOR_MAPPING_CONFIG,
@@ -121,7 +119,6 @@ export const Default: StoryObj<typeof Template> = {
         'Finland',
       ],
     },
-    palettes: AVAILABLE_PALETTES,
     specialTokens: new Map(),
     // eslint-disable-next-line no-console
     onModelUpdate: (model) => console.log(model),

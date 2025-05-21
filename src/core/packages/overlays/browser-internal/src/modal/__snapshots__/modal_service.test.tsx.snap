@@ -102,7 +102,20 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -400,7 +413,28 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -767,7 +801,36 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -1052,7 +1115,36 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -1342,7 +1434,36 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -1621,7 +1742,36 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -1843,7 +1993,20 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -1970,7 +2133,20 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -2102,7 +2278,20 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -2223,7 +2412,20 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },

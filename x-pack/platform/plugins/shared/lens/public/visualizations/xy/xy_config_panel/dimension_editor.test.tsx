@@ -18,6 +18,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { act } from 'react-dom/test-utils';
+import { getKbnPalettes } from '@kbn/palettes';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -63,6 +64,7 @@ describe('XY Config panels', () => {
           }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -91,6 +93,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -140,6 +143,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -186,6 +190,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
@@ -239,6 +244,7 @@ describe('XY Config panels', () => {
             state={state}
             formatFactory={jest.fn()}
             paletteService={chartPluginMock.createPaletteRegistry()}
+            palettes={getKbnPalettes({ darkMode: false })}
             panelRef={React.createRef()}
             addLayer={jest.fn()}
             removeLayer={jest.fn()}
@@ -292,6 +298,7 @@ describe('XY Config panels', () => {
           state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
+          palettes={getKbnPalettes({ darkMode: false })}
           panelRef={React.createRef()}
           addLayer={jest.fn()}
           removeLayer={jest.fn()}

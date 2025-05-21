@@ -11,7 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  PaletteRegistry,
+  CustomPaletteParams,
+  PaletteOutput,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -88,12 +94,17 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
   };
 }
 
-function computePaletteParams(params: CustomPaletteParams) {
+function computePaletteParams(
+  paletteService: PaletteRegistry,
+  palette: PaletteOutput<CustomPaletteParams>
+) {
+  const stops = getOverridePaletteStops(paletteService, palette);
+
   return {
-    ...params,
+    ...palette.params,
     // rewrite colors and stops as two distinct arguments
-    colors: (params?.stops || []).map(({ color }) => color),
-    stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
+    colors: stops?.map(({ color }) => color),
+    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }
@@ -350,7 +361,7 @@ export const getHeatmapVisualization = ({
       palette: state.palette?.params
         ? paletteService
             .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette?.params))
+            .toExpression(computePaletteParams(paletteService, state.palette))
         : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
       legend: buildExpression([legendFn]),
       gridConfig: buildExpression([gridConfigFn]),
@@ -408,7 +419,7 @@ export const getHeatmapVisualization = ({
       palette: state.palette?.params
         ? paletteService
             .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette?.params))
+            .toExpression(computePaletteParams(paletteService, state.palette))
         : paletteService.get(DEFAULT_PALETTE_NAME).toExpression(),
     });
 

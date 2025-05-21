@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getKbnPalettes } from '@kbn/palettes';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
 jest.mock('@kbn/coloring', () => ({
@@ -15,8 +16,10 @@ jest.mock('@kbn/coloring', () => ({
 }));
 
 describe('getColorAccessorFn', () => {
+  const palettes = getKbnPalettes({ darkMode: false });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getColorAccessor = getColorAccessorFn('{}', {} as any, false);
+  const getColorAccessor = getColorAccessorFn(palettes, '{}', {} as any, false);
 
   it('should return null for null values', () => {
     expect(getColorAccessor(null)).toBe(null);

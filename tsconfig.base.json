@@ -1402,6 +1402,8 @@
       "@kbn/paertial-results-example-plugin/*": ["examples/partial_results_example/*"],
       "@kbn/painless-lab-plugin": ["x-pack/platform/plugins/private/painless_lab"],
       "@kbn/painless-lab-plugin/*": ["x-pack/platform/plugins/private/painless_lab/*"],
+      "@kbn/palettes": ["src/platform/packages/shared/kbn-palettes"],
+      "@kbn/palettes/*": ["src/platform/packages/shared/kbn-palettes/*"],
       "@kbn/panel-loader": ["src/platform/packages/private/kbn-panel-loader"],
       "@kbn/panel-loader/*": ["src/platform/packages/private/kbn-panel-loader/*"],
       "@kbn/peggy": ["src/platform/packages/private/kbn-peggy"],

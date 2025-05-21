@@ -39,6 +39,7 @@ import {
 
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import { ThemeServiceSetup } from '@kbn/core/public';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
@@ -50,10 +51,11 @@ import type {
   StartServices,
 } from '../types';
 
-export type GetStartDepsFn = () => Promise<{
+export interface GetStartDeps {
   data: DataPublicPluginStart;
   formatFactory: FormatFactory;
   theme: ChartsPluginStart['theme'];
+  kibanaTheme: ThemeServiceSetup;
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
@@ -62,10 +64,10 @@ export type GetStartDepsFn = () => Promise<{
   usageCollection?: UsageCollectionStart;
   timeFormat: string;
   startServices: StartServices;
-}>;
+}
 
 interface XyChartRendererDeps {
-  getStartDeps: GetStartDepsFn;
+  getStartDeps: () => Promise<GetStartDeps>;
 }
 
 export const extractCounterEvents = (

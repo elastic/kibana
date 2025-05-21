@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PaletteDefinition } from '@kbn/coloring';
 import { createColorPalette as createLegacyColorPalette } from '../..';
 import { buildPalettes } from './palettes';
 import { colorsServiceMock } from '../legacy_colors/mock';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes: Record<string, PaletteDefinition> = buildPalettes(colorsServiceMock);
+  const palettes = buildPalettes({ darkMode: false });
+
   describe('default palette', () => {
     describe('syncColors: false', () => {
       it('should return different colors based on behind text flag', () => {

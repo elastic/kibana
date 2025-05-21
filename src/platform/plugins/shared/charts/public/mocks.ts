@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
 import { activeCursorMock } from './services/active_cursor/mock';
@@ -21,14 +22,14 @@ export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
 const createSetupContract = (): Setup => ({
   legacyColors: colorsServiceMock,
   theme: themeServiceMock,
-  palettes: paletteServiceMock.setup({} as any),
+  palettes: paletteServiceMock.setup(createCoreSetupMock().theme.getTheme(), {} as any),
 });
 
 const createStartContract = (): Start => ({
   legacyColors: colorsServiceMock,
   theme: themeServiceMock,
   activeCursor: activeCursorMock,
-  palettes: paletteServiceMock.setup({} as any),
+  palettes: paletteServiceMock.setup(createCoreSetupMock().theme.getTheme(), {} as any),
 });
 
 export const chartPluginMock = {
