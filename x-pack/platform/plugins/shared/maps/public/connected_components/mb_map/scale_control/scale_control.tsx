@@ -6,9 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import React, { Component } from 'react';
+import { UseEuiTheme } from '@elastic/eui';
 import type { Map as MapboxMap } from '@kbn/mapbox-gl';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 const MAX_WIDTH = 110;
 
 interface Props {
@@ -109,14 +111,49 @@ export class ScaleControl extends Component<Props, State> {
 
   render() {
     return (
-      <div
-        className={classNames('mapScaleControl', {
-          mapScaleControlFullScreen: this.props.isFullScreen,
-        })}
-        style={{ width: `${this.state.width}px` }}
-      >
-        {this.state.label}
-      </div>
+      <MapScaleControl
+        isFullScreen={this.props.isFullScreen}
+        stateWidth={this.state.width}
+        label={this.state.label}
+      />
     );
   }
 }
+
+interface MapScaleControlProps {
+  isFullScreen: boolean;
+  stateWidth: number;
+  label: string;
+}
+const componentStyles = {
+  mapScaleControlStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      zIndex: euiTheme.levels.header,
+      left: euiTheme.size.m,
+      bottom: euiTheme.size.m,
+      pointerEvents: 'none',
+      color: euiTheme.colors.textParagraph,
+      borderLeft: `2px solid ${euiTheme.colors.textParagraph}99`,
+      borderBottom: `2px solid ${euiTheme.colors.textParagraph}99`,
+      textAlign: 'right',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      paddingLeft: euiTheme.size.xs,
+      paddingRight: euiTheme.size.xs,
+    }),
+  mapScaleControlFullScreenStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      bottom: `calc(${euiTheme.size.l} * 2)`,
+    }),
+};
+const MapScaleControl: React.FC<MapScaleControlProps> = ({ isFullScreen, stateWidth, label }) => {
+  const styles = useMemoizedStyles(componentStyles);
+  return (
+    <div
+      css={[styles.mapScaleControlStyles, isFullScreen && styles.mapScaleControlFullScreenStyles]}
+      style={{ width: `${stateWidth}px` }}
+    >
+      {label}
+    </div>
+  );
+};
