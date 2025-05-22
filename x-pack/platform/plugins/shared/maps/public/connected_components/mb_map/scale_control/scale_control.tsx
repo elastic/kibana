@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import type { Map as MapboxMap } from '@kbn/mapbox-gl';
 import { css } from '@emotion/react';
 import { useMemoizedStyles } from '@kbn/core/public';
+
 const MAX_WIDTH = 110;
 
 interface Props {
@@ -18,113 +19,19 @@ interface Props {
   mbMap: MapboxMap;
 }
 
-interface State {
-  label: string;
-  width: number;
-}
-
-function getScaleDistance(value: number) {
+const getScaleDistance = (value: number) => {
   const orderOfMagnitude = Math.floor(Math.log10(value));
   const pow10 = Math.pow(10, orderOfMagnitude);
-
-  // reduce value to single order of magnitude to making rounding simple regardless of order of magnitude
   const distance = value / pow10;
 
-  if (distance < 1) {
-    return pow10 * (Math.round(distance * 10) / 10);
-  }
-
-  // provide easy to multiple round numbers for scale distance so its easy to measure distances longer then the scale
-  if (distance >= 10) {
-    return 10 * pow10;
-  }
-
-  if (distance >= 5) {
-    return 5 * pow10;
-  }
-
-  if (distance >= 3) {
-    return 3 * pow10;
-  }
+  if (distance < 1) return pow10 * (Math.round(distance * 10) / 10);
+  if (distance >= 10) return 10 * pow10;
+  if (distance >= 5) return 5 * pow10;
+  if (distance >= 3) return 3 * pow10;
 
   return Math.floor(distance) * pow10;
-}
+};
 
-export class ScaleControl extends Component<Props, State> {
-  private _isMounted: boolean = false;
-
-  state: State = { label: '', width: 0 };
-
-  componentDidMount() {
-    this._isMounted = true;
-    this.props.mbMap.on('move', this._onUpdate);
-    this._onUpdate();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    this.props.mbMap.off('move', this._onUpdate);
-  }
-
-  _onUpdate = () => {
-    if (!this._isMounted) {
-      return;
-    }
-    const centerHeight = this.props.mbMap.getContainer().clientHeight / 2;
-    const leftLatLon = this.props.mbMap.unproject([0, centerHeight]);
-    const rightLatLon = this.props.mbMap.unproject([MAX_WIDTH, centerHeight]);
-    const maxDistanceMeters = leftLatLon.distanceTo(rightLatLon);
-    if (maxDistanceMeters >= 1000) {
-      this._setScale(
-        maxDistanceMeters / 1000,
-        i18n.translate('xpack.maps.kilometersAbbr', {
-          defaultMessage: 'km',
-        })
-      );
-    } else {
-      this._setScale(
-        maxDistanceMeters,
-        i18n.translate('xpack.maps.metersAbbr', {
-          defaultMessage: 'm',
-        })
-      );
-    }
-  };
-
-  _setScale(maxDistance: number, unit: string) {
-    const scaleDistance = getScaleDistance(maxDistance);
-    const zoom = this.props.mbMap.getZoom();
-    const bounds = this.props.mbMap.getBounds();
-    let label = `${scaleDistance} ${unit}`;
-    if (
-      zoom <= 4 ||
-      (zoom <= 6 && (bounds.getNorth() > 23.5 || bounds.getSouth() < -23.5)) ||
-      (zoom <= 8 && (bounds.getNorth() > 45 || bounds.getSouth() < -45))
-    ) {
-      label = '~' + label;
-    }
-    this.setState({
-      width: MAX_WIDTH * (scaleDistance / maxDistance),
-      label,
-    });
-  }
-
-  render() {
-    return (
-      <MapScaleControl
-        isFullScreen={this.props.isFullScreen}
-        stateWidth={this.state.width}
-        label={this.state.label}
-      />
-    );
-  }
-}
-
-interface MapScaleControlProps {
-  isFullScreen: boolean;
-  stateWidth: number;
-  label: string;
-}
 const componentStyles = {
   mapScaleControlStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -146,12 +53,54 @@ const componentStyles = {
       bottom: `calc(${euiTheme.size.l} * 2)`,
     }),
 };
-const MapScaleControl: React.FC<MapScaleControlProps> = ({ isFullScreen, stateWidth, label }) => {
+
+export const ScaleControl: React.FC<Props> = ({ isFullScreen, mbMap }) => {
+  const [label, setLabel] = useState('');
+  const [width, setWidth] = useState(0);
   const styles = useMemoizedStyles(componentStyles);
+
+  useEffect(() => {
+    const onUpdate = () => {
+      const container = mbMap.getContainer();
+      const centerHeight = container.clientHeight / 2;
+      const leftLatLon = mbMap.unproject([0, centerHeight]);
+      const rightLatLon = mbMap.unproject([MAX_WIDTH, centerHeight]);
+      const maxDistanceMeters = leftLatLon.distanceTo(rightLatLon);
+
+      const isKm = maxDistanceMeters >= 1000;
+      const unit = i18n.translate(isKm ? 'xpack.maps.kilometersAbbr' : 'xpack.maps.metersAbbr', {
+        defaultMessage: isKm ? 'km' : 'm',
+      });
+      const maxDistance = isKm ? maxDistanceMeters / 1000 : maxDistanceMeters;
+      const scaleDistance = getScaleDistance(maxDistance);
+
+      const zoom = mbMap.getZoom();
+      const bounds = mbMap.getBounds();
+      let nextLabel = `${scaleDistance} ${unit}`;
+      if (
+        zoom <= 4 ||
+        (zoom <= 6 && (bounds.getNorth() > 23.5 || bounds.getSouth() < -23.5)) ||
+        (zoom <= 8 && (bounds.getNorth() > 45 || bounds.getSouth() < -45))
+      ) {
+        nextLabel = `~${nextLabel}`;
+      }
+
+      setLabel(nextLabel);
+      setWidth(MAX_WIDTH * (scaleDistance / maxDistance));
+    };
+
+    mbMap.on('move', onUpdate);
+    onUpdate();
+
+    return () => {
+      mbMap.off('move', onUpdate);
+    };
+  }, [mbMap]);
+
   return (
     <div
       css={[styles.mapScaleControlStyles, isFullScreen && styles.mapScaleControlFullScreenStyles]}
-      style={{ width: `${stateWidth}px` }}
+      style={{ width: `${width}px` }}
     >
       {label}
     </div>
