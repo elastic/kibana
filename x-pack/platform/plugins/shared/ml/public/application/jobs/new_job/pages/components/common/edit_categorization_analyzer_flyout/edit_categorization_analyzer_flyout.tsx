@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -20,8 +19,12 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isValidJson } from '@kbn/ml-common-utils/validation_utils';
+
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../common/job_creator';
 import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
