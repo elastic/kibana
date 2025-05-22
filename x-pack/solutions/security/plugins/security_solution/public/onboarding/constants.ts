@@ -20,6 +20,7 @@ export enum OnboardingCardId {
   rules = 'rules',
   alerts = 'alerts',
   assistant = 'assistant',
+  assistantExternalDetections = 'assistant_external_detections',
   attackDiscovery = 'attack_discovery',
 
   // siem_migrations topic cards
