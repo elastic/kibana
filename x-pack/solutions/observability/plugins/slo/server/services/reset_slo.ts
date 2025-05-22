@@ -8,6 +8,7 @@
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
+import { ResetSLOResponse, resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
@@ -40,7 +41,7 @@ export class ResetSLO {
     private basePath: IBasePath
   ) {}
 
-  public async execute(sloId: string) {
+  public async execute(sloId: string): Promise<ResetSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
     await assertExpectedIndicatorSourceIndexPrivileges(
       originalSlo,
@@ -60,7 +61,7 @@ export class ResetSLO {
 
     await this.repository.update(resetedSlo);
 
-    return resetedSlo;
+    return resetSLOResponseSchema.encode(resetedSlo);
   }
 
   private async deleteOriginalSLO(slo: SLODefinition) {
