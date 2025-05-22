@@ -10,12 +10,13 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
   AlertConsumers,
+  DEPRECATED_ALERTING_CONSUMERS,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
-import { ALERTING_FEATURE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';

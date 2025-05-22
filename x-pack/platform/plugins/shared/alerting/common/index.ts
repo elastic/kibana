@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
-
 // TODO: https://github.com/elastic/kibana/issues/110895
 
 export type {
@@ -262,5 +260,3 @@ export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-
-export const DEPRECATED_ALERTING_CONSUMERS = [AlertConsumers.OBSERVABILITY];
