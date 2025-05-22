@@ -7,11 +7,14 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useParams } from 'react-router-dom';
+import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
+import { useKibana } from '../../hooks/use_kibana';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
@@ -19,6 +22,9 @@ import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
 export const QueryRulesetDetail: React.FC = () => {
+  const {
+    services: { application, http },
+  } = useKibana();
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
   }>();
@@ -32,6 +38,23 @@ export const QueryRulesetDetail: React.FC = () => {
       {!isInitialLoading && !isError && !!queryRuleset && (
         <KibanaPageTemplate.Header
           pageTitle={rulesetId}
+          breadcrumbs={[
+            {
+              text: (
+                <>
+                  <EuiIcon size="s" type="arrowLeft" />{' '}
+                  {i18n.translate('xpack.queryRules.queryRulesetDetail.backButton', {
+                    defaultMessage: 'Back',
+                  })}
+                </>
+              ),
+              color: 'primary',
+              'aria-current': false,
+              href: '#',
+              onClick: (e) =>
+                application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`)),
+            },
+          ]}
           restrictWidth
           color="primary"
           data-test-subj="queryRulesetDetailHeader"

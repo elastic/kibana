@@ -13,9 +13,3 @@ export const ATTACK_DISCOVERY_TAG = 'attack-discovery';
 export const DEFAULT_MAX_GENERATION_ATTEMPTS = 10;
 export const DEFAULT_MAX_HALLUCINATION_FAILURES = 5;
 export const DEFAULT_MAX_REPEATED_GENERATIONS = 3;
-
-export const NodeType = {
-  GENERATE_NODE: 'generate',
-  REFINE_NODE: 'refine',
-  RETRIEVE_ANONYMIZED_ALERTS_NODE: 'retrieve_anonymized_alerts',
-} as const;
