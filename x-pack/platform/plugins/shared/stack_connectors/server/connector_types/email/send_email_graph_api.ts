@@ -16,8 +16,8 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { SendEmailOptions } from './send_email';
 import type { Attachment } from '.';
 
-const SMALL_ATTACHMENT_LIMIT = 3000000; // 3mb
-const ATTACHMENT_CHUNK_SIZE = 2000000; // 2mb
+const SMALL_ATTACHMENT_LIMIT = 3 * 1024 * 1024; // 3mb
+const ATTACHMENT_CHUNK_SIZE = 2 * 1024 * 1024; // 2mb
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
@@ -97,12 +97,16 @@ async function sendEmail({
   throw new Error(errString);
 }
 
-async function sendEmailWithAttachments(params: SendEmailParams): Promise<AxiosResponse> {
+export async function sendEmailWithAttachments(
+  params: SendEmailParams,
+  smallAttachmentLimit: number = SMALL_ATTACHMENT_LIMIT,
+  attachmentChunkSize: number = ATTACHMENT_CHUNK_SIZE
+): Promise<AxiosResponse> {
   const emailId = await createDraft(params);
   const attachments = params.sendEmailOptions.attachments ?? [];
   for (const attachment of attachments) {
     const size = Buffer.byteLength(attachment.content);
-    if (size < SMALL_ATTACHMENT_LIMIT) {
+    if (size < smallAttachmentLimit) {
       // If attachment is smaller than the limit, add the attachment to the draft email
       await addAttachment(emailId, attachment, params);
     } else {
@@ -112,10 +116,9 @@ async function sendEmailWithAttachments(params: SendEmailParams): Promise<AxiosR
       const bufferSize = buffer.length;
       const uploadUrl = await createUploadSession(emailId, attachment.filename, bufferSize, params);
 
-      const chunks = getAttachmentChunks(buffer, bufferSize);
+      const chunks = getAttachmentChunks(buffer, bufferSize, attachmentChunkSize);
       let start = 0;
-      for (let index = 0; index < chunks.length; index++) {
-        const chunk = chunks[index];
+      for (const chunk of chunks) {
         const end = start + chunk.length - 1;
         const headers = {
           'Content-Type': 'application/octet-stream',
@@ -162,11 +165,11 @@ function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
   };
 }
 
-function getAttachmentChunks(buffer: Buffer, size: number): Buffer[] {
+function getAttachmentChunks(buffer: Buffer, size: number, attachmentChunkSize: number): Buffer[] {
   const chunks: Buffer[] = [];
   let start = 0;
   while (start < size) {
-    const end = Math.min(start + ATTACHMENT_CHUNK_SIZE, size);
+    const end = Math.min(start + attachmentChunkSize, size);
     const chunk = buffer.subarray(start, end);
     chunks.push(chunk);
     start = end;

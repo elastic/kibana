@@ -17,6 +17,8 @@ import { PrepareJobResults, RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
 import { ScheduledReportType } from '../../types';
 
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10mb
+
 type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
 };
@@ -78,29 +80,40 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   protected async notify(
     report: SavedReport,
     taskInstance: ConcreteTaskInstance,
+    byteSize: number,
+    contentType?: string | null,
     spaceId?: string
   ): Promise<void> {
-    if (this.emailNotificationService) {
-      const { runAt, params } = taskInstance;
-      const task = params as ScheduledReportTaskParams;
-      const internalSoClient = await this.opts.reporting.getSoClient();
-      const reportSO = await internalSoClient.get<ScheduledReportType>(
-        SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-        task.id
+    if (byteSize > MAX_ATTACHMENT_SIZE) {
+      throw new Error('Error sending scheduled report: the report is larger than the 10MB limit.');
+    }
+    if (!this.emailNotificationService) {
+      throw new Error(
+        'Error sending scheduled report: reporting notification service has not been initialized.'
       );
-      const { notification } = reportSO.attributes;
+    }
 
-      if (notification && notification.email) {
-        const { asInternalUser: esClient } = await this.opts.reporting.getEsClient();
-        await this.emailNotificationService.notify({
-          esClient,
-          index: report._index,
-          id: report._id,
+    const { runAt, params } = taskInstance;
+    const task = params as ScheduledReportTaskParams;
+    const internalSoClient = await this.opts.reporting.getSoClient();
+    const reportSO = await internalSoClient.get<ScheduledReportType>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      task.id
+    );
+    const { notification } = reportSO.attributes;
+    if (notification && notification.email) {
+      await this.emailNotificationService.notify({
+        reporting: this.opts.reporting,
+        index: report._index,
+        id: report._id,
+        jobType: report.jobtype,
+        contentType,
+        emailParams: {
           to: notification.email.to,
           runAt: runAt.toISOString(),
           spaceId,
-        });
-      }
+        },
+      });
     }
   }
 

@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '@kbn/core/server';
+import { ReportingCore } from '../..';
 
 export interface NotifyArgs {
-  esClient: ElasticsearchClient;
+  reporting: ReportingCore;
   index: string;
   id: string;
-  to: string[];
-  bcc?: string[];
-  cc?: string[];
-  runAt: string;
-  spaceId?: string;
+  contentType?: string | null;
+  jobType: string;
+  emailParams: {
+    to: string[];
+    bcc?: string[];
+    cc?: string[];
+    runAt: string;
+    spaceId?: string;
+  };
 }
 
 export interface NotificationService {

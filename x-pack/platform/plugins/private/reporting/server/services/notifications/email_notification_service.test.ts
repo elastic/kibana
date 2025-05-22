@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
-import type { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { set } from '@kbn/safer-lodash-set';
+import { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 import { EmailNotificationService } from './email_notification_service';
 
 describe('EmailNotificationService', () => {
-  const mockLogger = loggingSystemMock.createLogger();
   const notifications = notificationsMock.createStart();
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let emailNotificationService: EmailNotificationService;
+  let mockCore: ReportingCore;
 
   beforeEach(async () => {
     jest.clearAllMocks();
     notifications.isEmailServiceAvailable.mockReturnValue(true);
     emailNotificationService = new EmailNotificationService({
-      logger: mockLogger,
       notifications,
     });
     const reportingConfig = {
@@ -30,40 +30,38 @@ describe('EmailNotificationService', () => {
       queue: { indexInterval: 'week' },
       statefulSettings: { enabled: true },
     };
-    const mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
+    mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
-    mockEsClient.get.mockResponse({} as any);
   });
 
   it('notify()', async () => {
-    const mockReport = {
-      _id: '1234',
-      _index: '.reporting-test-1234',
-      _primary_term: 1,
-      _seq_no: 1,
-      _source: {
-        jobtype: 'test-report',
+    const base64Content = Buffer.from('test-output').toString('base64');
+    mockEsClient.search.mockResponse(
+      set<any>({}, 'hits.hits.0._source', {
+        jobtype: 'pdf',
         output: {
-          content: 'test output',
-          content_type: 'test content_type',
+          content: base64Content,
+          size: 12,
         },
-      },
-    } as ReportDocument;
-    mockEsClient.get.mockResponse(mockReport as any);
+      })
+    );
     await emailNotificationService.notify({
-      esClient: mockEsClient,
+      reporting: mockCore,
       index: '.reporting-test-1234',
       id: '1234',
-      to: ['test@test.com'],
-      runAt: '04/18/2025',
-      spaceId: 'space1',
+      jobType: 'pdf',
+      contentType: 'test-content-type',
+      emailParams: {
+        to: ['test@test.com'],
+        runAt: '04/18/2025',
+        spaceId: 'space1',
+      },
     });
-
     expect(notifications.getEmailService().sendAttachmentEmail).toHaveBeenCalledWith({
       attachments: [
         {
-          content: 'test output',
-          contentType: 'test content_type',
+          content: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
+          contentType: 'test-content-type',
           encoding: 'base64',
           filename: 'report.pdf',
         },

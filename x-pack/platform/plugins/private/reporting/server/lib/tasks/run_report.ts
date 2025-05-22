@@ -132,6 +132,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected abstract notify(
     report: SavedReport,
     taskInstance: ConcreteTaskInstance,
+    byteSize: number,
+    contentType?: string | null,
     spaceId?: string
   ): Promise<void>;
 
@@ -530,20 +532,27 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
 
+            const byteSize = stream.bytesWritten;
             eventLog.logExecutionComplete({
               ...(output.metrics ?? {}),
-              byteSize: stream.bytesWritten,
+              byteSize,
             });
 
             if (output) {
-              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              logger.debug(`Job output size: ${byteSize} bytes.`);
               // Update the job status to "completed"
               report = await this.completeJob(report, {
                 ...output,
-                size: stream.bytesWritten,
+                size: byteSize,
               });
 
-              await this.notify(report, taskInstance, task.payload.spaceId);
+              await this.notify(
+                report,
+                taskInstance,
+                byteSize,
+                output.content_type,
+                task.payload.spaceId
+              );
             }
 
             // untrack the report for concurrency awareness

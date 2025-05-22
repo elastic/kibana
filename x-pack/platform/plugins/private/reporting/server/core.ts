@@ -91,7 +91,6 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
-  notifications: NotificationsPluginStart;
   screenshotting?: ScreenshottingStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
@@ -181,9 +180,8 @@ export class ReportingCore {
       et.start({ ...startDeps });
     });
 
-    const { taskManager, logger, notifications } = startDeps;
+    const { taskManager, notifications } = startDeps;
     const emailNotificationService = new EmailNotificationService({
-      logger,
       notifications,
     });
     const { runSingleReportTask, runScheduledReportTask } = this;

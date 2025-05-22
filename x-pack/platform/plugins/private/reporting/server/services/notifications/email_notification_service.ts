@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import type { ReportSource } from '@kbn/reporting-common/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { NotificationService, NotifyArgs } from './types';
+import { ReportingCore } from '../..';
+import { getContentStream } from '../../lib';
 
 export interface Attachment {
   content: string;
@@ -19,54 +19,50 @@ export interface Attachment {
 }
 
 export class EmailNotificationService implements NotificationService {
-  private readonly logger: Logger;
   private readonly notifications: NotificationsPluginStart;
 
-  constructor({
-    logger,
-    notifications,
-  }: {
-    logger: Logger;
-    notifications: NotificationsPluginStart;
-  }) {
-    this.logger = logger;
+  constructor({ notifications }: { notifications: NotificationsPluginStart }) {
     this.notifications = notifications;
   }
 
   private async getAttachments(
-    esClient: ElasticsearchClient,
+    reporting: ReportingCore,
     index: string,
-    id: string
+    id: string,
+    jobType: string,
+    contentType?: string | null
   ): Promise<Attachment[]> {
-    const { _source: report } = await esClient.get<ReportSource>({
-      index,
-      id,
-    });
+    const stream = await getContentStream(reporting, { id, index });
+    const buffers: Buffer[] = [];
+    for await (const chunk of stream) {
+      buffers.push(chunk);
+    }
+    const content = Buffer.concat(buffers);
 
-    if (report && report.output?.content && report.output?.content_type) {
-      const content = report.output.content;
-      const contentType = report.output.content_type;
-
-      let extension = 'pdf';
-      if (report.jobtype.toLowerCase().includes('png')) {
-        extension = 'png';
-      }
-
-      return [{ content, contentType, filename: `report.${extension}`, encoding: 'base64' }];
+    let extension = 'pdf';
+    if (jobType.toLowerCase().includes('png')) {
+      extension = 'png';
     }
 
-    return [];
+    return [
+      {
+        content: content.toString('base64'),
+        ...(contentType ? { contentType } : {}),
+        filename: `report.${extension}`,
+        encoding: 'base64',
+      },
+    ];
   }
 
-  public async notify({ esClient, index, id, to, bcc, cc, runAt, spaceId }: NotifyArgs) {
+  public async notify({ reporting, index, id, contentType, jobType, emailParams }: NotifyArgs) {
+    if (!this.notifications.isEmailServiceAvailable()) {
+      throw new Error('Error sending scheduled report: email service is not available.');
+    }
     try {
-      if (!this.notifications.isEmailServiceAvailable()) {
-        this.logger.warn('Could not send report. Email service is not available.');
-        return;
-      }
+      const attachments = await this.getAttachments(reporting, index, id, jobType, contentType);
+      const { to, bcc, cc, runAt, spaceId } = emailParams;
       const subject = `Scheduled report for ${runAt}`;
       const message = "Here's your report!";
-      const attachments = await this.getAttachments(esClient, index, id);
       await this.notifications.getEmailService().sendAttachmentEmail({
         to,
         bcc,
@@ -77,7 +73,7 @@ export class EmailNotificationService implements NotificationService {
         spaceId: spaceId ?? DEFAULT_SPACE_ID,
       });
     } catch (error) {
-      this.logger.warn(`Error sending scheduled report: ${error.message}`);
+      throw new Error(`Error sending scheduled report: ${error.message}`);
     }
   }
 }
