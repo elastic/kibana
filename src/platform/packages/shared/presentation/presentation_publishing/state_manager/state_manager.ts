@@ -40,7 +40,6 @@ export const initializeStateManager = <StateType extends object>(
    * Build the API for this state type. We loop through default state because it is guaranteed to
    * have all keys and we use it to build the API with a setter and a subject for each key.
    */
-  console.log('DEFAULT STATE', defaultState);
   const api: StateManager<StateType>['api'] = (
     Object.keys(defaultState) as Array<keyof StateType>
   ).reduce((acc, key) => {

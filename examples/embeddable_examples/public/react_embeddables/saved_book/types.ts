@@ -38,7 +38,7 @@ export interface BookAttributesV3 {
   published?: number;
 }
 
-export type BookAttributes = BookAttributesV3;
+export type BookAttributes = BookAttributesV1 | BookAttributesV2 | BookAttributesV3;
 
 export interface BookByValueSerializedState {
   attributes: BookAttributes;
@@ -58,10 +58,9 @@ export type BookSerializedState = SerializedTitles &
 /**
  * Book runtime state is a flattened version of all possible state keys.
  */
-export interface BookRuntimeState
-  extends BookAttributesV3,
-    Partial<BookByReferenceSerializedState>,
-    SerializedTitles {}
+export type BookRuntimeState = BookAttributes &
+  Partial<BookByReferenceSerializedState> &
+  SerializedTitles;
 
 export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
   HasEditCapabilities &
