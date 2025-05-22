@@ -106,7 +106,7 @@ The 8.18.2 release includes the following fixes.
 === Fixes
 Dashboards and Visualizations::
 * Fixes success message and auto-scroll behavior after adding a panel to a dashboard from the library ({kibana-pull}220122[#220122]).
-* Allows retrieval of empty columns ({kibana-pull}218085[#218085]).
+* Allows ES|QL queries to suggest a chart even when there is no data returned from a query. ({kibana-pull}218085[#218085]).
 Elastic Observability Solution::
 * Updates SLO created in a previous version to handle `createdBy` and `updatedBy` fields in an ingest pipeline ({kibana-pull}221158[#221158]).
 * Fixes errors in `error_marker.tsx` to support **Mobile Services** ({kibana-pull}220424[#220424]).
