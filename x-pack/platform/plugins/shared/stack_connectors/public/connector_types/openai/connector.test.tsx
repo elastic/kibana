@@ -415,14 +415,14 @@ describe('ConnectorFields renders', () => {
 
       const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
 
-      expect(screen.queryByTestId('config.certificateData-input')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('config.privateKeyData-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openAISSLCRTInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openAISSLKEYInput')).not.toBeInTheDocument();
       expect(screen.queryByTestId('verificationModeSelect')).not.toBeInTheDocument();
       expect(pkiToggle).toBeInTheDocument();
 
       await userEvent.click(pkiToggle);
-      expect(screen.getByTestId('config.certificateData-input')).toBeInTheDocument();
-      expect(screen.getByTestId('config.privateKeyData-input')).toBeInTheDocument();
+      expect(screen.getByTestId('openAISSLCRTInput')).toBeInTheDocument();
+      expect(screen.getByTestId('openAISSLKEYInput')).toBeInTheDocument();
       expect(screen.getByTestId('verificationModeSelect')).toBeInTheDocument();
     });
     it('succeeds without pki', async () => {
@@ -466,8 +466,10 @@ describe('ConnectorFields renders', () => {
       );
       const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
       await userEvent.click(pkiToggle);
-      await userEvent.type(screen.getByTestId('config.certificateData-input'), 'hello');
-      await userEvent.type(screen.getByTestId('config.privateKeyData-input'), 'world');
+      const certFile = new File(['hello'], 'cert.crt', { type: 'text/plain' });
+      const keyFile = new File(['world'], 'key.key', { type: 'text/plain' });
+      await userEvent.upload(screen.getByTestId('openAISSLCRTInput'), certFile);
+      await userEvent.upload(screen.getByTestId('openAISSLKEYInput'), keyFile);
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -475,9 +477,12 @@ describe('ConnectorFields renders', () => {
             ...testFormData,
             config: {
               ...testFormData.config,
-              certificateData: 'hello',
-              privateKeyData: 'world',
               verificationMode: 'full',
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+              certificateData: Buffer.from('hello').toString('base64'),
+              privateKeyData: Buffer.from('world').toString('base64'),
             },
             __internal__: {
               hasHeaders: false,
