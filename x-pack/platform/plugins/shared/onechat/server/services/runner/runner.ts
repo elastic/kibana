@@ -20,7 +20,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolsServiceStart } from '../tools';
 import { createModelProvider } from './model_provider';
-import { creatEmptyRunContext, createChildContextForToolRun } from './utils/run_context';
+import { creatEmptyRunContext, forkContextForToolRun } from './utils/run_context';
 import { createEventEmitter, createNoopEventEmitter } from './utils/events';
 
 export interface CreateScopedRunnerDeps {
@@ -71,7 +71,7 @@ const runTool = async <TResult = unknown>({
 }): Promise<TResult> => {
   const { toolId, toolParams } = toolExecutionParams;
 
-  const context = createChildContextForToolRun({ parentContext: parentManager.context, toolId });
+  const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
   const manager = parentManager.child(context);
 
   const { toolsService, request } = manager.deps;

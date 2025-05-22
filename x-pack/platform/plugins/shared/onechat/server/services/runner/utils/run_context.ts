@@ -16,7 +16,7 @@ export const creatEmptyRunContext = ({ runId = uuidv4() }: { runId?: string } = 
   };
 };
 
-export const createChildContextForToolRun = ({
+export const forkContextForToolRun = ({
   toolId,
   parentContext,
 }: {
