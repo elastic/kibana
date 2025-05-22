@@ -26,7 +26,7 @@ function savedObjectToItem({
       author: attributes.authorName,
       numberOfPages: attributes.numberOfPages,
       synopsis: attributes.bookSynopsis,
-      publicationYear: attributes.publicationYear,
+      publicationYear: attributes.publicationYear ?? null,
     },
     references,
   };
@@ -42,6 +42,7 @@ function itemToSavedObject({
       authorName: attributes.author,
       numberOfPages: attributes.numberOfPages,
       bookSynopsis: attributes.synopsis,
+      publicationYear: attributes.publicationYear ?? undefined,
     },
     references,
   };

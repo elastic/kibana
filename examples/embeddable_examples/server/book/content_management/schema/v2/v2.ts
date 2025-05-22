@@ -14,5 +14,5 @@ export const bookAttributesSchema = schema.object({
   author: schema.string(),
   numberOfPages: schema.number(),
   synopsis: schema.maybe(schema.string()),
-  publicationYear: schema.maybe(schema.number()),
+  publicationYear: schema.number(),
 });

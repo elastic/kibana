@@ -38,7 +38,7 @@ const defaultBookAttributesV3: WithAllKeys<BookAttributesV3> = {
 
 export const defaultBookAttributes: Record<
   number,
-  BookAttributesV1 | BookAttributesV2 | BookAttributesV3
+  WithAllKeys<BookAttributesV1> | WithAllKeys<BookAttributesV2> | WithAllKeys<BookAttributesV3>
 > = {
   1: defaultBookAttributesV1,
   2: defaultBookAttributesV2,
