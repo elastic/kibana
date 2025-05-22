@@ -28,8 +28,9 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer_constants';
+import { extractInfluencers } from '@kbn/ml-common-utils/job_utils';
+
 import { useMlLink } from '../../application/contexts/kibana';
-import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimlaneInitialInput } from '../types';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';

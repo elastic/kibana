@@ -21,25 +21,24 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
-
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
   mlFunctionToESAggregation,
-} from '../../../../common/util/job_utils';
+} from '@kbn/ml-common-utils/job_utils';
+import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { ForecastingModal } from '../components/forecasting_modal/forecasting_modal';
@@ -58,7 +57,6 @@ import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
-import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
 import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
 
@@ -923,7 +921,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 functionLabel={chartDetails.functionLabel}
                 entityData={chartDetails.entityData}
               />
-              <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
+              <EuiFlexGroup css={{ float: 'right' }} alignItems="center">
                 {showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleModelBoundsCheckbox"
@@ -966,7 +964,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 {arePartitioningFieldsProvided &&
                   selectedJob &&
                   shouldShowForecastButton === true && (
-                    <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>
+                    <EuiFlexItem grow={false} css={{ textAlign: 'right' }}>
                       <ForecastingModal
                         buttonMode={'empty'}
                         job={selectedJob}

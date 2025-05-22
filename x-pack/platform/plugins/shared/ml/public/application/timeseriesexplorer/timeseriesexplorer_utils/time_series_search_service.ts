@@ -9,17 +9,22 @@ import { useMemo } from 'react';
 import { each, find, get, filter } from 'lodash';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
+
 import type { MlEntityField, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import type { ModelPlotOutput } from '../../services/results_service/result_service_rx';
-import { type MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
-import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import {
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
-} from '../../../../common/util/job_utils';
+} from '@kbn/ml-common-utils/job_utils';
+
+import type { ModelPlotOutput } from '@kbn/ml-services/results_service_2/result_service_rx';
+import {
+  type MlResultsService,
+  mlResultsServiceProvider,
+} from '@kbn/ml-services/results_service_2';
+import { buildConfigFromDetector } from '../../util/chart_config_builder';
 
 interface TimeSeriesExplorerChartDetails {
   success: boolean;

@@ -7,10 +7,12 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import type { EuiButtonProps } from '@elastic/eui';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
+import { createPermissionFailureMessage } from '@kbn/ml-services/capabilities/check_capabilities';
 
 interface Props {
   isDisabled: boolean;

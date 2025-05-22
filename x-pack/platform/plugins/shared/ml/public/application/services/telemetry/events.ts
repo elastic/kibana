@@ -6,13 +6,14 @@
  */
 
 import type { SchemaObject } from '@elastic/ebt';
-import type { TrainedModelsModelTestedEbtProps } from './types';
+
 import {
   TrainedModelsTelemetryEventTypes,
+  type TrainedModelsModelTestedEbtProps,
   type TrainedModelsDeploymentEbtProps,
   type TrainedModelsTelemetryEvent,
   type TrainedModelsModelDownloadEbtProps,
-} from './types';
+} from '@kbn/ml-trained-models-utils/src/types/telemetry';
 
 const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProps>['properties'] = {
   model_id: {
