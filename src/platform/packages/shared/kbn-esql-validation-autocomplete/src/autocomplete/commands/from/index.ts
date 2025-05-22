@@ -8,14 +8,9 @@
  */
 
 import type { SuggestionRawDefinition } from '../../types';
-import {
-  getOverlapRange,
-  removeQuoteForSuggestedSources,
-  getSourceSuggestions,
-  additionalSourcesSuggestions,
-} from '../../helper';
+import { getOverlapRange, getSourceSuggestions, additionalSourcesSuggestions } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
-import { isRestartingExpression } from '../../../shared/helpers';
+import { isRestartingExpression, withinQuotes } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { metadataSuggestion, getMetadataSuggestions } from '../metadata';
 
@@ -26,21 +21,13 @@ export async function suggest({
   getRecommendedQueriesSuggestions,
   getSourcesFromQuery,
 }: CommandSuggestParams<'from'>): Promise<SuggestionRawDefinition[]> {
-  if (/\".*$/.test(innerText)) {
-    // FROM "<suggest>"
+  if (withinQuotes(innerText)) {
     return [];
   }
 
   const suggestions: SuggestionRawDefinition[] = [];
 
   const indexes = getSourcesFromQuery('index');
-  const canRemoveQuote = innerText.includes('"');
-  // Function to add suggestions based on canRemoveQuote
-  const addSuggestionsBasedOnQuote = (definitions: SuggestionRawDefinition[]) => {
-    suggestions.push(
-      ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
-    );
-  };
 
   const metadataSuggestions = getMetadataSuggestions(command, innerText);
   if (metadataSuggestions) {
@@ -51,7 +38,12 @@ export async function suggest({
 
   // FROM /
   if (indexes.length === 0) {
-    addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
+    suggestions.push(
+      ...getSourceSuggestions(
+        await getSources(),
+        indexes.map(({ name }) => name)
+      )
+    );
   }
   // FROM something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
@@ -74,9 +66,10 @@ export async function suggest({
     const additionalSuggestions = await additionalSourcesSuggestions(
       innerText,
       sources,
+      indexes.map(({ name }) => name),
       recommendedQuerySuggestions
     );
-    addSuggestionsBasedOnQuote(additionalSuggestions);
+    suggestions.push(...additionalSuggestions);
   }
 
   return suggestions;
