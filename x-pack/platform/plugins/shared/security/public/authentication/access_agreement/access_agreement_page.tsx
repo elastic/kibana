@@ -29,7 +29,6 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { parseNextURL } from '@kbn/std';
 
 import type { StartServices } from '../..';
@@ -132,12 +131,7 @@ export function renderAccessAgreementPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <AccessAgreementPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<AccessAgreementPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }
