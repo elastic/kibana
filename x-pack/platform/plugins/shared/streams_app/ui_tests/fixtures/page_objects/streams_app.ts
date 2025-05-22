@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ScoutPage } from '@kbn/scout';
+import { ScoutPage, expect } from '@kbn/scout';
 
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
     await this.page.gotoApp('streams');
+    await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
   async gotoStreamsFromBreadcrumb() {
