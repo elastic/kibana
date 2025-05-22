@@ -36,7 +36,9 @@ export async function runAndValidateEsqlQuery({
       const commandsUntilEndOfError = splitIntoCommands(query.substring(0, error.location.max));
       const lastCompleteCommand = asCommands[commandsUntilEndOfError.length - 1];
       if (lastCompleteCommand) {
-        return `Error in ${lastCompleteCommand.command}\n: ${error.text}`;
+        return `Error in ${lastCompleteCommand.command}\n: ${
+          (error as { text?: string }).text || ''
+        }`;
       }
     }
     return 'text' in error ? error.text : error.message;
