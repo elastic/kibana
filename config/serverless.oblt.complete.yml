@@ -77,8 +77,6 @@ xpack.features.overrides:
           privileges: [ "read" ]
   ### Logs feature is hidden in Role management since it's automatically granted by either Infrastructure, or Applications features.
   logs.hidden: true
-  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps_v2.hidden: true
   ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
   ml:
     category: "observability"
@@ -112,4 +110,3 @@ xpack.features.overrides:
       read.composedOf:
         - feature: "observability"
           privileges: [ "read" ]
-
