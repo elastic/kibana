@@ -7,11 +7,11 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
+import { zipObject, groupBy } from 'lodash';
 
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { zipObject, groupBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
@@ -22,10 +22,11 @@ import type {
   MlSummaryJobs,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
+import { useMlManagementLocator } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import { useRefresh } from '../../../routing/use_refresh';
