@@ -22,7 +22,6 @@ import { ReportingCore } from '../../..';
 import { createMockReportingCore } from '../../../test_helpers';
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 const getMockContext = () =>
   ({
@@ -90,20 +89,6 @@ describe('Handle request to schedule', () => {
       };
     });
 
-    jest.spyOn(reportingCore, 'scheduleRecurringTask').mockResolvedValue({
-      id: 'task-id',
-      scheduledAt: new Date(),
-      attempts: 0,
-      status: TaskStatus.Idle,
-      runAt: new Date(),
-      startedAt: new Date(),
-      retryAt: new Date(),
-      state: {},
-      ownerId: 'reporting',
-      taskType: 'reporting:printable_pdf_v2',
-      params: {},
-    });
-
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
       user: { username: 'testymcgee' },
@@ -117,7 +102,7 @@ describe('Handle request to schedule', () => {
   });
 
   describe('enqueueJob', () => {
-    test('creates a scheduled report saved object and schedules task', async () => {
+    test('creates a scheduled report saved object', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
         jobParams: mockJobParams,
@@ -179,12 +164,6 @@ describe('Handle request to schedule', () => {
           layout: 'preserve_layout',
           isDeprecated: false,
         },
-      });
-
-      expect(reportingCore.scheduleRecurringTask).toHaveBeenCalledWith(mockRequest, {
-        id: 'foo',
-        jobtype: 'printable_pdf_v2',
-        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
     });
 
@@ -413,6 +392,16 @@ describe('Handle request to schedule', () => {
       expect(requestHandler.getNotification()).toEqual({ email: { to: ['a@b.com'] } });
     });
 
+    test('parse notification from body when no to defined', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: { bcc: ['a@b.com'] } },
+      };
+      expect(requestHandler.getNotification()).toEqual({ email: { bcc: ['a@b.com'] } });
+    });
+
     test('returns undefined if notification object is empty', () => {
       // @ts-ignore body is a read-only property
       mockRequest.body = {
@@ -439,6 +428,16 @@ describe('Handle request to schedule', () => {
         jobParams: rison.encode(mockJobParams),
         schedule: { rrule: { freq: 1, interval: 2 } },
         notification: { email: {} },
+      };
+      expect(requestHandler.getNotification()).toBeUndefined();
+    });
+
+    test('returns undefined if notification.email arrays are all empty', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: { to: [], cc: [], bcc: [] } },
       };
       expect(requestHandler.getNotification()).toBeUndefined();
     });
@@ -472,6 +471,66 @@ describe('Handle request to schedule', () => {
 
       expect(error?.statusCode).toBe(400);
       expect(error?.body).toBe('Invalid email address(es): not valid emails: foo');
+    });
+
+    test('handles too many recipients', () => {
+      let error: { statusCode: number; body: string } | undefined;
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = {
+          jobParams: rison.encode(mockJobParams),
+          schedule: { rrule: { freq: 1, interval: 2 } },
+          notification: {
+            email: {
+              to: [
+                '1@elastic.co',
+                '2@elastic.co',
+                '3@elastic.co',
+                '4@elastic.co',
+                '5@elastic.co',
+                '6@elastic.co',
+                '7@elastic.co',
+              ],
+              cc: [
+                '8@elastic.co',
+                '9@elastic.co',
+                '10@elastic.co',
+                '11@elastic.co',
+                '12@elastic.co',
+                '13@elastic.co',
+                '14@elastic.co',
+                '15@elastic.co',
+                '16@elastic.co',
+                '17@elastic.co',
+              ],
+              bcc: [
+                '18@elastic.co',
+                '19@elastic.co',
+                '20@elastic.co',
+                '21@elastic.co',
+                '22@elastic.co',
+                '23@elastic.co',
+                '24@elastic.co',
+                '25@elastic.co',
+                '26@elastic.co',
+                '27@elastic.co',
+                '28@elastic.co',
+                '29@elastic.co',
+                '30@elastic.co',
+                '31@elastic.co',
+              ],
+            },
+          },
+        };
+        requestHandler.getNotification();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error?.statusCode).toBe(400);
+      expect(error?.body).toBe(
+        'Maximum number of recipients exceeded: cannot specify more than 30 recipients.'
+      );
     });
   });
 
@@ -529,6 +588,7 @@ describe('Handle request to schedule', () => {
       jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
         isSufficientlySecure: true,
         hasPermanentEncryptionKey: false,
+        areNotificationsEnabled: true,
       });
 
       expect(
@@ -547,6 +607,7 @@ describe('Handle request to schedule', () => {
       jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: true,
+        areNotificationsEnabled: true,
       });
 
       expect(

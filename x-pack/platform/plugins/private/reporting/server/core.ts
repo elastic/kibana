@@ -412,19 +412,13 @@ export class ReportingCore {
     return dataViews;
   }
 
-  public async getSoClient(request?: KibanaRequest) {
+  public async getSoClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-
-    // if request is provided, use scoped client
-    if (request) {
-      return savedObjects.getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
-      });
-    }
-
-    // otherwise use internal repository
-    return savedObjects.createInternalRepository([SCHEDULED_REPORT_SAVED_OBJECT_TYPE]);
+    const savedObjectsClient = savedObjects.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
+    });
+    return savedObjectsClient;
   }
 
   public async getDataService() {

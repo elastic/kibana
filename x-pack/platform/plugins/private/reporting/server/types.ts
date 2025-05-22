@@ -102,12 +102,13 @@ export interface ReportingJobResponse {
 
 export type ScheduledReportApiJSON = Omit<
   ReportSource,
-  'payload' | 'output' | 'attempts' | 'status'
+  'attempts' | 'migration_version' | 'output' | 'payload' | 'status'
 > & {
   id: string;
-  schedule: RruleSchedule;
+  migration_version?: string;
   notification?: RawNotification;
   payload: Omit<ReportSource['payload'], 'headers'>;
+  schedule: RruleSchedule;
 };
 
 export interface ScheduledReportingJobResponse {

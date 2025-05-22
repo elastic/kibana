@@ -19,10 +19,11 @@ import {
 } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RequestHandler, RequestParams } from './request_handler';
-import {
-  transformRawScheduledReportToReport,
-  transformRawScheduledReportToTaskParams,
-} from './lib';
+import { transformRawScheduledReportToReport } from './lib';
+
+// Using the limit specified in the cloud email service limits
+// https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
+const MAX_ALLOWED_EMAILS = 30;
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
@@ -75,14 +76,29 @@ export class ScheduleRequestHandler extends RequestHandler<
       return undefined;
     }
 
-    if (notification && notification.email && notification.email.to) {
-      const invalidEmails = reporting.validateNotificationEmails(notification.email.to);
-      if (invalidEmails) {
-        throw res.customError({
-          statusCode: 400,
-          body: `Invalid email address(es): ${invalidEmails}`,
-        });
-      }
+    const allEmails = new Set([
+      ...(notification.email.to || []),
+      ...(notification.email.bcc || []),
+      ...(notification.email.cc || []),
+    ]);
+
+    if (allEmails.size === 0) {
+      return undefined;
+    }
+
+    if (allEmails.size > MAX_ALLOWED_EMAILS) {
+      throw res.customError({
+        statusCode: 400,
+        body: `Maximum number of recipients exceeded: cannot specify more than ${MAX_ALLOWED_EMAILS} recipients.`,
+      });
+    }
+
+    const invalidEmails = reporting.validateNotificationEmails([...allEmails]);
+    if (invalidEmails) {
+      throw res.customError({
+        statusCode: 400,
+        body: `Invalid email address(es): ${invalidEmails}`,
+      });
     }
 
     return notification;
@@ -93,7 +109,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getSoClient(req);
-    const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
+    const { version, job, jobType } = await this.createJob(exportTypeId, jobParams);
 
     const payload = {
       ...job,
@@ -131,14 +147,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
-    // Schedule the report with Task Manager
-    const task = await reporting.scheduleRecurringTask(
-      req,
-      transformRawScheduledReportToTaskParams(report)
-    );
-    logger.info(
-      `Scheduled "${name}" reporting task. Task ID: task:${task.id}. Report ID: ${report.id}`
-    );
+    // TODO - Schedule the report with Task Manager
 
     return transformRawScheduledReportToReport(report);
   }

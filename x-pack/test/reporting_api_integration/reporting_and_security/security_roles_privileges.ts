@@ -219,12 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
-        scheduledReportIds.push(res.body.job.id);
-
-        const taskResult = await reportingAPI.getTask(res.body.job.id);
-        expect(taskResult.status).to.eql(200);
-        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
-        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -263,12 +257,6 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
-        scheduledReportIds.push(res.body.job.id);
-
-        const taskResult = await reportingAPI.getTask(res.body.job.id);
-        expect(taskResult.status).to.eql(200);
-        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
-        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -307,12 +295,6 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
-        scheduledReportIds.push(res.body.job.id);
-
-        const taskResult = await reportingAPI.getTask(res.body.job.id);
-        expect(taskResult.status).to.eql(200);
-        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
-        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -354,12 +336,6 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('allowed search');
-        scheduledReportIds.push(res.body.job.id);
-
-        const taskResult = await reportingAPI.getTask(res.body.job.id);
-        expect(taskResult.status).to.eql(200);
-        testExpectedTask(res.body.job.id, 'csv_searchsource', taskResult.body);
-        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
