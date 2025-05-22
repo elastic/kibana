@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type {
@@ -45,6 +46,7 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -672,6 +674,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     | 'docLinks'
   >;
   dateRange: DateRange;
+  esqlVariables?: ESQLControlVariable[] | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
@@ -1119,7 +1122,11 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /** Description is displayed as the clickable text in the chart switcher */
   getDescription: (state: T, layerId?: string) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
-  getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  getPersistableState?: (
+    state: T,
+    datasource?: Datasource,
+    datasourceState?: { state: unknown }
+  ) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
@@ -1407,11 +1414,17 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
+export interface LensAlertRulesEvent {
+  name: 'alertRule';
+  data: AlertRuleFromVisUIActionData;
+}
+
 export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
-  | LensTableRowContextMenuEvent;
+  | LensTableRowContextMenuEvent
+  | LensAlertRulesEvent;
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
@@ -1437,6 +1450,10 @@ export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
 ): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
+}
+
+export function isLensAlertRule(event: ExpressionRendererEvent): event is LensAlertRulesEvent {
+  return event.name === 'alertRule';
 }
 
 /**
