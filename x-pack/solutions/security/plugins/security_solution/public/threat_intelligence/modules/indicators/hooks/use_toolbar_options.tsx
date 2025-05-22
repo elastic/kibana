@@ -12,7 +12,7 @@ import type { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../hooks/use_inspector';
 import { IndicatorsFieldBrowser } from '../components/table/field_browser';
 import { INSPECT_BUTTON_TEST_ID } from './test_ids';
-import { INSPECT_BUTTON_TITLE } from './translations';
+import { INSPECT_BUTTON_TITLE, translatePaginationStatus } from './translations';
 
 export const useToolbarOptions = ({
   browserFields,
@@ -42,11 +42,7 @@ export const useToolbarOptions = ({
           prepend: (
             <EuiText css={{ display: 'inline' }} size="xs">
               {indicatorCount && end ? (
-                <>{`
-                  Showing ${start + 1}-${
-                  end > indicatorCount ? indicatorCount : end
-                } of ${indicatorCount} indicators
-                `}</>
+                <>{translatePaginationStatus({ start, end, indicatorCount })}</>
               ) : (
                 <>{'-'}</>
               )}

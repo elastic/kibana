@@ -20,3 +20,19 @@ export const INSPECT_BUTTON_TITLE = i18n.translate(
     defaultMessage: 'Inspect',
   }
 );
+
+interface PaginationStatus {
+  start: number;
+  indicatorCount: number;
+  end: number;
+}
+
+export const translatePaginationStatus = ({ start, indicatorCount, end }: PaginationStatus) =>
+  i18n.translate('xpack.securitySolution.threatIntelligence.paginationStatus', {
+    defaultMessage: `Showing {start}-{end} of {indicatorCount} indicators`,
+    values: {
+      start: start + 1,
+      end: end > indicatorCount ? indicatorCount : end,
+      indicatorCount,
+    },
+  });
