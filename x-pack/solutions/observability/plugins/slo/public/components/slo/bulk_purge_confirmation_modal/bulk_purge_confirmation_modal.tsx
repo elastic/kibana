@@ -27,7 +27,7 @@ export interface Props {
 }
 
 export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Props) {
-  const { mutateAsync: bulkPurge } = useBulkPurgeRollupData();
+  const { mutate: bulkPurge } = useBulkPurgeRollupData({ onConfirm });
 
   const [purgeDate, setPurgeDate] = React.useState<Moment | null>(moment());
   const [purgeType, setPurgeType] = React.useState<string>('fixed_age');
@@ -51,8 +51,8 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
         defaultMessage: 'Purge',
       })}
       onCancel={onCancel}
-      onConfirm={async () => {
-        await bulkPurge({
+      onConfirm={() => {
+        bulkPurge({
           list: items.map(({ id }) => id),
           purgePolicy:
             purgeType === 'fixed_age'
@@ -65,13 +65,7 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
                   timestamp: purgeDate!.toISOString(),
                 },
           force: forcePurge,
-        })
-          .then(() => {
-            onConfirm();
-          })
-          .catch((error) => {
-            console.error('error', error);
-          });
+        });
       }}
     >
       {i18n.translate('xpack.slo.bulkPurgeConfirmationModal.descriptionText', {

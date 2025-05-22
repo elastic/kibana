@@ -33,7 +33,7 @@ export function SloManagementBulkActions({
         {
           'data-test-subj': 'sloSloManagementTableBulkDeleteButton',
           onClick: () => {
-            triggerAction({ items, type: 'bulk_delete' });
+            triggerAction({ items, type: 'bulk_delete', onConfirm: () => resetSelectedItems() });
             setIsOpen(false);
           },
           name: i18n.translate(
@@ -49,9 +49,7 @@ export function SloManagementBulkActions({
             triggerAction({
               items,
               type: 'bulk_purge',
-              onConfirm() {
-                resetSelectedItems();
-              },
+              onConfirm: () => resetSelectedItems(),
             });
             setIsOpen(false);
           },
@@ -94,9 +92,7 @@ export function SloManagementBulkActions({
         initialPanelId={0}
         size="s"
         panels={panels}
-        className="actDetailsCollapsedItemActions"
         data-test-subj="detailsCollapsedActionPanel"
-        data-testid="detailsCollapsedActionPanel"
       />
     </EuiPopover>
   );
