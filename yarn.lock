@@ -5925,6 +5925,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-data-pooler@link:src/platform/packages/shared/shared-ux/esql_data_pooler/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-datagrid@link:src/platform/plugins/shared/esql_datagrid":
   version "0.0.0"
   uid ""

@@ -545,6 +545,7 @@
     "@kbn/esql-ast": "link:src/platform/packages/shared/kbn-esql-ast",
     "@kbn/esql-ast-inspector-plugin": "link:examples/esql_ast_inspector",
     "@kbn/esql-composer": "link:src/platform/packages/shared/kbn-esql-composer",
+    "@kbn/esql-data-pooler": "link:src/platform/packages/shared/shared-ux/esql_data_pooler/impl",
     "@kbn/esql-datagrid": "link:src/platform/plugins/shared/esql_datagrid",
     "@kbn/esql-editor": "link:src/platform/packages/private/kbn-esql-editor",
     "@kbn/esql-types": "link:src/platform/packages/shared/kbn-esql-types",
