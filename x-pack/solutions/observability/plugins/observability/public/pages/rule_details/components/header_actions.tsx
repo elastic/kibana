@@ -207,7 +207,7 @@ export function HeaderActions({
               </EuiButton>
             }
           >
-            <div data-test-subj={rule.ruleTypeId}>
+            <div data-test-subj={`contextMenu_${rule.ruleTypeId}`}>
               <EuiContextMenu
                 initialPanelId={0}
                 panels={panels}
