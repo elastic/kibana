@@ -7,13 +7,17 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
+import { css } from '@emotion/react';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
-import { css } from '@emotion/react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlKibana, useMlManagementLocator } from '@kbn/ml-kibana-context';
-import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
+import { useMlManagementLocator } from '../../../contexts/kibana/use_create_url';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';

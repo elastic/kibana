@@ -15,7 +15,7 @@ import {
   basicJobValidation,
   basicDatafeedValidation,
   basicJobAndDatafeedValidation,
-} from '../../../../../../common/util/job_utils';
+} from '@kbn/ml-common-utils/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import type { JobCreator, JobCreatorType } from '../job_creator';
 import { isCategorizationJobCreator } from '../job_creator';
