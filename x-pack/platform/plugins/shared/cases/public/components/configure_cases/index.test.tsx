@@ -1291,8 +1291,10 @@ describe('ConfigureCases', () => {
         wrappingComponentProps: { features: { observables: { enabled: true } } },
       });
 
-      expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
+      expect(
+        newWrapper.find('[data-test-subj="observable-types-form-group"]').exists()
+      ).toBeFalsy();
+      expect(newWrapper.find('[data-test-subj="add-observable-type"]').exists()).toBeFalsy();
     });
 
     it('opens fly out for when click on add observable type', async () => {
