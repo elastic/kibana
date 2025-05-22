@@ -115,7 +115,7 @@ function getSecurityTierFromCfg(configs) {
 
 /** @typedef {'essentials' | 'complete'} ServerlessProjectTier */
 /**
- * @param {string[]} configs List of configuration file paths
+ * @param {string[]} config Configuration object from merged configs
  * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
  */
 function getServerlessProjectTierFromConfig(config) {
