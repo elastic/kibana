@@ -9,3 +9,4 @@
 
 export { suggest } from './suggest';
 export { fieldsSuggestionsAfter } from './fields_suggestions_after';
+export { commandsSuggestionsAfter } from './commands_suggestions_after';

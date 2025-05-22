@@ -51,6 +51,7 @@ import { suggest as suggestForEval } from '../autocomplete/commands/eval';
 import {
   suggest as suggestForFork,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
+  commandsSuggestionsAfter as commandsSuggestionsAfterFork,
 } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
@@ -706,9 +707,10 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
 
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
+    commandsSuggestionsAfter: commandsSuggestionsAfterFork,
   },
   {
-    hidden: false, // HD
+    hidden: true, // This command should be keep as hidden as it only must be shown after a FORK command
     preview: true,
     name: 'rrf',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
