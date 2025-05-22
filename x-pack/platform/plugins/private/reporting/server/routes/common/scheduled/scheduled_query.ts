@@ -61,7 +61,7 @@ export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
 export function transformResponse(
   result: SavedObjectsFindResponse<ScheduledReportType>,
-  lastResponse: CreatedAtSearchResponse
+  lastResponse?: CreatedAtSearchResponse
 ): ApiResponse {
   return {
     page: result.page,
@@ -69,7 +69,7 @@ export function transformResponse(
     total: result.total,
     data: result.saved_objects.map((so) => {
       const id = so.id;
-      const lastRunForId = lastResponse.hits.hits.find(
+      const lastRunForId = (lastResponse?.hits.hits ?? []).find(
         (hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id
       );
 
@@ -144,24 +144,30 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           return getEmptyApiResponse(page, size);
         }
 
-        const lastRunResponse = (await esClient.asInternalUser.search({
-          index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
-          size,
-          _source: [CREATED_AT_FIELD],
-          sort: [{ [CREATED_AT_FIELD]: { order: 'desc' } }],
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    [SCHEDULED_REPORT_ID_FIELD]: scheduledReportSoIds,
+        let lastRunResponse;
+        try {
+          lastRunResponse = (await esClient.asInternalUser.search({
+            index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+            size,
+            _source: [CREATED_AT_FIELD],
+            sort: [{ [CREATED_AT_FIELD]: { order: 'desc' } }],
+            query: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportSoIds,
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          collapse: { field: SCHEDULED_REPORT_ID_FIELD },
-        })) as CreatedAtSearchResponse;
+            collapse: { field: SCHEDULED_REPORT_ID_FIELD },
+          })) as CreatedAtSearchResponse;
+        } catch (error) {
+          // if no scheduled reports have run yet, we will get an error from the collapse query
+          // ignore these and return an empty last run
+        }
 
         return transformResponse(response, lastRunResponse);
       } catch (error) {
