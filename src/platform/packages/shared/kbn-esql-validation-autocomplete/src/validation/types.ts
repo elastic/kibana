@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import type { ESQLMessage, ESQLLocation, EditorError } from '@kbn/esql-ast';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { FieldType, SupportedDataType } from '../definitions/types';
-import type { EditorError } from '../types';
 
 export interface ESQLUserDefinedColumn {
   name: string;
