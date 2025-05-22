@@ -32,14 +32,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
-
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '@kbn/ml-common-constants/new_job';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { basicJobValidation } from '@kbn/ml-common-utils/job_utils';
+
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
-import { basicJobValidation } from '../../../../common/util/job_utils';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
 import { useMlFromLensKibanaContext } from './context';
 
