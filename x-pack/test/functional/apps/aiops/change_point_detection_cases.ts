@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('checks if attachment is present in the case');
       await ml.cases.assertCaseWithChangePointDetectionChartsAttachment(caseParams);
-      await aiops.changePointDetectionPage.assertNoChangePointFoundTooltipWarning();
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning();
     });
   });
 }

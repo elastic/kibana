@@ -331,9 +331,5 @@ export function ChangePointDetectionPageProvider(
         );
       }
     },
-
-    async assertNoChangePointFoundTooltipWarning() {
-      await testSubjects.existOrFail('aiopsNoChangePointsWarningTooltipIcon');
-    },
   };
 }

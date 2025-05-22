@@ -84,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Jun 12, 2023 @ 00:04:19.000',
         'Jun 12, 2023 @ 01:00:19.000'
       );
-      await aiops.changePointDetectionPage.assertNoChangePointFoundTooltipWarning();
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning();
     });
   });
 }
