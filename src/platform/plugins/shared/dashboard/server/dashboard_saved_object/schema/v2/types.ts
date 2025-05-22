@@ -16,6 +16,7 @@ export type GridData = TypeOf<typeof gridDataSchema>;
 
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
+ * Type can not be generated from schema since state is stored as stringified JSON
  */
 export interface SavedDashboardPanel {
   embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput

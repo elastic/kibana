@@ -8,9 +8,7 @@
  */
 
 export type {
-  GridData,
   DashboardItem,
   DashboardCrudTypes,
   DashboardAttributes,
-  SavedDashboardPanel,
 } from './types';

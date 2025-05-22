@@ -12,7 +12,6 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { Serializable } from '@kbn/utility-types';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
 
@@ -30,37 +29,6 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
 >;
 
 export type DashboardItem = DashboardCrudTypes['Item'];
-
-/**
- * Grid type for React Grid Layout
- */
-export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
-
-/**
- * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
- */
-export interface SavedDashboardPanel {
-  embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
-  id?: string; // the saved object id for by reference panels
-  type: string; // the embeddable type
-  panelRefName?: string;
-  gridData: GridData;
-  panelIndex: string;
-  title?: string;
-
-  /**
-   * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.
-   * As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the
-   * embeddable's input. (embeddableConfig in this type).
-   */
-  version?: string;
-}
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ControlGroupAttributesV1 = {
