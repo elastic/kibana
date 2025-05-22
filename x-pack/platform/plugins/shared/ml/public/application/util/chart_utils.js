@@ -9,7 +9,7 @@ import d3 from 'd3';
 import { getAnomalyScoreExplanationImpactValue } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { calculateTextWidth } from './string_utils';
 import moment from 'moment';
-import { CHART_TYPE } from '../explorer/explorer_constants';
+import { CHART_TYPE } from '@kbn/ml-common-constants/explorer_constants';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
