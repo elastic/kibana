@@ -46,7 +46,7 @@ interface PreviewControllerArgs {
   deps: PreviewControllerDependencies;
 }
 
-interface PreviewControllerDependencies {
+export interface PreviewControllerDependencies {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   usageCollection: UsageCollectionStart;
@@ -372,7 +372,7 @@ export class PreviewController {
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
     this.updateState({
       customDocIdToLoad,
-      customId: customDocIdToLoad || undefined,
+      customId: customDocIdToLoad ?? undefined,
       isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad }),
     });
     // load document if id is present
