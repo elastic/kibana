@@ -47,6 +47,23 @@ async function populateMissingSemanticTextField({
 }) {
   logger.debug('Initalizing semantic text migration for knowledge base entries...');
 
+  const { count } = await esClient.asInternalUser.count({
+    index: resourceNames.writeIndexAlias.kb,
+    query: {
+      bool: {
+        must_not: {
+          exists: { field: 'semantic_text' },
+        },
+      },
+    },
+  });
+  logger.info(`Documents missing 'semantic_text' before migration: ${count}`);
+
+  if (count === 0) {
+    logger.debug('No documents missing semantic_text field, skipping migration.');
+    return;
+  }
+
   await pRetry(
     async () => {
       const inferenceId = await getInferenceIdFromWriteIndex(esClient);
