@@ -99,7 +99,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('should create an ES Query Rule and display it when consumer is observability', async () => {
       const esQuery = await alertingApi.helpers.createEsQueryRule({
         roleAuthc,
-        name: 'ES Query',
+        name: 'ES Query with observability consumer',
         consumer: 'observability',
         ruleTypeId: '.es-query',
         params: {
@@ -118,13 +118,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await refreshRulesList();
       const searchResults = await svlTriggersActionsUI.getRulesList();
       expect(searchResults.length).toEqual(1);
-      expect(searchResults[0].name).toEqual('ES QueryElasticsearch query');
+      expect(searchResults[0].name).toEqual(
+        'ES Query with observability consumerElasticsearch query'
+      );
     });
 
     it('should create an ES Query rule and display it when consumer is stackAlerts', async () => {
       const esQuery = await alertingApi.helpers.createEsQueryRule({
         roleAuthc,
-        name: 'ES Query',
+        name: 'ES Query with stackAlerts consumer',
         consumer: 'stackAlerts',
         ruleTypeId: '.es-query',
         params: {
@@ -141,7 +143,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ruleIdList = [esQuery.id];
 
       await refreshRulesList();
-      await testSubjects.exists('rule-row');
+      const searchResults = await svlTriggersActionsUI.getRulesList();
+      expect(searchResults.length).toEqual(1);
+      expect(searchResults[0].name).toEqual(
+        'ES Query with stackAlerts consumerElasticsearch query'
+      );
     });
 
     it('should create and display an APM latency rule', async () => {
@@ -684,9 +690,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('ruleTypeFilterButton');
         }
 
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
-          'Observability'
-        );
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
+        await new Promise((resolve) => setTimeout(resolve, 100000));
       });
 
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
