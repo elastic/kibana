@@ -209,7 +209,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       if (!keyboardEvent.isKeyboardEvent) return;
       const newIndex = getPositionAfterToggling(fieldName, pinnedFields, fieldList);
       // If the field is currently pinned and it goes over the limit of the fields to show we need to show all of them
-      if (newIndex > INITIAL_MAX_NUMBER_OF_FIELDS && !showAllFields) toggleShowAllFields();
+      if (newIndex >= INITIAL_MAX_NUMBER_OF_FIELDS && !showAllFields) toggleShowAllFields();
       requestAnimationFrame(() => {
         virtualListRef.current?.scrollToItem(newIndex, 'smart');
         // We need to wait for the scroll to finish so the element is in the DOM before focusing it
