@@ -361,7 +361,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -415,7 +421,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -463,7 +475,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -517,7 +535,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -571,7 +595,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -625,7 +655,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -679,7 +715,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -733,7 +775,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
@@ -3786,7 +3834,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3840,7 +3894,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -3888,7 +3948,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3942,7 +4008,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3996,7 +4068,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4050,7 +4128,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4104,7 +4188,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4158,7 +4248,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
@@ -4778,7 +4874,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -4832,7 +4934,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -4880,7 +4988,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -4934,7 +5048,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -4988,7 +5108,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -5042,7 +5168,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -5096,7 +5228,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -5150,7 +5288,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",

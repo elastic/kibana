@@ -17617,27 +17617,27 @@
                   "InfoResponse",
                   ">; }; ingest: ",
                   "default",
-                  "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "; knnSearch: { (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
-                  "KnnSearchResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "TODO",
+                  ">; (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
-                  "KnnSearchResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "TODO",
+                  ", unknown>>; (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
-                  "KnnSearchResponse",
-                  "<TDocument>>; }; license: ",
+                  "TODO",
+                  ">; }; license: ",
                   "default",
                   "; logstash: ",
                   "default",
@@ -18694,27 +18694,27 @@
                   "InfoResponse",
                   ">; }; ingest: ",
                   "default",
-                  "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "; knnSearch: { (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
-                  "KnnSearchResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "TODO",
+                  ">; (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
-                  "KnnSearchResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "KnnSearchRequest",
-                  ", options?: ",
+                  "TODO",
+                  ", unknown>>; (this: That, params?: ",
+                  "TODO",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
-                  "KnnSearchResponse",
-                  "<TDocument>>; }; license: ",
+                  "TODO",
+                  ">; }; license: ",
                   "default",
                   "; logstash: ",
                   "default",
@@ -21209,146 +21209,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmTraceExplorerTab",
-            "type": "Object",
-            "tags": [],
-            "label": "[apmTraceExplorerTab]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.showInLabs",
-                "type": "boolean",
-                "tags": [],
-                "label": "showInLabs",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmTraceExplorerTab.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-server.uiSettings.apmLabsButton",
             "type": "Object",
             "tags": [],
@@ -21558,244 +21418,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableInfrastructureAssetCustomDashboards]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureAssetCustomDashboards.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableAwsLambdaMetrics",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableAwsLambdaMetrics]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.showInLabs",
-                "type": "boolean",
-                "tags": [],
-                "label": "showInLabs",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableAwsLambdaMetrics.solution",
                 "type": "string",
                 "tags": [],
                 "label": "solution",
@@ -22509,118 +22131,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmEnableContinuousRollups",
-            "type": "Object",
-            "tags": [],
-            "label": "[apmEnableContinuousRollups]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableContinuousRollups.solution",
                 "type": "string",
                 "tags": [],
                 "label": "solution",
@@ -25182,21 +24692,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.apmEnableContinuousRollups",
-        "type": "string",
-        "tags": [],
-        "label": "apmEnableContinuousRollups",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableContinuousRollups\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-common.apmEnableProfilingIntegration",
         "type": "string",
         "tags": [],
@@ -25309,21 +24804,6 @@
         "description": [],
         "signature": [
           "\"observability:apmServiceGroupMaxNumberOfServices\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.apmTraceExplorerTab",
-        "type": "string",
-        "tags": [],
-        "label": "apmTraceExplorerTab",
-        "description": [],
-        "signature": [
-          "\"observability:apmTraceExplorerTab\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -25502,21 +24982,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.enableAwsLambdaMetrics",
-        "type": "string",
-        "tags": [],
-        "label": "enableAwsLambdaMetrics",
-        "description": [],
-        "signature": [
-          "\"observability:enableAwsLambdaMetrics\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-common.enableComparisonByDefault",
         "type": "string",
         "tags": [],
@@ -25524,21 +24989,6 @@
         "description": [],
         "signature": [
           "\"observability:enableComparisonByDefault\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.enableInfrastructureAssetCustomDashboards",
-        "type": "string",
-        "tags": [],
-        "label": "enableInfrastructureAssetCustomDashboards",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureAssetCustomDashboards\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
