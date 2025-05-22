@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import type { Map as MapboxMap } from '@kbn/mapbox-gl';
 import { css } from '@emotion/react';
@@ -60,14 +60,11 @@ export const ScaleControl: React.FC<Props> = ({ isFullScreen, mbMap }) => {
   const [label, setLabel] = useState('');
   const [width, setWidth] = useState(0);
   const styles = useMemoizedStyles(componentStyles);
-  const mbMapRef = useRef(mbMap);
-  const onUpdate = () => {
-    const map = mbMapRef.current;
-    if (!map) return;
-    const container = map.getContainer();
+  const onUpdate = useCallback(() => {
+    const container = mbMap.getContainer();
     const centerHeight = container.clientHeight / 2;
-    const leftLatLon = map.unproject([0, centerHeight]);
-    const rightLatLon = map.unproject([MAX_WIDTH, centerHeight]);
+    const leftLatLon = mbMap.unproject([0, centerHeight]);
+    const rightLatLon = mbMap.unproject([MAX_WIDTH, centerHeight]);
     const maxDistanceMeters = leftLatLon.distanceTo(rightLatLon);
     const isKm = maxDistanceMeters >= 1000;
     const unit = i18n.translate(isKm ? 'xpack.maps.kilometersAbbr' : 'xpack.maps.metersAbbr', {
@@ -76,8 +73,8 @@ export const ScaleControl: React.FC<Props> = ({ isFullScreen, mbMap }) => {
     const maxDistance = isKm ? maxDistanceMeters / 1000 : maxDistanceMeters;
     const scaleDistance = getScaleDistance(maxDistance);
 
-    const zoom = map.getZoom();
-    const bounds = map.getBounds();
+    const zoom = mbMap.getZoom();
+    const bounds = mbMap.getBounds();
     let nextLabel = `${scaleDistance} ${unit}`;
     if (
       zoom <= 4 ||
@@ -89,17 +86,15 @@ export const ScaleControl: React.FC<Props> = ({ isFullScreen, mbMap }) => {
 
     setLabel(nextLabel);
     setWidth(MAX_WIDTH * (scaleDistance / maxDistance));
-  };
+  }, [mbMap]);
 
   useEffect(() => {
-    const map = mbMapRef.current;
-    if (!map) return;
-    map.on('move', onUpdate);
+    mbMap.on('move', onUpdate);
     onUpdate();
     return () => {
-      map.off('move', onUpdate);
+      mbMap.off('move', onUpdate);
     };
-  }, []);
+  }, [mbMap, onUpdate]);
 
   return (
     <div
