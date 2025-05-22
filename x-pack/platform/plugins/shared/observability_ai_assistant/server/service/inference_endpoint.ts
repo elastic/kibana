@@ -112,7 +112,7 @@ export async function getKbModelStatus({
   try {
     inferenceId = await getInferenceIdFromWriteIndex(esClient);
   } catch (error) {
-    logger.error(`Unable to retrieve inference if from write index: ${error.message}`);
+    logger.error(`Unable to retrieve inference id from write index: ${error.message}`);
     return {
       enabled,
       errorMessage: error.message,
@@ -140,7 +140,7 @@ export async function getKbModelStatus({
         endpoint,
         enabled,
         kbState: KnowledgeBaseState.READY,
-        currentInferenceId,
+        currentInferenceId: undefined,
         concreteWriteIndex,
         isReIndexing,
       };
