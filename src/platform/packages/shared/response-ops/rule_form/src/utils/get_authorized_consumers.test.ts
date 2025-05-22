@@ -13,7 +13,8 @@ import type { RuleTypeWithDescription } from '../common/types';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 
 describe('getAuthorizedConsumers', () => {
-  const mockValidConsumers: RuleCreationValidConsumer[] = ['consumer1', 'consumer2'];
+  // @ts-ignore
+  const mockValidConsumers = ['consumer1', 'consumer2'] as RuleCreationValidConsumer[];
 
   it('should return authorized consumers that have "all" privileges and are valid', () => {
     const mockRuleType: RuleTypeWithDescription = {
@@ -22,7 +23,7 @@ describe('getAuthorizedConsumers', () => {
         consumer2: { all: false },
         consumer3: { all: true },
       },
-    } as RuleTypeWithDescription;
+    } as unknown as RuleTypeWithDescription;
 
     const result = getAuthorizedConsumers({
       ruleType: mockRuleType,
@@ -38,7 +39,7 @@ describe('getAuthorizedConsumers', () => {
         [AlertConsumers.OBSERVABILITY]: { all: true },
         consumer1: { all: true },
       },
-    } as RuleTypeWithDescription;
+    } as unknown as RuleTypeWithDescription;
 
     const result = getAuthorizedConsumers({
       ruleType: mockRuleType,
@@ -54,7 +55,7 @@ describe('getAuthorizedConsumers', () => {
         consumer1: { all: false },
         consumer2: { all: false },
       },
-    } as RuleTypeWithDescription;
+    } as unknown as RuleTypeWithDescription;
 
     const result = getAuthorizedConsumers({
       ruleType: mockRuleType,
@@ -69,7 +70,7 @@ describe('getAuthorizedConsumers', () => {
       authorizedConsumers: {
         consumer3: { all: true },
       },
-    } as RuleTypeWithDescription;
+    } as unknown as RuleTypeWithDescription;
 
     const result = getAuthorizedConsumers({
       ruleType: mockRuleType,
