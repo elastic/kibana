@@ -5,6 +5,118 @@
  * 2.0.
  */
 
+import { createInternalError } from './errors';
+
+/**
+ * Represents a plain toolId, without source information attached to it.
+ */
+export type PlainIdToolIdentifier = string;
+
+/**
+ * Represents the source type for a tool.
+ *
+ * Currently limited to a single value - 'built-in'.
+ */
+export enum ToolSourceType {
+  builtIn = 'builtIn',
+  unknown = 'unknown',
+}
+
+/**
+ * Structured representation of a tool identifier.
+ */
+export interface StructuredToolIdentifier {
+  /** The unique ID of this tool, relative to the source **/
+  toolId: string;
+  /** The type of source the tool is being provided from, e.g built-in or MCP **/
+  sourceType: ToolSourceType;
+  /** */
+  sourceId: string;
+}
+
+export const serializedPartsSeparator = '||';
+export const buildInSourceId = 'builtIn';
+export const unknownSourceId = 'unknown';
+
+/**
+ * Build a structured tool identifier for given builtin tool ID.
+ */
+export const builtinToolId = (plainId: PlainIdToolIdentifier): StructuredToolIdentifier => {
+  return {
+    toolId: plainId,
+    sourceType: ToolSourceType.builtIn,
+    sourceId: buildInSourceId,
+  };
+};
+
+/**
+ * String representation of {@link StructuredToolIdentifier}
+ * Follow a `{toolId}||{sourceType}||{sourceId}` format.
+ */
+export type SerializedToolIdentifier = `${PlainIdToolIdentifier}||${ToolSourceType}||${string}`;
+
+export type ToolIdentifier =
+  | PlainIdToolIdentifier
+  | StructuredToolIdentifier
+  | SerializedToolIdentifier;
+
+export const isSerializedToolIdentifier = (
+  identifier: ToolIdentifier
+): identifier is SerializedToolIdentifier => {
+  return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 3;
+};
+
+export const isStructuredToolIdentifier = (
+  identifier: ToolIdentifier
+): identifier is StructuredToolIdentifier => {
+  return typeof identifier === 'object' && 'toolId' in identifier && 'sourceType' in identifier;
+};
+
+export const isPlainToolIdentifier = (
+  identifier: ToolIdentifier
+): identifier is PlainIdToolIdentifier => {
+  return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 0;
+};
+
+export const toSerializedToolIdentifier = (identifier: ToolIdentifier): SerializedToolIdentifier => {
+  if (isSerializedToolIdentifier(identifier)) {
+    return identifier;
+  }
+  if (isStructuredToolIdentifier(identifier)) {
+    return `${identifier.toolId}||${identifier.sourceType}||${identifier.sourceId}`;
+  }
+  if (isPlainToolIdentifier(identifier)) {
+    return `${identifier}||${ToolSourceType.unknown}||${unknownSourceId}`;
+  }
+
+  throw createInternalError(`Malformed tool identifier: "${identifier}"`);
+};
+
+export const toStructuredToolIdentifier = (
+  identifier: ToolIdentifier
+): StructuredToolIdentifier => {
+  if (isStructuredToolIdentifier(identifier)) {
+    return identifier;
+  }
+  if (isSerializedToolIdentifier(identifier)) {
+    const [toolId, sourceType, sourceId] = identifier.split(serializedPartsSeparator);
+    return {
+      toolId,
+      sourceType: sourceType as ToolSourceType,
+      sourceId,
+    };
+  }
+  if (isPlainToolIdentifier(identifier)) {
+    return {
+      toolId: identifier,
+      sourceType: ToolSourceType.unknown,
+      sourceId: unknownSourceId,
+    };
+  }
+
+  throw createInternalError(`Malformed tool identifier: "${identifier}"`);
+};
+
 /**
  * Serializable representation of a tool, without its handler or schema.
  *

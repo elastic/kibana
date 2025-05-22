@@ -9,7 +9,7 @@ import type { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolDescriptor, ToolIdentifier } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner } from './runner';
 import type { RunEventEmitter } from './events';
@@ -82,12 +82,12 @@ export interface ToolProvider {
 }
 
 export interface ToolProviderHasOptions {
-  toolId: string;
+  toolId: ToolIdentifier;
   request: KibanaRequest;
 }
 
 export interface ToolProviderGetOptions {
-  toolId: string;
+  toolId: ToolIdentifier;
   request: KibanaRequest;
 }
 

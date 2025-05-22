@@ -6,7 +6,21 @@
  */
 
 export type { OnechatEvent } from './src/events';
-export type { ToolDescriptor, ToolDescriptorMeta } from './src/tools';
+export {
+  type ToolDescriptor,
+  type ToolDescriptorMeta,
+  type PlainIdToolIdentifier,
+  type SerializedToolIdentifier,
+  type StructuredToolIdentifier,
+  type ToolIdentifier,
+  ToolSourceType,
+  isSerializedToolIdentifier,
+  isStructuredToolIdentifier,
+  isPlainToolIdentifier,
+  toStructuredToolIdentifier,
+  toSerializedToolIdentifier,
+  builtinToolId,
+} from './src/tools';
 export {
   OnechatErrorCode,
   OnechatErrorUtils,

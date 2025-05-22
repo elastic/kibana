@@ -13,7 +13,16 @@ export interface OnechatEvent<
   TData extends Record<string, any>,
   TMeta extends Record<string, any>
 > {
+  /**
+   * Unique type identifier for the event.
+   */
   type: TEventType;
+  /**
+   * Data bound to this event.
+   */
   data: TData;
+  /**
+   * Metadata bound to this event.
+   */
   meta: TMeta;
 }

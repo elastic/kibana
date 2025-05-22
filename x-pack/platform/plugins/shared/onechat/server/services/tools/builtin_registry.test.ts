@@ -20,7 +20,7 @@ describe('BuiltinToolRegistry', () => {
   });
 
   describe('register', () => {
-    it('should register a direct tool', () => {
+    it('should register a direct tool', async () => {
       const mockTool: Tool = {
         id: 'test-tool',
         name: 'Test Tool',
@@ -30,7 +30,7 @@ describe('BuiltinToolRegistry', () => {
       };
 
       registry.register(mockTool);
-      expect(registry.list({ request: mockRequest })).resolves.toEqual([mockTool]);
+      await expect(registry.list({ request: mockRequest })).resolves.toEqual([mockTool]);
     });
 
     it('should register a tool registration function', async () => {

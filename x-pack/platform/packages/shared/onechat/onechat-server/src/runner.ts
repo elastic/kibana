@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ToolIdentifier, SerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunEventHandlerFn } from './events';
 
 /**
@@ -27,13 +28,10 @@ export type ScopedRunToolFn = <TResult = unknown>(
 ) => Promise<TResult>;
 
 /**
- * Params for {@link ScopedRunner.runTool}
+ * Context bound to a run execution.
+ * Contains metadata associated with the run's current state.
+ * Will be attached to errors thrown during a run.
  */
-export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
-  RunToolParams<TParams>,
-  'request'
->;
-
 export interface RunContext {
   runId: string;
   stack: RunContextStackEntry[];
@@ -44,7 +42,7 @@ export interface RunContext {
  * Used to follow nested / chained execution.
  */
 export type RunContextStackEntry =
-  | { type: 'tool'; toolId: string }
+  | { type: 'tool'; toolId: SerializedToolIdentifier }
   | { type: 'agent'; agentId: string };
 
 /**
@@ -54,7 +52,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   /**
    * ID of the tool to call.
    */
-  toolId: string;
+  toolId: ToolIdentifier;
   /**
    * Parameters to call the tool with.
    */
@@ -74,6 +72,14 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    */
   defaultConnectorId?: string;
 }
+
+/**
+ * Params for {@link ScopedRunner.runTool}
+ */
+export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
+  RunToolParams<TParams>,
+  'request'
+>;
 
 /**
  * Public onechat API to execute a tools.

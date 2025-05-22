@@ -7,7 +7,11 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { OnechatErrorUtils } from '@kbn/onechat-common';
+import {
+  OnechatErrorUtils,
+  toSerializedToolIdentifier,
+  toStructuredToolIdentifier,
+} from '@kbn/onechat-common';
 import type {
   Tool,
   ToolProvider,
@@ -45,7 +49,8 @@ export class BuiltinToolRegistry implements ToolProvider {
   }
 
   async has(options: ToolProviderHasOptions): Promise<boolean> {
-    const { toolId, request } = options;
+    const { toolId: structuredToolId, request } = options;
+    const { toolId } = toStructuredToolIdentifier(structuredToolId);
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
@@ -60,7 +65,8 @@ export class BuiltinToolRegistry implements ToolProvider {
   }
 
   async get(options: ToolProviderGetOptions): Promise<Tool> {
-    const { toolId, request } = options;
+    const { toolId: structuredToolId, request } = options;
+    const { toolId } = toStructuredToolIdentifier(structuredToolId);
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
@@ -72,7 +78,7 @@ export class BuiltinToolRegistry implements ToolProvider {
     }
 
     throw OnechatErrorUtils.createToolNotFoundError({
-      toolId,
+      toolId: toSerializedToolIdentifier(toolId),
     });
   }
 

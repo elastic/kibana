@@ -6,6 +6,7 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
+import type { SerializedToolIdentifier } from './tools';
 
 export enum OnechatErrorCode {
   internalError = 'internalError',
@@ -54,14 +55,16 @@ export const isToolNotFoundError = (err: unknown): err is OnechatInternalError =
 export const createToolNotFoundError = ({
   toolId,
   customMessage,
+  meta = {},
 }: {
-  toolId: string;
+  toolId: SerializedToolIdentifier;
   customMessage?: string;
+  meta?: Record<string, any>;
 }): OnechatToolNotFoundError => {
   return new OnechatError(
     OnechatErrorCode.toolNotFound,
     customMessage ?? `Tool ${toolId} not found`,
-    { toolId, statusCode: 404 }
+    { ...meta, toolId, statusCode: 404 }
   );
 };
 

@@ -13,6 +13,9 @@ export enum OnechatRunEventType {
   toolResponse = 'toolResponse',
 }
 
+/**
+ * Base set of meta for all onechat run events.
+ */
 export interface OnechatRunEventMeta {
   /**
    * Current runId
