@@ -30,6 +30,8 @@ export const getAuthorizedConsumers = ({
     }, [])
     .filter((consumer) => {
       // Filter out deprecated alerting consumers
-      return !DEPRECATED_ALERTING_CONSUMERS.includes(consumer as RuleCreationValidConsumer);
+      return !(DEPRECATED_ALERTING_CONSUMERS as RuleCreationValidConsumer[]).includes(
+        consumer as RuleCreationValidConsumer
+      );
     });
 };
