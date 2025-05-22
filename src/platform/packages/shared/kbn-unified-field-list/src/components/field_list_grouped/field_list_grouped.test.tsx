@@ -60,6 +60,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       scrollToTopResetCounter: 0,
       fieldsExistInIndex: true,
       screenReaderDescriptionId: 'testId',
+      shouldScreenReaderNarrateSearchResults: true,
       renderFieldItem: jest.fn(({ field, itemIndex, groupIndex }) => (
         <EuiText
           data-test-subj="testFieldItem"
