@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import type { RenderChildrenType } from '../types';
+import type { IntegrationCardMetadata, RenderChildrenType } from '../types';
 import { useIntegrationCardList } from '../hooks/use_integration_card_list';
 import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_component';
 
-export const DEFAULT_CHECK_COMPLETE_METADATA = {
-  installedIntegrationsCount: 0,
+export const DEFAULT_CHECK_COMPLETE_METADATA: IntegrationCardMetadata = {
+  activeIntegrations: [],
   isAgentRequired: false,
 };
 
@@ -21,17 +21,19 @@ export const IntegrationsCardGridTabs: RenderChildrenType = ({
   checkCompleteMetadata = DEFAULT_CHECK_COMPLETE_METADATA,
   selectedTabResult,
 }) => {
+  const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
+
   const list = useIntegrationCardList({
+    activeIntegrations,
     integrationsList: allowedIntegrations,
     featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
   });
-
-  const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
+  const activeIntegrationsCount = activeIntegrations?.length ?? 0;
 
   return (
     <IntegrationsCardGridTabsComponent
       isAgentRequired={isAgentRequired}
-      installedIntegrationsCount={installedIntegrationsCount}
+      activeIntegrationsCount={activeIntegrationsCount}
       topCalloutRenderer={topCalloutRenderer}
       integrationList={list}
       availablePackagesResult={availablePackagesResult}
