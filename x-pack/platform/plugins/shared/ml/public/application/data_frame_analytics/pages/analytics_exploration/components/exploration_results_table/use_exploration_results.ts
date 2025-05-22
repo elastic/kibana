@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { EuiDataGridColumn } from '@elastic/eui';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -34,12 +35,11 @@ import {
 } from '@kbn/ml-data-grid';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useTrainedModelsApiService } from '@kbn/ml-hooks/trained_models/use_trained_models_api_service';
 
-import type { estypes } from '@elastic/elasticsearch';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
 import { getIndexData, getIndexFields } from '../../../../common';
-import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
