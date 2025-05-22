@@ -9,7 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createMigrationRules,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
   statsOverrideCallbackFactory,
@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Stats API', () => {
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     it('should return stats for the specific migration', async () => {

@@ -17,7 +17,7 @@ import { deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
   createMigrationRules,
   defaultElasticRule,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
   statsOverrideCallbackFactory,
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     it('should install all installable custom migration rules', async () => {

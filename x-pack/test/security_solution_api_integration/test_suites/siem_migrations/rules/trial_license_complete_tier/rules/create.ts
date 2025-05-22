@@ -9,7 +9,7 @@ import expect from 'expect';
 import { SiemMigrationStatus } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import {
   defaultOriginalRule,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   ruleMigrationResourcesRouteHelpersFactory,
   ruleMigrationRouteHelpersFactory,
   splunkRuleWithResources,
@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Create Rules API', () => {
     let migrationId: string;
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
       const response = await migrationRulesRoutes.create({});
       migrationId = response.body.migration_id;
     });

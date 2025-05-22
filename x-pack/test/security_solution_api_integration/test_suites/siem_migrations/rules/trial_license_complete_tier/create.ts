@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { deleteAllMigrationRules, ruleMigrationRouteHelpersFactory } from '../../utils';
+import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Create API', () => {
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     describe('Happy path', () => {

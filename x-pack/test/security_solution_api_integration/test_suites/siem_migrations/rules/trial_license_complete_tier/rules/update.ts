@@ -9,7 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createMigrationRules,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocument,
   ruleMigrationRouteHelpersFactory,
 } from '../../../utils';
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Update Rules API', () => {
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     describe('Happy path', () => {

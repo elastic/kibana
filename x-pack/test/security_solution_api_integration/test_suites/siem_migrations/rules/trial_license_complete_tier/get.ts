@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { deleteAllMigrationRules, ruleMigrationRouteHelpersFactory } from '../../utils';
+import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Get API', () => {
     let migrationId: string;
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
       const creationResponse = await ruleMigrationRoutes.create({});
       migrationId = creationResponse.body.migration_id;
     });

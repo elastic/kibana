@@ -16,7 +16,7 @@ import {
   createMigrationRules,
   defaultElasticRule,
   defaultOriginalRule,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocument,
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Get Rules API', () => {
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     describe('Basic', () => {

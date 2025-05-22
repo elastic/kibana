@@ -13,7 +13,7 @@ import { deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
   createMigrationRules,
   defaultElasticRule,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
 } from '../../utils';
@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
 
       // Add some prebuilt rules
       const ruleAssetSavedObjects = [
