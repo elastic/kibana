@@ -90,12 +90,25 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
 
     it('should successfully execute email action for custom space', async () => {
       const testStart = new Date().toISOString();
+
+      const { body: createdConnector } = await supertest
+        .post(`/s/${Spaces.other.id}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: { service: '__json', from: 'bob@example.org', hasAuth: true },
+          secrets: { user: 'bob', password: 'supersecret' },
+        });
+      const connectorId = createdConnector.id;
+      objectRemover.add(Spaces.other.id, connectorId, 'connector', 'actions');
+
       const response = await supertest
         .post(`/api/execute_unsecured_action`)
         .set('kbn-xsrf', 'xxx')
         .send({
           requesterId: 'background_task',
-          id: 'my-test-email',
+          id: connectorId,
           params: {
             to: ['you@test.com'],
             subject: 'hello from Kibana!',
@@ -112,10 +125,10 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         })
         .expect(200);
       expect(response.body.status).to.eql('success');
-      expect(response.body.result.actionId).to.eql('my-test-email');
+      expect(response.body.result.actionId).to.eql(connectorId);
       expect(response.body.result.status).to.eql('ok');
 
-      const query = getEventLogExecuteQuery(testStart, 'my-test-email');
+      const query = getEventLogExecuteQuery(testStart, connectorId);
       await retry.try(async () => {
         const searchResult = await es.search(query);
         expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
@@ -125,7 +138,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         expect(hit?._source?.event?.outcome).to.eql('success');
         // @ts-expect-error _source: unknown
         expect(hit?._source?.message).to.eql(
-          `action executed: .email:my-test-email: TestEmail#xyz`
+          `action executed: .email:${connectorId}: An email action`
         );
         // @ts-expect-error _source: unknown
         expect(hit?._source?.kibana?.action?.execution?.source).to.eql('background_task');
