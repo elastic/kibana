@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { test, expect } from '@kbn/scout';
-import * as testData from '../fixtures/constants';
+import { expect } from '@kbn/scout';
+import { testData, test } from '../fixtures';
 
 const DATA_STREAM_NAME = 'my-data-stream';
+
 test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ kbnClient, esClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
@@ -37,7 +38,6 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
       },
       refresh: 'wait_for',
     });
-    // await apiServices.streams.enable();
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.goto();
   });

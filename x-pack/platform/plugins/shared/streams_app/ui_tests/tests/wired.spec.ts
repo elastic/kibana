@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { test, expect } from '@kbn/scout';
-import * as testData from '../fixtures/constants';
+import { expect } from '@kbn/scout';
+import { testData, test } from '../fixtures';
 
 test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, kbnClient, browserAuth, pageObjects }) => {

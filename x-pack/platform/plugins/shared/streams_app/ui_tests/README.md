@@ -22,4 +22,4 @@ npx playwright test --config x-pack/platform/plugins/shared/streams_app/ui_tests
 npx playwright test --config x-pack/platform/plugins/shared/streams_app/ui_tests/playwright.config.ts --project=local --grep @svlOblt
 ```
 
-Test results are available in `x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/output`
+Test results are available in `x-pack/platform/plugins/shared/streams_app/ui_tests/output`
