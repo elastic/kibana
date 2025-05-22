@@ -55,12 +55,8 @@ const bookSerializedStateIsByReference = (
   return Boolean(state && (state as BookByReferenceSerializedState).savedObjectId);
 };
 
-const bookAttributeComparators: StateComparators<BookAttributes> = {
-  bookTitle: 'referenceEquality',
-  author: 'referenceEquality',
-  synopsis: 'referenceEquality',
-  pages: 'referenceEquality',
-  published: 'referenceEquality',
+const bookAttributeComparators: StateComparators<{ attributes: BookAttributes }> = {
+  attributes: 'deepEquality',
 };
 
 const deserializeState = async (

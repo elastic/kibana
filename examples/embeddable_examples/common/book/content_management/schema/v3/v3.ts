@@ -33,7 +33,7 @@ export const bookAttributesDefinition: VersionableEmbeddableObject<
       author: attributes.authorName,
       pages: attributes.numberOfPages,
       synopsis: attributes.bookSynopsis,
-      published: attributes.published,
+      published: attributes.publicationYear,
     },
     references,
   }),
