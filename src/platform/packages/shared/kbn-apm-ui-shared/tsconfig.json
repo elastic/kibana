@@ -8,5 +8,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/charts-theme",
+    "@kbn/apm-types-shared",
   ]
 }
