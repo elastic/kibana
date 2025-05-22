@@ -8039,32 +8039,32 @@
   dependencies:
     ncp "^2.0.0"
 
-"@launchdarkly/js-sdk-common@2.12.0":
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.12.0.tgz#c22eb9fead687260d916a75f693c7d399f085b05"
-  integrity sha512-HIDxvgo1vksC9hsYy3517sgW0Ql+iW3fgwlq/CEigeBNmaa9/J1Pxo7LrKPzezEA0kaGedmt/DCzVVxVBmxSsQ==
+"@launchdarkly/js-sdk-common@2.17.0":
+  version "2.17.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.17.0.tgz#963978fc1d64f7166e72928c101805a3899b0142"
+  integrity sha512-HYQNc4xbE58hBOO1yZsqE+BHOC36AYrHPZ5hwvlHoZRSsaoYCPM+Q/n+O+N3JhWXTqGsu6SwUzqUzTyxg8prGg==
 
-"@launchdarkly/js-server-sdk-common@2.9.1":
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.9.1.tgz#a683d682897c20a6967f5454d932663e4da6fc5c"
-  integrity sha512-BGIjcfel1hURvX4hM4iVruWecWMntRzh1UuPtV0uOYnXLuETp5lfpqBB6KzFoERnEZoCyX6Tmo+tPFVwteIUGA==
+"@launchdarkly/js-server-sdk-common@2.15.1":
+  version "2.15.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.15.1.tgz#355ee04f6cdfa2aa9e006e3acdbcd7a11d863993"
+  integrity sha512-dAp2Uvo4r8nmIXHEUaRvxspLBYJmwVX3ZTCBvgX128pDi+ucJoW0IT10r8hD/OQrN5UJA66LDxI6RMr0kgqwGA==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.12.0"
+    "@launchdarkly/js-sdk-common" "2.17.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.1":
-  version "9.7.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.1.tgz#bb228e5f8c4c7ca52579f909e4150b9a749b04a9"
-  integrity sha512-razZ/ine5hfHiS7ZNfM1r/G7GNDQ+wHV0pRN2A0Yk5spZTmT/ecu67e+aXu/KAfEQyL0V4ofEkXJpeGl7TYJ5Q==
+"@launchdarkly/node-server-sdk@^9.9.1":
+  version "9.9.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.9.1.tgz#899e3e79c15a8a262af3e415a0c3c6de1d2a3f8e"
+  integrity sha512-4XM5RpqgkFtbDrmwqjsh0/T7X1bgnq+ds1yjZLuB8F2O8z0UJvlneMs9UjcQDJ+yetiJExVqrq8LsJ3geNyiJQ==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.9.1"
+    "@launchdarkly/js-server-sdk-common" "2.15.1"
     https-proxy-agent "^5.0.1"
-    launchdarkly-eventsource "2.0.3"
+    launchdarkly-eventsource "2.1.0"
 
-"@launchdarkly/openfeature-node-server@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.0.0.tgz#09abebb56608e729049c3ebbd2373ce0ea25121d"
-  integrity sha512-4O4bQSqM+9BUZo8L+rQkxUdrv3sqC8vGcC0U0yBvELXmd9Q8jJZkY+7+idcx/zJsInYwnfmS0TUA4YeOyQw89A==
+"@launchdarkly/openfeature-node-server@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.1.0.tgz#b2ae7a667f84bc4714c9657cd62f029c7af72f6e"
+  integrity sha512-x3uxYfF+NBbIZz0w8K4GIYquMiC5YaH8JwnrfYPrjO/gKHRnBlYdrAQFL+N8m4K7jf8U66Je1JRkGTVk+/2n+g==
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
@@ -11459,11 +11459,6 @@
   resolved "https://registry.yarnpkg.com/@types/deep-freeze-strict/-/deep-freeze-strict-1.1.0.tgz#447a6a2576191344aa42310131dd3df5c41492c4"
   integrity sha1-RHpqJXYZE0SqQjEBMd099cQUksQ=
 
-"@types/diff@^5.0.8":
-  version "5.0.8"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.8.tgz#28dc501cc3e7c62d4c5d096afe20755170acf276"
-  integrity sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==
-
 "@types/ejs@^3.0.6":
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
@@ -14068,7 +14063,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@^1.0.0, axios@^1.6.0, axios@^1.6.2, axios@^1.7.4, axios@^1.8.3:
+axios@^1.6.0, axios@^1.6.2, axios@^1.7.4, axios@^1.8.2, axios@^1.8.3:
   version "1.8.3"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.3.tgz#9ebccd71c98651d547162a018a1a95a4b4ed4de8"
   integrity sha512-iP4DebzoNlP/YN2dpwCgb8zoCmhtkajzS48JvwmkSkXvPI3DHc7m+XYL5tGnSlJtR6nImXZmdCuN5aP8dh1d8A==
@@ -14870,12 +14865,12 @@ buffer@^6.0.3:
     base64-js "^1.3.1"
     ieee754 "^1.2.1"
 
-buildkite-test-collector@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.7.0.tgz#3fdd753b185045c7aed0136a0e0713a77313164b"
-  integrity sha512-R2t3KfBmGCu8fllmZ5GBzOyLJxfB2CEwwgOOtLTleKrHLDPXDal+YLz09okOVL0DE+d5GaGhELwY1MD3xfwE4A==
+buildkite-test-collector@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.8.1.tgz#f1529929e1aab6681818713f533489d35113484b"
+  integrity sha512-f+npzAQZy1Im4OYwwISY5DcuspBMAaeYayIYVrgmpypBxsnJk06Gdw8qnJ578+9NLumXD8OR0X/TKamxebDVyg==
   dependencies:
-    axios "^1.0.0"
+    axios "^1.8.2"
     dotenv "^16.0.2"
     request-spy "^0.0.10"
     strip-ansi "^6.0.0"
@@ -17490,6 +17485,11 @@ diff@^5.0.0, diff@^5.1.0, diff@^5.2.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.0.tgz#26ded047cd1179b78b9537d5ef725503ce1ae531"
   integrity sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==
 
+diff@^8.0.0:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-8.0.1.tgz#1562531dbca460fe5be98a026412996ccab1abd5"
+  integrity sha512-rEaM3KmVm78zE3dFZaop3aCQa2MTm+T4kcigUFLVU/KbOYdiY6JnL2g2puOYnct3QFw9pjZadaCbCZ1O8ArMlQ==
+
 diffie-hellman@^5.0.3:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/diffie-hellman/-/diffie-hellman-5.0.3.tgz#40e8ee98f55a2149607146921c63e1ae5f3d2875"
@@ -17789,7 +17789,7 @@ elastic-apm-node@^4.10.0, elastic-apm-node@^4.13.0:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.11.3"
+    import-in-the-middle "1.13.1"
     json-bigint "^1.0.0"
     lru-cache "10.2.0"
     measured-reporting "^1.51.1"
@@ -21120,12 +21120,12 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.11.3:
-  version "1.11.3"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.11.3.tgz#08559f2c05fd65ba7062e747af056ed18a80120c"
-  integrity sha512-tNpKEb4AjZrCyrxi+Eyu43h5ig0O8ZRFSXPHh/00/o+4P4pKzVEW/m5lsVtsAT7fCIgmQOAPjdqecGDsBXRxsw==
+import-in-the-middle@1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.13.1.tgz#789651f9e93dd902a5a306f499ab51eb72b03a12"
+  integrity sha512-k2V9wNm9B+ysuelDTHjI9d5KPc4l8zAZTGqj+pcynvWkypZd857ryzN8jNC7Pg2YZXNMJcHRPpaDyCBbNyVRpA==
   dependencies:
-    acorn "^8.8.2"
+    acorn "^8.14.0"
     acorn-import-attributes "^1.9.5"
     cjs-module-lexer "^1.2.2"
     module-details-from-path "^1.0.3"
@@ -23216,23 +23216,23 @@ launch-editor@^2.6.1:
     picocolors "^1.0.0"
     shell-quote "^1.8.1"
 
-launchdarkly-eventsource@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.3.tgz#8a7b8da5538153f438f7d452b1c87643d900f984"
-  integrity sha512-VhFjppK7jXlcEKaS7bxdoibB5j01NKyeDR7a8XfssdDGNWCTsbF0/5IExSmPi44eDncPhkoPNxlSZhEZvrbD5w==
+launchdarkly-eventsource@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.1.0.tgz#9d16d0fadda61dc54cb393d323b3ef82a08803ff"
+  integrity sha512-1HigECOMYdqX6t1cLs21vYy8Cn4enx1uhVKI7ZgT3fY14x0e75xZGAJ+K2BrAkM6ldUQj2WvIHB9es4k3yaaTQ==
 
-launchdarkly-js-client-sdk@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.5.0.tgz#cb0e3d6fc21e56750aa86fcaf75733d7f510946f"
-  integrity sha512-3dgxC9S8K2ix6qjdArjZGOJPtAytgfQTuE+vWgjWJK7725rpYbuqbHghIFr5B0+WyWyVBYANldjWd1JdtYLwsw==
+launchdarkly-js-client-sdk@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.7.0.tgz#1bdd097c7bee7fd4539508bbf05b7a235b2e8e59"
+  integrity sha512-8uV0k4+ebwNcprqU0wNAxcI4y/kSKPaJ2RZtRVV2cHAXrur3Y4Ad3BkG3i2rhE7r2hyXWOAvGvYFl/byPg+Sug==
   dependencies:
     escape-string-regexp "^4.0.0"
-    launchdarkly-js-sdk-common "5.4.0"
+    launchdarkly-js-sdk-common "5.6.0"
 
-launchdarkly-js-sdk-common@5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.4.0.tgz#c9787daebe0b583b01d2334218524ea142c85001"
-  integrity sha512-Kb3SDcB6S0HUpFNBZgtEt0YUV/fVkyg+gODfaOCJQ0Y0ApxLKNmmJBZOrPE2qIdzw536u4BqEjtaJdqJWCEElg==
+launchdarkly-js-sdk-common@5.6.0:
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.6.0.tgz#99bd773d2f16f8234613a5e9577e57c91242bddc"
+  integrity sha512-tHSTcViOnu72j73p7lWO5GbArVlMwxl1AAoSWer735BFnygMpnInmJx1s0iLjeG/slwosqs7DFJ2YG78IvQYMw==
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"
@@ -29516,10 +29516,10 @@ semver@^6.0.0, semver@^6.1.0, semver@^6.1.2, semver@^6.3.0, semver@^6.3.1:
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.1.tgz#556d2ef8689146e46dcea4bfdd095f3434dffcb4"
   integrity sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==
 
-semver@^7.3.2, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.0, semver@^7.5.2, semver@^7.5.3, semver@^7.5.4, semver@^7.6.2, semver@^7.6.3, semver@^7.7.1:
-  version "7.7.1"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.1.tgz#abd5098d82b18c6c81f6074ff2647fd3e7220c9f"
-  integrity sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==
+semver@^7.3.2, semver@^7.3.4, semver@^7.3.5, semver@^7.3.7, semver@^7.5.0, semver@^7.5.2, semver@^7.5.3, semver@^7.5.4, semver@^7.6.2, semver@^7.6.3, semver@^7.7.2:
+  version "7.7.2"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.2.tgz#67d99fdcd35cec21e6f8b87a7fd515a33f982b58"
+  integrity sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==
 
 send@0.19.0:
   version "0.19.0"
