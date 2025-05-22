@@ -135,6 +135,34 @@ mapping_response = client.indices.put_mapping(index=index_name, body=mappings)
 print(mapping_response)
 `;
 
+const semanticIngestCommand: IngestCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  sampleDocuments,
+}) => `from elasticsearch import Elasticsearch, helpers
+
+client = Elasticsearch(
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}",
+)
+
+index_name = "${indexName}"
+
+docs = ${JSON.stringify(sampleDocuments, null, 4)}
+
+# Set the ingestion timeout to 5 minutes, to allow time for semantic ingestion
+# to complete. The initial ingest with semantic_text fields may take longer
+# while the model loads, or ML nodes are allocated.
+ingestion_timeout=300
+
+bulk_response = helpers.bulk(
+    client.options(request_timeout=ingestion_timeout),
+    docs,
+    index=index_name
+)
+print(bulk_response)`;
+
 export const PythonIngestDataExample: IngestDataCodeDefinition = {
   installCommand: PYTHON_INSTALL_CMD,
   ingestCommand: ingestionCommand,
@@ -164,4 +192,9 @@ print(search_response['hits']['hits'])
 
 export const PythonSearchExample: SearchCodeDefinition = {
   searchCommand,
+};
+
+export const PythonSemanticIngestDataExample: IngestDataCodeDefinition = {
+  ...PythonIngestDataExample,
+  ingestCommand: semanticIngestCommand,
 };

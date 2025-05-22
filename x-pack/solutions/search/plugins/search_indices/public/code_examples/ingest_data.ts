@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { IngestDataCodeExamples } from '../types';
 
-import { JSIngestDataExample } from './javascript';
-import { PythonIngestDataExample } from './python';
+import { JSIngestDataExample, JSSemanticIngestDataExample } from './javascript';
+import { PythonIngestDataExample, PythonSemanticIngestDataExample } from './python';
 import { ConsoleIngestDataExample } from './sense';
 import { CurlIngestDataExample } from './curl';
 import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
@@ -78,6 +78,6 @@ export const SemanticIngestDataCodeExamples: IngestDataCodeExamples = {
   },
   sense: ConsoleIngestDataExample,
   curl: CurlIngestDataExample,
-  python: PythonIngestDataExample,
-  javascript: JSIngestDataExample,
+  python: PythonSemanticIngestDataExample,
+  javascript: JSSemanticIngestDataExample,
 };

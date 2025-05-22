@@ -33,26 +33,24 @@ export const JavascriptCreateIndexExamples: CreateIndexLanguageExamples = {
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
   }
 });
 
-async function run() {
-  await client.indices.create({
-    index: "${indexName ?? INDEX_PLACEHOLDER}",
-    mappings: {
-      properties: {
-        text: { type: "text"}
-      },
+const createResponse = await client.indices.create({
+  index: '${indexName ?? INDEX_PLACEHOLDER}',
+  mappings: {
+    properties: {
+      text: { type: 'text'}
     },
   });
 }
-run().catch(console.log);`,
+console.log(createResponse);`,
   },
   dense_vector: {
     installCommand: INSTALL_CMD,
@@ -60,27 +58,25 @@ run().catch(console.log);`,
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
   }
 });
 
-async function run() {
-  await client.indices.create({
-    index: "${indexName ?? INDEX_PLACEHOLDER}",
-    mappings: {
-      properties: {
-        vector: { type: "dense_vector", dims: 3 },
-        text: { type: "text"}
-      },
+const createResponse = await client.indices.create({
+  index: '${indexName ?? INDEX_PLACEHOLDER}',
+  mappings: {
+    properties: {
+      vector: { type: 'dense_vector', dims: 3 },
+      text: { type: 'text'}
     },
   });
 }
-run().catch(console.log);`,
+console.log(createResponse);`,
   },
   semantic: {
     installCommand: INSTALL_CMD,
@@ -88,26 +84,24 @@ run().catch(console.log);`,
       elasticsearchURL,
       apiKey,
       indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
   }
 });
 
-async function run() {
-  await client.indices.create({
-    index: "${indexName ?? INDEX_PLACEHOLDER}",
-    mappings: {
-      properties: {
-        text: { type: "semantic_text"}
-      },
+const createResponse = client.indices.create({
+  index: '${indexName ?? INDEX_PLACEHOLDER}',
+  mappings: {
+    properties: {
+      text: { type: 'semantic_text'}
     },
   });
 }
-run().catch(console.log);`,
+console.log(createResponse);`,
   },
 };
 
@@ -118,56 +112,50 @@ export const JSIngestDataExample: IngestDataCodeDefinition = {
     elasticsearchURL,
     sampleDocuments,
     indexName,
-  }) => `import { Client } from "@elastic/elasticsearch";
+  }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
   },
 });
 
-const index = "${indexName}";
+const index = '${indexName}';
 const docs = ${JSON.stringify(sampleDocuments, null, 2)};
 
-async function run() {}
-  const bulkIngestResponse = await client.helpers.bulk({
-    index,
-    datasource: docs,
-    onDocument() {
-      return {
-        index: {},
-      };
-    }
-  });
-  console.log(bulkIngestResponse);
-}
-run().catch(console.log);`,
+const bulkIngestResponse = await client.helpers.bulk({
+  index,
+  datasource: docs,
+  onDocument() {
+    return {
+      index: {},
+    };
+  }
+});
+console.log(bulkIngestResponse);`,
   updateMappingsCommand: ({
     apiKey,
     elasticsearchURL,
     indexName,
     mappingProperties,
-  }) => `import { Client } from "@elastic/elasticsearch";
+  }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
-node: '${elasticsearchURL}',
-auth: {
-  apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
-}
+  node: '${elasticsearchURL}',
+  auth: {
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+  }
 });
 
-async function run() {
-  const index = "${indexName}";
-  const mapping = ${JSON.stringify(mappingProperties, null, 2)};
+const index = '${indexName}';
+const mapping = ${JSON.stringify(mappingProperties, null, 2)};
 
-  const updateMappingResponse = await client.indices.putMapping({
-    index,
-    properties: mapping,
-  });
-  console.log(updateMappingResponse);
-}
-run().catch(console.log);`,
+const updateMappingResponse = await client.indices.putMapping({
+  index,
+  properties: mapping,
+});
+console.log(updateMappingResponse);`,
 };
 
 const searchCommand: SearchCodeSnippetFunction = ({
@@ -187,16 +175,51 @@ const client = new Client({
 const index = "${indexName}";
 const query = ${JSON.stringify(queryObject, null, 2)};
 
-async function run() {
-  const result = await client.search({
-    index,
-    query,
-  });
+const result = await client.search({
+  index,
+  query,
+});
 
-  console.log(result.hits.hits);
-}
-run().catch(console.log);`;
+console.log(result.hits.hits);`;
 
 export const JavascriptSearchExample: SearchCodeDefinition = {
   searchCommand,
+};
+
+export const JSSemanticIngestDataExample: IngestDataCodeDefinition = {
+  ...JSIngestDataExample,
+  ingestCommand: ({
+    apiKey,
+    elasticsearchURL,
+    sampleDocuments,
+    indexName,
+  }) => `const { Client } = require('@elastic/elasticsearch');
+
+const client = new Client({
+  node: '${elasticsearchURL}',
+  auth: {
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+  },
+});
+
+// Set the ingestion timeout to 5 minutes, to allow for semantic ingestion
+// to complete. The initial ingest with semantic_text fields may take longer
+// while the model loads, or ML nodes are allocated.
+const timeout = '5m';
+
+const index = '${indexName}';
+const docs = ${JSON.stringify(sampleDocuments, null, 2)};
+
+const bulkIngestResponse = await client.helpers.bulk({
+  index,
+  datasource: docs,
+  timeout,
+  onDocument() {
+    return {
+      index: {},
+    };
+  }
+});
+
+console.log(bulkIngestResponse);`,
 };
