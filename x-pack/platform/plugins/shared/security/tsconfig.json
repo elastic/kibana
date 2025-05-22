@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
-    "../../../../../typings/**/*",
+    "../../../../../typings/emotion.d.ts",
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
