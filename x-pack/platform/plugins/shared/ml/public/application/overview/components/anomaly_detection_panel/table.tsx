@@ -7,19 +7,22 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
+
 import type { Direction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { toLocaleString } from '@kbn/ml-common-utils/string_utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useGroupActions } from './actions';
 import type { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
-import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export enum AnomalyDetectionListColumns {
   id = 'id',
