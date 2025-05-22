@@ -39,7 +39,7 @@ import type { PersistableStateAttachmentTypeRegistry } from './attachment_framew
 export interface CasesServerSetupDependencies {
   alerting: AlertingServerSetup;
   actions: ActionsPluginSetup;
-  lens?: LensServerPluginSetup;
+  lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
   files: FilesSetup;
   security: SecurityPluginSetup;
