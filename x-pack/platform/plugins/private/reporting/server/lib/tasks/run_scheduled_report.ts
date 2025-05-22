@@ -101,7 +101,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       task.id
     );
     const { notification } = reportSO.attributes;
-    if (notification && notification.email) {
+    if (notification && notification.email && notification.email.to) {
       await this.emailNotificationService.notify({
         reporting: this.opts.reporting,
         index: report._index,
@@ -110,6 +110,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         contentType,
         emailParams: {
           to: notification.email.to,
+          cc: notification.email.cc,
+          bcc: notification.email.bcc,
           runAt: runAt.toISOString(),
           spaceId,
         },

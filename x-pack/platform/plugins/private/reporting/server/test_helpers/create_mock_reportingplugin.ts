@@ -106,7 +106,6 @@ export const createMockPluginStart = async (
     securityService: coreStartMock.security, // we need authc from core.security start
     logger,
     screenshotting: createMockScreenshottingStart(),
-    notifications: notificationsMock.createStart(),
     ...startMock, // allows to override with test instances
   };
 };
