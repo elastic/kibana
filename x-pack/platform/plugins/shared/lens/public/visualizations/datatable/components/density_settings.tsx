@@ -17,6 +17,31 @@ export interface DensitySettingsProps {
 
 const densityValues = Object.values(DataGridDensity);
 
+const densityLabel = i18n.translate('xpack.lens.table.densityLabel', {
+  defaultMessage: 'Density',
+});
+
+const densityOptions = [
+  {
+    id: DataGridDensity.COMPACT,
+    label: i18n.translate('xpack.lens.table.labelCompact', {
+      defaultMessage: 'Compact',
+    }),
+  },
+  {
+    id: DataGridDensity.NORMAL,
+    label: i18n.translate('xpack.lens.table.labelNormal', {
+      defaultMessage: 'Normal',
+    }),
+  },
+  {
+    id: DataGridDensity.EXPANDED,
+    label: i18n.translate('xpack.lens.table.labelExpanded', {
+      defaultMessage: 'Expanded',
+    }),
+  },
+];
+
 export const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensity, onChange }) => {
   const isValidDensity = (value: string): value is DataGridDensity => {
     return densityValues.includes(value as DataGridDensity);
@@ -33,33 +58,12 @@ export const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensit
     [onChange]
   );
 
-  const densityLabel = i18n.translate('xpack.lens.table.densityLabel', {
-    defaultMessage: 'Density',
-  });
-
-  const densityOptions = [
-    {
-      id: DataGridDensity.COMPACT,
-      label: i18n.translate('xpack.lens.table.labelCompact', {
-        defaultMessage: 'Compact',
-      }),
-    },
-    {
-      id: DataGridDensity.NORMAL,
-      label: i18n.translate('xpack.lens.table.labelNormal', {
-        defaultMessage: 'Normal',
-      }),
-    },
-    {
-      id: DataGridDensity.EXPANDED,
-      label: i18n.translate('xpack.lens.table.labelExpanded', {
-        defaultMessage: 'Expanded',
-      }),
-    },
-  ];
-
   return (
-    <EuiFormRow label={densityLabel} display="columnCompressed" data-test-subj="lnsDensitySettings">
+    <EuiFormRow
+      aria-label={densityLabel}
+      display="columnCompressed"
+      data-test-subj="lnsDensitySettings"
+    >
       <EuiButtonGroup
         legend={densityLabel}
         buttonSize="compressed"

@@ -32,30 +32,22 @@ describe('DensitySettings', () => {
   it('renders the density settings component with label', () => {
     renderDensitySettingsComponent();
 
-    expect(screen.getByText('Density', { selector: 'label' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Density')).toBeInTheDocument();
     expect(screen.getByTestId('lnsDensitySettings')).toBeInTheDocument();
   });
 
-  it('displays all three density options', () => {
+  it('displays all three density options and selects the provided option', () => {
     renderDensitySettingsComponent();
 
-    expect(screen.getByText('Compact')).toBeInTheDocument();
-    expect(screen.getByText('Normal')).toBeInTheDocument();
-    expect(screen.getByText('Expanded')).toBeInTheDocument();
-  });
-
-  it('selects the provided density option', () => {
-    renderDensitySettingsComponent();
-
-    // The Normal button should be selected based on defaultProps
-    const normalButton = screen.getByText('Normal').closest('button');
-    expect(normalButton).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Compact', pressed: false })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Normal', pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Expanded', pressed: false })).toBeInTheDocument();
   });
 
   it('calls onChange with compact density when compact option is clicked', () => {
     renderDensitySettingsComponent();
 
-    fireEvent.click(screen.getByText('Compact'));
+    fireEvent.click(screen.getByRole('button', { name: 'Compact' }));
 
     expect(defaultProps.onChange).toHaveBeenCalledTimes(1);
     expect(defaultProps.onChange).toHaveBeenCalledWith(DataGridDensity.COMPACT);
@@ -64,7 +56,7 @@ describe('DensitySettings', () => {
   it('calls onChange with expanded density when expanded option is clicked', () => {
     renderDensitySettingsComponent();
 
-    fireEvent.click(screen.getByText('Expanded'));
+    fireEvent.click(screen.getByRole('button', { name: 'Expanded' }));
 
     expect(defaultProps.onChange).toHaveBeenCalledTimes(1);
     expect(defaultProps.onChange).toHaveBeenCalledWith(DataGridDensity.EXPANDED);
@@ -76,27 +68,23 @@ describe('DensitySettings', () => {
     });
 
     // The component should still render without errors
-    expect(screen.getByText('Density', { selector: 'label' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Density')).toBeInTheDocument();
 
-    // The Normal button should be selected
-    const normalButton = screen.getByText('Normal').closest('button');
-    expect(normalButton).toHaveAttribute('aria-pressed', 'true');
+    // The Normal button should be pressed
+    expect(screen.getByRole('button', { name: 'Normal', pressed: true })).toBeInTheDocument();
   });
 
   it('updates selection when props change', () => {
     const { rerender } = renderDensitySettingsComponent();
 
     // Initial render should have Normal selected
-    let normalButton = screen.getByText('Normal').closest('button');
-    expect(normalButton).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Normal', pressed: true }));
 
     // Update props to Compact
     rerender({ dataGridDensity: DataGridDensity.COMPACT });
 
-    // Now Compact should be selected
-    const compactButton = screen.getByText('Compact').closest('button');
-    expect(compactButton).toHaveAttribute('aria-pressed', 'true');
-    normalButton = screen.getByText('Normal').closest('button');
-    expect(normalButton).toHaveAttribute('aria-pressed', 'false');
+    // Now Compact should be pressed
+    expect(screen.getByRole('button', { name: 'Compact', pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Normal', pressed: false })).toBeInTheDocument();
   });
 });
