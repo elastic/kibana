@@ -148,6 +148,7 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .query({
               active_alert_delete_threshold: 90,
               inactive_alert_delete_threshold: undefined,
+              category_ids: ['management', 'observability', 'securitySolution'],
             })
             .send();
 
@@ -158,6 +159,7 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .query({
               active_alert_delete_threshold: undefined,
               inactive_alert_delete_threshold: 90,
+              category_ids: ['management', 'observability', 'securitySolution'],
             })
             .send();
 
@@ -168,6 +170,7 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .query({
               active_alert_delete_threshold: 90,
               inactive_alert_delete_threshold: 90,
+              category_ids: ['management', 'observability', 'securitySolution'],
             })
             .send();
 
@@ -311,21 +314,21 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
               expect(previewDeleteAllCategoryActiveAlerts.statusCode).to.eql(403);
               expect(previewDeleteAllCategoryActiveAlerts.body).to.eql({
                 error: 'Forbidden',
-                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?active_alert_delete_threshold=90] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?active_alert_delete_threshold=90&category_ids=management&category_ids=observability&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
                 statusCode: 403,
               });
 
               expect(previewDeleteAllCategoryInactiveAlerts.statusCode).to.eql(403);
               expect(previewDeleteAllCategoryInactiveAlerts.body).to.eql({
                 error: 'Forbidden',
-                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?inactive_alert_delete_threshold=90] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?inactive_alert_delete_threshold=90&category_ids=management&category_ids=observability&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
                 statusCode: 403,
               });
 
               expect(previewDeleteAllCategoryActiveAndInactiveAlerts.statusCode).to.eql(403);
               expect(previewDeleteAllCategoryActiveAndInactiveAlerts.body).to.eql({
                 error: 'Forbidden',
-                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?active_alert_delete_threshold=90&inactive_alert_delete_threshold=90] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=management&category_ids=observability&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
                 statusCode: 403,
               });
 
