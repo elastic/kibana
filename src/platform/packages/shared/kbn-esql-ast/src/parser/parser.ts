@@ -52,7 +52,7 @@ export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<a
   return lexer;
 };
 
-export const getParser = (
+const getParser = (
   inputStream: CharStream,
   errorListener: ErrorListener<any>,
   parseListener?: ESQLParserListener
