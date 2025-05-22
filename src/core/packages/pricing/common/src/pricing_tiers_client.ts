@@ -26,7 +26,19 @@ export class PricingTiersClient implements IPricingTiersClient {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   }
 
+  isEnabled() {
+    return this.tiers.enabled;
+  }
+
   isFeatureAvailable(featureId: string): boolean {
+    /**
+     * We assume that when the pricing tiers are disabled, features are available globally
+     * and not constrained by any product tier.
+     */
+    if (!this.isEnabled()) {
+      return true;
+    }
+
     const feature = this.productFeaturesRegistry.get(featureId);
 
     if (feature) {
