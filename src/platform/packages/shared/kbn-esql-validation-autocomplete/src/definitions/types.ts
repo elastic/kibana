@@ -436,7 +436,7 @@ export interface CommandDefinition<CommandName extends string> {
   ) => ESQLFieldWithMetadata[];
 
   /**
-   * This method is called to define the fields available after this command is applied.
+   * This method is called to define the commands available after this command is applied.
    */
   commandsSuggestionsAfter?: (suggestions: SuggestionRawDefinition[]) => SuggestionRawDefinition[];
 }
