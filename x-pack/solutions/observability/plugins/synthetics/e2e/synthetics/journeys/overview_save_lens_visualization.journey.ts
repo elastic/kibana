@@ -14,11 +14,11 @@ journey('OverviewSaveLensVisualization', async ({ page, params }) => {
   const syntheticsService = new SyntheticsServices(params);
 
   before(async () => {
-    await syntheticsService.cleaUp();
+    await syntheticsService.cleanUp();
   });
 
   after(async () => {
-    await syntheticsService.cleaUp();
+    await syntheticsService.cleanUp();
   });
 
   step('Go to Monitors overview page', async () => {
