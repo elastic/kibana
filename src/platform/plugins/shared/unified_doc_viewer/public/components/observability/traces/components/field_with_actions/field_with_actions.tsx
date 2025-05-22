@@ -20,6 +20,7 @@ export interface FieldWithActionsProps {
   value: string;
   children: React.ReactNode;
   loading?: boolean;
+  showActions?: boolean;
 }
 
 export function FieldWithActions({
@@ -30,6 +31,7 @@ export function FieldWithActions({
   value,
   loading,
   children,
+  showActions = true,
   ...props
 }: FieldWithActionsProps) {
   const hasFieldDescription = !!fieldMetadata?.flat_name;
@@ -37,6 +39,13 @@ export function FieldWithActions({
   if (!label) {
     return null;
   }
+
+  const fieldContent = (
+    <div className="eui-textBreakWord">
+      {loading && <EuiLoadingSpinner size="m" />}
+      {children}
+    </div>
+  );
 
   return (
     <div {...props}>
@@ -57,12 +66,13 @@ export function FieldWithActions({
         </EuiFlexItem>
 
         <EuiFlexItem grow={2}>
-          <FieldHoverActionPopover title={value} value={value} field={field}>
-            <div className="eui-textBreakWord">
-              {loading && <EuiLoadingSpinner size="m" />}
-              {children}
-            </div>
-          </FieldHoverActionPopover>
+          {showActions ? (
+            <FieldHoverActionPopover title={value} value={value} field={field}>
+              {fieldContent}
+            </FieldHoverActionPopover>
+          ) : (
+            fieldContent
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
