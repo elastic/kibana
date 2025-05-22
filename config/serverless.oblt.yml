@@ -3,12 +3,6 @@
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
 
-## Core pricing tier for observability project
-pricing.tiers.enabled: true
-pricing.tiers.products:
-  - name: observability
-    tier: complete
-
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false

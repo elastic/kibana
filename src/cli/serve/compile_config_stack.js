@@ -74,11 +74,15 @@ export function compileConfigStack({
   }
 
   // Pricing specific tier configs
-  const tier = getServerlessProjectTierFromConfig(configs);
-  if (tier) {
-    configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
-    if (dev && devConfig !== false) {
-      configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.dev.yml`));
+  const config = getConfigFromFiles(configs.filter(isNotNull));
+  const isPricingTiersEnabled = _.get(config, 'pricing.tiers.enabled', false);
+  if (isPricingTiersEnabled) {
+    const tier = getServerlessProjectTierFromConfig(config);
+    if (tier) {
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
+      if (dev && devConfig !== false) {
+        configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.dev.yml`));
+      }
     }
   }
 
@@ -114,11 +118,18 @@ function getSecurityTierFromCfg(configs) {
  * @param {string[]} configs List of configuration file paths
  * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
  */
-function getServerlessProjectTierFromConfig(configs) {
-  const config = getConfigFromFiles(configs.filter(isNotNull));
+function getServerlessProjectTierFromConfig(config) {
+  const products = _.get(config, 'pricing.tiers.products', []);
 
-  const product = _.get(config, 'pricing.tiers.products', []).at(0);
-  return product?.tier;
+  // Constraint tier to be the same for
+  const uniqueTiers = _.uniqBy(products, 'tier');
+  if (uniqueTiers.length !== 1) {
+    throw new Error(
+      'Multiple tiers found in pricing.tiers.products, the applied tier should be the same for all the products.'
+    );
+  }
+
+  return uniqueTiers.at(0).tier;
 }
 
 /**
