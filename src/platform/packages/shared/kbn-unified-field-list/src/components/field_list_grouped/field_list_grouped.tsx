@@ -41,6 +41,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   scrollToTopResetCounter: number;
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+  shouldScreenReaderNarrateSearchResults: boolean;
   'data-test-subj'?: string;
 }
 
@@ -52,6 +53,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   scrollToTopResetCounter,
   screenReaderDescriptionId,
   localStorageKeyPrefix,
+  shouldScreenReaderNarrateSearchResults,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
@@ -141,7 +143,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
-              aria-live="polite"
+              aria-live={shouldScreenReaderNarrateSearchResults ? 'polite' : 'off'}
               id={screenReaderDescriptionId}
               data-test-subj={`${dataTestSubject}__ariaDescription`}
             >
