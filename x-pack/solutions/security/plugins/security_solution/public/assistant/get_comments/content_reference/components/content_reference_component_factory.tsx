@@ -8,6 +8,7 @@
 import type {
   ContentReferences,
   EsqlContentReference,
+  HrefContentReference,
   KnowledgeBaseEntryContentReference,
   ProductDocumentationContentReference,
   SecurityAlertContentReference,
@@ -24,6 +25,7 @@ import { SecurityAlertsPageReference } from './security_alerts_page_reference';
 import { ContentReferenceButton } from './content_reference_button';
 import { ProductDocumentationReference } from './product_documentation_reference';
 import { EsqlQueryReference } from './esql_query_reference';
+import { HrefReference } from './href_reference';
 
 /** While a message is being streamed, content references are null. When a message has finished streaming, content references are either defined or undefined */
 export type StreamingOrFinalContentReferences = ContentReferences | undefined | null;
@@ -93,7 +95,17 @@ export const ContentReferenceComponentFactory: React.FC<Props> = ({
         />
       );
     }
+    case 'Href': {
+      return (
+        <HrefReference
+          contentReferenceNode={
+            contentReferenceNode as ResolvedContentReferenceNode<HrefContentReference>
+          }
+        />
+      );
+    }
     default:
-      return null;
+      const _exhaustiveCheck: never = contentReferenceNode.contentReference;
+      throw new Error(`Unhandled case: ${_exhaustiveCheck}`);
   }
 };
