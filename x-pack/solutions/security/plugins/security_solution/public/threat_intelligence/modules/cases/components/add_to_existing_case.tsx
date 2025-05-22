@@ -13,7 +13,7 @@ import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCaseDisabled } from '../hooks/use_case_permission';
 import type { AttachmentMetadata } from '../utils/attachments';
 import { generateAttachmentsMetadata, generateAttachmentsWithoutOwner } from '../utils/attachments';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
 export interface AddToExistingCaseProps {

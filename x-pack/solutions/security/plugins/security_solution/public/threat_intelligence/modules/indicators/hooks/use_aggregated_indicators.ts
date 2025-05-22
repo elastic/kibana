@@ -10,7 +10,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { useTIDataView } from './use_ti_data_view';

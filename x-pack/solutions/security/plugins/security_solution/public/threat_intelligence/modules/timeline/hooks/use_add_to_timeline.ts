@@ -7,7 +7,7 @@
 
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';

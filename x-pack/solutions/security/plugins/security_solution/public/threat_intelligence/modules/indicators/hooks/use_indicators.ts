@@ -10,7 +10,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { useInspector } from '../../../hooks/use_inspector';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { useTIDataView } from './use_ti_data_view';
 import type { FetchParams, Pagination } from '../services/fetch_indicators';

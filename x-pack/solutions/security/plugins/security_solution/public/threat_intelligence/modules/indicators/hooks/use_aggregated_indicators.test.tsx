@@ -15,11 +15,11 @@ import {
   mockedQueryService,
   mockedSearchService,
 } from '../../../mocks/test_providers';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import moment from 'moment';
 
 jest.mock('../services/fetch_aggregated_indicators');
-jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../../common/lib/kibana');
 
 const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
   timeRange: mockTimeRange,

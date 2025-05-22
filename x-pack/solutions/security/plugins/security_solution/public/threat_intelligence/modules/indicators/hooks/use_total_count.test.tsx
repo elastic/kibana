@@ -9,13 +9,18 @@ import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_total_count';
 import { TestProvidersComponent, mockedSearchService } from '../../../mocks/test_providers';
+import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../../common/lib/kibana');
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('useIndicatorsTotalCount()', () => {
   beforeEach(() => {
+    jest.mocked(useKibana).mockReturnValue({
+      services: { data: { search: mockedSearchService } },
+    } as unknown as ReturnType<typeof useKibana>);
+
     jest
       .mocked(mockedSearchService.search)
       .mockReturnValue(new BehaviorSubject(indicatorsResponse));

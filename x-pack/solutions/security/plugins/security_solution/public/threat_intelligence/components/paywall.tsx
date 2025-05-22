@@ -16,7 +16,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 export const Paywall: FC = () => {
   const {

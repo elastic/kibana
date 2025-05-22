@@ -6,7 +6,7 @@
  */
 
 import type { DocLinks } from '@kbn/doc-links';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 const useKibanaDocumentationLinks = (): DocLinks => useKibana().services.docLinks.links;
 

@@ -8,7 +8,7 @@
 import { type QueryFunctionContext, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
 import { filterIntegrations } from '../utils/filter_integrations';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 type IntegrationInstallStatus = 'installed' | 'installing' | 'install_failed';
 

@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import type { IndicatorsFiltersContextValue } from '../hooks/use_filters_context';
 import { IndicatorsFiltersContext } from '../hooks/use_filters_context';

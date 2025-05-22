@@ -14,7 +14,7 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@el
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';

@@ -12,7 +12,7 @@ import type { CasesPermissions } from '@kbn/cases-plugin/common';
 import { IndicatorsPage } from '../modules/indicators/pages/indicators';
 import { IntegrationsGuard } from './integrations_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 export const APP_ID = 'securitySolution';
 
