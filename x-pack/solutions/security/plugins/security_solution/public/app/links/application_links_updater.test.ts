@@ -26,7 +26,7 @@ const mockExistCapabilities = existCapabilities as jest.Mock;
 
 // Allow access to private method just for testing
 const appLinks = applicationLinksUpdater as unknown as {
-  filterAppLinks: (links: AppLinkItems, params: ApplicationLinksUpdateParams) => LinkItem[];
+  processAppLinks: (links: AppLinkItems, params: ApplicationLinksUpdateParams) => LinkItem[];
 };
 
 const link: LinkItem = {
@@ -60,10 +60,10 @@ describe('ApplicationLinksUpdater', () => {
     mockExistCapabilities.mockReturnValue(true);
   });
 
-  describe('filterAppLinks', () => {
+  describe('processAppLinks', () => {
     it('should include a link when all links are allowed', () => {
       const params = createMockParams();
-      const result = appLinks.filterAppLinks([link], params);
+      const result = appLinks.processAppLinks([link], params);
 
       expect(result).toEqual([link]);
     });
@@ -74,7 +74,7 @@ describe('ApplicationLinksUpdater', () => {
       const links: AppLinkItems = [{ ...link, capabilities: ['admin'] }];
 
       const params = createMockParams();
-      const result = appLinks.filterAppLinks(links, params);
+      const result = appLinks.processAppLinks(links, params);
 
       expect(result).toEqual([]);
     });
@@ -88,7 +88,7 @@ describe('ApplicationLinksUpdater', () => {
         upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
       });
 
-      const result = appLinks.filterAppLinks(links, params);
+      const result = appLinks.processAppLinks(links, params);
 
       expect(result).toEqual([expect.objectContaining({ ...link, unavailable: true })]);
     });
@@ -103,7 +103,7 @@ describe('ApplicationLinksUpdater', () => {
         upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
       });
 
-      const result = appLinks.filterAppLinks(links, params);
+      const result = appLinks.processAppLinks(links, params);
 
       expect(result).toEqual([expect.objectContaining({ ...link, unauthorized: true })]);
     });
@@ -115,7 +115,7 @@ describe('ApplicationLinksUpdater', () => {
         uiSettingsClient: { get: jest.fn(() => false) } as unknown as IUiSettingsClient,
       });
 
-      const result = appLinks.filterAppLinks(links, params);
+      const result = appLinks.processAppLinks(links, params);
 
       expect(result).toEqual([]);
     });
@@ -129,7 +129,7 @@ describe('ApplicationLinksUpdater', () => {
         experimentalFeatures: { labsEnabled: false } as unknown as ExperimentalFeatures,
       });
 
-      const result = appLinks.filterAppLinks(links, params);
+      const result = appLinks.processAppLinks(links, params);
 
       expect(result).toEqual([]);
     });
@@ -166,7 +166,7 @@ describe('ApplicationLinksUpdater', () => {
         upselling: { isPageUpsellable: jest.fn(() => false) } as unknown as UpsellingService,
       });
 
-      const result = appLinks.filterAppLinks(links, params);
+      const result = appLinks.processAppLinks(links, params);
 
       expect(result).toEqual([
         expect.objectContaining({

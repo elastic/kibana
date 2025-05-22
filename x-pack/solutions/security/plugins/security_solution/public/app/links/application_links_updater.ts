@@ -51,9 +51,9 @@ class ApplicationLinksUpdater {
    * Updates the internal app links applying the filter by permissions
    */
   public update(appLinksToUpdate: AppLinkItems, params: ApplicationLinksUpdateParams) {
-    const filteredAppLinks = this.filterAppLinks(appLinksToUpdate, params);
-    this.linksSubject$.next(Object.freeze(filteredAppLinks));
-    this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(filteredAppLinks)));
+    const processedAppLinks = this.processAppLinks(appLinksToUpdate, params);
+    this.linksSubject$.next(Object.freeze(processedAppLinks));
+    this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(processedAppLinks)));
   }
 
   /**
@@ -92,47 +92,54 @@ class ApplicationLinksUpdater {
   /**
    * Filters the app links based on the links configuration
    */
-  private filterAppLinks(
+  private processAppLinks(
     appLinks: AppLinkItems,
     params: ApplicationLinksUpdateParams,
     inheritedProps: Partial<LinkItem> = {}
   ): LinkItem[] {
     const { experimentalFeatures, uiSettingsClient, capabilities, license, upselling } = params;
 
-    return appLinks.reduce<LinkItem[]>((acc, { links, ...appLinkInfo }) => {
+    return appLinks.reduce<LinkItem[]>((acc, appLink) => {
+      const { links, ...link } = appLink;
+      // Check experimental flags and uiSettings, removing the link if any of them is defined and disabled
       if (
-        !this.isLinkExperimentalKeyAllowed(appLinkInfo, experimentalFeatures) ||
-        !this.isLinkUiSettingsAllowed(appLinkInfo, uiSettingsClient)
+        !this.isLinkExperimentalKeyAllowed(link, experimentalFeatures) ||
+        !this.isLinkUiSettingsAllowed(link, uiSettingsClient)
       ) {
         return acc;
       }
 
-      // props to be assigned to the current link and its children
+      // Extra props to be assigned to the current link and its children
       const extraProps: Partial<LinkItem> = { ...inheritedProps };
 
+      // Check link availability
       if (
-        !existCapabilities(capabilities, appLinkInfo.capabilities) ||
-        !this.isLinkLicenseAllowed(appLinkInfo, license)
+        !existCapabilities(capabilities, link.capabilities) ||
+        !this.isLinkLicenseAllowed(link, license)
       ) {
         // The link is not available in the current product payment plan
-        if (!upselling.isPageUpsellable(appLinkInfo.id)) {
+        if (!upselling.isPageUpsellable(link.id)) {
           return acc; // no upselling registered for this link, just exclude it
         }
         extraProps.unavailable = true;
-      } else if (!hasCapabilities(capabilities, appLinkInfo.capabilities)) {
-        // The link is available for the product payment plan but the user doesn't have privileges to access it
+
+        // Check link authorization only if it is available
+      } else if (!hasCapabilities(capabilities, link.capabilities)) {
+        // Required capabilities exist but are not granted
         extraProps.unauthorized = true;
       }
 
-      const resultAppLink: LinkItem = { ...appLinkInfo, ...extraProps };
+      const processedAppLink: LinkItem = { ...link, ...extraProps };
+
+      // Process children links if they exist
       if (links) {
-        const childrenLinks = this.filterAppLinks(links, params, extraProps);
+        const childrenLinks = this.processAppLinks(links, params, extraProps);
         if (childrenLinks.length > 0) {
-          resultAppLink.links = childrenLinks;
+          processedAppLink.links = childrenLinks;
         }
       }
 
-      acc.push(resultAppLink);
+      acc.push(processedAppLink);
       return acc;
     }, []);
   }
