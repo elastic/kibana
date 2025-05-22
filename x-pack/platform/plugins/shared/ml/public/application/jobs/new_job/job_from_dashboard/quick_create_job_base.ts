@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqWith, isEqual } from 'lodash';
+import { firstValueFrom } from 'rxjs';
+
+import type { estypes } from '@elastic/elasticsearch';
+
+import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { firstValueFrom } from 'rxjs';
-import type { estypes } from '@elastic/elasticsearch';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { getTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_title';
@@ -24,9 +26,9 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
-import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
+import { createDatafeedId, getFiltersForDSLQuery } from '@kbn/ml-common-utils/job_utils';
+
 import { createQueries } from '../utils/new_job_utils';
-import { createDatafeedId } from '../../../../../common/util/job_utils';
 
 interface CreationState {
   success: boolean;

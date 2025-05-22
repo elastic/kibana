@@ -7,15 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useContext } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type { Annotation } from '@kbn/ml-common-types/annotations';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { TimeseriesChart } from './timeseries_chart';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
-import { useMlKibana, useNotifications } from '../../../contexts/kibana';
+import { useNotifications } from '../../../contexts/kibana';
 import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';

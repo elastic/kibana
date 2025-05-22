@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
-
-import { isJobIdValid } from '../../../../../common/util/job_utils';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils';
 
 function getJobIds(mlApi: MlApi) {
   return new Promise((resolve, reject) => {

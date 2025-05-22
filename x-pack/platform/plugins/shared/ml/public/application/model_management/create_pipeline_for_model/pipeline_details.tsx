@@ -21,9 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
+import { isValidJson } from '@kbn/ml-common-utils/validation_utils';
+
 import { type InferencePipelineCreationState } from './state';
 import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE } from '../../components/ml_inference/constants';
-import { isValidJson } from '../../../../common/util/validation_utils';
 import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 import { SaveChangesButton } from '../../components/ml_inference/components/save_changes_button';
 import { validatePipelineProcessors } from '../../components/ml_inference/validation';

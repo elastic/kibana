@@ -27,16 +27,17 @@ import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { mlFunctionToESAggregation } from '@kbn/ml-common-utils/job_utils';
+import type { CriteriaField } from '@kbn/ml-services/results_service';
+import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import { useMlResultsService } from '@kbn/ml-hooks/results/use_ml_results_service';
 
-import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import { timeBucketsServiceFactory } from './time_buckets_service';
-import type { CriteriaField } from '../services/results_service';
 import {
   MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
-import { useMlResultsService, type MlResultsService } from '../services/results_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 

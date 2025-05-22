@@ -27,12 +27,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { composeValidators, maxLengthValidator } from '@kbn/ml-validators';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
-
 import type { JobOverride } from '@kbn/ml-common-types/modules';
-import type { ModuleJobUI } from '../page';
+import { isJobIdValid } from '@kbn/ml-common-utils/job_utils';
+
 import { usePartialState } from '../../../../components/custom_hooks';
-import { isJobIdValid } from '../../../../../../common/util/job_utils';
 import { JobGroupsInput } from '../../common/components';
+
+import type { ModuleJobUI } from '../page';
 
 interface EditJobProps {
   job: ModuleJobUI;
