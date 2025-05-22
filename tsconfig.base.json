@@ -978,6 +978,8 @@
       "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
       "@kbn/esql-composer": ["src/platform/packages/shared/kbn-esql-composer"],
       "@kbn/esql-composer/*": ["src/platform/packages/shared/kbn-esql-composer/*"],
+      "@kbn/esql-data-pooler": ["src/platform/packages/shared/shared-ux/esql_data_pooler/impl"],
+      "@kbn/esql-data-pooler/*": ["src/platform/packages/shared/shared-ux/esql_data_pooler/impl/*"],
       "@kbn/esql-datagrid": ["src/platform/plugins/shared/esql_datagrid"],
       "@kbn/esql-datagrid/*": ["src/platform/plugins/shared/esql_datagrid/*"],
       "@kbn/esql-editor": ["src/platform/packages/private/kbn-esql-editor"],
