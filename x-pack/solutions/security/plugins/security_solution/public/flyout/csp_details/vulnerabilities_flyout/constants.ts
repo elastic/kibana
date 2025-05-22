@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import type { FindingVulnerabilityPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
-
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export const VulnerabilityFindingsPanelKey: FindingVulnerabilityPanelExpandableFlyoutProps['key'] =
+  'findings-vulnerability-panel';

@@ -86,6 +86,7 @@ describe('Capabilities', { tags: '@serverless' }, () => {
 
       after(() => role.teardown());
 
+      // Individual test cases with clear descriptions
       it('should show alert summary prompt when visiting alert summary page', () => {
         visit(ALERT_SUMMARY_URL);
         cy.get(ALERTS_SUMMARY_PROMPT).should('exist');
