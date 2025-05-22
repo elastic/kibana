@@ -8,8 +8,6 @@
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,6 +27,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   DATA_FRAME_TASK_STATE,
@@ -37,8 +36,9 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { MemoryInputValidatorResult } from '@kbn/ml-validators';
 import { memoryInputValidator } from '@kbn/ml-validators';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
-import { useMlKibana, useMlApi } from '../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
