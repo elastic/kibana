@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Subject, combineLatest, debounceTime, map, skip, take } from 'rxjs';
+import { Subject, combineLatest, debounceTime, map, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -44,6 +44,7 @@ import {
   setSerializedGridLayout,
 } from './serialized_grid_layout';
 import { MockSerializedDashboardState } from './types';
+import { useLayoutStyles } from './use_layout_styles';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
 
@@ -59,6 +60,7 @@ export const GridExample = ({
   coreStart: CoreStart;
   uiActions: UiActionsStart;
 }) => {
+  const layoutStyles = useLayoutStyles();
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
@@ -79,23 +81,20 @@ export const GridExample = ({
   const layoutUpdated$ = useMemo(() => new Subject<void>(), []);
 
   useEffect(() => {
-    combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
+    combineLatest([mockDashboardApi.panels$, mockDashboardApi.sections$])
       .pipe(
         debounceTime(0), // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
-        map(([panels, rows]) => {
+        map(([panels, sections]) => {
           const panelIds = Object.keys(panels);
           let panelsAreEqual = true;
           for (const panelId of panelIds) {
             if (!panelsAreEqual) break;
             const currentPanel = panels[panelId];
             const savedPanel = savedState.current.panels[panelId];
-            panelsAreEqual = deepEqual(
-              { row: 'first', ...currentPanel?.gridData },
-              { row: 'first', ...savedPanel?.gridData }
-            );
+            panelsAreEqual = deepEqual(currentPanel?.gridData, savedPanel?.gridData);
           }
-          const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
-          return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, rows }) };
+          const hasChanges = !(panelsAreEqual && deepEqual(sections, savedState.current.sections));
+          return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, sections }) };
         })
       )
       .subscribe(({ hasChanges, updatedLayout }) => {
@@ -138,40 +137,47 @@ export const GridExample = ({
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
-      const { panels, rows } = gridLayoutToDashboardPanelMap(
+      const { panels, sections } = gridLayoutToDashboardPanelMap(
         mockDashboardApi.panels$.getValue(),
         newLayout
       );
       mockDashboardApi.panels$.next(panels);
-      mockDashboardApi.rows$.next(rows);
+      mockDashboardApi.sections$.next(sections);
     },
-    [mockDashboardApi.panels$, mockDashboardApi.rows$]
+    [mockDashboardApi.panels$, mockDashboardApi.sections$]
   );
 
   const addNewSection = useCallback(() => {
-    const rows = cloneDeep(mockDashboardApi.rows$.getValue());
+    const rows = cloneDeep(mockDashboardApi.sections$.getValue());
     const id = uuidv4();
+    const maxY = Math.max(
+      ...Object.values({
+        ...mockDashboardApi.sections$.getValue(),
+        ...mockDashboardApi.panels$.getValue(),
+      }).map((widget) => ('gridData' in widget ? widget.gridData.y + widget.gridData.h : widget.y))
+    );
+
     rows[id] = {
       id,
-      order: Object.keys(rows).length,
+      y: maxY + 1,
       title: i18n.translate('examples.gridExample.defaultSectionTitle', {
         defaultMessage: 'New collapsible section',
       }),
       collapsed: false,
     };
-    mockDashboardApi.rows$.next(rows);
+    mockDashboardApi.sections$.next(rows);
 
     // scroll to bottom after row is added
-    layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
+    layoutUpdated$.pipe(take(1)).subscribe(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
-  }, [mockDashboardApi.rows$, layoutUpdated$]);
+  }, [mockDashboardApi.sections$, mockDashboardApi.panels$, layoutUpdated$]);
 
   const resetUnsavedChanges = useCallback(() => {
-    const { panels, rows } = savedState.current;
+    const { panels, sections: rows } = savedState.current;
     mockDashboardApi.panels$.next(panels);
-    mockDashboardApi.rows$.next(rows);
-  }, [mockDashboardApi.panels$, mockDashboardApi.rows$]);
+    mockDashboardApi.sections$.next(rows);
+  }, [mockDashboardApi.panels$, mockDashboardApi.sections$]);
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -254,7 +260,7 @@ export const GridExample = ({
                     onClick={() => {
                       const newSavedState = {
                         panels: mockDashboardApi.panels$.getValue(),
-                        rows: mockDashboardApi.rows$.getValue(),
+                        sections: mockDashboardApi.sections$.getValue(),
                       };
                       savedState.current = newSavedState;
                       setHasUnsavedChanges(false);
@@ -276,10 +282,10 @@ export const GridExample = ({
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={gridSettings}
-            useCustomDragHandle={true}
             renderPanelContents={renderPanelContents}
             onLayoutChange={onLayoutChange}
-            css={layoutStyles}
+            css={[layoutStyles, customLayoutStyles]}
+            useCustomDragHandle={true}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
@@ -296,49 +302,60 @@ export const renderGridExampleApp = (
   return () => ReactDOM.unmountComponentAtNode(element);
 };
 
-const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
-  const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
+const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
   return css({
-    // background for grid row that is being targetted
-    '.kbnGridRow--targeted': {
-      backgroundPosition: `top calc((var(--kbnGridGutterSize) / 2) * -1px) left calc((var(--kbnGridGutterSize) / 2) * -1px)`,
-      backgroundSize: `calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px) calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px)`,
-      backgroundImage: `linear-gradient(to right, ${gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`,
-      backgroundColor: `${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)}`,
-    },
-    // styling for the "locked to grid" preview for what the panel will look like when dropped / resized
-    '.kbnGridPanel--dragPreview': {
-      borderRadius: `${euiTheme.border.radius}`,
-      backgroundColor: `${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)}`,
-      transition: `opacity 100ms linear`,
-    },
-    // styling for panel resize handle
-    '.kbnGridPanel--resizeHandle': {
-      opacity: '0',
-      transition: `opacity 0.2s, border 0.2s`,
-      borderRadius: `7px 0 7px 0`,
-      borderBottom: `2px solid ${euiTheme.colors.accentSecondary}`,
-      borderRight: `2px solid ${euiTheme.colors.accentSecondary}`,
-      '&:hover, &:focus': {
-        outlineStyle: `none !important`,
-        opacity: 1,
-        backgroundColor: `${transparentize(euiTheme.colors.accentSecondary, 0.05)}`,
-      },
-    },
+    // removes the extra padding that EuiPageTemplate adds in order to make it look more similar to Dashboard
+    marginLeft: `-${euiTheme.size.l}`,
+    marginRight: `-${euiTheme.size.l}`,
+
     // styling for what the grid row header looks like when being dragged
-    '.kbnGridRowHeader--active': {
+    '.kbnGridSectionHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      border: `1px solid ${euiTheme.border.color}`,
+      outline: `${euiTheme.border.width.thick} solid
+        ${euiTheme.colors.vis.euiColorVis0}`,
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
       paddingLeft: '8px',
       // hide accordian arrow + panel count text when row is being dragged
-      '& .kbnGridRowTitle--button svg, & .kbnGridLayout--panelCount': {
+      '& .kbnGridSectionTitle--button svg, & .kbnGridLayout--panelCount': {
         display: 'none',
       },
     },
     // styles for the area where the row will be dropped
-    '.kbnGridPanel--rowDragPreview': {
-      backgroundColor: euiTheme.components.dragDropDraggingBackground,
+    '.kbnGridSection--dragPreview': {
+      backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.2),
+      borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+    },
+
+    '.kbnGridSectionFooter': {
+      height: `${euiTheme.size.s}`,
+      display: `block`,
+      borderTop: `${euiTheme.border.thin}`,
+
+      '&--targeted': {
+        borderTop: `${euiTheme.border.width.thick} solid ${transparentize(
+          euiTheme.colors.vis.euiColorVis0,
+          0.5
+        )}`,
+      },
+    },
+
+    // hide border when section is being dragged
+    '&:has(.kbnGridSectionHeader--active) .kbnGridSectionHeader--active + .kbnGridSectionFooter': {
+      borderTop: `none`,
+    },
+
+    '.kbnGridSection--blocked': {
+      zIndex: 1,
+      backgroundColor: `${transparentize(euiTheme.colors.backgroundBaseSubdued, 0.5)}`,
+      // the oulines of panels extend past 100% by 1px on each side, so adjust for that
+      marginLeft: '-1px',
+      marginTop: '-1px',
+      width: `calc(100% + 2px)`,
+      height: `calc(100% + 2px)`,
+    },
+
+    '&:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle': {
+      cursor: 'not-allowed !important',
     },
   });
 };
