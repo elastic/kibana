@@ -61,30 +61,6 @@ When using the `Other` provider, you can use PKI (certificate-based) authenticat
 - If PKI is not used, `apiKey` is required for the `Other` provider.
 - For `OpenAI` and `Azure OpenAI`, only `apiKey` is supported for authentication.
 
-Default model
-:   The default model to use for requests. This is required when the provider is `Other` and optional when the provider is `OpenAI`.
-
-API key
-:   The OpenAI, Azure OpenAI, or Other provider API key for authentication.
-
-PKI Authentication (Other provider only)
-:   When using the Other provider type, you can configure PKI authentication with the following options:
-
-    Certificate data
-    :   PEM-encoded certificate content.
-
-    Private key data
-    :   PEM-encoded private key content.
-
-    CA data
-    :   PEM-encoded CA certificate content.
-
-    Verification mode
-    :   SSL verification mode for PKI authentication. Options are:
-        - `full`: Verify the server's certificate and hostname (default)
-        - `certificate`: Verify only the server's certificate
-        - `none`: Skip verification
-
 ## Test connectors [gen-ai-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}. For example:
