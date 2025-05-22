@@ -38,10 +38,10 @@ import {
 } from '@kbn/ml-anomaly-utils/detector_rule';
 import { getPartitioningFieldNames } from '@kbn/ml-common-utils/job_utils';
 import { mlJobServiceFactory } from '@kbn/ml-services/job_service';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
-import { checkPermission } from '../../capabilities/check_capabilities';
 import { ConditionsSection } from './conditions_section';
 import { ScopeSection } from './scope_section';
 import { SelectRuleAction } from './select_rule_action';
