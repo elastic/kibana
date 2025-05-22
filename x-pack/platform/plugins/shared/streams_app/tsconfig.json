@@ -9,7 +9,8 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "ui_tests/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
