@@ -16,8 +16,8 @@ interface ServiceInstances {
 
 export class ServiceManager {
   private services?: ServiceInstances;
-  private internalSetup?: InternalSetupServices;
-  private internalStart?: InternalStartServices;
+  public internalSetup?: InternalSetupServices;
+  public internalStart?: InternalStartServices;
 
   setupServices(): InternalSetupServices {
     this.services = {

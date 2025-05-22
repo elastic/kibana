@@ -47,6 +47,13 @@ export class OnechatPlugin
       router,
       coreSetup,
       logger: this.logger,
+      getInternalServices: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getInternalServices called before service init');
+        }
+        return services;
+      },
     });
 
     return {

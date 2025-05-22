@@ -6,7 +6,32 @@
  */
 
 import type { RouteDependencies } from './types';
+import { getHandlerWrapper } from './wrap_handler';
+import { toolToDescriptor } from '../services/tools/utils/tool_to_descriptor';
 
-export function registerToolsRoutes({ coreSetup, router }: RouteDependencies) {
-  // TODO
+export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+  const wrapHandler = getHandlerWrapper({ logger });
+
+  router.get(
+    {
+      path: '/api/onechat/tools/list',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Platform feature - RBAC in lower layers',
+        },
+      },
+      validate: false,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { tools: toolService } = getInternalServices();
+      const registry = toolService.getScopedRegistry({ request });
+      const tools = await registry.list({});
+      return response.ok({
+        body: {
+          tools: tools.map(toolToDescriptor),
+        },
+      });
+    })
+  );
 }
