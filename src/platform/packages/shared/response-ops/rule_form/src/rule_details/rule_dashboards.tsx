@@ -136,7 +136,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
 
   return (
     <>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
