@@ -118,8 +118,9 @@ export async function suggest(
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
+    // resolve particular commands suggestions after
     // filter source commands if already defined
-    const suggestions = getCommandAutocompleteDefinitions(getAllCommands());
+    let suggestions = getCommandAutocompleteDefinitions(getAllCommands());
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
@@ -142,6 +143,13 @@ export async function suggest(
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
+    }
+
+    const lastCommand = root.commands[root.commands.length - 1];
+    const lastCommandDefinition = getCommandDefinition(lastCommand.name);
+
+    if (lastCommandDefinition.commandsSuggestionsAfter) {
+      suggestions = lastCommandDefinition.commandsSuggestionsAfter(suggestions);
     }
 
     return suggestions.filter((def) => !isSourceCommand(def));
