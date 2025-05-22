@@ -78,7 +78,9 @@ export const isPlainToolIdentifier = (
   return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 0;
 };
 
-export const toSerializedToolIdentifier = (identifier: ToolIdentifier): SerializedToolIdentifier => {
+export const toSerializedToolIdentifier = (
+  identifier: ToolIdentifier
+): SerializedToolIdentifier => {
   if (isSerializedToolIdentifier(identifier)) {
     return identifier;
   }
