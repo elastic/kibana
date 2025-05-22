@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractCategorizeTokens } from './extract_categorize_keywords';
+import { extractCategorizeTokens } from './extract_categorize_tokens';
 
 describe('extractCategorizeTokens()', () => {
   it('should extract the keywords correctly', () => {
