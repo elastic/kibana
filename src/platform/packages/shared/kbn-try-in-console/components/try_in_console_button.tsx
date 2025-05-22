@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -29,7 +30,7 @@ export interface TryInConsoleButtonProps {
   content?: string | React.ReactElement;
   showIcon?: boolean;
   iconType?: string;
-  type?: 'link' | 'button' | 'emptyButton';
+  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   telemetryId?: string;
   onClick?: () => void;
   'data-test-subj'?: string;
@@ -95,12 +96,18 @@ export const TryInConsoleButton = ({
       ? dataTestSubj
       : type === 'link'
       ? 'tryInConsoleLink'
+      : type === 'contextMenuItem'
+      ? 'tryInConsoleContextMenuItem'
       : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
   };
   const btnIconType = showIcon ? iconType : undefined;
+
+  const noPadding = css({
+    padding: 0,
+  });
 
   switch (type) {
     case 'link':
@@ -110,6 +117,12 @@ export const TryInConsoleButton = ({
         <EuiButton color="primary" iconType={btnIconType} size="s" {...commonProps}>
           {content}
         </EuiButton>
+      );
+    case 'contextMenuItem':
+      return (
+        <EuiContextMenuItem icon={iconType} hasPanel={false} css={noPadding} {...commonProps}>
+          {content}
+        </EuiContextMenuItem>
       );
     case 'emptyButton':
     default:
