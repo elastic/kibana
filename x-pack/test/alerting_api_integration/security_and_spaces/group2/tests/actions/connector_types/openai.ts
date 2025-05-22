@@ -316,6 +316,74 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             });
           });
       });
+
+      it('should create the connector with PKI auth when both certificate and key are valid', async () => {
+        const validCert = Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nMIIC+zCCAeOgAwIBAgIJAKKpPKItestcert\n-----END CERTIFICATE-----'
+        ).toString('base64');
+        const validKey = Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC\n-----END PRIVATE KEY-----'
+        ).toString('base64');
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: `${name} PKI`,
+            connector_type_id: connectorTypeId,
+            config: {
+              ...config,
+              apiProvider: 'Other',
+              defaultModel: 'gpt-3.5-turbo',
+            },
+            secrets: {
+              certificateData: validCert,
+              privateKeyData: validKey,
+            },
+          })
+          .expect(200);
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Other');
+      });
+
+      it('should execute successfully with valid PKI certificate and key', async () => {
+        const validCert = Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nMIIC+zCCAeOgAwIBAgIJAKKpPKItestcert\n-----END CERTIFICATE-----'
+        ).toString('base64');
+        const validKey = Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC\n-----END PRIVATE KEY-----'
+        ).toString('base64');
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: `${name} PKI exec`,
+            connector_type_id: connectorTypeId,
+            config: {
+              ...config,
+              apiProvider: 'Other',
+              defaultModel: 'gpt-3.5-turbo',
+            },
+            secrets: {
+              certificateData: validCert,
+              privateKeyData: validKey,
+            },
+          })
+          .expect(200);
+        const { body } = await supertest
+          .post(`/api/actions/connector/${createdAction.id}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              subAction: 'test',
+              subActionParams: {
+                body: '{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello world"}]}',
+              },
+            },
+          })
+          .expect(200);
+        expect(body.status).to.equal('ok');
+        expect(body.connector_id).to.equal(createdAction.id);
+      });
     });
 
     describe('executor', () => {
