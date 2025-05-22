@@ -374,8 +374,9 @@ describe('Missing mappings', { tags: ['@ess'] }, () => {
       waitForViewToBeLoaded();
     });
 
-    it.only('should display data grid despite the missing mappings and missing fields', () => {
+    it('should display data grid despite the missing mappings and missing fields', () => {
       // there are 2 documents in the x-pack/test/security_solution_cypress/es_archives/ti_indicators_data_no_mappings/data.json
+      // mappings are removed entirely
       const documentsNumber = 2;
       cy.get(INDICATORS_TABLE_ROW_CELL).should('have.length.gte', documentsNumber);
 
