@@ -9,16 +9,21 @@ import type { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor, ToolIdentifier } from '@kbn/onechat-common';
+import type { ToolDescriptor, ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { RunEventEmitter } from './events';
 
 /**
+ * Subset of {@link ToolDescriptorMeta} that are being defined during registration
+ */
+export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'sourceType' | 'sourceId'>>;
+
+/**
  * Onechat tool, as registered by tool providers
  */
 export interface RegisteredTool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>
-  extends ToolDescriptor {
+  extends Omit<ToolDescriptor, 'meta'> {
   /**
    * Tool's input schema, in zod format.
    */
@@ -27,8 +32,10 @@ export interface RegisteredTool<RunInput extends ZodRawShape = ZodRawShape, RunO
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<RunInput, RunOutput>;
-
-  // TODO: optional meta / make it mandatory on tool descriptor.
+  /**
+   * Optional set of metadata for this tool.
+   */
+  meta?: RegisteredToolMeta;
 }
 
 /**
@@ -140,5 +147,5 @@ export interface ToolProviderGetOptions {
  */
 export interface ToolProviderListOptions {
   request: KibanaRequest;
-  // TODO once we figure out metas: filters.
+  // TODO later: filtering
 }

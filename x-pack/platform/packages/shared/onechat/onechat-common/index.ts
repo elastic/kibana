@@ -19,7 +19,8 @@ export {
   isPlainToolIdentifier,
   toStructuredToolIdentifier,
   toSerializedToolIdentifier,
-  builtinToolId,
+  createBuiltinToolId,
+  builtinSourceId,
 } from './src/tools';
 export {
   OnechatErrorCode,

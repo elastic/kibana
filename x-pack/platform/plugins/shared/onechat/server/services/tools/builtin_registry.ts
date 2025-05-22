@@ -9,12 +9,15 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   OnechatErrorUtils,
+  builtinSourceId,
   ToolSourceType,
+  type ToolDescriptorMeta,
   type ToolIdentifier,
   toSerializedToolIdentifier,
   toStructuredToolIdentifier,
 } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
+import type { ZodRawShape } from '@kbn/zod';
 
 export type ToolRegistrationFn = (opts: {
   request: KibanaRequest;
@@ -33,11 +36,31 @@ export const wrapToolRegistration = (tool: ToolDirectRegistration): ToolRegistra
   };
 };
 
+export type RegisteredToolWithMeta<
+  RunInput extends ZodRawShape = ZodRawShape,
+  RunOutput = unknown
+> = Omit<RegisteredTool<RunInput, RunOutput>, 'meta'> & {
+  meta: ToolDescriptorMeta;
+};
+
+export const addSystemMeta = <RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>(
+  tool: RegisteredTool<RunInput, RunOutput>
+): RegisteredToolWithMeta<RunInput, RunOutput> => {
+  return {
+    ...tool,
+    meta: {
+      tags: tool.meta?.tags ?? [],
+      sourceType: ToolSourceType.builtIn,
+      sourceId: builtinSourceId,
+    },
+  };
+};
+
 export interface BuiltinToolRegistry {
   register(tool: ToolRegistration): void;
   has(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<boolean>;
-  get(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool>;
-  list(options: { request: KibanaRequest }): Promise<RegisteredTool[]>;
+  get(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<RegisteredToolWithMeta>;
+  list(options: { request: KibanaRequest }): Promise<RegisteredToolWithMeta[]>;
 }
 
 export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
@@ -79,7 +102,10 @@ export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
     return false;
   }
 
-  async get(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool> {
+  async get(options: {
+    toolId: ToolIdentifier;
+    request: KibanaRequest;
+  }): Promise<RegisteredToolWithMeta> {
     const { toolId: structuredToolId, request } = options;
     const { toolId, sourceType } = toStructuredToolIdentifier(structuredToolId);
 
@@ -93,7 +119,7 @@ export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
       const tools = await this.eval(registration, { request });
       for (const tool of tools) {
         if (tool.id === toolId) {
-          return tool;
+          return addSystemMeta(tool);
         }
       }
     }
@@ -103,13 +129,13 @@ export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
     });
   }
 
-  async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
+  async list(options: { request: KibanaRequest }): Promise<RegisteredToolWithMeta[]> {
     const { request } = options;
-    const matchingTools: RegisteredTool[] = [];
+    const matchingTools: RegisteredToolWithMeta[] = [];
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
-      matchingTools.push(...tools);
+      matchingTools.push(...tools.map((tool) => addSystemMeta(tool)));
     }
 
     return matchingTools;

@@ -9,7 +9,7 @@ import {
   isPlainToolIdentifier,
   isStructuredToolIdentifier,
   isSerializedToolIdentifier,
-  builtinToolId,
+  createBuiltinToolId,
   toStructuredToolIdentifier,
   ToolSourceType,
   StructuredToolIdentifier,
@@ -77,7 +77,7 @@ describe('Tool Identifier utilities', () => {
 
   describe('builtinToolId', () => {
     it('should create a structured identifier for a builtIn tool', () => {
-      const result = builtinToolId('my-tool');
+      const result = createBuiltinToolId('my-tool');
       expect(result).toEqual({
         toolId: 'my-tool',
         sourceType: ToolSourceType.builtIn,

@@ -35,17 +35,23 @@ export interface StructuredToolIdentifier {
 }
 
 export const serializedPartsSeparator = '||';
-export const buildInSourceId = 'builtIn';
+/**
+ * The singleton sourceId used for all builtIn tools.
+ */
+export const builtinSourceId = 'builtIn';
+/**
+ * Unknown sourceId used from converting plain Ids to structured or serialized ids.
+ */
 export const unknownSourceId = 'unknown';
 
 /**
  * Build a structured tool identifier for given builtin tool ID.
  */
-export const builtinToolId = (plainId: PlainIdToolIdentifier): StructuredToolIdentifier => {
+export const createBuiltinToolId = (plainId: PlainIdToolIdentifier): StructuredToolIdentifier => {
   return {
     toolId: plainId,
     sourceType: ToolSourceType.builtIn,
-    sourceId: buildInSourceId,
+    sourceId: builtinSourceId,
   };
 };
 
@@ -55,6 +61,9 @@ export const builtinToolId = (plainId: PlainIdToolIdentifier): StructuredToolIde
  */
 export type SerializedToolIdentifier = `${PlainIdToolIdentifier}||${ToolSourceType}||${string}`;
 
+/**
+ * Defines all possible shapes for a tool identifier.
+ */
 export type ToolIdentifier =
   | PlainIdToolIdentifier
   | StructuredToolIdentifier
@@ -140,9 +149,28 @@ export interface ToolDescriptor {
   /**
    * Meta associated with this tool
    */
-  meta?: ToolDescriptorMeta;
+  meta: ToolDescriptorMeta;
 }
 
+/**
+ * Metadata associated with a tool.
+ *
+ * Some of them are specified by the tool owner during registration,
+ * others are automatically added by the framework.
+ */
 export interface ToolDescriptorMeta {
-  tags?: string[];
+  /**
+   * The type of the source this tool is provided by.
+   */
+  sourceType: ToolSourceType;
+  /**
+   * The id of the source this tool is provided by.
+   * E.g. for MCP source, this will be the ID of the MCP connector.
+   */
+  sourceId: string;
+  /**
+   * Optional list of tags attached to this tool.
+   * For built-in tools, this is specified during registration.
+   */
+  tags: string[];
 }
