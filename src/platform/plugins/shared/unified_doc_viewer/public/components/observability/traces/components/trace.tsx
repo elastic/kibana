@@ -23,9 +23,16 @@ export interface TraceProps {
   traceId: string;
   displayType: 'span' | 'transaction';
   docId: string;
+  showWaterfall?: boolean;
 }
 
-export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
+export const Trace = ({
+  traceId,
+  fields,
+  displayType,
+  docId,
+  showWaterfall = true,
+}: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
@@ -59,23 +66,46 @@ export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
-            defaultMessage: 'Trace',
-          })}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
+                defaultMessage: 'Trace',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {showWaterfall && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="unifiedDocViewerObservabilityTracesTraceFullScreenButton"
+              iconSize="m"
+              iconType="fullScreen"
+              color="text"
+              aria-label="pepito"
+              onClick={() => {
+                setShowFullScreenWaterfall(true);
+              }}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
         <EuiFlexItem>{fieldRows}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EmbeddableRenderer
-        type="APM_TRACE_WATERFALL_EMBEDDABLE"
-        getParentApi={getParentApi}
-        hidePanelChrome={true}
-      />
+
+      {showWaterfall && (
+        <>
+          <EuiSpacer size="m" />
+          <EmbeddableRenderer
+            type="APM_TRACE_WATERFALL_EMBEDDABLE"
+            getParentApi={getParentApi}
+            hidePanelChrome={true}
+          />
+        </>
+      )}
     </>
   );
 };
