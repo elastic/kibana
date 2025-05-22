@@ -71,6 +71,12 @@ export const FindingsVulnerabilityPanel = ({
         eventId={eventId}
       >
         {({ finding, createRuleFn }: FindingVulnerabilityFullFlyoutContentProps) => {
+          const vulnerabilityTitle =
+            finding?.vulnerability?.title ??
+            i18n.translate('xpack.securitySolution.csp.vulnerabilitiesFlyout.emptyTitleHolder', {
+              defaultMessage: 'No title available (open in Findings page)',
+            });
+
           return (
             <>
               <FlyoutHeader>
@@ -120,11 +126,12 @@ export const FindingsVulnerabilityPanel = ({
                     target={'_blank'}
                     external={false}
                   >
-                    <FlyoutTitle title={finding?.vulnerability?.title} isLink />
+                    <FlyoutTitle title={vulnerabilityTitle} isLink />
                   </SecuritySolutionLinkAnchor>
                 ) : (
-                  <FlyoutTitle title={finding?.vulnerability?.title} />
+                  <FlyoutTitle title={vulnerabilityTitle} />
                 )}
+                <EuiSpacer size="xs" />
                 <CspVulnerabilityFlyout.Header finding={finding} />
               </FlyoutHeader>
               <FlyoutBody>

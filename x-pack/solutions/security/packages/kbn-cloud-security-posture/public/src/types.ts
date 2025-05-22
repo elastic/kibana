@@ -85,7 +85,7 @@ export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-interface BaseFlyoutProps {
+interface BaseMisconfigurationFlyoutProps {
   ruleId: string;
   resourceId: string;
 }
@@ -105,12 +105,12 @@ interface NonPreviewModeProps {
 }
 export type FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
   id: 'findings-misconfiguration-panel';
-  params: BaseFlyoutProps & NonPreviewModeProps;
+  params: BaseMisconfigurationFlyoutProps & NonPreviewModeProps;
 };
 
 export type FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
   id: 'findings-misconfiguration-panel-preview';
-  params: BaseFlyoutProps & PreviewModeProps;
+  params: BaseMisconfigurationFlyoutProps & PreviewModeProps;
 };
 
 export type FindingsMisconfigurationPanelExpandableFlyoutProps =
@@ -143,10 +143,6 @@ export interface FindingVulnerabilityFlyoutProps extends Record<string, unknown>
   packageVersion: string | string[];
   eventId: string;
 }
-export interface FindingVulnerabilityPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'findings-vulnerability-panel';
-  params: FindingVulnerabilityFlyoutProps;
-}
 
 export interface FindingsVulnerabilityFlyoutHeaderProps {
   finding: CspVulnerabilityFinding;
@@ -166,8 +162,6 @@ export interface FindingVulnerabilityFullFlyoutContentProps {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   isPreviewMode?: boolean;
 }
-
-// New
 
 interface BaseVulnerabilityFlyoutProps {
   vulnerabilityId: string | string[];

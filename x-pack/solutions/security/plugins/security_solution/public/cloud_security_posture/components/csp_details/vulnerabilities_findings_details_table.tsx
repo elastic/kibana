@@ -44,7 +44,8 @@ import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { get } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
+
+import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
