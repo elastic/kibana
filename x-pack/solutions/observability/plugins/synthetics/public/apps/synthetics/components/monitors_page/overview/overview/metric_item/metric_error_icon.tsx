@@ -8,7 +8,7 @@
 import { EuiButtonIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useSyntheticsSettingsContext } from '../../../../../contexts';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
+import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux-v4';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { State } from '../../../common/store/types';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { FC, useCallback, useContext } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect, useDispatch } from 'react-redux-v7';
 import { compose, withHandlers } from 'react-recompose';
-import { Dispatch } from 'redux';
+import { Dispatch } from 'redux-v4';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-expect-error untyped local

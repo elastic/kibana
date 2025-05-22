@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { isEmpty } from 'lodash/fp';
 import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';

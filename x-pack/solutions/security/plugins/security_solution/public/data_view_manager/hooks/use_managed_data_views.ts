@@ -6,7 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { sharedStateSelector } from '../redux/selectors';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice, createListenerMiddleware } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { createSlice, createListenerMiddleware } from 'redux-toolkit-v1';
 
 import { i18n } from '@kbn/i18n';
 import type { SignificantItem } from '@kbn/ml-agg-utils';

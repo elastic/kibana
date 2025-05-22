@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { applyMiddleware, compose as reduxCompose } from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import { applyMiddleware, compose as reduxCompose } from 'redux-v4';
+import thunkMiddleware from 'redux-thunk-v2';
 import { getWindow } from '../../lib/get_window';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';

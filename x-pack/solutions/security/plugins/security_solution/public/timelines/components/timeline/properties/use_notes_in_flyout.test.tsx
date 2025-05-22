@@ -11,7 +11,7 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import type { UseNotesInFlyoutArgs } from './use_notes_in_flyout';
 import { useNotesInFlyout } from './use_notes_in_flyout';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),

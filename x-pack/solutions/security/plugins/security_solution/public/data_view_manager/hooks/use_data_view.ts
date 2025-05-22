@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { type DataView } from '@kbn/data-views-plugin/public';
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '../../common/lib/kibana';
 import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';

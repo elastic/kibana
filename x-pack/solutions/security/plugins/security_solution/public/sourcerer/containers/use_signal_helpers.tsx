@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { sourcererSelectors, sourcererActions } from '../store';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../store/model';

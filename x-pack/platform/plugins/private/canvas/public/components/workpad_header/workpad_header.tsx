@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
+import { connect } from 'react-redux-v7';
+import { Dispatch } from 'redux-v4';
 import { Action } from 'redux-actions';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';

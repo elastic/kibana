@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback } from 'react';
 import { ChromeHelpMenuActions } from '@kbn/core/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { HelpMenu as Component } from './help_menu.component';
 import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
 

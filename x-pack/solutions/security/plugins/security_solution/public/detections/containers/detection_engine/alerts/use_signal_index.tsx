@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { createSignalIndex, getSignalIndex } from './api';

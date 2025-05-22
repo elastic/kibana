@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { getElementStats } from '../../state/selectors/workpad';
 import { ElementConfig as Component } from './element_config';
 

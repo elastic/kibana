@@ -8,7 +8,7 @@
 import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
 import React, { useMemo, useCallback, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';

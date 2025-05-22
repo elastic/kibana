@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';

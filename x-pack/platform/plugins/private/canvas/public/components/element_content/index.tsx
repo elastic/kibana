@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { getSelectedPage, getPageById, getSelectedElementId } from '../../state/selectors/workpad';
 import { ElementContent as Component, Props as ComponentProps } from './element_content';
 import { State } from '../../../types';

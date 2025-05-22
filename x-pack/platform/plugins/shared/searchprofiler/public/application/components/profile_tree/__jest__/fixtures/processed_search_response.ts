@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { Index } from '../../../../types';
 
 const shard1 = {

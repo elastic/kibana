@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { fetchNotesByDocumentIds } from '../store/notes.slice';

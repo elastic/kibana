@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { estypes } from '@elastic/elasticsearch';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import {

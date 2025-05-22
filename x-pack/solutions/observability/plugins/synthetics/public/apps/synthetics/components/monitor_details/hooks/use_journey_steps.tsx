@@ -6,7 +6,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useEffect } from 'react';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStep } from '../../../../../../common/runtime_types';

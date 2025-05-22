@@ -6,9 +6,9 @@
  */
 
 import type React from 'react';
-import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
+import type { Store, Middleware, Dispatch, AnyAction } from 'redux-v4';
 import type { BBox } from 'rbush';
-import type { Provider } from 'react-redux';
+import type { Provider } from 'react-redux-v7';
 import type {
   ResolverNode,
   ResolverRelatedEvents,

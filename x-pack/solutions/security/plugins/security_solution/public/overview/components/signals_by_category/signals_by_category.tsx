@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { Filter } from '@kbn/es-query';
 
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis/alerts_histogram_panel';

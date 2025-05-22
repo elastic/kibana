@@ -6,7 +6,14 @@
  */
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
+import {
+  combineReducers,
+  createStore,
+  Store,
+  AnyAction,
+  Dispatch,
+  applyMiddleware,
+} from 'redux-v4';
 import { ChromeStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';

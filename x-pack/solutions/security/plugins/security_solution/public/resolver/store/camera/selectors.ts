@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector, defaultMemoize } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect-v4';
 import { easing } from 'ts-easing';
 import { clamp, lerp } from '../../lib/math';
 import * as vector2 from '../../models/vector2';

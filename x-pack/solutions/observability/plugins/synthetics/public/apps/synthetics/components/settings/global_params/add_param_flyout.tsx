@@ -21,7 +21,7 @@ import {
 import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import {

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getLocationMonitorsAction } from '../../../../state/settings/actions';
 import { selectLocationMonitors } from '../../../../state/settings';
 

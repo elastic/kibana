@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 
 import * as i18n from './translations';
 import type { sourcererModel } from '../store';

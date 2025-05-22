@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { BLANK_STR, SPACE_STR } from '../../pages/translations';
 import { isValidCertVal, SettingsPageFieldErrors } from '../../pages/settings';

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiSkeletonText,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 

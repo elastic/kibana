@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';

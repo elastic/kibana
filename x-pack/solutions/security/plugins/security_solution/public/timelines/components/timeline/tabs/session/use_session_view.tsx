@@ -15,7 +15,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';

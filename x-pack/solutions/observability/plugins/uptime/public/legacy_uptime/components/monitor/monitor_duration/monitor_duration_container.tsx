@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { JobStat } from '@kbn/ml-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
 import {

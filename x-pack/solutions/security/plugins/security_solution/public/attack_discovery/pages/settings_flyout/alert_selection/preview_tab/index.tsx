@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { useEuiComboBoxReset } from '../../../../../common/components/use_combo_box_reset';
 import { StackByComboBox } from '../../../../../detections/components/alerts_kpis/common/components';

@@ -12,8 +12,8 @@ import {
   type Action,
   type Dispatch,
   type MiddlewareAPI,
-} from '@reduxjs/toolkit';
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+} from 'redux-toolkit-v1';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux-v7';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';

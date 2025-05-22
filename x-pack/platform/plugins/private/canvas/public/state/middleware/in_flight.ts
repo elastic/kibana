@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Dispatch, Middleware } from 'redux';
+import { Dispatch, Middleware } from 'redux-v4';
 import {
   loadingIndicator as defaultLoadingIndicator,
   LoadingIndicatorInterface,

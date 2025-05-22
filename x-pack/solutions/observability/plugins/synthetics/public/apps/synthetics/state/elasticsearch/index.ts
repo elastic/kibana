@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import { ESSearchResponse } from '@kbn/es-types';
 
 import { IHttpSerializedFetchError } from '..';

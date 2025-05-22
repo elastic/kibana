@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
 import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';

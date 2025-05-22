@@ -7,7 +7,7 @@
 
 import { useCallback, useRef } from 'react';
 import type { Subscription } from 'rxjs';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import memoizeOne from 'memoize-one';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';

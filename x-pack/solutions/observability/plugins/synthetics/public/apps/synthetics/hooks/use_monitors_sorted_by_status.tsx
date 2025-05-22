@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import moment from 'moment';
 import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';

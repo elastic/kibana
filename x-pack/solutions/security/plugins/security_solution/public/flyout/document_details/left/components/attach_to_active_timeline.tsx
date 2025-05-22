@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import type { State } from '../../../../common/store';
 import { TimelineId } from '../../../../../common/types';

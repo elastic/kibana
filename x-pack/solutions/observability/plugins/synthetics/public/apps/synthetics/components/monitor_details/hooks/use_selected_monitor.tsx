@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useParams } from 'react-router-dom';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { ConfigKey } from '../../../../../../common/runtime_types';

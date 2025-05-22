@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { ResolverProps } from '../types';
 import { ResolverWithoutProviders } from './resolver_without_providers';
 import { createResolver } from '../store/actions';

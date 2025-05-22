@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import {
   EuiFlexGroup,
   EuiFlexItem,

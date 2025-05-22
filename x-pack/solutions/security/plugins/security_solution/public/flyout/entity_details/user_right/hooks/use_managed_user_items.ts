@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { UserAssetTableType } from '../../../../explore/users/store/model';
 import type { State } from '../../../../common/store/types';
 import { usersSelectors } from '../../../../explore/users/store';

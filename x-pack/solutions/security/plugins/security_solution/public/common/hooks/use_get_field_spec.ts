@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { SourcererScopeName } from '../../sourcerer/store/model';
 import { sourcererSelectors } from '../../sourcerer/store';
 import type { State } from '../store';

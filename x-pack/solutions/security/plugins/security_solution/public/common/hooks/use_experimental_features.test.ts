@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 

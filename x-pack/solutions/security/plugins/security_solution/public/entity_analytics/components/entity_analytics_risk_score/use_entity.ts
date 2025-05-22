@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../explore/users/store/model';

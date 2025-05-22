@@ -19,8 +19,8 @@ import {
 } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch, useSelector } from 'react-redux-v7';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type {

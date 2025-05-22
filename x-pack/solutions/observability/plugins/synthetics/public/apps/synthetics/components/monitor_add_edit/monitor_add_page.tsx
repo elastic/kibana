@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { useCloneMonitor } from './hooks/use_clone_monitor';

@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { tableDefaults, getDataTableManageDefaults } from './defaults';
 import type { DataTableState, TableById, DataTableModel } from './types';
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 

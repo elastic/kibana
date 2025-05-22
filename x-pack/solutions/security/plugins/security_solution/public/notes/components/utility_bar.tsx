@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {

@@ -7,7 +7,7 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useRef, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';

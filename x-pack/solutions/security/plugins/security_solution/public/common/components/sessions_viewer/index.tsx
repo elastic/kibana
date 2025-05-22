@@ -8,7 +8,7 @@
 import React, { useMemo, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';

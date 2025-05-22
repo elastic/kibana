@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { MiddlewareAPI } from '@reduxjs/toolkit';
+import { MiddlewareAPI } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { setState, initExisting, initEmpty, LensStoreDeps, LensAppState } from '..';

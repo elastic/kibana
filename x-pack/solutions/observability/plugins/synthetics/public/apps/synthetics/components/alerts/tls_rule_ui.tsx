@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import React, { useCallback, useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';

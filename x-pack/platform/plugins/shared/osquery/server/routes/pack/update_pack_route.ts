@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
 import { unset, has, difference, filter, map, mapKeys, uniq, some, isEmpty } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,

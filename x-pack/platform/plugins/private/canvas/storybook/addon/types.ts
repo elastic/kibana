@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action } from 'redux';
+import { Action } from 'redux-v4';
 import { State } from '../../types';
 
 export interface RecordedPayload {

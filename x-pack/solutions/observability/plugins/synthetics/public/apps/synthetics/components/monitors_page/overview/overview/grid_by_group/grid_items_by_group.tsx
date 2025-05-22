@@ -7,7 +7,7 @@
 
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useRef, useState, FC, PropsWithChildren } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';

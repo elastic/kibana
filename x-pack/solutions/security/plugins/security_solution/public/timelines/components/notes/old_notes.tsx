@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';

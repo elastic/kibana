@@ -9,7 +9,7 @@ import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/m
 import type { DiscoverInternalState } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import {
   updateDiscoverAppState,
   updateDiscoverInternalState,

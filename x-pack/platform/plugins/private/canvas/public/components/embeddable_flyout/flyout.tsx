@@ -7,7 +7,7 @@
 
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';

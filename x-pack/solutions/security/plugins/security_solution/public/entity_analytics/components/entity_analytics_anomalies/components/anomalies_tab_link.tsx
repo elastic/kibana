@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { usersActions } from '../../../../explore/users/store';

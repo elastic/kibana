@@ -18,7 +18,7 @@ import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,

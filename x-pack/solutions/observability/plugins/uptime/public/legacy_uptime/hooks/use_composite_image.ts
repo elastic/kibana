@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import React from 'react';
 import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
 import {

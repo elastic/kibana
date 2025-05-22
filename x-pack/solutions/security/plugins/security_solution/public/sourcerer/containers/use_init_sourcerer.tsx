@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { sourcererActions, sourcererSelectors } from '../store';
 import type { SourcererUrlState } from '../store/model';

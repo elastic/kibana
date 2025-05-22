@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';

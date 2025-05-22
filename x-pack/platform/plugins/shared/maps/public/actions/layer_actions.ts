@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import { AnyAction, Dispatch } from 'redux-v4';
+import { ThunkDispatch } from 'redux-thunk-v2';
 import type { Query } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';

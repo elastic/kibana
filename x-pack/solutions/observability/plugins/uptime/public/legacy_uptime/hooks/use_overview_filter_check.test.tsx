@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React, { FC, PropsWithChildren } from 'react';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { useOverviewFilterCheck } from './use_overview_filter_check';
 import { MockRouter } from '../lib/helper/rtl_helpers';
 

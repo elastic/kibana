@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { EuiButtonGroup, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

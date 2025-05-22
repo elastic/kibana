@@ -11,7 +11,7 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from
 
 import { useDataView } from './use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 jest.mock('../../common/hooks/use_experimental_features');
 

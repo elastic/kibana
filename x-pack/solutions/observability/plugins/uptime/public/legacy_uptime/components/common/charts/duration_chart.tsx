@@ -18,7 +18,7 @@ import {
   BrushEndListener,
   LegendItemListener,
 } from '@elastic/charts';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../../common/types';

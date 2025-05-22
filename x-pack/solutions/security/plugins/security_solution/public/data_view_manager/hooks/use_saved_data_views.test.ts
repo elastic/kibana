@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useSavedDataViews } from './use_saved_data_views';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 

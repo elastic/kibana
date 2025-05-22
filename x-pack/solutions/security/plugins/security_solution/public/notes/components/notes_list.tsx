@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DeleteConfirmModal } from './delete_confirm_modal';

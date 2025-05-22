@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
+import { Dispatch } from 'redux-v4';
 import { createAction } from 'redux-actions';
 import { createThunk } from '../../lib/create_thunk';
 // @ts-expect-error untyped local

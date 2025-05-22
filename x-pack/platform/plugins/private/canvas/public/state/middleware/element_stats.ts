@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Middleware } from 'redux';
+import { Middleware } from 'redux-v4';
 import { State } from '../../../types';
 
 // @ts-expect-error untyped local

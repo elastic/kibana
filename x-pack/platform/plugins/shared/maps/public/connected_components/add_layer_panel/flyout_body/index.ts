@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { FlyoutBody } from './flyout_body';
 import { MapStoreState } from '../../../reducers/store';
 import { getMapColors, getMostCommonDataViewId } from '../../../selectors/map_selectors';

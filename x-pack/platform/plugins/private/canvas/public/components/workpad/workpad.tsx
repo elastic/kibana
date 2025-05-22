@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC, useContext, useCallback, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import useObservable from 'react-use/lib/useObservable';
 // @ts-expect-error
 import { transitionsRegistry } from '../../lib/transitions_registry';

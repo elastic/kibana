@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 import { CoreSetup, ExecutionContextStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';

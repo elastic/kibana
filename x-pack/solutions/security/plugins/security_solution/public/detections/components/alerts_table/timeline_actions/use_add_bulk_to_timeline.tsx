@@ -7,7 +7,7 @@
 
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';

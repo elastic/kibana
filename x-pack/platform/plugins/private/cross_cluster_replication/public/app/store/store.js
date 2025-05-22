@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { applyMiddleware, compose, createStore } from 'redux';
-import thunk from 'redux-thunk';
+import { applyMiddleware, compose, createStore } from 'redux-v4';
+import thunk from 'redux-thunk-v2';
 
 import { ccr } from './reducers';
 

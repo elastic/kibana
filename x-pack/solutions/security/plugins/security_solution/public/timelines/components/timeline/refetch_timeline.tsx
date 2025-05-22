@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, memo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { inputsModel } from '../../../common/store';

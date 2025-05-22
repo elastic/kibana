@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { isEmpty } from 'lodash/fp';
 
 import { getTimelineUrl, useFormatUrl } from '../../../common/components/link_to';

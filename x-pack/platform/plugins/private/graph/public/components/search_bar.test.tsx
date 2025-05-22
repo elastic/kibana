@@ -28,7 +28,7 @@ import { openSourceModal } from '../services/source_modal';
 import { GraphStore, setDatasource, submitSearchSaga } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';

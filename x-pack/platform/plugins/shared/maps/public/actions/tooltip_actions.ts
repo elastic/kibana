@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { Dispatch } from 'redux';
+import { Dispatch } from 'redux-v4';
 import { getOpenTooltips } from '../selectors/map_selectors';
 import { SET_OPEN_TOOLTIPS } from './map_action_constants';
 import { TooltipState } from '../../common/descriptor_types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import { inputsSelectors } from '../../store/inputs';

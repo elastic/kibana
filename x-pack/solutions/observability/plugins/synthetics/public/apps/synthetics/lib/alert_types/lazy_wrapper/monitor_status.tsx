@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

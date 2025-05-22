@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';

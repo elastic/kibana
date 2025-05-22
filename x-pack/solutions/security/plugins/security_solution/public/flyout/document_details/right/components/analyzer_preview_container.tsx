@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { EuiLink, EuiMark } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

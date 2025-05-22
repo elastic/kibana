@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { UptimeAlertsFlyoutWrapperComponent } from '../uptime_alerts_flyout_wrapper';
 import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../state/selectors';

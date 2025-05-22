@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Store, Reducer, AnyAction } from 'redux';
-import { createStore } from 'redux';
+import type { Store, Reducer, AnyAction } from 'redux-v4';
+import { createStore } from 'redux-v4';
 import { cameraReducer } from './reducer';
 import type { AnalyzerById, Vector2 } from '../../types';
 import { translation } from './selectors';

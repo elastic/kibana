@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TypedUseSelectorHook } from 'react-redux';
-import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { AppDispatch, RootState } from './store';
 
 // Improves TypeScript support compared to plain `useDispatch` and `useSelector`

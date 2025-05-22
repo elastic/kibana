@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { sourcererSelectors } from '../store';
 import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';

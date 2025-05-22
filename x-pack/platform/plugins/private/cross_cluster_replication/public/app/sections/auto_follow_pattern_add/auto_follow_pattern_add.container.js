@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 
 import { SECTIONS } from '../../constants';
 import { getApiStatus, getApiError } from '../../store/selectors';

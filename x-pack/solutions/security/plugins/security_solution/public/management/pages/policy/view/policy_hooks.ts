@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,

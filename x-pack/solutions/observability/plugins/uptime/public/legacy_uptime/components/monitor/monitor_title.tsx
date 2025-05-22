@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useMonitorId } from '../../hooks';
 import { monitorStatusSelector } from '../../state/selectors';
 import { Ping } from '../../../../common/runtime_types/ping';

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';

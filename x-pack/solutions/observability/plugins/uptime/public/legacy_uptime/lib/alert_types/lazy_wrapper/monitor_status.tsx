@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { store } from '../../../state';

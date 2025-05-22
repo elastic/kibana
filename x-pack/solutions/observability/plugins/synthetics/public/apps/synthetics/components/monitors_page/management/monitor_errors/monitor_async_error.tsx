@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';

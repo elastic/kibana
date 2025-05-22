@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import { EuiComboBox, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

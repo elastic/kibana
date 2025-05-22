@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EmbeddablePanelWrapper } from '../../../common/components/embeddable_panel_wrapper';
 import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';

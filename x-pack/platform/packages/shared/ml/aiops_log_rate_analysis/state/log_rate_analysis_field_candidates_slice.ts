@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { createAsyncThunk, createSlice } from 'redux-toolkit-v1';
 
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';

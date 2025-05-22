@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 

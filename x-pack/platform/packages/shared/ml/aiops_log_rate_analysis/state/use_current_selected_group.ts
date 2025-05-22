@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 
 import type { RootState } from './store';
 import { useAppSelector } from './hooks';

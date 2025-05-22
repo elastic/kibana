@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import { useCallback, useState, useEffect, useRef, useLayoutEffect, useContext } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { SideEffectContext } from './side_effect_context';
 import type { Matrix3 } from '../types';
 import * as selectors from '../store/selectors';

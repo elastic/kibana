@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction, CombinedState, Reducer } from 'redux';
+import type { AnyAction, CombinedState, Reducer } from 'redux-v4';
 import * as dataTableActions from './actions';
 import * as dataTableSelectors from './selectors';
 import type { TableState } from './types';

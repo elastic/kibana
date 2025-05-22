@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';

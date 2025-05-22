@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { Controller, useFormContext, FieldError } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';

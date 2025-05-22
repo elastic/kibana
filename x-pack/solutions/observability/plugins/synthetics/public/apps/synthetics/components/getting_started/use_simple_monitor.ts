@@ -8,7 +8,7 @@
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSyntheticsRefreshContext } from '../../contexts';
 import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';

@@ -8,7 +8,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { Store } from 'redux';
+import { Store } from 'redux-v4';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 

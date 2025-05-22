@@ -8,7 +8,7 @@
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { RootState } from '../reducer';
 import { DataViewManagerScopeName } from '../../constants';
 

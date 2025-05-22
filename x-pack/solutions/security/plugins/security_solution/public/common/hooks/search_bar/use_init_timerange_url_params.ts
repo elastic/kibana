@@ -7,8 +7,8 @@
 
 import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import { useDispatch } from 'react-redux-v7';
+import type { Dispatch } from 'redux-v4';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { TimeRangeKinds } from '../../store/inputs/constants';
 import type {

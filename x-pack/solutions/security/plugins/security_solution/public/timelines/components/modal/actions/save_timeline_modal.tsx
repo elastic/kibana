@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import type { State } from '../../../../common/store';

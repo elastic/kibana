@@ -8,8 +8,8 @@
 import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   dataTableSelectors,

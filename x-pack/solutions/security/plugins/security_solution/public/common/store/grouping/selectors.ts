@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { GroupModel, GroupState } from './types';
 
 export const groupSelector = ({ groups }: GroupState, id: string): GroupModel => groups[id];

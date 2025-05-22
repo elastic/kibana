@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { networkEventsSelector } from '../../../../state/network_events/selectors';
 import { JourneyStep } from '../../../../../../../common/runtime_types';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';

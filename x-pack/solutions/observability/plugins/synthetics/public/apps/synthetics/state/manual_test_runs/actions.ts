@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import { ManualTestRun } from '.';
 import { TestNowResponse } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';

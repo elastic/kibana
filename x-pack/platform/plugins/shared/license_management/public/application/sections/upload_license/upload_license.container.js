@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 import { uploadLicense, uploadLicenseStatus } from '../../store/actions/upload_license';
 import { addUploadErrorMessage } from '../../store/actions/add_error_message';

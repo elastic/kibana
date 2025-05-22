@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { AppState } from '../../../state';
 import { getJourneySteps } from '../../../state/actions/journey';
 import { JourneyState } from '../../../state/reducers/journey';

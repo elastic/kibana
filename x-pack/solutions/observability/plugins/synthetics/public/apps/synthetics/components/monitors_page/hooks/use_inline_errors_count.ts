@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';

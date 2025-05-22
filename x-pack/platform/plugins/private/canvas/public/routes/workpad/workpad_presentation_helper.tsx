@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FC, PropsWithChildren, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
 import { getUntitledWorkpadLabel, setDocTitle } from '../../lib/doc_title';

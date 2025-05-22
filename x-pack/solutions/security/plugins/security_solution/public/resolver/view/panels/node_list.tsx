@@ -7,7 +7,7 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import React, { memo, useMemo, useCallback, useContext } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';

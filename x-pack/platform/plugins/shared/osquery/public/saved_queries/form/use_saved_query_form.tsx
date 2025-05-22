@@ -7,8 +7,8 @@
 
 import { useForm as useHookForm } from 'react-hook-form';
 import { isArray, isEmpty, map } from 'lodash';
-import type { Draft } from 'immer';
-import produce from 'immer';
+import type { Draft } from 'immer-v9';
+import produce from 'immer-v9';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QUERY_TIMEOUT } from '../../../common/constants';

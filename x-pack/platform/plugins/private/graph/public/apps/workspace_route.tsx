@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Workspace } from '../types';

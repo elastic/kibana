@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { areFiltersEmpty } from '../common/utils';
 import { getStatsOverviewStore } from './redux_store';

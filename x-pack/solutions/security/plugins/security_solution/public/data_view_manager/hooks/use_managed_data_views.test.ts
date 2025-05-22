@@ -23,7 +23,7 @@ jest.mock('@kbn/data-views-plugin/public', () => ({
   DataView: jest.fn(),
 }));
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useKibana } from '../../common/lib/kibana';
 
 describe('useManagedDataViews', () => {

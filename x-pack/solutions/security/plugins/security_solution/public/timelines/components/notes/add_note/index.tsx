@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { appActions } from '../../../../common/store/app';
 import type { Note } from '../../../../common/lib/note';

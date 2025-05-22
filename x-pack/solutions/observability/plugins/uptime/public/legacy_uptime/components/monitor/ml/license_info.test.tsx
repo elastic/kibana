@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ShowLicenseInfo } from './license_info';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('ShowLicenseInfo', () => {

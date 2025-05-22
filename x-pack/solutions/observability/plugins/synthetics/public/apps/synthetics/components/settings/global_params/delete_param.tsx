@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import {
   getGlobalParamAction,
   deleteGlobalParamsAction,

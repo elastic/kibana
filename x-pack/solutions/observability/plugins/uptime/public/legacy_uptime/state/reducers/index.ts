@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-v4';
 import { monitorReducer, MonitorState } from './monitor';
 import { uiReducer, UiState } from './ui';
 import { monitorStatusReducer, MonitorStatusState } from './monitor_status';

@@ -11,7 +11,7 @@ import { DataViewPicker } from '.';
 import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useKibana } from '../../../common/lib/kibana';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';

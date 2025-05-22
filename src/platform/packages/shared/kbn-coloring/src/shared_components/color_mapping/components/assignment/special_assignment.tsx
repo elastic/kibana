@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import React from 'react';
 import { IKbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorSwatch } from '../color_picker/color_swatch';

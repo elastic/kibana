@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
+import type { Action } from 'redux-v4';
 import type { DataViewBase } from '@kbn/es-query';
 import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type {

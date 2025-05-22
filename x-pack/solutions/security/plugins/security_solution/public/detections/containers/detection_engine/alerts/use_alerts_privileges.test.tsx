@@ -6,7 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import produce from 'immer';
+import produce from 'immer-v9';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';

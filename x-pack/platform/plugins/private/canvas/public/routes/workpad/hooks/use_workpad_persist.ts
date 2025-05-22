@@ -6,7 +6,7 @@
  */
 import { useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { CanvasWorkpad, State } from '../../../../types';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { canUserWrite } from '../../../state/selectors/app';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Store, AnyAction } from 'redux';
-import { createStore, applyMiddleware } from 'redux';
+import type { Store, AnyAction } from 'redux-v4';
+import { createStore, applyMiddleware } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { AnalyzerById, DataAccessLayer } from '../types';
 import { analyzerReducer } from './reducer';

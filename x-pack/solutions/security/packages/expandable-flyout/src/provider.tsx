@@ -7,7 +7,7 @@
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
 import { FlyoutPanels } from './store/state';

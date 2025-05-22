@@ -20,7 +20,7 @@ import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, ComponentType } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import styled, { ThemeContext } from 'styled-components';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-v4';
 import { clusters } from './clusters';
 import { detailPanel } from './detail_panel';
 import { addCluster } from './add_cluster';

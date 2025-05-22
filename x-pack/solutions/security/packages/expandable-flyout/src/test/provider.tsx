@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Provider as ReduxProvider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import { Provider as ReduxProvider } from 'react-redux-v7';
+import { configureStore } from 'redux-toolkit-v1';
 import React, { FC, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {

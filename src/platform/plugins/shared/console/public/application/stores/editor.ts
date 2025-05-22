@@ -8,7 +8,7 @@
  */
 
 import { Reducer } from 'react';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { identity } from 'fp-ts/function';
 import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';

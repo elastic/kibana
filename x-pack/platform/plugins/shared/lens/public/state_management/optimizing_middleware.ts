@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
+import { Dispatch, MiddlewareAPI, Action } from 'redux-toolkit-v1';
 import { isEqual } from 'lodash';
 import { onActiveDataChange, updateDatasourceState, setExecutionContext } from '.';
 import { SetExecutionContextPayload } from './lens_slice';

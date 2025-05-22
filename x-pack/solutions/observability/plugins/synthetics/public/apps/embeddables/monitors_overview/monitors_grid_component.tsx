@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';

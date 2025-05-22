@@ -8,7 +8,7 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS } from '../common/components/permissions';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';

@@ -13,9 +13,9 @@ import React from 'react';
 import { DragDropContext, DropResult, ResponderProvided } from '@hello-pangea/dnd';
 
 import { ThemeProvider } from 'styled-components';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { euiDarkVars } from '@kbn/ui-theme';
-import { createStore as createReduxStore } from 'redux';
+import { createStore as createReduxStore } from 'redux-v4';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { mockGlobalState } from '../../mock/global_state';

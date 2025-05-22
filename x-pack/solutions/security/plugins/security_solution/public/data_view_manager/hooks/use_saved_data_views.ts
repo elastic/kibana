@@ -7,7 +7,7 @@
 
 import { type DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { sharedStateSelector } from '../redux/selectors';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 

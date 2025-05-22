@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useSelectDataView } from './use_select_data_view';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { DataViewManagerScopeName } from '../constants';
 
 jest.mock('react-redux', () => {

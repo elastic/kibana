@@ -17,7 +17,7 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { BehaviorSubject } from 'rxjs';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';

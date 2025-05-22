@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';

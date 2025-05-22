@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InputsModelId } from './constants';

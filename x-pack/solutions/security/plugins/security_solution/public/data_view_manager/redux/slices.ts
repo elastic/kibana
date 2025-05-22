@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { createSlice } from 'redux-toolkit-v1';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';

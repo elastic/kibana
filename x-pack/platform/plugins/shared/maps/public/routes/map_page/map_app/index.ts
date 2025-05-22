@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
+import { connect } from 'react-redux-v7';
+import { ThunkDispatch } from 'redux-thunk-v2';
+import { AnyAction } from 'redux-v4';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';

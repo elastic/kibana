@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useContext } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 // @ts-expect-error untyped local
 import * as pageActions from '../../state/actions/pages';
 import { canUserWrite } from '../../state/selectors/app';

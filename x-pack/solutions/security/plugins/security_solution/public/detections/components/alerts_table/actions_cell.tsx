@@ -7,7 +7,7 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { TableId, getTableByIdSelector } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash';
 import type { SetEventsLoading } from '../../../../common/types';
