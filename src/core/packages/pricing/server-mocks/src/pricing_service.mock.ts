@@ -8,7 +8,6 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { createPricingTiersClientMock } from '@kbn/core-pricing-common/src/pricing_tiers_client.mock';
 import type { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
 import type { PricingService } from '@kbn/core-pricing-server-internal';
 
@@ -21,7 +20,12 @@ const createSetupContractMock = () => {
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<PricingServiceStart> = {
-    tiers: createPricingTiersClientMock(),
+    tiers: {
+      getActiveProducts: jest.fn(),
+      isActiveProduct: jest.fn(),
+      isEnabled: jest.fn(),
+      isFeatureAvailable: jest.fn(),
+    },
   };
   return startContract;
 };
