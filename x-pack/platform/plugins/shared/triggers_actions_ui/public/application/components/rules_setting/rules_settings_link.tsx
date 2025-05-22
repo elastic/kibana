@@ -13,7 +13,7 @@ import { RulesSettingsFlyout } from './rules_settings_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 
 export interface RuleSettingsLinkProps {
-  alertDeleteCategoryIds: AlertDeleteCategoryIds[];
+  alertDeleteCategoryIds?: AlertDeleteCategoryIds[];
 }
 export const RulesSettingsLink = ({ alertDeleteCategoryIds }: RuleSettingsLinkProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);

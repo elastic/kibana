@@ -195,7 +195,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
 
   useEffect(() => {
     setHeaderActions?.([
-      <RulesSettingsLink alertDeleteCategoryIds={['management']} />,
+      <RulesSettingsLink
+        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+      />,
       <RulesListDocLink />,
     ]);
     return () => setHeaderActions?.();

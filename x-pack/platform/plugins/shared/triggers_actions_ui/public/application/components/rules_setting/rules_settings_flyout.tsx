@@ -91,7 +91,7 @@ export interface RulesSettingsFlyoutProps {
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
   onClose: () => void;
   onSave?: () => void;
-  alertDeleteCategoryIds: AlertDeleteCategoryIds[];
+  alertDeleteCategoryIds?: AlertDeleteCategoryIds[];
 }
 
 export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
@@ -256,16 +256,18 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             />
           </>
         )}
-        {isAlertDeletionSettingsEnabled && readAlertDeleteSettingsUI && (
-          <>
-            <EuiSpacer />
-            <AlertDeleteDescriptiveFormGroup
-              services={{ http, notifications }}
-              categoryIds={props.alertDeleteCategoryIds}
-              isDisabled={!writeAlertDeleteSettingsUI}
-            />
-          </>
-        )}
+        {isAlertDeletionSettingsEnabled &&
+          readAlertDeleteSettingsUI &&
+          props.alertDeleteCategoryIds && (
+            <>
+              <EuiSpacer />
+              <AlertDeleteDescriptiveFormGroup
+                services={{ http, notifications }}
+                categoryIds={props.alertDeleteCategoryIds}
+                isDisabled={!writeAlertDeleteSettingsUI}
+              />
+            </>
+          )}
       </>
     );
   };
