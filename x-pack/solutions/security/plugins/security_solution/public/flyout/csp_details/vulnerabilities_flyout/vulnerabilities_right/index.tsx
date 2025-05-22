@@ -74,7 +74,7 @@ export const FindingsVulnerabilityPanel = ({
           const vulnerabilityTitle =
             finding?.vulnerability?.title ??
             i18n.translate('xpack.securitySolution.csp.vulnerabilitiesFlyout.emptyTitleHolder', {
-              defaultMessage: 'No title available (open in Findings page)',
+              defaultMessage: 'No title available',
             });
 
           return (
