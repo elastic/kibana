@@ -17,7 +17,7 @@ import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import type {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
-} from '../../../../../services/ml_api_service/data_frame_analytics';
+} from '@kbn/ml-services/ml_api_service/data_frame_analytics';
 import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
 import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
