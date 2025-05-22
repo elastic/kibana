@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCallOut,
   EuiCheckbox,
   EuiConfirmModal,
   EuiDatePicker,
@@ -35,6 +36,13 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
   const [age, setAge] = React.useState('7d');
 
   const basicCheckboxId = useGeneratedHtmlId({ prefix: 'basicCheckbox' });
+
+  const purgeTimeLabel = i18n.translate(
+    'xpack.slo.bulkPurgeConfirmationModal.purgeDataDescription',
+    {
+      defaultMessage: 'Purge data older than',
+    }
+  );
 
   return (
     <EuiConfirmModal
@@ -76,7 +84,7 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.purgeTypeLabel', {
-          defaultMessage: 'Purge type',
+          defaultMessage: 'Choose basis by which to purge data',
         })}
       >
         <EuiRadioGroup
@@ -85,13 +93,13 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
             {
               id: 'fixed_age',
               label: i18n.translate('xpack.slo.bulkPurgeConfirmationModal.fixedAgeLabel', {
-                defaultMessage: 'Fixed age',
+                defaultMessage: 'Age of data',
               }),
             },
             {
               id: 'fixed_time',
               label: i18n.translate('xpack.slo.bulkPurgeConfirmationModal.fixedDateTimeLabel', {
-                defaultMessage: 'Fixed date/time',
+                defaultMessage: 'Specific date and time',
               }),
             },
           ]}
@@ -103,30 +111,26 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
         />
       </EuiFormRow>
       {purgeType === 'fixed_age' ? (
-        <EuiFormRow
-          label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.purgeAgeLabel', {
-            defaultMessage: 'Purge age',
-          })}
-        >
+        <EuiFormRow label={purgeTimeLabel}>
           <EuiRadioGroup
             data-test-subj="sloBulkPurgeConfirmationModalPurgeAge"
             options={[
               {
                 id: '7d',
                 label: i18n.translate('xpack.slo.bulkPurgeConfirmationModal.last7DaysLabel', {
-                  defaultMessage: 'Last 7 days',
+                  defaultMessage: '7 days',
                 }),
               },
               {
                 id: '30d',
                 label: i18n.translate('xpack.slo.bulkPurgeConfirmationModal.last30DaysLabel', {
-                  defaultMessage: 'Last 30 days',
+                  defaultMessage: '30 days',
                 }),
               },
               {
                 id: '90d',
                 label: i18n.translate('xpack.slo.bulkPurgeConfirmationModal.last90DaysLabel', {
-                  defaultMessage: 'Last 90 days',
+                  defaultMessage: '90 days',
                 }),
               },
             ]}
@@ -135,11 +139,7 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
           />
         </EuiFormRow>
       ) : (
-        <EuiFormRow
-          label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.purgeDateLabel', {
-            defaultMessage: 'Purge date',
-          })}
-        >
+        <EuiFormRow label={purgeTimeLabel}>
           <EuiDatePicker showTimeSelect selected={purgeDate} onChange={setPurgeDate} />
         </EuiFormRow>
       )}
@@ -155,6 +155,19 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
           })}
         />
       </EuiFormRow>
+      {forcePurge && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            color="warning"
+            size="s"
+            title={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.forceWarning', {
+              defaultMessage:
+                'Ignoring purge policy restrictions may delete data that is used to calculate SLOs',
+            })}
+          />
+        </>
+      )}
     </EuiConfirmModal>
   );
 }
