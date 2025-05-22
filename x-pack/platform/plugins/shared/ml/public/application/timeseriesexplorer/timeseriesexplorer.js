@@ -53,6 +53,7 @@ import {
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '@kbn/ml-common-constants/settings';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils/anomaly_utils';
 import { indexServiceFactory } from '@kbn/ml-services/index_service';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -62,7 +63,6 @@ import { SelectInterval } from '../components/controls/select_interval/select_in
 import { SelectSeverity } from '../components/controls/select_severity';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
-import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
 import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
