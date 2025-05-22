@@ -3496,14 +3496,6 @@
             "section": "def-public.SearchEmbeddableSerializedState",
             "text": "SearchEmbeddableSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.SearchEmbeddableRuntimeState",
-            "text": "SearchEmbeddableRuntimeState"
-          },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",

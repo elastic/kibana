@@ -1104,21 +1104,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableContinuousRollups\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
         "type": "string",
         "tags": [],
@@ -1216,21 +1201,6 @@
         "description": [],
         "signature": [
           "\"observability:apmTraceExplorerTab\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableAwsLambdaMetrics\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
