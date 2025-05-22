@@ -67,9 +67,7 @@ export const sourcererScopeMissingPatterns = createSelector(
 
 export const kibanaDataViews = createSelector(
   selectSourcerer,
-  (sourcerer) => {
-    return sourcerer.kibanaDataViews;
-  },
+  (sourcerer) => sourcerer.kibanaDataViews,
   {
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
