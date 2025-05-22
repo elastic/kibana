@@ -8,7 +8,6 @@
 import { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
@@ -21,12 +20,13 @@ import {
 import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useTrainedModelsApiService } from '@kbn/ml-hooks/trained_models/use_trained_models_api_service';
 
 import { useNewJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
-import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
-import { useToastNotificationService } from '../../services/toast_notification_service';
+
 import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {
