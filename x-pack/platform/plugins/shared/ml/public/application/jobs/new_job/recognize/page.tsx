@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { isEqual, merge } from 'lodash';
+import moment from 'moment';
+
 import {
   EuiTitle,
   EuiFlexItem,
@@ -18,8 +19,9 @@ import {
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';
-import { isEqual, merge } from 'lodash';
-import moment from 'moment';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
@@ -36,8 +38,10 @@ import type {
 } from '@kbn/ml-common-types/modules';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useDataSource } from '../../../contexts/ml';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { useMlLocator } from '../../../contexts/kibana';
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
