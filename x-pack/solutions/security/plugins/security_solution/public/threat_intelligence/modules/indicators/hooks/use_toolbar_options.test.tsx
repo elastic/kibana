@@ -82,9 +82,7 @@ describe('useToolbarOptions()', () => {
           size="xs"
         >
           <React.Fragment>
-            
-                        Showing 1-25 of 25 indicators
-                      
+            Showing 1-25 of 25 indicators
           </React.Fragment>
         </EuiText>,
       }
@@ -128,9 +126,7 @@ describe('useToolbarOptions()', () => {
           size="xs"
         >
           <React.Fragment>
-            
-                        Showing 26-50 of 50 indicators
-                      
+            Showing 26-50 of 50 indicators
           </React.Fragment>
         </EuiText>,
       }
