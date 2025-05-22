@@ -15,6 +15,7 @@ import type {
   ScopedRunnerRunToolsParams,
   RunContext,
   Runner,
+  RunToolReturn,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import { ModelProviderFactoryFn } from './model_provider';
@@ -36,7 +37,7 @@ export interface CreateScopedRunnerDeps {
 
 export type CreateRunnerDeps = Omit<CreateScopedRunnerDeps, 'request' | 'defaultConnectorId'>;
 
-class RunnerManager {
+export class RunnerManager {
   public readonly deps: CreateScopedRunnerDeps;
   public readonly context: RunContext;
 
@@ -53,22 +54,22 @@ class RunnerManager {
     };
   }
 
-  child(childContext: RunContext): RunnerManager {
+  createChild(childContext: RunContext): RunnerManager {
     return new RunnerManager(this.deps, childContext);
   }
 }
 
-const runTool = async <TResult = unknown>({
+export const runTool = async <TResult = unknown>({
   toolExecutionParams,
   parentManager,
 }: {
   toolExecutionParams: ScopedRunnerRunToolsParams;
   parentManager: RunnerManager;
-}): Promise<TResult> => {
+}): Promise<RunToolReturn<TResult>> => {
   const { toolId, toolParams } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
-  const manager = parentManager.child(context);
+  const manager = parentManager.createChild(context);
 
   const { toolsService, request } = manager.deps;
 
@@ -78,11 +79,14 @@ const runTool = async <TResult = unknown>({
 
   const toolHandlerContext = createToolHandlerContext({ toolExecutionParams, manager });
 
+  // TODO: try/catch errors
   const toolResult = await tool.handler(toolParams, toolHandlerContext);
 
   // TODO: send toolResult event
 
-  return toolResult as TResult;
+  return {
+    result: toolResult as TResult,
+  };
 };
 
 export const createToolHandlerContext = ({
@@ -95,6 +99,7 @@ export const createToolHandlerContext = ({
   const { onEvent } = toolExecutionParams;
   const { request, defaultConnectorId, elasticsearch, modelProviderFactory } = manager.deps;
   return {
+    request,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),

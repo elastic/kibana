@@ -75,7 +75,7 @@ export const isStructuredToolIdentifier = (
 export const isPlainToolIdentifier = (
   identifier: ToolIdentifier
 ): identifier is PlainIdToolIdentifier => {
-  return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 0;
+  return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 1;
 };
 
 export const toSerializedToolIdentifier = (

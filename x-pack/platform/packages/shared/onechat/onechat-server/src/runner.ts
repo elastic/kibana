@@ -10,6 +10,16 @@ import type { ToolIdentifier, SerializedToolIdentifier } from '@kbn/onechat-comm
 import type { RunEventHandlerFn } from './events';
 
 /**
+ * Return type for tool invocation APIs.
+ *
+ * Wrapping the plain result to allow extending the shape later without
+ * introducing breaking changes.
+ */
+export interface RunToolReturn<TResult = unknown> {
+  result: TResult;
+}
+
+/**
  * Represents a runner, which is the entry point to execute all onechat primitives,
  * such as tools or agents.
  *
@@ -25,7 +35,7 @@ export interface ScopedRunner {
  */
 export type ScopedRunToolFn = <TResult = unknown>(
   params: ScopedRunnerRunToolsParams
-) => Promise<TResult>;
+) => Promise<RunToolReturn<TResult>>;
 
 /**
  * Context bound to a run execution.
@@ -84,7 +94,9 @@ export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit
 /**
  * Public onechat API to execute a tools.
  */
-export type RunToolFn = <TResult = unknown>(params: RunToolParams) => Promise<TResult>;
+export type RunToolFn = <TResult = unknown>(
+  params: RunToolParams
+) => Promise<RunToolReturn<TResult>>;
 
 /**
  * Public onechat runner.

@@ -16,8 +16,10 @@ export {
   createToolsServiceStartMock,
   createToolProviderMock,
   createScopedPublicToolRegistryMock,
+  createMockedTool,
   type ScopedPublicToolRegistryFactoryFnMock,
   type ScopedPublicToolRegistryMock,
   type ToolProviderMock,
   type ToolsServiceStartMock,
+  type MockedTool,
 } from './tools';

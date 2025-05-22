@@ -7,6 +7,7 @@
 
 export type {
   Tool,
+  ToolHandlerFn,
   ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
@@ -23,6 +24,7 @@ export type {
   RunToolParams,
   RunToolFn,
   Runner,
+  RunToolReturn,
 } from './src/runner';
 export {
   OnechatRunEventType,

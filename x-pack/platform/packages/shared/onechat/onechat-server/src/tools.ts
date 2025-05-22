@@ -43,6 +43,11 @@ export type ToolHandlerFn<RunInput extends ZodRawShape = ZodRawShape, RunOutput 
  */
 export interface ToolHandlerContext {
   /**
+   * The request that was provided when initiating that tool execution.
+   * Can be used to create scoped services not directly exposed by this context.
+   */
+  request: KibanaRequest;
+  /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
    */
