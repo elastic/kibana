@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { OnechatPluginSetup, OnechatPluginStart } from './types';
+import { OnechatPluginSetup, OnechatPluginStart, ScopedToolsStart } from './types';
+import {
+  createMockedTool,
+  createToolProviderMock,
+  createScopedPublicToolRegistryMock,
+} from './test_utils/tools';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
@@ -15,16 +20,19 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   };
 };
 
+export const createScopedToolStartMock = (): jest.Mocked<ScopedToolsStart> => {
+  return {
+    execute: jest.fn(),
+    registry: createScopedPublicToolRegistryMock(),
+  };
+};
+
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
     tools: {
-      registry: {
-        has: jest.fn(),
-        get: jest.fn(),
-        list: jest.fn(),
-      },
       execute: jest.fn(),
-      asScoped: jest.fn(),
+      registry: createToolProviderMock(),
+      asScoped: jest.fn().mockImplementation(() => createScopedToolStartMock()),
     },
   };
 };
@@ -32,4 +40,5 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
 export const onechatMocks = {
   createSetup: createSetupContractMock,
   createStart: createStartContractMock,
+  createTool: createMockedTool,
 };
