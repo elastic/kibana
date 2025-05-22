@@ -13,7 +13,7 @@ import { colorsServiceMock } from '../legacy_colors/mock';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes = buildPalettes({ darkMode: false });
+  const palettes = buildPalettes({ darkMode: false }, {} as any);
 
   describe('default palette', () => {
     describe('syncColors: false', () => {
