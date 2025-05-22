@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
+import { type MlSeverityType } from '@kbn/ml-anomaly-utils';
 
 export const useInfluencersListStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -26,65 +26,50 @@ export const useInfluencersListStyles = () => {
       maxHeight: euiFontSizeM,
       maxWidth: 'calc(100% - 102px)',
     }),
-    progress: css({
-      display: 'inline-block',
-      width: 'calc(100% - 34px)',
-      height: '22px',
-      minWidth: '70px',
-      marginBottom: 0,
-      color: euiTheme.colors.darkShade,
-      backgroundColor: 'transparent',
+    progressBar: css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      '&::-webkit-progress-bar': {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
     }),
-    progressBarHolder: css({
-      width: `calc(100% - 28px)`,
-    }),
-    progressBar: (severity: string, barScore: number) =>
+    progressColor: (severity: MlSeverityType) =>
+      severity.id === 'critical'
+        ? euiTheme.colors.severity.danger
+        : severity.id === 'major'
+        ? euiTheme.colors.severity.risk
+        : severity.id === 'minor'
+        ? euiTheme.colors.severity.warning
+        : severity.id === 'warning'
+        ? // TODO: SKY40
+          '#94D8EB'
+        : severity.id === 'low'
+        ? // TODO: SKY20
+          '#CFEEF7'
+        : euiTheme.colors.severity.unknown,
+    influencerBadgeBackgroundColor: (severity: MlSeverityType) =>
+      severity.id === 'critical'
+        ? euiTheme.colors.backgroundLightDanger
+        : severity.id === 'major'
+        ? euiTheme.colors.backgroundLightRisk
+        : severity.id === 'minor'
+        ? euiTheme.colors.backgroundLightWarning
+        : severity.id === 'warning' || severity.id === 'low'
+        ? euiTheme.colors.backgroundLightNeutral
+        : // TODO: Figure out unknown background color
+          euiTheme.colors.severity.unknown,
+    influencerBadgeTextColor: (severity: MlSeverityType) =>
       css({
-        height: `calc(${euiTheme.size.xs} / 2)`,
-        float: 'left',
-        marginTop: euiTheme.size.m,
-        textAlign: 'right',
-        lineHeight: '18px',
-        display: 'inline-block',
-        transition: 'none',
-        width: `${barScore}%`,
-        backgroundColor:
-          severity === 'critical'
-            ? ML_SEVERITY_COLORS.CRITICAL
-            : severity === 'major'
-            ? ML_SEVERITY_COLORS.MAJOR
-            : severity === 'minor'
-            ? ML_SEVERITY_COLORS.MINOR
-            : ML_SEVERITY_COLORS.WARNING,
+        color:
+          severity.id === 'critical'
+            ? euiTheme.colors.textDanger
+            : severity.id === 'major'
+            ? euiTheme.colors.textRisk
+            : severity.id === 'minor'
+            ? euiTheme.colors.textWarning
+            : severity.id === 'warning' || severity.id === 'low'
+            ? euiTheme.colors.textNeutral
+            : // TODO: Figure out unknown text color
+              euiTheme.colors.textSubdued,
       }),
-    scoreLabel: (severity: string) =>
-      css({
-        textAlign: 'center',
-        lineHeight: '14px',
-        whiteSpace: 'nowrap',
-        fontSize: euiFontSizeXS,
-        marginLeft: euiTheme.size.xs,
-        display: 'inline',
-        borderColor:
-          severity === 'critical'
-            ? ML_SEVERITY_COLORS.CRITICAL
-            : severity === 'major'
-            ? ML_SEVERITY_COLORS.MAJOR
-            : severity === 'minor'
-            ? ML_SEVERITY_COLORS.MINOR
-            : ML_SEVERITY_COLORS.WARNING,
-      }),
-    totalScoreLabel: css({
-      width: euiTheme.size.xl,
-      verticalAlign: 'top',
-      textAlign: 'center',
-      color: euiTheme.colors.darkShade,
-      fontSize: '11px',
-      lineHeight: '14px',
-      borderRadius: euiTheme.border.radius.small,
-      padding: `calc(${euiTheme.size.xs} / 2)`,
-      display: 'inline-block',
-      border: euiTheme.border.thin,
-    }),
   };
 };
