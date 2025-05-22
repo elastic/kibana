@@ -23,7 +23,7 @@ import {
   showMultiBucketAnomalyTooltip,
 } from './chart_utils';
 
-import { CHART_TYPE } from '../explorer/explorer_constants';
+import { CHART_TYPE } from '@kbn/ml-common-constants/explorer_constants';
 
 describe('ML - chart utils', () => {
   describe('getChartType', () => {
