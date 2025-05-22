@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getHashedEntity, getRegexEntities } from './get_regex_entities';
+import { getHashedEntity, detectRegexEntities } from './detect_regex_entities';
 
 describe('getHashedEntity', () => {
   it('returns the same hash for differently cased emails when normalize=true', () => {
@@ -27,10 +27,10 @@ describe('getHashedEntity', () => {
   });
 });
 
-describe('getRegexEntities', () => {
+describe('detectRegexEntities', () => {
   it('detects and hashes an email address', () => {
     const content = 'Contact me at TEST@Example.Com';
-    const entities = getRegexEntities(content);
+    const entities = detectRegexEntities(content);
     expect(entities).toHaveLength(1);
     expect(entities[0].entity).toBe('TEST@Example.Com');
     expect(entities[0].class_name).toBe('EMAIL');
@@ -43,7 +43,7 @@ describe('getRegexEntities', () => {
   it('detects URL, IP, and email all in one string', () => {
     const content =
       'Check https://kibana.elastic.co, reach me at user@elastic.co, or ping 192.168.1.1';
-    const entities = getRegexEntities(content);
+    const entities = detectRegexEntities(content);
 
     const classes = entities.map((e) => e.class_name);
     expect(classes).toContain('URL');
@@ -53,7 +53,7 @@ describe('getRegexEntities', () => {
 
   it('computes correct start and end positions', () => {
     const content = 'Email: hello@example.com';
-    const entities = getRegexEntities(content);
+    const entities = detectRegexEntities(content);
     const emailEntity = entities.find((e) => e.class_name === 'EMAIL');
     expect(emailEntity).toBeDefined();
     expect(content.slice(emailEntity!.start_pos, emailEntity!.end_pos)).toBe(emailEntity!.entity);

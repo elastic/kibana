@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DetectedEntity, Message } from '../types';
+import { DetectedEntity, Message } from '../../types';
 
 /**
  * Build a map from each entity‐hash to its original value & metadata.

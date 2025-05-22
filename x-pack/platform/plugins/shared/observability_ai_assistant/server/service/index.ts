@@ -18,6 +18,7 @@ import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
 import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
+import { AnonymizationService } from './anonymization';
 
 export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -100,6 +101,7 @@ export class ObservabilityAIAssistantService {
     const inferenceClient = plugins.inference.getClient({ request });
 
     const { asInternalUser } = coreStart.elasticsearch.client;
+    const { asCurrentUser } = coreStart.elasticsearch.client.asScoped(request);
 
     const kbService = new KnowledgeBaseService({
       core: this.core,
@@ -108,6 +110,13 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asInternalUser,
       },
+    });
+    const anonymizationService = new AnonymizationService({
+      logger: this.logger.get('anonymization'),
+      esClient: {
+        asCurrentUser,
+      },
+      config: this.config,
     });
 
     return new ObservabilityAIAssistantClient({
@@ -118,8 +127,9 @@ export class ObservabilityAIAssistantService {
       namespace: spaceId,
       esClient: {
         asInternalUser,
-        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        asCurrentUser,
       },
+      anonymizationService,
       inferenceClient,
       logger: this.logger,
       user: user

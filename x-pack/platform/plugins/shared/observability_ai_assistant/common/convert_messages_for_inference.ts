@@ -13,7 +13,7 @@ import {
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
-import { redactEntities } from './utils/redaction';
+import { redactEntities } from './utils/anonymization/redaction';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {

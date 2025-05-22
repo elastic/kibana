@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DetectedEntity } from '../types';
+import { DetectedEntity } from '../../types';
 /** Regex matching object‑hash placeholders (40 hex chars) */
 export const HASH_REGEX = /[0-9a-f]{40}/g;
 /**

@@ -6,7 +6,6 @@
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound, forbidden } from '@hapi/boom';
-import objectHash from 'object-hash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -32,11 +31,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { withInferenceSpan, type InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
-import pLimit from 'p-limit';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
-import { HASH_REGEX, unhashString } from '../../../common/utils/redaction';
-import { buildDetectedEntitiesMap } from '../../../common/utils/build_detected_entities_map';
-import { getRegexEntities } from '../../../common/utils/get_regex_entities';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -57,14 +52,13 @@ import {
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
-  type InferenceChunk,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
-  DetectedEntity,
 } from '../../../common/types';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import { AnonymizationService } from '../anonymization';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -83,7 +77,6 @@ import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_o
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 const MAX_FUNCTION_CALLS = 8;
-const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -105,161 +98,10 @@ export class ObservabilityAIAssistantClient {
       };
       knowledgeBaseService: KnowledgeBaseService;
       scopes: AssistantScope[];
+      anonymizationService: AnonymizationService;
     }
   ) {}
-  async inferNER(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
-    // Maximum number of concurrent requests to the ML model
-    const MAX_CONCURRENT_REQUESTS = 5;
-    const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
-    const processChunk = async ({
-      chunkText,
-      charStartOffset,
-    }: InferenceChunk): Promise<DetectedEntity[]> => {
-      let response;
-      try {
-        response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
-          model_id: NER_MODEL_ID,
-          docs: [{ text_field: chunkText }],
-        });
-      } catch (error) {
-        // If the model doesn't exist or the call fails, return no entities for this chunk
-        return [];
-      }
-      const entities = response?.inference_results?.[0]?.entities ?? [];
-      const adjustedEntities = entities.map((entity) => ({
-        ...entity,
-        start_pos: entity.start_pos + charStartOffset,
-        end_pos: entity.end_pos + charStartOffset,
-        hash: objectHash({ entity: entity.entity, class_name: entity.class_name }),
-        type: 'ner' as const,
-      }));
-
-      return adjustedEntities;
-    };
-
-    const promises = chunks.map((chunk) => limiter(() => processChunk(chunk)));
-    const results = await Promise.all(promises);
-
-    return results.flat();
-  }
-
-  /**
-   * Replace every placeholder in message with its real value
-   * (taken from `hashMap`) and generate entities.
-   */
-  private processAssistantMessage(
-    contentWithHashes: string,
-    hashMap: Map<string, { value: string; class_name: string; type: DetectedEntity['type'] }>
-  ) {
-    const detectedEntities: DetectedEntity[] = [];
-    let unhashedText = '';
-    let cursor = 0;
-
-    let match: RegExpExecArray | null;
-    while ((match = HASH_REGEX.exec(contentWithHashes)) !== null) {
-      const [hash] = match;
-      const rep = hashMap.get(hash);
-      if (!rep) {
-        continue; // keep unknown hash as‑is
-      }
-
-      // copy segment before the hash
-      unhashedText += contentWithHashes.slice(cursor, match.index);
-
-      // insert real value & capture span
-      const start = unhashedText.length;
-      unhashedText += rep.value;
-      const end = unhashedText.length;
-
-      detectedEntities.push({
-        entity: rep.value,
-        class_name: rep.class_name,
-        start_pos: start,
-        end_pos: end,
-        type: rep.type,
-        hash,
-      });
-
-      cursor = match.index + hash.length;
-    }
-
-    unhashedText += contentWithHashes.slice(cursor);
-    return { unhashedText, detectedEntities };
-  }
-  /**
-   * New user messages are anonymised (NER + regex) and their entities stored.
-   * Assistant messages have any {hash} placeholders replaced with the original values.
-   *
-   * The function keeps a running `hashMap` built from all previously detected
-   * entities so that assistant placeholders originating from earlier user
-   * messages can be restored.
-   *
-   * If a message already has `detected_entities` it is skipped.
-   *
-   * @param messages
-   * @returns         Same array instance with in-place edits.
-   */
-  async anonymizeMessages(messages: Message[]): Promise<{ anonymizedMessages: Message[] }> {
-    if (!this.dependencies.config.enableAnonymization) {
-      return { anonymizedMessages: messages };
-    }
-    const hashMap = buildDetectedEntitiesMap(messages);
-
-    for (const message of messages) {
-      if (message.message.detected_entities) continue;
-
-      const { role, content } = message.message;
-      if (role === 'user' && content) {
-        const chunks = chunkTextByChar(content);
-        const nerEntities = await this.inferNER(chunks);
-        const regexEntities = getRegexEntities(content);
-
-        const combined = [...nerEntities, ...regexEntities];
-        const deduped = combined.filter((ent) =>
-          // Regex entities take precedence over NER entities
-          ent.type === 'regex'
-            ? true
-            : // check for intersecting ranges
-              !regexEntities.some((re) => ent.start_pos < re.end_pos && ent.end_pos > re.start_pos)
-        );
-
-        message.message.detected_entities = deduped.map((ent) => ({
-          entity: ent.entity,
-          class_name: ent.class_name,
-          start_pos: ent.start_pos,
-          end_pos: ent.end_pos,
-          type: ent.type,
-          hash: ent.hash,
-        }));
-        // cache for assistant message reversal
-        deduped.forEach((ent) =>
-          hashMap.set(ent.hash, {
-            value: ent.entity,
-            class_name: ent.class_name,
-            type: ent.type,
-          })
-        );
-        // Assistant messages might include {hash} placeholders coming back
-        // from the LLM – resolve them to real values here using the building map.
-      } else if (role === 'assistant') {
-        if (content) {
-          const { unhashedText, detectedEntities } = this.processAssistantMessage(content, hashMap);
-          message.message.content = unhashedText;
-          message.message.detected_entities = detectedEntities;
-        }
-        // TODO: unhash other places?
-        if (message.message.function_call?.arguments) {
-          message.message.function_call.arguments = unhashString(
-            message.message.function_call.arguments,
-            hashMap
-          );
-        }
-      }
-    }
-
-    return { anonymizedMessages: messages };
-  }
   private getConversationWithMetaFields = async (
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
@@ -487,19 +329,14 @@ export class ObservabilityAIAssistantClient {
               systemMessage$,
             ]).pipe(
               switchMap(([addedMessages, title, systemMessage]) =>
-                // Call anonymizeMessages on history + new messages
-                from(this.anonymizeMessages(initialMessages.concat(addedMessages))).pipe(
-                  switchMap(({ anonymizedMessages: allAnonymizedMessages }) => {
-                    // Extract only the newly sanitised messages (the tail of allAnonyimizedMessages):
-                    const newAnonymizedMessages = allAnonymizedMessages.slice(
-                      initialMessages.length
-                    );
-
-                    // merge back for downstream processing
-                    const initialMessagesWithAddedMessages =
-                      initialMessages.concat(newAnonymizedMessages);
-
-                    const lastMessage = last(initialMessagesWithAddedMessages);
+                from(
+                  // Call processMessages on history + new messages
+                  this.dependencies.anonymizationService.processMessages(
+                    initialMessages.concat(addedMessages)
+                  )
+                ).pipe(
+                  switchMap(({ anonymizedMessages: allMessages }) => {
+                    const lastMessage = last(allMessages);
 
                     // if a function request is at the very end, close the stream to consumer
                     // without persisting or updating the conversation. we need to wait
@@ -519,7 +356,7 @@ export class ObservabilityAIAssistantClient {
                             // base conversation without messages
                             omit(conversation._source, 'messages'),
                             // update messages and system message
-                            { messages: initialMessagesWithAddedMessages, systemMessage },
+                            { messages: allMessages, systemMessage },
                             // update title
                             {
                               conversation: {
@@ -549,7 +386,7 @@ export class ObservabilityAIAssistantClient {
                         labels: {},
                         numeric_labels: {},
                         systemMessage,
-                        messages: initialMessagesWithAddedMessages,
+                        messages: allMessages,
                         archived: false,
                       })
                     ).pipe(
@@ -654,7 +491,7 @@ export class ObservabilityAIAssistantClient {
     };
     if (stream) {
       return defer(() =>
-        from(this.anonymizeMessages(messages)).pipe(
+        from(this.dependencies.anonymizationService.processMessages(messages)).pipe(
           switchMap(({ anonymizedMessages }) => {
             this.dependencies.logger.debug(
               () =>
@@ -1014,13 +851,4 @@ export class ObservabilityAIAssistantClient {
       this.dependencies.user
     );
   };
-}
-
-function chunkTextByChar(text: string, maxChars: number = 1000): InferenceChunk[] {
-  const chunks: InferenceChunk[] = [];
-  for (let i = 0; i < text.length; i += maxChars) {
-    const chunk = text.slice(i, i + maxChars);
-    chunks.push({ chunkText: chunk, charStartOffset: i });
-  }
-  return chunks;
 }

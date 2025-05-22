@@ -5,7 +5,7 @@
  * 2.0.
  */
 import objectHash from 'object-hash';
-import { DetectedEntity } from '../types';
+import { DetectedEntity } from '../../../common/types';
 
 export function getHashedEntity(
   entity: string,
@@ -46,7 +46,7 @@ function getMatches(
   return result;
 }
 
-export function getRegexEntities(content: string): DetectedEntity[] {
+export function detectRegexEntities(content: string): DetectedEntity[] {
   return [
     ...getMatches(content, urlRegex, 'URL', true),
     ...getMatches(content, ipRegex, 'IP'),
