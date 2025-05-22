@@ -105,7 +105,7 @@ steps:
   - command: .buildkite/scripts/steps/storybooks/storybook_tests.sh
     label: 'Run Storybook Tests'
     env:
-      STORYBOOK_URL: 'http://localhost:9001'
+      STORYBOOK_URL: 'http://127.0.0.1:6006'
 
   - wait
 
