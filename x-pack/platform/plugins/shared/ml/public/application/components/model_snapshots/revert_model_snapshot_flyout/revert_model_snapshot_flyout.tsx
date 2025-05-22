@@ -37,9 +37,9 @@ import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detectio
 import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
 import { useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
-import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
