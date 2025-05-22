@@ -8,12 +8,15 @@
 import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 
 /**
- * Naive utility function to consistently return the "best" connector for workchat features.
+ * Naive utility function to consistently return the "best" default connector for onechat features.
  *
- * In practice, mostly useful for development, as for production there should always be a single connector
+ * For now, the logic is, by order of priority:
+ * - any inference connector
+ * - any openAI connector
+ * - any other GenAI-compatible connector.
+ *
  */
 export const getDefaultConnector = ({ connectors }: { connectors: InferenceConnector[] }) => {
-  //
   const inferenceConnector = connectors.find(
     (connector) => connector.type === InferenceConnectorType.Inference
   );

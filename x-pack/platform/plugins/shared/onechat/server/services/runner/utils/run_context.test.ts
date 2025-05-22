@@ -5,10 +5,81 @@
  * 2.0.
  */
 
-import { type ToolIdentifier } from '@kbn/onechat-common';
+import { builtinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
 import { creatEmptyRunContext, forkContextForToolRun } from './run_context';
 
 describe('RunContext utilities', () => {
-  // TODO
+  describe('creatEmptyRunContext', () => {
+    it('should create an empty run context with a generated UUID', () => {
+      const context = creatEmptyRunContext();
+      expect(context).toEqual({
+        runId: expect.any(String),
+        stack: [],
+      });
+    });
+
+    it('should create an empty run context with provided runId', () => {
+      const runId = 'test-run-id';
+      const context = creatEmptyRunContext({ runId });
+      expect(context).toEqual({
+        runId,
+        stack: [],
+      });
+    });
+  });
+
+  describe('forkContextForToolRun', () => {
+    it('should fork context and add tool to stack', () => {
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [],
+      };
+
+      const toolId = builtinToolId('test-tool');
+      const expectedSerializedToolId = toSerializedToolIdentifier(toolId);
+      const forkedContext = forkContextForToolRun({ toolId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'tool',
+            toolId: expectedSerializedToolId,
+          },
+        ],
+      });
+    });
+
+    it('should preserve existing stack entries when forking', () => {
+      const existingToolId = builtinToolId('existing-tool');
+      const newToolId = builtinToolId('new-tool');
+
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'tool',
+            toolId: toSerializedToolIdentifier(existingToolId),
+          },
+        ],
+      };
+
+      const forkedContext = forkContextForToolRun({ toolId: newToolId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'tool',
+            toolId: toSerializedToolIdentifier(existingToolId),
+          },
+          {
+            type: 'tool',
+            toolId: toSerializedToolIdentifier(newToolId),
+          },
+        ],
+      });
+    });
+  });
 });
