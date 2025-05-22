@@ -274,7 +274,7 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = `[${elements}]`;
+      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
 
       return this.decorateWithComments(ctx.node, formatted);
     })

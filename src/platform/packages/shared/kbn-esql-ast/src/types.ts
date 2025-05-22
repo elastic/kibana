@@ -354,9 +354,36 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   quoted: boolean;
 }
 
+/**
+ * Represents list-like structures where elements are separated by commas.
+ *
+ * *Literal lists* use square brackets and can contain only
+ * string, number, or boolean literals and all elements must be of the same
+ * type:
+ *
+ * ```
+ * [1, 2, 3]
+ * ```
+ *
+ * *Tuple lists* use round brackets and can contain any type of expression.
+ * Tuple list are used in the `IN` expression:
+ *
+ * ```
+ * a IN ("abc", "def")
+ * ```
+ */
 export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
-  values: ESQLLiteral[];
+
+  /**
+   * The list can be a literal list (uses square brackets) or a tuple list (uses
+   * round brackets). If not specified, the list is assumed to be a literal list.
+   *
+   * @default 'literal'
+   */
+  subtype?: 'literal' | 'tuple';
+
+  values: ESQLAstExpression[];
 }
 
 /**
