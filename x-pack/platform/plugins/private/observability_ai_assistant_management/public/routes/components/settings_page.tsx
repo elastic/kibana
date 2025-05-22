@@ -24,7 +24,8 @@ export function SettingsPage() {
     services: {
       application: { navigateToApp, isAppRegistered },
       serverless,
-    },
+      observabilityAIAssistant,
+    }
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
@@ -34,18 +35,35 @@ export function SettingsPage() {
     query: { tab },
   } = useObservabilityAIAssistantManagementRouterParams('/');
 
+  const isObservabilityDeployment = observabilityAIAssistant.service.getScopes().includes('observability');
+
   useEffect(() => {
     if (serverless) {
-      serverless.setBreadcrumbs([
-        {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
-            {
-              defaultMessage: 'AI Assistant for Observability Settings',
-            }
-          ),
-        },
-      ]);
+      if(isObservabilityDeployment) {
+        serverless.setBreadcrumbs([
+          {
+            text: i18n.translate(
+              'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
+              {
+                defaultMessage: 'AI Assistant for Observability Settings',
+              }
+            ),
+          },
+        ]);
+      }
+      else {
+        serverless.setBreadcrumbs([
+          {
+            text: i18n.translate(
+              'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observabilityandsearch',
+              {
+                defaultMessage: 'AI Assistant for Observability and Search Settings',
+              }
+            ),
+          },
+        ]);
+      }
+      
     } else {
       setBreadcrumbs([
         {

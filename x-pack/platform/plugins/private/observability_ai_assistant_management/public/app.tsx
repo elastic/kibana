@@ -32,14 +32,20 @@ interface MountParams {
 
 export const mountManagementSection = async ({ core, mountParams, config }: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
-
+  const isServerless = startDeps.serverless ?? false;
   if (!startDeps.observabilityAIAssistant) return () => {};
 
   const { element, history, setBreadcrumbs } = mountParams;
-  const { theme$ } = core.theme;
+  const { theme$ } = core.theme; 
+
+  const isObservabilityDeployment = startDeps.observabilityAIAssistant.service.getScopes().includes('observability');
+  console.log(isObservabilityDeployment);
+  
 
   coreStart.chrome.docTitle.change(
-    i18n.translate('xpack.observabilityAiAssistantManagement.app.titleBar', {
+    isServerless && isObservabilityDeployment ? i18n.translate('xpack.observabilityAiAssistantManagement.app.titleBarServerless', {
+      defaultMessage: 'AI Assistant for Observability Settings',
+    }) : i18n.translate('xpack.observabilityAiAssistantManagement.app.titleBar', {
       defaultMessage: 'AI Assistant for Observability and Search Settings',
     })
   );
