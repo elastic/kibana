@@ -78,6 +78,10 @@ export class Parser {
     return new Parser(src, options);
   };
 
+  public static readonly parse = (src: string, options?: ParseOptions): ParseResult => {
+    return Parser.create(src, options).parse();
+  };
+
   public static readonly parseErrors = (src: string): EditorError[] => {
     return Parser.create(src).parseErrors();
   };
@@ -165,16 +169,24 @@ export class Parser {
   }
 }
 
+/**
+ * @deprecated Use `Parser.create` instead.
+ */
 export const createParser = Parser.create;
+
+/**
+ * @deprecated Use `Parser.parseErrors` instead.
+ */
 export const parseErrors = Parser.parseErrors;
 
+/**
+ * @deprecated Use `Parser.parse` instead.
+ */
 export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {
   if (src == null) {
     const commands: ESQLAstQueryExpression['commands'] = [];
     return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
   }
 
-  const parser = new Parser(src, options);
-
-  return parser.parse();
+  return Parser.create(src, options).parse();
 };
