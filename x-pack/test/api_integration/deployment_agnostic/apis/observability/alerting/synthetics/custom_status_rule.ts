@@ -9,7 +9,7 @@ import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { waitForDocumentInIndex } from '../../../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
-import { SupertestWithRoleScopeType } from '../../../../services';
+import { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SyntheticsRuleHelper, SYNTHETICS_ALERT_ACTION_INDEX } from './synthetics_rule_helper';
 
@@ -22,39 +22,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestEditorWithApiKey: SupertestWithRoleScopeType;
-  let supertestAdminWithApiKey: SupertestWithRoleScopeType;
+  let supertestAdminWithCookieHeader: SupertestWithRoleScopeType;
+  let adminRoleAuthc: RoleCredentials;
+  const samlAuth = getService('samlAuth');
 
   describe('SyntheticsCustomStatusRule', () => {
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {
-      [supertestEditorWithApiKey, supertestAdminWithApiKey] = await Promise.all([
-        roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          withInternalHeaders: true,
-        }),
-        roleScopedSupertest.getSupertestWithRoleScope('admin', {
-          withInternalHeaders: true,
-          useCookieHeader: true,
-        }),
-      ]);
+      [supertestEditorWithApiKey, supertestAdminWithCookieHeader, adminRoleAuthc] =
+        await Promise.all([
+          roleScopedSupertest.getSupertestWithRoleScope('editor', {
+            withInternalHeaders: true,
+          }),
+          roleScopedSupertest.getSupertestWithRoleScope('admin', {
+            withInternalHeaders: true,
+            useCookieHeader: true,
+          }),
+          samlAuth.createM2mApiKeyWithRoleScope('admin'),
+        ]);
 
-      ruleHelper = new SyntheticsRuleHelper(
-        getService,
-        supertestEditorWithApiKey,
-        supertestAdminWithApiKey
-      );
+      ruleHelper = new SyntheticsRuleHelper(getService, supertestEditorWithApiKey, adminRoleAuthc);
       await server.savedObjects.cleanStandardList();
       await ruleHelper.createIndexAction();
       await esClient.deleteByQuery({
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
       });
-      await supertestAdminWithApiKey.put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT).expect(200);
+      await supertestAdminWithCookieHeader
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .expect(200);
     });
 
     after(async () => {
       await supertestEditorWithApiKey.destroy();
-      await supertestAdminWithApiKey.destroy();
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+      await supertestAdminWithCookieHeader.destroy();
       await server.savedObjects.cleanStandardList();
       await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
     });

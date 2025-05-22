@@ -9,7 +9,7 @@ import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import moment from 'moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -17,33 +17,34 @@ import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { waitForAlertInIndex } from '../helpers/alerting_wait_for_helpers';
-import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
+import { AlertingApiProvider } from '../../../../services/alerting_api';
 
 export const SYNTHETICS_ALERT_ACTION_INDEX = 'alert-action-synthetics';
 export class SyntheticsRuleHelper {
   supertestEditorWithApiKey: SupertestWithRoleScope;
-  supertestAdminWithApiKey: SupertestWithRoleScope;
+  adminRoleAuthc: RoleCredentials;
   logger: ToolingLog;
   esClient: Client;
   retryService: RetryService;
   alertActionIndex: string;
   actionId: string | null = null;
   isServerless: boolean;
+  alertingApi: ReturnType<typeof AlertingApiProvider>;
 
   constructor(
     getService: DeploymentAgnosticFtrProviderContext['getService'],
     supertestEditorWithApiKey: SupertestWithRoleScope,
-    supertestAdminWithApiKey: SupertestWithRoleScope
+    adminRoleAuthc: RoleCredentials
   ) {
     this.esClient = getService('es');
     this.supertestEditorWithApiKey = supertestEditorWithApiKey;
-    this.supertestAdminWithApiKey = supertestAdminWithApiKey;
+    this.adminRoleAuthc = adminRoleAuthc;
     this.logger = getService('log');
     this.retryService = getService('retry');
     this.alertActionIndex = SYNTHETICS_ALERT_ACTION_INDEX;
     const config = getService('config');
     this.isServerless = config.get('serverless');
+    this.alertingApi = getService('alertingApi');
   }
 
   async createIndexAction() {
@@ -57,11 +58,10 @@ export class SyntheticsRuleHelper {
         },
       },
     });
-    const actionId = await createIndexConnector({
-      supertest: this.supertestAdminWithApiKey,
+    const actionId = await this.alertingApi.createIndexConnector({
+      roleAuthc: this.adminRoleAuthc,
       name: 'Index Connector: Synthetics API test',
       indexName: this.alertActionIndex,
-      logger: this.logger,
     });
     this.actionId = actionId;
   }
@@ -77,14 +77,12 @@ export class SyntheticsRuleHelper {
     if (this.actionId === null) {
       throw new Error('Index action not created. Call createIndexAction() first');
     }
-    return await createRule<StatusRuleParams>({
+    return this.alertingApi.createRule({
+      roleAuthc: this.adminRoleAuthc,
       params,
       name: name ?? 'Custom status rule',
       ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
       consumer: 'alerts',
-      supertest: this.supertestAdminWithApiKey,
-      esClient: this.esClient,
-      logger: this.logger,
       schedule: { interval: '5s' },
       actions: [
         {
@@ -180,16 +178,12 @@ export class SyntheticsRuleHelper {
     ruleId: string;
     filters?: QueryDslQueryContainer[];
   }) {
-    return await waitForAlertInIndex({
+    return this.alertingApi.waitForAlertInIndex({
       ruleId,
       filters,
-      esClient: this.esClient,
-      retryService: this.retryService,
-      logger: this.logger,
       indexName: `.${
         this.isServerless ? 'ds-' : 'internal'
       }.alerts-observability.uptime.alerts-default*`,
-      retryDelay: 1000,
     });
   }
 
