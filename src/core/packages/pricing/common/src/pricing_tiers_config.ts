@@ -29,3 +29,10 @@ export const pricingProductsSchema = schema.oneOf([
 ]);
 
 export type PricingProduct = TypeOf<typeof pricingProductsSchema>;
+
+export const tiersConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  products: schema.maybe(schema.arrayOf(pricingProductsSchema)),
+});
+
+export type TiersConfig = TypeOf<typeof tiersConfigSchema>;

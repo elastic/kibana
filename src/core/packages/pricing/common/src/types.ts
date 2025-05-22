@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PricingProduct } from './pricing_products';
+import { PricingProduct } from './pricing_tiers_config';
 
 export interface PricingProductFeature {
   id: string;
@@ -17,5 +17,6 @@ export interface PricingProductFeature {
 export interface IPricingTiersClient {
   getActiveProducts(): PricingProduct[];
   isActiveProduct(product: PricingProduct): boolean;
+  isEnabled(): boolean;
   isFeatureAvailable(featureId: string): boolean;
 }

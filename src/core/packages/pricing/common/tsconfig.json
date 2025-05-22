@@ -12,7 +12,7 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/pricing"
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

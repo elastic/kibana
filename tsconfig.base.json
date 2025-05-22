@@ -570,6 +570,8 @@
       "@kbn/core-pricing-server/*": ["src/core/packages/pricing/server/*"],
       "@kbn/core-pricing-server-internal": ["src/core/packages/pricing/server-internal"],
       "@kbn/core-pricing-server-internal/*": ["src/core/packages/pricing/server-internal/*"],
+      "@kbn/core-pricing-server-mocks": ["src/core/packages/pricing/server-mocks"],
+      "@kbn/core-pricing-server-mocks/*": ["src/core/packages/pricing/server-mocks/*"],
       "@kbn/core-provider-plugin": ["src/platform/test/plugin_functional/plugins/core_provider_plugin"],
       "@kbn/core-provider-plugin/*": ["src/platform/test/plugin_functional/plugins/core_provider_plugin/*"],
       "@kbn/core-rendering-browser": ["src/core/packages/rendering/browser"],

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PricingProduct, ProductFeaturesRegistry } from '@kbn/core-pricing-common';
 import { isEqual } from 'lodash';
-import { PricingConfigType } from '../../server-internal/src/pricing_config';
 import { IPricingTiersClient } from './types';
+import { PricingProduct, TiersConfig } from './pricing_tiers_config';
+import { ProductFeaturesRegistry } from './product_features_registry';
 
 export class PricingTiersClient implements IPricingTiersClient {
   constructor(
-    private readonly tiers: PricingConfigType['tiers'],
+    private readonly tiers: TiersConfig,
     private readonly productFeaturesRegistry: ProductFeaturesRegistry
   ) {}
 

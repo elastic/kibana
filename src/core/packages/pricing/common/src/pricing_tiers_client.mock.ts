@@ -12,5 +12,6 @@ import { IPricingTiersClient } from './types';
 export const createPricingTiersClientMock = (): jest.Mocked<IPricingTiersClient> => ({
   getActiveProducts: jest.fn(),
   isActiveProduct: jest.fn(),
+  isEnabled: jest.fn(),
   isFeatureAvailable: jest.fn(),
 });

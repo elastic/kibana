@@ -8,4 +8,3 @@
  */
 
 export { PricingService } from './src/pricing_service';
-export type { PricingStart } from './src/pricing_service';

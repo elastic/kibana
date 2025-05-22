@@ -8,11 +8,16 @@
     ]
   },
   "include": [
-    "**/*.ts", "../common/src/pricing_tiers_client.ts",
+    "**/*.ts",
   ],
   "kbn_references": [
     "@kbn/config",
     "@kbn/config-schema",
+    "@kbn/core-pricing-common",
+    "@kbn/core-http-server",
+    "@kbn/core-base-server-internal",
+    "@kbn/logging",
+    "@kbn/core-http-server-internal",
   ],
   "exclude": [
     "target/**/*",

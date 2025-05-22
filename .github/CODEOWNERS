@@ -238,6 +238,9 @@ src/core/packages/plugins/server-mocks @elastic/kibana-core
 src/core/packages/preboot/server @elastic/kibana-core
 src/core/packages/preboot/server-internal @elastic/kibana-core
 src/core/packages/preboot/server-mocks @elastic/kibana-core
+src/core/packages/pricing/common @elastic/kibana-core
+src/core/packages/pricing/server @elastic/kibana-core
+src/core/packages/pricing/server-internal @elastic/kibana-core
 src/core/packages/rendering/browser @elastic/kibana-core
 src/core/packages/rendering/browser-internal @elastic/kibana-core
 src/core/packages/rendering/browser-mocks @elastic/kibana-core

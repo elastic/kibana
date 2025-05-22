@@ -4832,6 +4832,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-pricing-server-mocks@link:src/core/packages/pricing/server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-pricing-server@link:src/core/packages/pricing/server":
   version "0.0.0"
   uid ""

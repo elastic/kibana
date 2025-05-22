@@ -8,15 +8,12 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { pricingProductsSchema } from '@kbn/core-pricing-common';
+import { tiersConfigSchema } from '@kbn/core-pricing-common';
 
 export const pricingConfig = {
   path: 'pricing',
   schema: schema.object({
-    tiers: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      products: schema.maybe(schema.arrayOf(pricingProductsSchema)),
-    }),
+    tiers: tiersConfigSchema,
   }),
 };
 

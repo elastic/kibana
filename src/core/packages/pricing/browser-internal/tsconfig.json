@@ -13,5 +13,10 @@
   ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-pricing-browser",
+    "@kbn/core-pricing-common",
   ]
 }
