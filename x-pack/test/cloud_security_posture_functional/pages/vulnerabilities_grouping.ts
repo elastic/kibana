@@ -47,7 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.remove();
     });
 
-    describe('Default Grouping', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/220578
+    describe.skip('Default Grouping', async () => {
       it('groups vulnerabilities by cloud account and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();
