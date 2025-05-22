@@ -29,7 +29,7 @@ import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizard
 import { MapSerializedState } from './react_embeddable/types';
 
 function setAppChrome() {
-  if (!getMapsCapabilities()?.save) {
+  if (!getMapsCapabilities().save) {
     getCoreChrome().setBadge({
       text: i18n.translate('xpack.maps.badge.readOnly.text', {
         defaultMessage: 'Read only',
