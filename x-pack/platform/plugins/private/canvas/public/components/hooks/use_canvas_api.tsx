@@ -22,7 +22,7 @@ import { coreServices } from '../../services/kibana_services';
 
 const reload$ = new Subject<void>();
 
-export function reload() {
+export function forceReload() {
   reload$.next();
 }
 

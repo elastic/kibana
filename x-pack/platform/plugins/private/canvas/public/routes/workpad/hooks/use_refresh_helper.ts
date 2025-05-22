@@ -11,7 +11,7 @@ import { WorkpadRoutingContext } from '../workpad_routing_context';
 import { getInFlight } from '../../../state/selectors/resolved_args';
 // @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
-import { reload } from '../../../components/hooks/use_canvas_api';
+import { forceReload } from '../../../components/hooks/use_canvas_api';
 
 export const useRefreshHelper = () => {
   const dispatch = useDispatch();
@@ -26,7 +26,7 @@ export const useRefreshHelper = () => {
 
     if (refreshInterval > 0 && !inFlight) {
       timer.current = window.setTimeout(() => {
-        reload();
+        forceReload();
         dispatch(fetchAllRenderables());
       }, refreshInterval);
     }

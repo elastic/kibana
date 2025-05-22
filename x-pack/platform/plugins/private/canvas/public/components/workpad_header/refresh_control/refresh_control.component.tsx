@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllRenderables } from '../../../state/actions/elements';
 import { getInFlight } from '../../../state/selectors/resolved_args';
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
-import { reload } from '../../hooks/use_canvas_api';
+import { forceReload } from '../../hooks/use_canvas_api';
 
 const strings = {
   getRefreshAriaLabel: () =>
@@ -32,7 +32,7 @@ export const RefreshControl = () => {
   const dispatch = useDispatch();
   const inFlight = useSelector(getInFlight);
   const doRefresh = useCallback(() => {
-    reload();
+    forceReload();
     dispatch(fetchAllRenderables());
   }, [dispatch]);
 
