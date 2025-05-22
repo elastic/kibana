@@ -410,7 +410,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
-                shouldScreenReaderNarrateSearchResults={isFieldNameSearchFocused}
+                muteScreenReader={!isFieldNameSearchFocused}
               />
             ) : (
               <EuiFlexItem grow />
