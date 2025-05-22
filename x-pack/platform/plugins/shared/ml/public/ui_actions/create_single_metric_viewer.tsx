@@ -67,7 +67,7 @@ export function createAddSingleMetricViewerPanelAction(
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
           '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout'
         );
-        const { mlApiProvider } = await import('../application/services/ml_api_service');
+        const { mlApiProvider } = await import('@kbn/ml-services/ml_api_service');
         const httpService = new HttpService(coreStart.http);
         const mlApi: MlApi = mlApiProvider(httpService);
 

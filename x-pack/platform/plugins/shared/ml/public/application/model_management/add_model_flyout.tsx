@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { type FC, useMemo, useState } from 'react';
+import { groupBy } from 'lodash';
+
 import {
   EuiBadge,
   EuiButton,
@@ -26,12 +29,13 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, useMemo, useState } from 'react';
-import { groupBy } from 'lodash';
 import type { ModelDownloadItem } from '@kbn/ml-common-types/trained_models';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
+import { ElandPythonClient } from './eland_python_client';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelDownloadItem[];
