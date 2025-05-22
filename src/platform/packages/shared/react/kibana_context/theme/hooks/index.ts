@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useDarkMode } from './use_dark_mode';
+export { useKibanaIsDarkMode } from './use_kibana_is_dark_mode';
