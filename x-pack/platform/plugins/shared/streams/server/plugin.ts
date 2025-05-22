@@ -81,10 +81,19 @@ export class StreamsPlugin
 
     this.telemtryService.setup(core.analytics);
 
-    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-      ruleTypeId,
-      consumers: [STREAMS_CONSUMER],
-    }));
+    const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
+    this.logger.info(`isSignificantEventsEnabled: ${isSignificantEventsEnabled}`);
+    const alertingFeatures = isSignificantEventsEnabled
+      ? STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
+          ruleTypeId,
+          consumers: [STREAMS_CONSUMER],
+        }))
+      : [];
+
+    if (isSignificantEventsEnabled) {
+      this.logger.info(`enabling rules for significant events`);
+      registerRules({ plugins, logger: this.logger.get('rules') });
+    }
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
@@ -175,8 +184,6 @@ export class StreamsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
-
-    registerRules({ plugins, logger: this.logger.get('rules') });
 
     return {};
   }
