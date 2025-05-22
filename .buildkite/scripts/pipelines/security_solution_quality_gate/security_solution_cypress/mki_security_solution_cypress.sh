@@ -8,6 +8,10 @@ if [ -z "$1" ]
     exit 1
 fi
 
+export XDG_RUNTIME_DIR=/tmp/$USER
+mkdir -p "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR"
+
 source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
@@ -23,4 +27,4 @@ set +e
 export BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
 echo "--- Triggering Kibana tests for $1"
-BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY  yarn $1; status=$?; yarn junit:merge || :; exit $status
+XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY  yarn $1; status=$?; yarn junit:merge || :; exit $status
