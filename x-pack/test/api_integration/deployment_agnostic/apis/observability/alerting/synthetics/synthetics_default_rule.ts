@@ -30,7 +30,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
         withInternalHeaders: true,
-        withCustomHeaders: { 'accept-encoding': 'gzip' },
       });
       await server.savedObjects.cleanStandardList();
     });

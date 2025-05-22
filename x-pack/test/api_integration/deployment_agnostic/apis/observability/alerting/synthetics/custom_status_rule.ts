@@ -31,7 +31,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       [supertestEditorWithApiKey, supertestAdminWithApiKey] = await Promise.all([
         roleScopedSupertest.getSupertestWithRoleScope('editor', {
           withInternalHeaders: true,
-          useCookieHeader: true,
         }),
         roleScopedSupertest.getSupertestWithRoleScope('admin', {
           withInternalHeaders: true,

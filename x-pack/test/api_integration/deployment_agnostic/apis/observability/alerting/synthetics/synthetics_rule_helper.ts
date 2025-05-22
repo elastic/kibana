@@ -29,6 +29,7 @@ export class SyntheticsRuleHelper {
   retryService: RetryService;
   alertActionIndex: string;
   actionId: string | null = null;
+  isServerless: boolean;
 
   constructor(
     getService: DeploymentAgnosticFtrProviderContext['getService'],
@@ -41,6 +42,8 @@ export class SyntheticsRuleHelper {
     this.logger = getService('log');
     this.retryService = getService('retry');
     this.alertActionIndex = SYNTHETICS_ALERT_ACTION_INDEX;
+    const config = getService('config');
+    this.isServerless = config.get('serverless');
   }
 
   async createIndexAction() {
@@ -82,7 +85,7 @@ export class SyntheticsRuleHelper {
       supertest: this.supertestAdminWithApiKey,
       esClient: this.esClient,
       logger: this.logger,
-      schedule: { interval: '15s' },
+      schedule: { interval: '5s' },
       actions: [
         {
           group: 'recovered',
@@ -183,7 +186,9 @@ export class SyntheticsRuleHelper {
       esClient: this.esClient,
       retryService: this.retryService,
       logger: this.logger,
-      indexName: '.internal.alerts-observability.uptime.alerts-default*',
+      indexName: `.${
+        this.isServerless ? 'ds-' : 'internal'
+      }.alerts-observability.uptime.alerts-default*`,
       retryDelay: 1000,
     });
   }
