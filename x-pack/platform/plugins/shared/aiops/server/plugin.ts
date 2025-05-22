@@ -29,6 +29,7 @@ import { defineRoute as defineLogRateAnalysisFieldCandidatesRoute } from './rout
 import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
 import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
 import { registerCasesPersistableState } from './register_cases';
+import type { ConfigSchema } from './config_schema';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -37,7 +38,7 @@ export class AiopsPlugin
   private licenseSubscription: Subscription | null = null;
   private usageCounter?: UsageCounter;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get();
   }
 

@@ -73,7 +73,7 @@ export interface SLOPublicPluginsSetup {
 }
 
 export interface SLOPublicPluginsStart {
-  aiops: AiopsPluginStart;
+  aiops?: AiopsPluginStart;
   cases: CasesPublicStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;

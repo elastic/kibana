@@ -178,7 +178,8 @@ export class MlServerPlugin
       coreSetup,
       plugins.licensing.license$,
       this.enabledFeatures,
-      this.log
+      this.log,
+      plugins.aiops
     );
     setupSavedObjects(coreSetup.savedObjects);
     this.savedObjectsSyncService.registerSyncTask(

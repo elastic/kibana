@@ -27,6 +27,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import type { AiopsPluginSetup } from '@kbn/aiops-plugin/server';
 import type { RouteGuard } from './lib/route_guard';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { MlLicense } from '../common/license';
@@ -53,6 +54,7 @@ export interface SavedObjectsRouteDeps {
 }
 
 export interface PluginsSetup {
+  aiops?: AiopsPluginSetup;
   cloud: CloudSetup;
   data: DataPluginSetup;
   fieldFormats: FieldFormatsSetup;

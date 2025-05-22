@@ -156,7 +156,7 @@ export interface ObservabilityPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
-  aiops: AiopsPluginStart;
+  aiops?: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;

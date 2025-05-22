@@ -59,6 +59,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const {
     charts,
     data,
+    application,
     share: {
       url: { locators },
     },
@@ -66,6 +67,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const { hasAtLeast } = useLicense();
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
+  const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
@@ -173,7 +175,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup>
-                <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
+                <EuiFlexItem css={{ minHeight: 150, minWidth: 160 }} grow={1}>
                   <Threshold
                     chartProps={chartProps}
                     id={`threshold-${index}`}
@@ -215,7 +217,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
           </EuiFlexItem>
         );
       })}
-      {hasLogRateAnalysisLicense && (
+      {hasLogRateAnalysisLicense && aiopsEnabled && (
         <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
       )}
     </EuiFlexGroup>
