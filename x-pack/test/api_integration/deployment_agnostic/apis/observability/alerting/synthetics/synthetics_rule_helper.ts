@@ -28,7 +28,6 @@ export class SyntheticsRuleHelper {
   retryService: RetryService;
   alertActionIndex: string;
   actionId: string | null = null;
-  isServerless: boolean;
   alertingApi: ReturnType<typeof AlertingApiProvider>;
 
   constructor(
@@ -42,8 +41,6 @@ export class SyntheticsRuleHelper {
     this.logger = getService('log');
     this.retryService = getService('retry');
     this.alertActionIndex = SYNTHETICS_ALERT_ACTION_INDEX;
-    const config = getService('config');
-    this.isServerless = config.get('serverless');
     this.alertingApi = getService('alertingApi');
   }
 
@@ -181,9 +178,7 @@ export class SyntheticsRuleHelper {
     return this.alertingApi.waitForAlertInIndex({
       ruleId,
       filters,
-      indexName: `.${
-        this.isServerless ? 'ds-' : 'internal'
-      }.alerts-observability.uptime.alerts-default*`,
+      indexName: '.alerts-observability.uptime.alerts-default*',
     });
   }
 

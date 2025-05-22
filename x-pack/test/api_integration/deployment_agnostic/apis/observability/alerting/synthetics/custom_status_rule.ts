@@ -179,30 +179,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 2,
           filters: [
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'recovered' },
+            },
           ],
         });
-        expect(recoveredResponse.hits.hits[1]._source).property(
+        expect(recoveredResponse.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service is recovered. Alert when 5 out of the last 5 checks are down from at least 1 location.`
         );
-        expect(recoveredResponse.hits.hits[1]._source).property('locationNames', 'Dev Service');
-        expect(recoveredResponse.hits.hits[1]._source).property(
+        expect(recoveredResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
+        expect(recoveredResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveredResponse.hits.hits[1]._source).property('locationId', 'dev');
-        expect(recoveredResponse.hits.hits[1]._source).property(
+        expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
+        expect(recoveredResponse.hits.hits[0]._source).property(
           'recoveryReason',
           `the monitor is now up again. It ran successfully at ${moment(docs[0]['@timestamp'])
             .tz('UTC')
             .format('MMM D, YYYY @ HH:mm:ss.SSS')}`
         );
-        expect(recoveredResponse.hits.hits[1]._source).property('recoveryStatus', 'is now up');
+        expect(recoveredResponse.hits.hits[0]._source).property('recoveryStatus', 'is now up');
       });
     });
 
@@ -408,28 +410,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 2,
           filters: [
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'recovered' },
+            },
           ],
         });
-        expect(recoveredResponse.hits.hits[1]._source).property(
+        expect(recoveredResponse.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service is recovered. Alert when 5 out of the last 5 checks are down from at least 1 location.`
         );
-        expect(recoveredResponse.hits.hits[1]._source).property('locationNames', 'Dev Service');
-        expect(recoveredResponse.hits.hits[1]._source).property(
+        expect(recoveredResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
+        expect(recoveredResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveredResponse.hits.hits[1]._source).property('locationId', 'dev');
-        expect(recoveredResponse.hits.hits[1]._source).property(
+        expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
+        expect(recoveredResponse.hits.hits[0]._source).property(
           'recoveryReason',
           'the alert condition is no longer met'
         );
-        expect(recoveredResponse.hits.hits[1]._source).property('recoveryStatus', 'has recovered');
+        expect(recoveredResponse.hits.hits[0]._source).property('recoveryStatus', 'has recovered');
       });
     });
 
@@ -610,7 +614,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 1,
           filters: [
             {
               term: { 'monitor.id': monitor.id },
@@ -842,24 +845,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'recovered' },
+            },
           ],
-          docCountTarget: 2,
         });
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service is recovered. Alert when 5 checks are down within the last 5 minutes from at least 1 location.`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'recoveryReason',
           'the alert condition is no longer met'
         );
-        expect(recoveryResponse.hits.hits[1]._source).property('recoveryStatus', 'has recovered');
-        expect(recoveryResponse.hits.hits[1]._source).property('locationNames', 'Dev Service');
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property('recoveryStatus', 'has recovered');
+        expect(recoveryResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property('locationId', 'dev');
+        expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev');
       });
     });
 
@@ -1016,28 +1021,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'recovered' },
+            },
           ],
-          docCountTarget: 2,
         });
 
-        expect(recoveryAction.hits.hits[1]._source).property(
+        expect(recoveryAction.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 5 checks are down within the last 5 minutes from at least 2 locations.`
         );
-        expect(recoveryAction.hits.hits[1]._source).property(
+        expect(recoveryAction.hits.hits[0]._source).property(
           'recoveryReason',
           'the alert condition is no longer met'
         );
-        expect(recoveryAction.hits.hits[1]._source).property('recoveryStatus', 'has recovered');
-        expect(recoveryAction.hits.hits[1]._source).property(
+        expect(recoveryAction.hits.hits[0]._source).property('recoveryStatus', 'has recovered');
+        expect(recoveryAction.hits.hits[0]._source).property(
           'locationNames',
           'Dev Service and Dev Service 2'
         );
-        expect(recoveryAction.hits.hits[1]._source).property(
+        expect(recoveryAction.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryAction.hits.hits[1]._source).property('locationId', 'dev and dev2');
+        expect(recoveryAction.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
     });
 
