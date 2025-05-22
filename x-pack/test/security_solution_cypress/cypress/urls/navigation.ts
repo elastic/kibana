@@ -82,3 +82,5 @@ export const FLEET_URL = '/app/fleet';
 
 // Entity Analytics
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
+
+export const SIEM_MIGRATIONS_TRANSLATED_RULES_URL = 'app/security/siem_migrations/rules';
