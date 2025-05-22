@@ -6,6 +6,7 @@
  */
 
 import { ReactElement } from 'react';
+import { type FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
@@ -57,6 +58,8 @@ export interface AlertSearchBarContainerState {
   status: AlertStatus;
   filters?: Filter[];
   savedQueryId?: string;
+  controlConfigs?: FilterControlConfig[];
+  groupings?: string[];
 }
 
 interface AlertSearchBarStateTransitions {

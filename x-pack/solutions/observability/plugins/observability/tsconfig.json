@@ -117,7 +117,9 @@
     "@kbn/ebt-tools",
     "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/object-utils"
+    "@kbn/object-utils",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": ["target/**/*"]
 }
