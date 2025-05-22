@@ -31,6 +31,7 @@ import { TransactionSummaryTitle } from './sub_components/transaction_summary_ti
 export type TransactionOverviewProps = Omit<DocViewRenderProps, 'dataView'> & {
   tracesIndexPattern: string;
   showWaterfall?: boolean;
+  showActions?: boolean;
 };
 
 export function TransactionOverview({
@@ -41,6 +42,7 @@ export function TransactionOverview({
   onRemoveColumn,
   tracesIndexPattern,
   showWaterfall = true,
+  showActions = true,
 }: TransactionOverviewProps) {
   const parsedDoc = useMemo(() => getTransactionDocumentOverview(hit), [hit]);
   const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
@@ -72,6 +74,7 @@ export function TransactionOverview({
               key={fieldId}
               fieldId={fieldId}
               fieldConfiguration={fieldConfigurations[fieldId]}
+              showActions={showActions}
             />
           ))}
 

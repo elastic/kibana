@@ -32,6 +32,7 @@ import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hook
 export type SpanOverviewProps = Omit<DocViewRenderProps, 'dataView'> & {
   transactionIndexPattern: string;
   showWaterfall?: boolean;
+  showActions?: boolean;
 };
 
 export function SpanOverview({
@@ -42,6 +43,7 @@ export function SpanOverview({
   onRemoveColumn,
   transactionIndexPattern,
   showWaterfall = true,
+  showActions = true,
 }: SpanOverviewProps) {
   const parsedDoc = useMemo(() => getSpanDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
@@ -71,6 +73,7 @@ export function SpanOverview({
                 key={fieldId}
                 fieldId={fieldId}
                 fieldConfiguration={fieldConfigurations[fieldId]}
+                showActions={showActions}
               />
             ))}
 
