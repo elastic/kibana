@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GridRow } from './grid_row';
+import { RunOptions } from '../parse_run_cli_flags';
+
+export interface BaseWorkerData {
+  bucketFrom: Date;
+  bucketTo: Date;
+  workerId: string;
+  file: string;
+  from: number;
+  to: number;
+  runOptions: RunOptions;
+}

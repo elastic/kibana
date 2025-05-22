@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires*/
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-});
+export { GridSectionHeader } from './grid_section_header';
+export { GridSectionWrapper } from './grid_section_wrapper';
+export { GridSectionFooter } from './grid_section_footer';
+export { GridSectionDragPreview } from './grid_section_drag_preview';
 
-require('./synthtrace_worker');
+export type { GridSectionData, MainSection, CollapsibleSection, ActiveSectionEvent } from './types';

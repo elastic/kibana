@@ -18288,6 +18288,68 @@ paths:
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
+  /api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status:
+    get:
+      description: 'Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.'
+      operationId: get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status
+      parameters:
+        - in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  currentVersions:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agents:
+                          type: number
+                        failedUpgradeAgents:
+                          type: number
+                        version:
+                          type: string
+                      required:
+                        - version
+                        - agents
+                        - failedUpgradeAgents
+                    type: array
+                  totalAgents:
+                    type: number
+                required:
+                  - currentVersions
+                  - totalAgents
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get auto upgrade agent status
+      tags:
+        - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
       description: Copy an agent policy by ID.
@@ -53002,6 +53064,7 @@ components:
           - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_HrefContentReference'
             additionalProperties: false
       description: A union of all content reference types
       type: object
@@ -53305,6 +53368,25 @@ components:
         - name
         - updated_at
       type: string
+    Security_AI_Assistant_API_HrefContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            href:
+              description: URL to the external resource
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            type:
+              enum:
+                - Href
+              type: string
+          required:
+            - type
+            - href
+      description: References an external URL
     Security_AI_Assistant_API_IndexEntry:
       allOf:
         - type: object
