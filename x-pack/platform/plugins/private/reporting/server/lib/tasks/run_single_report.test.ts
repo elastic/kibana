@@ -179,7 +179,7 @@ describe('Run Single Report Task', () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
     });
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
@@ -212,7 +212,7 @@ describe('Run Single Report Task', () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: false,
     });
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
@@ -242,7 +242,7 @@ describe('Run Single Report Task', () => {
       hasPermanentEncryptionKey: false,
       areNotificationsEnabled: true,
     });
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
