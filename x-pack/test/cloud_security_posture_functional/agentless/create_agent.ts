@@ -44,6 +44,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       mockApiServer.close();
     });
 
+    it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
+      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
+      );
+      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.inputUniqueIntegrationName();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.selectSetupTechnology('agent-based');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.clickSaveButton();
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
+          true
+        );
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          (await cisIntegration.getUrlOnPostInstallModal()) ===
+            'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+        );
+      });
+    });
+
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
