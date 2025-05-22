@@ -106,6 +106,13 @@ const defaultGrokProcessorFormState = (sampleDocs: FlattenRecord[]): GrokFormSta
   if: ALWAYS_CONDITION,
 });
 
+const defaultAdvancedJsonProcessorFormState = (): AdvancedJsonFormState => ({
+  type: 'advanced_json',
+  processors: [],
+  ignore_failure: true,
+  if: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState

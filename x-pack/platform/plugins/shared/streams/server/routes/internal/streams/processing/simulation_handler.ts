@@ -238,7 +238,7 @@ const prepareSimulationProcessors = (
     },
   };
 
-  const formattedProcessors = formatToIngestProcessors(processors);
+  const formattedProcessors = formatToIngestProcessors(processors, true);
 
   return [dotExpanderProcessor, ...formattedProcessors];
 };

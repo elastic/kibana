@@ -111,11 +111,11 @@ const availableProcessors: TAvailableProcessors = {
   },
   advanced_json: {
     type: 'advanced_json',
-    inputDisplay: 'Advanced JSON Ingest pipeline',
+    inputDisplay: 'Advanced Elasticsearch ingest pipeline',
     getDocUrl: () => (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.advancedJsonHelpText"
-        defaultMessage="Allows specifying a JSON object that contains an array of ingest pipeline processors."
+        defaultMessage="Allows specifying an array of ingest pipeline processors as JSON."
       />
     ),
   },

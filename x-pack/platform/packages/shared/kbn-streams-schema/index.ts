@@ -52,6 +52,8 @@ export { isRootStreamDefinition } from './src/helpers/is_root';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 
+export * from './src/ingest_pipeline_processors';
+
 export {
   type SampleDocument,
   type FlattenRecord,

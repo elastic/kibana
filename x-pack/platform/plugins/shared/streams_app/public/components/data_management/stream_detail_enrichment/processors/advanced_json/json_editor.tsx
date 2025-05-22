@@ -10,11 +10,48 @@ import { useController } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchProcessorType, elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { ProcessorFormState } from '../../types';
+import { deserializeJson, serializeXJson } from '../../helpers';
 
 export const JsonEditor = () => {
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
+    rules: {
+      validate: (value) => {
+        if (typeof value === 'string') {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidJSON',
+            {
+              defaultMessage: 'Invalid JSON format',
+            }
+          );
+        }
+        if (!Array.isArray(value)) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidArray',
+            {
+              defaultMessage: 'Expected an array',
+            }
+          );
+        }
+        const invalidProcessor = value.find((processor) => {
+          const processorType = Object.keys(processor)[0];
+          return !elasticsearchProcessorTypes.includes(processorType as ElasticsearchProcessorType);
+        });
+        if (invalidProcessor) {
+          return i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsInvalidProcessorType',
+            {
+              defaultMessage: 'Invalid processor type: {processorType}',
+              values: {
+                processorType: Object.keys(invalidProcessor)[0],
+              },
+            }
+          );
+        }
+      },
+    },
   });
 
   return (
@@ -29,12 +66,13 @@ export const JsonEditor = () => {
           defaultMessage: 'A JSON-encoded array of ingest pipeline processors',
         }
       )}
+      error={fieldState.error?.message}
       isInvalid={fieldState.invalid}
       fullWidth
     >
       <CodeEditor
-        value={serialize(field.value)}
-        onChange={(value) => field.onChange(deserialize(value))}
+        value={serializeXJson(field.value, '[]')}
+        onChange={(value) => field.onChange(deserializeJson(value))}
         languageId="xjson"
         height={200}
         aria-label={i18n.translate(
@@ -44,51 +82,4 @@ export const JsonEditor = () => {
       />
     </EuiFormRow>
   );
-};
-
-const serialize = (v: unknown) => {
-  if (!v) {
-    return '{}';
-  }
-  if (typeof v === 'string') {
-    return formatXJsonString(v);
-  }
-  return JSON.stringify(v, null, 2);
-};
-
-const deserialize = (input: string) => {
-  try {
-    return JSON.parse(input);
-  } catch (e) {
-    return input;
-  }
-};
-
-/**
- * Format a XJson string input as parsed JSON. Replaces the invalid characters
- *  with a placeholder, parses the new string in a JSON format with the expected
- * indentantion and then replaces the placeholders with the original values.
- */
-const formatXJsonString = (input: string) => {
-  let placeholder = 'PLACEHOLDER';
-  const INVALID_STRING_REGEX = /"""(.*?)"""/gs;
-  while (input.includes(placeholder)) {
-    placeholder += '_';
-  }
-  const modifiedInput = input.replace(INVALID_STRING_REGEX, () => `"${placeholder}"`);
-
-  let jsonObject;
-  try {
-    jsonObject = JSON.parse(modifiedInput);
-  } catch (error) {
-    return input;
-  }
-  let formattedJsonString = JSON.stringify(jsonObject, null, 2);
-  const invalidStrings = input.match(INVALID_STRING_REGEX);
-  if (invalidStrings) {
-    invalidStrings.forEach((invalidString) => {
-      formattedJsonString = formattedJsonString.replace(`"${placeholder}"`, invalidString);
-    });
-  }
-  return formattedJsonString;
 };
