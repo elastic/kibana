@@ -290,7 +290,14 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateBasicData(item);
 
     try {
-      TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      const isAdvancedMode = item.tags.includes('form_mode:advanced');
+      // if (feature is disabled && isadvancedmode) throw new Error('some error');
+      if (/* feature is enabled && */ isAdvancedMode) {
+        TrustedAppAdvancedModeDataSchema.validate(item);
+      }
+      else {
+        TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      }
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }
