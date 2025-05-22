@@ -42,7 +42,7 @@ const replaceSymbolsWithLiterals = (
   }
 };
 
-export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
+const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
   const lexer = new ESQLLexer(inputStream);
   replaceSymbolsWithLiterals(lexer.symbolicNames, lexer.literalNames);
 
