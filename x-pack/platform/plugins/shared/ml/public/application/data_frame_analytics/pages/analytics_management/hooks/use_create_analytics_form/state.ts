@@ -18,10 +18,12 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { DeepReadonly } from '@kbn/ml-common-types/common';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
+
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
 import { defaultSearchQuery } from '../../../../common/analytics';
+
 import type { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {

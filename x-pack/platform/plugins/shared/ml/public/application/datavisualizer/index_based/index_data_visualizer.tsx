@@ -21,12 +21,12 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
+import { isFullLicense } from '@kbn/ml-license';
 
 import { useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
-import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
-import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';

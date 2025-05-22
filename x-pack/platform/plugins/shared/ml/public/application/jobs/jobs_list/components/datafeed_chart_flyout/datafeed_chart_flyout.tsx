@@ -7,9 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+
 import {
   useEuiTheme,
   EuiButtonEmpty,
@@ -51,6 +50,9 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
@@ -60,6 +62,8 @@ import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import type { LineAnnotationDatumWithModelSnapshot } from '@kbn/ml-common-types/results';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
+
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
@@ -67,7 +71,6 @@ import { EditQueryDelay } from './edit_query_delay';
 import type { ChartDirectionType } from './constants';
 import { CHART_DIRECTION, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { type ChartDataWithNullValues, fillMissingChartData } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
