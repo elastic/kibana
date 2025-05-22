@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { IndicatorsPage } from './indicators';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
 import { useIndicators } from '../hooks/use_indicators';
@@ -19,6 +19,10 @@ import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
 jest.mock('../../query_bar/hooks/use_filters');
 jest.mock('../hooks/use_indicators');
 jest.mock('../hooks/use_aggregated_indicators');
+
+jest.mock('../../../../common/components/filters_global', () => ({
+  FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
+}));
 
 const stub = () => {};
 
@@ -69,9 +73,9 @@ describe('<IndicatorsPage />', () => {
     expect(queryByTestId(TABLE_TEST_ID)).toBeInTheDocument();
   });
 
-  // FIXME: for some reason, this test does not work but the search bar is there
-  it.skip('should render SIEM Search Bar', () => {
+  it('should render SIEM Search Bar', () => {
     const { queryByTestId } = render(<IndicatorsPage />, { wrapper: TestProvidersComponent });
+    screen.debug();
     expect(queryByTestId('SiemSearchBar')).toBeInTheDocument();
   });
 
