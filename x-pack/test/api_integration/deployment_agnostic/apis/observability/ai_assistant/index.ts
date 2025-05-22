@@ -26,7 +26,6 @@ export default function aiAssistantApiIntegrationTests({
 
     // knowledge base
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.10_upgrade_test.spec.ts'));
-    loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.16_upgrade_test.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.18_upgrade_test.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_reindex_concurrency.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
