@@ -10,8 +10,9 @@
 import { schema } from '@kbn/config-schema';
 
 export const bookAttributesSchema = schema.object({
-  title: schema.string(),
+  bookTitle: schema.string(),
   author: schema.string(),
   pages: schema.number(),
   synopsis: schema.maybe(schema.string()),
+  published: schema.maybe(schema.number()),
 });

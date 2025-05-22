@@ -15,12 +15,30 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-export interface BookAttributes {
+export interface BookAttributesV1 {
   bookTitle: string;
   authorName: string;
   numberOfPages: number;
   bookSynopsis?: string;
 }
+
+export interface BookAttributesV2 {
+  bookTitle: string;
+  author: string;
+  numberOfPages: number;
+  synopsis?: string;
+  publicationYear?: number;
+}
+
+export interface BookAttributesV3 {
+  bookTitle: string;
+  author: string;
+  pages: number;
+  synopsis?: string;
+  published?: number;
+}
+
+export type BookAttributes = BookAttributesV3;
 
 export interface BookByValueSerializedState {
   attributes: BookAttributes;
@@ -41,7 +59,7 @@ export type BookSerializedState = SerializedTitles &
  * Book runtime state is a flattened version of all possible state keys.
  */
 export interface BookRuntimeState
-  extends BookAttributes,
+  extends BookAttributesV3,
     Partial<BookByReferenceSerializedState>,
     SerializedTitles {}
 

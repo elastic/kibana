@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { savedBookAttributesSchema as savedBookAttributesSchemaV2 } from '../v2';
 
-export const bookAttributesSchema = schema.object({
-  bookTitle: schema.string(),
-  author: schema.string(),
-  numberOfPages: schema.number(),
-  synopsis: schema.maybe(schema.string()),
-  publicationYear: schema.maybe(schema.number()),
-});
+export const savedBookAttributesSchema = savedBookAttributesSchemaV2.extends({});

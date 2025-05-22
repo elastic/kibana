@@ -8,21 +8,25 @@
  */
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
-import type { ItemAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
-import type { SavedBookAttributes } from '../../../../../server/types';
+import type {
+  ItemAttributesWithReferences,
+  SavedObjectAttributesWithReferences,
+} from '@kbn/embeddable-plugin/common/types';
+import type { SavedBookAttributesV2 } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v2';
 import type { BookAttributes as BookV1Attributes } from '../../../../../server/book/content_management/schema/v1';
 
 function savedObjectToItem({
   attributes,
   references,
-}: ItemAttributesWithReferences<BookV1Attributes>): ItemAttributesWithReferences<BookAttributes> {
+}: SavedObjectAttributesWithReferences<SavedBookAttributesV2>): ItemAttributesWithReferences<BookAttributes> {
   return {
     attributes: {
-      title: attributes.bookTitle,
+      bookTitle: attributes.bookTitle,
       author: attributes.authorName,
       numberOfPages: attributes.numberOfPages,
       synopsis: attributes.bookSynopsis,
+      publicationYear: attributes.publicationYear,
     },
     references,
   };
@@ -31,10 +35,10 @@ function savedObjectToItem({
 function itemToSavedObject({
   attributes,
   references,
-}: ItemAttributesWithReferences<BookAttributes>): ItemAttributesWithReferences<BookV1Attributes> {
+}: ItemAttributesWithReferences<BookAttributes>): SavedObjectAttributesWithReferences<SavedBookAttributesV2> {
   return {
     attributes: {
-      bookTitle: attributes.title,
+      bookTitle: attributes.bookTitle,
       authorName: attributes.author,
       numberOfPages: attributes.numberOfPages,
       bookSynopsis: attributes.synopsis,
@@ -44,12 +48,10 @@ function itemToSavedObject({
 }
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
-  SavedBookAttributes,
+  SavedBookAttributesV2,
   BookAttributes,
   BookV1Attributes
 > = {
-  // up: transformV1ToV2,
-  // down: transformV2ToV1,
   itemToSavedObject,
   savedObjectToItem,
 };

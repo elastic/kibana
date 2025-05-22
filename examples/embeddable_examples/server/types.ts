@@ -9,7 +9,9 @@
 
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 
-export type { SavedBookAttributes } from './book/saved_object/schema/v1';
+export type { SavedBookAttributes as SavedBookAttributesV1 } from './book/saved_object/schema/v1';
+export type { SavedBookAttributes as SavedBookAttributesV2 } from './book/saved_object/schema/v2';
+export type { SavedBookAttributes as SavedBookAttributesV3 } from './book/saved_object/schema/v3';
 
 export interface SetupDeps {
   embeddable: EmbeddableSetup;

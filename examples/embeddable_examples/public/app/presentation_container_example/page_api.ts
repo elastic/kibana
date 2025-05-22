@@ -58,6 +58,7 @@ export function getPageApi(embeddable: EmbeddableStart) {
   const timeRange$ = new BehaviorSubject<TimeRange>(
     initialUnsavedState?.timeRange ?? initialState.timeRange
   );
+
   const reload$ = new Subject<void>();
 
   function serializePage() {

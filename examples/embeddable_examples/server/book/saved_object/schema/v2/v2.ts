@@ -8,11 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { savedBookAttributesSchema as savedBookAttributesSchemaV1 } from '../v1';
 
-export const bookAttributesSchema = schema.object({
-  bookTitle: schema.string(),
-  author: schema.string(),
-  numberOfPages: schema.number(),
-  synopsis: schema.maybe(schema.string()),
+export const savedBookAttributesSchema = savedBookAttributesSchemaV1.extends({
   publicationYear: schema.maybe(schema.number()),
 });

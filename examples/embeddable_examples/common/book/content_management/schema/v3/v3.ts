@@ -8,39 +8,33 @@
  */
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
-import type { SavedBookAttributes } from '../../../../../server/types';
+import type { SavedBookAttributesV3 } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v3';
 import type { BookAttributes as BookV2Attributes } from '../../../../../server/book/content_management/schema/v2';
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
-  SavedBookAttributes,
+  SavedBookAttributesV3,
   BookAttributes,
   BookV2Attributes
 > = {
-  up: (item) => ({
-    ...item,
-    pages: item.numberOfPages,
-  }),
-  down: (item) => ({
-    ...item,
-    numberOfPages: item.pages,
-  }),
-  itemToSavedObject: (item) => ({
+  itemToSavedObject: ({ attributes, references }) => ({
     attributes: {
-      bookTitle: item.title,
-      authorName: item.author,
-      numberOfPages: item.pages,
-      bookSynopsis: item.synopsis,
+      bookTitle: attributes.bookTitle,
+      authorName: attributes.author,
+      numberOfPages: attributes.pages,
+      bookSynopsis: attributes.synopsis,
+      publicationYear: attributes.published,
     },
-    references: [],
+    references,
   }),
-  savedObjectToItem: (savedObject) => ({
+  savedObjectToItem: ({ attributes, references }) => ({
     attributes: {
-      title: savedObject.bookTitle,
-      author: savedObject.authorName,
-      pages: savedObject.numberOfPages,
-      synopsis: savedObject.bookSynopsis,
+      bookTitle: attributes.bookTitle,
+      author: attributes.authorName,
+      pages: attributes.numberOfPages,
+      synopsis: attributes.bookSynopsis,
+      published: attributes.published,
     },
-    references: [],
+    references,
   }),
 };

@@ -8,11 +8,11 @@
  */
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
-import type { SavedBookAttributes } from '../../../../../server/types';
+import type { SavedBookAttributesV1 } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v1';
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
-  SavedBookAttributes,
+  SavedBookAttributesV1,
   BookAttributes
 > = {
   // TODO up or down?

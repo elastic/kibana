@@ -66,9 +66,10 @@ export const lastSavedStateSessionStorage = {
       );
       if (!savedObjectToItem) return panel;
       const newState = savedObjectToItem(rawState);
+
       return {
         ...panel,
-        panelState: {
+        serializedState: {
           rawState: newState,
         },
       };
