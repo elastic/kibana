@@ -29,15 +29,19 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const { notifications, ml } = useKibana().services;
   const service = useAIAssistantAppService();
 
-  const statusRequest = useAbortableAsync(
-    ({ signal }) => {
-      return service.callApi('GET /internal/observability_ai_assistant/kb/status', { signal });
-    },
-    [service]
-  );
-
   const [isInstalling, setIsInstalling] = useState(false);
   const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
+  const [installingInferenceId, setInstallingInferenceId] = useState<string>();
+
+  const statusRequest = useAbortableAsync(
+    ({ signal }) => {
+      return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
+        params: { query: { inference_id: installingInferenceId || '' } },
+        signal,
+      });
+    },
+    [service, installingInferenceId]
+  );
 
   // poll for status when installing, until install is complete and the KB is ready
   const isPolling =
@@ -46,11 +50,16 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL;
 
   useEffect(() => {
-    // toggle installing state to false once KB is ready
-    if (isInstalling && statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+    // Only reset installation state when the KB is ready and the endpoint model matches what we're installing
+    if (
+      isInstalling &&
+      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.endpoint?.inference_id === installingInferenceId
+    ) {
       setIsInstalling(false);
+      setInstallingInferenceId(undefined);
     }
-  }, [isInstalling, statusRequest]);
+  }, [isInstalling, statusRequest, installingInferenceId]);
 
   useEffect(() => {
     // toggle warming up state to false once KB is ready
@@ -62,6 +71,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const install = useCallback(
     async (inferenceId: string) => {
       setIsInstalling(true);
+      setInstallingInferenceId(inferenceId);
+
       try {
         // Retry the setup with a maximum of 5 attempts
         await pRetry(

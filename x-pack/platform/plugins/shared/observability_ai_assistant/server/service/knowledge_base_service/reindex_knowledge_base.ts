@@ -193,5 +193,5 @@ export async function isReIndexInProgress({
     getActiveReindexingTaskId(esClient),
   ]);
 
-  return lock !== undefined || activeReindexingTask !== undefined;
+  return lock !== undefined && activeReindexingTask !== undefined;
 }

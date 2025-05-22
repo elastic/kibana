@@ -8,10 +8,12 @@
 import React from 'react';
 import { EuiButton, EuiDescribedFormGroup, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 import { ProductDocEntry } from './product_doc_entry';
+import { ChangeKbModel } from './change_kb_model';
 
 export function SettingsTab() {
   const {
@@ -19,6 +21,9 @@ export function SettingsTab() {
     productDocBase,
   } = useKibana().services;
   const { config } = useAppContext();
+
+  const knowledgeBase = useKnowledgeBase();
+  const connectors = useGenAIConnectors();
 
   const handleNavigateToConnectors = () => {
     navigateToApp('management', {
@@ -111,7 +116,12 @@ export function SettingsTab() {
       </EuiDescribedFormGroup>
 
       {productDocBase ? <ProductDocEntry /> : undefined}
-      <UISettings />
+
+      {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
+        <ChangeKbModel knowledgeBase={knowledgeBase} />
+      ) : undefined}
+
+      <UISettings knowledgeBase={knowledgeBase} />
     </EuiPanel>
   );
 }

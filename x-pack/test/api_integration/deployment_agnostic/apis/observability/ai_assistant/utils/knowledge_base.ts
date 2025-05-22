@@ -51,6 +51,9 @@ export async function getKnowledgeBaseStatus(
 ) {
   return observabilityAIAssistantAPIClient.editor({
     endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+    params: {
+      query: {},
+    },
   });
 }
 

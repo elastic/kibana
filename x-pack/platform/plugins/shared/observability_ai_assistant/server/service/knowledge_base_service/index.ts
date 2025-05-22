@@ -479,12 +479,13 @@ export class KnowledgeBaseService {
     }
   };
 
-  getModelStatus = async () => {
+  getModelStatus = async ({ inferenceId }: { inferenceId?: string } = {}) => {
     return getKbModelStatus({
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
+      inferenceId,
     });
   };
 

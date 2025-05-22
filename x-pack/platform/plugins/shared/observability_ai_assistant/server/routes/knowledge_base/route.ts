@@ -24,26 +24,32 @@ import {
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+  params: t.type({
+    query: t.partial({
+      inference_id: t.string,
+    }),
+  }),
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async ({
-    service,
-    request,
-  }): Promise<{
+  handler: async (
+    resources
+  ): Promise<{
     errorMessage?: string;
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
     modelStats?: Partial<MlTrainedModelStats>;
     kbState: KnowledgeBaseState;
-    currentInferenceId: string | undefined;
+    currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
   }> => {
-    const client = await service.getClient({ request });
-    return client.getKnowledgeBaseStatus();
+    const client = await resources.service.getClient({ request: resources.request });
+    return client.getKnowledgeBaseStatus({
+      inferenceId: resources.params.query.inference_id,
+    });
   },
 });
 

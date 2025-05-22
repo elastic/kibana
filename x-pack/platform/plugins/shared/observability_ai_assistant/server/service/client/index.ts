@@ -659,8 +659,8 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getInferenceEndpointsForEmbedding();
   };
 
-  getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getModelStatus();
+  getKnowledgeBaseStatus = ({ inferenceId }: { inferenceId?: string } = {}) => {
+    return this.dependencies.knowledgeBaseService.getModelStatus({ inferenceId });
   };
 
   setupKnowledgeBase = async (
