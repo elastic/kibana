@@ -23,7 +23,7 @@ interface BaseAction {
 }
 
 interface SingleAction extends BaseAction {
-  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable' | 'purge';
+  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable';
   item: SLODefinitionResponse | SLOWithSummaryResponse;
 }
 
