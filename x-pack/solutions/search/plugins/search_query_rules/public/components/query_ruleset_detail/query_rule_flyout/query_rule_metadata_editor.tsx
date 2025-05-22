@@ -231,7 +231,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            data-test-subj="searchQueryRulesQueryRuleMetadataEditorButton"
+            data-test-subj="searchQueryRulesQueryRuleMetadataEditorDeleteButton"
             iconType="minusInCircle"
             color="danger"
             onClick={onRemove}

@@ -32,3 +32,12 @@ export type SearchQueryRulesQueryRule = Omit<QueryRulesQueryRule, 'criteria'> & 
 export type SearchQueryRulesQueryRuleset = Omit<QueryRulesQueryRuleset, 'rules'> & {
   rules: SearchQueryRulesQueryRule[];
 };
+
+export interface QueryRuleEditorForm {
+  mode: 'create' | 'edit';
+  ruleId: SearchQueryRulesQueryRule['rule_id'];
+  rulesetId: QueryRulesQueryRuleset['ruleset_id'];
+  criteria: SearchQueryRulesQueryRule['criteria'];
+  type: SearchQueryRulesQueryRule['type'];
+  actions: SearchQueryRulesQueryRule['actions'];
+}

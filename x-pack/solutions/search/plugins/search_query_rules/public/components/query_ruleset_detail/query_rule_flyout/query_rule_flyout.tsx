@@ -31,7 +31,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
-import { useFetchQueryRule } from '../../../hooks/use_fetch_query_rule';
 import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../types';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
@@ -61,10 +60,8 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const ruleFromRuleset = rules.find((rule) => rule.rule_id === ruleId);
-  const { isLoading } = useFetchQueryRule(rulesetId, ruleId);
-  const data = ruleFromRuleset;
   const [isAlways, setIsAlways] = useState<boolean>(
-    (data?.criteria && isCriteriaAlways(data?.criteria)) ?? false
+    (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
   );
 
   useEffect(() => {
@@ -83,29 +80,16 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     }
   }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
 
-  // const isUpdateEnabled =
-  //   // TODO: add if has documents and they are valid &&
-  //   isAlways &&
-  //   (fields.length > 0
-  //     ? fields.every((field) => {
-  //         // TODO: check if valid
-  //         return true;
-  //       })
-  //     : false);
-
-  if (isLoading) {
-    return <></>;
-  }
   return (
     <EuiFlyout onClose={onClose} ownFocus={false} size="l" aria-labelledby="flyoutTitle">
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder data-test-subj="queryRulesFlyoutHeader">
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <EuiTitle size="m" id="flyoutTitle">
               <h2>
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.create"
-                  defaultMessage="Create rule"
+                  id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.edit"
+                  defaultMessage="Edit rule"
                 />
               </h2>
             </EuiTitle>
@@ -147,6 +131,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                         className="eui-displayInlineBlock"
                         options={[
                           {
+                            'data-test-subj': 'searchQueryRulesQueryRuleActionTypePinned',
                             id: 'pinned',
                             label: (
                               <>
@@ -160,6 +145,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                             ),
                           },
                           {
+                            'data-test-subj': 'searchQueryRulesQueryRuleActionTypeExclude',
                             id: 'exclude',
                             label: (
                               <>
@@ -207,14 +193,17 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     id="xpack.search.queryRulesetDetail.queryRuleFlyout.documentCount"
                     defaultMessage="{documentCount, plural, one {# document} other {# documents}}"
                     values={{
-                      documentCount: (data?.actions.ids?.length || data?.actions.docs?.length) ?? 0,
+                      documentCount:
+                        (ruleFromRuleset?.actions.ids?.length ||
+                          ruleFromRuleset?.actions.docs?.length) ??
+                        0,
                     }}
                   />
                 </b>
               </EuiText>
               <EuiDragDropContext onDragEnd={() => {}}>
                 <EuiDroppable droppableId="queryRuleDroppable" spacing="m">
-                  {data?.actions?.ids?.map((value, index) => (
+                  {ruleFromRuleset?.actions?.ids?.map((value, index) => (
                     <EuiDraggable
                       usePortal
                       spacing="m"
@@ -223,7 +212,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       draggableId={'queryRuleDocumentDraggable'}
                       key={value + '-' + index}
                     >
-                      {(provided) => (
+                      {() => (
                         <EuiPanel paddingSize="s" hasShadow={false}>
                           <EuiFlexGroup alignItems="center" gutterSize="s">
                             <EuiFlexItem grow={false}>
@@ -274,6 +263,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     className="eui-displayInlineBlock"
                     options={[
                       {
+                        'data-test-subj': 'searchQueryRulesQueryRuleCriteriaCustom',
                         id: 'custom',
                         label: (
                           <>
@@ -285,6 +275,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                         ),
                       },
                       {
+                        'data-test-subj': 'searchQueryRulesQueryRuleCriteriaAlways',
                         id: 'always',
                         label: (
                           <>
@@ -316,10 +307,10 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              {data &&
+              {ruleFromRuleset &&
                 !isAlways &&
                 fields.map((field, index) => (
-                  <>
+                  <React.Fragment key={field.id}>
                     <QueryRuleMetadataEditor
                       criteria={field}
                       key={field.id}
@@ -331,10 +322,10 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       }}
                     />
                     <EuiSpacer size="m" />
-                  </>
+                  </React.Fragment>
                 ))}
 
-              {data && !isAlways && (
+              {ruleFromRuleset && !isAlways && (
                 <EuiButton
                   data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                   onClick={() => {

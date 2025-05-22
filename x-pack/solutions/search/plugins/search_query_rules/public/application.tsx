@@ -14,7 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppPluginStartDependencies } from './types';
-import { QueryRuleFlyoutFormProvider } from './providers/query_rules_flyout_hook_provider';
 import { QueryRulesetDetailsForm } from './providers/query_ruleset_details_form';
 
 const queryClient = new QueryClient({});
@@ -29,15 +28,13 @@ export const renderApp = async (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
-          <QueryRuleFlyoutFormProvider>
-            <QueryRulesetDetailsForm>
-              <QueryClientProvider client={queryClient}>
-                <Router history={services.history}>
-                  <QueryRulesRouter />
-                </Router>
-              </QueryClientProvider>
-            </QueryRulesetDetailsForm>
-          </QueryRuleFlyoutFormProvider>
+          <QueryRulesetDetailsForm>
+            <QueryClientProvider client={queryClient}>
+              <Router history={services.history}>
+                <QueryRulesRouter />
+              </Router>
+            </QueryClientProvider>
+          </QueryRulesetDetailsForm>
         </I18nProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
