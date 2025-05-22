@@ -777,7 +777,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '90px',
         render(rule: RuleTableItem) {
           return (
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              gutterSize="none"
+              data-test-subj={`tableRow_ruleType_${rule.ruleTypeId}`}
+            >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
                   {rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId) ? (

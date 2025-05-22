@@ -358,16 +358,14 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           panelPaddingSize="none"
           data-test-subj="collapsedItemActions"
         >
-          <div data-test-subj={`contextMenu_ruleType_${item.ruleTypeId}`}>
-            <EuiContextMenu
-              initialPanelId={0}
-              panels={panels}
-              className="actCollapsedItemActions"
-              data-test-subj="collapsedActionPanel"
-              data-testid="collapsedActionPanel"
-              css={collapsedItemActionsCss}
-            />
-          </div>
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={panels}
+            className="actCollapsedItemActions"
+            data-test-subj="collapsedActionPanel"
+            data-testid="collapsedActionPanel"
+            css={collapsedItemActionsCss}
+          />
         </EuiPopover>
         {isUntrackAlertsModalOpen && (
           <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
