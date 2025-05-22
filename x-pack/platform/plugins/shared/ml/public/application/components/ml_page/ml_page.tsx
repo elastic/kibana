@@ -10,8 +10,7 @@ import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { Redirect, useLocation } from 'react-router-dom';
-import { Subscription } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs';
+import { map, distinctUntilChanged, Subscription } from 'rxjs';
 
 import type { EuiPaddingSize } from '@elastic/eui';
 import {
@@ -29,6 +28,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management';
@@ -37,7 +37,7 @@ import * as dfaRoutes from '../../routing/routes/data_frame_analytics_management
 import * as settingsRoutes from '../../routing/routes/settings';
 import * as trainedModelsRoutes from '../../routing/routes/trained_models';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
-import { useMlKibana, useMlManagementLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlManagementLocator, useNavigateToPath } from '../../contexts/kibana';
 import type { NavigateToPath } from '../../contexts/kibana';
 import type { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';

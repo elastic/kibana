@@ -11,9 +11,10 @@ import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlKibana, useMlManagementLocator } from '@kbn/ml-kibana-context';
-import { usePermissionCheck } from '@kbn/ml-services/capabilities/check_capabilities';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 
+import { useMlManagementLocator } from '../../../contexts/kibana/use_create_url';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
