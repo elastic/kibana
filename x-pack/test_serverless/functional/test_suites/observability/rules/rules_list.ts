@@ -691,7 +691,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         }
 
         expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
-        await new Promise((resolve) => setTimeout(resolve, 100000));
       });
 
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
