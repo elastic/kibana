@@ -11,7 +11,8 @@ import {
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,
 } from '@kbn/ml-common-constants/settings';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { useMlKibana, useUiSettings } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useUiSettings } from '../../contexts/kibana';
 import { createResultsUrlForJobs } from '../../util/results_url';
 
 export const useCreateADLinks = () => {
