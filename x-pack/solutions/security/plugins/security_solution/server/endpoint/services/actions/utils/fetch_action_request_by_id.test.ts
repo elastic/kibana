@@ -65,7 +65,7 @@ describe('fetchActionRequestById() utility', () => {
       });
     });
 
-    it('should error is action id is not accessible in active space', async () => {
+    it('should error if action id is not accessible in active space', async () => {
       await expect(fetchActionRequestById(endpointServiceMock, 'default', '123')).rejects.toThrow(
         'Action [123] not found'
       );
