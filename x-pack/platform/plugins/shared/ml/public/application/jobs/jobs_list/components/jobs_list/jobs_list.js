@@ -10,16 +10,6 @@ import React, { Component } from 'react';
 import { sortBy } from 'lodash';
 import moment from 'moment';
 
-import { TIME_FORMAT } from '@kbn/ml-date-utils';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
-
-import { toLocaleString } from '../../../../util/string_utils';
-import { JobIcon } from '../../../../components/job_message_icon';
-
-import { ResultLinks, actionsMenuContent } from '../job_actions';
-
-import { JobDescription } from './job_description';
-
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -30,12 +20,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { toLocaleString } from '@kbn/ml-common-utils/string_utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AnomalyDetectionJobIdLink } from './job_id_link';
-import { isManagedJob } from '../../../jobs_utils';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
+
+import { JobIcon } from '../../../../components/job_message_icon';
 import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
-import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
+
+import { isManagedJob } from '../../../jobs_utils';
+
+import { ResultLinks, actionsMenuContent } from '../job_actions';
+
+import { JobDescription } from './job_description';
+import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
