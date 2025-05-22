@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useUpgradeCheck } from '../../capabilities/check_capabilities';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUpgradeCheck } from '@kbn/ml-hooks/capabilities/use_upgrade_check';
 
 export const UpgradeWarning: FC = () => {
   const isUpgradeInProgress = useUpgradeCheck();

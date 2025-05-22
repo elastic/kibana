@@ -26,14 +26,15 @@ import {
 } from '@elastic/eui';
 
 import { JOB_STATE } from '@kbn/ml-common-constants/states';
-import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
-import { ForecastProgress } from './forecast_progress';
 import {
   checkPermission,
   createPermissionFailureMessage,
-} from '../../../capabilities/check_capabilities';
+} from '@kbn/ml-services/capabilities/check_capabilities';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
+import { ForecastProgress } from './forecast_progress';
 
 function getRunInputDisabledState(job, isForecastRequested, mlNodesAvailable, jobState) {
   // Disable the 'run forecast' text field and button if any of the conditions are met:

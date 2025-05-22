@@ -33,7 +33,7 @@ import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { forecastServiceFactory } from '../../../../../services/forecast_service';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
 
 const MAX_FORECASTS = 500;
 
