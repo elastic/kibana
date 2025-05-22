@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useState, useContext, useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -22,11 +21,15 @@ import {
   EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { isValidJson } from '@kbn/ml-common-utils/validation_utils';
+
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
 import { isAdvancedJobCreator } from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
