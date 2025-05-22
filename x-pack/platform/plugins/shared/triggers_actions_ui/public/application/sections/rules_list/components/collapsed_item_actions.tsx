@@ -358,7 +358,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           panelPaddingSize="none"
           data-test-subj="collapsedItemActions"
         >
-          <div data-test-subj={`contextMenu_${item.ruleTypeId}`}>
+          <div data-test-subj={`contextMenu_ruleType_${item.ruleTypeId}`}>
             <EuiContextMenu
               initialPanelId={0}
               panels={panels}
