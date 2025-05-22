@@ -8,6 +8,8 @@
 import type {
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
   FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
 
 export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview['id'] =
@@ -15,3 +17,9 @@ export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpa
 
 export const MisconfigurationFindingsPreviewPanelKey: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview['id'] =
   'findings-misconfiguration-panel-preview';
+
+export const VulnerabilityFindingsPanelKey: FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview['id'] =
+  'findings-vulnerability-panel';
+
+export const VulnerabilityFindingsPreviewPanelKey: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview['id'] =
+  'findings-vulnerability-panel-preview';

@@ -154,6 +154,7 @@ export interface FindingsVulnerabilityFlyoutHeaderProps {
 
 export interface FindingsVulnerabilityFlyoutContentProps {
   finding: CspVulnerabilityFinding;
+  isPreviewMode?: boolean;
 }
 
 export interface FindingsVulnerabilityFlyoutFooterProps {
@@ -163,4 +164,29 @@ export interface FindingsVulnerabilityFlyoutFooterProps {
 export interface FindingVulnerabilityFullFlyoutContentProps {
   finding: CspVulnerabilityFinding;
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+  isPreviewMode?: boolean;
 }
+
+// New
+
+interface BaseVulnerabilityFlyoutProps {
+  vulnerabilityId: string | string[];
+  resourceId: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId: string;
+}
+
+export type FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
+  id: 'findings-vulnerability-panel';
+  params: BaseVulnerabilityFlyoutProps & NonPreviewModeProps;
+};
+
+export type FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
+  id: 'findings-vulnerability-panel-preview';
+  params: BaseVulnerabilityFlyoutProps & PreviewModeProps;
+};
+
+export type FindingsVulnerabilityPanelExpandableFlyoutProps =
+  | FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview
+  | FindingsVulnerabilityPanelExpandableFlyoutPropsPreview;
