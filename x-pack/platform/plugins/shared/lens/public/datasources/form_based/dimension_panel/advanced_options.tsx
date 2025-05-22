@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiAccordion, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiAccordion, EuiTextColor, EuiTitle, useEuiTheme, euiThemeCssVariables } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
 import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <EuiAccordion
       id="advancedOptionsAccordion"
@@ -22,7 +21,7 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       buttonContent={
         <EuiTitle size="xxs">
           <h5>
-            <EuiTextColor color={euiTheme.colors.primary}>
+            <EuiTextColor color={euiThemeCssVariables.colors.primary}>
               {i18n.translate('xpack.lens.indexPattern.advancedSettings', {
                 defaultMessage: 'Advanced',
               })}
@@ -31,8 +30,8 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
         </EuiTitle>
       }
       css={css`
-        padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
-        color: ${euiTheme.colors.primary};
+        padding: 0 ${euiThemeCssVariables.size.base} ${euiThemeCssVariables.size.base};
+        color: ${euiThemeCssVariables.colors.primary};
       `}
     >
       {props.options.map(({ dataTestSubj, inlineElement }) => (
