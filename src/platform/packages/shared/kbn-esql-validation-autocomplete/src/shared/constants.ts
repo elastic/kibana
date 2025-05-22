@@ -41,3 +41,8 @@ export const UNSUPPORTED_COMMANDS_BEFORE_QSTR = new Set([
   'limit',
 ]);
 export const UNSUPPORTED_COMMANDS_BEFORE_MATCH = new Set(['limit']);
+
+export const UNSUPPORTED_AIOPS_FEATURES_LOGS_ESSENTIALS = {
+  commands: new Set(['change_point']),
+  functions: new Set(['categorize']),
+};

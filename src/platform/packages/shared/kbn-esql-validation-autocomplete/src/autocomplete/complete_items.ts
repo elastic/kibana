@@ -12,6 +12,7 @@ import type { ItemKind, SuggestionRawDefinition } from './types';
 import { TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
+import { UNSUPPORTED_AIOPS_FEATURES_LOGS_ESSENTIALS } from '../shared/constants';
 import { buildDocumentation } from './documentation_util';
 
 const techPreviewLabel = i18n.translate(
@@ -21,13 +22,18 @@ const techPreviewLabel = i18n.translate(
   }
 );
 
+export function isCommandUnsupportedForLogsEssentials(commandName: string) {
+  const hiddenCommands = UNSUPPORTED_AIOPS_FEATURES_LOGS_ESSENTIALS.commands;
+  return hiddenCommands.has(commandName);
+}
+
 export const getCommandAutocompleteDefinitions = (
   commands: Array<CommandDefinition<string>>
 ): SuggestionRawDefinition[] => {
   const suggestions: SuggestionRawDefinition[] = [];
 
   for (const command of commands) {
-    if (command.hidden) {
+    if (command.hidden || isCommandUnsupportedForLogsEssentials(command.name)) {
       continue;
     }
 
