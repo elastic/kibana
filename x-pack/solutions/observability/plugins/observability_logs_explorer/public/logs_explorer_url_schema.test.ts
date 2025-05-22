@@ -15,6 +15,7 @@ import {
 } from './logs_explorer_url_schema';
 import type { DisplayOptions, ControlOptions } from './logs_explorer_schema_types';
 import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src/data_types';
 
 jest.mock('@kbn/discover-utils/src/data_types/logs/utils', () => ({
   getAllLogsDataViewSpec: jest.fn(({ allLogsIndexPattern }) => ({
@@ -38,7 +39,7 @@ describe('logs_explorer_url_schema', () => {
     it('should handle "all" selection type correctly', () => {
       const result = hydrateDataSourceSelection({ selectionType: 'all' });
       expect(result).toEqual({
-        id: 'discover-observability-solution-all-logs',
+        id: ALL_LOGS_DATA_VIEW_ID,
       });
     });
 
