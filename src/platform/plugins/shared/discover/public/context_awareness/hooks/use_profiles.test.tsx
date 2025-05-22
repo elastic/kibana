@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
-import { ScopedProfilesManagerProvider, type GetProfilesOptions } from '../profiles_manager';
+import { type GetProfilesOptions } from '../profiles_manager';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { useProfiles } from './use_profiles';
 import type { CellRenderersExtensionParams } from '../types';
 import type { AppliedProfile } from '../composable_profile';
 import { SolutionType } from '../profiles';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 const {
   rootProfileProviderMock,
@@ -60,11 +60,9 @@ const render = () => {
   return renderHook((props) => useProfiles(props), {
     initialProps: { record } as React.PropsWithChildren<GetProfilesOptions>,
     wrapper: ({ children }) => (
-      <KibanaContextProvider services={services}>
-        <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
-          {children}
-        </ScopedProfilesManagerProvider>
-      </KibanaContextProvider>
+      <DiscoverTestProvider services={services} scopedProfilesManager={scopedProfilesManager}>
+        {children}
+      </DiscoverTestProvider>
     ),
   });
 };

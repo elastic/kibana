@@ -60,6 +60,7 @@ export { selectAllTabs, selectTab } from './selectors';
 
 export {
   type RuntimeStateManager,
+  type CombinedRuntimeState,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,

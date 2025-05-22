@@ -17,13 +17,12 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
-import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
+import { internalStateActions } from '../../state_management/redux';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -116,15 +115,13 @@ describe('Discover topnav component', () => {
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
     const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-          <ScopedProfilesManagerProvider
-            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-          >
-            <DiscoverTopNav {...props} />
-          </ScopedProfilesManagerProvider>
-        </RuntimeStateProvider>
-      </DiscoverMainProvider>
+      <DiscoverTestProvider
+        services={mockDiscoverService}
+        stateContainer={props.stateContainer}
+        runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+      >
+        <DiscoverTopNav {...props} />
+      </DiscoverTestProvider>
     );
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
@@ -134,15 +131,13 @@ describe('Discover topnav component', () => {
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
     const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-          <ScopedProfilesManagerProvider
-            scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-          >
-            <DiscoverTopNav {...props} />
-          </ScopedProfilesManagerProvider>
-        </RuntimeStateProvider>
-      </DiscoverMainProvider>
+      <DiscoverTestProvider
+        services={mockDiscoverService}
+        stateContainer={props.stateContainer}
+        runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+      >
+        <DiscoverTopNav {...props} />
+      </DiscoverTestProvider>
     );
     const topNavMenu = component.find(TopNavMenu).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
@@ -162,15 +157,13 @@ describe('Discover topnav component', () => {
       };
       const props = getProps();
       const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-            <ScopedProfilesManagerProvider
-              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            >
-              <DiscoverTopNav {...props} />
-            </ScopedProfilesManagerProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <DiscoverTestProvider
+          services={mockDiscoverService}
+          stateContainer={props.stateContainer}
+          runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+        >
+          <DiscoverTopNav {...props} />
+        </DiscoverTestProvider>
       );
       const topNavMenu = component.find(TopNavMenu);
       const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
@@ -188,15 +181,13 @@ describe('Discover topnav component', () => {
 
       const props = getProps();
       const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-            <ScopedProfilesManagerProvider
-              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            >
-              <DiscoverTopNav {...props} />
-            </ScopedProfilesManagerProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <DiscoverTestProvider
+          services={mockDiscoverService}
+          stateContainer={props.stateContainer}
+          runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+        >
+          <DiscoverTopNav {...props} />
+        </DiscoverTestProvider>
       );
 
       expect(component.find({ 'data-test-subj': 'custom-search-bar' })).toHaveLength(1);
@@ -206,15 +197,13 @@ describe('Discover topnav component', () => {
       mockUseCustomizations = true;
       const props = getProps();
       const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-            <ScopedProfilesManagerProvider
-              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            >
-              <DiscoverTopNav {...props} />
-            </ScopedProfilesManagerProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <DiscoverTestProvider
+          services={mockDiscoverService}
+          stateContainer={props.stateContainer}
+          runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+        >
+          <DiscoverTopNav {...props} />
+        </DiscoverTestProvider>
       );
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
@@ -233,15 +222,13 @@ describe('Discover topnav component', () => {
 
       const props = getProps();
       const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-            <ScopedProfilesManagerProvider
-              scopedProfilesManager={mockDiscoverService.profilesManager.createScopedProfilesManager()}
-            >
-              <DiscoverTopNav {...props} />
-            </ScopedProfilesManagerProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <DiscoverTestProvider
+          services={mockDiscoverService}
+          stateContainer={props.stateContainer}
+          runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+        >
+          <DiscoverTopNav {...props} />
+        </DiscoverTestProvider>
       );
 
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);

@@ -14,7 +14,6 @@ import {
   toCellActionContext,
   useAdditionalCellActions,
 } from './use_additional_cell_actions';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
 import { createEsqlDataSource } from '../../../common/data_sources';
@@ -31,7 +30,8 @@ import {
 } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ScopedProfilesManagerProvider, type ScopedProfilesManager } from '../profiles_manager';
+import { type ScopedProfilesManager } from '../profiles_manager';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 let mockScopedProfilesManager: ScopedProfilesManager;
 let mockUuid = 0;
@@ -81,11 +81,12 @@ describe('useAdditionalCellActions', () => {
     return renderHook(useAdditionalCellActions, {
       initialProps,
       wrapper: ({ children }) => (
-        <KibanaContextProvider services={discoverServiceMock}>
-          <ScopedProfilesManagerProvider scopedProfilesManager={mockScopedProfilesManager}>
-            {children}
-          </ScopedProfilesManagerProvider>
-        </KibanaContextProvider>
+        <DiscoverTestProvider
+          services={discoverServiceMock}
+          scopedProfilesManager={mockScopedProfilesManager}
+        >
+          {children}
+        </DiscoverTestProvider>
       ),
     });
   };

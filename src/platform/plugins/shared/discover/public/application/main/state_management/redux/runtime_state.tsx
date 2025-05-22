@@ -76,7 +76,8 @@ export const useCurrentTabRuntimeState = <T,>(
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-type CombinedRuntimeState = DiscoverRuntimeState & Omit<TabRuntimeState, 'scopedProfilesManager'>;
+export type CombinedRuntimeState = DiscoverRuntimeState &
+  Omit<TabRuntimeState, 'scopedProfilesManager'>;
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
