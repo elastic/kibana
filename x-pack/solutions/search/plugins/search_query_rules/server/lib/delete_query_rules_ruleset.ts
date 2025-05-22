@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { ElasticsearchClient } from '@kbn/core/server';
 
-import { useDarkMode } from '../kibana';
-
-export const useEuiTheme = () => {
-  const darkMode = useDarkMode();
-  return darkMode ? darkTheme : lightTheme;
+export const deleteRuleset = async (client: ElasticsearchClient, rulesetId: string) => {
+  return await client.queryRules.deleteRuleset({ ruleset_id: rulesetId });
 };
