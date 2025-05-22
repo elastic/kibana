@@ -31,7 +31,9 @@
       "features",
       "fieldFormats",
       "inspector",
+      "lens",
       "licensing",
+      "maps",
       "navigation",
       "ruleRegistry",
       "sessionView",
@@ -67,9 +69,7 @@
       "usageCollection",
       "lists",
       "home",
-      "lens",
       "management",
-      "maps",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
@@ -83,12 +83,10 @@
       "kibanaUtils",
       "kibanaReact",
       "usageCollection",
-      "lens",
       "lists",
       "ml",
       "unifiedSearch",
-      "esql",
-      "maps"
+      "esql"
     ],
     "extraPublicDirs": [
       "common"
