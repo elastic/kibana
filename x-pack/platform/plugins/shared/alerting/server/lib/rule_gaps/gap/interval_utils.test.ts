@@ -15,6 +15,7 @@ import {
   normalizeInterval,
   denormalizeInterval,
   clipInterval,
+  clampIntervals,
 } from './interval_utils';
 import type { Interval, StringInterval } from '../types';
 
@@ -258,6 +259,96 @@ describe('interval_utils', () => {
         lte: new Date('2025-01-01T12:30:00Z'),
       };
       expect(clipInterval(interval, boundary)).toBeNull();
+    });
+  });
+
+  describe('clampIntervals', () => {
+    const toInterval = (start: string, end: string) => ({ gte: start, lte: end });
+
+    const buildTestCase = (
+      testDescription: string,
+      intervals: StringInterval[],
+      boundary: StringInterval,
+      expectedResult: StringInterval[]
+    ) => ({
+      testDescription,
+      intervals,
+      boundary,
+      expectedResult,
+    });
+
+    const testCases = [
+      buildTestCase(
+        'when the list of intervals is outside the range on the left, it should return an empty list',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:15:09.457Z', '2025-05-09T09:17:09.457Z'),
+        []
+      ),
+      buildTestCase(
+        'when the list of intervals overlaps on the left, it should clamp the overlapping interval on the start',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:14:50.457Z', '2025-05-09T09:17:09.457Z'),
+        [toInterval('2025-05-09T09:14:50.457Z', '2025-05-09T09:15:09.457Z')]
+      ),
+      buildTestCase(
+        'when the list of intervals overlaps with the range on both left and right, it should clamp the overlapping intervals',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:15:09.457Z', '2025-05-09T09:16:09.457Z'),
+          toInterval('2025-05-09T09:17:09.458Z', '2025-05-09T09:20:09.457Z'),
+          toInterval('2025-05-09T09:21:09.458Z', '2025-05-09T09:22:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:15:50.457Z', '2025-05-09T09:18:09.457Z'),
+        [
+          toInterval('2025-05-09T09:15:50.457Z', '2025-05-09T09:16:09.457Z'),
+          toInterval('2025-05-09T09:17:09.458Z', '2025-05-09T09:18:09.457Z'),
+        ]
+      ),
+      buildTestCase(
+        'when the list of intervals is included inside the range, it should not clamp anything',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T08:11:50.457Z', '2025-05-09T09:17:09.457Z'),
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ]
+      ),
+      buildTestCase(
+        'when the list of intervals overlaps on the right, it should clamp the overlapping interval on the end',
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:15:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:11:50.457Z', '2025-05-09T09:14:55.457Z'),
+        [
+          toInterval('2025-05-09T09:12:09.457Z', '2025-05-09T09:13:09.457Z'),
+          toInterval('2025-05-09T09:14:09.457Z', '2025-05-09T09:14:55.457Z'),
+        ]
+      ),
+      buildTestCase(
+        'when the list of intervals is outside the range on the right, it should return an empty list',
+        [
+          toInterval('2025-05-09T09:18:09.457Z', '2025-05-09T09:20:09.457Z'),
+          toInterval('2025-05-09T09:21:09.457Z', '2025-05-09T09:22:09.457Z'),
+        ],
+        toInterval('2025-05-09T09:15:09.457Z', '2025-05-09T09:17:09.457Z'),
+        []
+      ),
+    ];
+
+    testCases.forEach(({ testDescription, intervals, boundary, expectedResult }) => {
+      it(testDescription, () => {
+        expect(clampIntervals(intervals, boundary)).toEqual(expectedResult);
+      });
     });
   });
 });

@@ -5,43 +5,30 @@
  * 2.0.
  */
 
-/**
- * Clamps the list `intervals` (in ascending order) to the dates provided in the `range`
- * @param intervals
- * @param range
- * @returns
- */
-export const clampIntervalsForScheduling = (
-  intervals: Array<{ gte: string; lte: string }>,
-  range: { start: string; end: string }
+import type { BulkGapsFillStep } from './types';
+
+export const toBulkGapFillError = (
+  rule: { id: string; name: string },
+  step: BulkGapsFillStep,
+  error: Error
 ) => {
-  const clampedIntervals = [];
-  const { start, end } = range;
-
-  for (const { gte, lte } of intervals) {
-    // If the interval ends before the range starts, skip it
-    if (lte < start) {
-      continue;
-    }
-
-    // If the interval starts after the range ends, stop processing (since the list is sorted)
-    if (gte > end) {
+  let fallbackMessage: string;
+  switch (step) {
+    case 'BULK_GAPS_FILL_STEP_SCHEDULING':
+      fallbackMessage = 'Error scheduling backfills';
       break;
-    }
-
-    const clamped = {
-      gte: gte < start ? start : gte,
-      lte: lte > end ? end : lte,
-    };
-
-    // Atter clamping the intervals the limits cannot be the same
-    if (clamped.gte >= clamped.lte) {
-      continue;
-    }
-
-    // Clamp the interval to the range
-    clampedIntervals.push(clamped);
+    case 'BULK_GAPS_FILL_STEP_GAPS_RESOLUTION':
+      fallbackMessage = 'Error resolving gaps';
+      break;
+    case 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION':
+      fallbackMessage = 'Error validating user access to the rule';
   }
-
-  return clampedIntervals;
+  return {
+    rule: {
+      id: rule.id,
+      name: rule.name,
+    },
+    step,
+    errorMessage: error?.message ?? fallbackMessage,
+  };
 };

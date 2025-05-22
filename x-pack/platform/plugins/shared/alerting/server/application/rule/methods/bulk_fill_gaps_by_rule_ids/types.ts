@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type {
-  ScheduleBackfillParams,
-  ScheduleBackfillResults,
-} from '../../../backfill/methods/schedule/types';
+import type { ScheduleBackfillResults } from '../../../backfill/methods/schedule/types';
 
-export type BulkGapsFillStep = 'ACCESS_VALIDATION' | 'RESOLVING_GAPS' | 'SCHEDULING';
+export type BulkGapsFillStep =
+  | 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION'
+  | 'BULK_GAPS_FILL_STEP_GAPS_RESOLUTION'
+  | 'BULK_GAPS_FILL_STEP_SCHEDULING';
 
 export interface BulkGapFillingErroredRule {
   rule: {
@@ -40,28 +40,6 @@ export interface BulkFillGapsByRuleIdsParams {
 }
 
 export interface BulkFillGapsByRuleIdsResult {
-  outcomes: ScheduleBackfillResults[];
-  skipped: BulkGapFillingSkippedRule[];
-  errored: BulkGapFillingErroredRule[];
-}
-
-export interface GetBackfillSchedulePayloadsParams {
-  rules: Array<
-    Pick<BulkFillGapsByRuleIdsParams['rules'][0], 'id' | 'name'> & {
-      gapPagination: { page: number };
-    }
-  >;
-  range: BulkFillGapsByRuleIdsParams['range'];
-  maxGapPageSize: number;
-}
-
-export interface GetBackfillSchedulePayloadsResult {
-  payloads: ScheduleBackfillParams;
-  next: GetBackfillSchedulePayloadsParams['rules'];
-  errored: BulkGapFillingErroredRule[];
-}
-
-export interface BulkFillGapsImplResult {
   outcomes: ScheduleBackfillResults[];
   skipped: BulkGapFillingSkippedRule[];
   errored: BulkGapFillingErroredRule[];
