@@ -29,14 +29,18 @@ export const getConfigStatusByLocation = (
   const configIdByLocation = `${configId}-${locationId}`;
 
   if (!status) {
-    return { status: 'unknown', configIdByLocation };
+    return { status: 'pending', configIdByLocation };
   }
-  const config = status.upConfigs[configId] || status.downConfigs[configId];
+  const config =
+    status.upConfigs[configId] ||
+    status.upConfigs[configIdByLocation] ||
+    status.downConfigs[configId] ||
+    status.downConfigs[configIdByLocation];
   const monitorStatus = config?.locations?.find((location) => location.id === locationId)?.status;
 
   return {
     configIdByLocation,
-    status: monitorStatus || 'unknown',
+    status: monitorStatus || 'pending',
     timestamp: config?.timestamp,
   };
 };

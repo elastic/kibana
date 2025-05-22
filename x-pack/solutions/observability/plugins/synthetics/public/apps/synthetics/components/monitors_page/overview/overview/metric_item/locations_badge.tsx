@@ -52,32 +52,38 @@ export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData })
   ];
 
   const button = (
-    <EuiBadge
-      data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"
-      iconType="arrowDown"
-      iconSide="right"
+    <div
       onMouseOver={() => {
         setPopover(true);
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-        setPopover(!isPopoverOpen);
-      }}
-      iconOnClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        setPopover(!isPopoverOpen);
-      }}
-      iconOnClickAriaLabel={'Click to open context menu'}
-      onClickAriaLabel="Click to open context menu"
     >
-      {i18n.translate('xpack.synthetics.locationsBadge.clickMeToLoadButtonLabel', {
-        defaultMessage: '{locations} Locations',
-        values: {
-          locations: monitor.locations.length,
-        },
-      })}
-    </EuiBadge>
+      <EuiBadge
+        data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"
+        iconType="arrowDown"
+        iconSide="right"
+        onMouseOver={() => {
+          setPopover(true);
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setPopover(!isPopoverOpen);
+        }}
+        iconOnClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setPopover(!isPopoverOpen);
+        }}
+        iconOnClickAriaLabel={'Click to open context menu'}
+        onClickAriaLabel="Click to open context menu"
+      >
+        {i18n.translate('xpack.synthetics.locationsBadge.clickMeToLoadButtonLabel', {
+          defaultMessage: '{locations} Locations',
+          values: {
+            locations: monitor.locations.length,
+          },
+        })}
+      </EuiBadge>
+    </div>
   );
 
   return (

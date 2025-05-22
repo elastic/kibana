@@ -105,14 +105,13 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
-  locationId: locId,
+  locationId: locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
 
   const { http } = useKibana().services;
-  const locationId = locId ?? monitor.locations[0].id;
   const locationLabel = monitor.locations[0].label;
 
   const detailUrl = useMonitorDetailLocator({

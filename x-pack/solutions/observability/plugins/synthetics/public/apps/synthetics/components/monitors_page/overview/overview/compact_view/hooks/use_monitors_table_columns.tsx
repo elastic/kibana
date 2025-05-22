@@ -81,7 +81,6 @@ export const useMonitorsTableColumns = ({
   const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(
     () => [
       {
-        field: 'status',
         name: STATUS,
         render: (monitor: OverviewStatusMetaData) => (
           <BadgeStatus
@@ -135,7 +134,6 @@ export const useMonitorsTableColumns = ({
           ),
       },
       {
-        field: 'locationLabel',
         name: LOCATIONS,
         render: (monitor: OverviewStatusMetaData) => {
           return <MonitorLocations configId={monitor.configId} locations={monitor.locations} />;

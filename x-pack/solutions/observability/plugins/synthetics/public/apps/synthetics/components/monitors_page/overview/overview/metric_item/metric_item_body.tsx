@@ -33,9 +33,11 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <LocationsBadge monitor={monitor} />
-        </EuiFlexItem>
+        {monitor?.locations?.length > 1 && (
+          <EuiFlexItem>
+            <LocationsBadge monitor={monitor} />
+          </EuiFlexItem>
+        )}
         {(tags ?? []).length > 0 && (
           <EuiFlexItem grow={false}>
             <TagsList

@@ -119,3 +119,11 @@ export enum LegacyConfigKey {
   UPLOAD_SPEED = 'throttling.upload_speed',
   LATENCY = 'throttling.latency',
 }
+
+export const MONITOR_STATUS_ENUM = {
+  UP: 'up',
+  DOWN: 'down',
+  PENDING: 'pending',
+  SUCCESS: 'succeeded',
+  DISABLED: 'disabled',
+};

@@ -176,18 +176,23 @@ describe('current status route', () => {
           "disabledMonitorsCount": 0,
           "down": 1,
           "downConfigs": Object {
-            "id2-europe_germany": Object {
+            "id2": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "europe_germany",
               "locationLabel": "Europe - Germany",
+              "locations": Array [
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "down",
+                },
+              ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "down",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -195,7 +200,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": undefined,
+              "urls": "undefined",
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -207,18 +212,23 @@ describe('current status route', () => {
           "projectMonitorsCount": 0,
           "up": 2,
           "upConfigs": Object {
-            "id1-asia_japan": Object {
+            "id1": Object {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "up",
+                },
+              ],
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "up",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -226,20 +236,25 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": undefined,
+              "urls": "undefined",
             },
-            "id2-asia_japan": Object {
+            "id2": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "up",
+                },
+              ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "up",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -247,7 +262,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": undefined,
+              "urls": "undefined",
             },
           },
         }
@@ -338,18 +353,23 @@ describe('current status route', () => {
           "disabledMonitorsCount": 0,
           "down": 1,
           "downConfigs": Object {
-            "id2-europe_germany": Object {
+            "id2": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "europe_germany",
               "locationLabel": "Europe - Germany",
+              "locations": Array [
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "down",
+                },
+              ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "down",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -357,7 +377,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": undefined,
+              "urls": "undefined",
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -369,18 +389,23 @@ describe('current status route', () => {
           "projectMonitorsCount": 0,
           "up": 2,
           "upConfigs": Object {
-            "id1-asia_japan": Object {
+            "id1": Object {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "up",
+                },
+              ],
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "up",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -388,20 +413,25 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": undefined,
+              "urls": "undefined",
             },
-            "id2-asia_japan": Object {
+            "id2": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "up",
+                },
+              ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "up",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -409,7 +439,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
-              "urls": undefined,
+              "urls": "undefined",
             },
           },
         }
@@ -448,20 +478,25 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
-          "pending": 3,
+          "pending": 2,
           "pendingConfigs": Object {
-            "id1-asia_japan": Object {
+            "id1": Object {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "pending",
+                },
+              ],
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "unknown",
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -471,39 +506,28 @@ describe('current status route', () => {
               "updated_at": undefined,
               "urls": undefined,
             },
-            "id2-asia_japan": Object {
+            "id2": Object {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationId": "asia_japan",
               "locationLabel": "Asia/Pacific - Japan",
-              "monitorQueryId": "id2",
-              "name": "test monitor 2",
-              "projectId": "project-id",
-              "schedule": "1",
-              "spaceId": undefined,
-              "status": "unknown",
-              "tags": Array [
-                "tag-1",
-                "tag-2",
+              "locations": Array [
+                Object {
+                  "id": "asia_japan",
+                  "label": "Asia/Pacific - Japan",
+                  "status": "pending",
+                },
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "pending",
+                },
               ],
-              "timestamp": undefined,
-              "type": "browser",
-              "updated_at": undefined,
-              "urls": undefined,
-            },
-            "id2-europe_germany": Object {
-              "configId": "id2",
-              "isEnabled": true,
-              "isStatusAlertEnabled": false,
-              "locationId": "europe_germany",
-              "locationLabel": "Europe - Germany",
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
-              "status": "unknown",
               "tags": Array [
                 "tag-1",
                 "tag-2",

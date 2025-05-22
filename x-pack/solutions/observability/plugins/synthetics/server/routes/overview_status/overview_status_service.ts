@@ -13,7 +13,7 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMonitorFilters, OverviewStatusQuery } from '../common';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { ConfigKey } from '../../../common/constants/monitor_management';
+import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
 import { RouteContext } from '../types';
 import {
   EncryptedSyntheticsMonitorAttributes,
@@ -30,7 +30,7 @@ type LocationStatus = Array<{
   status: string;
   locationId: string;
   timestamp: string;
-  monitorUrl: string;
+  monitorUrl?: string;
 }>;
 
 export const SUMMARIES_PAGE_SIZE = 5000;
@@ -256,7 +256,7 @@ export class OverviewStatusService {
           disabledConfigs[meta.configId].locations.push({
             id: location.id,
             label: location.label,
-            status: 'disabled',
+            status: MONITOR_STATUS_ENUM.DISABLED,
           });
         } else {
           disabledConfigs[meta.configId] = {
@@ -265,7 +265,7 @@ export class OverviewStatusService {
               {
                 id: location.id,
                 label: location.label,
-                status: 'disabled',
+                status: MONITOR_STATUS_ENUM.DISABLED,
               },
             ],
             ...meta,
@@ -298,19 +298,19 @@ export class OverviewStatusService {
         const location = {
           id: monLocation.id,
           label: monLocation.label,
-          status: locData?.status || 'unknown',
+          status: locData?.status || MONITOR_STATUS_ENUM.PENDING,
         };
         if (locData) {
           if (downConfigs[meta.configId]) {
             downConfigs[meta.configId].locations.push(location);
           } else {
-            if (locData.status === 'down') {
+            if (locData.status === MONITOR_STATUS_ENUM.DOWN) {
               down += 1;
               downConfigs[meta.configId] = {
                 ...meta,
                 locations: [location],
               };
-            } else if (locData.status === 'up') {
+            } else if (locData.status === MONITOR_STATUS_ENUM.UP) {
               up += 1;
               if (upConfigs[meta.configId]) {
                 upConfigs[meta.configId].locations.push(location);

@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_management';
 import {
   EncryptedSyntheticsMonitor,
   OverviewStatusMetaData,
@@ -24,7 +25,7 @@ export const BadgeStatus = ({
   onClickBadge?: () => void;
 }) => {
   const monStatus = status ? status : monitor?.locations[0]?.status;
-  const { color, dataTestSubj, labels } = badgeMapping[monStatus || 'unknown'];
+  const { color, dataTestSubj, labels } = badgeMapping[monStatus || MONITOR_STATUS_ENUM.PENDING];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
 
   return (
@@ -115,7 +116,7 @@ interface BadgeData {
 }
 
 const badgeMapping: Record<string, BadgeData> = {
-  unknown: {
+  pending: {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },
