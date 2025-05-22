@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { camelCase, pick } from 'lodash';
+import { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -46,7 +46,6 @@ import {
   FramePublicAPI,
   DatasourceMap,
   VisualizationMap,
-  DatasourceLayers,
   UserMessagesGetter,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
