@@ -42,13 +42,20 @@ const bucketParameterTypes: Array<
   ]
 > = [
   // field   // bucket   //from    // to   //result
-  ['date', 'date_period', null, null, 'date'],
-  ['date', 'integer', 'date', 'date', 'date'],
+  // 2-param signatures
   ['date_nanos', 'date_period', null, null, 'date_nanos'],
-  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
-  // Modified time_duration to time_literal
+  ['date', 'date_period', null, null, 'date'],
+  ['date_nanos', 'time_literal', null, null, 'date_nanos'],
   ['date', 'time_literal', null, null, 'date'],
   ['double', 'double', null, null, 'double'],
+  ['double', 'integer', null, null, 'double'],
+  ['integer', 'double', null, null, 'double'],
+  ['integer', 'integer', null, null, 'double'],
+  ['long', 'double', null, null, 'double'],
+  ['long', 'integer', null, null, 'double'],
+  // 4-param signatures
+  ['date', 'integer', 'date', 'date', 'date'],
+  ['date_nanos', 'integer', 'date', 'date', 'date_nanos'],
   ['double', 'integer', 'double', 'double', 'double'],
   ['double', 'integer', 'double', 'integer', 'double'],
   ['double', 'integer', 'double', 'long', 'double'],
@@ -58,7 +65,6 @@ const bucketParameterTypes: Array<
   ['double', 'integer', 'long', 'double', 'double'],
   ['double', 'integer', 'long', 'integer', 'double'],
   ['double', 'integer', 'long', 'long', 'double'],
-  ['integer', 'double', null, null, 'double'],
   ['integer', 'integer', 'double', 'double', 'double'],
   ['integer', 'integer', 'double', 'integer', 'double'],
   ['integer', 'integer', 'double', 'long', 'double'],
@@ -68,7 +74,6 @@ const bucketParameterTypes: Array<
   ['integer', 'integer', 'long', 'double', 'double'],
   ['integer', 'integer', 'long', 'integer', 'double'],
   ['integer', 'integer', 'long', 'long', 'double'],
-  ['long', 'double', null, null, 'double'],
   ['long', 'integer', 'double', 'double', 'double'],
   ['long', 'integer', 'double', 'integer', 'double'],
   ['long', 'integer', 'double', 'long', 'double'],
@@ -317,7 +322,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
   // MATCH and QSRT has limited supported for where commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    locationsAvailable = [Location.WHERE];
+    locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
   }
   const ret = {
     type: ESFunctionDefinition.type,

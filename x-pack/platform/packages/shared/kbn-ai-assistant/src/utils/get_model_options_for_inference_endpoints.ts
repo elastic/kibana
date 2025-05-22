@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 export interface ModelOptionsData {
   key: string;
@@ -63,19 +69,19 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
 > = {
-  '.elser-2-elasticsearch': {
+  [ELSER_ON_ML_NODE_INFERENCE_ID]: {
     title: elserTitle,
     description: elserDescription,
   },
-  '.elser-v2-elastic': {
+  [ELSER_IN_EIS_INFERENCE_ID]: {
     title: elserTitle,
     description: elserDescription,
   },
-  '.multilingual-e5-small-elasticsearch': {
+  [E5_SMALL_INFERENCE_ID]: {
     title: e5SmallTitle,
     description: e5SmallDescription,
   },
-  '.multilingual-e5-large-elasticsearch': {
+  [E5_LARGE_IN_EIS_INFERENCE_ID]: {
     title: e5LargeTitle,
     description: e5LargeDescription,
   },
@@ -86,22 +92,31 @@ export const getModelOptionsForInferenceEndpoints = ({
 }: {
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
-  // TODO: add logic to show the EIS models if EIS is enabled, if not show the other models
-  const preConfiguredEndpoints = endpoints
-    .map((endpoint) => {
-      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id];
+  const hasElserEIS = endpoints.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID);
+  const hasE5EIS = endpoints.some((ep) => ep.inference_id === E5_LARGE_IN_EIS_INFERENCE_ID);
 
-      if (!meta) {
-        return undefined;
+  return endpoints
+    .filter((endpoint) => {
+      // if ELSER exists in EIS, skip the other ELSER model
+      if (endpoint.inference_id === ELSER_ON_ML_NODE_INFERENCE_ID && hasElserEIS) {
+        return false;
       }
+
+      // if e5-large exists in EIS, skip the e5-small
+      if (endpoint.inference_id === E5_SMALL_INFERENCE_ID && hasE5EIS) {
+        return false;
+      }
+
+      // Only include preconfigured endpoints and skip custom endpoints
+      return Boolean(PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]);
+    })
+    .map((endpoint) => {
+      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]!;
 
       return {
         key: endpoint.inference_id,
         label: meta.title,
         description: meta.description,
       };
-    })
-    .filter(Boolean) as ModelOptionsData[];
-
-  return preConfiguredEndpoints;
+    });
 };

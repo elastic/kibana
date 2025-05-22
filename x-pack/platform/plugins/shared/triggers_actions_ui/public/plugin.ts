@@ -34,6 +34,9 @@ import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plug
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -65,6 +68,7 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
 
 import type {
   ActionTypeModel,
@@ -166,6 +170,7 @@ interface PluginsStart {
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  uiActions: UiActionsStart;
 }
 
 export class Plugin
@@ -426,6 +431,23 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const createAlertRuleAction = async () => {
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      return action;
+    };
+
+    plugins.uiActions.addTriggerActionAsync(
+      ALERT_RULE_TRIGGER,
+      ALERT_RULE_TRIGGER,
+      createAlertRuleAction
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      ALERT_RULE_TRIGGER,
+      createAlertRuleAction
+    );
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
