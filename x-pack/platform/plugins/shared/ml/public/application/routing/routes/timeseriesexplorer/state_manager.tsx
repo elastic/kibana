@@ -10,6 +10,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
+
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -17,9 +18,10 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { TimeSeriesExplorerAppState } from '@kbn/ml-common-types/locator';
 import { useMlJobService } from '@kbn/ml-services/job_service';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils';
+
 import { getViewableDetectors } from '../../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { useNotifications } from '../../../contexts/kibana';
-import { isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
 import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
 import { useForecastService } from '../../../services/forecast_service';
 import { useTimeSeriesExplorerService } from '../../../util/time_series_explorer_service';

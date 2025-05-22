@@ -7,6 +7,8 @@
 
 import React, { type FC, useMemo } from 'react';
 import { pick } from 'lodash';
+import useLifecycles from 'react-use/lib/useLifecycles';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -15,16 +17,15 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import useLifecycles from 'react-use/lib/useLifecycles';
-import useObservable from 'react-use/lib/useObservable';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '@kbn/ml-common-constants/app';
 import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 import { getMlGlobalServices } from '@kbn/ml-services/get_services';
 import type { StartServices } from '@kbn/ml-kibana-context';
+import { setLicenseCache } from '@kbn/ml-license/check_license';
+
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
