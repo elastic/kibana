@@ -29,6 +29,7 @@
       "dashboard",
       "licensing",
       "expressions",
+      "lens",
       "controls",
       "embeddable",
       "fieldsMetadata",
@@ -38,7 +39,6 @@
       "cloud",
       "features",
       "home",
-      "lens",
       "spaces",
       "serverless",
       "share"
