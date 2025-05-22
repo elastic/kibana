@@ -49,7 +49,7 @@ export interface VulnerabilitiesFindingTableDetailsFields {
   [VULNERABILITY.TITLE]: string;
   [VULNERABILITY.ID]: string;
   [VULNERABILITY.SEVERITY]: string;
-  [VULNERABILITY.PACKAGE_NAME]: string;
+  [VULNERABILITY.PACKAGE_NAME]: string | string[];
 }
 
 export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'score'> &
