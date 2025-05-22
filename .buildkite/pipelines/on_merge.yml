@@ -10,7 +10,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 75
+      diskSizeGb: 80
     retry:
       automatic:
         - exit_status: '*'
@@ -151,7 +151,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -168,7 +168,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
