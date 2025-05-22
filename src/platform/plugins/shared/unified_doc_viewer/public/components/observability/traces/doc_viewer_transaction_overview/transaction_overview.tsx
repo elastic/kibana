@@ -30,6 +30,7 @@ import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
+  showWaterfall?: boolean;
 };
 
 export function TransactionOverview({
@@ -39,6 +40,7 @@ export function TransactionOverview({
   onAddColumn,
   onRemoveColumn,
   tracesIndexPattern,
+  showWaterfall = true,
 }: TransactionOverviewProps) {
   const parsedDoc = useMemo(() => getTransactionDocumentOverview(hit), [hit]);
   const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
@@ -92,6 +94,7 @@ export function TransactionOverview({
                 traceId={traceId}
                 docId={transactionId}
                 displayType="transaction"
+                showWaterfall={showWaterfall}
               />
             </>
           ) : null}
