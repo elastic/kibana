@@ -14,6 +14,22 @@ const USER_ERRORS_EXCEPTIONS = [
 ];
 
 /**
+ *
+ * @param error
+ * @returns
+ */
+export const isMlJobMissingError = (error: unknown): boolean => {
+  /*
+  This is the logic I pulled directly from the ML rule type.
+  I am also checking length here because the message returned
+  from ES for a missing ML job is seemingly always <job name> missing.
+  So to ensure we are not checking "missing" as a user error for other
+  possible error messages, I added this check.
+  */
+  return typeof error === 'string' && error.endsWith('missing') && error.split(' ').length === 2;
+};
+
+/**
  * if error can be qualified as user error(configurational), returns isUserError: true
  * user errors are excluded from SLO dashboards
  */
@@ -27,7 +43,7 @@ export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
     (error instanceof Error &&
       typeof error.message === 'string' &&
       (error.message as string).endsWith('missing')) ||
-    (typeof error === 'string' && error.endsWith('missing') && error.split(' ').length === 2)
+    isMlJobMissingError(error)
   ) {
     return { isUserError: true };
   }
