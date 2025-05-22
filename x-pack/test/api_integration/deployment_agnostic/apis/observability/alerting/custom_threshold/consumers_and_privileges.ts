@@ -100,6 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Custom threshold - Rule visibility - consumer observability', () => {

@@ -54,6 +54,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(editorRoleAuthc);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Rule creation - logs consumer', () => {

@@ -37,7 +37,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": ".index-threshold",
         },
@@ -45,7 +44,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": ".geo-containment",
         },
@@ -53,7 +51,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": "transform_health",
         },
@@ -62,7 +59,6 @@ describe('Stack Alerts Feature Privileges', () => {
             "stackAlerts",
             "alerts",
             "discover",
-            "observability",
           ],
           "ruleTypeId": ".es-query",
         },
@@ -87,7 +83,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": ".index-threshold",
         },
@@ -95,7 +90,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": ".geo-containment",
         },
@@ -103,7 +97,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": "transform_health",
         },
@@ -112,7 +105,6 @@ describe('Stack Alerts Feature Privileges', () => {
             "stackAlerts",
             "alerts",
             "discover",
-            "observability",
           ],
           "ruleTypeId": ".es-query",
         },
@@ -137,7 +129,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": ".index-threshold",
         },
@@ -145,7 +136,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": ".geo-containment",
         },
@@ -153,7 +143,6 @@ describe('Stack Alerts Feature Privileges', () => {
           "consumers": Array [
             "stackAlerts",
             "alerts",
-            "observability",
           ],
           "ruleTypeId": "transform_health",
         },
@@ -162,7 +151,6 @@ describe('Stack Alerts Feature Privileges', () => {
             "stackAlerts",
             "alerts",
             "discover",
-            "observability",
           ],
           "ruleTypeId": ".es-query",
         },
