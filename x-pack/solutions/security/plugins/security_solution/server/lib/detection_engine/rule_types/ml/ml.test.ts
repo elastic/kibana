@@ -127,6 +127,25 @@ describe('ml_executor', () => {
     expect(result.warningMessages.length).toEqual(1);
   });
 
+  it('should report job missing errors as user errors', async () => {
+    (findMlSignals as jest.Mock).mockRejectedValue({
+      message: 'my_test_job_name missing',
+    });
+
+    const { result } = await mlExecutor({
+      sharedParams,
+      ml: mlMock,
+      services: ruleServices,
+      wrapSuppressedHits: jest.fn(),
+      isAlertSuppressionActive: true,
+      scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
+    });
+    // eventually tagged as a user error in the rule wrapper
+    expect(result.userError).toEqual(false);
+    expect(result.success).toEqual(false);
+    expect(result.errors).toEqual(['my_test_job_name missing']);
+  });
+
   it('returns some timing information as part of the result', async () => {
     // ensure our mock corresponds to the job that the rule uses
     jobsSummaryMock.mockResolvedValue(
