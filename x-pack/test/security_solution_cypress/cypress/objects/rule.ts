@@ -487,7 +487,7 @@ export const getNewThreatIndicatorRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
+  from: '2000-01-01T00:00:00.000Z',
   threat_index: ['filebeat-*'],
   threat_mapping: [
     {
