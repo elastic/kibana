@@ -25,6 +25,13 @@ export function SloManagementBulkActions({
     setSelectedItems([]);
   };
 
+  const SELECTED_SLOS = (count: number) => {
+    return i18n.translate('xpack.slo.sloManagementTable.selectedSLOsButton', {
+      values: { count },
+      defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
+    });
+  };
+
   const panels = [
     {
       id: 0,
@@ -75,13 +82,7 @@ export function SloManagementBulkActions({
           size="xs"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {i18n.translate('xpack.slo.sloManagementTable.sloSloManagementTableBulkMenuLabel', {
-            defaultMessage: 'Perform bulk action on {count} SLOs',
-            values: {
-              count: items.length,
-            },
-          })}{' '}
-          <EuiIcon type="arrowDown" size="s" />
+          {SELECTED_SLOS(items.length)} <EuiIcon type="arrowDown" size="s" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
