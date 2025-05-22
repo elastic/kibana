@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { AppCategory } from './src/app_category';
-export { APP_WRAPPER_CLASS } from './src/app_wrapper_class';
-export { DEFAULT_APP_CATEGORIES } from './src/default_app_categories';
-export { GlobalAppStyle } from './src/global_app_style';
+export { ProductFeaturesRegistry } from './src/product_features_registry';
+export type { IPricingTiersClient, PricingProductFeature } from './src/types';
+export { pricingProductsSchema } from './src/pricing_products';
+export type { PricingProduct } from './src/pricing_products';
+export { PricingTiersClient } from './src/pricing_tiers_client';

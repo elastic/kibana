@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { PricingConfigType } from './src';
-export { pricingConfig } from './src';
+export type { PricingConfigType } from './src/pricing_config';
+export { pricingConfig } from './src/pricing_config';
+export { PricingService } from './src/pricing_service';

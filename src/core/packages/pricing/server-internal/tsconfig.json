@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts", "../common/src/pricing_tiers_client.ts",
   ],
   "kbn_references": [
     "@kbn/config",

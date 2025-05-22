@@ -56,6 +56,7 @@ import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-inte
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
+import { PricingService } from '@kbn/core-pricing-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -91,6 +92,7 @@ export class Server {
   private readonly deprecations: DeprecationsService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
+  private readonly pricing: PricingService;
   private readonly docLinks: DocLinksService;
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
@@ -143,6 +145,7 @@ export class Server {
     this.deprecations = new DeprecationsService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
+    this.pricing = new PricingService(core);
     this.docLinks = new DocLinksService(core);
     this.customBranding = new CustomBrandingService(core);
     this.userSettingsService = new UserSettingsService(core);
@@ -189,6 +192,7 @@ export class Server {
     // services we need to preboot even when preboot is disabled
     const uiSettingsPreboot = await this.uiSettings.preboot();
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
+    await this.pricing.preboot();
 
     let corePreboot: InternalCorePreboot | undefined;
 
@@ -359,6 +363,8 @@ export class Server {
       rendering: renderingSetup,
     });
 
+    const pricingSetup = this.pricing.setup({ http: httpSetup });
+
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
@@ -380,6 +386,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      pricing: pricingSetup,
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
       userProfile: userProfileSetup,
@@ -451,6 +458,8 @@ export class Server {
 
     const featureFlagsStart = this.featureFlags.start();
 
+    const pricingStart = this.pricing.start();
+
     this.httpRateLimiter.start();
     this.status.start();
 
@@ -474,6 +483,7 @@ export class Server {
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
+      pricing: pricingStart,
     };
 
     this.coreApp.start(this.coreStart);

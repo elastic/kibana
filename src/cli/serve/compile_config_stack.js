@@ -74,11 +74,11 @@ export function compileConfigStack({
   }
 
   // Pricing specific tier configs
-  const pricingTier = getPricingTierFromConfig(configs);
-  if (pricingTier) {
-    configs.push(resolveConfig(`serverless.${serverlessMode}.${pricingTier}.yml`));
+  const tier = getServerlessProjectTierFromConfig(configs);
+  if (tier) {
+    configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
     if (dev && devConfig !== false) {
-      configs.push(resolveConfig(`serverless.${serverlessMode}.${pricingTier}.dev.yml`));
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.dev.yml`));
     }
   }
 
@@ -109,15 +109,15 @@ function getSecurityTierFromCfg(configs) {
   return productType?.product_tier;
 }
 
-/** @typedef {'essentials' | 'complete'} ServerlessObservabilityTier */
+/** @typedef {'essentials' | 'complete'} ServerlessProjectTier */
 /**
  * @param {string[]} configs List of configuration file paths
- * @returns {ServerlessObservabilityTier|undefined} The serverless observability tier in the summed configs
+ * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
  */
-function getPricingTierFromConfig(configs) {
+function getServerlessProjectTierFromConfig(configs) {
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
-  const product = _.get(config, 'pricing.tiers.products', [])[0];
+  const product = _.get(config, 'pricing.tiers.products', []).at(0);
   return product?.tier;
 }
 

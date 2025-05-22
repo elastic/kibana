@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { pricingConfig } from './pricing_config';
-export type { PricingConfigType } from './pricing_config';
+import { PricingProduct } from './pricing_products';
+
+export interface PricingProductFeature {
+  id: string;
+  products: PricingProduct[];
+}
+
+export interface IPricingTiersClient {
+  getActiveProducts(): PricingProduct[];
+  isActiveProduct(product: PricingProduct): boolean;
+  isFeatureAvailable(featureId: string): boolean;
+}

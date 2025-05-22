@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * The class name for top level *and* nested pricing wrappers to ensure proper layout
- * @public
- */
-export const APP_WRAPPER_CLASS = 'kbnAppWrapper';
+import type { IPricingTiersClient, PricingProductFeature } from '@kbn/core-pricing-common';
+
+export interface PricingServiceSetup {
+  registerProductFeatures(features: PricingProductFeature[]): void;
+}
+
+export interface PricingServiceStart {
+  tiers: IPricingTiersClient;
+}

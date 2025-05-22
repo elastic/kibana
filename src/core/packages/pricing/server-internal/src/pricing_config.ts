@@ -8,34 +8,14 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { pricingProductsSchema } from '@kbn/core-pricing-common';
 
 export const pricingConfig = {
   path: 'pricing',
   schema: schema.object({
     tiers: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      products: schema.maybe(
-        schema.arrayOf(
-          schema.oneOf([
-            schema.object({
-              name: schema.literal('observability'),
-              tier: schema.oneOf([schema.literal('complete'), schema.literal('essentials')]),
-            }),
-            schema.object({
-              name: schema.literal('security'),
-              tier: schema.oneOf([schema.literal('complete'), schema.literal('essentials')]),
-            }),
-            schema.object({
-              name: schema.literal('endpoint'),
-              tier: schema.oneOf([schema.literal('complete'), schema.literal('essentials')]),
-            }),
-            schema.object({
-              name: schema.literal('cloud'),
-              tier: schema.oneOf([schema.literal('complete'), schema.literal('essentials')]),
-            }),
-          ])
-        )
-      ),
+      products: schema.maybe(schema.arrayOf(pricingProductsSchema)),
     }),
   }),
 };
