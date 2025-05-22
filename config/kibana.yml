@@ -1,2 +1,2 @@
 server.host: 0.0.0.0
-csp.rules: ["script-src 'self' 'unsafe-eval' https://*.pendo.io wss://*.pendo.io"]
+csp.rules: ["script-src 'self' 'unsafe-eval' https://*.pendo.io wss://*.pendo.io https://*.storage.googleapis.com https://feeds.elastic.co"]

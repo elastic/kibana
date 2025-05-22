@@ -5,7 +5,7 @@ import {
   KibanaPendoPluginStart,
   AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_NAME, API_KEY } from '../common';
 import { Console } from 'console';
 
 declare global {
@@ -56,7 +56,7 @@ export class KibanaPendoPlugin implements Plugin<KibanaPendoPluginSetup, KibanaP
 
 export const loadPendoScript = () => {
   const script = document.createElement('script');
-  script.src = 'https://cdn.pendo.io/agent/static/7c78ad3b-9857-453d-46c3-fa6fec8e6935/pendo.js';
+  script.src = `https://cdn.pendo.io/agent/static/${API_KEY}/pendo.js`;
   script.async = true;
   document.body.appendChild(script);
 };
@@ -102,7 +102,7 @@ export const setupPendo = () => {
   var account = getAccount();
   if (areAnalyticsEnabled() && window.pendo) {
     window.pendo.initialize({
-      apiKey: '7c78ad3b-9857-453d-46c3-fa6fec8e6935',
+      apiKey: API_KEY,
       visitor: {
         id: user.id,
         email: user.email,
