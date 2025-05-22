@@ -55,13 +55,44 @@ export async function fetchFieldExistence({
     includeEmptyFields: false,
   });
 
-  // take care of fields of existingFieldList, that are not yet available
-  // in the given data view. Those fields we consider as new fields,
-  // that were ingested after the data view was loaded
+  // Identify two categories of fields requiring a refresh:
+  // 1. New fields - fields that don't exist in the current data view
+  // 2. Fields with mapping changes - existing fields with updated mapping information
   const newFields = existingFieldList.filter((field) => !dataView.getFieldByName(field.name));
-  // refresh the data view in case there are new fields
-  if (newFields.length) {
-    await dataViewsService.refreshFields(dataView, false, true);
+
+  // Check for existing fields with mapping changes (unmapped→mapped or type changes)
+  const fieldsWithMappingChanges = existingFieldList.filter((field) => {
+    const existingField = dataView.getFieldByName(field.name);
+    // Skip fields that don't exist (already handled in newFields)
+    if (!existingField) return false;
+
+    // Detect if a field changed from unmapped to mapped
+    if (!existingField.isMapped && field.type !== 'text') return true;
+
+    // Detect field type changes
+    return existingField.type !== field.type;
+  });
+
+  // Refresh if either new fields or mapping changes are detected
+  const needsRefresh = newFields.length > 0 || fieldsWithMappingChanges.length > 0;
+
+  if (needsRefresh) {
+    try {
+      // Refresh with force=true to ensure all fields are properly loaded
+      await dataViewsService.refreshFields(dataView, false, true);
+
+      // Check if any fields are still missing after refresh
+      const stillMissingFields = existingFieldList.filter(
+        (field) => !dataView.getFieldByName(field.name)
+      );
+
+      // If needed, try one more refresh for stubborn fields
+      if (stillMissingFields.length > 0) {
+        await dataViewsService.refreshFields(dataView, false, true);
+      }
+    } catch (error) {
+      // Silently continue if refresh fails - we've already tried our best
+    }
   }
   const allFields = buildFieldList(dataView, metaFields);
   return {

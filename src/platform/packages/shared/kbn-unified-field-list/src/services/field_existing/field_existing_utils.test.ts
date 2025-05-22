@@ -8,7 +8,8 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { existingFields, buildFieldList } from './field_existing_utils';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { existingFields, fetchFieldExistence } from './field_existing_utils';
 
 describe('existingFields', () => {
   it('should remove missing fields by matching names', () => {
@@ -42,49 +43,111 @@ describe('existingFields', () => {
   });
 });
 
-describe('buildFieldList', () => {
-  const indexPattern = {
-    title: 'testpattern',
-    type: 'type',
-    typeMeta: 'typemeta',
-    fields: [
-      { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
-      {
-        name: 'runtime_foo',
-        isMapped: false,
-        runtimeField: { type: 'long', script: { source: '2+2' } },
-      },
-      { name: 'bar' },
-      { name: '@bar' },
-      { name: 'baz' },
-      { name: '_mymeta' },
-    ],
+describe('fetchFieldExistence', () => {
+  const mockDslQuery = { match_all: {} };
+  const mockMetaFields = ['_id', '_type'];
+
+  const createMockDataView = (fields: Array<Partial<DataViewField>> = []) => {
+    const mock = {
+      getIndexPattern: jest.fn().mockReturnValue('test-pattern'),
+      getFieldByName: jest.fn((name) => fields.find((f) => f.name === name)),
+      fields,
+    } as unknown as DataView;
+    return mock;
   };
 
-  it('supports scripted fields', () => {
-    const fields = buildFieldList(indexPattern as unknown as DataView, []);
-    expect(fields.find((f) => f.isScript)).toMatchObject({
-      isScript: true,
-      name: 'foo',
-      lang: 'painless',
-      script: '2+2',
+  const mockSearch = jest.fn().mockResolvedValue({});
+
+  it('should trigger refresh when a field changes from unmapped to mapped', async () => {
+    const mockDataViewsService = {
+      getFieldsForIndexPattern: jest.fn().mockResolvedValue([
+        {
+          name: 'previously_unmapped_field',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+        },
+      ]),
+      refreshFields: jest.fn().mockResolvedValue(undefined),
+    } as unknown as import('@kbn/data-views-plugin/common').DataViewsContract;
+
+    const mockDataView = createMockDataView([
+      {
+        name: 'previously_unmapped_field',
+        type: 'text',
+        isMapped: false,
+      } as Partial<DataViewField>,
+    ]);
+
+    await fetchFieldExistence({
+      search: mockSearch,
+      dataViewsService: mockDataViewsService,
+      dataView: mockDataView,
+      dslQuery: mockDslQuery,
+      includeFrozen: false,
+      metaFields: mockMetaFields,
     });
+
+    expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(mockDataView, false, true);
   });
 
-  it('supports runtime fields', () => {
-    const fields = buildFieldList(indexPattern as unknown as DataView, []);
-    expect(fields.find((f) => f.runtimeField)).toMatchObject({
-      name: 'runtime_foo',
-      runtimeField: { type: 'long', script: { source: '2+2' } },
+  it('should trigger refresh when a field type changes', async () => {
+    const mockDataViewsService = {
+      getFieldsForIndexPattern: jest
+        .fn()
+        .mockResolvedValue([
+          { name: 'changing_type_field', type: 'long', aggregatable: true, searchable: true },
+        ]),
+      refreshFields: jest.fn().mockResolvedValue(undefined),
+    } as unknown as import('@kbn/data-views-plugin/common').DataViewsContract;
+
+    const mockDataView = createMockDataView([
+      {
+        name: 'changing_type_field',
+        type: 'keyword',
+        isMapped: true,
+      } as Partial<DataViewField>,
+    ]);
+
+    await fetchFieldExistence({
+      search: mockSearch,
+      dataViewsService: mockDataViewsService,
+      dataView: mockDataView,
+      dslQuery: mockDslQuery,
+      includeFrozen: false,
+      metaFields: mockMetaFields,
     });
+
+    expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(mockDataView, false, true);
   });
 
-  it('supports meta fields', () => {
-    const fields = buildFieldList(indexPattern as unknown as DataView, ['_mymeta']);
-    expect(fields.find((f) => f.isMeta)).toMatchObject({
-      isScript: false,
-      isMeta: true,
-      name: '_mymeta',
+  it('should not trigger refresh when fields are unchanged', async () => {
+    const mockDataViewsService = {
+      getFieldsForIndexPattern: jest
+        .fn()
+        .mockResolvedValue([
+          { name: 'unchanged_field', type: 'keyword', aggregatable: true, searchable: true },
+        ]),
+      refreshFields: jest.fn().mockResolvedValue(undefined),
+    } as unknown as import('@kbn/data-views-plugin/common').DataViewsContract;
+
+    const mockDataView = createMockDataView([
+      {
+        name: 'unchanged_field',
+        type: 'keyword',
+        isMapped: true,
+      } as Partial<DataViewField>,
+    ]);
+
+    await fetchFieldExistence({
+      search: mockSearch,
+      dataViewsService: mockDataViewsService,
+      dataView: mockDataView,
+      dslQuery: mockDslQuery,
+      includeFrozen: false,
+      metaFields: mockMetaFields,
     });
+
+    expect(mockDataViewsService.refreshFields).not.toHaveBeenCalled();
   });
 });

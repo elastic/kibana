@@ -72,14 +72,24 @@ export function getSelectedFields({
 
   // add selected field names, that are not part of the data view, to be removable
   for (const selectedFieldName of workspaceSelectedFieldNames) {
+    // First try to get the field from the dataView directly
+    // This ensures we get the most up-to-date version of the field after a refresh
+    const fieldFromDataView =
+      searchMode === 'documents' && dataView?.getFieldByName?.(selectedFieldName);
+
+    // Then look in allFields
+    const fieldFromAllFields = allFields.find((field) => field.name === selectedFieldName);
+
+    // Use the data view field first (most up-to-date), then allFields, then create a placeholder
     const selectedField =
-      (searchMode === 'documents' && dataView?.getFieldByName?.(selectedFieldName)) ||
-      allFields.find((field) => field.name === selectedFieldName) || // for example to pick a `nested` root field or find a selected field in text-based response
+      fieldFromDataView ||
+      fieldFromAllFields ||
       ({
         name: selectedFieldName,
         displayName: selectedFieldName,
         type: 'unknown_selected',
       } as DataViewField);
+
     result.selectedFields.push(selectedField);
     result.selectedFieldsMap[selectedField.name] = true;
   }
