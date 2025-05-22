@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteRules({ getService, roleAuthc, internalReqHeader });
 
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should execute the function without any errors', async () => {
