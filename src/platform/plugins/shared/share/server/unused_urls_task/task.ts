@@ -40,14 +40,14 @@ export const deleteUnusedUrls = async ({
   logger: Logger;
 }) => {
   try {
-    logger.info(`Deleting ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
+    logger.debug(`Deleting ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
 
     await savedObjectsRepository.bulkDelete(unusedUrls, {
       refresh: 'wait_for',
       namespace,
     });
 
-    logger.info(
+    logger.debug(
       `Succesfully deleted ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`
     );
   } catch (e) {
@@ -122,7 +122,7 @@ export const runDeleteUnusedUrlsTask = async ({
   pitKeepAlive: Duration;
   logger: Logger;
 }) => {
-  logger.info('Unused URLs cleanup started');
+  logger.debug('Unused URLs cleanup started');
 
   const [coreStart] = await core.getStartServices();
 
@@ -139,7 +139,7 @@ export const runDeleteUnusedUrlsTask = async ({
   if (Object.keys(unusedUrlsGroupedByNamespace).length) {
     const deletionPromises = Object.entries(unusedUrlsGroupedByNamespace).map(
       async ([namespace, unusedUrls]) => {
-        logger.info(`Found ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
+        logger.debug(`Found ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
 
         await deleteUnusedUrls({
           savedObjectsRepository,
@@ -152,6 +152,6 @@ export const runDeleteUnusedUrlsTask = async ({
 
     await Promise.all(deletionPromises);
   } else {
-    logger.info('No unused URLs found');
+    logger.debug('No unused URLs found');
   }
 };
