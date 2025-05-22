@@ -73,7 +73,6 @@ export class RenderingService {
         renderer: bootstrapRendererFactory({
           uiPlugins,
           baseHref: http.staticAssets.getHrefBase(),
-          packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
       });
@@ -99,7 +98,6 @@ export class RenderingService {
       renderer: bootstrapRendererFactory({
         uiPlugins,
         baseHref: http.staticAssets.getHrefBase(),
-        packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
         userSettingsService: userSettings,
       }),
@@ -219,6 +217,7 @@ export class RenderingService {
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
     });
+
     const scriptPaths = getScriptPaths({
       darkMode,
       baseHref: staticAssetsHrefBase,

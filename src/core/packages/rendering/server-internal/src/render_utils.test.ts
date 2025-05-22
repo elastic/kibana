@@ -15,8 +15,9 @@ describe('getScriptPaths', () => {
       getScriptPaths({
         baseHref: '/base-path',
         darkMode: 'system',
+        themeName: 'v8',
       })
-    ).toEqual(['/base-path/ui/legacy_theme.js']);
+    ).toEqual(['/base-path/ui/bootstrap_system_theme_amsterdam.js']);
   });
 
   it('returns the correct list when darkMode is `true`', () => {
@@ -24,6 +25,7 @@ describe('getScriptPaths', () => {
       getScriptPaths({
         baseHref: '/base-path',
         darkMode: true,
+        themeName: 'v8',
       })
     ).toEqual([]);
   });
@@ -33,6 +35,7 @@ describe('getScriptPaths', () => {
       getScriptPaths({
         baseHref: '/base-path',
         darkMode: false,
+        themeName: 'v8',
       })
     ).toEqual([]);
   });
