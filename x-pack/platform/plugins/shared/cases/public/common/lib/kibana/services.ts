@@ -10,7 +10,7 @@ import type { CasesUiConfigType } from '../../../../common/ui/types';
 import type { CasesPublicStartDependencies } from '../../../types';
 
 type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'theme' | 'userProfile'> &
-  Pick<CasesPublicStartDependencies, 'serverless' | 'lens'>;
+  Pick<CasesPublicStartDependencies, 'serverless'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
