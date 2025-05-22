@@ -7,8 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
-import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
 import { parse } from 'query-string';
+
+import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -16,12 +18,14 @@ import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/da
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { createPath } from '../../routing/router';
-import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
+import { useNavigateToPath } from '../../contexts/kibana';
+import { createPath } from '../../routing/router';
 import { MlPageHeader } from '../../components/page_header';
-import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { PageTitle } from '../../components/page_title';
+
+import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
 type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
 
