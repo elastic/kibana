@@ -17,6 +17,11 @@ export interface DensitySettingsProps {
 
 const densityValues = Object.values(DataGridDensity);
 
+const getValidDensity = (density: string) => {
+  const isValidDensity = densityValues.includes(density as DataGridDensity);
+  return isValidDensity ? (density as DataGridDensity) : DataGridDensity.NORMAL;
+};
+
 const densityLabel = i18n.translate('xpack.lens.table.densityLabel', {
   defaultMessage: 'Density',
 });
@@ -43,17 +48,12 @@ const densityOptions = [
 ];
 
 export const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensity, onChange }) => {
-  const isValidDensity = (value: string): value is DataGridDensity => {
-    return densityValues.includes(value as DataGridDensity);
-  };
-
   // Falls back to NORMAL density when an invalid density is provided
-  const validDensity = isValidDensity(dataGridDensity) ? dataGridDensity : DataGridDensity.NORMAL;
+  const validDensity = getValidDensity(dataGridDensity);
 
   const setDensity = useCallback(
     (density: string) => {
-      const _density = isValidDensity(density) ? density : DataGridDensity.NORMAL;
-      onChange(_density);
+      onChange(getValidDensity(density));
     },
     [onChange]
   );
