@@ -12,6 +12,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ReindexWorker } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 
+// todo look at relocating
 interface CreateReindexWorker {
   logger: Logger;
   elasticsearchService: ElasticsearchServiceStart;

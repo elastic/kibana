@@ -15,11 +15,16 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ReindexWorker } from './lib/reindexing';
-import { createReindexWorker } from './routes/reindex_indices';
-import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
-import { hiddenTypes } from './saved_object_types';
+// todo look at moving these to this dir
+import { ReindexWorker } from '../lib/reindexing';
+import { createReindexWorker } from '../routes/reindex_indices';
+import { CredentialStore, credentialStoreFactory } from '../lib/reindexing/credential_store';
+import { hiddenTypes } from '../saved_object_types';
 // import { defaultExclusions } from './lib/data_source_exclusions';
+import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './routes';
+import { handleEsError } from '../shared_imports';
+
+import { RouteDependencies } from './types';
 
 interface PluginsStart {
   security: SecurityPluginStart;
@@ -41,6 +46,7 @@ export class ReindexingService {
 
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
+  private securityPluginStart?: SecurityPluginStart;
   // private readonly kibanaVersion: string;
 
   constructor({ logger }: { logger: LoggerFactory }) {
@@ -54,9 +60,26 @@ export class ReindexingService {
     // this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
   }
 
-  public setup({}: CoreSetup, { licensing }: PluginsSetup) {
+  public setup({ http }: CoreSetup, { licensing }: PluginsSetup) {
     this.licensing = licensing;
     // todo routing
+
+    const router = http.createRouter();
+
+    const dependencies: RouteDependencies = {
+      router,
+      credentialStore: this.credentialStore,
+      log: this.logger,
+      licensing,
+      // todo probably a better way to do this
+      getSecurityPlugin: () => this.securityPluginStart,
+      lib: {
+        handleEsError,
+      },
+    };
+
+    registerReindexIndicesRoutes(dependencies, () => this.getWorker());
+    registerBatchReindexIndicesRoutes(dependencies, () => this.getWorker());
   }
 
   public start(
@@ -66,6 +89,8 @@ export class ReindexingService {
     }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
     { security }: PluginsStart
   ) {
+    this.securityPluginStart = security;
+
     this.reindexWorker = createReindexWorker({
       credentialStore: this.credentialStore,
       licensing: this.licensing!,
@@ -82,5 +107,12 @@ export class ReindexingService {
     if (this.reindexWorker) {
       this.reindexWorker.stop();
     }
+  }
+
+  private getWorker() {
+    if (!this.reindexWorker) {
+      throw new Error('Worker unavailable');
+    }
+    return this.reindexWorker;
   }
 }

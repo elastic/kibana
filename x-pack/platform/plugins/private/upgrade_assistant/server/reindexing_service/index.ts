@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createReindexWorker } from './create_reindex_worker';
+export { ReindexingService } from './reindexing_service';

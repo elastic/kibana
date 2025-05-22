@@ -23,7 +23,6 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
-import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { registerRoutes } from './routes/register_routes';
@@ -57,7 +56,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private securityPluginStart?: SecurityPluginStart;
-  private worker?: ReindexWorker;
 
   private reindexingService?: ReindexingService;
 
@@ -71,13 +69,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.initialFeatureSet = featureSet;
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
     this.reindexingService = new ReindexingService({ logger: this.logger });
-  }
-
-  private getWorker() {
-    if (!this.worker) {
-      throw new Error('Worker unavailable');
-    }
-    return this.worker;
   }
 
   setup(coreSetup: CoreSetup, pluginSetup: PluginsSetup) {
@@ -145,7 +136,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       defaultTarget: versionService.getNextMajorVersion(),
     };
 
-    registerRoutes(dependencies, this.getWorker.bind(this));
+    registerRoutes(dependencies);
 
     if (usageCollection) {
       void getStartServices().then(([{ elasticsearch }]) => {
