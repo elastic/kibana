@@ -32,8 +32,17 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
 
   const query = 'query' in layer ? layer.query : undefined;
   const { euiTheme } = useEuiTheme();
-  const { isFullscreen, columnId, layerId, setState, indexPatterns, dateRange, expressions } =
-    props;
+
+  const {
+    isFullscreen,
+    columnId,
+    layerId,
+    setState,
+    indexPatterns,
+    dateRange,
+    expressions,
+    esqlVariables,
+  } = props;
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
@@ -46,7 +55,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           undefined,
           Object.values(indexPatterns).length
             ? Object.values(indexPatterns)[0].timeFieldName
-            : undefined
+            : undefined,
+          esqlVariables
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
@@ -78,6 +88,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     indexPatterns,
     props,
     props.expressions,
+    esqlVariables,
     query,
   ]);
 
@@ -119,6 +130,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         className="lnsIndexPatternDimensionEditor--padded"
       >
         <FieldSelect
+          data-test-subj="text-based-dimension-field"
           existingFields={allColumns ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {
