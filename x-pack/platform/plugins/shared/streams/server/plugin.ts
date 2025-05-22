@@ -82,7 +82,6 @@ export class StreamsPlugin
     this.telemtryService.setup(core.analytics);
 
     const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
-    this.logger.info(`isSignificantEventsEnabled: ${isSignificantEventsEnabled}`);
     const alertingFeatures = isSignificantEventsEnabled
       ? STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
           ruleTypeId,
@@ -91,7 +90,6 @@ export class StreamsPlugin
       : [];
 
     if (isSignificantEventsEnabled) {
-      this.logger.info(`enabling rules for significant events`);
       registerRules({ plugins, logger: this.logger.get('rules') });
     }
 
