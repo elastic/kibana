@@ -25,6 +25,7 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
 };
 
 const INSTALL_CMD = `npm install @elastic/elasticsearch`;
+const CLIENT_SERVERLESS_OPTION = `,\n    serverMode: 'serverless',`;
 
 export const JavascriptCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
@@ -33,12 +34,13 @@ export const JavascriptCreateIndexExamples: CreateIndexLanguageExamples = {
       elasticsearchURL,
       apiKey,
       indexName,
+      isServerless,
     }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
   }
 });
 
@@ -58,12 +60,13 @@ console.log(createResponse);`,
       elasticsearchURL,
       apiKey,
       indexName,
+      isServerless,
     }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
   }
 });
 
@@ -84,12 +87,13 @@ console.log(createResponse);`,
       elasticsearchURL,
       apiKey,
       indexName,
+      isServerless,
     }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
   }
 });
 
@@ -112,12 +116,13 @@ export const JSIngestDataExample: IngestDataCodeDefinition = {
     elasticsearchURL,
     sampleDocuments,
     indexName,
+    isServerless,
   }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
   },
 });
 
@@ -139,12 +144,13 @@ console.log(bulkIngestResponse);`,
     elasticsearchURL,
     indexName,
     mappingProperties,
+    isServerless,
   }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
   }
 });
 
@@ -193,12 +199,13 @@ export const JSSemanticIngestDataExample: IngestDataCodeDefinition = {
     elasticsearchURL,
     sampleDocuments,
     indexName,
+    isServerless,
   }) => `const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({
   node: '${elasticsearchURL}',
   auth: {
-    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
   },
 });
 
