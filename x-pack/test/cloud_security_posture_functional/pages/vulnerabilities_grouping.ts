@@ -25,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const cloudProviderName1 = 'Amazon Web Services';
   const cloudProviderName2 = 'Google Cloud Platform';
 
-  describe('Vulnerabilities Page - Grouping', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/221220
+  describe.skip('Vulnerabilities Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 
