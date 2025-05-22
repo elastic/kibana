@@ -7,8 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiTitle,
@@ -23,12 +21,14 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { detectorToString } from '@kbn/ml-common-utils/string_utils';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import type { Validation } from '../../../../../common/job_validator';
-import { detectorToString } from '../../../../../../../util/string_utils';
-
 interface Props {
   isActive: boolean;
   onEditJob: (i: number) => void;
