@@ -119,7 +119,7 @@ export const definition = {
   hidden: true,
   name: 'rerank',
   preview: true,
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rerankDoc', {
     defaultMessage: 'Reorder results using a semantic reranker.',
   }),
   declaration: 'RERANK <query> ON <field1> [, <field2> [, ...]] WITH <inferenceID>',
