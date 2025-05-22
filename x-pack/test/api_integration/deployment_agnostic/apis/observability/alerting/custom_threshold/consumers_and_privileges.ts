@@ -38,7 +38,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let ruleId: string;
-    let alertId: string;
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -541,6 +540,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('creates rule successfully', async () => {
         const createdRule = await alertingApi.createRule({
           roleAuthc,
+          // @ts-ignore
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
         });
         expect(createdRule.statusCode).to.be(400);
@@ -552,7 +552,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Custom threshold - Rule creation - logs only role', function () {
       const consumer = 'logs';
-      let logsOnlyRole;
+      let logsOnlyRole: RoleCredentials;
+
       it('creates rule successfully', async () => {
         await samlAuth.setCustomRole(ROLES.logs_only);
         logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();

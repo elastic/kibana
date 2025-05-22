@@ -493,7 +493,7 @@ export const ROLES = {
   },
 };
 
-export const getESQueryRuleConfiguration = ({ consumer }) => ({
+export const getESQueryRuleConfiguration = ({ consumer }: { consumer: string }) => ({
   consumer,
   name: 'always fire',
   ruleTypeId: RULE_TYPE_ID,
