@@ -141,7 +141,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ruleIdList = [esQuery.id];
 
       await refreshRulesList();
-      await testSubjects.existsOrFail('rule-row');
+      await testSubjects.exists('rule-row');
     });
 
     it('should create and display an APM latency rule', async () => {
