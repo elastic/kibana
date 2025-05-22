@@ -8,5 +8,3 @@
  */
 
 export { pricingServiceMock } from './src/pricing_service.mock';
-export type { ScopedHistoryMock } from './src/scoped_history.mock';
-export { scopedHistoryMock } from './src/scoped_history.mock';

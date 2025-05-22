@@ -18,6 +18,7 @@ import {
 } from '@kbn/core-pricing-common';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { PricingConfigType } from './pricing_config';
+import { registerRoutes } from './routes';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -50,6 +51,11 @@ export class PricingService {
   public setup({ http }: SetupDeps) {
     this.logger.debug('Setting up pricing service');
 
+    registerRoutes(http.createRouter(''), {
+      pricingConfig: this.pricingConfig,
+      productFeaturesRegistry: this.productFeaturesRegistry,
+    });
+
     return {
       registerProductFeatures: (features: PricingProductFeature[]) => {
         features.forEach((feature) => {
@@ -61,10 +67,7 @@ export class PricingService {
 
   public start() {
     return {
-      tiers: PricingTiersClient.create({
-        pricingConfig: this.pricingConfig,
-        productFeaturesRegistry: this.productFeaturesRegistry,
-      }),
+      tiers: new PricingTiersClient(this.pricingConfig.tiers, this.productFeaturesRegistry),
     };
   }
 }

@@ -1,3 +1,3 @@
 # @kbn/core-pricing-browser-internal
 
-Contains the internal implementation and types of Core's browser-side `pricing` service.
+Contains the implementation of Core's internal `pricing` browser-side service.

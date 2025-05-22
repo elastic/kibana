@@ -41,10 +41,20 @@ interface UseCaseOption {
   description: React.ReactNode;
   logos?: SupportedLogo[];
   showIntegrationsBadge?: boolean;
+  enabled: boolean;
 }
 
 export const OnboardingFlowForm: FunctionComponent = () => {
-  const options: UseCaseOption[] = [
+  const {
+    services: {
+      context: { isCloud },
+      pricing,
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const isFeatureAvailable = pricing.tiers.isFeatureAvailable('observability-complete-onboarding');
+
+  const options = [
     {
       id: 'host',
       label: i18n.translate(
@@ -59,6 +69,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         }
       ),
       logos: ['opentelemetry', 'apache', 'mysql'],
+      enabled: true,
     },
     {
       id: 'kubernetes',
@@ -74,6 +85,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         }
       ),
       logos: ['kubernetes', 'opentelemetry'],
+      enabled: isFeatureAvailable,
     },
     {
       id: 'application',
@@ -89,6 +101,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         }
       ),
       logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
+      enabled: isFeatureAvailable,
     },
     {
       id: 'cloud',
@@ -103,14 +116,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         }
       ),
       logos: ['azure', 'aws', 'gcp'],
+      enabled: true,
     },
-  ];
+  ].filter((option) => option.enabled) as UseCaseOption[];
 
-  const {
-    services: {
-      context: { isCloud },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
   const packageListTitleId = useGeneratedHtmlId();

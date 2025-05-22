@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_integration',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/packages/pricing/browser-internal'],
-};
+import { PricingProduct, PricingProductFeature } from '@kbn/core-pricing-common';
+
+export interface GetPricingResponse {
+  tiers: {
+    enabled: boolean;
+    products: PricingProduct[];
+  };
+  product_features: Record<string, PricingProductFeature>;
+}

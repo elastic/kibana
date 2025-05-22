@@ -6,9 +6,3 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { AppDeepLinkLocations } from '@kbn/core-pricing-browser/src/pricing';
-
-export const DEFAULT_APP_VISIBILITY: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
-
-export const DEFAULT_LINK_VISIBILITY: AppDeepLinkLocations[] = ['globalSearch'];

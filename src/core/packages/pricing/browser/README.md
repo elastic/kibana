@@ -1,3 +1,3 @@
 # @kbn/core-pricing-browser
 
-Contains the public type for Core's browser-side `pricing` service.
+This package contains the public types for Core's browser-side `pricing` service.

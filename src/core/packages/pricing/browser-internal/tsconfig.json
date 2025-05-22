@@ -4,39 +4,12 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-  ],
-  "kbn_references": [
-    "@kbn/std",
-    "@kbn/pricing",
-    "@kbn/pricing-react",
-    "@kbn/core-base-common",
-    "@kbn/core-http-browser",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-theme-browser",
-    "@kbn/core-overlays-browser",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-capabilities-browser-internal",
-    "@kbn/core-pricing-common",
-    "@kbn/core-pricing-browser",
-    "@kbn/core-capabilities-browser-mocks",
-    "@kbn/core-overlays-browser-mocks",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-theme-browser-mocks",
-    "@kbn/core-http-browser-internal",
-    "@kbn/test-jest-helpers",
-    "@kbn/core-custom-branding-browser",
-    "@kbn/core-custom-branding-browser-mocks",
-    "@kbn/core-analytics-browser-mocks",
-    "@kbn/core-analytics-browser",
-    "@kbn/shared-ux-router",
-    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",

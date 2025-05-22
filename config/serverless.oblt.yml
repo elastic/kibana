@@ -7,7 +7,7 @@ plugins.allowlistPluginGroups: ['platform', 'observability']
 pricing.tiers.enabled: true
 pricing.tiers.products:
   - name: observability
-    tier: essentials
+    tier: complete
 
 # Disabled Observability plugins
 xpack.ux.enabled: false

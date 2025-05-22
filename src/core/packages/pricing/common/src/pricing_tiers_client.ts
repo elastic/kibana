@@ -12,25 +12,18 @@ import { isEqual } from 'lodash';
 import { PricingConfigType } from '../../server-internal/src/pricing_config';
 import { IPricingTiersClient } from './types';
 
-interface PricingTiersClientDeps {
-  pricingConfig: PricingConfigType;
-  productFeaturesRegistry: ProductFeaturesRegistry;
-}
-
 export class PricingTiersClient implements IPricingTiersClient {
-  private constructor(
-    private readonly pricingConfig: PricingConfigType,
+  constructor(
+    private readonly tiers: PricingConfigType['tiers'],
     private readonly productFeaturesRegistry: ProductFeaturesRegistry
   ) {}
 
   getActiveProducts(): PricingProduct[] {
-    return this.pricingConfig.tiers.products ?? [];
+    return this.tiers.products ?? [];
   }
 
   isActiveProduct(product: PricingProduct) {
-    return Boolean(
-      this.pricingConfig.tiers.products?.some((currentProduct) => isEqual(currentProduct, product))
-    );
+    return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   }
 
   isFeatureAvailable(featureId: string): boolean {
@@ -41,9 +34,5 @@ export class PricingTiersClient implements IPricingTiersClient {
     }
 
     return false;
-  }
-
-  public static create({ pricingConfig, productFeaturesRegistry }: PricingTiersClientDeps) {
-    return new PricingTiersClient(pricingConfig, productFeaturesRegistry);
   }
 }

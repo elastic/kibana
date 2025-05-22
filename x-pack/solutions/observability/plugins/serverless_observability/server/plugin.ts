@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import type {
@@ -26,19 +26,12 @@ export class ServerlessObservabilityPlugin
 {
   constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
-    coreSetup.pricing.registerProductFeatures([
-      {
-        id: 'observability-complete-onboarding',
-        products: [{ name: 'observability', tier: 'complete' }],
-      },
-    ]);
-
+  public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
     pluginsSetup.serverless.setupProjectSettings(OBSERVABILITY_PROJECT_SETTINGS);
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start() {
     return {};
   }
 

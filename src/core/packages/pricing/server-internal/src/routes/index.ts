@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { appendAppPath } from './append_app_path';
-export { getAppInfo } from './get_app_info';
-export { parseAppUrl } from './parse_app_url';
-export { relativeToAbsolute } from './relative_to_absolute';
-export { removeSlashes } from './remove_slashes';
-export { getLocationObservable } from './get_location_observable';
-export { DEFAULT_APP_VISIBILITY, DEFAULT_LINK_VISIBILITY } from './constants';
+import type { IRouter } from '@kbn/core-http-server';
+import type { ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import { registerPricingRoutes } from './pricing';
+import type { PricingConfigType } from '../pricing_config';
+
+export function registerRoutes(
+  router: IRouter,
+  params: {
+    pricingConfig: PricingConfigType;
+    productFeaturesRegistry: ProductFeaturesRegistry;
+  }
+) {
+  registerPricingRoutes(router, params);
+}
