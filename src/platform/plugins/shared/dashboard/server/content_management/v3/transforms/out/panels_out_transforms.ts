@@ -19,11 +19,13 @@ function transformPanelsProperties(panels: SavedDashboardPanel[]) {
   return panels.map(
     ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
       gridData,
-      id,
-      panelConfig: embeddableConfig,
+      panelConfig: {
+        ...embeddableConfig,
+        ...(id ? { savedObjectId:  id } : {}),
+        ...(panelRefName ? { savedObjectRefName: panelRefName } : {}),
+        ...(title ? { title } : {}),
+      },
       panelIndex,
-      panelRefName,
-      title,
       type,
       version,
     })

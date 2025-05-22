@@ -19,7 +19,6 @@ export interface DashboardPanelState<PanelState = object> {
   type: string;
   explicitInput: PanelState;
   readonly gridData: GridData;
-  panelRefName?: string;
 
   /**
    * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.

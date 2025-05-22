@@ -13,65 +13,6 @@ import { ParsedDashboardAttributesWithType } from '../../types';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 
-const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType = {
-  id: 'id',
-  type: 'dashboard',
-  panels: {
-    panel_1: {
-      type: 'panel_type',
-      gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-      panelRefName: 'panel_panel_1',
-      explicitInput: {
-        id: 'panel_1',
-      },
-    },
-  },
-};
-
-const extractedSavedObjectPanelRef = {
-  name: 'panel_1:panel_panel_1',
-  type: 'panel_type',
-  id: 'object-id',
-};
-
-const unextractedDashboardState: ParsedDashboardAttributesWithType = {
-  id: 'id',
-  type: 'dashboard',
-  panels: {
-    panel_1: {
-      type: 'panel_type',
-      gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-      explicitInput: {
-        id: 'panel_1',
-        savedObjectId: 'object-id',
-      },
-    },
-  },
-};
-
-describe('inject/extract by reference panel', () => {
-  it('should inject the extracted saved object panel', () => {
-    const inject = createInject(persistableStateService);
-    const references = [extractedSavedObjectPanelRef];
-
-    const injected = inject(
-      dashboardWithExtractedPanel,
-      references
-    ) as ParsedDashboardAttributesWithType;
-
-    expect(injected).toEqual(unextractedDashboardState);
-  });
-
-  it('should extract the saved object panel', () => {
-    const extract = createExtract(persistableStateService);
-    const { state: extractedState, references: extractedReferences } =
-      extract(unextractedDashboardState);
-
-    expect(extractedState).toEqual(dashboardWithExtractedPanel);
-    expect(extractedReferences[0]).toEqual(extractedSavedObjectPanelRef);
-  });
-});
-
 const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
   id: 'id',
   type: 'dashboard',
@@ -108,7 +49,7 @@ const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
   },
 };
 
-describe('inject/extract by value panels', () => {
+describe('inject/extract panels', () => {
   it('should inject the extracted references', () => {
     const inject = createInject(persistableStateService);
 

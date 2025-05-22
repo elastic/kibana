@@ -54,35 +54,6 @@ export const createInject = (
         const filteredReferences = getReferencesForPanelId(key, references);
         const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
 
-        /**
-         * Inject saved object ID back into the explicit input.
-         *
-         * TODO move this logic into the persistable state service inject method for each panel type
-         * that could be by value or by reference
-         */
-        if (panel.panelRefName !== undefined) {
-          const matchingReference = panelReferences.find(
-            (reference) => reference.name === panel.panelRefName
-          );
-
-          if (!matchingReference) {
-            throw new Error(`Could not find reference "${panel.panelRefName}"`);
-          }
-
-          if (matchingReference !== undefined) {
-            workingState.panels[key] = {
-              ...panel,
-              type: matchingReference.type,
-              explicitInput: {
-                ...workingState.panels[key].explicitInput,
-                savedObjectId: matchingReference.id,
-              },
-            };
-
-            delete workingState.panels[key].panelRefName;
-          }
-        }
-
         const { type, ...injectedState } = persistableStateService.inject(
           { ...workingState.panels[key].explicitInput, type: workingState.panels[key].type },
           panelReferences
@@ -111,25 +82,6 @@ export const createExtract = (
 
       // Run every panel through the state service to get the nested references
       for (const [id, panel] of Object.entries(workingState.panels)) {
-        /**
-         * Extract saved object ID reference from the explicit input.
-         *
-         * TODO move this logic into the persistable state service extract method for each panel type
-         * that could be by value or by reference.
-         */
-        const savedObjectId = (panel.explicitInput as { savedObjectId?: string }).savedObjectId;
-        if (savedObjectId) {
-          panel.panelRefName = `panel_${id}`;
-
-          references.push({
-            name: `${id}:panel_${id}`,
-            type: panel.type,
-            id: savedObjectId,
-          });
-
-          delete (panel.explicitInput as { savedObjectId?: string }).savedObjectId;
-        }
-
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
           ...panel.explicitInput,
           type: panel.type,

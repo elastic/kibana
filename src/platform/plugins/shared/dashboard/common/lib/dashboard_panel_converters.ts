@@ -8,7 +8,6 @@
  */
 
 import { v4 } from 'uuid';
-import { omit } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardPanelMap } from '..';
@@ -25,12 +24,7 @@ export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): Dashboa
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
       gridData: panel.gridData,
-      panelRefName: panel.panelRefName,
-      explicitInput: {
-        ...(panel.id !== undefined && { savedObjectId: panel.id }),
-        ...(panel.title !== undefined && { title: panel.title }),
-        ...panel.panelConfig,
-      },
+      explicitInput: panel.panelConfig,
       version: panel.version,
     };
   });
@@ -42,8 +36,6 @@ export const convertPanelMapToPanelsArray = (
   removeLegacyVersion?: boolean
 ) => {
   return Object.entries(panels).map(([panelId, panelState]) => {
-    const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
-    const title = (panelState.explicitInput as { title?: string }).title;
     return {
       /**
        * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
@@ -55,10 +47,7 @@ export const convertPanelMapToPanelsArray = (
       type: panelState.type,
       gridData: panelState.gridData,
       panelIndex: panelId,
-      panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-      ...(title !== undefined && { title }),
-      ...(savedObjectId !== undefined && { id: savedObjectId }),
-      ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
+      panelConfig: panelState.explicitInput,
     };
   });
 };
