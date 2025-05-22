@@ -17,12 +17,20 @@ describe('autocomplete.suggest', () => {
       expect(suggestedCommands).not.toContain('RRF ');
     });
 
-    it('suggests RRF after a FORK command', async () => {
+    it('suggests RRF immediately after a FORK command', async () => {
       const { suggest } = await setup();
       const suggestedCommands = (await suggest('FROM a | FORK (LIMIT 1) (LIMIT 2) | /')).map(
         (s) => s.text
       );
       expect(suggestedCommands).toContain('RRF ');
+    });
+
+    it('does not suggests RRF if FORK is not immediately before', async () => {
+      const { suggest } = await setup();
+      const suggestedCommands = (
+        await suggest('FROM a | FORK (LIMIT 1) (LIMIT 2) | LIMIT 1 /')
+      ).map((s) => s.text);
+      expect(suggestedCommands).not.toContain('RRF ');
     });
 
     it('suggests pipe after complete command', async () => {
