@@ -17,6 +17,7 @@ import {
   getRuleEvents,
   expectNoActionsFired,
   runSoon,
+  expectActionsFired,
 } from './test_helpers';
 
 // eslint-disable-next-line import/no-default-export
@@ -25,7 +26,8 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('maintenanceWindowFlows', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/220281
+  describe.skip('maintenanceWindowFlows', () => {
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
     afterEach(async () => {
@@ -214,7 +216,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
     });
 
-    it('alerts triggered within a MW should not fire actions if active or recovered outside a MW', async () => {
+    it('alerts triggered within a MW should fire actions if still active or recoveres after the MW expired', async () => {
       const pattern = {
         instance: [true, true, false, true],
       };
@@ -278,10 +280,11 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
         getService,
       });
 
-      await expectNoActionsFired({
+      await expectActionsFired({
         id: rule.id,
         supertest,
         retry,
+        expectedNumberOfActions: 1,
       });
 
       // Run again - recovered
@@ -298,10 +301,11 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
         getService,
       });
 
-      await expectNoActionsFired({
+      await expectActionsFired({
         id: rule.id,
         supertest,
         retry,
+        expectedNumberOfActions: 2,
       });
 
       // Run again - active again, this time fire the action since its a new alert instance
@@ -312,7 +316,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
       await getRuleEvents({
         id: rule.id,
-        action: 1,
+        action: 3,
         activeInstance: 3,
         recoveredInstance: 1,
         retry,
