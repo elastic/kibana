@@ -422,37 +422,26 @@ export function initializeLayoutManager(
 
       /** Sectionss */
       addNewSection: () => {
-        const oldLayout = cloneDeep(layout$.getValue());
+        const newLayout = cloneDeep(layout$.getValue());
         const newId = v4();
 
-        const maxPanelY = Math.max(
-          ...Object.values(oldLayout.panels)
-            .filter(({ gridData }) => !Boolean(gridData.sectionId)) // filter out panels in sections
-            .map(({ gridData }) => gridData.y + gridData.h)
-        ); // calculate the bottom coordinate of the panel
-        const maxSectionY = Math.max(
-          ...Object.values(oldLayout.sections).map(({ gridData }) => gridData.y)
+        // push every other panel + section down
+        [...Object.values(newLayout.panels), ...Object.values(newLayout.sections)].forEach(
+          (widget) => {
+            widget.gridData = { ...widget.gridData, y: widget.gridData.y + 1 };
+          }
         );
-        const newLayout = {
-          ...oldLayout,
-          sections: {
-            ...oldLayout.sections,
-            [newId]: {
-              type: 'section',
-              gridData: { i: newId, y: Math.max(maxPanelY, maxSectionY) + 1 },
-              title: i18n.translate('dashboard.defaultSectionTitle', {
-                defaultMessage: 'New collapsible section',
-              }),
-              collapsed: false,
-            },
-          },
+        // add the new section
+        newLayout.sections[newId] = {
+          gridData: { i: newId, y: 0 },
+          title: i18n.translate('dashboard.defaultSectionTitle', {
+            defaultMessage: 'New collapsible section',
+          }),
+          collapsed: true,
         };
         layout$.next(newLayout);
-
-        //   // scroll to bottom after row is added
-        //   scrollToBottom$.next();
+        trackPanel.scrollToTop();
       },
-      // setSections,
     },
   };
 }
