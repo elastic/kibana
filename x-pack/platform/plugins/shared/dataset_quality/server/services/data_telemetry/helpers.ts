@@ -241,7 +241,7 @@ export function getIndexBasicStats({
   ).pipe(
     delay(breatheDelay),
     concatMap((allIndexStats) => {
-      return from(getFailureStoreStats({ esClient, indexNames })).pipe(
+      return from(getFailureStoreStats({ esClient, indexName: indexNames.join(',') })).pipe(
         map((allFailureStoreStats) => {
           return indices.map((info) =>
             getIndexStats(allIndexStats.indices, allFailureStoreStats, info)
@@ -365,23 +365,22 @@ function getIndexNamespace(indexInfo: IndexBasicInfo): string | undefined {
 
 async function getFailureStoreStats({
   esClient,
-  indexNames,
+  indexName,
 }: {
   esClient: ElasticsearchClient;
-  indexNames: string[];
+  indexName: string;
 }): Promise<IndicesStatsResponse['indices']> {
   try {
-    const { indices } = await reduceAsyncChunks(indexNames, (chunk) =>
-      esClient.transport.request<ReturnType<typeof esClient.indices.stats>>({
-        method: 'GET',
-        path: `/${chunk.join(',')}/_stats`,
-        querystring: {
-          failure_store: 'only',
-        },
-      })
-    );
+    // TODO: Use the failure store API when it is available
+    const resp = await esClient.transport.request<ReturnType<typeof esClient.indices.stats>>({
+      method: 'GET',
+      path: `/${indexName}/_stats`,
+      querystring: {
+        failure_store: 'only',
+      },
+    });
 
-    return indices;
+    return (await resp).indices;
   } catch (e) {
     // Failure store API may not be available
     return {};
