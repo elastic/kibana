@@ -15,6 +15,7 @@ import { isEmpty } from 'lodash';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
+import { getLlmClass } from '../../../../routes/utils';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
@@ -40,6 +41,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   dataClients,
   esClient,
   inference,
+  inferenceChatModelEnabled = false,
   langChainMessages,
   llmTasks,
   llmType,
@@ -61,6 +63,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
+  const isOpenAI = llmType === 'openai' && !isOssModel;
+  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -71,23 +75,48 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
   const createLlmInstance = async () =>
-    inference.getChatModel({
-      request,
-      connectorId,
-      chatModelOptions: {
-        model: request.body.model,
-        signal: abortSignal,
-        temperature: getDefaultArguments(llmType).temperature,
-        // prevents the agent from retrying on failure
-        // failure could be due to bad connector, we should deliver that result to the client asap
-        maxRetries: 0,
-        metadata: {
-          connectorTelemetry: {
+    inferenceChatModelEnabled
+      ? inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {
+            model: request.body.model,
+            signal: abortSignal,
+            temperature: getDefaultArguments(llmType).temperature,
+            // prevents the agent from retrying on failure
+            // failure could be due to bad connector, we should deliver that result to the client asap
+            maxRetries: 0,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'security_ai_assistant',
+              },
+            },
+            // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+            // timeout,
+          },
+        })
+      : new llmClass({
+          actionsClient,
+          connectorId,
+          llmType,
+          logger,
+          // possible client model override,
+          // let this be undefined otherwise so the connector handles the model
+          model: request.body.model,
+          // ensure this is defined because we default to it in the language_models
+          // This is where the LangSmith logs (Metadata > Invocation Params) are set
+          temperature: getDefaultArguments(llmType).temperature,
+          signal: abortSignal,
+          streaming: isStream,
+          // prevents the agent from retrying on failure
+          // failure could be due to bad connector, we should deliver that result to the client asap
+          maxRetries: 0,
+          convertSystemMessageToHumanContent: false,
+          timeout,
+          telemetryMetadata: {
             pluginId: 'security_ai_assistant',
           },
-        },
-      },
-    });
+        });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -188,6 +217,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llm,
     llmType,
     tools,
+    inferenceChatModelEnabled,
+    isOpenAI,
     isStream,
     prompt: chatPromptTemplate,
   });
@@ -252,6 +283,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
+      inferenceChatModelEnabled,
       logger,
       onLlmResponse,
       request,

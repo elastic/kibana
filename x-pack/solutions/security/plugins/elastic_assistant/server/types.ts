@@ -247,6 +247,13 @@ export interface AssistantTool {
   getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
 }
 
+export type AssistantToolLlm =
+  | ActionsClientChatBedrockConverse
+  | ActionsClientChatOpenAI
+  | ActionsClientGeminiChatModel
+  | ActionsClientChatVertexAI
+  | InferenceChatModel;
+
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   assistantContext?: ElasticAssistantApiRequestHandlerContext;
@@ -259,7 +266,7 @@ export interface AssistantToolParams {
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | InferenceChatModel;
+  llm?: ActionsClientLlm | AssistantToolLlm;
   llmTasks?: LlmTasksPluginStart;
   isOssModel?: boolean;
   logger: Logger;
@@ -272,5 +279,5 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
-  createLlmInstance?: () => Promise<InferenceChatModel>;
+  createLlmInstance?: () => Promise<AssistantToolLlm>;
 }

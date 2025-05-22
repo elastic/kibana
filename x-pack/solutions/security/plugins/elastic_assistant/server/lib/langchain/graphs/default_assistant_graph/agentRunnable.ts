@@ -6,9 +6,15 @@
  */
 
 import { ToolDefinition } from '@langchain/core/language_models/base';
+import {
+  ActionsClientChatBedrockConverse,
+  ActionsClientChatVertexAI,
+  ActionsClientChatOpenAI,
+} from '@kbn/langchain/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import {
   AgentRunnableSequence,
+  createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
@@ -21,10 +27,18 @@ export const agentRunnableFactory = async ({
   llm,
   llmType,
   tools,
+  inferenceChatModelEnabled,
+  isOpenAI,
   isStream,
   prompt,
 }: {
-  llm: InferenceChatModel;
+  llm:
+    | ActionsClientChatBedrockConverse
+    | ActionsClientChatVertexAI
+    | ActionsClientChatOpenAI
+    | InferenceChatModel;
+  inferenceChatModelEnabled: boolean;
+  isOpenAI: boolean;
   llmType: string | undefined;
   tools: StructuredToolInterface[] | ToolDefinition[];
   isStream: boolean;
@@ -36,6 +50,10 @@ export const agentRunnableFactory = async ({
     streamRunnable: isStream,
     prompt,
   } as const;
+
+  if (!inferenceChatModelEnabled && (isOpenAI || llmType === 'inference')) {
+    return createOpenAIToolsAgent(params);
+  }
 
   if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
     return createToolCallingAgent(params);

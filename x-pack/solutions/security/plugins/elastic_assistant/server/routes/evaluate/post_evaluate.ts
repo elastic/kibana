@@ -23,6 +23,7 @@ import {
   PostEvaluateBody,
   PostEvaluateResponse,
   DefendInsightType,
+  INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
@@ -49,7 +50,7 @@ import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
-import { getLlmType, isOpenSourceModel } from '../utils';
+import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
@@ -162,6 +163,12 @@ export const postEvaluateRoute = (
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+
+          const { featureFlags } = await context.core;
+          const inferenceChatModelEnabled = await featureFlags.getBooleanValue(
+            INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+            false
+          );
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -295,23 +302,44 @@ export const postEvaluateRoute = (
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
+              const isOpenAI = llmType === 'openai' && !isOssModel;
+              const llmClass = getLlmClass(llmType);
               const createLlmInstance = async () =>
-                inference.getChatModel({
-                  request,
-                  connectorId: connector.id,
-                  chatModelOptions: {
-                    signal: abortSignal,
-                    temperature: getDefaultArguments(llmType).temperature,
-                    // prevents the agent from retrying on failure
-                    // failure could be due to bad connector, we should deliver that result to the client asap
-                    maxRetries: 0,
-                    metadata: {
-                      connectorTelemetry: {
+                inferenceChatModelEnabled
+                  ? inference.getChatModel({
+                      request,
+                      connectorId: connector.id,
+                      chatModelOptions: {
+                        signal: abortSignal,
+                        temperature: getDefaultArguments(llmType).temperature,
+                        // prevents the agent from retrying on failure
+                        // failure could be due to bad connector, we should deliver that result to the client asap
+                        maxRetries: 0,
+                        metadata: {
+                          connectorTelemetry: {
+                            pluginId: 'security_ai_assistant',
+                          },
+                        },
+                        // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+                        // timeout: ROUTE_HANDLER_TIMEOUT,
+                      },
+                    })
+                  : new llmClass({
+                      actionsClient,
+                      connectorId: connector.id,
+                      llmType,
+                      logger,
+                      model: connector.config?.defaultModel,
+                      temperature: getDefaultArguments(llmType).temperature,
+                      signal: abortSignal,
+                      streaming: false,
+                      maxRetries: 0,
+                      convertSystemMessageToHumanContent: false,
+                      telemetryMetadata: {
                         pluginId: 'security_ai_assistant',
                       },
-                    },
-                  },
-                });
+                      timeout: ROUTE_HANDLER_TIMEOUT,
+                    });
 
               const llm = await createLlmInstance();
               const anonymizationFieldsRes =
@@ -423,6 +451,8 @@ export const postEvaluateRoute = (
               const agentRunnable = await agentRunnableFactory({
                 llm: chatModel,
                 llmType,
+                inferenceChatModelEnabled,
+                isOpenAI,
                 tools,
                 isStream: false,
                 prompt: chatPromptTemplate,

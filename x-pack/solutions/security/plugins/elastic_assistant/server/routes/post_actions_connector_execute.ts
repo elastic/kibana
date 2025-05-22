@@ -19,6 +19,7 @@ import {
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
+  INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getPrompt } from '../lib/prompt';
@@ -79,6 +80,12 @@ export const postActionsConnectorExecuteRoute = (
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
         let onLlmResponse;
+
+        const { featureFlags } = await context.core;
+        const inferenceChatModelEnabled = await featureFlags.getBooleanValue(
+          INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+          false
+        );
 
         try {
           const checkResponse = await performChecks({
@@ -192,6 +199,7 @@ export const postActionsConnectorExecuteRoute = (
               connectorId,
               contentReferencesStore,
               isOssModel,
+              inferenceChatModelEnabled,
               conversationId,
               context: ctx,
               logger,

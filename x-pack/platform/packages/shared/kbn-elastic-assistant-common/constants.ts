@@ -125,3 +125,15 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
  */
 export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
   `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;
+
+/**
+ * This feature flag enables the InferenceChatModel feature.
+ *
+ * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
+ * ```
+ * feature_flags.overrides:
+ *   securitySolution.inferenceChatModelEnabled: true
+ * ```
+ */
+export const INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG =
+  'securitySolution.inferenceChatModelEnabled' as const;

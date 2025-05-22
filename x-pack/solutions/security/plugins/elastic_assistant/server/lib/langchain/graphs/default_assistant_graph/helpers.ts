@@ -14,6 +14,8 @@ import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assist
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { AgentFinish } from 'langchain/agents';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
@@ -24,9 +26,12 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
+  inferenceChatModelEnabled?: boolean;
+  isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  telemetry: AnalyticsServiceSetup;
   telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
 }
@@ -37,9 +42,11 @@ interface StreamGraphParams {
  * @param apmTracer
  * @param assistantGraph
  * @param inputs
+ * @param isEnabledKnowledgeBase
  * @param logger
  * @param onLlmResponse
  * @param request
+ * @param telemetry
  * @param telemetryTracer
  * @param traceOptions
  */
@@ -47,9 +54,12 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
+  inferenceChatModelEnabled = false,
+  isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
   request,
+  telemetry,
   telemetryTracer,
   traceOptions,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
@@ -67,6 +77,16 @@ export const streamGraph = async ({
   const handleStreamEnd = (finalResponse: string, isError = false) => {
     if (didEnd) {
       return;
+    }
+    if (isError) {
+      telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+        actionTypeId: request.body.actionTypeId,
+        model: request.body.model,
+        errorMessage: finalResponse,
+        assistantStreamingEnabled: true,
+        isEnabledKnowledgeBase,
+        errorLocation: 'handleStreamEnd',
+      });
     }
     if (onLlmResponse) {
       onLlmResponse(
@@ -86,7 +106,62 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  const stream = await assistantGraph.streamEvents(
+  // Stream is from tool calling agent or structured chat agent
+  if (
+    inferenceChatModelEnabled ||
+    inputs.isOssModel ||
+    inputs?.llmType === 'bedrock' ||
+    inputs?.llmType === 'gemini'
+  ) {
+    const stream = await assistantGraph.streamEvents(
+      inputs,
+      {
+        callbacks: [
+          apmTracer,
+          ...(traceOptions?.tracers ?? []),
+          ...(telemetryTracer ? [telemetryTracer] : []),
+        ],
+        runName: DEFAULT_ASSISTANT_GRAPH_ID,
+        tags: traceOptions?.tags ?? [],
+        version: 'v2',
+        streamMode: 'values',
+        recursionLimit: inputs?.isOssModel ? 50 : 25,
+      },
+      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+    );
+
+    const pushStreamUpdate = async () => {
+      for await (const { event, data, tags } of stream) {
+        if ((tags || []).includes(AGENT_NODE_TAG)) {
+          if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
+            const msg = data.chunk as AIMessageChunk;
+            if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+              push({ payload: msg.content as string, type: 'content' });
+            }
+          }
+
+          if (
+            event === 'on_chat_model_end' &&
+            !data.output.lc_kwargs?.tool_calls?.length &&
+            !didEnd
+          ) {
+            handleStreamEnd(data.output.content);
+          }
+        }
+      }
+    };
+
+    pushStreamUpdate().catch((err) => {
+      logger.error(`Error streaming graph: ${err}`);
+      handleStreamEnd(err.message, true);
+    });
+
+    return responseWithHeaders;
+  }
+
+  // Stream is from openai functions agent
+  let finalMessage = '';
+  const stream = assistantGraph.streamEvents(
     inputs,
     {
       callbacks: [
@@ -95,39 +170,46 @@ export const streamGraph = async ({
         ...(telemetryTracer ? [telemetryTracer] : []),
       ],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      tags: traceOptions?.tags ?? [],
-      version: 'v2',
       streamMode: 'values',
+      tags: traceOptions?.tags ?? [],
+      version: 'v1',
     },
-    inputs.isOssModel || inputs?.llmType === 'bedrock'
-      ? { includeNames: ['Summarizer'] }
-      : undefined
+    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
   );
 
   const pushStreamUpdate = async () => {
     for await (const { event, data, tags } of stream) {
       if ((tags || []).includes(AGENT_NODE_TAG)) {
-        if (event === 'on_chat_model_stream') {
-          const msg = data.chunk as AIMessageChunk;
-          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-            push({ payload: msg.content as string, type: 'content' });
+        if (event === 'on_llm_stream') {
+          const chunk = data?.chunk;
+          const msg = chunk.message;
+          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+            /* empty */
+          } else if (!didEnd) {
+            push({ payload: msg.content, type: 'content' });
+            finalMessage += msg.content;
           }
         }
 
-        if (
-          event === 'on_chat_model_end' &&
-          !data.output.lc_kwargs?.tool_calls?.length &&
-          !didEnd
-        ) {
-          handleStreamEnd(data.output.content);
+        if (event === 'on_llm_end' && !didEnd) {
+          const generation = data.output?.generations[0][0];
+          if (
+            // if generation is null, an error occurred - do nothing and let error handling complete the stream
+            generation != null &&
+            // no finish_reason means the stream was aborted
+            (!generation?.generationInfo?.finish_reason ||
+              generation?.generationInfo?.finish_reason === 'stop')
+          ) {
+            handleStreamEnd(
+              generation?.text && generation?.text.length ? generation?.text : finalMessage
+            );
+          }
         }
       }
     }
   };
 
   pushStreamUpdate().catch((err) => {
-    // @TODO: remove
-    console.log(`--@@err`, JSON.stringify(err, null, 2));
     logger.error(`Error streaming graph: ${err}`);
     handleStreamEnd(err.message, true);
   });
@@ -185,6 +267,7 @@ export const invokeGraph = async ({
       ],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
+      recursionLimit: inputs?.isOssModel ? 50 : 25,
     });
     const output = (result.agentOutcome as AgentFinish).returnValues.output;
     const conversationId = result.conversation?.id;
