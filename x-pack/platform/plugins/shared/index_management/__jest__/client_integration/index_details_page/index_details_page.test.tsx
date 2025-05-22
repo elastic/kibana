@@ -669,6 +669,7 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickFilterByFieldType();
         expect(testBed.exists('euiSelectableList')).toBe(true);
         expect(testBed.exists('indexDetailsMappingsFilterByFieldTypeSearch')).toBe(true);
+        expect(testBed.exists('clearFilters')).toBe(true);
         expect(testBed.exists('euiSelectableList')).toBe(true);
       });
       test('can select a field type and list view changes', async () => {
@@ -681,6 +682,23 @@ describe('<IndexDetailsPage />', () => {
         );
         expect(testBed.find('@timestampField-fieldName')).not.toContain('@timestamp');
       });
+
+      test('can clear selected field types', async () => {
+        expect(testBed.find('fieldName')).toHaveLength(2);
+        await testBed.actions.mappings.clickFilterByFieldType();
+        expect(testBed.actions.mappings.isClearFilterFieldTypeDisabled()).toBe(true);
+
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+        expect(testBed.actions.mappings.isClearFilterFieldTypeDisabled()).toBe(false);
+        expect(testBed.find('fieldName')).toHaveLength(1);
+
+        await testBed.actions.mappings.clearFilterFieldType();
+
+        expect(testBed.find('fieldName')).toHaveLength(2);
+      });
+
       test('can search field with filter', async () => {
         expect(testBed.find('fieldName')).toHaveLength(2);
 

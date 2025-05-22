@@ -42,12 +42,8 @@ export const MappingsFilter: React.FC<Props> = ({
   const dispatch = useDispatch();
 
   const isClearAllFilterDisabled = !isAddingFields
-    ? state.filter.selectedOptions.filter(
-        (option) => option.checked === 'on' || option.checked === 'off'
-      ).length === 0
-    : previousState.filter.selectedOptions.filter(
-        (option) => option.checked === 'on' || option.checked === 'off'
-      ).length === 0;
+    ? state.filter.selectedOptions.filter((option) => option.checked === 'on').length === 0
+    : previousState.filter.selectedOptions.filter((option) => option.checked === 'on').length === 0;
 
   const setSelectedOptions = useCallback(
     (options: EuiSelectableOption[]) => {
@@ -122,6 +118,20 @@ export const MappingsFilter: React.FC<Props> = ({
       })}
     </EuiFilterButton>
   );
+
+  const clearOptions = () => {
+    const clearCheckedOptions = (options: EuiSelectableOption[]) => {
+      return options.map((option) =>
+        option.checked === 'on' ? { ...option, checked: undefined } : option
+      );
+    };
+    if (!isAddingFields) {
+      setSelectedOptions(clearCheckedOptions(state.filter.selectedOptions));
+    } else {
+      setPreviousStateSelectedOptions(clearCheckedOptions(previousState.filter.selectedOptions));
+    }
+  };
+
   return (
     <EuiFilterGroup>
       <EuiPopover
@@ -175,23 +185,7 @@ export const MappingsFilter: React.FC<Props> = ({
             iconType="cross"
             data-test-subj="clearFilters"
             disabled={isClearAllFilterDisabled}
-            onClick={() => {
-              if (!isAddingFields) {
-                state.filter.selectedOptions.filter((option) => {
-                  if (option.checked === 'on') {
-                    option.checked = undefined;
-                  }
-                });
-                setSelectedOptions(state.filter.selectedOptions);
-              } else {
-                previousState.filter.selectedOptions.filter((option) => {
-                  if (option.checked === 'on') {
-                    option.checked = undefined;
-                  }
-                });
-                setPreviousStateSelectedOptions(previousState.filter.selectedOptions);
-              }
-            }}
+            onClick={clearOptions}
           >
             {i18n.translate(
               'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.filter.clearAll',
