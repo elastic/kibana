@@ -13,6 +13,7 @@ import {
   isToolNotFoundError,
   OnechatErrorCode,
 } from './errors';
+import { toSerializedToolIdentifier } from './tools';
 
 describe('Onechat errors', () => {
   describe('isOnechatError', () => {
@@ -41,7 +42,7 @@ describe('Onechat errors', () => {
     });
 
     it('should return false for a tool not found error', () => {
-      const error = createToolNotFoundError({ toolId: 'test-tool' });
+      const error = createToolNotFoundError({ toolId: toSerializedToolIdentifier('test-tool') });
       expect(isInternalError(error)).toBe(false);
     });
 
@@ -53,7 +54,7 @@ describe('Onechat errors', () => {
 
   describe('isToolNotFoundError', () => {
     it('should return true for a tool not found error', () => {
-      const error = createToolNotFoundError({ toolId: 'test-tool' });
+      const error = createToolNotFoundError({ toolId: toSerializedToolIdentifier('test-tool') });
       expect(isToolNotFoundError(error)).toBe(true);
     });
 
@@ -89,19 +90,25 @@ describe('Onechat errors', () => {
 
   describe('createToolNotFoundError', () => {
     it('should create an error with the correct code and default message', () => {
-      const error = createToolNotFoundError({ toolId: 'test-tool' });
+      const error = createToolNotFoundError({ toolId: toSerializedToolIdentifier('test-tool') });
       expect(error.code).toBe(OnechatErrorCode.toolNotFound);
-      expect(error.message).toBe('Tool test-tool not found');
-      expect(error.meta).toEqual({ toolId: 'test-tool', statusCode: 404 });
+      expect(error.message).toBe(`Tool ${toSerializedToolIdentifier('test-tool')} not found`);
+      expect(error.meta).toEqual({
+        toolId: toSerializedToolIdentifier('test-tool'),
+        statusCode: 404,
+      });
     });
 
     it('should use custom message when provided', () => {
       const error = createToolNotFoundError({
-        toolId: 'test-tool',
+        toolId: toSerializedToolIdentifier('test-tool'),
         customMessage: 'Custom error message',
       });
       expect(error.message).toBe('Custom error message');
-      expect(error.meta).toEqual({ toolId: 'test-tool', statusCode: 404 });
+      expect(error.meta).toEqual({
+        toolId: toSerializedToolIdentifier('test-tool'),
+        statusCode: 404,
+      });
     });
   });
 });
