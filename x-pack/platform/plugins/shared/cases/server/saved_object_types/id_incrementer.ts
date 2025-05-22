@@ -11,7 +11,7 @@ import { CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../common/constants';
 
 export const caseIdIncrementerSavedObjectType: SavedObjectsType = {
   name: CASE_ID_INCREMENTER_SAVED_OBJECT,
-  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX, // TODO - determine if this should be saved with this index
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
