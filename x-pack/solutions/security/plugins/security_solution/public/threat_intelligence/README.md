@@ -2,10 +2,6 @@
 
 Elastic Threat Intelligence makes it easy to analyze and investigate potential security threats by aggregating data from multiple sources in one place. You’ll be able to view data from all activated threat intelligence feeds and take action.
 
-### Where to find the UI for this plugin?
-
-The Threat Intelligence UI is displayed in Kibana Security, under the Explore section.
-
 ## Development setup
 
 ### Kibana development in general
@@ -63,29 +59,3 @@ node scripts/generate_indicators.js
 ```
 
 see the file in order to adjust the amount of indicators generated. The default is one million.
-
-## E2E
-
-### Running locally
-
-Cypress tests are integrated with the Security Solution ones. Please refer to https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/README.md for more information
-
-## FAQ
-
-### How is the Threat Intelligence code loaded in Kibana?
-
-The Threat Intelligence plugin is loaded lazily within the [security_solution](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution) plugin,
-from `x-pack/solutions/security/plugins/security_solution/public/threat_intelligence` owned by the Threat Hunting Investigations Team.
-
-## QA and demo for implemented features
-
-One way to QA and demo the feature merged into `main` branch is to run the latest `main` locally.
-Another option is to deploy a Staging instance. For Staging environment snapshots are being build every night with the latest state of the `main` branch. More documentation can be found [here](https://cloud.elastic.dev/environments/Staging/#automatic-termination-of-staging-deployments)
-
-## Contributing
-
-See [CONTRIBUTING.md](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/threat_intelligence/CONTRIBUTING.md) for information on contributing.
-
-## Issues
-
-Please report any issues in [this GitHub project](https://github.com/orgs/elastic/projects/758/).
