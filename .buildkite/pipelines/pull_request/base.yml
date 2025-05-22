@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 75
+      diskSizeGb: 80
 
   - wait
 
@@ -108,7 +108,7 @@ steps:
     label: Mark CI Stats as ready
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -122,7 +122,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
