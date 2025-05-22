@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PidConversion } from './pid';
-export { LevelConversion } from './level';
-export { LoggerConversion } from './logger';
-export {
-  DateConversion,
-  MessageConversion,
-  MetaConversion,
-  ErrorConversion,
-} from '@kbn/core-logging-common-internal';
+// import { EcsError } from '@elastic/ecs';
+import { LogRecord } from '@kbn/logging';
+import { Conversion } from './types';
+
+function isError(x: any): x is Error {
+  return x instanceof Error;
+}
+
+export const ErrorConversion: Conversion = {
+  pattern: /%error/g,
+  convert(record: LogRecord) {
+    let error;
+    if (isError(record.meta?.error)) {
+      error = record.meta?.error.stack;
+    }
+    return error ? `${error}` : '';
+  },
+};
