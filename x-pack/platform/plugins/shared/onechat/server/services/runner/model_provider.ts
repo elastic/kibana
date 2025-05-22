@@ -11,6 +11,31 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorList, getDefaultConnector } from './utils';
 
+export interface CreateModelProviderOpts {
+  inference: InferenceServerStart;
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  defaultConnectorId?: string;
+}
+
+export type CreateModelProviderFactoryFn = (
+  opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+) => ModelProviderFactoryFn;
+
+export type ModelProviderFactoryFn = (
+  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+) => ModelProvider;
+
+/**
+ * Utility function to creates a {@link ModelProviderFactoryFn}
+ */
+export const createModelProviderFactory: CreateModelProviderFactoryFn = (factoryOpts) => (opts) => {
+  return createModelProvider({
+    ...factoryOpts,
+    ...opts,
+  });
+};
+
 /**
  * Utility function to creates a {@link ModelProvider}
  */
@@ -19,12 +44,7 @@ export const createModelProvider = ({
   actions,
   request,
   defaultConnectorId,
-}: {
-  inference: InferenceServerStart;
-  actions: ActionsPluginStart;
-  request: KibanaRequest;
-  defaultConnectorId?: string;
-}): ModelProvider => {
+}: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = async () => {
     if (defaultConnectorId) {
       return defaultConnectorId;

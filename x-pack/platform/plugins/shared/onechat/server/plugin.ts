@@ -73,11 +73,11 @@ export class OnechatPlugin
 
     return {
       tools: {
-        registry: tools.provider,
+        registry: tools.registry,
         execute: runner.runTool.bind(runner),
         asScoped: ({ request }) => {
           return {
-            registry: tools.public.asScoped({ request }),
+            registry: tools.getScopedRegistry({ request }),
             execute: (args) => {
               return runner.runTool({ ...args, request });
             },

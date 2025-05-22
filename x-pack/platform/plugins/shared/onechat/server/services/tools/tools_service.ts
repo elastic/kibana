@@ -26,10 +26,8 @@ export class ToolsService {
     const toolProvider = combineToolProviders(this.builtinRegistry);
 
     return {
-      provider: toolProvider,
-      public: {
-        asScoped: toolProviderToPublicRegistryFactory({ provider: toolProvider }),
-      },
+      registry: toolProvider,
+      getScopedRegistry: toolProviderToPublicRegistryFactory({ provider: toolProvider }),
     };
   }
 

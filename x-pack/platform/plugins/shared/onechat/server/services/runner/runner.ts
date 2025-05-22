@@ -16,10 +16,8 @@ import type {
   RunContext,
   Runner,
 } from '@kbn/onechat-server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolsServiceStart } from '../tools';
-import { createModelProvider } from './model_provider';
+import { ModelProviderFactoryFn } from './model_provider';
 import { creatEmptyRunContext, forkContextForToolRun } from './utils/run_context';
 import { createEventEmitter, createNoopEventEmitter } from './utils/events';
 
@@ -27,10 +25,8 @@ export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
-  // plugin deps
-  inference: InferenceServerStart;
-  actions: ActionsPluginStart;
   // internal service deps
+  modelProviderFactory: ModelProviderFactoryFn;
   toolsService: ToolsServiceStart;
   // other deps
   logger: Logger;
@@ -76,7 +72,7 @@ const runTool = async <TResult = unknown>({
 
   const { toolsService, request } = manager.deps;
 
-  const tool = await toolsService.provider.get({ toolId, request });
+  const tool = await toolsService.registry.get({ toolId, request });
 
   // TODO: send toolCall event
 
@@ -97,10 +93,10 @@ export const createToolHandlerContext = ({
   manager: RunnerManager;
 }): ToolHandlerContext => {
   const { onEvent } = toolExecutionParams;
-  const { inference, actions, request, defaultConnectorId, elasticsearch } = manager.deps;
+  const { request, defaultConnectorId, elasticsearch, modelProviderFactory } = manager.deps;
   return {
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: createModelProvider({ inference, actions, request, defaultConnectorId }),
+    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
     events: onEvent
       ? createEventEmitter({ eventHandler: onEvent, context: manager.context })

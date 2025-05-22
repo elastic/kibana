@@ -7,7 +7,12 @@
 
 import type { RunnerFactoryDeps } from './types';
 import type { CreateScopedRunnerExtraParams, RunnerFactory } from './types';
-import { createScopedRunner as createScopedRunnerInternal, createRunner } from './runner';
+import { createModelProviderFactory } from './model_provider';
+import {
+  createScopedRunner as createScopedRunnerInternal,
+  createRunner,
+  type CreateRunnerDeps,
+} from './runner';
 
 export class RunnerFactoryImpl implements RunnerFactory {
   private readonly deps: RunnerFactoryDeps;
@@ -17,13 +22,21 @@ export class RunnerFactoryImpl implements RunnerFactory {
   }
 
   getRunner() {
-    return createRunner(this.deps);
+    return createRunner(this.createRunnerDeps());
   }
 
   createScopedRunner(scopedParams: CreateScopedRunnerExtraParams) {
     return createScopedRunnerInternal({
-      ...this.deps,
+      ...this.createRunnerDeps(),
       ...scopedParams,
     });
+  }
+
+  private createRunnerDeps(): CreateRunnerDeps {
+    const { inference, actions, ...otherDeps } = this.deps;
+    return {
+      ...otherDeps,
+      modelProviderFactory: createModelProviderFactory({ inference, actions }),
+    };
   }
 }

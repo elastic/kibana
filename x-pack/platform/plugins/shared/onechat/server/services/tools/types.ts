@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolDescriptor, ToolIdentifier } from '@kbn/onechat-common';
 import type { ToolProvider } from '@kbn/onechat-server';
 import { ToolRegistration } from './builtin_registry';
 
@@ -14,15 +14,16 @@ export interface ToolsServiceSetup {
   register(toolRegistration: ToolRegistration): void;
 }
 
+// type alias for now, we may extend later.
+export type InternalToolRegistry = ToolProvider;
+
 export interface ToolsServiceStart {
   /**
    * Main tool provider exposing all tools
    */
-  provider: ToolProvider;
+  registry: InternalToolRegistry;
 
-  public: {
-    asScoped: ScopedPublicToolRegistryFactoryFn;
-  };
+  getScopedRegistry: ScopedPublicToolRegistryFactoryFn;
 }
 
 /**
@@ -30,8 +31,8 @@ export interface ToolsServiceStart {
  * and pre-bound to a given request.
  */
 export interface ScopedPublicToolRegistry {
-  has(toolId: string): Promise<boolean>;
-  get(toolId: string): Promise<ToolDescriptor>;
+  has(toolId: ToolIdentifier): Promise<boolean>;
+  get(toolId: ToolIdentifier): Promise<ToolDescriptor>;
   list(options?: {}): Promise<ToolDescriptor[]>;
 }
 
