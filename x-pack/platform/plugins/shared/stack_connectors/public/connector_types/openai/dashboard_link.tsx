@@ -43,6 +43,7 @@ export const DashboardLink: React.FC<Props> = ({
 
     <>
       <EuiSpacer size="s" />
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick} href={dashboardUrl}>
         {i18n.USAGE_DASHBOARD_LINK(selectedProvider, connectorName)}
       </EuiLink>
