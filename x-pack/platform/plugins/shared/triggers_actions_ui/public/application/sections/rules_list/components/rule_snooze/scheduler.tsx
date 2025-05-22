@@ -33,7 +33,6 @@ import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
 
 interface PanelOpts {
-  ruleType: string;
   onSaveSchedule: (sched: SnoozeSchedule) => void;
   onCancelSchedules: (ids: string[]) => void;
   initialSchedule: SnoozeSchedule | null;
@@ -102,7 +101,6 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
 };
 
 const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
-  ruleType,
   onSaveSchedule,
   initialSchedule,
   isLoading,
@@ -333,7 +331,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} style={{ width: '400px' }}>
+          <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} css={{ width: '400px' }}>
             <EuiSplitPanel.Inner paddingSize="s">
               <EuiDatePicker
                 inline
@@ -397,7 +395,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         disabled={!startDT || !endDT || startDT.isSameOrAfter(endDT) || startDT.isBefore(minDate)}
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
-        data-test-subj={`scheduler-saveSchedule__${ruleType}`}
+        data-test-subj="scheduler-saveSchedule"
       >
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',

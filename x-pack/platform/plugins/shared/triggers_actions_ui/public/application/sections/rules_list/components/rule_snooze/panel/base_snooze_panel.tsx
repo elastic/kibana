@@ -39,7 +39,6 @@ import { durationToTextString, scheduleSummary, usePreviousSnoozeInterval } from
 import { DAYS, HOURS, MINUTES, MONTHS, WEEKS } from './translations';
 
 export interface BaseSnoozePanelProps {
-  ruleType: string;
   interval?: string;
   snoozeRule: (schedule: SnoozeSchedule) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
@@ -55,7 +54,6 @@ export interface BaseSnoozePanelProps {
 }
 
 export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
-  ruleType,
   isLoading,
   interval = '3d',
   snoozeRule,
@@ -172,7 +170,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   fill
                   color="primary"
                   onClick={onClickAddSchedule}
-                  data-test-subj={`ruleAddSchedule__${ruleType}`}
+                  data-test-subj="ruleAddSchedule"
                   iconType="calendar"
                 >
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.addSchedule', {
@@ -203,7 +201,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   color="danger"
                   size="xs"
                   onClick={() => setIsRemoveAllModalVisible(true)}
-                  data-test-subj={`ruleRemoveAllSchedules__${ruleType}`}
+                  data-test-subj="ruleRemoveAllSchedules"
                 >
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.removeAllButton', {
                     defaultMessage: 'Remove all',
@@ -252,7 +250,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               <EuiFlexItem>
                 <EuiButtonEmpty
                   isDisabled={numberOfSchedules >= 5}
-                  data-test-subj={`ruleSchedulesListAddButton__${ruleType}`}
+                  data-test-subj="ruleSchedulesListAddButton"
                   iconType="plusInCircleFilled"
                   onClick={onClickAddSchedule}
                 >
@@ -279,7 +277,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             flush="left"
             size="s"
             iconType="refresh"
-            data-test-subj={`ruleSnoozePreviousButton__${ruleType}`}
+            data-test-subj="ruleSnoozePreviousButton"
             onClick={() => applySnooze(parsedPrevSnooze.value, parsedPrevSnooze.unit as SnoozeUnit)}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.previousSnooze', {
@@ -361,7 +359,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             disabled={!intervalValue || intervalValue < 1}
             isLoading={isLoading}
             onClick={onClickApplyButton}
-            data-test-subj={`ruleSnoozeApply__${ruleType}`}
+            data-test-subj="ruleSnoozeApply"
             minWidth={0}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
@@ -401,7 +399,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             flush="left"
             size="s"
             onClick={onApplyIndefinite}
-            data-test-subj={`ruleSnoozeIndefiniteApply__${ruleType}`}
+            data-test-subj="ruleSnoozeIndefiniteApply"
           >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
               defaultMessage: 'Snooze indefinitely',
@@ -421,7 +419,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   isLoading={isLoading}
                   color="danger"
                   onClick={onClickCancelSnooze}
-                  data-test-subj={`ruleSnoozeCancel__${ruleType}`}
+                  data-test-subj="ruleSnoozeCancel"
                 >
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
                     defaultMessage: 'Cancel snooze',

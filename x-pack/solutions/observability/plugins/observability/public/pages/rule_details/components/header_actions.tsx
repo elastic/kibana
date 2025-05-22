@@ -123,10 +123,8 @@ export function HeaderActions({
     return null;
   }
 
-  const snakeRuleType = rule.ruleTypeId.replace(/:/g, '_');
-
   const disableRuleOption = {
-    'data-test-subj': `disableRuleButton__${snakeRuleType}`,
+    'data-test-subj': 'disableRuleButton',
     onClick: onDisableModalOpen,
     name: i18n.translate('xpack.observability.ruleDetails.disableRule', {
       defaultMessage: 'Disable',
@@ -134,7 +132,7 @@ export function HeaderActions({
   };
 
   const enableRuleOption = {
-    'data-test-subj': `editRuleButton__${snakeRuleType}`,
+    'data-test-subj': 'enableRuleButton',
     onClick: handleEnableRule,
     name: i18n.translate('xpack.observability.ruleDetails.enableRule', {
       defaultMessage: 'Enable',
@@ -148,14 +146,14 @@ export function HeaderActions({
       items: [
         ...[rule.enabled ? disableRuleOption : enableRuleOption],
         {
-          'data-test-subj': `runRuleButton__${snakeRuleType}`,
+          'data-test-subj': 'runRuleButton',
           onClick: handleRunRule,
           name: i18n.translate('xpack.observability.ruleDetails.runRule', {
             defaultMessage: 'Run',
           }),
         },
         {
-          'data-test-subj': `updateApiKeyButton__${snakeRuleType}`,
+          'data-test-subj': 'updateAPIKeyButton',
           onClick: handleUpdateAPIKey,
           name: i18n.translate('xpack.observability.ruleDetails.updateAPIkey', {
             defaultMessage: 'Update API key',
@@ -166,7 +164,7 @@ export function HeaderActions({
         },
         {
           icon: 'pencil',
-          'data-test-subj': `editRuleButton__${snakeRuleType}`,
+          'data-test-subj': 'editRuleButton',
           onClick: handleEditRule,
           name: i18n.translate('xpack.observability.ruleDetails.editRule', {
             defaultMessage: 'Edit',
@@ -174,7 +172,7 @@ export function HeaderActions({
         },
         {
           icon: 'trash',
-          'data-test-subj': `deleteRuleButton__${snakeRuleType}`,
+          'data-test-subj': 'deleteRuleButton',
           className: 'collapsedItemActions__deleteButton',
           onClick: handleRemoveRule,
           name: i18n.translate('xpack.observability.ruleDetails.deleteRule', {
@@ -209,14 +207,16 @@ export function HeaderActions({
               </EuiButton>
             }
           >
-            <EuiContextMenu
-              initialPanelId={0}
-              panels={panels}
-              className="actDetailsCollapsedItemActions"
-              data-test-subj="detailsCollapsedActionPanel"
-              data-testid="detailsCollapsedActionPanel"
-              css={collapsedItemActionsCss}
-            />
+            <div data-test-subj={rule.ruleTypeId}>
+              <EuiContextMenu
+                initialPanelId={0}
+                panels={panels}
+                className="actDetailsCollapsedItemActions"
+                data-test-subj="detailsCollapsedActionPanel"
+                data-testid="detailsCollapsedActionPanel"
+                css={collapsedItemActionsCss}
+              />
+            </div>
           </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
