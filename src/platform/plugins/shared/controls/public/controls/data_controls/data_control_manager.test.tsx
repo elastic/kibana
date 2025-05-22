@@ -11,14 +11,15 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { first, skip } from 'rxjs';
 import { dataViewsService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
-import { initializeDataControl } from './initialize_data_control';
+import { initializeDataControlManager } from './data_control_manager';
 
-describe('initializeDataControl', () => {
+describe('initializeDataControlManager', () => {
   const dataControlState = {
     dataViewId: 'myDataViewId',
     fieldName: 'myFieldName',
   };
-  const editorStateManager = {};
+  const getEditorState = () => ({});
+  const setEditorState = () => {};
   const controlGroupApi = {} as unknown as ControlGroupApi;
 
   dataViewsService.get = async (id: string): Promise<DataView> => {
@@ -41,58 +42,58 @@ describe('initializeDataControl', () => {
 
   describe('dataViewId subscription', () => {
     describe('no blocking errors', () => {
-      let dataControl: undefined | ReturnType<typeof initializeDataControl>;
+      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
       beforeAll((done) => {
-        dataControl = initializeDataControl(
+        dataControlManager = initializeDataControlManager(
           'myControlId',
           'myControlType',
-          'referenceNameSuffix',
           dataControlState,
-          editorStateManager,
+          getEditorState,
+          setEditorState,
           controlGroupApi
         );
 
-        dataControl.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+        dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
 
       test('should set data view', () => {
-        const dataViews = dataControl!.api.dataViews$.value;
+        const dataViews = dataControlManager!.api.dataViews$.value;
         expect(dataViews).not.toBeUndefined();
         expect(dataViews!.length).toBe(1);
         expect(dataViews![0].id).toBe('myDataViewId');
       });
 
       test('should set default panel title', () => {
-        const defaultPanelTitle = dataControl!.api.defaultTitle$!.value;
+        const defaultPanelTitle = dataControlManager!.api.defaultTitle$!.value;
         expect(defaultPanelTitle).not.toBeUndefined();
         expect(defaultPanelTitle).toBe('My field name');
       });
     });
 
     describe('data view does not exist', () => {
-      let dataControl: undefined | ReturnType<typeof initializeDataControl>;
+      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
       beforeAll((done) => {
-        dataControl = initializeDataControl(
+        dataControlManager = initializeDataControlManager(
           'myControlId',
           'myControlType',
-          'referenceNameSuffix',
           {
             ...dataControlState,
             dataViewId: 'notGonnaFindMeDataViewId',
           },
-          editorStateManager,
+          getEditorState,
+          setEditorState,
           controlGroupApi
         );
 
-        dataControl.api.dataViews$.pipe(skip(1), first()).subscribe(() => {
+        dataControlManager.api.dataViews$.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
 
       test('should set blocking error', () => {
-        const error = dataControl!.api.blockingError$.value;
+        const error = dataControlManager!.api.blockingError$.value;
         expect(error).not.toBeUndefined();
         expect(error!.message).toBe(
           'Simulated error: no data view found for id notGonnaFindMeDataViewId'
@@ -100,48 +101,48 @@ describe('initializeDataControl', () => {
       });
 
       test('should clear blocking error when valid data view id provided', (done) => {
-        dataControl!.api.dataViews$.pipe(skip(1), first()).subscribe((dataView) => {
+        dataControlManager!.api.dataViews$.pipe(skip(1), first()).subscribe((dataView) => {
           expect(dataView).not.toBeUndefined();
-          expect(dataControl!.api.blockingError$.value).toBeUndefined();
+          expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
           done();
         });
-        dataControl!.stateManager.dataViewId.next('myDataViewId');
+        dataControlManager!.api.setDataViewId('myDataViewId');
       });
     });
 
     describe('field does not exist', () => {
-      let dataControl: undefined | ReturnType<typeof initializeDataControl>;
+      let dataControlManager: undefined | ReturnType<typeof initializeDataControlManager>;
       beforeAll((done) => {
-        dataControl = initializeDataControl(
+        dataControlManager = initializeDataControlManager(
           'myControlId',
           'myControlType',
-          'referenceNameSuffix',
           {
             ...dataControlState,
             fieldName: 'notGonnaFindMeFieldName',
           },
-          editorStateManager,
+          getEditorState,
+          setEditorState,
           controlGroupApi
         );
 
-        dataControl.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+        dataControlManager!.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
 
       test('should set blocking error', () => {
-        const error = dataControl!.api.blockingError$.value;
+        const error = dataControlManager!.api.blockingError$.value;
         expect(error).not.toBeUndefined();
         expect(error!.message).toBe('Could not locate field: notGonnaFindMeFieldName');
       });
 
       test('should clear blocking error when valid field name provided', (done) => {
-        dataControl!.api.defaultTitle$!.pipe(skip(1), first()).subscribe((defaultTitle) => {
+        dataControlManager!.api.defaultTitle$!.pipe(skip(1), first()).subscribe((defaultTitle) => {
           expect(defaultTitle).toBe('My field name');
-          expect(dataControl!.api.blockingError$.value).toBeUndefined();
+          expect(dataControlManager!.api.blockingError$.value).toBeUndefined();
           done();
         });
-        dataControl!.stateManager.fieldName.next('myFieldName');
+        dataControlManager!.api.setFieldName('myFieldName');
       });
     });
   });
