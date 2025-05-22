@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useState, useEffect } from 'react';
 import type { Subscription } from 'rxjs';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,11 +17,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { createResultsUrl } from '../../../../../util/results_url';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
