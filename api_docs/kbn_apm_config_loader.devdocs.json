@@ -118,6 +118,30 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.ApmConfiguration.getTelemetryConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getTelemetryConfig",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/telemetry-config",
+                "scope": "common",
+                "docId": "kibKbnTelemetryConfigPluginApi",
+                "section": "def-common.TelemetryConfig",
+                "text": "TelemetryConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
             "id": "def-server.ApmConfiguration.isUsersRedactionEnabled",
             "type": "Function",
             "tags": [],
@@ -242,6 +266,84 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/init_apm.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.loadConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "loadConfiguration",
+        "description": [
+          "\nLoad the APM configuration.\n"
+        ],
+        "signature": [
+          "(argv: string[], rootDir: string, isDistributable: boolean) => ",
+          {
+            "pluginId": "@kbn/apm-config-loader",
+            "scope": "server",
+            "docId": "kibKbnApmConfigLoaderPluginApi",
+            "section": "def-server.ApmConfiguration",
+            "text": "ApmConfiguration"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.loadConfiguration.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "argv",
+            "description": [
+              "the `process.argv` arguments"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.loadConfiguration.$2",
+            "type": "string",
+            "tags": [],
+            "label": "rootDir",
+            "description": [
+              "The root directory of kibana (where the sources and the `package.json` file are)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.loadConfiguration.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDistributable",
+            "description": [
+              "true for production builds, false otherwise"
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/private/kbn-apm-config-loader/src/config_loader.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
