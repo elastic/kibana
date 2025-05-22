@@ -16,6 +16,7 @@ import type { Connector } from '@kbn/actions-plugin/server/application/connector
 import { getDefaultArguments } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
+import { PLUGIN_ID } from '@kbn/search-playground/common';
 
 export const getChatParams = async (
   {
@@ -86,6 +87,7 @@ export const getChatParams = async (
       // prevents the agent from retrying on failure
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
+      telemetryMetadata: { pluginId: PLUGIN_ID },
     },
   });
 
