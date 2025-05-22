@@ -1618,17 +1618,6 @@ describe('SearchSource', () => {
   });
 
   describe('parseActiveIndexPatternFromQueryString', () => {
-    beforeEach(() => {
-      // Minimal dependencies for SearchSource
-      const dependencies = {
-        aggs: { createAggConfigs: jest.fn() },
-        search: jest.fn(),
-        dataViews: {} as any,
-        scriptedFieldsEnabled: false,
-      } as any;
-      searchSource = new SearchSource({}, dependencies);
-    });
-
     it('should extract a single index name without wildcards', () => {
       const result = searchSource.parseActiveIndexPatternFromQueryString('_index: logs-2024-06-27');
       expect(result).toEqual(['logs-2024-06-27']);
