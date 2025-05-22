@@ -44,7 +44,6 @@
     "@kbn/presentation-publishing",
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",
