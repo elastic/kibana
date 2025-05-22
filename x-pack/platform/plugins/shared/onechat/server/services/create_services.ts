@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Runner } from '@kbn/onechat-server';
 import type { InternalSetupServices, InternalStartServices, ServicesStartDeps } from './types';
 import { ToolsService } from './tools';
 import { RunnerFactoryImpl } from './runner';
@@ -41,7 +42,17 @@ export class ServiceManager {
       throw new Error('#startServices called before #setupServices');
     }
 
-    const tools = this.services.tools.start();
+    // eslint-disable-next-line prefer-const
+    let runner: Runner | undefined;
+
+    const tools = this.services.tools.start({
+      getRunner: () => {
+        if (!runner) {
+          throw new Error('Trying to access runner before initialization');
+        }
+        return runner;
+      },
+    });
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -50,6 +61,7 @@ export class ServiceManager {
       inference,
       toolsService: tools,
     });
+    runner = runnerFactory.getRunner();
 
     this.internalStart = {
       tools,

@@ -11,13 +11,13 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptor, ToolIdentifier } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
-import type { ScopedRunner } from './runner';
+import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { RunEventEmitter } from './events';
 
 /**
- * Represents a onechat tool.
+ * Onechat tool, as registered by tool providers
  */
-export interface Tool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>
+export interface RegisteredTool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>
   extends ToolDescriptor {
   /**
    * Tool's input schema, in zod format.
@@ -27,10 +27,42 @@ export interface Tool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = un
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<RunInput, RunOutput>;
+
+  // TODO: optional meta / make it mandatory on tool descriptor.
 }
 
 /**
- * Tool handler function for {@link Tool} handlers.
+ * Onechat tool, as exposed by the onechat tool registry
+ */
+export interface ExecutableTool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>
+  extends ToolDescriptor {
+  /**
+   * Tool's input schema, in zod format.
+   */
+  schema: RunInput;
+  /**
+   * Handler attached to the tool
+   */
+  execute: ExecutableToolHandlerFn<z.objectOutputType<RunInput, ZodTypeAny>, RunOutput>;
+}
+
+/**
+ * Param type for {@link ExecutableToolHandlerFn}
+ */
+export type ExecutableToolHandlerParams<TParams = Record<string, unknown>> = Omit<
+  ScopedRunnerRunToolsParams<TParams>,
+  'toolId'
+>;
+
+/**
+ * Execution handler for {@link ExecutableTool}
+ */
+export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult = unknown> = (
+  params: ExecutableToolHandlerParams<TParams>
+) => Promise<RunToolReturn<TResult>>;
+
+/**
+ * Tool handler function for {@link RegisteredTool} handlers.
  */
 export type ToolHandlerFn<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown> = (
   args: z.objectOutputType<RunInput, ZodTypeAny>,
@@ -73,29 +105,40 @@ export interface ToolHandlerContext {
  */
 export interface ToolProvider {
   /**
-   * TODO doc
+   * Check if a tool is available in the provider
    */
   has(options: ToolProviderHasOptions): Promise<boolean>;
   /**
-   * TODO doc
+   * Retrieve a tool based on its identifier.
+   * If not found, will throw a toolNotFound error.
    */
-  get(options: ToolProviderGetOptions): Promise<Tool>;
+  get(options: ToolProviderGetOptions): Promise<ExecutableTool>;
   /**
-   * TODO doc
+   * List all tools based on the provided filters
    */
-  list(options: ToolProviderListOptions): Promise<Tool[]>;
+  list(options: ToolProviderListOptions): Promise<ExecutableTool[]>;
 }
 
+/**
+ * Options for {@link ToolProvider.has}
+ */
 export interface ToolProviderHasOptions {
   toolId: ToolIdentifier;
   request: KibanaRequest;
 }
 
+/**
+ * Options for {@link ToolProvider.get}
+ */
 export interface ToolProviderGetOptions {
   toolId: ToolIdentifier;
   request: KibanaRequest;
 }
 
+/**
+ * Options for {@link ToolProvider.list}
+ */
 export interface ToolProviderListOptions {
   request: KibanaRequest;
+  // TODO once we figure out metas: filters.
 }

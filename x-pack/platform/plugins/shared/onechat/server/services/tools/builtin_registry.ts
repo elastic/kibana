@@ -9,19 +9,17 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   OnechatErrorUtils,
+  ToolSourceType,
+  type ToolIdentifier,
   toSerializedToolIdentifier,
   toStructuredToolIdentifier,
 } from '@kbn/onechat-common';
-import type {
-  Tool,
-  ToolProvider,
-  ToolProviderHasOptions,
-  ToolProviderGetOptions,
-  ToolProviderListOptions,
-} from '@kbn/onechat-server';
+import type { RegisteredTool } from '@kbn/onechat-server';
 
-export type ToolRegistrationFn = (opts: { request: KibanaRequest }) => MaybePromise<Tool[]>;
-export type ToolDirectRegistration = Tool;
+export type ToolRegistrationFn = (opts: {
+  request: KibanaRequest;
+}) => MaybePromise<RegisteredTool[]>;
+export type ToolDirectRegistration = RegisteredTool;
 
 export type ToolRegistration = ToolDirectRegistration | ToolRegistrationFn;
 
@@ -35,22 +33,39 @@ export const wrapToolRegistration = (tool: ToolDirectRegistration): ToolRegistra
   };
 };
 
-export class BuiltinToolRegistry implements ToolProvider {
+export interface BuiltinToolRegistry {
+  register(tool: ToolRegistration): void;
+  has(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<boolean>;
+  get(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool>;
+  list(options: { request: KibanaRequest }): Promise<RegisteredTool[]>;
+}
+
+export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
+  return new BuiltinToolRegistryImpl();
+};
+
+const isValidSource = (source: ToolSourceType) => {
+  return source === ToolSourceType.builtIn || source === ToolSourceType.unknown;
+};
+
+export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
   private registrations: ToolRegistrationFn[] = [];
 
   constructor() {}
 
-  register(registration: ToolRegistration) {
-    if (isToolRegistrationFn(registration)) {
-      this.registrations.push(registration);
-    } else {
-      this.registrations.push(wrapToolRegistration(registration));
-    }
+  register(registration: RegisteredTool) {
+    this.registrations.push(
+      isToolRegistrationFn(registration) ? registration : wrapToolRegistration(registration)
+    );
   }
 
-  async has(options: ToolProviderHasOptions): Promise<boolean> {
+  async has(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<boolean> {
     const { toolId: structuredToolId, request } = options;
-    const { toolId } = toStructuredToolIdentifier(structuredToolId);
+    const { toolId, sourceType } = toStructuredToolIdentifier(structuredToolId);
+
+    if (!isValidSource(sourceType)) {
+      return false;
+    }
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
@@ -64,9 +79,15 @@ export class BuiltinToolRegistry implements ToolProvider {
     return false;
   }
 
-  async get(options: ToolProviderGetOptions): Promise<Tool> {
+  async get(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool> {
     const { toolId: structuredToolId, request } = options;
-    const { toolId } = toStructuredToolIdentifier(structuredToolId);
+    const { toolId, sourceType } = toStructuredToolIdentifier(structuredToolId);
+
+    if (!isValidSource(sourceType)) {
+      throw OnechatErrorUtils.createToolNotFoundError({
+        toolId: toSerializedToolIdentifier(toolId),
+      });
+    }
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
@@ -82,9 +103,9 @@ export class BuiltinToolRegistry implements ToolProvider {
     });
   }
 
-  async list(options: ToolProviderListOptions): Promise<Tool[]> {
+  async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
     const { request } = options;
-    const matchingTools: Tool[] = [];
+    const matchingTools: RegisteredTool[] = [];
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
@@ -97,7 +118,7 @@ export class BuiltinToolRegistry implements ToolProvider {
   private async eval(
     registration: ToolRegistrationFn,
     { request }: { request: KibanaRequest }
-  ): Promise<Tool[]> {
+  ): Promise<RegisteredTool[]> {
     return await registration({ request });
   }
 }

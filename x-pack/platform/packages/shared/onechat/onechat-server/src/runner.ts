@@ -33,8 +33,8 @@ export interface ScopedRunner {
 /**
  * Public onechat API to execute a tools.
  */
-export type ScopedRunToolFn = <TResult = unknown>(
-  params: ScopedRunnerRunToolsParams
+export type ScopedRunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
+  params: ScopedRunnerRunToolsParams<TParams>
 ) => Promise<RunToolReturn<TResult>>;
 
 /**
@@ -94,8 +94,8 @@ export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit
 /**
  * Public onechat API to execute a tools.
  */
-export type RunToolFn = <TResult = unknown>(
-  params: RunToolParams
+export type RunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
+  params: RunToolParams<TParams>
 ) => Promise<RunToolReturn<TResult>>;
 
 /**

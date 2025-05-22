@@ -6,13 +6,16 @@
  */
 
 export type {
-  Tool,
+  RegisteredTool,
   ToolHandlerFn,
   ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
   ToolProviderListOptions,
+  ExecutableTool,
+  ExecutableToolHandlerParams,
+  ExecutableToolHandlerFn,
 } from './src/tools';
 export type { ModelProvider, ScopedModel } from './src/model_provider';
 export type {

@@ -17,8 +17,8 @@ import {
 
 describe('Tool Identifier utilities', () => {
   describe('isPlainToolIdentifier', () => {
-    it('should return false for a plain string identifier', () => {
-      expect(isPlainToolIdentifier('my-tool')).toBe(false);
+    it('should return true for a plain string identifier', () => {
+      expect(isPlainToolIdentifier('my-tool')).toBe(true);
     });
 
     it('should return false for an unstructured identifier', () => {
@@ -105,8 +105,13 @@ describe('Tool Identifier utilities', () => {
       });
     });
 
-    it('should throw an error for plain identifiers', () => {
-      expect(() => toStructuredToolIdentifier('my-tool')).toThrow('Malformed tool identifier');
+    it('should convert a plain identifier to structured', () => {
+      const result = toStructuredToolIdentifier('my-tool');
+      expect(result).toEqual({
+        toolId: 'my-tool',
+        sourceType: ToolSourceType.unknown,
+        sourceId: 'unknown',
+      });
     });
 
     it('should throw an error for malformed identifiers', () => {

@@ -7,7 +7,7 @@
 
 import type {
   ToolProvider,
-  Tool,
+  RegisteredTool,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
   ToolProviderListOptions,
@@ -38,7 +38,7 @@ export const combineToolProviders = (...providers: ToolProvider[]): ToolProvider
       throw new Error(`Tool with id ${options.toolId} not found`);
     },
     list: async (options: ToolProviderListOptions) => {
-      const tools: Tool[] = [];
+      const tools: RegisteredTool[] = [];
       const toolIds = new Set<string>();
 
       for (const provider of providers) {

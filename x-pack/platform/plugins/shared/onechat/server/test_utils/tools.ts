@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolProvider, Tool, ToolHandlerFn } from '@kbn/onechat-server';
+import type { ToolProvider, RegisteredTool, ToolHandlerFn } from '@kbn/onechat-server';
 import type {
   ToolsServiceStart,
   ScopedPublicToolRegistry,
@@ -47,11 +47,11 @@ export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   };
 };
 
-export type MockedTool = Omit<Tool, 'handler'> & {
+export type MockedTool = Omit<RegisteredTool, 'handler'> & {
   handler: jest.MockedFunction<ToolHandlerFn>;
 };
 
-export const createMockedTool = (parts: Partial<Tool> = {}): MockedTool => {
+export const createMockedTool = (parts: Partial<RegisteredTool> = {}): MockedTool => {
   return {
     id: 'test-tool',
     name: 'my test tool',

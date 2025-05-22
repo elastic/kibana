@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { Tool } from '@kbn/onechat-server';
+import type { RegisteredTool } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { BuiltinToolRegistry } from './builtin_registry';
+import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;
   let mockRequest: KibanaRequest;
 
   beforeEach(() => {
-    registry = new BuiltinToolRegistry();
+    registry = createBuiltinToolRegistry();
     mockRequest = httpServerMock.createKibanaRequest();
   });
 
   describe('register', () => {
     it('should register a direct tool', async () => {
-      const mockTool: Tool = {
+      const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
@@ -34,7 +34,7 @@ describe('BuiltinToolRegistry', () => {
     });
 
     it('should register a tool registration function', async () => {
-      const mockTool: Tool = {
+      const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
@@ -52,7 +52,7 @@ describe('BuiltinToolRegistry', () => {
 
   describe('has', () => {
     it('should return true when tool exists', async () => {
-      const mockTool: Tool = {
+      const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
@@ -66,7 +66,7 @@ describe('BuiltinToolRegistry', () => {
     });
 
     it('should return false when tool does not exist', async () => {
-      const mockTool: Tool = {
+      const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
@@ -82,7 +82,7 @@ describe('BuiltinToolRegistry', () => {
 
   describe('get', () => {
     it('should return the tool when it exists', async () => {
-      const mockTool: Tool = {
+      const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
@@ -96,7 +96,7 @@ describe('BuiltinToolRegistry', () => {
     });
 
     it('should throw an error when tool does not exist', async () => {
-      const mockTool: Tool = {
+      const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
@@ -107,13 +107,13 @@ describe('BuiltinToolRegistry', () => {
       registry.register(mockTool);
       await expect(
         registry.get({ toolId: 'non-existent-tool', request: mockRequest })
-      ).rejects.toThrow('Method not implemented.');
+      ).rejects.toThrow(/not found/);
     });
   });
 
   describe('list', () => {
     it('should return all registered tools', async () => {
-      const mockTool1: Tool = {
+      const mockTool1: RegisteredTool = {
         id: 'test-tool-1',
         name: 'Test Tool 1',
         description: 'A test tool',
@@ -121,7 +121,7 @@ describe('BuiltinToolRegistry', () => {
         handler: async () => 'test1',
       };
 
-      const mockTool2: Tool = {
+      const mockTool2: RegisteredTool = {
         id: 'test-tool-2',
         name: 'Test Tool 2',
         description: 'Another test tool',
