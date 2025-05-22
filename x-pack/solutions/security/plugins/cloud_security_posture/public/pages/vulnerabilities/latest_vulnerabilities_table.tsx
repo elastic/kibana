@@ -22,9 +22,9 @@ import {
   MultiValueCellPopover,
   findReferenceLink,
 } from '@kbn/cloud-security-posture';
+import { HttpSetup } from '@kbn/core/public';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
-import { HttpSetup } from '@kbn/core/public';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
@@ -32,7 +32,6 @@ import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vul
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
-import { VulnerabilityCloudSecurityDataTable } from '../../components/cloud_security_data_table/vulnerability_security_data_table';
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
