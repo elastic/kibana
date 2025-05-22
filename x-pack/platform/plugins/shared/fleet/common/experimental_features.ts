@@ -14,7 +14,7 @@ const _allowedExperimentalValues = {
   enableSyncIntegrationsOnRemote: false,
   enableSSLSecrets: false,
   installedIntegrationsTabularUI: false,
-  enabledUpgradeAgentlessDeploymentsTask: true,
+  enabledUpgradeAgentlessDeploymentsTask: false,
 };
 
 /**
