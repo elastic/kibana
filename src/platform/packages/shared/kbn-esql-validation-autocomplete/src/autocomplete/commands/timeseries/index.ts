@@ -10,12 +10,11 @@
 import type { SuggestionRawDefinition } from '../../types';
 import {
   getOverlapRange,
-  removeQuoteForSuggestedSources,
   specialIndicesToSuggestions,
   additionalSourcesSuggestions,
 } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
-import { isRestartingExpression } from '../../../shared/helpers';
+import { isRestartingExpression, withinQuotes } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { metadataSuggestion, getMetadataSuggestions } from '../metadata';
 
@@ -26,20 +25,16 @@ export async function suggest({
   getSources,
   getSourcesFromQuery,
 }: CommandSuggestParams<'ts'>): Promise<SuggestionRawDefinition[]> {
-  if (/\".*$/.test(innerText)) {
-    // TS "<suggest>"
+  if (withinQuotes(innerText)) {
     return [];
   }
 
   const suggestions: SuggestionRawDefinition[] = [];
 
   const indexes = getSourcesFromQuery('index');
-  const canRemoveQuote = innerText.includes('"');
   // Function to add suggestions based on canRemoveQuote
   const addSuggestionsBasedOnQuote = (definitions: SuggestionRawDefinition[]) => {
-    suggestions.push(
-      ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
-    );
+    suggestions.push(...definitions);
   };
 
   const metadataSuggestions = getMetadataSuggestions(command, innerText);
@@ -72,7 +67,12 @@ export async function suggest({
   // TS something, /
   else if (indexes.length) {
     const sources = await getSources();
-    const additionalSuggestions = await additionalSourcesSuggestions(innerText, sources, []);
+    const additionalSuggestions = await additionalSourcesSuggestions(
+      innerText,
+      sources,
+      indexes.map(({ name }) => name),
+      []
+    );
     addSuggestionsBasedOnQuote(additionalSuggestions);
   }
 
