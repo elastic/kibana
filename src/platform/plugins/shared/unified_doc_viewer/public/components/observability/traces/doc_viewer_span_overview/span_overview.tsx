@@ -29,7 +29,7 @@ import { Trace } from '../components/trace';
 import { SpanSummaryTitle } from './sub_components/span_summary_title';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
 
-export type SpanOverviewProps = DocViewRenderProps & {
+export type SpanOverviewProps = Omit<DocViewRenderProps, 'dataView'> & {
   transactionIndexPattern: string;
   showWaterfall?: boolean;
 };

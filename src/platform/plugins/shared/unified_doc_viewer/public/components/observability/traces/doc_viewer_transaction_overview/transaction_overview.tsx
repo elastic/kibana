@@ -26,9 +26,9 @@ import { TransactionSummaryField } from './sub_components/transaction_summary_fi
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
-
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
-export type TransactionOverviewProps = DocViewRenderProps & {
+
+export type TransactionOverviewProps = Omit<DocViewRenderProps, 'dataView'> & {
   tracesIndexPattern: string;
   showWaterfall?: boolean;
 };
