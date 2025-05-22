@@ -53,14 +53,7 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
-export const CaseIncrementalId = rt.union([
-  rt.strict({
-    space_id: rt.string,
-    numerical_id: rt.number,
-  }),
-  rt.null,
-  rt.undefined,
-]);
+export const CaseIncrementalId = rt.union([rt.number, rt.null, rt.undefined]);
 
 const CaseBaseFields = {
   /**

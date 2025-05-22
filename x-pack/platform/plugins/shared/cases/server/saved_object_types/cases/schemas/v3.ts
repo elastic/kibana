@@ -9,12 +9,5 @@ import { schema } from '@kbn/config-schema';
 import { casesSchema as casesSchemaV2 } from './v2';
 
 export const casesSchema = casesSchemaV2.extends({
-  incremental_id: schema.maybe(
-    schema.nullable(
-      schema.object({
-        space_id: schema.string(),
-        numerical_id: schema.number(),
-      })
-    )
-  ),
+  incremental_id: schema.maybe(schema.nullable(schema.number())),
 });

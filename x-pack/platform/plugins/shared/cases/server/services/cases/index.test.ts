@@ -3227,10 +3227,7 @@ describe('CasesService', () => {
       it('sets `incremental_id` field to undefined when it is passed', async () => {
         const attributes = {
           ...createCasePostParams({ connector: createJiraConnector() }),
-          incremental_id: {
-            space_id: 'default',
-            numerical_id: 200,
-          },
+          incremental_id: 200,
         };
 
         await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
@@ -3283,10 +3280,7 @@ describe('CasesService', () => {
       it('sets `incremental_id` field to undefined when it is passed', async () => {
         const attributes = {
           ...createCasePostParams({ connector: createJiraConnector() }),
-          incremental_id: {
-            space_id: 'default',
-            numerical_id: 200,
-          },
+          incremental_id: 200,
         };
 
         await expect(
@@ -3343,10 +3337,7 @@ describe('CasesService', () => {
       it('removes incremental_id value', async () => {
         const updatedAttributes = {
           ...createCasePostParams({ connector: createJiraConnector() }),
-          incremental_id: {
-            space_id: 'default',
-            numerical_id: 200,
-          },
+          incremental_id: 200,
         };
 
         await expect(
@@ -3415,10 +3406,7 @@ describe('CasesService', () => {
       it('removes incremental_id values', async () => {
         const updatedAttributes = {
           ...createCasePostParams({ connector: createJiraConnector() }),
-          incremental_id: {
-            space_id: 'default',
-            numerical_id: 200,
-          },
+          incremental_id: 200,
         };
 
         await expect(

@@ -241,14 +241,7 @@ export const createCaseSavedObjectType = (
         },
       },
       incremental_id: {
-        properties: {
-          space_id: {
-            type: 'keyword',
-          },
-          numerical_id: {
-            type: 'integer',
-          },
-        },
+        type: 'integer',
       },
     },
   },

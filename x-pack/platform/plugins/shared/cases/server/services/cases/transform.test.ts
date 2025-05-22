@@ -630,21 +630,13 @@ describe('case transforms', () => {
     it('returns incremental_id when it is defined', () => {
       const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
         overrides: {
-          incremental_id: {
-            space_id: 'default',
-            numerical_id: 100,
-          },
+          incremental_id: 100,
         },
       });
 
       expect(
         transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
-      ).toMatchInlineSnapshot(`
-        Object {
-          "numerical_id": 100,
-          "space_id": "default",
-        }
-      `);
+      ).toMatchInlineSnapshot(`100`);
     });
 
     it('returns undefined for `inceremental_id` when it is not defined', () => {

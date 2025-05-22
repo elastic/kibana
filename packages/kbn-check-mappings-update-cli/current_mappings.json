@@ -601,14 +601,7 @@
         }
       },
       "incremental_id": {
-        "properties": {
-          "numerical_id": {
-            "type": "integer"
-          },
-          "space_id": {
-            "type": "keyword"
-          }
-        }
+        "type": "integer"
       },
       "observables": {
         "properties": {

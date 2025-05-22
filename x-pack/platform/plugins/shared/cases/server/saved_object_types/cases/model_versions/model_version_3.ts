@@ -17,14 +17,7 @@ export const modelVersion3: SavedObjectsModelVersion = {
       type: 'mappings_addition',
       addedMappings: {
         incremental_id: {
-          properties: {
-            space_id: {
-              type: 'keyword',
-            },
-            numerical_id: {
-              type: 'integer',
-            },
-          },
+          type: 'integer',
         },
       },
     },

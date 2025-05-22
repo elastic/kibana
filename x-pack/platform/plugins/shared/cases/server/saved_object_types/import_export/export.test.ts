@@ -25,10 +25,7 @@ describe('case export', () => {
     ..._case,
     attributes: {
       ..._case.attributes,
-      incremental_id: {
-        numerical_id: idx + 1,
-        space_id: 'default',
-      },
+      incremental_id: idx + 1,
     },
   }));
 
