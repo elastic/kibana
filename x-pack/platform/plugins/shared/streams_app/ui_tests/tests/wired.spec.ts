@@ -29,6 +29,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByPlaceholder('Value').fill('nginx');
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByRole('link', { name: 'logs.nginx', exact: true })).toBeVisible();
+    await page.getByTestId('toastCloseButton').click();
 
     // Update "logs.nginx" data retention
     await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
@@ -39,6 +40,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(
       page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
     ).toBeVisible();
+    await page.getByTestId('toastCloseButton').click();
 
     // Update "logs.nginx" processing
     await esClient.index({
@@ -66,6 +68,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
+    await page.getByTestId('toastCloseButton').click();
 
     // Update "logs.nginx" mapping
     await pageObjects.streams.gotoSchemaEditorTab('logs.nginx');
@@ -84,6 +87,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByRole('heading', { name: 'agent.name' }).waitFor({ state: 'hidden' });
 
     await expect(page.getByText('Mapped', { exact: true })).toBeVisible();
+    await page.getByTestId('toastCloseButton').click();
 
     // Add dashboard
     await pageObjects.streams.gotoStreamDashboard('logs.nginx');

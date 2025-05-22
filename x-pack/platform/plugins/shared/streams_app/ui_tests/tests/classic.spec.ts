@@ -61,6 +61,7 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(
       page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('30d')
     ).toBeVisible();
+    await page.getByTestId('toastCloseButton').click();
 
     // Update field extraction
     await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
@@ -74,6 +75,7 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByRole('button', { name: 'Save changes' }).click();
 
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
+    await page.getByTestId('toastCloseButton').click();
 
     // Add dashboard
     await pageObjects.streams.gotoStreamDashboard(DATA_STREAM_NAME);
