@@ -383,6 +383,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           currentRoleAuthc
         );
 
+        // @ts-ignore
         const createdRule = await alertingApi.createRule({
           roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
@@ -482,6 +483,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           currentRoleAuthc
         );
 
+        // @ts-ignore
         const createdRule = await alertingApi.createRule({
           roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
@@ -582,6 +584,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           currentRoleAuthc
         );
 
+        // @ts-ignore
         const createdRule = await alertingApi.createRule({
           roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
@@ -680,6 +683,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           currentRoleAuthc
         );
 
+        // @ts-ignore
         const createdRule = await alertingApi.createRule({
           roleAuthc: currentRoleAuthc,
           ...getSloBurnRateRuleConfiguration({
@@ -749,6 +753,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         // verify that synthetics only role cannot create the rule
+        // @ts-ignore
         const respponse = await alertingApi.createRule({
           roleAuthc: syntheticsOnlyRole,
           ...getSloBurnRateRuleConfiguration({
