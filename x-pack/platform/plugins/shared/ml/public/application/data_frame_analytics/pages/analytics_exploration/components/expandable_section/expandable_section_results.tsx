@@ -37,7 +37,6 @@ import {
   isRegressionAnalysis,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import { useMlKibana } from '@kbn/ml-kibana-context';

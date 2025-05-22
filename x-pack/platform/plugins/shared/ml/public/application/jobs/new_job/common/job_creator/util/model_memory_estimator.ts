@@ -22,8 +22,9 @@ import {
 } from 'rxjs';
 import { useEffect, useMemo } from 'react';
 
+import type { MLHttpFetchError } from '@kbn/ml-common-types/errors';
 import { i18n } from '@kbn/i18n';
-import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '@kbn/ml-common-constants/new_job';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
