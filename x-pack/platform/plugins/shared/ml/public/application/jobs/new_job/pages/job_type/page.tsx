@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import {
   EuiTitle,
   EuiSpacer,
@@ -17,13 +17,16 @@ import {
   EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 import { PageTitle } from '../../../../components/page_title';
-import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
+import { useMlManagementLocator } from '../../../../contexts/kibana';
 import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
