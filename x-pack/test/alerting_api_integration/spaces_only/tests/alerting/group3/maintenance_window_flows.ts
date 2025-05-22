@@ -26,7 +26,8 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('maintenanceWindowFlows', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/220281
+  describe.skip('maintenanceWindowFlows', () => {
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
     afterEach(async () => {
