@@ -99,7 +99,7 @@ const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div
       css={fullScreenGraphicsMixinStyles(Number(theme.euiTheme.levels.toast), theme)}
-      data-test-subj="login-form"
+      data-test-subj="loginForm"
     >
       {children}
     </div>

@@ -303,10 +303,14 @@ export class SecurityPageObject extends FtrService {
     { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
   ) {
     this.log.debug('SecurityPage.forceLogout');
-    if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
+    if (await this.isLoginFormVisible()) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }
+    // if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
+    //   this.log.debug('Already on the login page, not forcing anything');
+    //   return;
+    // }
 
     const performForceLogout = async () => {
       this.log.debug(`Redirecting to ${this.deployment.getHostPort()}/logout to force the logout`);
