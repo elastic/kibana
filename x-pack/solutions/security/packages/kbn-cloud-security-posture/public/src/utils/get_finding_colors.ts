@@ -7,11 +7,7 @@
 
 import { EuiThemeComputed } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme'; // TODO: replace with euiTheme
-import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
-import {
-  VULNERABILITIES_SEVERITY,
-  MISCONFIGURATION_STATUS,
-} from '@kbn/cloud-security-posture-common';
+import { VULNERABILITIES_SEVERITY } from '@kbn/cloud-security-posture-common';
 
 const isAmsterdam = (euiThemeName: string) => {
   return euiThemeName?.toLowerCase().includes('amsterdam');
@@ -84,19 +80,5 @@ export const getCvsScoreColor = (score: number, euiTheme: EuiThemeComputed): str
     return getSeverityStatusColor(VULNERABILITIES_SEVERITY.CRITICAL, euiTheme);
   } else {
     return getSeverityStatusColor(VULNERABILITIES_SEVERITY.UNKNOWN, euiTheme);
-  }
-};
-
-// TODO: Borealis migration - migrate to EUI color tokens when they are ready https://github.com/elastic/security-team/issues/11606
-export const getMisconfigurationStatusColor = (
-  status?: MisconfigurationEvaluationStatus
-): string => {
-  switch (status) {
-    case MISCONFIGURATION_STATUS.PASSED:
-      return SEVERITY_COLOR.low;
-    case MISCONFIGURATION_STATUS.FAILED:
-      return SEVERITY_COLOR.critical;
-    default:
-      return SEVERITY_COLOR.unknown;
   }
 };

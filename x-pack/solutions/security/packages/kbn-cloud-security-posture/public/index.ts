@@ -16,9 +16,6 @@ export { getSeverityStatusColor, getCvsScoreColor } from './src/utils/get_vulner
 export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
 export { CVSScoreBadge, SeverityStatusBadge,  } from './src/components/vulnerability_badges';
-export {
-  getMisconfigurationStatusColor,
-} from './src/utils/get_finding_colors';
 export { getNormalizedSeverity } from './src/utils/get_normalized_severity';
 export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
