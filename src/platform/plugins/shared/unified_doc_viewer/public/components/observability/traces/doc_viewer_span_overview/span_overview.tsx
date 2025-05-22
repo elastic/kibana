@@ -27,9 +27,11 @@ import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { Trace } from '../components/trace';
 import { SpanSummaryTitle } from './sub_components/span_summary_title';
+import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
+  showWaterfall?: boolean;
 };
 
 export function SpanOverview({
@@ -39,53 +41,60 @@ export function SpanOverview({
   onAddColumn,
   onRemoveColumn,
   transactionIndexPattern,
+  showWaterfall = true,
 }: SpanOverviewProps) {
   const parsedDoc = useMemo(() => getSpanDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
   const fieldConfigurations = useMemo(() => getSpanFieldConfiguration(parsedDoc), [parsedDoc]);
 
   return (
-    <TransactionProvider
-      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+    <RootTransactionProvider
+      traceId={parsedDoc[TRACE_ID_FIELD]}
       indexPattern={transactionIndexPattern}
     >
-      <FieldActionsProvider
-        columns={columns}
-        filter={filter}
-        onAddColumn={onAddColumn}
-        onRemoveColumn={onRemoveColumn}
+      <TransactionProvider
+        transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+        indexPattern={transactionIndexPattern}
       >
-        <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
-          <EuiSpacer size="m" />
-          <SpanSummaryTitle name={parsedDoc[SPAN_NAME_FIELD]} id={parsedDoc[SPAN_ID_FIELD]} />
-          <EuiSpacer size="m" />
-          {spanFields.map((fieldId) => (
-            <SpanSummaryField
-              key={fieldId}
-              fieldId={fieldId}
-              fieldConfiguration={fieldConfigurations[fieldId]}
-            />
-          ))}
-
-          {spanDuration && (
-            <>
-              <EuiSpacer size="m" />
-              <SpanDurationSummary
-                spanDuration={spanDuration}
-                spanName={parsedDoc[SPAN_NAME_FIELD]}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+        <FieldActionsProvider
+          columns={columns}
+          filter={filter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+        >
+          <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
+            <EuiSpacer size="m" />
+            <SpanSummaryTitle name={parsedDoc[SPAN_NAME_FIELD]} id={parsedDoc[SPAN_ID_FIELD]} />
+            <EuiSpacer size="m" />
+            {spanFields.map((fieldId) => (
+              <SpanSummaryField
+                key={fieldId}
+                fieldId={fieldId}
+                fieldConfiguration={fieldConfigurations[fieldId]}
               />
-            </>
-          )}
-          <EuiSpacer size="m" />
-          <Trace
-            fields={fieldConfigurations}
-            traceId={parsedDoc[TRACE_ID_FIELD]}
-            docId={parsedDoc[SPAN_ID_FIELD]}
-            displayType="span"
-          />
-        </EuiPanel>
-      </FieldActionsProvider>
-    </TransactionProvider>
+            ))}
+
+            {spanDuration && (
+              <>
+                <EuiSpacer size="m" />
+                <SpanDurationSummary
+                  spanDuration={spanDuration}
+                  spanName={parsedDoc[SPAN_NAME_FIELD]}
+                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                />
+              </>
+            )}
+            <EuiSpacer size="m" />
+            <Trace
+              fields={fieldConfigurations}
+              traceId={parsedDoc[TRACE_ID_FIELD]}
+              docId={parsedDoc[SPAN_ID_FIELD]}
+              displayType="span"
+              showWaterfall={showWaterfall}
+            />
+          </EuiPanel>
+        </FieldActionsProvider>
+      </TransactionProvider>
+    </RootTransactionProvider>
   );
 }
