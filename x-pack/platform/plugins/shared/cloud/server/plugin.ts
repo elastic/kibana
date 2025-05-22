@@ -296,7 +296,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
           core
             .getStartServices()
             .then(async ([coreStart]) => {
-              const soClient = savedObjects.getClient({
+              const soClient = coreStart.savedObjects.getScopedClient(request, {
                 includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
               });
 
