@@ -12,8 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { ALL_DATASETS_LOCATOR_ID, OBSERVABILITY_ONBOARDING_LOCATOR, type AllDatasetsLocatorParams, type ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { safeDecode } from '@kbn/rison';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
@@ -92,28 +91,32 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
-        <Route
-          path="/stream"
-          exact
-          render={(props) => {
-            const searchParams = new URLSearchParams(props.location.search);
-            const logFilterEncoded = searchParams.get('logFilter');
-            let locatorParams: LogsLocatorParams = {};
+        {routes.stream ? (
+          <Route path={routes.stream.path} component={StreamPage} />
+        ) : (
+          <Route
+            path="/stream"
+            exact
+            render={(props) => {
+              const searchParams = new URLSearchParams(props.location.search);
+              const logFilterEncoded = searchParams.get('logFilter');
+              let locatorParams: LogsLocatorParams = {};
 
-            if (logFilterEncoded) {
-              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
+              if (logFilterEncoded) {
+                const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
 
-              locatorParams = {
-                timeRange: logFilter?.timeRange,
-                query: logFilter?.query,
-                filters: logFilter?.filters,
-              };
-            }
+                locatorParams = {
+                  timeRange: logFilter?.timeRange,
+                  query: logFilter?.query,
+                  filters: logFilter?.filters,
+                };
+              }
 
-            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate(locatorParams);
-            return null;
-          }}
-        />
+              share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate(locatorParams);
+              return null;
+            }}
+          />
+        )}
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
         <Route path={routes.settings.path} component={LogsSettingsPage} />
