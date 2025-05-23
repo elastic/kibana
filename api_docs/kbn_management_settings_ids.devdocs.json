@@ -1580,7 +1580,7 @@
           "\"securitySolution:enableVisualizationsInFlyout\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
         "initialIsOpen": false
       },
