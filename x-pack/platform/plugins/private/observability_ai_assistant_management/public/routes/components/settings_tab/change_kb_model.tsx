@@ -260,18 +260,24 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
               href="https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-built-in-models"
               target="_blank"
             >
-              {i18n.translate('xpack.aiAssistant.knowledgeBase.subtitleLearnMore', {
-                defaultMessage: 'Learn more',
-              })}
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBase.subtitleLearnMore',
+                {
+                  defaultMessage: 'Learn more',
+                }
+              )}
             </EuiLink>
           </EuiText>
           {knowledgeBase.status?.value?.kbState && (
             <EuiFlexGroup gutterSize="s" alignItems="center" css={{ marginTop: 8 }}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  {i18n.translate('xpack.aiAssistant.knowledgeBase.kbStateLabel', {
-                    defaultMessage: 'Knowledge Base Status:',
-                  })}
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBase.kbStateLabel',
+                    {
+                      defaultMessage: 'Knowledge Base Status:',
+                    }
+                  )}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -289,12 +295,18 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
                     >
                       {knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
                         ? isKnowledgeBaseInLoadingState
-                          ? i18n.translate('xpack.aiAssistant.knowledgeBase.stateUpdatingModel', {
-                              defaultMessage: 'Updating model',
-                            })
-                          : i18n.translate('xpack.aiAssistant.knowledgeBase.stateInstalled', {
-                              defaultMessage: 'Installed',
-                            })
+                          ? i18n.translate(
+                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateUpdatingModel',
+                              {
+                                defaultMessage: 'Updating model',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateInstalled',
+                              {
+                                defaultMessage: 'Installed',
+                              }
+                            )
                         : knowledgeBase.status.value.kbState}
                     </EuiBadge>
                   </EuiFlexItem>
