@@ -8,6 +8,7 @@ import {
   EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -176,24 +177,25 @@ export const MappingsFilter: React.FC<Props> = ({
             </div>
           )}
         </EuiSelectable>
-        <EuiPopoverFooter paddingSize="s">
-          <EuiButtonEmpty
-            color="danger"
-            iconSide="left"
-            size="s"
-            css={{ width: '100%' }}
-            iconType="cross"
-            data-test-subj="clearFilters"
-            disabled={isClearAllFilterDisabled}
-            onClick={clearOptions}
-          >
-            {i18n.translate(
-              'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.filter.clearAll',
-              {
-                defaultMessage: 'Clear all ',
-              }
-            )}
-          </EuiButtonEmpty>
+        <EuiPopoverFooter paddingSize="xs">
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              color="danger"
+              iconSide="left"
+              size="s"
+              iconType="cross"
+              data-test-subj="clearFilters"
+              disabled={isClearAllFilterDisabled}
+              onClick={clearOptions}
+            >
+              {i18n.translate(
+                'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.filter.clearAll',
+                {
+                  defaultMessage: 'Clear all',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiPopoverFooter>
       </EuiPopover>
     </EuiFilterGroup>
