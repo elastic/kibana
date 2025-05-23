@@ -247,21 +247,18 @@ export function updateColumnFormat({
 export const getUserMessages = (state: CombinedFormBasedPrivateState) => {
   const errors: Error[] = [];
 
-  Object.values(state.layers).forEach((layer) => {
-    if (layer.type === 'esql' && layer.errors && layer.errors.length > 0) {
-      errors.push(...layer.errors);
+  return Object.values(state.layers).flatMap((layer) => {
+    if(layer.type === 'esql' && layer.errors){
+      return layer.errors.map<UserMessage>((err) => ({
+        uniqueId: TEXT_BASED_LANGUAGE_ERROR,
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
+        shortMessage: err.message,
+        longMessage: err.message,
+      }));
     }
-  });
-  return errors.map((err) => {
-    const message: UserMessage = {
-      uniqueId: TEXT_BASED_LANGUAGE_ERROR,
-      severity: 'error',
-      fixableInEditor: true,
-      displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
-      shortMessage: err.message,
-      longMessage: err.message,
-    };
-    return message;
+    return [];
   });
 };
 
