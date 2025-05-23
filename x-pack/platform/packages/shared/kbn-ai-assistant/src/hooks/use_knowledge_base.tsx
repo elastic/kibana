@@ -18,18 +18,17 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
-  isInstalling: boolean;
   isPolling: boolean;
   install: (inferenceId: string) => Promise<void>;
   warmupModel: (inferenceId: string) => Promise<void>;
   isWarmingUpModel: boolean;
+  isInstalling: boolean;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const { notifications, ml } = useKibana().services;
   const service = useAIAssistantAppService();
 
-  const [isInstalling, setIsInstalling] = useState(false);
   const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
   const [installingInferenceId, setInstallingInferenceId] = useState<string>();
 
@@ -44,7 +43,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   // poll for status when installing, until install is complete, KB is ready, and inference ID matches
   const isPolling =
-    ((isInstalling || isWarmingUpModel) &&
+    ((installingInferenceId !== undefined || isWarmingUpModel) &&
       (statusRequest.value?.kbState !== KnowledgeBaseState.READY ||
         (installingInferenceId &&
           statusRequest.value?.currentInferenceId !== installingInferenceId))) ||
@@ -53,14 +52,13 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   useEffect(() => {
     // Only reset installation state when the KB is ready and the endpoint model matches what we're installing
     if (
-      isInstalling &&
+      installingInferenceId &&
       statusRequest.value?.kbState === KnowledgeBaseState.READY &&
       statusRequest.value?.currentInferenceId === installingInferenceId
     ) {
-      setIsInstalling(false);
       setInstallingInferenceId(undefined);
     }
-  }, [isInstalling, statusRequest, installingInferenceId]);
+  }, [statusRequest, installingInferenceId]);
 
   useEffect(() => {
     // toggle warming up state to false once KB is ready
@@ -71,7 +69,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   const install = useCallback(
     async (inferenceId: string) => {
-      setIsInstalling(true);
       setInstallingInferenceId(inferenceId);
 
       try {
@@ -160,7 +157,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {
     status: statusRequest,
     install,
-    isInstalling,
+    isInstalling: installingInferenceId !== undefined,
     isPolling,
     warmupModel,
     isWarmingUpModel,
