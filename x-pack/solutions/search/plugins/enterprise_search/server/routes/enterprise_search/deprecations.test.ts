@@ -245,38 +245,149 @@ describe('POST /internal/enterprise_search/deprecations/clean_ent_search_account
     });
   });
 
-  it('should clean up any accounts, credentials, and tokens', async () => {
-    const request = {
-      body: { deprecationDetails: { domainId: 'enterpriseSearch' } },
-    };
-
-    mockRouter.shouldValidate(request);
-    getEnterpriseSearchAccountCleanupAccounts.mockResolvedValue({
-      esUser: {
-        enterprise_search: {
-          metadata: {},
-          roles: [],
-          username: 'enterprise_search',
-          enabled: true,
+  const cleanupTestCases = [
+    [
+      {
+        esUser: {
+          enterprise_search: {
+            username: 'enterprise_search',
+          },
         },
+        credentialTokenIds: ['test_token_id'],
+        esCloudApiKeys: ['test_api_key'],
       },
-      credentialTokenIds: ['test_token_id'],
-      esCloudApiKeys: ['test_api_key'],
-    });
+      {
+        hasUser: true,
+        hasCredentials: true,
+        hasApiKeys: true,
+      },
+    ],
+    [
+      {
+        esUser: undefined,
+        credentialTokenIds: ['test_token_id'],
+        esCloudApiKeys: ['test_api_key'],
+      },
+      {
+        hasUser: false,
+        hasCredentials: true,
+        hasApiKeys: true,
+      },
+    ],
+    [
+      {
+        esUser: undefined,
+        credentialTokenIds: [],
+        esCloudApiKeys: ['test_api_key'],
+      },
+      {
+        hasUser: false,
+        hasCredentials: false,
+        hasApiKeys: true,
+      },
+    ],
+    [
+      {
+        esUser: undefined,
+        credentialTokenIds: [],
+        esCloudApiKeys: [],
+      },
+      {
+        hasUser: false,
+        hasCredentials: false,
+        hasApiKeys: false,
+      },
+    ],
+    [
+      {
+        esUser: {
+          enterprise_search: {
+            username: 'enterprise_search',
+          },
+        },
+        credentialTokenIds: [],
+        esCloudApiKeys: ['test_api_key'],
+      },
+      {
+        hasUser: true,
+        hasCredentials: false,
+        hasApiKeys: true,
+      },
+    ],
+    [
+      {
+        esUser: {
+          enterprise_search: {
+            username: 'enterprise_search',
+          },
+        },
+        credentialTokenIds: [],
+        esCloudApiKeys: [],
+      },
+      {
+        hasUser: true,
+        hasCredentials: false,
+        hasApiKeys: false,
+      },
+    ],
+    [
+      {
+        esUser: {
+          enterprise_search: {
+            username: 'enterprise_search',
+          },
+        },
+        credentialTokenIds: ['test_token_id'],
+        esCloudApiKeys: [],
+      },
+      {
+        hasUser: true,
+        hasCredentials: true,
+        hasApiKeys: false,
+      },
+    ],
+  ];
 
-    await mockRouter.callRoute(request);
+  test.each(cleanupTestCases)(
+    'should clean up accounts, credentials, and tokens for (%p): %p',
+    async (mockData: any, expected: any) => {
+      const request = {
+        body: { deprecationDetails: { domainId: 'enterpriseSearch' } },
+      };
 
-    expect(getEnterpriseSearchAccountCleanupAccounts).toHaveBeenCalled();
-    expect(mockedDeleteUser).toHaveBeenCalledWith({ username: 'enterprise_search' });
-    expect(mockedDeleteServiceCredentials).toHaveBeenCalledWith({
-      namespace: 'elastic',
-      service: 'enterprise-search-server',
-      name: 'test_token_id',
-    });
-    expect(mockedInvalidateApiKey).toHaveBeenCalledWith({ id: 'test_api_key' });
-    expect(mockRouter.response.ok).toHaveBeenCalledWith({
-      body: { success: true },
-      headers: { 'content-type': 'application/json' },
-    });
-  });
+      mockRouter.shouldValidate(request);
+      getEnterpriseSearchAccountCleanupAccounts.mockResolvedValue(mockData);
+
+      await mockRouter.callRoute(request);
+
+      expect(getEnterpriseSearchAccountCleanupAccounts).toHaveBeenCalled();
+
+      if (expected.hasUser) {
+        expect(mockedDeleteUser).toHaveBeenCalledWith({ username: 'enterprise_search' });
+      } else {
+        expect(mockedDeleteUser).not.toHaveBeenCalled();
+      }
+
+      if (expected.hasCredentials) {
+        expect(mockedDeleteServiceCredentials).toHaveBeenCalledWith({
+          namespace: 'elastic',
+          service: 'enterprise-search-server',
+          name: 'test_token_id',
+        });
+      } else {
+        expect(mockedDeleteServiceCredentials).not.toHaveBeenCalled();
+      }
+
+      if (expected.hasApiKeys) {
+        expect(mockedInvalidateApiKey).toHaveBeenCalledWith({ id: 'test_api_key' });
+      } else {
+        expect(mockedInvalidateApiKey).not.toHaveBeenCalled();
+      }
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: { success: true },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
 });
