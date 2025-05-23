@@ -136,3 +136,20 @@ export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.exten
     schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
   ),
 });
+
+const TAB_ATTRIBUTES = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  title: undefined,
+  description: undefined,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_6 = schema.object({
+  title: schema.string(),
+  description: schema.string({ defaultValue: '' }),
+  tabs: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      label: schema.string({ defaultValue: '' }),
+      attributes: TAB_ATTRIBUTES,
+    })
+  ),
+});

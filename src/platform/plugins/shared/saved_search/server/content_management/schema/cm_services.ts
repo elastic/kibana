@@ -12,11 +12,14 @@ import type {
   Version,
 } from '@kbn/object-versioning';
 
-// We export the versionned service definition from this file and not the barrel to avoid adding
+// We export the versioned service definition from this file and not the barrel to avoid adding
 // the schemas in the "public" js bundle
 
+import { SAVED_SEARCH_CM_VERSION_1, SAVED_SEARCH_CM_VERSION_2 } from '../../../common/constants';
 import { serviceDefinition as v1 } from './v1/cm_services';
+import { serviceDefinition as v2 } from './v2/cm_services';
 
 export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
-  1: v1,
+  [SAVED_SEARCH_CM_VERSION_1]: v1,
+  [SAVED_SEARCH_CM_VERSION_2]: v2,
 };

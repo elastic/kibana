@@ -34,26 +34,37 @@ export const fromSavedSearchAttributes = (
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes => ({
-  kibanaSavedObjectMeta: { searchSourceJSON },
-  title: savedSearch.title ?? '',
-  sort: savedSearch.sort ?? [],
-  columns: savedSearch.columns ?? [],
-  description: savedSearch.description ?? '',
-  grid: savedSearch.grid ?? {},
-  hideChart: savedSearch.hideChart ?? false,
-  viewMode: savedSearch.viewMode,
-  hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-  rowHeight: savedSearch.rowHeight,
-  headerRowHeight: savedSearch.headerRowHeight,
-  isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-  usesAdHocDataView: savedSearch.usesAdHocDataView,
-  timeRestore: savedSearch.timeRestore ?? false,
-  timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
-  refreshInterval: savedSearch.refreshInterval,
-  rowsPerPage: savedSearch.rowsPerPage,
-  sampleSize: savedSearch.sampleSize,
-  density: savedSearch.density,
-  breakdownField: savedSearch.breakdownField,
-  visContext: savedSearch.visContext,
-});
+): SavedSearchAttributes =>
+  ({
+    title: savedSearch.title ?? '',
+    description: savedSearch.description ?? '',
+    tabs: [
+      {
+        id: '',
+        label: '',
+        attributes: {
+          kibanaSavedObjectMeta: { searchSourceJSON },
+          sort: savedSearch.sort ?? [],
+          columns: savedSearch.columns ?? [],
+          grid: savedSearch.grid ?? {},
+          hideChart: savedSearch.hideChart ?? false,
+          viewMode: savedSearch.viewMode,
+          hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+          rowHeight: savedSearch.rowHeight,
+          headerRowHeight: savedSearch.headerRowHeight,
+          isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+          usesAdHocDataView: savedSearch.usesAdHocDataView,
+          timeRestore: savedSearch.timeRestore ?? false,
+          timeRange: savedSearch.timeRange
+            ? pick(savedSearch.timeRange, ['from', 'to'])
+            : undefined,
+          refreshInterval: savedSearch.refreshInterval,
+          rowsPerPage: savedSearch.rowsPerPage,
+          sampleSize: savedSearch.sampleSize,
+          density: savedSearch.density,
+          breakdownField: savedSearch.breakdownField,
+          visContext: savedSearch.visContext,
+        },
+      },
+    ],
+  } as unknown as SavedSearchAttributes); // TODO: Fix SavedSearchAttributes type & remove cast
