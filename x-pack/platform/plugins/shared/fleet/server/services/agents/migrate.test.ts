@@ -7,6 +7,8 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import type { AgentPolicy, Agent } from '../../types';
+
 import { migrateSingleAgent } from './migrate';
 import { createAgentAction } from './actions';
 
@@ -14,6 +16,35 @@ import { createAgentAction } from './actions';
 jest.mock('./actions');
 
 const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
+
+const mockedAgent: Agent = {
+  id: 'agent-123',
+  policy_id: 'policy-456',
+  last_checkin: new Date().toISOString(),
+  components: [],
+  local_metadata: {
+    elastic: {
+      agent: {
+        version: '1.0.0',
+      },
+    },
+  },
+  enrolled_at: new Date().toISOString(),
+  active: true,
+  packages: [],
+  type: 'PERMANENT',
+};
+const mockedPolicy: AgentPolicy = {
+  id: 'policy-456',
+  is_protected: false,
+  status: 'active',
+  is_managed: false,
+  updated_at: new Date().toISOString(),
+  updated_by: 'kibana',
+  revision: 1,
+  name: 'Test Policy',
+  namespace: 'default',
+};
 
 describe('Agent migration', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
@@ -42,7 +73,13 @@ describe('Agent migration', () => {
         settings: { timeout: 300 },
       };
 
-      const result = await migrateSingleAgent(esClientMock, agentId, options);
+      const result = await migrateSingleAgent(
+        esClientMock,
+        agentId,
+        mockedPolicy,
+        mockedAgent,
+        options
+      );
 
       // Verify createAgentAction was called with correct params
       expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
@@ -68,7 +105,7 @@ describe('Agent migration', () => {
         uri: 'https://test-fleet-server.example.com',
       };
 
-      await migrateSingleAgent(esClientMock, agentId, options);
+      await migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options);
 
       // Verify createAgentAction was called with correct params and undefined additionalSettings
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
@@ -77,6 +114,19 @@ describe('Agent migration', () => {
           additionalSettings: undefined,
         })
       );
+    });
+
+    it('should throw an error if the agent is protected', async () => {
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      mockedPolicy.is_protected = true;
+      await expect(
+        migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options)
+      ).rejects.toThrowError('Agent is protected and cannot be migrated');
     });
   });
 });
