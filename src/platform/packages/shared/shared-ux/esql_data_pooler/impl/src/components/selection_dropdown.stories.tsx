@@ -33,7 +33,7 @@ class SelectionDropdownStorybookMock extends AbstractStorybookMock<
   propArguments = {
     query: {
       name: 'ES|QL Editor Query',
-      control: 'text',
+      type: 'string' as const,
       description: 'Simulation of The ES|QL query that the user provided into the esql editor',
     },
   };
@@ -54,7 +54,7 @@ class SelectionDropdownStorybookMock extends AbstractStorybookMock<
 const selectionDropdownStorybookMock = new SelectionDropdownStorybookMock();
 const argTypes = selectionDropdownStorybookMock.getArgumentTypes();
 
-export const ValidQueryScenario: StoryObj = {
+export const ValidQueryScenario: StoryObj<Arguments> = {
   render: (args) => {
     return (
       <DataPoolerProvider query={args.query}>
