@@ -10,12 +10,10 @@
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
 import type { SavedBookAttributesV3 } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v3';
-import type { BookAttributes as BookV2Attributes } from '../../../../../server/book/content_management/schema/v2';
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
   SavedBookAttributesV3,
-  BookAttributes,
-  BookV2Attributes
+  BookAttributes
 > = {
   itemToSavedObject: ({ attributes, references }) => ({
     attributes: {

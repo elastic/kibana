@@ -14,7 +14,6 @@ import type {
 } from '@kbn/embeddable-plugin/common/types';
 import type { SavedBookAttributesV2 } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v2';
-import type { BookAttributes as BookV1Attributes } from '../../../../../server/book/content_management/schema/v1';
 
 function savedObjectToItem({
   attributes,
@@ -50,8 +49,7 @@ function itemToSavedObject({
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
   SavedBookAttributesV2,
-  BookAttributes,
-  BookV1Attributes
+  BookAttributes
 > = {
   itemToSavedObject,
   savedObjectToItem,

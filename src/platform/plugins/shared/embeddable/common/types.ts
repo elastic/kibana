@@ -13,7 +13,6 @@ import type {
   PersistableState,
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectTransform } from '@kbn/object-versioning';
 import type { Type } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 
@@ -40,20 +39,7 @@ export type ItemAttributesWithReferences<ItemAttributes> = {
   references: SavedObjectReference[];
 };
 
-export type VersionableEmbeddableObject<
-  SOAttributes = unknown,
-  ItemAttributes = unknown,
-  PrevItemAttributes = void,
-  NextItemAttributes = void
-> = {
-  up?: ObjectTransform<
-    ItemAttributesWithReferences<ItemAttributes>,
-    ItemAttributesWithReferences<NextItemAttributes>
-  >;
-  down?: ObjectTransform<
-    ItemAttributesWithReferences<ItemAttributes>,
-    ItemAttributesWithReferences<PrevItemAttributes>
-  >;
+export type VersionableEmbeddableObject<SOAttributes, ItemAttributes> = {
   itemSchema?: Type<ItemAttributes>;
   savedObjectToItem?: (
     savedObject: SavedObjectAttributesWithReferences<SOAttributes>
@@ -65,7 +51,10 @@ export type VersionableEmbeddableObject<
 
 export type EmbeddableContentManagementDefinition = {
   id: string;
-  versions: Record<number, VersionableEmbeddableObject<any, any, any>>;
+  versions: { 1: VersionableEmbeddableObject<any, any> } & Record<
+    number,
+    VersionableEmbeddableObject<any, any>
+  >;
   latestVersion: number;
 };
 

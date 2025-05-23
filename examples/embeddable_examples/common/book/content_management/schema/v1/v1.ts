@@ -15,7 +15,6 @@ export const bookAttributesDefinition: VersionableEmbeddableObject<
   SavedBookAttributesV1,
   BookAttributes
 > = {
-  // TODO up or down?
   itemToSavedObject: (item) => item,
   savedObjectToItem: (savedObject) => savedObject,
 };
