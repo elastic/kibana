@@ -6,13 +6,13 @@
  */
 
 import type { ReactText } from 'react';
-import chroma from 'chroma-js';
 import { get, first, last, min, max } from 'lodash';
 import type {
   InventoryFormatterType,
   InventoryVisType,
 } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryVisTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { getValidColor } from '@kbn/coloring';
 import { createFormatter } from '../../../../../common/formatters';
 import type { SeriesOverrides } from '../types';
 import type {
@@ -76,8 +76,8 @@ export const getChartColor = (seriesOverrides: SeriesOverrides | undefined, seri
   if (!rawColor) {
     return null;
   }
-  const color = chroma(rawColor);
-  return color.hex();
+  const color = getValidColor(rawColor, { shouldBeCompatibleWithColorJs: true });
+  return color ? color.hex() : null;
 };
 
 /**

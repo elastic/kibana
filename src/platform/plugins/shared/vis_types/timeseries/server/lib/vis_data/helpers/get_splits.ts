@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// import Color from 'color';
-import chroma from 'chroma-js';
 import { get, isPlainObject } from 'lodash';
+import { getValidColor } from '@kbn/coloring';
 import { overwrite } from '.';
 
 import { calculateLabel } from '../../../../common/calculate_label';
@@ -55,9 +54,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
 
   // FIXME: the series.color could be undefined even if it is typed as required. This happen due to
   // a partially implemented Mock of Series and Panel in the process_bucket.test.ts
-  // The fallback follows the preexisting fallback used from the `color` library
-  // https://github.com/Qix-/color/blob/e188999dee229c902102ec37e398ff4d868616e5/index.js#L38-L41
-  const color = chroma.valid(series.color) ? chroma(series.color).hex() : '#000000';
+  const color = getValidColor(series.color, { shouldBeCompatibleWithColorJs: true }).hex();
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
 
