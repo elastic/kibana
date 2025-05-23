@@ -28,4 +28,17 @@ describe('RRF', () => {
       });
     });
   });
+
+  describe('when incorrectly formatted, return errors', () => {
+    it('when no pipe', () => {
+      const text = `FROM search-movies METADATA _score, _id, _index
+| FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
+          ( WHERE title:"Shakespeare" | SORT _score)
+| RRF KEEP title, _score`;
+
+      const { errors } = parse(text);
+
+      expect(errors.length > 0).toBe(true);
+    });
+  });
 });
