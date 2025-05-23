@@ -7,7 +7,7 @@
 
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { toolToDescriptor } from '../services/tools/utils/tool_to_descriptor';
+import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -25,7 +25,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools: toolService } = getInternalServices();
-      const registry = toolService.getScopedRegistry({ request });
+      const registry = toolService.registry.asScopedPublicRegistry({ request });
       const tools = await registry.list({});
       return response.ok({
         body: {

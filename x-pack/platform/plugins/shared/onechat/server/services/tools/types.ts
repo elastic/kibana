@@ -5,26 +5,56 @@
  * 2.0.
  */
 
+import type { ZodRawShape } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor, ToolIdentifier } from '@kbn/onechat-common';
-import type { ToolProvider } from '@kbn/onechat-server';
+import type { ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
+import type {
+  ToolProvider,
+  RegisteredTool,
+  ToolProviderHasOptions,
+  ToolProviderGetOptions,
+  ToolProviderListOptions,
+  ExecutableTool,
+} from '@kbn/onechat-server';
 import { ToolRegistration } from './builtin_registry';
 
 export interface ToolsServiceSetup {
   register(toolRegistration: ToolRegistration): void;
 }
 
-// type alias for now, we may extend later.
-export type InternalToolRegistry = ToolProvider;
-
 export interface ToolsServiceStart {
   /**
-   * Main tool provider exposing all tools
+   * Internal tool registry, exposing internal APIs to interact with tool providers.
    */
   registry: InternalToolRegistry;
-
-  getScopedRegistry: ScopedPublicToolRegistryFactoryFn;
 }
+
+export type RegisteredToolWithMeta<
+  RunInput extends ZodRawShape = ZodRawShape,
+  RunOutput = unknown
+> = Omit<RegisteredTool<RunInput, RunOutput>, 'meta'> & {
+  meta: ToolDescriptorMeta;
+};
+
+/**
+ * Internal tool provider interface
+ */
+export interface InternalToolProvider {
+  has(options: ToolProviderHasOptions): Promise<boolean>;
+  get(options: ToolProviderGetOptions): Promise<RegisteredToolWithMeta>;
+  list(options: ToolProviderListOptions): Promise<RegisteredToolWithMeta[]>;
+}
+
+/**
+ * Internal registry interface for the runner to interact with
+ */
+export interface InternalToolRegistry extends InternalToolProvider {
+  asPublicRegistry: () => PublicToolRegistry;
+  asScopedPublicRegistry: ScopedPublicToolRegistryFactoryFn;
+}
+
+// type alias for now, we may extend later.
+export type PublicToolRegistry = ToolProvider;
 
 /**
  * Public tool registry exposed from the plugin's contract,
@@ -32,8 +62,8 @@ export interface ToolsServiceStart {
  */
 export interface ScopedPublicToolRegistry {
   has(toolId: ToolIdentifier): Promise<boolean>;
-  get(toolId: ToolIdentifier): Promise<ToolDescriptor>;
-  list(options?: {}): Promise<ToolDescriptor[]>;
+  get(toolId: ToolIdentifier): Promise<ExecutableTool>;
+  list(options?: {}): Promise<ExecutableTool[]>;
 }
 
 export type ScopedPublicToolRegistryFactoryFn = (opts: {

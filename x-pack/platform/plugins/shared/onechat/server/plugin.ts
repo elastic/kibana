@@ -80,11 +80,11 @@ export class OnechatPlugin
 
     return {
       tools: {
-        registry: tools.registry,
+        registry: tools.registry.asPublicRegistry(),
         execute: runner.runTool.bind(runner),
         asScoped: ({ request }) => {
           return {
-            registry: tools.getScopedRegistry({ request }),
+            registry: tools.registry.asScopedPublicRegistry({ request }),
             execute: (args) => {
               return runner.runTool({ ...args, request });
             },

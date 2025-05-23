@@ -12,11 +12,7 @@ import {
   type ToolRegistration,
 } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
-import {
-  combineToolProviders,
-  toolProviderToPublicRegistryFactory,
-  builtinRegistryToProvider,
-} from './utils';
+import { createInternalRegistry } from './utils';
 
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
@@ -36,15 +32,10 @@ export class ToolsService {
   }
 
   start({ getRunner }: ToolsServiceStartDeps): ToolsServiceStart {
-    const builtinProvider = builtinRegistryToProvider({
-      registry: this.builtinRegistry,
-      getRunner,
-    });
-    const toolProvider = combineToolProviders(builtinProvider);
+    const registry = createInternalRegistry({ providers: [this.builtinRegistry], getRunner });
 
     return {
-      registry: toolProvider,
-      getScopedRegistry: toolProviderToPublicRegistryFactory({ provider: toolProvider }),
+      registry,
     };
   }
 

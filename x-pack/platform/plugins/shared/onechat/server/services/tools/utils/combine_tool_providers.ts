@@ -6,19 +6,20 @@
  */
 
 import type {
-  ToolProvider,
-  RegisteredTool,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
   ToolProviderListOptions,
 } from '@kbn/onechat-server';
+import type { InternalToolProvider, RegisteredToolWithMeta } from '../types';
 
 /**
  * Creates a tool provider that combines multiple tool providers.
  *
  * Note: order matters - providers will be checked in the order they are provided (e.g. in case of id conflicts).
  */
-export const combineToolProviders = (...providers: ToolProvider[]): ToolProvider => {
+export const combineToolProviders = (
+  ...providers: InternalToolProvider[]
+): InternalToolProvider => {
   return {
     has: async (options: ToolProviderHasOptions) => {
       for (const provider of providers) {
@@ -38,7 +39,7 @@ export const combineToolProviders = (...providers: ToolProvider[]): ToolProvider
       throw new Error(`Tool with id ${options.toolId} not found`);
     },
     list: async (options: ToolProviderListOptions) => {
-      const tools: RegisteredTool[] = [];
+      const tools: RegisteredToolWithMeta[] = [];
       const toolIds = new Set<string>();
 
       for (const provider of providers) {

@@ -8,6 +8,7 @@
 import type { ToolProvider, RegisteredTool, ToolHandlerFn } from '@kbn/onechat-server';
 import type {
   ToolsServiceStart,
+  InternalToolRegistry,
   ScopedPublicToolRegistry,
   ScopedPublicToolRegistryFactoryFn,
 } from '../services/tools/types';
@@ -18,10 +19,10 @@ export type ScopedPublicToolRegistryMock = jest.Mocked<ScopedPublicToolRegistry>
 export type ScopedPublicToolRegistryFactoryFnMock = jest.MockedFn<
   ChangeReturnType<ScopedPublicToolRegistryFactoryFn, ScopedPublicToolRegistryMock>
 >;
+export type InternalToolRegistryMock = jest.Mocked<InternalToolRegistry>;
 
 export type ToolsServiceStartMock = ToolsServiceStart & {
-  registry: ToolProviderMock;
-  getScopedRegistry: ScopedPublicToolRegistryFactoryFnMock;
+  registry: InternalToolRegistryMock;
 };
 
 export const createToolProviderMock = (): ToolProviderMock => {
@@ -29,6 +30,18 @@ export const createToolProviderMock = (): ToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+  };
+};
+
+export const createInternalToolRegistryMock = (): InternalToolRegistryMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    list: jest.fn(),
+    asPublicRegistry: jest.fn().mockImplementation(() => createToolProviderMock()),
+    asScopedPublicRegistry: jest
+      .fn()
+      .mockImplementation(() => createScopedPublicToolRegistryMock()),
   };
 };
 
@@ -42,8 +55,7 @@ export const createScopedPublicToolRegistryMock = (): ScopedPublicToolRegistryMo
 
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
-    registry: createToolProviderMock(),
-    getScopedRegistry: jest.fn().mockImplementation(() => createScopedPublicToolRegistryMock),
+    registry: createInternalToolRegistryMock(),
   };
 };
 

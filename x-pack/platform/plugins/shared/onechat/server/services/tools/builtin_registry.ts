@@ -9,15 +9,14 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   OnechatErrorUtils,
-  builtinSourceId,
   ToolSourceType,
-  type ToolDescriptorMeta,
   type ToolIdentifier,
   toSerializedToolIdentifier,
   toStructuredToolIdentifier,
 } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
-import type { ZodRawShape } from '@kbn/zod';
+import type { RegisteredToolWithMeta, InternalToolProvider } from './types';
+import { addBuiltinSystemMeta } from './utils/tool_conversion';
 
 export type ToolRegistrationFn = (opts: {
   request: KibanaRequest;
@@ -36,31 +35,8 @@ export const wrapToolRegistration = (tool: ToolDirectRegistration): ToolRegistra
   };
 };
 
-export type RegisteredToolWithMeta<
-  RunInput extends ZodRawShape = ZodRawShape,
-  RunOutput = unknown
-> = Omit<RegisteredTool<RunInput, RunOutput>, 'meta'> & {
-  meta: ToolDescriptorMeta;
-};
-
-export const addSystemMeta = <RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>(
-  tool: RegisteredTool<RunInput, RunOutput>
-): RegisteredToolWithMeta<RunInput, RunOutput> => {
-  return {
-    ...tool,
-    meta: {
-      tags: tool.meta?.tags ?? [],
-      sourceType: ToolSourceType.builtIn,
-      sourceId: builtinSourceId,
-    },
-  };
-};
-
-export interface BuiltinToolRegistry {
+export interface BuiltinToolRegistry extends InternalToolProvider {
   register(tool: ToolRegistration): void;
-  has(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<boolean>;
-  get(options: { toolId: ToolIdentifier; request: KibanaRequest }): Promise<RegisteredToolWithMeta>;
-  list(options: { request: KibanaRequest }): Promise<RegisteredToolWithMeta[]>;
 }
 
 export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
@@ -119,7 +95,7 @@ export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
       const tools = await this.eval(registration, { request });
       for (const tool of tools) {
         if (tool.id === toolId) {
-          return addSystemMeta(tool);
+          return addBuiltinSystemMeta(tool);
         }
       }
     }
@@ -135,7 +111,7 @@ export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
 
     for (const registration of this.registrations) {
       const tools = await this.eval(registration, { request });
-      matchingTools.push(...tools.map((tool) => addSystemMeta(tool)));
+      matchingTools.push(...tools.map((tool) => addBuiltinSystemMeta(tool)));
     }
 
     return matchingTools;

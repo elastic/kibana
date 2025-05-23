@@ -48,8 +48,10 @@ export class RunnerManager {
 
   getRunner(): ScopedRunner {
     return {
-      runTool: <TResult = unknown>(toolExecutionParams: ScopedRunnerRunToolsParams) => {
-        return runTool<TResult>({ toolExecutionParams, parentManager: this });
+      runTool: <TParams = Record<string, unknown>, TResult = unknown>(
+        toolExecutionParams: ScopedRunnerRunToolsParams<TParams>
+      ): Promise<RunToolReturn<TResult>> => {
+        return runTool<TParams, TResult>({ toolExecutionParams, parentManager: this });
       },
     };
   }
@@ -59,11 +61,11 @@ export class RunnerManager {
   }
 }
 
-export const runTool = async <TResult = unknown>({
+export const runTool = async <TParams = Record<string, unknown>, TResult = unknown>({
   toolExecutionParams,
   parentManager,
 }: {
-  toolExecutionParams: ScopedRunnerRunToolsParams;
+  toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn<TResult>> => {
   const { toolId, toolParams } = toolExecutionParams;
@@ -77,10 +79,10 @@ export const runTool = async <TResult = unknown>({
 
   // TODO: send toolCall event
 
-  const toolHandlerContext = createToolHandlerContext({ toolExecutionParams, manager });
+  const toolHandlerContext = createToolHandlerContext<TParams>({ toolExecutionParams, manager });
 
   // TODO: try/catch errors
-  const toolResult = await tool.handler(toolParams, toolHandlerContext);
+  const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
 
   // TODO: send toolResult event
 
@@ -89,11 +91,11 @@ export const runTool = async <TResult = unknown>({
   };
 };
 
-export const createToolHandlerContext = ({
+export const createToolHandlerContext = <TParams = Record<string, unknown>>({
   manager,
   toolExecutionParams,
 }: {
-  toolExecutionParams: ScopedRunnerRunToolsParams;
+  toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): ToolHandlerContext => {
   const { onEvent } = toolExecutionParams;
