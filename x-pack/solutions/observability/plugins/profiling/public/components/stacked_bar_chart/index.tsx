@@ -135,6 +135,7 @@ export function StackedBarChart({
           yAccessors={['Count']}
           stackAccessors={['true']}
           stackMode={asPercentages ? StackMode.Percentage : undefined}
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           timeZone={timeZone}
         />

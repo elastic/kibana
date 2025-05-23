@@ -69,6 +69,7 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
         <BarSeries
           id={`${ID}BarChart`}
           name="Indicators"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

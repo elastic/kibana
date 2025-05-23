@@ -27,6 +27,7 @@ export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
         key={`loc-line-${name}`}
         name={name}
         xAccessor={0}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yAccessors={[1]}
         yScaleType={ScaleType.Linear}

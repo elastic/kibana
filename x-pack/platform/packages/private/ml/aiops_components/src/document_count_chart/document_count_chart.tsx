@@ -514,6 +514,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             <HistogramBarSeries
               id={SPEC_ID}
               name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"
@@ -530,6 +531,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={chartPointsSplitLabel}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"

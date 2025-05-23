@@ -292,6 +292,7 @@ export function DataPreviewChart({
 
               <LineSeries
                 id="All groups"
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor="date"
@@ -307,6 +308,7 @@ export function DataPreviewChart({
                 <LineSeries
                   key={group}
                   id={group}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="date"
