@@ -10,7 +10,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
 import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useStyles } from './styles';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
@@ -27,7 +27,7 @@ export const cellRendererFactory = (from: number) => {
       throw new Error('this can only be used inside indicators table');
     }
 
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaIsDarkMode();
 
     const { indicators, expanded } = indicatorsTableContext;
 

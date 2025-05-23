@@ -252,6 +252,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",
-    "@kbn/unified-histogram"
+    "@kbn/unified-histogram",
+    "@kbn/react-kibana-context-theme"
   ]
 }
