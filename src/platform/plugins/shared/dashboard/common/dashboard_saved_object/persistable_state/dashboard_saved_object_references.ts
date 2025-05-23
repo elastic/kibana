@@ -52,7 +52,7 @@ export function injectReferences(
 
   const newAttributes = {
     ...attributes,
-    panels: [...attributes.panels, ...injectedPanels], // spreading the old panels array ensures that sections aren't dropped
+    panels: injectedPanels,
   };
 
   return newAttributes;
@@ -63,7 +63,6 @@ export function extractReferences(
   deps: InjectExtractDeps
 ): DashboardAttributesAndReferences {
   const parsedAttributes = parseDashboardAttributesWithType(attributes);
-
   const panels = parsedAttributes.panels;
 
   const panelMissingType = Object.entries(panels).find(
@@ -82,10 +81,9 @@ export function extractReferences(
     extractedState.panels,
     parsedAttributes.sections
   ); // sections don't have references
-
   const newAttributes = {
     ...attributes,
-    panels: [...attributes.panels, ...extractedPanels], // spreading the old panels array ensures that sections aren't dropped
+    panels: extractedPanels,
   };
 
   return {
