@@ -94,11 +94,11 @@ const createChunkEvent = (input: ChunkEventInput): ChatCompletionChunkEvent => {
 };
 
 const telemetryMetadata = {
-  pluginId: 'plugin-id'
+  pluginId: 'plugin-id',
 };
 
 const metadata = {
-  connectorTelemetry: telemetryMetadata
+  connectorTelemetry: telemetryMetadata,
 };
 
 describe('InferenceChatModel', () => {
@@ -390,7 +390,7 @@ describe('InferenceChatModel', () => {
         stream: false,
         metadata: {
           connectorTelemetry: undefined,
-        }
+        },
       });
     });
   });
