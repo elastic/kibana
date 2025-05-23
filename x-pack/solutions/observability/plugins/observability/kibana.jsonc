@@ -15,6 +15,7 @@
       "observability"
     ],
     "requiredPlugins": [
+      "aiops",
       "alerting",
       "cases",
       "charts",
@@ -47,7 +48,6 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
-      "aiops",
       "discover",
       "home",
       "usageCollection",
@@ -60,7 +60,6 @@
       "streams"
     ],
     "requiredBundles": [
-      "aiops",
       "data",
       "discover",
       "kibanaReact",

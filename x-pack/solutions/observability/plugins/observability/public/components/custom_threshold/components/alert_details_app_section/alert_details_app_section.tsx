@@ -21,6 +21,7 @@ import {
   transparentize,
 } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import type { ConfigSchema as AiopsConfigSchema } from '@kbn/aiops-plugin/server';
 import {
   ALERT_END,
   ALERT_START,
@@ -67,7 +68,8 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const { hasAtLeast } = useLicense();
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
-  const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
+  const aiopsCapabilities: AiopsConfigSchema = application.capabilities.aiops;
+  const aiopsEnabled = aiopsCapabilities?.ui?.enabled ?? false;
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });

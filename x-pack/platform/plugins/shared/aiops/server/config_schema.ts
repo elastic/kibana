@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
-  enabled: schema.maybe(schema.boolean()),
+  ui: schema.maybe(
+    schema.object({
+      enabled: schema.maybe(schema.boolean()),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
@@ -17,6 +21,6 @@ export type ConfigSchema = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   exposeToBrowser: {
-    enabled: true,
+    ui: true,
   },
 };

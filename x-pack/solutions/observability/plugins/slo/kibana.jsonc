@@ -10,6 +10,7 @@
     "server": true,
     "configPath": ["xpack", "slo"],
     "requiredPlugins": [
+      "aiops",
       "alerting",
       "cases",
       "charts",
@@ -38,7 +39,6 @@
       "apmSourcesAccess"
     ],
     "optionalPlugins": [
-      "aiops",
       "cloud",
       "discover",
       "embeddableEnhanced",
@@ -48,7 +48,6 @@
       "spaces"
     ],
     "requiredBundles": [
-      "aiops",
       "controls",
       "embeddable",
       "ingestPipelines",

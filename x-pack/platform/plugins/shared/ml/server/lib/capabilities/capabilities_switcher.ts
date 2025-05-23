@@ -10,7 +10,7 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import type { AiopsPluginSetup } from '@kbn/aiops-plugin/server';
+import type { ConfigSchema as AiopsConfigSchema } from '@kbn/aiops-plugin/server';
 import type { MlFeatures } from '../../../common/constants/app';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import {
@@ -23,11 +23,10 @@ export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,
   license$: Observable<ILicense>,
   enabledFeatures: MlFeatures,
-  logger: Logger,
-  aiops: AiopsPluginSetup | undefined
+  logger: Logger
 ) => {
   coreSetup.capabilities.registerSwitcher(
-    getSwitcher(license$, logger, enabledFeatures, coreSetup.getStartServices, aiops),
+    getSwitcher(license$, logger, enabledFeatures, coreSetup.getStartServices),
     {
       capabilityPath: 'ml.*',
     }
@@ -38,8 +37,7 @@ function getSwitcher(
   license$: Observable<ILicense>,
   logger: Logger,
   enabledFeatures: MlFeatures,
-  getStartServices: CoreSetup['getStartServices'],
-  aiops: AiopsPluginSetup | undefined
+  getStartServices: CoreSetup['getStartServices']
 ): CapabilitiesSwitcher {
   return async (request, capabilities) => {
     const isAnonymousRequest = !request.route.options.authRequired;
@@ -58,7 +56,8 @@ function getSwitcher(
       const originalCapabilities = capabilities.ml as MlCapabilities;
       const mlCaps = cloneDeep(originalCapabilities);
 
-      if (aiops === undefined) {
+      const aiopsCapabilities: AiopsConfigSchema = capabilities.aiops;
+      if (aiopsCapabilities?.ui?.enabled === false) {
         mlCaps.canUseAiops = false;
       }
 

@@ -15,4 +15,4 @@ export async function plugin(initializerContext: PluginInitializerContext<Config
 
 export type { AiopsPluginSetup, AiopsPluginStart } from './types';
 
-export { config } from './config_schema';
+export { config, type ConfigSchema } from './config_schema';
