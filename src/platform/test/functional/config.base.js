@@ -51,7 +51,9 @@ export default async function ({ readConfigFile }) {
         'dateFormat:tz': 'UTC',
       },
     },
-
+    screenshots: {
+      directory: '/screenshots',
+    },
     apps: {
       kibana: {
         pathname: '/app/kibana',
