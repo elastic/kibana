@@ -324,7 +324,7 @@ export function AlertDetails() {
       name: (
         <FormattedMessage
           id="xpack.observability.alertDetails.tab.investigationGuideLabel"
-          defaultMessage="Investigation Guide"
+          defaultMessage="Investigation guide"
         />
       ),
       'data-test-subj': 'investigationGuideTab',
