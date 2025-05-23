@@ -13012,27 +13012,27 @@
                 "InfoResponse",
                 ">; }; ingest: ",
                 "default",
-                "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-                "KnnSearchRequest",
-                ", options?: ",
+                "; knnSearch: { (this: That, params?: ",
+                "TODO",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
-                "KnnSearchResponse",
-                "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                "KnnSearchRequest",
-                ", options?: ",
+                "TODO",
+                ">; (this: That, params?: ",
+                "TODO",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
-                "KnnSearchResponse",
-                "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                "KnnSearchRequest",
-                ", options?: ",
+                "TODO",
+                ", unknown>>; (this: That, params?: ",
+                "TODO",
+                " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
-                "KnnSearchResponse",
-                "<TDocument>>; }; license: ",
+                "TODO",
+                ">; }; license: ",
                 "default",
                 "; logstash: ",
                 "default",
@@ -13647,16 +13647,16 @@
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/options_list_fetch_cache.ts"
               },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
