@@ -71,7 +71,7 @@ export default function ({
       );
 
       await dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.15);
+      expect(percentDifference).to.be.lessThan(0.022);
     });
 
     it('compare area chart snapshot', async () => {
@@ -92,7 +92,7 @@ export default function ({
       );
 
       await dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.29);
+      expect(percentDifference).to.be.lessThan(0.029);
     });
 
     describe('compare controls snapshot', () => {
