@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const LEGACY_TIME_AXIS = 'visualization:useLegacyTimeAxis';
+
 export type {
   CustomPaletteArguments,
   CustomPaletteState,
