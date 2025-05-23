@@ -53,7 +53,7 @@ export async function exec(
           log[level](chalk.dim('$'), cmd, ...args);
 
           if (logs?.length) {
-            logs.forEach((line: string) => log[level](line.trimStart()));
+            logs.forEach((line: string) => log[level](line.trim()));
           }
         });
       });
