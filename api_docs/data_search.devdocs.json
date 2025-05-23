@@ -10984,7 +10984,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }, references: ",
+              " & { indexRefName?: string | undefined; }, references: ",
               "SavedObjectReference",
               "[]) => ",
               {
@@ -15657,7 +15657,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          " & { indexRefName: string; }, references: ",
+          " & { indexRefName?: string | undefined; }, references: ",
           "SavedObjectReference",
           "[]) => ",
           {
@@ -15687,7 +15687,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }"
+              " & { indexRefName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/search_source/inject_references.ts",
             "deprecated": false,
