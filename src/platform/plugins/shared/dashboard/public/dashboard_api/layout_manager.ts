@@ -45,14 +45,7 @@ import { coreServices, usageCollectionService } from '../services/kibana_service
 import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { areLayoutsEqual } from './are_layouts_equal';
 import type { initializeTrackPanel } from './track_panel';
-import {
-  DashboardChildState,
-  DashboardChildren,
-  DashboardLayout,
-  DashboardPanel,
-  DashboardSection,
-  ReservedLayoutItemTypes,
-} from './types';
+import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from './types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -425,22 +418,24 @@ export function initializeLayoutManager(
         const newLayout = cloneDeep(layout$.getValue());
         const newId = v4();
 
-        // push every other panel + section down
+        // find the max y so we know where to add the section
+        let maxY = 0;
         [...Object.values(newLayout.panels), ...Object.values(newLayout.sections)].forEach(
           (widget) => {
-            widget.gridData = { ...widget.gridData, y: widget.gridData.y + 1 };
+            const { y, h } = { h: 1, ...widget.gridData };
+            maxY = Math.max(maxY, y + h);
           }
         );
         // add the new section
         newLayout.sections[newId] = {
-          gridData: { i: newId, y: 0 },
+          gridData: { i: newId, y: maxY + 1 },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',
           }),
-          collapsed: true,
+          collapsed: false,
         };
         layout$.next(newLayout);
-        trackPanel.scrollToTop();
+        trackPanel.scrollToBottom$.next();
       },
     },
   };

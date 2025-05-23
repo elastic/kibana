@@ -62,7 +62,7 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
-export type DashboardPanel = { gridData: GridData } & HasType;
+export type DashboardPanel = { gridData: GridData & { sectionId?: string } } & HasType;
 export interface DashboardSection {
   gridData: Pick<GridData, 'i' | 'y'>; // sections only have a vertical position for grid data
   title: string;
@@ -162,6 +162,8 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
+    scrollToBottom: () => void;
+    scrollToBottom$: Subject<void>;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;

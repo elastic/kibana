@@ -171,31 +171,31 @@ export const DashboardGrid = ({
      * element; we want to ignore this first call and scroll to the bottom on the **second**
      * callback - i.e. after the row is actually added to the DOM
      */
-    // let first = false;
-    // const scrollToBottomOnResize = new ResizeObserver(() => {
-    //   if (first) {
-    //     first = false;
-    //   } else {
-    //     dashboardInternalApi.scrollToBottom();
-    //     scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
-    //   }
-    // });
+    let first = false;
+    const scrollToBottomOnResize = new ResizeObserver(() => {
+      if (first) {
+        first = false;
+      } else {
+        dashboardApi.scrollToBottom();
+        scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
+      }
+    });
 
     /**
      * When `scrollToBottom$` emits, wait for the `layoutRef` size to change then scroll
      * to the bottom of the screen
      */
-    // const scrollToBottomSubscription = dashboardInternalApi.scrollToBottom$.subscribe(() => {
-    //   if (!layoutRef.current) return;
-    //   first = true; // ensure that only the second resize callback actually triggers scrolling
-    //   scrollToBottomOnResize.observe(layoutRef.current);
-    // });
+    const scrollToBottomSubscription = dashboardApi.scrollToBottom$.subscribe(() => {
+      if (!layoutRef.current) return;
+      first = true; // ensure that only the second resize callback actually triggers scrolling
+      scrollToBottomOnResize.observe(layoutRef.current);
+    });
 
     return () => {
-      // scrollToBottomOnResize.disconnect();
-      // scrollToBottomSubscription.unsubscribe();
+      scrollToBottomOnResize.disconnect();
+      scrollToBottomSubscription.unsubscribe();
     };
-  }, [dashboardInternalApi]);
+  }, [dashboardApi]);
 
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
