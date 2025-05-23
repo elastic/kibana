@@ -26,7 +26,7 @@ import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_s
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 import type { CustomScript } from '../../../../common/endpoint/types/custom_scripts';
 
-// Css to have a tooltip in place with a one line description
+// Css to have a tooltip in place with a one line truncated description
 const truncationStyle = css({
   display: '-webkit-box',
   overflow: 'hidden',
@@ -40,11 +40,6 @@ const truncationStyle = css({
 const INITIAL_DISPLAY_LABEL = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.initialDisplayLabel',
   { defaultMessage: 'Click to select script' }
-);
-
-const NO_SCRIPT_SELECTED = i18n.translate(
-  'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.noFileSelected',
-  { defaultMessage: 'No script selected' }
 );
 
 /**
@@ -165,9 +160,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           button={
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false} onClick={handleOpenPopover}>
-                <div title={valueText || NO_SCRIPT_SELECTED}>
-                  {valueText || INITIAL_DISPLAY_LABEL}
-                </div>
+                <div title={valueText}>{valueText || INITIAL_DISPLAY_LABEL}</div>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -185,12 +178,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
                   autoFocus: true,
                   onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
                     // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
-                    if (
-                      event.key !== 'Enter' &&
-                      event.key !== 'ArrowUp' &&
-                      event.key !== 'ArrowDown' &&
-                      event.key !== 'Escape'
-                    ) {
+                    if (!['Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
                       event.stopPropagation();
                     }
                   },
