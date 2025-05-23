@@ -150,10 +150,13 @@ export const RuleDetails = () => {
                 type="questionInCircle"
                 content={
                   <p>
-                    {i18n.translate('xpack.triggersActionsUI.ruleDetails.investigationGuideHelp', {
-                      defaultMessage:
-                        'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
-                    })}
+                    {i18n.translate(
+                      'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
+                      {
+                        defaultMessage:
+                          'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
+                      }
+                    )}
                   </p>
                 }
               />
