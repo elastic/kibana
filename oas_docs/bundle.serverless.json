@@ -44216,6 +44216,9 @@
                           },
                           "updated_at": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
                           }
                         },
                         "required": [
@@ -44383,6 +44386,9 @@
                             "type": "string"
                           },
                           "updated_at": {
+                            "type": "string"
+                          },
+                          "warning": {
                             "type": "string"
                           }
                         },
