@@ -71,7 +71,6 @@ export const UseRunQueryRuleset = ({
       }
     }
   }
-
   // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
   const TEST_QUERY_RULESET_API_SNIPPET = dedent`
   # Test your query ruleset
@@ -80,7 +79,8 @@ export const UseRunQueryRuleset = ({
   {
     "query": {
       "rule": {
-        "match_criteria": // Defines the match criteria to apply to rules in the given query ruleset ${
+        // Defines the match criteria to apply to rules in the given query ruleset
+        "match_criteria": ${
           criteriaData.length > 0
             ? (() => {
                 const matchCriteria = criteriaData.reduce<Record<string, any>>((acc, criterion) => {
