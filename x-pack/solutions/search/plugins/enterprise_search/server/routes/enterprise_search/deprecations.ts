@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
+import { getEnterpriseSearchAccountCleanupAccounts } from '../../deprecations';
 import { RouteDependencies } from '../../plugin';
 
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -57,6 +58,53 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       );
       return response.ok({
         body: { converted_to_client: request.body.ids },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/deprecations/clean_ent_search_accounts',
+      validate: {
+        body: schema.object({
+          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch') }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const esClient = client.asCurrentUser;
+
+      const { esUser, credentialTokenIds, esCloudApiKeys } =
+        await getEnterpriseSearchAccountCleanupAccounts(esClient);
+
+      if (!esUser && credentialTokenIds.length === 0 && esCloudApiKeys.length === 0) {
+        // nothing to delete or invalidate - just return success
+        return response.ok({
+          body: { success: true },
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+
+      if (esUser && esUser.enterprise_search) {
+        await esClient.security.deleteUser({ username: esUser.enterprise_search.username });
+      }
+
+      for (const tokenId of credentialTokenIds) {
+        await esClient.security.deleteServiceToken({
+          namespace: 'elastic',
+          service: 'enterprise-search-server',
+          name: tokenId,
+        });
+      }
+
+      for (const apiKey of esCloudApiKeys) {
+        await esClient.security.invalidateApiKey({ id: apiKey });
+      }
+
+      return response.ok({
+        body: { success: true },
         headers: { 'content-type': 'application/json' },
       });
     })
