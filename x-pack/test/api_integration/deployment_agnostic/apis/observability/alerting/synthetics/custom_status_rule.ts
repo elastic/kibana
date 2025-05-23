@@ -63,7 +63,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
       await supertestAdminWithCookieHeader.destroy();
       await server.savedObjects.cleanStandardList();
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX, SYNTHETICS_DOCS_INDEX]);
+      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
+      await esClient.indices.deleteDataStream({
+        name: SYNTHETICS_DOCS_INDEX,
+      });
       await esClient.deleteByQuery({
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
