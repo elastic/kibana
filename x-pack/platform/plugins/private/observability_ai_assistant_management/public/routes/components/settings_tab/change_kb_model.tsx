@@ -204,44 +204,20 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isKnowledgeBaseInLoadingState ? (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  {knowledgeBase.isWarmingUpModel
-                    ? i18n.translate(
-                        'xpack.observabilityAiAssistantManagement.knowledgeBase.redeployingModelLabel',
-                        {
-                          defaultMessage: 'Re-deploying model...',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.observabilityAiAssistantManagement.knowledgeBase.updatingModelLabel',
-                        {
-                          defaultMessage: 'Updating model...',
-                        }
-                      )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <EuiButton
-              color="primary"
-              data-test-subj="observabilityAiAssistantKnowledgeBaseUpdateModelButton"
-              onClick={handleInstall}
-              isDisabled={
-                !selectedInferenceId ||
-                (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
-                  selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
-                  !doesModelNeedRedeployment)
-              }
-            >
-              {buttonText}
-            </EuiButton>
-          )}
+          <EuiButton
+            color="primary"
+            data-test-subj="observabilityAiAssistantKnowledgeBaseUpdateModelButton"
+            onClick={handleInstall}
+            isDisabled={
+              !selectedInferenceId ||
+              isKnowledgeBaseInLoadingState ||
+              (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
+                selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
+                !doesModelNeedRedeployment)
+            }
+          >
+            {buttonText}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -253,7 +229,6 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     selectedInferenceId,
     isKnowledgeBaseInLoadingState,
     doesModelNeedRedeployment,
-    knowledgeBase.isWarmingUpModel,
     knowledgeBase.status?.value?.kbState,
     knowledgeBase.status?.value?.endpoint?.inference_id,
     handleInstall,
@@ -300,19 +275,28 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color={
-                    knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
-                      ? 'success'
-                      : 'default'
-                  }
-                >
-                  {knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
-                    ? i18n.translate('xpack.aiAssistant.knowledgeBase.stateInstalled', {
-                        defaultMessage: 'Installed',
-                      })
-                    : knowledgeBase.status.value.kbState}
-                </EuiBadge>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color={
+                        knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
+                          ? 'success'
+                          : 'default'
+                      }
+                    >
+                      {knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
+                        ? i18n.translate('xpack.aiAssistant.knowledgeBase.stateInstalled', {
+                            defaultMessage: 'Installed',
+                          })
+                        : knowledgeBase.status.value.kbState}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  {isKnowledgeBaseInLoadingState && (
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="s" />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
