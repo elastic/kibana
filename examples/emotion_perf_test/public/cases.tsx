@@ -11,6 +11,72 @@ import React, { useMemo } from 'react';
 import { css, cx } from '@emotion/css';
 import { TestCase } from './types';
 
+
+
+const base = {
+  outline: 0,
+  border: 0,
+  margin: '2px 2px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'anchor-center',
+  height: '30px',
+  fontSize: '20px',
+  width: '30px',
+  opacity: 1,
+  color: '#E2F8F0',
+  backgroundColor: '#008A5E',
+};
+
+const disabledBase = {
+  opacity: 0.5,
+  color: '#E2F9F7',
+  backgroundColor: '#C61E25',
+};
+
+const disabledBas = {
+  ...base,
+  ...disabledBase,
+};
+
+
+// Control Case:  inline style tag
+export const ControlRow = ({
+  disabled,
+  index,
+}: {
+  disabled: boolean;
+  index: number;
+}) => {
+  return (
+    <div
+      style={
+        disabled
+          ? {
+              ...base,
+              ...disabledBase,
+            }
+          : {
+              outline: 0,
+              border: 0,
+              margin: "2px 2px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "anchor-center",
+              height: "30px",
+              fontSize: "20px",
+              width: "30px",
+              opacity: 1,
+              color: "#E2F8F0",
+              backgroundColor: "#008A5E",
+            }
+      }
+    >
+      {index}
+    </div>
+  );
+};
+
 // Case A: Emotion inline styles
 export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   return (
@@ -36,27 +102,6 @@ export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index:
 };
 
 // Case B: The styles are defined outside, but the condition is within css prop
-
-const base = {
-  outline: 0,
-  border: 0,
-  margin: '2px 2px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'anchor-center',
-  height: '30px',
-  fontSize: '20px',
-  width: '30px',
-  opacity: 1,
-  color: '#E2F8F0',
-  backgroundColor: '#008A5E',
-};
-
-const disabledBase = {
-  opacity: 0.5,
-  color: '#E2F9F7',
-  backgroundColor: '#C61E25',
-};
 
 export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   return <div className={cx(css(base), css(disabled && disabledBase))}>{index}</div>;
@@ -135,10 +180,15 @@ export const testCases: TestCase[] = [
   },
   { component: MemoizedStylesRow, description: 'Styles memoized in the component' },
   { component: ScopedCSSVarRow, description: 'Css variables scoped to the component' },
+  // {
+  //   component: RootCSSVarRow,
+  //   description: 'Css variables defined in the :root (the practice we should never use for the variables that change often!!!)',
+  //   mountRootVars: true,
+  // },
   {
-    component: RootCSSVarRow,
-    description: 'Css variables defined in the :root (the practice we should never use for the variables that change often!!!)',
-    mountRootVars: true,
+    component: ControlRow,
+    description: 'Control case: inline style tag',
   },
   { component: ClassNameRow, description: 'An element styled by adding a classname on parent' },
 ];
+
