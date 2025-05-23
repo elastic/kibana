@@ -2254,10 +2254,10 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.getTraceDocumentOverview",
+        "id": "def-common.getSpanDocumentOverview",
         "type": "Function",
         "tags": [],
-        "label": "getTraceDocumentOverview",
+        "label": "getSpanDocumentOverview",
         "description": [],
         "signature": [
           "(doc: ",
@@ -2273,17 +2273,17 @@
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
             "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TraceDocumentOverview",
-            "text": "TraceDocumentOverview"
+            "section": "def-common.SpanDocumentOverview",
+            "text": "SpanDocumentOverview"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_span_document_overview.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.getTraceDocumentOverview.$1",
+            "id": "def-common.getSpanDocumentOverview.$1",
             "type": "Object",
             "tags": [],
             "label": "doc",
@@ -2297,7 +2297,61 @@
                 "text": "DataTableRecord"
               }
             ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_trace_document_overview.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_span_document_overview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.getTransactionDocumentOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "getTransactionDocumentOverview",
+        "description": [],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableRecord",
+            "text": "DataTableRecord"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TransactionDocumentOverview",
+            "text": "TransactionDocumentOverview"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_transaction_document_overview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.getTransactionDocumentOverview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_transaction_document_overview.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4296,32 +4350,62 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.SpanTraceFields",
+        "id": "def-common.SpanDocumentOverview",
         "type": "Interface",
         "tags": [],
-        "label": "SpanTraceFields",
+        "label": "SpanDocumentOverview",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SpanDocumentOverview",
+            "text": "SpanDocumentOverview"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceFields",
+            "text": "TraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ServiceFields",
+            "text": "ServiceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.SpanFields",
+            "text": "SpanFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.UserAgentFields",
+            "text": "UserAgentFields"
+          }
+        ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.id",
+            "id": "def-common.SpanDocumentOverview.transaction.id",
             "type": "string",
             "tags": [],
-            "label": "'span.id'",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.name",
-            "type": "string",
-            "tags": [],
-            "label": "'span.name'",
+            "label": "'transaction.id'",
             "description": [],
             "signature": [
               "string | undefined"
@@ -4332,66 +4416,10 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.action",
+            "id": "def-common.SpanDocumentOverview.transaction.name",
             "type": "string",
             "tags": [],
-            "label": "'span.action'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.duration.us",
-            "type": "number",
-            "tags": [],
-            "label": "'span.duration.us'",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.type",
-            "type": "string",
-            "tags": [],
-            "label": "'span.type'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.subtype",
-            "type": "string",
-            "tags": [],
-            "label": "'span.subtype'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.SpanTraceFields.span.destination.service.resource",
-            "type": "string",
-            "tags": [],
-            "label": "'span.destination.service.resource'",
+            "label": "'transaction.name'",
             "description": [],
             "signature": [
               "string | undefined"
@@ -4405,59 +4433,109 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TraceDocumentOverview",
+        "id": "def-common.SpanFields",
         "type": "Interface",
         "tags": [],
-        "label": "TraceDocumentOverview",
+        "label": "SpanFields",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TraceDocumentOverview",
-            "text": "TraceDocumentOverview"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.ServiceFields",
-            "text": "ServiceFields"
-          },
-          ",",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TransactionTraceFields",
-            "text": "TransactionTraceFields"
-          },
-          ",",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.SpanTraceFields",
-            "text": "SpanTraceFields"
-          },
-          ",",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.UserAgentTraceFields",
-            "text": "UserAgentTraceFields"
-          }
-        ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.timestamp",
+            "id": "def-common.SpanFields.span.id",
+            "type": "string",
+            "tags": [],
+            "label": "'span.id'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.name",
+            "type": "string",
+            "tags": [],
+            "label": "'span.name'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.action",
+            "type": "string",
+            "tags": [],
+            "label": "'span.action'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.duration.us",
+            "type": "number",
+            "tags": [],
+            "label": "'span.duration.us'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.type",
+            "type": "string",
+            "tags": [],
+            "label": "'span.type'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.subtype",
+            "type": "string",
+            "tags": [],
+            "label": "'span.subtype'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanFields.span.destination.service.resource",
+            "type": "string",
+            "tags": [],
+            "label": "'span.destination.service.resource'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TraceFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "TraceFields",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceFields.timestamp",
             "type": "number",
             "tags": [],
             "label": "'@timestamp'",
@@ -4468,7 +4546,7 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.trace.id",
+            "id": "def-common.TraceFields.trace.id",
             "type": "string",
             "tags": [],
             "label": "'trace.id'",
@@ -4479,7 +4557,21 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.parent.id",
+            "id": "def-common.TraceFields.processor.event",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'processor.event'",
+            "description": [],
+            "signature": [
+              "\"transaction\" | \"span\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TraceFields.parent.id",
             "type": "string",
             "tags": [],
             "label": "'parent.id'",
@@ -4493,27 +4585,13 @@
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.http.response.status_code",
+            "id": "def-common.TraceFields.http.response.status_code",
             "type": "number",
             "tags": [],
             "label": "'http.response.status_code'",
             "description": [],
             "signature": [
               "number | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TraceDocumentOverview.processor.event",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "'processor.event'",
-            "description": [],
-            "signature": [
-              "\"transaction\" | \"span\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
@@ -4618,10 +4696,64 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TransactionTraceFields",
+        "id": "def-common.TransactionDocumentOverview",
         "type": "Interface",
         "tags": [],
-        "label": "TransactionTraceFields",
+        "label": "TransactionDocumentOverview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TransactionDocumentOverview",
+            "text": "TransactionDocumentOverview"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TraceFields",
+            "text": "TraceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ServiceFields",
+            "text": "ServiceFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.TransactionFields",
+            "text": "TransactionFields"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.UserAgentFields",
+            "text": "UserAgentFields"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TransactionFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "TransactionFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
@@ -4629,35 +4761,40 @@
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TransactionTraceFields.transaction.id",
+            "id": "def-common.TransactionFields.transaction.id",
             "type": "string",
             "tags": [],
             "label": "'transaction.id'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TransactionTraceFields.transaction.name",
+            "id": "def-common.TransactionFields.transaction.type",
+            "type": "string",
+            "tags": [],
+            "label": "'transaction.type'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.TransactionFields.transaction.name",
             "type": "string",
             "tags": [],
             "label": "'transaction.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TransactionTraceFields.transaction.duration.us",
+            "id": "def-common.TransactionFields.transaction.duration.us",
             "type": "number",
             "tags": [],
             "label": "'transaction.duration.us'",
@@ -4674,10 +4811,10 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.UserAgentTraceFields",
+        "id": "def-common.UserAgentFields",
         "type": "Interface",
         "tags": [],
-        "label": "UserAgentTraceFields",
+        "label": "UserAgentFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
         "deprecated": false,
@@ -4685,28 +4822,22 @@
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.UserAgentTraceFields.user_agent.name",
+            "id": "def-common.UserAgentFields.user_agent.name",
             "type": "string",
             "tags": [],
             "label": "'user_agent.name'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.UserAgentTraceFields.user_agent.version",
+            "id": "def-common.UserAgentFields.user_agent.version",
             "type": "string",
             "tags": [],
             "label": "'user_agent.version'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6319,6 +6450,21 @@
         "description": [],
         "signature": [
           "\"transaction.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRANSACTION_TYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_TYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.type\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
