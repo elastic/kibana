@@ -13,6 +13,8 @@ export type { SavedBookAttributes as SavedBookAttributesV1 } from './book/saved_
 export type { SavedBookAttributes as SavedBookAttributesV2 } from './book/saved_object/schema/v2';
 export type { SavedBookAttributes as SavedBookAttributesV3 } from './book/saved_object/schema/v3';
 
+export type { SavedFieldListAttributes as SavedFieldListAttributesV1 } from './field_list/saved_object/schema/v1';
+
 export interface SetupDeps {
   embeddable: EmbeddableSetup;
 }

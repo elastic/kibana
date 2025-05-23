@@ -13,8 +13,9 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
-import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
+import { ADD_FIELD_LIST_ACTION_ID } from './constants';
 import { FieldListSerializedState } from './types';
+import { FIELD_LIST_ID } from '../../../common/field_list/constants';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
