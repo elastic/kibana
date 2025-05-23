@@ -278,6 +278,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiBadge
+                      data-test-subj="observabilityAiAssistantKnowledgeBaseStatus"
                       color={
                         knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
                           ? 'success'
