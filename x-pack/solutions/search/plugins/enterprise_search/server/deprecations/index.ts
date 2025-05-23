@@ -288,15 +288,17 @@ export async function getNativeConnectorDeprecations(
 export interface IEnterpriseSearchAccountCleanupAccounts {
   esUser?: SecurityGetUserResponse;
   credentialTokenIds: string[];
-  esCloudApiKeys: SecurityApiKey[];
+  esCloudApiKeys: string[];
 }
 
 export const getEnterpriseSearchAccountCleanupAccounts = async (client: ElasticsearchClient) => {
   const esUser = await client.security.getUser({ username: 'enterprise_search' });
 
-  const esCloudApiKeys =
+  const esCloudApiKeysResponse =
     (await client.security.getApiKey({ username: 'cloud-internal-enterprise_search-server' }))
       .api_keys || [];
+
+  const esCloudApiKeys = esCloudApiKeysResponse.map((apiKey: SecurityApiKey) => apiKey.id);
 
   const esServerCredentials =
     (await client.security.getServiceCredentials({
@@ -367,7 +369,7 @@ export async function getEnterpriseSearchAccountCleanups(
     esCloudApiKeys.forEach((apiKey) => {
       manualStepsToAdd.push(
         "Invalidate the 'cloud-internal-enterprise_search-server' API key '" +
-          apiKey.id +
+          apiKey +
           "' via `DELETE /_security/api_key` passing the API key id in the body"
       );
     });
