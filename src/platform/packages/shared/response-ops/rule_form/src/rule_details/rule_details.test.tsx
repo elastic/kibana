@@ -14,13 +14,6 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
 
-const render = (toRender: React.ReactElement) =>
-  rtlRender(toRender, {
-    wrapper: ({ children }) => <IntlProvider>{children}</IntlProvider>,
-  });
-
-const mockOnChange = jest.fn();
-
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
   useRuleFormDispatch: jest.fn(),
@@ -28,19 +21,14 @@ jest.mock('../hooks', () => ({
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
-describe('RuleDetails', () => {
-  beforeAll(() => {
-    class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    }
-
-    // this only sets the mock polyfill for this test file's env
-    // we delete it in `afterAll` as well
-    globalThis.ResizeObserver = ResizeObserver;
+const render = (toRender: React.ReactElement) =>
+  rtlRender(toRender, {
+    wrapper: ({ children }) => <IntlProvider>{children}</IntlProvider>,
   });
 
+const mockOnChange = jest.fn();
+
+describe('RuleDetails', () => {
   beforeEach(() => {
     useRuleFormState.mockReturnValue({
       plugins: {
@@ -56,12 +44,6 @@ describe('RuleDetails', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-  });
-
-  afterAll(() => {
-    if ('ResizeObserver' in globalThis) {
-      delete (globalThis as any).ResizeObserver;
-    }
   });
 
   test('Renders correctly', () => {
@@ -115,6 +97,9 @@ describe('RuleDetails', () => {
 
   test('should call dispatch with artifacts object when investigation guide is added', async () => {
     useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+      },
       formData: {
         id: 'test-id',
         params: {},
