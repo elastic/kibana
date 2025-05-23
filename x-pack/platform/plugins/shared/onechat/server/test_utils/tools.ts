@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolSourceType } from '@Kbn/onechat-common';
+import { ToolSourceType } from '@kbn/onechat-common';
 import type {
   ToolProvider,
   ToolHandlerFn,
