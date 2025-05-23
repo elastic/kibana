@@ -7,14 +7,16 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiSelectProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+
+import type { EuiSelectProps } from '@elastic/eui';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { Detector, JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import {
@@ -26,12 +28,13 @@ import {
 } from '@kbn/ml-common-types/storage';
 import { useMlJobService } from '@kbn/ml-services/job_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { EntityControl } from '../entity_control';
+import type { FieldDefinition } from '@kbn/ml-services/results_service_2/result_service_rx';
+
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
 import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
+import { EntityControl } from '../entity_control';
 import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
 import { getControlsForDetector } from '../../get_controls_for_detector';
-import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
 import type { MlEntity } from '../../../../embeddables/types';
