@@ -40,6 +40,10 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
+import { useStateFromPublishingSubject } from '../../../../../../../../../src/platform/packages/shared/presentation/presentation_publishing';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { BehaviorSubject } from 'rxjs';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -73,7 +77,14 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    parentApi,
   } = props;
+
+  const esqlVariables = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.esqlVariables$
+      : new BehaviorSubject(undefined)
+  );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
@@ -753,6 +764,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
+                esqlVariables,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

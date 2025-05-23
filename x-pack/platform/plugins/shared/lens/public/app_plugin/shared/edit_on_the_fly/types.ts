@@ -102,4 +102,5 @@ export interface LayerConfigurationProps {
   setIsInlineFlyoutVisible: (flag: boolean) => void;
   getUserMessages: UserMessagesGetter;
   onlyAllowSwitchToSubtypes?: boolean;
+  parentApi?: unknown;
 }
