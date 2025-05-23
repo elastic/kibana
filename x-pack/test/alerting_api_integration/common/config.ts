@@ -16,6 +16,7 @@ import type { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import type { AwsSesConfig } from '@kbn/actions-plugin/server/types';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -37,6 +38,7 @@ interface CreateTestConfigOptions {
   maxScheduledPerMinute?: number;
   experimentalFeatures?: ExperimentalConfigKeys;
   disabledRuleTypes?: string[];
+  awsSesConfig?: AwsSesConfig;
 }
 
 // test.not-enabled is specifically not enabled
@@ -100,6 +102,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     enableFooterInEmail = true,
     maxScheduledPerMinute,
     experimentalFeatures = [],
+    awsSesConfig = undefined,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {

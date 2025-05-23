@@ -28,6 +28,12 @@ const MIN_MAX_ATTEMPTS = 1;
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
 
+export const DEFAULT_AWS_SES_CONFIG = {
+  host: 'email-smtp.us-east-1.amazonaws.com',
+  port: 465,
+  secure: true,
+};
+
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
   actionTypeId: schema.string({ minLength: 1 }),
@@ -121,9 +127,26 @@ export const configSchema = schema.object({
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
   email: schema.maybe(
-    schema.object({
-      domain_allowlist: schema.arrayOf(schema.string()),
-    })
+    schema.object(
+      {
+        domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        services: schema.maybe(
+          schema.object({
+            ses: schema.object({
+              host: schema.maybe(schema.string()),
+              port: schema.maybe(schema.number()),
+            }),
+          })
+        ),
+      },
+      {
+        validate: (obj) => {
+          if (!obj.domain_allowlist && !obj.services?.ses.host && !obj.services?.ses.port) {
+            return 'Email configuration requires either domain_allowlist or services.ses to be specified';
+          }
+        },
+      }
+    )
   ),
   run: schema.maybe(
     schema.object({

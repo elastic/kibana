@@ -12,10 +12,15 @@ import { curry } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 
 import type { ActionsConfig, CustomHostSettings } from './config';
-import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
+import {
+  AllowedHosts,
+  EnabledActionTypes,
+  DEFAULT_QUEUED_MAX,
+  DEFAULT_AWS_SES_CONFIG,
+} from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import type { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import type { AwsSesConfig, ProxySettings, ResponseSettings, SSLSettings } from './types';
 import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
 import type { ValidateEmailAddressesOptions } from '../common';
 import { validateEmailAddresses, invalidEmailsAsMessage } from '../common';
@@ -55,6 +60,7 @@ export interface ActionsConfigurationUtilities {
   ): string | undefined;
   enableFooterInEmail: () => boolean;
   getMaxQueued: () => number;
+  getAwsSesConfig: () => AwsSesConfig;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -168,7 +174,7 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email == null) {
+  if (config.email?.domain_allowlist == null) {
     return;
   }
 
@@ -225,5 +231,12 @@ export function getActionsConfigurationUtilities(
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
     getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
+    getAwsSesConfig: () => {
+      return {
+        host: config.email?.services?.ses.host || DEFAULT_AWS_SES_CONFIG.host,
+        port: config.email?.services?.ses.port || DEFAULT_AWS_SES_CONFIG.port,
+        secure: DEFAULT_AWS_SES_CONFIG.secure,
+      };
+    },
   };
 }

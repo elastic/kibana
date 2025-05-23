@@ -33,6 +33,7 @@ import type {
 import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { EmailServices } from '../../../common';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -1259,6 +1260,89 @@ describe('execute()', () => {
         ],
       ]
     `);
+  });
+});
+
+describe('validateConfig AWS_SES specific checks', () => {
+  const awsSesHost = 'email-smtp.us-east-1.amazonaws.com';
+  const awsSesPort = 465;
+  const awsSesConfig = {
+    host: awsSesHost,
+    port: awsSesPort,
+    secure: true,
+  };
+
+  let configUtilsWithSes: jest.Mocked<ActionsConfigurationUtilities>;
+
+  beforeEach(() => {
+    configUtilsWithSes = {
+      ...actionsConfigMock.create(),
+      getAwsSesConfig: jest.fn(() => awsSesConfig),
+    } as unknown as jest.Mocked<ActionsConfigurationUtilities>;
+  });
+
+  test('throws if both host and port do not match AWS SES config', () => {
+    const config = {
+      service: EmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: 'wrong-host',
+      port: 123,
+      secure: true,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
+    );
+  });
+
+  test('throws if host does not match AWS SES config', () => {
+    const config = {
+      service: EmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: 'wrong-host',
+      port: awsSesPort,
+      secure: true,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.host] does not match with the configured AWS SES host"`
+    );
+  });
+
+  test('throws if port does not match AWS SES config', () => {
+    const config = {
+      service: EmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: awsSesHost,
+      port: 123,
+      secure: true,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.port] does not match with the configured AWS SES port"`
+    );
+  });
+
+  test('throws if secure is not true for AWS SES', () => {
+    const config = {
+      service: EmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: awsSesHost,
+      port: awsSesPort,
+      secure: false,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.secure] must be true for AWS SES"`
+    );
   });
 });
 
