@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiPopover,
   EuiFlexGroup,
@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
@@ -109,10 +108,6 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       setIsPopoverOpen(false);
     }, [setIsPopoverOpen]);
 
-    const [selectedScript, setSelectedScript] = useState<EuiComboBoxOptionOption<string> | null>(
-      null
-    );
-
     // Focus on the input element when the popover closes after selection
     useEffect(() => {
       if (!state.isPopoverOpen) {
@@ -123,17 +118,13 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           }
         }, 0);
       }
-    }, [state.isPopoverOpen, selectedScript, inputRef]);
+    }, [state.isPopoverOpen, inputRef]);
 
     const handleScriptSelection = useCallback(
       (options: EuiSelectableOption[]) => {
         // Find the first option that is checked (selected)
         const selected = options.find((option: EuiSelectableOption) => option.checked === 'on');
         if (selected) {
-          setSelectedScript({
-            label: selected.label,
-          });
-
           onChange({
             value: selected.label,
             valueText: selected.label,
@@ -151,9 +142,9 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       return (
         <EuiPopover
           isOpen={state.isPopoverOpen}
+          offset={10}
           panelStyle={{
             padding: 0,
-            transform: 'translateY(-10px)',
             minWidth: 400,
           }}
           closePopover={handleClosePopover}
