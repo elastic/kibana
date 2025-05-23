@@ -16,6 +16,7 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useUserInfo } from '../../detections/components/user_info';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */
@@ -32,7 +33,8 @@ export const useSignalHelpers = (): {
     data: { dataViews },
   } = useKibana().services;
 
-  const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
+  const { signalIndexName: signalIndexNameSourcerer } = useUserInfo();
+
   const oldDefaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);

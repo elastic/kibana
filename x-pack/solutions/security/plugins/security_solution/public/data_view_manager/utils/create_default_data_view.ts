@@ -39,17 +39,6 @@ export const bootstrapSourcererDataViews = async ({
     index_mapping_outdated: null,
   };
 
-  try {
-    if (hasAccessToSecuritySolution(application.capabilities)) {
-      signal = await http.fetch(DETECTION_ENGINE_INDEX_URL, {
-        version: '2023-10-31',
-        method: 'GET',
-      });
-    }
-  } catch {
-    // NOTE: this is empty intentionally
-  }
-
   if (skip) {
     return {
       kibanaDataViews: [],
@@ -59,6 +48,12 @@ export const bootstrapSourcererDataViews = async ({
   }
 
   try {
+    if (hasAccessToSecuritySolution(application.capabilities)) {
+      signal = await http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        version: '2023-10-31',
+        method: 'GET',
+      });
+    }
     // check for/generate default Security Solution Kibana data view
     const sourcererDataViews = await createSourcererDataView({
       body: {
