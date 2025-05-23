@@ -6,7 +6,8 @@
  */
 
 import { IRouter, Logger } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema'; import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { APIRoutes } from '../common/api_routes';
 
 import { errorHandler } from './utils/error_handler';
