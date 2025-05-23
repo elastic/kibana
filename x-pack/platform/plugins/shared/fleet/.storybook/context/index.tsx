@@ -15,6 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type {
   PluginsServiceStart,
+  PricingServiceStart,
   SecurityServiceStart,
   UserProfileServiceStart,
 } from '@kbn/core/public';
@@ -103,6 +104,7 @@ export const StorybookContext: React.FC<{
         theme$: EMPTY,
         getTheme: () => ({ darkMode: false, name: 'amsterdam' }),
       },
+      pricing: {} as unknown as PricingServiceStart,
       security: {} as unknown as SecurityServiceStart,
       userProfile: {} as unknown as UserProfileServiceStart,
       plugins: {} as unknown as PluginsServiceStart,
