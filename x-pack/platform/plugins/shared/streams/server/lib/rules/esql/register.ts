@@ -9,12 +9,9 @@ import { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/server
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
-import {
-  STREAMS_FEATURE_ID,
-  STREAMS_RULE_REGISTRATION_CONTEXT,
-} from '../../../../common/constants';
+import { STREAMS_PRODUCER, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../../common/constants';
 import { getRuleExecutor } from './executor';
 import { EsqlRuleParams, esqlRuleParams } from './types';
 
@@ -25,7 +22,7 @@ export function esqlRuleType(): PersistenceAlertType<
   'default'
 > {
   return {
-    id: ESQL_RULE_TYPE_ID,
+    id: STREAMS_ESQL_RULE_TYPE_ID,
     name: 'ES|QL Rule',
     validate: {
       params: {
@@ -46,7 +43,7 @@ export function esqlRuleType(): PersistenceAlertType<
     ],
     minimumLicenseRequired: 'enterprise' as LicenseType,
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: STREAMS_FEATURE_ID,
+    producer: STREAMS_PRODUCER,
     solution: 'observability',
     isExportable: false,
     actionVariables: {},
@@ -56,7 +53,7 @@ export function esqlRuleType(): PersistenceAlertType<
       context: STREAMS_RULE_REGISTRATION_CONTEXT,
       mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
       shouldWrite: false,
-      isSpaceAware: true,
+      isSpaceAware: false,
     },
   };
 }

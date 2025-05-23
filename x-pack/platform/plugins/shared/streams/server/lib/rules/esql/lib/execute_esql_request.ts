@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ESQLSearchResponse } from '@kbn/es-types';
 
 type Response = Array<{
@@ -17,31 +17,38 @@ type Response = Array<{
 export const executeEsqlRequest = async ({
   esClient,
   esqlRequest,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   esqlRequest: { query: string; filter: estypes.QueryDslQueryContainer };
+  logger: Logger;
 }): Promise<Response> => {
-  const response = (await esClient.esql.query({
-    query: esqlRequest.query,
-    filter: esqlRequest.filter,
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  try {
+    const response = (await esClient.esql.query({
+      query: esqlRequest.query,
+      filter: esqlRequest.filter,
+      drop_null_columns: true,
+    })) as unknown as ESQLSearchResponse;
 
-  const { columns, values } = response;
+    const { columns, values } = response;
 
-  const [sourceIndex, idIndex] = [
-    columns.findIndex((col) => col.name === '_source'),
-    columns.findIndex((col) => col.name === '_id'),
-  ];
+    const [sourceIndex, idIndex] = [
+      columns.findIndex((col) => col.name === '_source'),
+      columns.findIndex((col) => col.name === '_id'),
+    ];
 
-  if (sourceIndex === -1 || idIndex === -1) {
-    throw new Error('Invalid ES|QL response format: missing _source or _id column');
+    if (sourceIndex === -1 || idIndex === -1) {
+      throw new Error('Invalid ES|QL response format: missing _source or _id column');
+    }
+
+    const results = values.map((row) => ({
+      _id: row[idIndex],
+      _source: row[sourceIndex],
+    })) as Response;
+
+    return results;
+  } catch (error) {
+    logger.debug(`Error executing ES|QL request: ${error.message}`);
+    return [];
   }
-
-  const results = values.map((row) => ({
-    _id: row[idIndex],
-    _source: row[sourceIndex],
-  })) as Response;
-
-  return results;
 };

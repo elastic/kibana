@@ -50,6 +50,7 @@ export async function getRuleExecutor(
   const results = await executeEsqlRequest({
     esClient: scopedClusterClient.asCurrentUser,
     esqlRequest,
+    logger,
   });
 
   const alertDocIdToDocumentIdMap = new Map<string, string>();

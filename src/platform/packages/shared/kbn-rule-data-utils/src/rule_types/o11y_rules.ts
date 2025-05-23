@@ -45,8 +45,8 @@ export const SLO_RULE_TYPE_IDS = [SLO_BURN_RATE_RULE_TYPE_ID];
 /**
  * ESQL rule types
  */
-export const ESQL_RULE_TYPE_ID = 'streams.rules.esql';
-export const STREAMS_RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID];
+export const STREAMS_ESQL_RULE_TYPE_ID = 'streams.rules.esql';
+export const STREAMS_RULE_TYPE_IDS = [STREAMS_ESQL_RULE_TYPE_ID];
 
 /**
  * Metrics rule types

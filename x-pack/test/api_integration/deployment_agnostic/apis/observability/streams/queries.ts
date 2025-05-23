@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredIngestUpsertRequest } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -26,7 +26,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   const STREAM_NAME = 'logs.queries-test';
-  const stream: WiredIngestUpsertRequest = {
+  const stream: Streams.WiredStream.UpsertRequest['stream'] = {
+    description: '',
     ingest: {
       lifecycle: { inherit: {} },
       processing: [],

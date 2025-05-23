@@ -38,7 +38,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
   const dynamicOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const options = KAFKA_DYNAMIC_FIELDS.map((option) => ({
       label: option,
-      value: `%{[${option}]}`,
+      value: option,
     }));
     return options;
   }, []);
@@ -78,13 +78,17 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel"
-                defaultMessage="Topic from field(s). For more info, see our {guideLink}"
+                defaultMessage="Topic from field(s). For more info, see our {guideLink}."
                 values={{
                   guideLink: (
-                    <EuiLink href={docLinks.links.filebeat.kafkaOutput} target="_blank" external>
+                    <EuiLink
+                      href={docLinks.links.fleet.kafkaOutputTopicsSettings}
+                      target="_blank"
+                      external
+                    >
                       <FormattedMessage
                         id="xpack.fleet.settings.kafkaGuideLink"
-                        defaultMessage="docs."
+                        defaultMessage="docs"
                       />
                     </EuiLink>
                   ),

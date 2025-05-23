@@ -56,6 +56,7 @@ export const createEndpointFleetServicesFactoryMock = (
   jest.spyOn(fleetInternalServicesMocked, 'ensureInCurrentSpace');
   jest.spyOn(fleetInternalServicesMocked, 'getPolicyNamespace');
   jest.spyOn(fleetInternalServicesMocked, 'getIntegrationNamespaces');
+  jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
 
   const asInternalUserSpy = jest.spyOn(serviceFactoryMock, 'asInternalUser');
   asInternalUserSpy.mockReturnValue(fleetInternalServicesMocked);

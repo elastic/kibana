@@ -13,7 +13,7 @@ import type { DashboardsCardItemId } from '../dashboards/types';
 import { useCardSelectorListStyles } from './card_selector_list.styles';
 import { HEIGHT_ANIMATION_DURATION } from '../../onboarding_card_panel.styles';
 import { useOnboardingContext } from '../../../onboarding_context';
-import type { KnowledgeSourceCardItemId } from '../search_ai_lake/knowledge_source/types';
+import type { KnowledgeSourceCardItemId } from '../knowledge_source/types';
 
 export interface CardSelectorListItem {
   id: RulesCardItemId | AlertsCardItemId | DashboardsCardItemId | KnowledgeSourceCardItemId;

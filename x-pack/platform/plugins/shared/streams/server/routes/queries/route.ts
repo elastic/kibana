@@ -18,6 +18,7 @@ import { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
+
 export interface ListQueriesResponse {
   queries: StreamQuery[];
 }

@@ -29,16 +29,33 @@ export const getHttpClient = () => {
 
 const basePath = ROUTES.API_ROOT;
 
-const loadWatchesDeserializer = ({ watches = [] }: { watches: any[] }) => {
-  return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
+const loadWatchesDeserializer = ({
+  watches = [],
+  watchCount,
+}: {
+  watches: any[];
+  watchCount: number;
+}) => {
+  return {
+    watches: watches.map((watch: any) => Watch.fromUpstreamJson(watch)),
+    watchCount,
+  };
 };
 
-export const useLoadWatches = (pollIntervalMs: number) => {
+export const useLoadWatches = (
+  pollIntervalMs: number,
+  pageSize: number,
+  pageIndex: number,
+  sortField?: string,
+  sortDirection?: string,
+  query?: string
+) => {
   return useRequest({
     path: `${basePath}/watches`,
     method: 'get',
     pollIntervalMs,
     deserializer: loadWatchesDeserializer,
+    query: { pageSize, pageIndex, sortField, sortDirection, query },
   });
 };
 

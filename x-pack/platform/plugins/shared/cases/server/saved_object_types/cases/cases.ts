@@ -24,6 +24,7 @@ export const createCaseSavedObjectType = (
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
+  switchToModelVersionAt: '8.10.0',
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
@@ -210,7 +211,6 @@ export const createCaseSavedObjectType = (
               },
               boolean: {
                 type: 'boolean',
-                // @ts-expect-error: es types are not correct. ignore_malformed is supported.
                 ignore_malformed: true,
               },
               string: {
