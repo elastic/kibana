@@ -13,7 +13,6 @@ import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-types';
-import { i18n } from '@kbn/i18n';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
@@ -45,13 +44,7 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {
-  DashboardLocatorParams,
-  DashboardPanelMap,
-  DashboardSectionMap,
-  DashboardSettings,
-  DashboardState,
-} from '../../common';
+import { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import {
   LoadDashboardReturn,
@@ -181,9 +174,4 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializePanels: () => {
-    references: Reference[];
-    panels: DashboardPanelMap;
-    sections?: DashboardSectionMap;
-  };
 }
