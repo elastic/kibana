@@ -47,7 +47,7 @@ export const getRecommendedQueries = ({
           defaultMessage: 'Use WHERE to filter data',
         }
       ),
-      queryString: `${fromCommand}\n  | WHERE QSTR("term") /* e.g. WHERE QSTR("""debug""") */`,
+      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* e.g. WHERE QSTR("""debug""") */`,
       sortText: 'D',
     },
     ...(timeField
