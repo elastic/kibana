@@ -716,7 +716,17 @@
             "StreamsRouteHandlerResources",
             ", ",
             "ListDashboardsResponse",
-            ", undefined>; \"POST /internal/streams/{name}/processing/_suggestions\": ",
+            ", undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/{name}/processing/_suggestions/date\", any, ",
+            "StreamsRouteHandlerResources",
+            ", { formats: string[]; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1735,7 +1745,17 @@
           "StreamsRouteHandlerResources",
           ", ",
           "ListDashboardsResponse",
-          ", undefined>; \"POST /internal/streams/{name}/processing/_suggestions\": ",
+          ", undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/{name}/processing/_suggestions/date\", any, ",
+          "StreamsRouteHandlerResources",
+          ", { formats: string[]; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
