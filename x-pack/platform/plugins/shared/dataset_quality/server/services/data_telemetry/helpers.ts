@@ -7,12 +7,13 @@
 
 import { intersection } from 'lodash';
 import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
-import {
-  MappingPropertyBase,
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
   IndicesGetMappingResponse,
+  IndicesGetResponse,
+  MappingPropertyBase,
   IndicesStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
 
 import {
@@ -106,20 +107,23 @@ export function addMappingsToIndices({
   dataStreamsInfo: IndexBasicInfo[];
   logsIndexPatterns: DatasetIndexPattern[];
 }): Observable<IndexBasicInfo[]> {
+  const patterns = logsIndexPatterns.map((pattern) => pattern.pattern);
   return from(
-    esClient.indices.getMapping({
-      index: logsIndexPatterns.map((pattern) => pattern.pattern),
-    })
+    reduceAsyncChunks<IndicesGetMappingResponse>(patterns, (patternChunk) =>
+      esClient.indices.getMapping({
+        index: patternChunk,
+      })
+    )
   ).pipe(
     map((mappings) => {
       return dataStreamsInfo.map((info) => {
         // Add mapping for each index
         info.indices.forEach((index) => {
-          if (mappings[index]) {
-            info.mapping = { ...(info.mapping ?? {}), [index]: mappings[index] };
+          const mappingsRecord = mappings as IndicesGetMappingResponse;
+          if (mappingsRecord[index]) {
+            info.mapping = { ...(info.mapping ?? {}), [index]: mappingsRecord[index] };
           }
         });
-
         return info;
       });
     })
@@ -308,16 +312,20 @@ async function getDataStreamsInfoForPattern({
   }));
 }
 
-async function getIndicesInfoForPattern({
+export async function getIndicesInfoForPattern({
   esClient,
   pattern,
 }: {
   esClient: ElasticsearchClient;
   pattern: DatasetIndexPattern;
 }): Promise<IndexBasicInfo[]> {
-  const resp = await esClient.indices.get({
-    index: pattern.pattern,
-  });
+  const indices = Array.isArray(pattern.pattern) ? pattern.pattern : [pattern.pattern];
+  const resp = await reduceAsyncChunks<IndicesGetResponse>(indices, (indexChunk) =>
+    esClient.indices.get({
+      index: indexChunk,
+      features: ['mappings'],
+    })
+  );
 
   return Object.entries(resp).map(([index, indexInfo]) => {
     // This is needed to keep the format same for data streams and indices
