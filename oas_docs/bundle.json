@@ -44151,7 +44151,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44208,7 +44209,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44223,6 +44225,9 @@
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -44314,7 +44319,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44371,7 +44377,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44386,6 +44393,9 @@
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
                     }
                   },
                   "required": [
