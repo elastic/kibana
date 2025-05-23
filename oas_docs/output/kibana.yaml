@@ -41270,6 +41270,8 @@ paths:
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
                         - install_status
@@ -41378,6 +41380,8 @@ paths:
                             - warning
                           type: string
                         updated_at:
+                          type: string
+                        warning:
                           type: string
                       required:
                         - sync_status
