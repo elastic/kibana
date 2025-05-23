@@ -54,6 +54,7 @@ export const bootstrapSourcererDataViews = async ({
         method: 'GET',
       });
     }
+
     // check for/generate default Security Solution Kibana data view
     const sourcererDataViews = await createSourcererDataView({
       body: {

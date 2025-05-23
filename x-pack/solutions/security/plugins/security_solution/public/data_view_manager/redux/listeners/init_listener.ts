@@ -9,7 +9,7 @@ import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
+import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { bootstrapSourcererDataViews } from '../../utils/create_default_data_view';
 
@@ -30,7 +30,9 @@ export const createInitListener = (dependencies: {
         // Initialize default security data view first
         // Note: this is subject to change, as we might want to add specific data view just for alerts
 
-        await bootstrapSourcererDataViews({
+        // TODO: store this in shared reducer and replace all the uses of constant data view id (DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
+        // Issue: https://github.com/elastic/security-team/issues/12667
+        const { defaultDataView } = await bootstrapSourcererDataViews({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
           spaces: dependencies.spaces,
@@ -48,7 +50,7 @@ export const createInitListener = (dependencies: {
         // NOTE: we will remove this ideally and load only when particular dataview is necessary
         listenerApi.dispatch(
           selectDataViewAsync({
-            id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+            id: defaultDataView.id,
             scope: [
               DataViewManagerScopeName.default,
               DataViewManagerScopeName.detections,
