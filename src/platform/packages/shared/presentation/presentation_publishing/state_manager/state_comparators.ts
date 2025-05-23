@@ -15,8 +15,8 @@ const deepEquality = <T>(a: T, b: T) => deepEqual(a, b);
 
 export const runComparator = <StateType extends object = object>(
   comparator: StateComparators<StateType>[keyof StateType],
-  lastSavedState?: StateType,
-  latestState?: StateType,
+  lastSavedState?: Partial<StateType>,
+  latestState?: Partial<StateType>,
   lastSavedValue?: StateType[keyof StateType],
   latestValue?: StateType[keyof StateType]
 ): boolean => {
