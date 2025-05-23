@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiIconTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
@@ -29,7 +30,6 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from '../rule_definition/rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
-import { i18n } from '@kbn/i18n';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
