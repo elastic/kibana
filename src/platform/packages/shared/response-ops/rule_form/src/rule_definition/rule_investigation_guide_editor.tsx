@@ -8,6 +8,7 @@
  */
 
 import { EuiMarkdownEditor } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -25,6 +26,11 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
       placeholder={i18n.translate('responseOpsRuleForm.investigationGuide.editor.placeholder', {
         defaultMessage: 'Add guidelines for addressing alerts created by this rule',
       })}
+      css={css`
+        .euiMarkdownFormat {
+          word-wrap: break-word;
+        }
+      `}
       value={value}
       onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
       height={200}

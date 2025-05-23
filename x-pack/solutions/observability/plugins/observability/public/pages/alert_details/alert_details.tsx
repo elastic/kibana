@@ -343,7 +343,11 @@ export function AlertDetails() {
       content: (
         <>
           <EuiSpacer size="m" />
-          <EuiMarkdownFormat>
+          <EuiMarkdownFormat
+            css={css`
+              word-wrap: break-word;
+            `}
+          >
             {(rule?.artifacts?.investigation_guide?.blob as string) ?? ''}
           </EuiMarkdownFormat>
         </>
