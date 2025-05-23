@@ -43,6 +43,7 @@ import { ActionsMenu } from './actions_menu';
 import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
 import { getElasticManagedLlmConnector } from '../../utils/get_elastic_managed_llm_connector';
 import { ElasticLlmTourCallout } from '../tour_callout/elastic_llm_tour_callout';
+import { useElasticLlmTourCalloutDismissed } from '../../hooks/use_elastic_llm_tour_callout_dismissed';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -243,6 +244,7 @@ export function Insight({
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
   const [isTourCalloutOpen, setIsTourCalloutOpen] = useState(true);
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmTourCalloutDismissed(false);
 
   const updateInitialMessages = useCallback(async () => {
     if (isArray(initialMessagesOrCallback)) {
@@ -455,7 +457,11 @@ export function Insight({
       }}
       controls={
         !!elasticManagedLlm && showElasticLlmCallout ? (
-          <ElasticLlmTourCallout isOpen={isTourCalloutOpen} zIndex={999}>
+          <ElasticLlmTourCallout
+            isOpen={!tourCalloutDismissed && isTourCalloutOpen}
+            zIndex={999}
+            dismissTour={() => setTourCalloutDismissed(true)}
+          >
             <ActionsMenu
               connectors={connectors}
               onEditPrompt={() => {
