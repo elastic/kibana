@@ -46,7 +46,7 @@ export async function handleExport({
       ...obj,
       attributes: {
         ...obj.attributes,
-        incremental_id: null,
+        incremental_id: undefined,
       },
     }));
     const [{ savedObjects }] = await coreSetup.getStartServices();

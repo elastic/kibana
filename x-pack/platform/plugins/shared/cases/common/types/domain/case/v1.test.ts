@@ -92,7 +92,7 @@ const basicCase = {
     },
   ],
   observables: [],
-  incremental_id: null,
+  incremental_id: undefined,
 };
 
 describe('RelatedCaseRt', () => {
