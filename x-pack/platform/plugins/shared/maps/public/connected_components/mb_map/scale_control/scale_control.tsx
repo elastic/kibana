@@ -67,9 +67,9 @@ export const ScaleControl: React.FC<Props> = ({ isFullScreen, mbMap }) => {
     const rightLatLon = mbMap.unproject([MAX_WIDTH, centerHeight]);
     const maxDistanceMeters = leftLatLon.distanceTo(rightLatLon);
     const isKm = maxDistanceMeters >= 1000;
-    const unit = i18n.translate(isKm ? 'xpack.maps.kilometersAbbr' : 'xpack.maps.metersAbbr', {
-      defaultMessage: isKm ? 'km' : 'm',
-    });
+    const unit = isKm
+      ? i18n.translate('xpack.maps.kilometersAbbr', { defaultMessage: 'km' })
+      : i18n.translate('xpack.maps.metersAbbr', { defaultMessage: 'm' });
     const maxDistance = isKm ? maxDistanceMeters / 1000 : maxDistanceMeters;
     const scaleDistance = getScaleDistance(maxDistance);
 
