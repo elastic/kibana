@@ -20,6 +20,8 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_c
 import { AlertingApiProvider } from '../../../../services/alerting_api';
 
 export const SYNTHETICS_ALERT_ACTION_INDEX = 'alert-action-synthetics';
+export const SYNTHETICS_DOCS_INDEX = 'synthetics-http-default';
+
 export class SyntheticsRuleHelper {
   supertestEditorWithApiKey: SupertestWithRoleScope;
   adminRoleAuthc: RoleCredentials;
@@ -243,8 +245,6 @@ export class SyntheticsRuleHelper {
       '@timestamp': timestamp,
     };
 
-    const index = 'synthetics-http-default';
-
     const commonData = {
       timestamp,
       location,
@@ -269,7 +269,7 @@ export class SyntheticsRuleHelper {
       `created synthetics summary, status: ${status}, monitor: "${monitor.name}", location: "${location?.label}"`
     );
     await this.esClient.index({
-      index,
+      index: SYNTHETICS_DOCS_INDEX,
       document,
       refresh: true,
     });

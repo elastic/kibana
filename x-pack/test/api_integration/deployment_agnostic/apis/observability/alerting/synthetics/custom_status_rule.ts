@@ -11,7 +11,11 @@ import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn
 import { waitForDocumentInIndex } from '../../../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { SyntheticsRuleHelper, SYNTHETICS_ALERT_ACTION_INDEX } from './synthetics_rule_helper';
+import {
+  SyntheticsRuleHelper,
+  SYNTHETICS_ALERT_ACTION_INDEX,
+  SYNTHETICS_DOCS_INDEX,
+} from './synthetics_rule_helper';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const server = getService('kibanaServer');
@@ -59,7 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
       await supertestAdminWithCookieHeader.destroy();
       await server.savedObjects.cleanStandardList();
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
+      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX, SYNTHETICS_DOCS_INDEX]);
       await esClient.deleteByQuery({
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
