@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getStatsGroupByColumnsFromQuery } from './parse_esql';
-export { DataPoolerProvider, useDataPoolerDispatch, useDataPoolerState } from './store';
+export { DataPoolerProvider } from './lib/store';
+export { ESQLDataPooler } from './components';
