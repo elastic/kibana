@@ -181,7 +181,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
             >
               {(list, search) => (
                 <>
-                  {search}
+                  <div css={{ margin: 5 }}>{search}</div>
                   {list}
                 </>
               )}
