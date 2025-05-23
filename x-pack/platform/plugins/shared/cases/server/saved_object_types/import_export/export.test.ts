@@ -41,7 +41,7 @@ describe('case export', () => {
     const containsIncrementalId = exported.some((exportedCase) => {
       return (
         'incremental_id' in exportedCase.attributes &&
-        exportedCase.attributes.incremental_id !== null
+        exportedCase.attributes.incremental_id !== undefined
       );
     });
 

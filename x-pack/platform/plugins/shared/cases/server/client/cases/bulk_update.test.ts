@@ -901,7 +901,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-1",
-            "incremental_id": null,
+            "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
@@ -946,7 +946,7 @@ describe('update', () => {
             "duration": null,
             "external_service": null,
             "id": "mock-id-2",
-            "incremental_id": null,
+            "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
