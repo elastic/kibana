@@ -262,7 +262,10 @@ export function getFormBasedDatasource({
   const getSuggestionsForState = (state: CombinedFormBasedPrivateState) => {
     return Object.entries(state.layers)?.flatMap((entry) => {
       const [id] = entry;
-      const layer = entry[1] as TextBasedLayer;
+      const layer = entry[1];
+      if (isFormBasedLayer(layer)) {
+        return [];
+      }
       const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
 
       if (!allColumns.length && layer.query) {
@@ -457,7 +460,7 @@ export function getFormBasedDatasource({
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
         const layer = newLayers[id];
-        if (!layer || !isFormBasedLayer(layer)) {
+        if (!layer || isTextBasedLayer(layer)) {
           return;
         }
         const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
@@ -483,7 +486,7 @@ export function getFormBasedDatasource({
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
         const layer = newLayers[id];
-        if (!layer || !isFormBasedLayer(layer)) {
+        if (!layer || isTextBasedLayer(layer)) {
           return;
         }
         const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
@@ -494,7 +497,7 @@ export function getFormBasedDatasource({
       });
 
       const layer = newLayers[layerId];
-      if (!layer || !isFormBasedLayer(layer)) {
+      if (!layer || isTextBasedLayer(layer)) {
         return {
           removedLayerIds,
           newState: {
@@ -797,7 +800,7 @@ export function getFormBasedDatasource({
       const { onChangeIndexPattern, ...otherProps } = props;
 
       const layer = props.state.layers[props.layerId];
-      if (!layer || !isFormBasedLayer(layer)) {
+      if (!layer || isTextBasedLayer(layer)) {
         return null;
       }
 
@@ -926,7 +929,7 @@ export function getFormBasedDatasource({
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId }) => {
       const layer = state.layers[layerId];
-      if (!layer || !isFormBasedLayer(layer)) {
+      if (!layer || isTextBasedLayer(layer)) {
         return state;
       }
       if (!Object.values(layer.incompleteColumns || {}).length) {
@@ -953,7 +956,7 @@ export function getFormBasedDatasource({
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column
-          if (!layer || !isFormBasedLayer(layer)) {
+          if (!layer || isTextBasedLayer(layer)) {
             return (
               layer.columns.map((column) => ({
                 columnId: column.columnId,
@@ -1012,7 +1015,7 @@ export function getFormBasedDatasource({
           return layer.indexPatternId;
         },
         getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
-          if (!layer || !isFormBasedLayer(layer)) {
+          if (!layer || isTextBasedLayer(layer)) {
             return {
               enabled: {
                 kuery: [],
@@ -1033,13 +1036,13 @@ export function getFormBasedDatasource({
           );
         },
         getVisualDefaults: () => {
-          if (!layer || !isFormBasedLayer(layer)) {
+          if (!layer || isTextBasedLayer(layer)) {
             return {};
           }
           return getVisualDefaultsForLayer(layer);
         },
         getMaxPossibleNumValues: (columnId) => {
-          if (!layer || !isFormBasedLayer(layer)) {
+          if (!layer || isTextBasedLayer(layer)) {
             return null;
           }
           if (layer && layer.columns[columnId]) {
@@ -1170,7 +1173,7 @@ export function getFormBasedDatasource({
         layerErrorMessages,
         (layerId, columnId) => {
           const layer = state.layers[layerId];
-          if (!layer || !isFormBasedLayer(layer)) {
+          if (!layer || isTextBasedLayer(layer)) {
             return false;
           }
           const column = layer.columns[columnId];

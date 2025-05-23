@@ -567,20 +567,22 @@ export function toExpression(
   forceDSL?: boolean
 ) {
   const layer = state.layers[layerId];
-  if (layer && isFormBasedLayer(layer)) {
-    return getExpressionForLayer(
-      layer,
-      indexPatterns[layer.indexPatternId],
-      uiSettings,
-      featureFlags,
-      dateRange,
-      nowInstant,
-      searchSessionId,
-      forceDSL
-    );
-  } else if (layer && isTextBasedLayer(layer)) {
-    return getESQLExpression(layer, layerId, state.indexPatternRefs ?? []);
+  if (layer) {
+    if (isFormBasedLayer(layer)) {
+      return getExpressionForLayer(
+        layer,
+        indexPatterns[layer.indexPatternId],
+        uiSettings,
+        featureFlags,
+        dateRange,
+        nowInstant,
+        searchSessionId,
+        forceDSL
+      );
+    } else if (isTextBasedLayer(layer)) {
+      return getESQLExpression(layer, layerId, state.indexPatternRefs ?? []);
+    }  
   }
-
+  
   return null;
 }

@@ -70,7 +70,6 @@ export interface FormBasedLayer {
 
 export interface TextBasedLayer {
   type: 'esql';
-  index?: string;
   indexPatternId?: string;
   query?: AggregateQuery | undefined;
   table?: Datatable;
@@ -97,7 +96,7 @@ export interface CombinedFormBasedPersistedState {
 }
 
 export function isTextBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is TextBasedLayer {
-  return layer?.type === 'esql';
+  return layer.type === 'esql';
 }
 export function isFormBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is FormBasedLayer {
   return !layer.type || layer.type === 'form';
@@ -117,24 +116,24 @@ export function isPersistedTextBasedLayer(
 export function isTextBasedPersistedState(
   state: FormBasedPersistedState | TextBasedPersistedState
 ): state is TextBasedPersistedState {
-  return Object.values(state.layers).some((layer) => isTextBasedLayer(layer));
+  return Object.values(state.layers).every(isTextBasedLayer);
 }
 export function isFormBasedPersistedState(
   state: FormBasedPersistedState | TextBasedPersistedState
 ): state is FormBasedPersistedState {
-  return Object.values(state.layers).some((layer) => isFormBasedLayer(layer));
+  return Object.values(state.layers).every(isFormBasedLayer);
 }
 
 export function hasTextBasedLayers(
   state: FormBasedPrivateState | CombinedFormBasedPrivateState
 ): state is CombinedFormBasedPrivateState {
-  return Object.values(state.layers).some((layer) => isTextBasedLayer(layer));
+  return Object.values(state.layers).some(isTextBasedLayer);
 }
 
 export function hasFormBasedLayers(
   state: FormBasedPrivateState | CombinedFormBasedPrivateState
 ): state is CombinedFormBasedPrivateState {
-  return Object.values(state.layers).some((layer) => isFormBasedLayer(layer));
+  return Object.values(state.layers).some(isFormBasedLayer);
 }
 
 export interface FormBasedPrivateState {
