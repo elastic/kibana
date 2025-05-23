@@ -11,16 +11,17 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 
-type Bucket = AggregationsStringTermsBucketKeys & { max_ignored_field: { value: number } };
+type Bucket = AggregationsStringTermsBucketKeys & {
+  ignored_field: { buckets: Bucket[] };
+};
 
-export function parseMaxIgnoreRuleTypeBucket(
+export function parseCountIgnoreRuleTypeBucket(
   ruleTypeBuckets: AggregationsBuckets<AggregationsStringTermsBucketKeys>
 ) {
   const buckets = ruleTypeBuckets as Bucket[];
   return (buckets ?? []).reduce((acc, bucket: Bucket) => {
     const ruleType: string = replaceDotSymbols(`${bucket.key}`);
-    const maxIgnoredField: number = bucket.max_ignored_field.value ?? 0;
-    acc[ruleType] = maxIgnoredField > (acc[ruleType] ?? 0) ? maxIgnoredField : acc[ruleType] ?? 0;
+    acc[ruleType] = bucket.ignored_field.buckets?.length ?? 0;
     return acc;
   }, {} as Record<string, number>);
 }
