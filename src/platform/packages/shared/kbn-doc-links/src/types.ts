@@ -171,6 +171,7 @@ export interface DocLinks {
   };
   readonly heartbeat: {
     readonly base: string;
+    readonly monitorTags: string;
   };
   readonly libbeat: {
     readonly getStarted: string;
@@ -480,6 +481,7 @@ export interface DocLinks {
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
+    fingerprint: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
