@@ -91,11 +91,10 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
     if (task.global) {
       await execTask(chalk`{dim [  global  ]} ${task.description}`, task);
     } else {
-      for (const build of builds) {
-        const desc = `${build.getLogTag()} ${task.description}`;
-        build.setBuildDesc(desc);
+      log.warning(`---- Number of builds: ${builds.length}`);
 
-        await execTask(desc, task, build);
+      for (const build of builds) {
+        await execTask(`${build.getLogTag()} ${task.description}`, task, build);
       }
     }
   };
