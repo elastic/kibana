@@ -44,7 +44,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   // poll for status when installing, until install is complete, KB is ready, and inference ID matches
   let isPolling = false;
 
-  if (statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL) {
+  if (
+    statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL ||
+    statusRequest.value?.isReIndexing
+  ) {
     isPolling = true;
   } else if (installingInferenceId !== undefined || isWarmingUpModel) {
     if (
