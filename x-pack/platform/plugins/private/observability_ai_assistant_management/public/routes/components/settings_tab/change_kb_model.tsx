@@ -293,7 +293,10 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
                   </EuiFlexItem>
                   {isKnowledgeBaseInLoadingState && (
                     <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner size="s" />
+                      <EuiLoadingSpinner
+                        size="s"
+                        data-test-subj="observabilityAiAssistantKnowledgeBaseLoadingSpinner"
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
