@@ -16,10 +16,12 @@ export function handleImport({
   objects: Array<SavedObject<CasePersistedAttributes>>;
   logger: Logger;
 }): SavedObjectsImportHookResult {
-  const hasObjectsWithIncrementalId = objects.some((obj) => !!obj.attributes.incremental_id);
+  const hasObjectsWithIncrementalId = objects.some(
+    (obj) => obj.attributes.incremental_id !== undefined
+  );
   if (hasObjectsWithIncrementalId) {
     throw createCaseError({
-      message: 'Remove `incremental_id` from cases before importing',
+      message: 'The `incremental_id` field is not supported on importing',
       logger,
     });
   } else {

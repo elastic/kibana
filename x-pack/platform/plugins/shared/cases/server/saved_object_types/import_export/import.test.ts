@@ -27,8 +27,36 @@ describe('case import', () => {
     }).toThrow();
   });
 
+  it('should throw when import contains a case with `incremental_id` set to 0', () => {
+    const testCases: CaseSavedObjectTransformed[] = mockCases.map((_case) => ({
+      ..._case,
+      attributes: {
+        ..._case.attributes,
+        incremental_id: 0,
+      },
+    }));
+    expect(() => {
+      // @ts-ignore: cases attribtue types are not correct
+      handleImport({ objects: testCases, logger });
+    }).toThrow();
+  });
+
+  it('should throw when import contains a case with `incremental_id` set to a negative value', () => {
+    const testCases: CaseSavedObjectTransformed[] = mockCases.map((_case) => ({
+      ..._case,
+      attributes: {
+        ..._case.attributes,
+        incremental_id: -1,
+      },
+    }));
+    expect(() => {
+      // @ts-ignore: cases attribtue types are not correct
+      handleImport({ objects: testCases, logger });
+    }).toThrow();
+  });
+
   it('should not throw when import contains no case with `incremental_id`', () => {
-    const testCases: CaseSavedObjectTransformed[] = mockCases.map((_case, idx) => ({
+    const testCases: CaseSavedObjectTransformed[] = mockCases.map((_case) => ({
       ..._case,
       attributes: {
         ..._case.attributes,
