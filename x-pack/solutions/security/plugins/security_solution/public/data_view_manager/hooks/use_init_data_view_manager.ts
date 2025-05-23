@@ -41,12 +41,18 @@ export const useInitDataViewManager = () => {
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
   useEffect(() => {
+    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
     if (!newDataViewPickerEnabled) {
       return;
     }
 
+    // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
+      http: services.http,
+      uiSettings: services.uiSettings,
+      application: services.application,
+      spaces: services.spaces,
     });
 
     const dataViewSelectedListener = createDataViewSelectedListener({
@@ -63,5 +69,13 @@ export const useInitDataViewManager = () => {
       dispatch(removeListener(dataViewsLoadingListener));
       dispatch(removeListener(dataViewSelectedListener));
     };
-  }, [dispatch, newDataViewPickerEnabled, services.dataViews]);
+  }, [
+    dispatch,
+    newDataViewPickerEnabled,
+    services.application,
+    services.dataViews,
+    services.http,
+    services.spaces,
+    services.uiSettings,
+  ]);
 };

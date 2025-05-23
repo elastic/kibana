@@ -11,10 +11,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { sourcererSelectors, sourcererActions } from '../store';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../store/model';
-import { useDataView } from '../../common/containers/source/use_data_view';
+import { useDataView as useOldDataView } from '../../common/containers/source/use_data_view';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */
@@ -23,7 +24,7 @@ export const useSignalHelpers = (): {
   signalIndexNeedsInit: boolean;
 } => {
   const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.detections);
-  const { indexFieldsSearch } = useDataView();
+  const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
   const abortCtrl = useRef(new AbortController());
@@ -32,10 +33,17 @@ export const useSignalHelpers = (): {
   } = useKibana().services;
 
   const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
-  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const oldDefaultDataView = useSelector(sourcererSelectors.defaultDataView);
+
+  const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
+
+  const defaultDataViewPattern = experimentalDefaultDataView
+    ? experimentalDefaultDataView.getIndexPattern()
+    : oldDefaultDataView.title;
+
   const signalIndexNeedsInit = useMemo(
-    () => !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-    [defaultDataView.title, signalIndexNameSourcerer]
+    () => !defaultDataViewPattern.includes(`${signalIndexNameSourcerer}`),
+    [defaultDataViewPattern, signalIndexNameSourcerer]
   );
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,
@@ -47,7 +55,7 @@ export const useSignalHelpers = (): {
       abortCtrl.current = new AbortController();
       try {
         const sourcererDataView = await createSourcererDataView({
-          body: { patternList: defaultDataView.title.split(',') },
+          body: { patternList: defaultDataViewPattern.split(',') },
           signal: abortCtrl.current.signal,
           dataViewId,
           dataViewService: dataViews,
@@ -86,7 +94,7 @@ export const useSignalHelpers = (): {
     addError,
     dataViewId,
     dataViews,
-    defaultDataView.title,
+    defaultDataViewPattern,
     dispatch,
     indexFieldsSearch,
     signalIndexNameSourcerer,

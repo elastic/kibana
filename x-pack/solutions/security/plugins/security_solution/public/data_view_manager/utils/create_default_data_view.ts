@@ -1,0 +1,85 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
+import { initDataView } from '../../sourcerer/store/model';
+import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
+import {
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_INDEX_KEY,
+  DETECTION_ENGINE_INDEX_URL,
+} from '../../../common/constants';
+import { hasAccessToSecuritySolution } from '../../helpers_access';
+
+export const bootstrapSourcererDataViews = async ({
+  uiSettings,
+  dataViewService,
+  spaces,
+  skip,
+  http,
+  application,
+}: {
+  dataViewService: any;
+  uiSettings: any;
+  spaces: any;
+  http: any;
+  application: any;
+  skip?: boolean;
+}) => {
+  const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
+  let defaultDataView: SourcererModel['defaultDataView'];
+  let kibanaDataViews: SourcererModel['kibanaDataViews'];
+
+  let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
+    name: null,
+    index_mapping_outdated: null,
+  };
+
+  try {
+    if (hasAccessToSecuritySolution(application.capabilities)) {
+      signal = await http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        version: '2023-10-31',
+        method: 'GET',
+      });
+    }
+  } catch {
+    // NOTE: this is empty intentionally
+  }
+
+  if (skip) {
+    return {
+      kibanaDataViews: [],
+      defaultDataView: { ...initDataView },
+      signal,
+    };
+  }
+
+  try {
+    // check for/generate default Security Solution Kibana data view
+    const sourcererDataViews = await createSourcererDataView({
+      body: {
+        patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
+      },
+      dataViewService,
+      dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await spaces?.getActiveSpace())?.id}`,
+    });
+
+    if (sourcererDataViews === undefined) {
+      throw new Error('');
+    }
+    defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
+    kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
+      ...initDataView,
+      ...dataView,
+    }));
+  } catch (error) {
+    defaultDataView = { ...initDataView, error };
+    kibanaDataViews = [];
+  }
+
+  return { kibanaDataViews, defaultDataView, signal };
+};

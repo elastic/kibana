@@ -11,8 +11,15 @@ import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
+import { bootstrapSourcererDataViews } from '../../utils/create_default_data_view';
 
-export const createInitListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
+export const createInitListener = (dependencies: {
+  dataViews: DataViewsServicePublic;
+  http: any;
+  spaces: any;
+  application: any;
+  uiSettings: any;
+}) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (
@@ -20,6 +27,17 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
       try {
+        // Initialize default security data view first
+        // Note: this is subject to change, as we might want to add specific data view just for alerts
+
+        await bootstrapSourcererDataViews({
+          dataViewService: dependencies.dataViews,
+          uiSettings: dependencies.uiSettings,
+          spaces: dependencies.spaces,
+          application: dependencies.application,
+          http: dependencies.http,
+        });
+
         // NOTE: This is later used in the data view manager drop-down selector
         const dataViews = await dependencies.dataViews.getAllDataViewLazy();
         const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
