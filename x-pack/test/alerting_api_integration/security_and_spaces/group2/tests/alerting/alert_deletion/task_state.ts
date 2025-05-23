@@ -143,6 +143,7 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
                 .send({
                   active_alert_delete_threshold: 1,
                   inactive_alert_delete_threshold: undefined,
+                  category_ids: ['management', 'securitySolution', 'observability'],
                 })
                 .expect(204);
 
