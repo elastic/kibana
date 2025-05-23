@@ -100,7 +100,6 @@ import {
   CombinedFormBasedPersistedState,
   CombinedFormBasedPrivateState,
   isFormBasedLayer,
-  TextBasedLayer,
   isTextBasedLayer,
   hasTextBasedLayers,
   TextBasedField,
@@ -1063,7 +1062,10 @@ export function getFormBasedDatasource({
         const fieldList = query ? getColumnsFromCache(query) : [];
         const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
         if (!field) return [];
-        return Object.entries(state.layers)?.map(([id, layer]) => {
+        const suggestions = Object.entries(state.layers)?.map(([id, layer]) => {
+          if (isFormBasedLayer(layer)) {
+            return;
+          }
           const newId = generateId();
           const newColumn = {
             columnId: newId,
@@ -1109,6 +1111,7 @@ export function getFormBasedDatasource({
             keptLayerIds: [id],
           };
         });
+        return suggestions.filter(nonNullable);
       }
       if (hasTextBasedLayers(state)) {
         return [];

@@ -245,8 +245,6 @@ export function updateColumnFormat({
 }
 
 export const getUserMessages = (state: CombinedFormBasedPrivateState) => {
-  const errors: Error[] = [];
-
   return Object.values(state.layers).flatMap((layer) => {
     if(layer.type === 'esql' && layer.errors){
       return layer.errors.map<UserMessage>((err) => ({

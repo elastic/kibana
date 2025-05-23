@@ -370,17 +370,17 @@ export function getTextBasedDatasource({
 
     getUsedDataViews: (state) => {
       return Object.values(state.layers)
-        .map(({ index }) => index)
+        .map(({ indexPatternId }) => indexPatternId)
         .filter(nonNullable);
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {
       const savedObjectReferences: SavedObjectReference[] = [];
-      Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
-        if (index) {
+      Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
+        if (indexPatternId) {
           savedObjectReferences.push({
             type: 'index-pattern',
-            id: index,
+            id: indexPatternId,
             name: getLayerReferenceName(layerId),
           });
         }
@@ -391,7 +391,7 @@ export function getTextBasedDatasource({
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
       const index =
-        layer?.index ??
+        layer?.indexPatternId ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
           state.indexPatternRefs[0].id);
       return {
@@ -455,16 +455,16 @@ export function getTextBasedDatasource({
       return (
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
+          return layer.indexPatternId && Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName);
         })
       );
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
-      if (!layerId || !state.layers[layerId].index) {
+      if (!layerId || !state.layers[layerId].indexPatternId) {
         const layers = Object.values(state.layers);
-        return layers?.[0]?.index as string;
+        return layers?.[0]?.indexPatternId as string;
       }
-      return state.layers[layerId].index as string;
+      return state.layers[layerId].indexPatternId as string;
     },
 
     removeColumn,
@@ -599,7 +599,7 @@ export function getTextBasedDatasource({
         },
         getSourceId: () => {
           const layer = state.layers[layerId];
-          return layer.index;
+          return layer.indexPatternId;
         },
         getFilters: () => {
           return {
@@ -723,7 +723,7 @@ export function getTextBasedDatasource({
         acc.push({
           layerId: key,
           columns,
-          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.indexPatternId),
         });
 
         return acc;
