@@ -8,15 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  ESQLColumn,
-  ESQLCommand,
-  ESQLFunction,
-  ESQLLocation,
-  ESQLMessage,
-  ESQLSource,
+import {
+  isLiteral,
+  type ESQLColumn,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLLocation,
+  type ESQLMessage,
+  type ESQLSource,
 } from '@kbn/esql-ast';
-import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import { ESQLAstExpression, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
@@ -449,6 +450,35 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           defaultMessage: '[FORK] a query cannot have more than one FORK command.',
         }),
       };
+    case 'rerankQueryMustBeString':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.rerankQueryType',
+          {
+            defaultMessage: '[RERANK] a query must be a string, found [{foundType}]',
+            values: { foundType: out.foundType },
+          }
+        ),
+      };
+    case 'rerankFieldMustBeNamed':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.rerankFieldMustBeNamed',
+          {
+            defaultMessage:
+              '[RERANK] a field must be named. Assign a column name to the field, e.g. "field_name = MY_FIELD"',
+          }
+        ),
+      };
+    case 'rerankInferenceIdMustBeIdentifier':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.rerankInferenceIdMustBeIdentifier',
+          {
+            defaultMessage: '[RERANK] inference ID must be an identifier or a parameter.',
+          }
+        ),
+      };
   }
   return { message: '' };
 }
@@ -547,6 +577,17 @@ export const errors = {
     errors.byId('invalidJoinIndex', identifier.location, {
       identifier: identifier.name,
     }),
+
+  rerankQueryMustBeString: (node: ESQLAstExpression): ESQLMessage =>
+    errors.byId('rerankQueryMustBeString', node.location, {
+      foundType: isLiteral(node) ? node.literalType : node.type,
+    }),
+
+  rerankFieldMustBeNamed: (node: ESQLAstExpression): ESQLMessage =>
+    errors.byId('rerankFieldMustBeNamed', node.location, {}),
+
+  rerankInferenceIdMustBeIdentifier: (node: ESQLAstExpression): ESQLMessage =>
+    errors.byId('rerankInferenceIdMustBeIdentifier', node.location, {}),
 };
 
 export function getUnknownTypeLabel() {

@@ -217,7 +217,9 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
 export function getCommandDefinition<CommandName extends string>(
   name: CommandName
 ): CommandDefinition<CommandName> {
-  return buildCommandLookup().get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
+  const map = buildCommandLookup();
+
+  return map.get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
 }
 
 export function getAllCommands() {

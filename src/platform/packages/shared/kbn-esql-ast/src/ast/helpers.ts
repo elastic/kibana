@@ -17,6 +17,7 @@ import type {
   ESQLIdentifier,
   ESQLIntegerLiteral,
   ESQLLiteral,
+  ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSource,
@@ -44,6 +45,10 @@ export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
  */
 export const isBinaryExpression = (node: unknown): node is ESQLBinaryExpression =>
   isFunctionExpression(node) && node.subtype === 'binary-expression';
+
+export const isAssignment = (node: unknown): node is ESQLBinaryExpression<'='> => {
+  return isBinaryExpression(node) && node.name === '=';
+};
 
 export const isWhereExpression = (
   node: unknown
@@ -83,6 +88,21 @@ export const isSource = (node: unknown): node is ESQLSource =>
 
 export const isIdentifier = (node: unknown): node is ESQLIdentifier =>
   isProperNode(node) && node.type === 'identifier';
+
+export const isContainedLocation = (container: ESQLLocation, contained: ESQLLocation): boolean => {
+  return container.min <= contained.min && container.max >= contained.max;
+};
+
+export const isContained = (
+  container: { location?: ESQLLocation },
+  contained: { location?: ESQLLocation }
+): boolean => {
+  if (!container.location || !contained.location) {
+    return false;
+  }
+
+  return isContainedLocation(container.location, contained.location);
+};
 
 /**
  * Returns the group of a binary expression:

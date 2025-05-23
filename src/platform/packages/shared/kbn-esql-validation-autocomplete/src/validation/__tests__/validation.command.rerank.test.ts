@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface EditorError {
-  startLineNumber: number;
-  endLineNumber: number;
-  startColumn: number;
-  endColumn: number;
-  message: string;
-  code?: string;
-  severity: 'error' | 'warning' | number;
-}
+import * as helpers from './helpers';
+import { validationRerankCommandTestSuite } from './test_suites/validation.command.rerank';
+
+validationRerankCommandTestSuite(helpers.setup);

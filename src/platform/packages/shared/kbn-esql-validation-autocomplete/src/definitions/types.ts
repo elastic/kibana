@@ -13,6 +13,7 @@ import type {
   ESQLMessage,
   ESQLSource,
   ESQLAstCommand,
+  EditorError,
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
@@ -413,6 +414,25 @@ export interface CommandDefinition<CommandName extends string> {
    * this for commands that are not yet ready to be advertised.
    */
   hidden?: boolean;
+
+  /**
+   * Return nicely formatted human-readable out of parser errors. This callback
+   * lets commands construct their own error messages out of parser errors,
+   * as parser errors have the following drawbacks:
+   *
+   * 1. Not human-readable, even hard to read for developers.
+   * 2. Not translated to other languages, e.g. Chinese.
+   * 3. Depend on ANTLR grammar, which is not stable and may change in the future.
+   *
+   * @param parsingErrors List of parsing errors returned by the ANTLR parser
+   *     for this command.
+   * @returns Human-readable, translatable messages for the user.
+   */
+  parsingErrorsToMessages?: (
+    parsingErrors: EditorError[],
+    command: ESQLCommand<CommandName>,
+    references: ReferenceMaps
+  ) => ESQLMessage[];
 
   /**
    * This method is run when the command is being validated, but it does not

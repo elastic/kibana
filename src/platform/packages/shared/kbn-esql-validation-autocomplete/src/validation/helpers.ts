@@ -17,13 +17,13 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@kbn/esql-ast';
-import { mutate, synth } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, mutate, synth } from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
 import type { ESQLPolicy, ReferenceMaps } from './types';
 
-export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
+export function buildQueryForFieldsFromSource(ast: ESQLAst) {
   const firstCommand = ast[0];
   if (!firstCommand) return '';
 
@@ -55,7 +55,7 @@ export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst)
   }
 
   if (sources.length === 0) {
-    return queryString.substring(0, firstCommand.location.max + 1);
+    return BasicPrettyPrinter.command(firstCommand);
   }
 
   const from =

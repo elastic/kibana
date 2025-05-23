@@ -14,11 +14,13 @@ import {
   ESQLCommandOption,
   ESQLMessage,
   ESQLSource,
+  ParseResult,
   isIdentifier,
   parse,
   walk,
 } from '@kbn/esql-ast';
-import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import type { ESQLAstJoinCommand, ESQLIdentifier, EditorError } from '@kbn/esql-ast/src/types';
+import { isContained } from '@kbn/esql-ast/src/ast/helpers';
 import {
   areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
@@ -52,7 +54,6 @@ import type {
   ValidationOptions,
   ValidationResult,
 } from './types';
-
 import { validate as validateJoinCommand } from './commands/join';
 
 /**
@@ -67,13 +68,13 @@ export async function validateQuery(
   options: ValidationOptions = {},
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
-  const result = await validateAst(queryString, callbacks);
+  const result = await validateQueryString(queryString, callbacks);
   // early return if we do not want to ignore errors
   if (!options.ignoreOnMissingCallbacks) {
     return result;
   }
   const finalCallbacks = callbacks || {};
-  const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
+  const errorTypesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
     if (
       !(key in finalCallbacks) ||
       (key in finalCallbacks && finalCallbacks[key as keyof ESQLCallbacks] == null)
@@ -89,7 +90,7 @@ export async function validateQuery(
       if ('severity' in error) {
         return true;
       }
-      return !errorTypoesToIgnore[error.code as ErrorTypes];
+      return !errorTypesToIgnore[error.code as ErrorTypes];
     })
     .map((error) =>
       'severity' in error
@@ -119,42 +120,54 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getTimeseriesIndices: [],
 };
 
-/**
- * This function will perform an high level validation of the
- * query AST. An initial syntax validation is already performed by the parser
- * while here it can detect things like function names, types correctness and potential warnings
- * @param ast A valid AST data structure
- */
-async function validateAst(
+const validateQueryString = async (
   queryString: string,
   callbacks?: ESQLCallbacks
-): Promise<ValidationResult> {
+): Promise<ValidationResult> => {
+  const parsingResult = parse(queryString);
+  const messages = await validateAst(parsingResult, queryString, callbacks);
+
+  return {
+    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+    warnings: messages.filter(({ type }) => type === 'warning'),
+  };
+};
+
+const validateAst = async (
+  parsingResult: ParseResult,
+  queryString: string,
+  callbacks?: ESQLCallbacks
+): Promise<ESQLMessage[]> => {
   const messages: ESQLMessage[] = [];
 
-  const parsingResult = parse(queryString);
-
-  const { ast } = parsingResult;
+  const {
+    root: { commands },
+  } = parsingResult;
 
   const [sources, availableFields, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
-    retrieveSources(ast, callbacks),
+    retrieveSources(commands, callbacks),
     // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, ast, callbacks),
+    retrieveFields(commands, callbacks),
     // retrieve available policies (if an enrich command has been defined)
-    retrievePolicies(ast, callbacks),
+    retrievePolicies(commands, callbacks),
     // retrieve indices for join command
     callbacks?.getJoinIndices?.(),
   ]);
 
   if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
+    const fieldsFromPoliciesMap = await retrievePoliciesFields(
+      commands,
+      availablePolicies,
+      callbacks
+    );
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
   }
 
-  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+  if (commands.some(({ name }) => ['grok', 'dissect'].includes(name))) {
     const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
       queryString,
-      ast,
+      commands,
       callbacks
     );
     fieldsFromGrokOrDissect.forEach((value, key) => {
@@ -166,10 +179,10 @@ async function validateAst(
     });
   }
 
-  const userDefinedColumns = collectUserDefinedColumns(ast, availableFields, queryString);
+  const userDefinedColumns = collectUserDefinedColumns(commands, availableFields, queryString);
   // notify if the user is rewriting a column as userDefinedColumn with another type
   messages.push(...validateFieldsShadowing(availableFields, userDefinedColumns));
-  messages.push(...validateUnsupportedTypeFields(availableFields, ast));
+  messages.push(...validateUnsupportedTypeFields(availableFields, commands));
 
   const references: ReferenceMaps = {
     sources,
@@ -180,7 +193,10 @@ async function validateAst(
     joinIndices: joinIndices?.indices || [],
   };
   let seenFork = false;
-  for (const [index, command] of ast.entries()) {
+
+  const length = commands.length;
+  for (let index = 0; index < length; index++) {
+    const command = commands[index];
     if (command.name === 'fork') {
       if (seenFork) {
         messages.push(errors.tooManyForks(command));
@@ -188,42 +204,55 @@ async function validateAst(
         seenFork = true;
       }
     }
-    const commandMessages = validateCommand(command, references, ast, index);
+    const parsingErrors = parsingResult.errors.filter((error) => isContained(command, error));
+    const commandMessages = validateCommand(command, references, commands, index, parsingErrors);
     messages.push(...commandMessages);
   }
 
-  return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
-    warnings: messages.filter(({ type }) => type === 'warning'),
-  };
-}
+  return messages;
+};
 
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
   ast: ESQLAst,
-  currentCommandIndex: number
+  currentCommandIndex: number,
+  parsingErrors: EditorError[]
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
+  const definition = getCommandDefinition(command.name);
+
+  if (!definition) {
+    return messages;
+  }
+
+  if (parsingErrors.length && definition.parsingErrorsToMessages) {
+    const messagesFromParsingErrors = definition.parsingErrorsToMessages(
+      parsingErrors,
+      command,
+      references
+    );
+
+    messages.push(...messagesFromParsingErrors);
+  }
+
   if (command.incomplete) {
     return messages;
   }
-  // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
 
-  if (!commandDef) {
-    return messages;
+  if (definition.validate) {
+    messages.push(...definition.validate(command, references));
   }
 
-  if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
-  }
-
-  switch (commandDef.name) {
+  switch (definition.name) {
     case 'join': {
       const join = command as ESQLAstJoinCommand;
       const joinCommandErrors = validateJoinCommand(join, references);
       messages.push(...joinCommandErrors);
+      break;
+    }
+    case 'rerank': {
+      // Do nothing, validation is implemented in the RERANK command definition.
       break;
     }
     case 'fork': {
@@ -236,7 +265,21 @@ function validateCommand(
         if (isSingleItem(arg) && arg.type === 'query') {
           // all the args should be commands
           arg.commands.forEach((subCommand) => {
-            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
+            const subCommandParsingErrors = parsingErrors.filter(
+              (error) =>
+                error.location.min >= subCommand.location.min &&
+                error.location.max <= subCommand.location.max
+            );
+
+            messages.push(
+              ...validateCommand(
+                subCommand,
+                references,
+                ast,
+                currentCommandIndex,
+                subCommandParsingErrors
+              )
+            );
           });
         }
       }

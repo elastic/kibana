@@ -166,6 +166,10 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
           endColumn: 0,
           message: `Invalid query [${text}]`,
           severity: 'error',
+          location: {
+            min: 0,
+            max: 0,
+          },
         },
       ],
       tokens: [],

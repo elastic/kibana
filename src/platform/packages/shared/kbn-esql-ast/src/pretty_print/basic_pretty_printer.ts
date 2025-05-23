@@ -367,7 +367,12 @@ export class BasicPrettyPrinter {
             args += (args ? ', ' : '') + arg;
           }
 
-          const formatted = `${operator}(${args})`;
+          const isParentShowCommand =
+            !args.length &&
+            (ctx.parent?.node as any)?.type === 'command' &&
+            (ctx.parent?.node as any)?.name === 'show';
+
+          const formatted = isParentShowCommand ? operator : `${operator}(${args})`;
 
           return this.decorateWithComments(ctx.node, formatted);
         }

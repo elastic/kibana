@@ -12,14 +12,16 @@ export function getErrorsWithCommands(query: string, errors: Array<ESQLMessage |
   const asCommands = splitIntoCommands(query);
 
   const errorMessages = errors.map((error) => {
+    const message = 'text' in error ? error.text : error.message;
+
     if ('location' in error) {
       const commandsUntilEndOfError = splitIntoCommands(query.substring(0, error.location.max));
       const lastCompleteCommand = asCommands[commandsUntilEndOfError.length - 1];
       if (lastCompleteCommand) {
-        return `Error in \`| ${lastCompleteCommand.command}\`:\n ${error.text}`;
+        return `Error in \`| ${lastCompleteCommand.command}\`:\n ${message}`;
       }
     }
-    return 'text' in error ? error.text : error.message;
+    return message;
   });
 
   return errorMessages;

@@ -73,7 +73,12 @@ export const createRerankCommand = (ctx: RerankCommandContext): ESQLAstRerankCom
   const fields = visitRerankFields(fieldsCtx);
   const inferenceIdCtx = ctx._inferenceId;
   const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
-  const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+  const inferenceId =
+    maybeInferenceId ??
+    Builder.identifier('', {
+      incomplete: true,
+      location: inferenceIdCtx ? getPosition(inferenceIdCtx.start, inferenceIdCtx.stop) : undefined,
+    });
   const command = createCommand<'rerank', ESQLAstRerankCommand>('rerank', ctx, {
     query,
     fields,
