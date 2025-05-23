@@ -66,6 +66,7 @@ describe('checkVersionCompatibility', () => {
       mappings,
       source: 'mappingVersions',
       knownTypes: ['foo', 'bar'],
+      minimumVirtualVersion: '10.0.0',
     });
   });
 

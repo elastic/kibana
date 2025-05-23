@@ -16,6 +16,7 @@ import {
   type CompareModelVersionStatus,
   type CompareModelVersionDetails,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal/src/model_version/constants';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 
 interface CheckVersionCompatibilityOpts {
@@ -44,6 +45,7 @@ export const checkVersionCompatibility = ({
     mappings,
     source,
     knownTypes: types.map((type) => type.name),
+    minimumVirtualVersion: initialModelVersion,
   });
   if (!indexVersions) {
     throw new Error(`Cannot check version: ${source} not present in the mapping meta`);
