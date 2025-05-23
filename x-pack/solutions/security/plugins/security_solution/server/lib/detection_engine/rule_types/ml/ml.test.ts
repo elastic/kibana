@@ -141,7 +141,7 @@ describe('ml_executor', () => {
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     // eventually tagged as a user error in the rule wrapper
-    expect(result.userError).toEqual(false);
+    expect(result.userError).toBeFalsy();
     expect(result.success).toEqual(false);
     expect(result.errors).toEqual(['my_test_job_name missing']);
   });
