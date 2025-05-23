@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { ToolProvider, RegisteredTool, ToolHandlerFn } from '@kbn/onechat-server';
+import { ToolSourceType } from '@Kbn/onechat-common';
+import type {
+  ToolProvider,
+  ToolHandlerFn,
+  ExecutableTool,
+  ExecutableToolHandlerFn,
+} from '@kbn/onechat-server';
 import type {
   ToolsServiceStart,
   InternalToolRegistry,
   ScopedPublicToolRegistry,
   ScopedPublicToolRegistryFactoryFn,
+  RegisteredToolWithMeta,
 } from '../services/tools/types';
 import { ChangeReturnType } from './common';
 
@@ -59,18 +66,44 @@ export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   };
 };
 
-export type MockedTool = Omit<RegisteredTool, 'handler'> & {
+export type MockedTool = Omit<RegisteredToolWithMeta, 'handler'> & {
   handler: jest.MockedFunction<ToolHandlerFn>;
 };
 
-export const createMockedTool = (parts: Partial<RegisteredTool> = {}): MockedTool => {
+export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
+  execute: jest.MockedFunction<ExecutableToolHandlerFn>;
+};
+
+export const createMockedTool = (parts: Partial<RegisteredToolWithMeta> = {}): MockedTool => {
   return {
     id: 'test-tool',
     name: 'my test tool',
     description: 'test description',
     schema: {},
-    meta: {},
+    meta: {
+      sourceType: ToolSourceType.builtIn,
+      sourceId: 'foo',
+      tags: ['tag-1', 'tag-2'],
+    },
     ...parts,
     handler: jest.fn(parts.handler),
+  };
+};
+
+export const createMockedExecutableTool = (
+  parts: Partial<ExecutableTool> = {}
+): MockedExecutableTool => {
+  return {
+    id: 'test-tool',
+    name: 'my test tool',
+    description: 'test description',
+    schema: {},
+    meta: {
+      sourceType: ToolSourceType.builtIn,
+      sourceId: 'foo',
+      tags: ['tag-1', 'tag-2'],
+    },
+    ...parts,
+    execute: jest.fn(parts.execute),
   };
 };

@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { RegisteredTool, ToolProvider } from '@kbn/onechat-server';
+import type { RegisteredTool } from '@kbn/onechat-server';
+import type { InternalToolProvider } from '../types';
 import { combineToolProviders } from './combine_tool_providers';
 
 describe('combineToolProviders', () => {
@@ -25,7 +26,7 @@ describe('combineToolProviders', () => {
     handler: jest.fn(),
   });
 
-  const createMockProvider = (tools: RegisteredTool[]): ToolProvider => ({
+  const createMockProvider = (tools: RegisteredTool[]): InternalToolProvider => ({
     has: jest.fn().mockImplementation(async ({ toolId }) => {
       return tools.some((t) => t.id === toolId);
     }),

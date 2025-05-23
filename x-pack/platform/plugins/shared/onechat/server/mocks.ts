@@ -7,7 +7,7 @@
 
 import { OnechatPluginSetup, OnechatPluginStart, ScopedToolsStart } from './types';
 import {
-  createMockedTool,
+  createMockedExecutableTool,
   createToolProviderMock,
   createScopedPublicToolRegistryMock,
 } from './test_utils/tools';
@@ -40,5 +40,5 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
 export const onechatMocks = {
   createSetup: createSetupContractMock,
   createStart: createStartContractMock,
-  createTool: createMockedTool,
+  createTool: createMockedExecutableTool,
 };
