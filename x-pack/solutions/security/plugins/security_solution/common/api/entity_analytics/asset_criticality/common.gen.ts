@@ -58,16 +58,6 @@ export const AssetCriticalityRecordEcsParts = z.object({
   asset: z.object({
     criticality: AssetCriticalityLevel.optional(),
   }),
-  generic: z
-    .object({
-      name: z.string(),
-      asset: z
-        .object({
-          criticality: AssetCriticalityLevel,
-        })
-        .optional(),
-    })
-    .optional(),
   host: z
     .object({
       name: z.string(),
@@ -91,6 +81,16 @@ export const AssetCriticalityRecordEcsParts = z.object({
   service: z
     .object({
       name: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
+  entity: z
+    .object({
+      id: z.string(),
       asset: z
         .object({
           criticality: AssetCriticalityLevel,

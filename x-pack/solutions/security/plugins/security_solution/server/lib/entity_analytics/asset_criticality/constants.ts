@@ -69,12 +69,12 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
   'service.asset.criticality': assetCriticalityMapping,
-  'generic.name': {
+  'entity.id': {
     type: 'keyword',
     array: false,
     required: false,
   },
-  'generic.asset.criticality': assetCriticalityMapping,
+  'entity.asset.criticality': assetCriticalityMapping,
 } as const;
 
 export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {

@@ -27,20 +27,20 @@ describe('asset criticality - constants', () => {
           "required": false,
           "type": "keyword",
         },
+        "entity.asset.criticality": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
+        "entity.id": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
         "event.ingested": Object {
           "array": false,
           "required": false,
           "type": "date",
-        },
-        "generic.asset.criticality": Object {
-          "array": false,
-          "required": false,
-          "type": "keyword",
-        },
-        "generic.name": Object {
-          "array": false,
-          "required": false,
-          "type": "keyword",
         },
         "host.asset.criticality": Object {
           "array": false,

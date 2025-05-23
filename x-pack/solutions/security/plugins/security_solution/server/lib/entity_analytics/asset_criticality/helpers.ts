@@ -85,8 +85,24 @@ const entityTypeByIdField = {
   'entity.id': 'generic',
 } as const;
 
+/**
+ * Returns the implicit Asset Criticality fields for the given entity according to the identifier field.
+ */
 export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {
   const entityType = entityTypeByIdField[record.idField];
+
+  // Generic entity has a different treatment since it uses entity.id as identifier
+  if (entityType === 'generic') {
+    return {
+      entity: {
+        asset: {
+          criticality: record.criticalityLevel,
+        },
+        id: record.idValue,
+      },
+    };
+  }
+
   return {
     [entityType]: {
       asset: {

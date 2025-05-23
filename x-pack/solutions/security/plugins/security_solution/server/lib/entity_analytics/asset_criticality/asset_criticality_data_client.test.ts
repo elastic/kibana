@@ -119,7 +119,7 @@ describe('AssetCriticalityDataClient', () => {
                   },
                 },
               },
-              generic: {
+              entity: {
                 properties: {
                   asset: {
                     properties: {
@@ -128,7 +128,7 @@ describe('AssetCriticalityDataClient', () => {
                       },
                     },
                   },
-                  name: {
+                  id: {
                     type: 'keyword',
                   },
                 },
