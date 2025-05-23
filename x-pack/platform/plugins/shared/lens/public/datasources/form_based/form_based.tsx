@@ -100,7 +100,6 @@ import {
   CombinedFormBasedPersistedState,
   CombinedFormBasedPrivateState,
   isFormBasedLayer,
-  TextBasedLayer,
   isTextBasedLayer,
   hasTextBasedLayers,
   TextBasedField,

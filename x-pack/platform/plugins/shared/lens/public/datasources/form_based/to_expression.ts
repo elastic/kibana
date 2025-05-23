@@ -581,8 +581,8 @@ export function toExpression(
       );
     } else if (isTextBasedLayer(layer)) {
       return getESQLExpression(layer, layerId, state.indexPatternRefs ?? []);
-    }  
+    }
   }
-  
+
   return null;
 }
