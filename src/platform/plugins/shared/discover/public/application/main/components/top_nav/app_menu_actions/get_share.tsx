@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import type { AppMenuActionPrimary } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
@@ -107,6 +109,28 @@ export const getShareAppMenuItem = ({
           embed: {
             disabled: true,
             showPublicUrlSwitch,
+          },
+          integration: {
+            export: {
+              csvReports: {
+                draftModeCallOut: (
+                  <EuiCallOut
+                    color="warning"
+                    iconType="warning"
+                    title={i18n.translate('discover.exports.csvReports.warning.title', {
+                      defaultMessage: 'Unsaved changes',
+                    })}
+                  >
+                    {i18n.translate(
+                      'discover.exports.csvReports.postURLWatcherMessage.unsavedChanges',
+                      {
+                        defaultMessage: 'URL may change if you upgrade Kibana.',
+                      }
+                    )}
+                  </EuiCallOut>
+                ),
+              },
+            },
           },
         },
       },

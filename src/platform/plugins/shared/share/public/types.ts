@@ -203,7 +203,10 @@ export type EmbedShareUIConfig = ShareActionUserInputBase<{
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }>;
 
-type ExportShareUIConfig = ShareActionUserInputBase<{}>;
+/**
+ * @description record of user config for each registered export integration
+ */
+type ExportShareUIConfig = Record<string, ShareActionUserInputBase<{}>>;
 
 export interface ShareUIConfig {
   link: LinkShareUIConfig;

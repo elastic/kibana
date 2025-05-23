@@ -134,6 +134,7 @@ export const downloadCsvLensShareProvider = ({
         });
 
       return {
+        id: 'csvDownloadLens',
         name: panelTitle,
         icon: 'document',
         sortOrder: 1,

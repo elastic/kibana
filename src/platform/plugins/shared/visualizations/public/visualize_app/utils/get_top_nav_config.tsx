@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiBetaBadgeProps, EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
@@ -320,6 +320,64 @@ export const getTopNavConfig = (
           config: {
             embed: {
               computeAnonymousCapabilities: showPublicUrlSwitch,
+            },
+            integration: {
+              export: {
+                pdfReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                imageReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.imageReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.imageReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                csvReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.csvReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.csvReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+              },
             },
           },
         },

@@ -27,7 +27,6 @@ import {
   EuiToolTip,
   type EuiSwitchEvent,
   EuiSwitch,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -111,6 +110,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     publicAPIEnabled,
     objectType,
     objectTypeAlias,
+    objectTypeMeta,
   } = useShareTabsContext('integration', 'export');
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
@@ -145,6 +145,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
   const flyoutOnCloseHandler = useCallback(() => {
     return shareMenuItems.length === 1 ? onClose() : setIsFlyoutVisible(false);
   }, [onClose, shareMenuItems.length]);
+
+  const DraftModeCallout = objectTypeMeta.config?.[selectedMenuItemId!]?.draftModeCallOut;
 
   return (
     <Fragment>
@@ -256,24 +258,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               </Fragment>
               <Fragment>{selectedMenuItem?.config.generateAssetComponent}</Fragment>
               <Fragment>
-                {publicAPIEnabled && isDirty && (
-                  <EuiFlexItem>
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={
-                        <FormattedMessage
-                          id="share.link.warning.title"
-                          defaultMessage="Unsaved changes"
-                        />
-                      }
-                    >
-                      <FormattedMessage
-                        id="share.postURLWatcherMessage.unsavedChanges"
-                        defaultMessage="URL may change if you upgrade Kibana."
-                      />
-                    </EuiCallOut>
-                  </EuiFlexItem>
+                {publicAPIEnabled && isDirty && DraftModeCallout && (
+                  <EuiFlexItem>{DraftModeCallout}</EuiFlexItem>
                 )}
               </Fragment>
             </EuiFlexGroup>

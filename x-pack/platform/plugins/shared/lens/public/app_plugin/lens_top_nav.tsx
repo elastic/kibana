@@ -702,6 +702,70 @@ export const LensTopNavMenu = ({
               disabled: true,
               showPublicUrlSwitch: () => false,
             },
+            integration: {
+              export: {
+                csvDownloadLens: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate(
+                        'xpack.lens.app.exports.csvDownloadLens.warning.title',
+                        {
+                          defaultMessage: 'Unsaved changes',
+                        }
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.lens.app.exports.csvDownloadLens.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage:
+                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                imageReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('xpack.lens.app.exports.imageReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'xpack.lens.app.exports.imageReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage:
+                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                pdfReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('xpack.lens.app.exports.pdfReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'xpack.lens.app.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage:
+                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+              },
+            },
           },
         },
         sharingData,

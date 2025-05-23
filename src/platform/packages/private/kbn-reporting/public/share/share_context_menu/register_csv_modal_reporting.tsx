@@ -158,7 +158,7 @@ export const reportingCsvExportProvider = ({
 
   return {
     shareType: 'integration',
-    id: 'csvReportsModal',
+    id: 'csvReports',
     groupId: 'export',
     config: getShareMenuItems,
     prerequisiteCheck: ({ license, capabilities }) => {
