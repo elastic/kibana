@@ -113,10 +113,7 @@ export function isSamplingValueEnabled(layer: FormBasedLayer) {
  * @returns
  */
 export function getSamplingValue(layer: FormBasedLayer | TextBasedLayer) {
-  if (!isFormBasedLayer(layer)) {
-    return 1;
-  }
-  return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
+  return isFormBasedLayer(layer) && isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
 }
 
 export function isColumnInvalid(
