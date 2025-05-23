@@ -202,56 +202,62 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
         {availableFieldTypes.length > 0 ? (
           <EuiContextMenuPanel
             data-test-subj={`${testSubj}Options`}
-            items={availableFieldTypes.map((type) => (
-              <EuiContextMenuItem
-                aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.typeButtonAriaLabel', {
-                  defaultMessage: '{type} field count: {count}',
-                  values: {
-                    type: getFieldTypeName(type),
-                    count: typeCounts?.get(type) ?? 0,
-                  },
-                })}
-                aria-describedby={`unifiedFieldList.fieldTypeFilter.${type}.descriptionTooltip`}
-                key={type}
-                icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
-                data-test-subj={`typeFilter-${type}`}
-                css={itemStyle}
-                onClick={() => {
-                  onChange(
-                    selectedFieldTypes.includes(type)
-                      ? selectedFieldTypes.filter((t) => t !== type)
-                      : [...selectedFieldTypes, type]
-                  );
-                }}
-              >
-                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <FieldIcon aria-hidden type={type} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">{getFieldTypeName(type)}</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          id={`unifiedFieldList.fieldTypeFilter.${type}.descriptionTooltip`}
-                          aria-label={getFieldTypeDescription(type)}
-                          type="questionInCircle"
-                          color="subdued"
-                          content={getFieldTypeDescription(type)}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiNotificationBadge aria-hidden color="subdued" size="m">
-                      {typeCounts?.get(type) ?? 0}
-                    </EuiNotificationBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiContextMenuItem>
-            ))}
+            items={availableFieldTypes.map((type) => {
+              const fieldTypeName = getFieldTypeName(type);
+              const fieldTypeCount = typeCounts?.get(type) ?? 0;
+
+              return (
+                <EuiContextMenuItem
+                  aria-label={i18n.translate(
+                    'unifiedFieldList.fieldTypeFilter.typeButtonAriaLabel',
+                    {
+                      defaultMessage: '{type} field count: {count}',
+                      values: {
+                        type: fieldTypeName,
+                        count: fieldTypeCount,
+                      },
+                    }
+                  )}
+                  key={type}
+                  icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
+                  data-test-subj={`typeFilter-${type}`}
+                  css={itemStyle}
+                  onClick={() => {
+                    onChange(
+                      selectedFieldTypes.includes(type)
+                        ? selectedFieldTypes.filter((t) => t !== type)
+                        : [...selectedFieldTypes, type]
+                    );
+                  }}
+                >
+                  <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <FieldIcon aria-hidden type={type} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">{fieldTypeName}</EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiIconTip
+                            aria-label={getFieldTypeDescription(type)}
+                            type="questionInCircle"
+                            color="subdued"
+                            content={getFieldTypeDescription(type)}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiNotificationBadge aria-hidden color="subdued" size="m">
+                        {fieldTypeCount}
+                      </EuiNotificationBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiContextMenuItem>
+              );
+            })}
           />
         ) : (
           <EuiFlexGroup responsive={false} alignItems="center" justifyContent="center">
