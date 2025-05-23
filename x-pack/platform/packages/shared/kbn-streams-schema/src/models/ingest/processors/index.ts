@@ -7,6 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import {
+  ElasticsearchProcessorType,
+  elasticsearchProcessorTypes,
+} from '../../../ingest_pipeline_processors';
 import { Condition, conditionSchema } from '../../../conditions';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
@@ -27,8 +31,12 @@ const processorBaseSchema = z.object({
 
 /* Advanced JSON processor */
 
+// Not 100% accurate, but close enough for our use case to provide minimal safety
+// without having to check all details
+export type ElasticsearchProcessor = Partial<Record<ElasticsearchProcessorType, unknown>>;
+
 export interface AdvancedJsonProcessorConfig extends ProcessorBase {
-  processors: Array<Record<string, unknown>>;
+  processors: ElasticsearchProcessor[];
   ignore_failure?: boolean;
   tag?: string;
   on_failure?: Array<Record<string, unknown>>;
@@ -41,7 +49,7 @@ export const advancedJsonProcessorDefinitionSchema = z.strictObject({
   advanced_json: z.intersection(
     processorBaseSchema,
     z.object({
-      processors: z.array(z.record(z.string(), z.unknown())),
+      processors: z.array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown())),
       tag: z.optional(z.string()),
       on_failure: z.optional(z.array(z.record(z.unknown()))),
     })

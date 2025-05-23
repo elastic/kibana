@@ -173,5 +173,116 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       expect((response.hits.total as SearchTotalHits).value).to.eql(0);
     });
+
+    describe('Elasticsearch ingest pipeline enrichment', () => {
+      before(async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [
+                {
+                  advanced_json: {
+                    processors: [
+                      {
+                        // apply custom processor
+                        uppercase: {
+                          field: 'abc',
+                        },
+                      },
+                      {
+                        // apply condition
+                        lowercase: {
+                          field: 'def',
+                          if: "ctx.def == 'yes'",
+                        },
+                      },
+                      {
+                        fail: {
+                          message: 'Failing',
+                          on_failure: [
+                            // execute on failure pipeline
+                            {
+                              set: {
+                                field: 'fail_failed',
+                                value: 'yes',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    if: { always: {} },
+                  },
+                },
+              ],
+              wired: {
+                routing: [],
+                fields: {},
+              },
+            },
+          },
+        };
+        const response = await putStream(apiClient, 'logs.nginx', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Transforms doc on index', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:11.000Z',
+          abc: 'should become uppercase',
+          def: 'SHOULD NOT BECOME LOWERCASE',
+          ['host.name']: 'routeme',
+        };
+        const response = await indexDocument(esClient, 'logs', doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:11.000Z',
+          abc: 'SHOULD BECOME UPPERCASE',
+          def: 'SHOULD NOT BECOME LOWERCASE',
+          fail_failed: 'yes',
+          'host.name': 'routeme',
+          'stream.name': 'logs.nginx',
+        });
+      });
+
+      it('fails to store non-existing processor', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [
+                {
+                  advanced_json: {
+                    processors: [
+                      {
+                        // apply custom processor
+                        non_existing_processor: {
+                          field: 'abc',
+                        },
+                      } as any,
+                    ],
+                    if: { always: {} },
+                  },
+                },
+              ],
+              wired: {
+                routing: [],
+                fields: {},
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.nginx', body, 400);
+      });
+    });
   });
 }

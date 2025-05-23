@@ -7,14 +7,19 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchProcessorType, elasticsearchProcessorTypes } from '@kbn/streams-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { ProcessorFormState } from '../../types';
 import { deserializeJson, serializeXJson } from '../../helpers';
 
 export const JsonEditor = () => {
+  const {
+    core: { docLinks },
+  } = useKibana();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
     rules: {
@@ -60,12 +65,32 @@ export const JsonEditor = () => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsLabel',
         { defaultMessage: 'Ingest pipeline processors' }
       )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsHelpText',
-        {
-          defaultMessage: 'A JSON-encoded array of ingest pipeline processors',
-        }
-      )}
+      helpText={
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsHelpText"
+          defaultMessage={
+            'A JSON-encoded array of {ingestPipelineProcessors}. If you run processors {conditionally}, the condition defined in "Optional fields" will be ignored.'
+          }
+          values={{
+            ingestPipelineProcessors: (
+              <EuiLink href={docLinks.links.ingest.processors} target="_blank" external>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsLabel',
+                  { defaultMessage: 'ingest pipeline processors' }
+                )}
+              </EuiLink>
+            ),
+            conditionally: (
+              <EuiLink href={docLinks.links.ingest.conditionalProcessor} target="_blank" external>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsConditionallyLabel',
+                  { defaultMessage: 'conditionally' }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      }
       error={fieldState.error?.message}
       isInvalid={fieldState.invalid}
       fullWidth

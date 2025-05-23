@@ -109,16 +109,6 @@ const availableProcessors: TAvailableProcessors = {
       />
     ),
   },
-  advanced_json: {
-    type: 'advanced_json',
-    inputDisplay: 'Advanced Elasticsearch ingest pipeline',
-    getDocUrl: () => (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.advancedJsonHelpText"
-        defaultMessage="Allows specifying an array of ingest pipeline processors as JSON."
-      />
-    ),
-  },
   grok: {
     type: 'grok',
     inputDisplay: 'Grok',
@@ -144,6 +134,16 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   ...configDrivenProcessors,
+  advanced_json: {
+    type: 'advanced_json',
+    inputDisplay: 'Advanced Elasticsearch ingest pipeline',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.advancedJsonHelpText"
+        defaultMessage="Allows specifying an array of ingest pipeline processors as JSON."
+      />
+    ),
+  },
 };
 
 const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>

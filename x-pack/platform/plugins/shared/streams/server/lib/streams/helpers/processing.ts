@@ -40,7 +40,10 @@ export function formatToIngestProcessors(
             )}`
           );
         }
-        const nestedConfig = nestedProcessor[nestedType] as Record<string, unknown>;
+        const nestedConfig = nestedProcessor[nestedType as ElasticsearchProcessorType] as Record<
+          string,
+          unknown
+        >;
         if (typeof nestedConfig !== 'object' || nestedConfig === null) {
           if (ignoreMalformedAdvancedJson) {
             return [];
@@ -58,7 +61,7 @@ export function formatToIngestProcessors(
             on_failure: nestedConfig.on_failure
               ? [
                   ...(nestedConfig.on_failure as []),
-                  ...(advancedJsonProcessorConfig.on_failure as []),
+                  ...(advancedJsonProcessorConfig.on_failure || []),
                 ]
               : advancedJsonProcessorConfig.on_failure,
             ...(!nestedConfig.if && 'if' in config && config.if
