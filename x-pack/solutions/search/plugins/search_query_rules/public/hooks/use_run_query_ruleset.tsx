@@ -24,27 +24,25 @@ export const UseRunQueryRuleset = ({
   const { application, share, console: consolePlugin } = useKibana().services;
   const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
   const indecesRuleset = queryRulesetData?.rules?.[0]?.actions?.docs?.[0]?._index || 'my_index';
-
+  // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
   const TEST_QUERY_RULESET_API_SNIPPET = dedent`
 # Test your query ruleset
 GET ${indecesRuleset}/_search
 {
-  "retriever": {
+  "query": {
     "rule": {
-      "retriever": {
-        "standard": {
-          "query": {
-            "query_string": {
-              "query": "puggles"
-            }
-          }
+      // Defines the match criteria to apply to rules in the given query ruleset
+      "match_criteria": { 
+        "user_query": "pugs"
+      },
+      // An array of one or more unique query ruleset ID with query-based rules to match and apply as applicable
+      "ruleset_ids": ["${rulesetId}"], 
+      // Any choice of query used to return results, that may be modified by matching query rules
+      "organic": { 
+        "match": {
+          "description": "puggles"
         }
-      },
-      "match_criteria": {
-         "query_string": "puggles",
-         "user_country": "us"
-      },
-      "ruleset_ids": [ "${rulesetId}" ]
+      }
     }
   }
 }
