@@ -10,4 +10,5 @@ export interface GetRemoteSyncedIntegrationsStatusResponse {
   integrations: RemoteSyncedIntegrationsStatus[];
   custom_assets?: RemoteSyncedCustomAssetsRecord;
   error?: string;
+  warning?: string;
 }

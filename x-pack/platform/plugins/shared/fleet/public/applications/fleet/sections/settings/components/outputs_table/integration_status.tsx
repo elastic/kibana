@@ -20,7 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
   useEuiTheme,
-  EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
@@ -175,9 +175,9 @@ export const IntegrationStatus: React.FunctionComponent<{
         }
       >
         <>
-          {integration.error && (
+          {integration?.error && (
             <>
-              {syncUninstalledIntegrations && (
+              {/* {syncUninstalledIntegrations && (
                 <>
                   <EuiText size="xs" color="subdued">
                     <FormattedMessage
@@ -199,7 +199,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                     />
                   </EuiText>
                 </>
-              )}
+              )} */}
               <EuiSpacer size="m" />
               <EuiCallOut
                 title={
@@ -214,6 +214,56 @@ export const IntegrationStatus: React.FunctionComponent<{
                 data-test-subj="integrationSyncIntegrationErrorCallout"
               >
                 <EuiText size="s">{integration.error}</EuiText>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          {integration?.warning && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                title={
+                  syncUninstalledIntegrations ? (
+                    <FormattedMessage
+                      id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
+                      defaultMessage="Integration was uninstalled, but removal from remote cluster failed. {uninstallWarning}"
+                      values={{
+                        uninstallWarning: integration?.warning,
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.integrationSyncStatus.integrationErrorTitle"
+                      defaultMessage="Warning"
+                    />
+                  )
+                }
+                color="warning"
+                iconType="warning"
+                size="s"
+                data-test-subj="integrationSyncIntegrationWarningCallout"
+              >
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
+                    defaultMessage="{uninstallWarning}"
+                    values={{
+                      uninstallWarning: integration?.warning,
+                    }}
+                  />
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiButton
+                  color="warning"
+                  href={docLinks.links.fleet.remoteESOoutputTroubleshooting}
+                  iconType="popout"
+                  target="blank"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.integrationSyncStatus.integrationWarningButton"
+                    defaultMessage="View troubleshooting guide"
+                  />
+                </EuiButton>
               </EuiCallOut>
               <EuiSpacer size="m" />
             </>

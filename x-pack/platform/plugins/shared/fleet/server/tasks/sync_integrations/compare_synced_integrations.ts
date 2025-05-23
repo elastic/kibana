@@ -213,7 +213,7 @@ const compareIntegrations = (
       if (
         isSyncUninstalledEnabled &&
         ccrIntegration.install_status === 'not_installed' &&
-        localIntegrationSO?.attributes.latest_uninstall_failed_attempts !== undefined
+        localIntegrationSO?.attributes.install_status === 'installed'
       ) {
         const latestUninstallFailedAttemptTime = localIntegrationSO?.attributes
           ?.latest_uninstall_failed_attempts?.[0].created_at
@@ -232,8 +232,10 @@ const compareIntegrations = (
             remote: localIntegrationSO?.attributes.install_status,
           },
           updated_at: ccrIntegration.updated_at,
-          sync_status: SyncStatus.FAILED,
-          error: `Uninstall error: ${latestUninstallFailedAttempt} ${latestUninstallFailedAttemptTime}`,
+          sync_status: SyncStatus.WARNING,
+          ...(localIntegrationSO?.attributes.latest_uninstall_failed_attempts !== undefined
+            ? { warning: `${latestUninstallFailedAttempt} ${latestUninstallFailedAttemptTime}` }
+            : {}),
         };
       }
       return {

@@ -10,6 +10,7 @@ export enum SyncStatus {
   SYNCHRONIZING = 'synchronizing',
   COMPLETED = 'completed',
   FAILED = 'failed',
+  WARNING = 'warning',
 }
 
 export interface RemoteSyncedIntegrationsBase {
@@ -20,6 +21,7 @@ export interface RemoteSyncedIntegrationsBase {
 export interface RemoteSyncedIntegrationsStatus extends RemoteSyncedIntegrationsBase {
   sync_status: SyncStatus;
   error?: string;
+  warning?: string;
   updated_at?: string;
   install_status: {
     main: string;

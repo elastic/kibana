@@ -20,6 +20,7 @@ export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBase
     schema.literal(SyncStatus.COMPLETED),
     schema.literal(SyncStatus.SYNCHRONIZING),
     schema.literal(SyncStatus.FAILED),
+    schema.literal(SyncStatus.WARNING),
   ]),
   error: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
@@ -38,6 +39,7 @@ export const CustomAssetsDataSchema = schema.object({
     schema.literal(SyncStatus.COMPLETED),
     schema.literal(SyncStatus.SYNCHRONIZING),
     schema.literal(SyncStatus.FAILED),
+    schema.literal(SyncStatus.WARNING),
   ]),
   error: schema.maybe(schema.string()),
   is_deleted: schema.maybe(schema.boolean()),
@@ -47,4 +49,5 @@ export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
   integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
   custom_assets: schema.maybe(schema.recordOf(schema.string(), CustomAssetsDataSchema)),
   error: schema.maybe(schema.string()),
+  warning: schema.maybe(schema.string()),
 });
