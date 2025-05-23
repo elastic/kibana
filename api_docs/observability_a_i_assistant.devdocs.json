@@ -2550,15 +2550,9 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/observability_ai_assistant/kb/reindex\", ",
-              "TypeC",
-              "<{ query: ",
-              "TypeC",
-              "<{ inference_id: ",
-              "StringC",
-              "; }>; }>, ",
+              "<\"POST /internal/observability_ai_assistant/kb/reindex\", undefined, ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              ", { result: boolean; }, ",
+              ", { success: boolean; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/setup\": ",
               {
@@ -2571,10 +2565,16 @@
               "<\"POST /internal/observability_ai_assistant/kb/setup\", ",
               "TypeC",
               "<{ query: ",
+              "IntersectionC",
+              "<[",
               "TypeC",
               "<{ inference_id: ",
               "StringC",
-              "; }>; }>, ",
+              "; }>, ",
+              "PartialC",
+              "<{ wait_until_complete: ",
+              "Type",
+              "<boolean, boolean, unknown>; }>]>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", { reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -3622,15 +3622,9 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/observability_ai_assistant/kb/reindex\", ",
-              "TypeC",
-              "<{ query: ",
-              "TypeC",
-              "<{ inference_id: ",
-              "StringC",
-              "; }>; }>, ",
+              "<\"POST /internal/observability_ai_assistant/kb/reindex\", undefined, ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              ", { result: boolean; }, ",
+              ", { success: boolean; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/setup\": ",
               {
@@ -3643,10 +3637,16 @@
               "<\"POST /internal/observability_ai_assistant/kb/setup\", ",
               "TypeC",
               "<{ query: ",
+              "IntersectionC",
+              "<[",
               "TypeC",
               "<{ inference_id: ",
               "StringC",
-              "; }>; }>, ",
+              "; }>, ",
+              "PartialC",
+              "<{ wait_until_complete: ",
+              "Type",
+              "<boolean, boolean, unknown>; }>]>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", { reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -5466,15 +5466,9 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/observability_ai_assistant/kb/reindex\", ",
-          "TypeC",
-          "<{ query: ",
-          "TypeC",
-          "<{ inference_id: ",
-          "StringC",
-          "; }>; }>, ",
+          "<\"POST /internal/observability_ai_assistant/kb/reindex\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { result: boolean; }, ",
+          ", { success: boolean; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/setup\": ",
           {
@@ -5487,10 +5481,16 @@
           "<\"POST /internal/observability_ai_assistant/kb/setup\", ",
           "TypeC",
           "<{ query: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ inference_id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ wait_until_complete: ",
+          "Type",
+          "<boolean, boolean, unknown>; }>]>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -6392,12 +6392,87 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.E5_LARGE_IN_EIS_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "E5_LARGE_IN_EIS_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".multilingual-e5-large-elastic\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.E5_SMALL_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "E5_SMALL_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".multilingual-e5-small-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.EIS_PRECONFIGURED_INFERENCE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "EIS_PRECONFIGURED_INFERENCE_IDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.elasticAiAssistantImage",
         "type": "string",
         "tags": [],
         "label": "elasticAiAssistantImage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ELSER_IN_EIS_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ELSER_IN_EIS_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".elser-v2-elastic\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ELSER_ON_ML_NODE_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ELSER_ON_ML_NODE_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".elser-2-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6759,15 +6834,9 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/observability_ai_assistant/kb/reindex\", ",
-          "TypeC",
-          "<{ query: ",
-          "TypeC",
-          "<{ inference_id: ",
-          "StringC",
-          "; }>; }>, ",
+          "<\"POST /internal/observability_ai_assistant/kb/reindex\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { result: boolean; }, ",
+          ", { success: boolean; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/setup\": ",
           {
@@ -6780,10 +6849,16 @@
           "<\"POST /internal/observability_ai_assistant/kb/setup\", ",
           "TypeC",
           "<{ query: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ inference_id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ wait_until_complete: ",
+          "Type",
+          "<boolean, boolean, unknown>; }>]>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -8804,7 +8879,7 @@
             "label": "chat",
             "description": [],
             "signature": [
-              "<TStream extends boolean>(name: string, { systemMessage, messages, connectorId, functions, functionCall, signal, simulateFunctionCalling, tracer, stream, }: { systemMessage?: string | undefined; messages: ",
+              "<TStream extends boolean>(name: string, { systemMessage, messages, connectorId, functions, functionCall, signal, simulateFunctionCalling, stream, }: { systemMessage?: string | undefined; messages: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -8820,9 +8895,7 @@
                 "section": "def-common.CompatibleJSONSchema",
                 "text": "CompatibleJSONSchema"
               },
-              " | undefined; }[] | undefined; functionCall?: string | undefined; signal: AbortSignal; simulateFunctionCalling?: boolean | undefined; tracer: ",
-              "LangTracer",
-              "; stream: TStream; }) => TStream extends true ? ",
+              " | undefined; }[] | undefined; functionCall?: string | undefined; signal: AbortSignal; simulateFunctionCalling?: boolean | undefined; stream: TStream; }) => TStream extends true ? ",
               "Observable",
               "<",
               {
@@ -8882,7 +8955,7 @@
                 "id": "def-server.ObservabilityAIAssistantClient.chat.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      systemMessage,\n      messages,\n      connectorId,\n      functions,\n      functionCall,\n      signal,\n      simulateFunctionCalling,\n      tracer,\n      stream,\n    }",
+                "label": "{\n      systemMessage,\n      messages,\n      connectorId,\n      functions,\n      functionCall,\n      signal,\n      simulateFunctionCalling,\n      stream,\n    }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                 "deprecated": false,
@@ -8993,20 +9066,6 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-server.ObservabilityAIAssistantClient.chat.$2.tracer",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "tracer",
-                    "description": [],
-                    "signature": [
-                      "LangTracer"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -9417,7 +9476,7 @@
             "label": "setupKnowledgeBase",
             "description": [],
             "signature": [
-              "(nextInferenceId: string) => Promise<{ reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }>"
+              "(nextInferenceId: string, waitUntilComplete?: boolean) => Promise<{ reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -9437,6 +9496,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-server.ObservabilityAIAssistantClient.setupKnowledgeBase.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "waitUntilComplete",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -9449,7 +9523,7 @@
             "label": "warmupKbModel",
             "description": [],
             "signature": [
-              "(inferenceId: string) => Promise<void>"
+              "(inferenceId: string) => void"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -9481,28 +9555,12 @@
             "label": "reIndexKnowledgeBaseWithLock",
             "description": [],
             "signature": [
-              "(inferenceId: string) => Promise<boolean>"
+              "() => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observabilityAIAssistant",
-                "id": "def-server.ObservabilityAIAssistantClient.reIndexKnowledgeBaseWithLock.$1",
-                "type": "string",
-                "tags": [],
-                "label": "inferenceId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
+            "children": [],
             "returnComment": []
           },
           {
@@ -10348,15 +10406,9 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/observability_ai_assistant/kb/reindex\", ",
-          "TypeC",
-          "<{ query: ",
-          "TypeC",
-          "<{ inference_id: ",
-          "StringC",
-          "; }>; }>, ",
+          "<\"POST /internal/observability_ai_assistant/kb/reindex\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { result: boolean; }, ",
+          ", { success: boolean; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/setup\": ",
           {
@@ -10369,10 +10421,16 @@
           "<\"POST /internal/observability_ai_assistant/kb/setup\", ",
           "TypeC",
           "<{ query: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ inference_id: ",
           "StringC",
-          "; }>; }>, ",
+          "; }>, ",
+          "PartialC",
+          "<{ wait_until_complete: ",
+          "Type",
+          "<boolean, boolean, unknown>; }>]>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", { reindex: boolean; currentInferenceId: string | undefined; nextInferenceId: string; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -12580,6 +12638,81 @@
           ".ConversationUpdate; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.E5_LARGE_IN_EIS_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "E5_LARGE_IN_EIS_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".multilingual-e5-large-elastic\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.E5_SMALL_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "E5_SMALL_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".multilingual-e5-small-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.EIS_PRECONFIGURED_INFERENCE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "EIS_PRECONFIGURED_INFERENCE_IDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ELSER_IN_EIS_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ELSER_IN_EIS_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".elser-v2-elastic\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ELSER_ON_ML_NODE_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ELSER_ON_ML_NODE_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\".elser-2-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

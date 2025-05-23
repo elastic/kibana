@@ -288,6 +288,54 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "cloudSecurityPosture",
+          "id": "def-public.CspClientPluginStart.getCloudSecurityPostureVulnerabilityFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getCloudSecurityPostureVulnerabilityFlyout",
+          "description": [],
+          "signature": [
+            "() => { Component: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingVulnerabilityFlyoutProps",
+              "text": "FindingVulnerabilityFlyoutProps"
+            },
+            ">; Header: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsVulnerabilityFlyoutHeaderProps",
+              "text": "FindingsVulnerabilityFlyoutHeaderProps"
+            },
+            ">; Body: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsVulnerabilityFlyoutContentProps",
+              "text": "FindingsVulnerabilityFlyoutContentProps"
+            },
+            ">; Footer: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsVulnerabilityFlyoutFooterProps",
+              "text": "FindingsVulnerabilityFlyoutFooterProps"
+            },
+            ">; }"
+          ],
+          "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

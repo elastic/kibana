@@ -3240,83 +3240,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.getParser",
-        "type": "Function",
-        "tags": [],
-        "label": "getParser",
-        "description": [],
-        "signature": [
-          "(inputStream: ",
-          "CharStream",
-          ", errorListener: ",
-          "ErrorListener",
-          "<any>, parseListener?: ",
-          "default",
-          " | undefined) => { lexer: ",
-          "default",
-          "; tokens: ",
-          "CommonTokenStream",
-          "; parser: ",
-          "default",
-          "; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/parser/parser.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.getParser.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "inputStream",
-            "description": [],
-            "signature": [
-              "CharStream"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/parser/parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.getParser.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "errorListener",
-            "description": [],
-            "signature": [
-              "ErrorListener",
-              "<any>"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/parser/parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.getParser.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "parseListener",
-            "description": [],
-            "signature": [
-              "default",
-              " | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/parser/parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.isBinaryExpression",
         "type": "Function",
         "tags": [],
@@ -6639,7 +6562,17 @@
             "docId": "kibKbnEsqlAstPluginApi",
             "section": "def-common.ESQLAstJoinCommand",
             "text": "ESQLAstJoinCommand"
-          }
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstChangePointCommand",
+            "text": "ESQLAstChangePointCommand"
+          },
+          " | ",
+          "ESQLAstRerankCommand"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -6709,6 +6642,16 @@
             "section": "def-common.ESQLAstJoinCommand",
             "text": "ESQLAstJoinCommand"
           },
+          " | ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstChangePointCommand",
+            "text": "ESQLAstChangePointCommand"
+          },
+          " | ",
+          "ESQLAstRerankCommand",
           " | ",
           {
             "pluginId": "@kbn/esql-ast",
