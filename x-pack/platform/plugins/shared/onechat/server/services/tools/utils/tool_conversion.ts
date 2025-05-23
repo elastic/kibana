@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ZodRawShape } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { builtinSourceId, ToolSourceType, ToolDescriptor } from '@kbn/onechat-common';
 import type { Runner, RegisteredTool, ExecutableTool } from '@kbn/onechat-server';
 import { RegisteredToolWithMeta } from '../types';
 
 export const addBuiltinSystemMeta = <
-  RunInput extends ZodRawShape = ZodRawShape,
+  RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
 >(
   tool: RegisteredTool<RunInput, RunOutput>
@@ -27,7 +27,7 @@ export const addBuiltinSystemMeta = <
   };
 };
 
-export const toExecutableTool = <RunInput extends ZodRawShape, RunOutput>({
+export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
   tool,
   runner,
   request,

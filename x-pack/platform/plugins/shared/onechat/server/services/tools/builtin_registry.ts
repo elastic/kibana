@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
@@ -23,7 +24,10 @@ export type ToolRegistrationFn = (opts: {
 }) => MaybePromise<RegisteredTool[]>;
 export type ToolDirectRegistration = RegisteredTool;
 
-export type ToolRegistration = ToolDirectRegistration | ToolRegistrationFn;
+export type ToolRegistration<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+> = RegisteredTool<RunInput, RunOutput> | ToolRegistrationFn;
 
 export const isToolRegistrationFn = (tool: ToolRegistration): tool is ToolRegistrationFn => {
   return typeof tool === 'function';
@@ -36,7 +40,7 @@ export const wrapToolRegistration = (tool: ToolDirectRegistration): ToolRegistra
 };
 
 export interface BuiltinToolRegistry extends InternalToolProvider {
-  register(tool: ToolRegistration): void;
+  register(tool: RegisteredTool): void;
 }
 
 export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {

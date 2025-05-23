@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { RegisteredTool } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
+import { addBuiltinSystemMeta } from './utils/tool_conversion';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;
@@ -20,33 +22,19 @@ describe('BuiltinToolRegistry', () => {
   });
 
   describe('register', () => {
-    it('should register a direct tool', async () => {
+    it('should register a tool', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test',
       };
 
       registry.register(mockTool);
-      await expect(registry.list({ request: mockRequest })).resolves.toEqual([mockTool]);
-    });
-
-    it('should register a tool registration function', async () => {
-      const mockTool: RegisteredTool = {
-        id: 'test-tool',
-        name: 'Test Tool',
-        description: 'A test tool',
-        schema: {},
-        handler: async () => 'test',
-      };
-
-      const registrationFn = () => Promise.resolve([mockTool]);
-      registry.register(registrationFn);
-
-      const tools = await registry.list({ request: mockRequest });
-      expect(tools).toEqual([mockTool]);
+      await expect(registry.list({ request: mockRequest })).resolves.toEqual([
+        addBuiltinSystemMeta(mockTool),
+      ]);
     });
   });
 
@@ -56,7 +44,7 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test',
       };
 
@@ -70,7 +58,7 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test',
       };
 
@@ -86,13 +74,13 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test',
       };
 
       registry.register(mockTool);
       const tool = await registry.get({ toolId: 'test-tool', request: mockRequest });
-      expect(tool).toEqual(mockTool);
+      expect(tool).toEqual(addBuiltinSystemMeta(mockTool));
     });
 
     it('should throw an error when tool does not exist', async () => {
@@ -100,7 +88,7 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         name: 'Test Tool',
         description: 'A test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test',
       };
 
@@ -117,7 +105,7 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool-1',
         name: 'Test Tool 1',
         description: 'A test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test1',
       };
 
@@ -125,7 +113,7 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool-2',
         name: 'Test Tool 2',
         description: 'Another test tool',
-        schema: {},
+        schema: z.object({}),
         handler: async () => 'test2',
       };
 
@@ -133,7 +121,7 @@ describe('BuiltinToolRegistry', () => {
       registry.register(mockTool2);
 
       const tools = await registry.list({ request: mockRequest });
-      expect(tools).toEqual([mockTool1, mockTool2]);
+      expect(tools).toEqual([addBuiltinSystemMeta(mockTool1), addBuiltinSystemMeta(mockTool2)]);
     });
 
     it('should return empty array when no tools are registered', async () => {

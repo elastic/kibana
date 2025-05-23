@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z, ZodRawShape, ZodTypeAny } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -22,8 +22,10 @@ export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'sourceType' |
 /**
  * Onechat tool, as registered by tool providers
  */
-export interface RegisteredTool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>
-  extends Omit<ToolDescriptor, 'meta'> {
+export interface RegisteredTool<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+> extends Omit<ToolDescriptor, 'meta'> {
   /**
    * Tool's input schema, in zod format.
    */
@@ -31,7 +33,7 @@ export interface RegisteredTool<RunInput extends ZodRawShape = ZodRawShape, RunO
   /**
    * Handler to call to execute the tool.
    */
-  handler: ToolHandlerFn<RunInput, RunOutput>;
+  handler: ToolHandlerFn<z.infer<RunInput>, RunOutput>;
   /**
    * Optional set of metadata for this tool.
    */
@@ -41,8 +43,10 @@ export interface RegisteredTool<RunInput extends ZodRawShape = ZodRawShape, RunO
 /**
  * Onechat tool, as exposed by the onechat tool registry
  */
-export interface ExecutableTool<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown>
-  extends ToolDescriptor {
+export interface ExecutableTool<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+> extends ToolDescriptor {
   /**
    * Tool's input schema, in zod format.
    */
@@ -50,7 +54,7 @@ export interface ExecutableTool<RunInput extends ZodRawShape = ZodRawShape, RunO
   /**
    * Handler attached to the tool
    */
-  execute: ExecutableToolHandlerFn<z.objectOutputType<RunInput, ZodTypeAny>, RunOutput>;
+  execute: ExecutableToolHandlerFn<z.infer<RunInput>, RunOutput>;
 }
 
 /**
@@ -71,10 +75,10 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 /**
  * Tool handler function for {@link RegisteredTool} handlers.
  */
-export type ToolHandlerFn<RunInput extends ZodRawShape = ZodRawShape, RunOutput = unknown> = (
-  args: z.objectOutputType<RunInput, ZodTypeAny>,
-  context: ToolHandlerContext
-) => MaybePromise<RunOutput>;
+export type ToolHandlerFn<
+  TParams extends Record<string, unknown> = Record<string, unknown>,
+  RunOutput = unknown
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<RunOutput>;
 
 /**
  * Scoped context which can be used during tool execution to access

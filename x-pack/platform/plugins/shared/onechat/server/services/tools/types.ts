@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodRawShape } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
 import type {
@@ -19,7 +19,9 @@ import type {
 import { ToolRegistration } from './builtin_registry';
 
 export interface ToolsServiceSetup {
-  register(toolRegistration: ToolRegistration): void;
+  register<RunInput extends ZodObject<any>, RunOutput = unknown>(
+    toolRegistration: ToolRegistration<RunInput, RunOutput>
+  ): void;
 }
 
 export interface ToolsServiceStart {
@@ -30,7 +32,7 @@ export interface ToolsServiceStart {
 }
 
 export type RegisteredToolWithMeta<
-  RunInput extends ZodRawShape = ZodRawShape,
+  RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
 > = Omit<RegisteredTool<RunInput, RunOutput>, 'meta'> & {
   meta: ToolDescriptorMeta;
