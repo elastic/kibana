@@ -87,7 +87,6 @@ export function KeyboardShortcuts() {
             <EuiButtonIcon
               size="xs"
               iconType="keyboard"
-              color="text"
               data-test-subj="editorKeyboardShortcutsButton"
               onClick={() => setIsOpen(!isOpen)}
               aria-label={label}
