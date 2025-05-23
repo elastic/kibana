@@ -7,22 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isRangeFilter, type Filter, type RangeFilter } from '../build_filters';
-import type { TimeRange } from './types';
+import { keys, partition } from 'lodash';
+import { Filter, isRangeFilter, RangeFilter } from '../build_filters';
+import { TimeRange } from './types';
 import { convertRangeFilterToTimeRangeString } from './convert_range_filter';
 
 export function extractTimeFilter(
   timeFieldName: string,
   filters: Filter[]
 ): { restOfFilters: Filter[]; timeRangeFilter?: RangeFilter } {
-  const restOfFilters = filters.filter((f) => !isRangeFilter(f));
-  const timeRangeFilter = filters.find(
-    (f): f is RangeFilter => isRangeFilter(f) && timeFieldName === Object.keys(f.query.range)[0]
+  const [timeRangeFilter, restOfFilters] = partition<Filter, RangeFilter>(
+    filters,
+    (f: Filter): f is RangeFilter => isRangeFilter(f) && timeFieldName === keys(f.query.range)[0]
   );
 
   return {
     restOfFilters,
-    timeRangeFilter,
+    timeRangeFilter: timeRangeFilter[0],
   };
 }
 
