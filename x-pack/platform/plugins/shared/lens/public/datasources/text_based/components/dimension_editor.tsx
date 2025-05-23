@@ -57,7 +57,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           Object.values(indexPatterns).length
             ? Object.values(indexPatterns)[0].timeFieldName
             : undefined,
-            esqlVariables
+          esqlVariables
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);

@@ -22,6 +22,8 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
+import { BehaviorSubject } from 'rxjs';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -40,10 +42,7 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { useStateFromPublishingSubject } from '../../../../../../../../../src/platform/packages/shared/presentation/presentation_publishing';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
-import { BehaviorSubject } from 'rxjs';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
