@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { hasCapabilities, existCapabilities, type RequiredCapabilities } from './has_capabilities';
-export { CapabilitiesChecker } from './capabilities_checker';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

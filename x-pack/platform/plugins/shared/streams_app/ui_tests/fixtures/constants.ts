@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { hasCapabilities, existCapabilities, type RequiredCapabilities } from './has_capabilities';
-export { CapabilitiesChecker } from './capabilities_checker';
+export const KBN_ARCHIVES = {
+  DASHBOARD: 'x-pack/test/functional/fixtures/kbn_archiver/dashboard/simple.json',
+};
