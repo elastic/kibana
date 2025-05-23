@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
@@ -24,13 +24,9 @@ export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
 {
   private telemetry = new TelemetryService();
-  private isServerless = false;
 
-  constructor(private context: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
+  public setup(core: CoreSetup, _plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
-    this.isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
     return {};
   }
@@ -46,27 +42,21 @@ export class DatasetQualityPlugin
       http: core.http,
     });
 
-    // TODO: Remove first check once the failure store is enabled
-    const isFailureStoreEnabled = false && !this.isServerless;
-
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
       telemetryClient,
-      isFailureStoreEnabled,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsService,
-      isFailureStoreEnabled,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
       core,
       plugins,
       telemetryClient,
-      isFailureStoreEnabled,
     });
 
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
@@ -74,7 +64,6 @@ export class DatasetQualityPlugin
       plugins,
       dataStreamStatsService,
       dataStreamDetailsService,
-      isFailureStoreEnabled,
     });
 
     return {

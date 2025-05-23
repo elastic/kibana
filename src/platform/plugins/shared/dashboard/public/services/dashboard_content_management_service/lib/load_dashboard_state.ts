@@ -8,7 +8,6 @@
  */
 
 import { has } from 'lodash';
-
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -85,7 +84,11 @@ export const loadDashboardState = async ({
         id,
       })
       .catch((e) => {
-        throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+        if (e.response?.status === 404) {
+          throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+        }
+        const message = (e.body as { message?: string })?.message ?? e.message;
+        throw new Error(message);
       });
 
     ({ item: rawDashboardContent, meta: resolveMeta } = result);
@@ -136,7 +139,7 @@ export const loadDashboardState = async ({
         references
       ) as DashboardSearchSource;
       return await dataSearchService.searchSource.create(searchSourceValues);
-    } catch (error: any) {
+    } catch (error) {
       return await dataSearchService.searchSource.create();
     }
   })();

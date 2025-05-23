@@ -32,7 +32,8 @@
       "lens",
       "controls",
       "embeddable",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "uiActions"
     ],
     "optionalPlugins": [
       "cloud",
