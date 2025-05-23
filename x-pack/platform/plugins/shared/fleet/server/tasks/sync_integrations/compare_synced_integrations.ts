@@ -162,6 +162,21 @@ const compareIntegrations = (
         install_status: ccrIntegration.install_status,
       };
       const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
+      // Handle case of integration uninstalled from both clusters
+      if (
+        isSyncUninstalledEnabled &&
+        !localIntegrationSO?.attributes &&
+        ccrIntegration.install_status === 'not_installed'
+      ) {
+        return {
+          ...baseIntegrationData,
+          install_status: {
+            main: 'not_installed',
+            remote: 'not_installed',
+          },
+          sync_status: SyncStatus.COMPLETED,
+        };
+      }
       if (!localIntegrationSO) {
         return {
           ...baseIntegrationData,
@@ -197,7 +212,7 @@ const compareIntegrations = (
           : '';
         const latestFailedAttempt = localIntegrationSO?.attributes
           ?.latest_install_failed_attempts?.[0]?.error?.message
-          ? `- reason: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
+          ? ` ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
           : '';
         return {
           ...baseIntegrationData,
@@ -223,7 +238,7 @@ const compareIntegrations = (
           : '';
         const latestUninstallFailedAttempt = localIntegrationSO?.attributes
           ?.latest_uninstall_failed_attempts?.[0]?.error?.message
-          ? `- reason: ${localIntegrationSO?.attributes?.latest_uninstall_failed_attempts[0].error.message}`
+          ? `${localIntegrationSO?.attributes?.latest_uninstall_failed_attempts[0].error.message}`
           : '';
         return {
           ...baseIntegrationData,

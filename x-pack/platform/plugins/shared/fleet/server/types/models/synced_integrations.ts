@@ -23,6 +23,7 @@ export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBase
     schema.literal(SyncStatus.WARNING),
   ]),
   error: schema.maybe(schema.string()),
+  warning: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
   install_status: schema.object({
     main: schema.string(),

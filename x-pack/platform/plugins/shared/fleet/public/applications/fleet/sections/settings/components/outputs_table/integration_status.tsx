@@ -130,6 +130,12 @@ export const IntegrationStatus: React.FunctionComponent<{
     const integrationStatus = getIntegrationStatus(statuses).toUpperCase();
     const { euiTheme } = useEuiTheme();
     const { docLinks } = useStartServices();
+
+    const titleTextColor =
+      integration.install_status.main !== 'installed'
+        ? euiTheme.colors.textDisabled
+        : euiTheme.colors.textParagraph;
+
     return (
       <CollapsiblePanel
         id={integration.package_name}
@@ -149,19 +155,13 @@ export const IntegrationStatus: React.FunctionComponent<{
                       />
                     </EuiFlexItem>
                     <EuiFlexItem className="eui-textTruncate">
-                      <EuiTitle size="xs">
-                        {syncUninstalledIntegrations &&
-                        integration.install_status.main !== 'installed' ? (
-                          <p
-                            css={css`
-                              color: ${euiTheme.colors.textDisabled};
-                            `}
-                          >
-                            {packageInfo?.title ?? integration.package_name}
-                          </p>
-                        ) : (
-                          <p>{packageInfo?.title ?? integration.package_name}</p>
-                        )}
+                      <EuiTitle
+                        size="xs"
+                        css={css`
+                          color: ${titleTextColor};
+                        `}
+                      >
+                        <p>{packageInfo?.title ?? integration.package_name}</p>
                       </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -177,29 +177,6 @@ export const IntegrationStatus: React.FunctionComponent<{
         <>
           {integration?.error && (
             <>
-              {/* {syncUninstalledIntegrations && (
-                <>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.integrationSyncStatus.integrationErrorContent"
-                      defaultMessage="This integration was uninstalled but could not be uninstalled on the remote cluster. Check out the {troubleshootingLink} for help."
-                      values={{
-                        troubleshootingLink: (
-                          <EuiLink
-                            href={docLinks.links.fleet.remoteESOoutputTroubleshooting}
-                            target="_blank"
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.integrationsSyncFlyout.integrationStatus.troubleshootingLinkLabel"
-                              defaultMessage="troubleshooting guide"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </>
-              )} */}
               <EuiSpacer size="m" />
               <EuiCallOut
                 title={
@@ -218,7 +195,8 @@ export const IntegrationStatus: React.FunctionComponent<{
               <EuiSpacer size="m" />
             </>
           )}
-          {integration?.warning && (
+
+          {integration.sync_status === 'warning' && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
@@ -226,10 +204,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                   syncUninstalledIntegrations ? (
                     <FormattedMessage
                       id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
-                      defaultMessage="Integration was uninstalled, but removal from remote cluster failed. {uninstallWarning}"
-                      values={{
-                        uninstallWarning: integration?.warning,
-                      }}
+                      defaultMessage="Integration was uninstalled, but removal from remote cluster failed."
                     />
                   ) : (
                     <FormattedMessage
@@ -243,15 +218,17 @@ export const IntegrationStatus: React.FunctionComponent<{
                 size="s"
                 data-test-subj="integrationSyncIntegrationWarningCallout"
               >
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
-                    defaultMessage="{uninstallWarning}"
-                    values={{
-                      uninstallWarning: integration?.warning,
-                    }}
-                  />
-                </EuiText>
+                {integration?.warning && (
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
+                      defaultMessage="{uninstallWarning}"
+                      values={{
+                        uninstallWarning: integration?.warning,
+                      }}
+                    />
+                  </EuiText>
+                )}
                 <EuiSpacer size="m" />
                 <EuiButton
                   color="warning"
@@ -265,9 +242,10 @@ export const IntegrationStatus: React.FunctionComponent<{
                   />
                 </EuiButton>
               </EuiCallOut>
-              <EuiSpacer size="m" />
             </>
           )}
+          <EuiSpacer size="m" />
+
           {customAssets.map((customAsset) => {
             return (
               <EuiAccordion

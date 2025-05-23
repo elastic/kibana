@@ -91,8 +91,14 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
             {(syncedIntegrationsStatus?.integrations ?? [])
-              // don't show integrations that have no remote install_status, as they were likely uninstalled
-              .filter((integration) => integration.install_status?.remote !== undefined)
+              // don't show integrations that were successfully uninstalled
+              .filter(
+                (integration) =>
+                  !(
+                    integration.install_status?.main === 'not_installed' &&
+                    integration.install_status?.remote === 'not_installed'
+                  )
+              )
               .map((integration) => {
                 const customAssets = Object.values(
                   syncedIntegrationsStatus?.custom_assets ?? {}
