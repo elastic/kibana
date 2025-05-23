@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         expect(datasetSelectorText).to.eql(regularDatasetName);
       });
 
-      it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
+      it('should go to discover for degraded docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
@@ -436,10 +436,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        });
       });
     });
 

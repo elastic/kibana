@@ -31,6 +31,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
   breakdownField,
   sendTelemetry,
   selector,
+  forceDiscover = false,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
@@ -38,6 +39,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
   breakdownField?: string;
   sendTelemetry: SendTelemetryFn;
   selector?: DataStreamSelector;
+  forceDiscover?: boolean;
 }) => {
   const {
     services: { share, application },
@@ -68,7 +70,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
     navigate: () => void;
     isLogsExplorerAvailable: boolean;
   }>(() => {
-    const isLogsExplorerAvailable =
+    const isLogsExplorerAvailable = !forceDiscover &&
       isLogsExplorerAppAccessible && !!logsExplorerLocator && dataStreamStat.type === 'logs';
     const config = isLogsExplorerAvailable
       ? buildLogsExplorerConfig({
