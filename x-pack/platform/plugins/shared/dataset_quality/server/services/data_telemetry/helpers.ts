@@ -6,7 +6,7 @@
  */
 
 import { intersection } from 'lodash';
-import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
+import { from, of, Observable, concatMap, delay, map, toArray, forkJoin, catchError } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   IndicesGetMappingResponse,
@@ -110,9 +110,7 @@ export function addMappingsToIndices({
   const patterns = logsIndexPatterns.map((pattern) => pattern.pattern);
   return from(
     reduceAsyncChunks<IndicesGetMappingResponse>(patterns, (patternChunk) =>
-      esClient.indices.getMapping({
-        index: patternChunk,
-      })
+      safeMappingCall(esClient, patternChunk)
     )
   ).pipe(
     map((mappings) => {
@@ -230,30 +228,68 @@ export function groupStatsByPatternName(
 export function getIndexBasicStats({
   esClient,
   indices,
-  breatheDelay,
+  breatheDelay = 100,
 }: {
   esClient: ElasticsearchClient;
   indices: IndexBasicInfo[];
-  breatheDelay: number;
+  breatheDelay?: number;
 }): Observable<DataStreamStatsPerNamespace[]> {
+  if (indices.length === 0) {
+    return of([]);
+  }
   const indexNames = indices.map((info) => info.name);
 
   return from(
-    reduceAsyncChunks(indexNames, (indexChunk) =>
-      esClient.indices.stats({ index: indexChunk, metric: ['docs'] })
+    reduceAsyncChunks<IndicesStatsResponse>(indexNames, (indexChunk) =>
+      safeEsCall(() =>
+        esClient.indices.stats({
+          index: indexChunk,
+          metric: ['docs'],
+          filter_path: ['indices.*.total.docs'],
+        })
+      )
     )
   ).pipe(
     delay(breatheDelay),
-    concatMap((allIndexStats) => {
-      return from(getFailureStoreStats({ esClient, indexName: indexNames.join(',') })).pipe(
-        map((allFailureStoreStats) => {
-          return indices.map((info) =>
-            getIndexStats(allIndexStats.indices, allFailureStoreStats, info)
-          );
-        })
-      );
+    concatMap((allIndexStats) =>
+      from(getFailureStoreStats({ esClient, indexName: indexNames.join(',') })).pipe(
+        map((allFailureStoreStats) =>
+          indices.map((info) => getIndexStats(allIndexStats.indices, allFailureStoreStats, info))
+        )
+      )
+    ),
+    catchError((error) => {
+      return of([]);
     })
   );
+}
+
+async function safeMappingCall(
+  esClient: ElasticsearchClient,
+  chunk: string[],
+  { retries = 1 } = {}
+): Promise<Record<string, any>> {
+  try {
+    const result = await esClient.indices.getMapping({
+      index: chunk,
+      filter_path: ['*.mappings'],
+    });
+    return (result as any).body ?? result;
+  } catch (err: any) {
+    const type = err?.meta?.body?.error?.type;
+    if (
+      retries > 0 &&
+      (type === 'too_long_http_line_exception' || err.message?.includes('DeserializationError'))
+    ) {
+      if (chunk.length > 1) {
+        const mid = Math.ceil(chunk.length / 2);
+        const left = await safeMappingCall(esClient, chunk.slice(0, mid), { retries: 0 });
+        const right = await safeMappingCall(esClient, chunk.slice(mid), { retries: 0 });
+        return { ...left, ...right };
+      }
+    }
+    throw err;
+  }
 }
 
 export function getIndexFieldStats({
@@ -320,31 +356,47 @@ export async function getIndicesInfoForPattern({
   pattern: DatasetIndexPattern;
 }): Promise<IndexBasicInfo[]> {
   const indices = Array.isArray(pattern.pattern) ? pattern.pattern : [pattern.pattern];
-  const resp = await reduceAsyncChunks<IndicesGetResponse>(indices, (indexChunk) =>
-    esClient.indices.get({
-      index: indexChunk,
-      features: ['mappings'],
-    })
-  );
+  try {
+    const resp = await reduceAsyncChunks<IndicesGetResponse>(indices, (indexChunk) =>
+      safeEsCall(() =>
+        esClient.indices.get({
+          index: indexChunk,
+          features: ['mappings'],
+          filter_path: ['*.mappings', '*._meta'],
+        })
+      )
+    );
 
-  return Object.entries(resp).map(([index, indexInfo]) => {
-    // This is needed to keep the format same for data streams and indices
-    const indexMapping: IndicesGetMappingResponse | undefined = indexInfo.mappings
-      ? {
-          [index]: { mappings: indexInfo.mappings },
-        }
-      : undefined;
+    return Object.entries(resp).map(([index, indexInfo]) => {
+      // This is needed to keep the format same for data streams and indices
+      const indexMapping: IndicesGetMappingResponse | undefined = indexInfo.mappings
+        ? {
+            [index]: { mappings: indexInfo.mappings },
+          }
+        : undefined;
 
-    return {
+      return {
+        patternName: pattern.patternName,
+        shipper: pattern.shipper,
+        isDataStream: false,
+        name: index,
+        indices: [index],
+        mapping: indexMapping,
+        meta: indexInfo.mappings?._meta,
+      };
+    });
+  } catch (error) {
+    // Fallback to empty mappings but return basic info for all indices
+    return indices.map((idx) => ({
       patternName: pattern.patternName,
       shipper: pattern.shipper,
       isDataStream: false,
-      name: index,
-      indices: [index],
-      mapping: indexMapping,
-      meta: indexInfo.mappings?._meta,
-    };
-  });
+      name: idx,
+      indices: [idx],
+      mapping: undefined,
+      meta: undefined,
+    }));
+  }
 }
 
 /**
@@ -581,4 +633,12 @@ function getFieldPathsMapFromMapping(mapping: MappingPropertyBase): Record<strin
 
   traverseMapping(mapping);
   return fieldPathsMap;
+}
+
+async function safeEsCall<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    throw error;
+  }
 }
