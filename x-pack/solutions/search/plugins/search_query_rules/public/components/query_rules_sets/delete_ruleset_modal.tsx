@@ -20,15 +20,25 @@ import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
 export interface DeleteRulesetModalProps {
   rulesetId: string;
   closeDeleteModal: () => void;
+  onSuccess?: () => void;
 }
 
-export const DeleteRulesetModal = ({ closeDeleteModal, rulesetId }: DeleteRulesetModalProps) => {
+export const DeleteRulesetModal = ({
+  closeDeleteModal,
+  rulesetId,
+  onSuccess: onSuccessProp,
+}: DeleteRulesetModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const onSuccess = () => {
     setIsLoading(false);
     closeDeleteModal();
+    if (onSuccessProp) {
+      onSuccessProp();
+    }
   };
+
   const confirmCheckboxId = useGeneratedHtmlId({
     prefix: 'confirmCheckboxId',
   });
