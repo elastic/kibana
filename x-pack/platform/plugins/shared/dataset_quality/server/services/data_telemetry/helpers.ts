@@ -348,7 +348,7 @@ async function getDataStreamsInfoForPattern({
   }));
 }
 
-export async function getIndicesInfoForPattern({
+async function getIndicesInfoForPattern({
   esClient,
   pattern,
 }: {
