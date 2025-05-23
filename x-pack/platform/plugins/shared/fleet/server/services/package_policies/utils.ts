@@ -26,6 +26,7 @@ import {
   PackagePolicyMultipleAgentPoliciesError,
   PackagePolicyOutputError,
   PackagePolicyContentPackageError,
+  PackagePolicyNotAllowedError,
 } from '../../errors';
 import { licenseService } from '../license';
 import { outputService } from '../output';
@@ -48,7 +49,7 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
 export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy | NewPackagePolicy,
-  packageInfo?: Pick<PackageInfo, 'type'>
+  packageInfo?: PackageInfo
 ) {
   // Package policies cannot be created for content type packages
   if (packageInfo?.type === 'content') {
@@ -70,6 +71,18 @@ export async function preflightCheckPackagePolicy(
     if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
       throw new PackagePolicyOutputError(outputForIntegrationErrorMessage);
     }
+  }
+
+  const installSource =
+    packageInfo &&
+    'savedObject' in packageInfo &&
+    packageInfo.savedObject?.attributes.install_source;
+  const isCustom = installSource === 'custom' || installSource === 'upload';
+
+  if (isCustom && packagePolicy.supports_agentless) {
+    throw new PackagePolicyNotAllowedError(
+      'Custom integration agentless deployments are not allowed'
+    );
   }
 }
 
