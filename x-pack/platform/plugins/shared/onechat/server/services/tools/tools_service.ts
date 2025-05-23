@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { Runner } from '@kbn/onechat-server';
-import {
-  createBuiltinToolRegistry,
-  type BuiltinToolRegistry,
-  type ToolRegistration,
-} from './builtin_registry';
+import type { Runner, RegisteredTool } from '@kbn/onechat-server';
+import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { createInternalRegistry } from './utils';
 
@@ -39,7 +35,7 @@ export class ToolsService {
     };
   }
 
-  private register(toolRegistration: ToolRegistration) {
+  private register(toolRegistration: RegisteredTool<any, any>) {
     this.builtinRegistry.register(toolRegistration);
   }
 }

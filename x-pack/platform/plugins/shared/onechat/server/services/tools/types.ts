@@ -16,11 +16,10 @@ import type {
   ToolProviderListOptions,
   ExecutableTool,
 } from '@kbn/onechat-server';
-import { ToolRegistration } from './builtin_registry';
 
 export interface ToolsServiceSetup {
   register<RunInput extends ZodObject<any>, RunOutput = unknown>(
-    toolRegistration: ToolRegistration<RunInput, RunOutput>
+    tool: RegisteredTool<RunInput, RunOutput>
   ): void;
 }
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RegisteredTool } from '@kbn/onechat-server';
@@ -22,7 +23,7 @@ describe('combineToolProviders', () => {
     id,
     name: `Tool ${id}`,
     description: `Description for tool ${id}`,
-    schema: {},
+    schema: z.object({}),
     handler: jest.fn(),
   });
 
