@@ -106,6 +106,8 @@ describe('StatusRuleExecutor', () => {
           upConfigs: {},
           downConfigs: {},
           enabledMonitorQueryIds: [],
+          pendingConfigs: {},
+          configStats: {},
         });
 
       // Create a new instance with empty locations array
@@ -134,7 +136,7 @@ describe('StatusRuleExecutor', () => {
         .mockResolvedValue(testMonitors);
 
       // Execute
-      await statusRuleWithEmptyLocations.getDownChecks({});
+      await statusRuleWithEmptyLocations.getConfigs({});
 
       // Verify that queryMonitorStatusAlert was called passing the monitor location
       expect(spy).toHaveBeenCalledWith(
