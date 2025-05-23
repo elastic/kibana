@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import { IndicesQuerySourceFields } from '../types';
-import {
-  createQuery,
-  getDefaultQueryFields,
-  getDefaultSourceFields,
-  getIndicesWithNoSourceFields,
-} from './create_query';
+import { QueryGenerationFieldDescriptors } from './types';
+import { generateSearchQuery } from './generate_query';
 
-describe('create_query', () => {
+describe('generate_query', () => {
   const sourceFields = { index1: [], index2: [] };
 
-  describe('createQuery', () => {
+  describe('generateSearchQuery', () => {
     it('should return a sparse single query', () => {
       const fields = {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -35,7 +30,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           standard: {
             query: {
@@ -55,7 +50,7 @@ describe('create_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: false },
@@ -68,7 +63,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           standard: {
             query: {
@@ -89,7 +84,7 @@ describe('create_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', indices: ['index1'] }],
@@ -100,7 +95,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           standard: {
             query: {
@@ -126,7 +121,7 @@ describe('create_query', () => {
         index2: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             {
@@ -159,7 +154,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           standard: {
             query: {
@@ -180,7 +175,7 @@ describe('create_query', () => {
         index2: ['field2'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -203,7 +198,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           rrf: {
             retrievers: [
@@ -242,7 +237,7 @@ describe('create_query', () => {
           index2: ['field2'],
         };
 
-        const fieldDescriptors: IndicesQuerySourceFields = {
+        const fieldDescriptors: QueryGenerationFieldDescriptors = {
           index1: {
             elser_query_fields: [
               { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -265,39 +260,41 @@ describe('create_query', () => {
           },
         };
 
-        expect(createQuery(fields, sourceFields, fieldDescriptors, { rrf: false })).toEqual({
-          retriever: {
-            standard: {
-              query: {
-                bool: {
-                  should: [
-                    {
-                      sparse_vector: {
-                        field: 'field1',
-                        inference_id: 'model1',
-                        query: '{query}',
+        expect(generateSearchQuery(fields, sourceFields, fieldDescriptors, { rrf: false })).toEqual(
+          {
+            retriever: {
+              standard: {
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        sparse_vector: {
+                          field: 'field1',
+                          inference_id: 'model1',
+                          query: '{query}',
+                        },
                       },
-                    },
-                    {
-                      multi_match: {
-                        query: '{query}',
-                        fields: ['content', 'title'],
+                      {
+                        multi_match: {
+                          query: '{query}',
+                          fields: ['content', 'title'],
+                        },
                       },
-                    },
-                    {
-                      sparse_vector: {
-                        field: 'field2',
-                        inference_id: 'model1',
-                        query: '{query}',
+                      {
+                        sparse_vector: {
+                          field: 'field2',
+                          inference_id: 'model1',
+                          query: '{query}',
+                        },
                       },
-                    },
-                  ],
-                  minimum_should_match: 1,
+                    ],
+                    minimum_should_match: 1,
+                  },
                 },
               },
             },
-          },
-        });
+          }
+        );
       });
     });
 
@@ -308,7 +305,7 @@ describe('create_query', () => {
           index2: ['field2'],
         };
 
-        const fieldDescriptors: IndicesQuerySourceFields = {
+        const fieldDescriptors: QueryGenerationFieldDescriptors = {
           index1: {
             elser_query_fields: [
               { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -331,7 +328,7 @@ describe('create_query', () => {
           },
         };
 
-        expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+        expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
           retriever: {
             rrf: {
               retrievers: [
@@ -379,7 +376,7 @@ describe('create_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', indices: ['index1'] }],
@@ -400,7 +397,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           standard: {
             query: {
@@ -426,7 +423,7 @@ describe('create_query', () => {
         index1: ['field1', 'title', 'content'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', indices: ['index1'] }],
@@ -437,7 +434,7 @@ describe('create_query', () => {
         },
       };
 
-      expect(createQuery(fields, sourceFields, fieldDescriptors)).toEqual({
+      expect(generateSearchQuery(fields, sourceFields, fieldDescriptors)).toEqual({
         retriever: {
           rrf: {
             retrievers: [
@@ -481,7 +478,7 @@ describe('create_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -502,7 +499,7 @@ describe('create_query', () => {
           };
 
           expect(
-            createQuery(
+            generateSearchQuery(
               fields,
               {
                 index1: ['field2'],
@@ -549,7 +546,7 @@ describe('create_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -570,7 +567,7 @@ describe('create_query', () => {
           };
 
           expect(
-            createQuery(
+            generateSearchQuery(
               fields,
               {
                 index1: ['content'],
@@ -601,7 +598,7 @@ describe('create_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -622,7 +619,7 @@ describe('create_query', () => {
           };
 
           expect(
-            createQuery(
+            generateSearchQuery(
               fields,
               {
                 index1: ['field2'],
@@ -669,7 +666,7 @@ describe('create_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -690,7 +687,7 @@ describe('create_query', () => {
           };
 
           expect(
-            createQuery(
+            generateSearchQuery(
               fields,
               {
                 index1: ['content'],
@@ -713,276 +710,6 @@ describe('create_query', () => {
           });
         });
       });
-    });
-  });
-
-  describe('getDefaultQueryFields', () => {
-    it('should return default ELSER query fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [
-            { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
-          ],
-          dense_vector_query_fields: [
-            { field: 'field1', model_id: 'dense_model', indices: ['index1'] },
-          ],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-
-      expect(getDefaultQueryFields(fieldDescriptors)).toEqual({ index1: ['field1'] });
-    });
-
-    it('should return default elser query fields for multiple indices', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [
-            { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
-          ],
-          dense_vector_query_fields: [
-            {
-              field: 'dv_field1',
-              model_id: 'dense_model',
-
-              indices: ['index1', 'index2'],
-            },
-          ],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-        index2: {
-          elser_query_fields: [
-            { field: 'vector', model_id: 'model1', indices: ['index2'], sparse_vector: true },
-          ],
-          dense_vector_query_fields: [
-            {
-              field: 'dv_field1',
-              model_id: 'dense_model',
-
-              indices: ['index1', 'index2'],
-            },
-          ],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-
-      expect(getDefaultQueryFields(fieldDescriptors)).toEqual({
-        index1: ['field1'],
-        index2: ['vector'],
-      });
-    });
-
-    it('should return elser query fields for default fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [
-            { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
-          ],
-          dense_vector_query_fields: [
-            {
-              field: 'dv_field1',
-              model_id: 'dense_model',
-
-              indices: ['index1', 'index2'],
-            },
-          ],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-        index2: {
-          elser_query_fields: [
-            { field: 'vector', model_id: 'model1', indices: ['index2'], sparse_vector: true },
-          ],
-          dense_vector_query_fields: [
-            {
-              field: 'dv_field1',
-              model_id: 'dense_model',
-
-              indices: ['index1', 'index2'],
-            },
-          ],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-
-      expect(getDefaultQueryFields(fieldDescriptors)).toEqual({
-        index1: ['field1'],
-        index2: ['vector'],
-      });
-    });
-
-    it('should fallback to dense vector fields for index', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [],
-          dense_vector_query_fields: [
-            { field: 'dv_field1', model_id: 'dense_model', indices: ['index1'] },
-          ],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-
-      expect(getDefaultQueryFields(fieldDescriptors)).toEqual({ index1: ['dv_field1'] });
-    });
-
-    it('should fallback to all BM25 fields in index, using suggested fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: ['title', 'text', 'content'],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-
-      expect(getDefaultQueryFields(fieldDescriptors)).toEqual({
-        index1: ['title', 'text', 'content'],
-      });
-    });
-
-    it('should fallback to all BM25 fields in index, only using first unrecognised field', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        index1: {
-          elser_query_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: ['unknown1', 'unknown2'],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-
-      expect(getDefaultQueryFields(fieldDescriptors)).toEqual({
-        index1: ['unknown1'],
-      });
-    });
-  });
-
-  describe('getDefaultSourceFields', () => {
-    it('should return source fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        'search-search-labs': {
-          elser_query_fields: [],
-          dense_vector_query_fields: [],
-          semantic_fields: [],
-          bm25_query_fields: [
-            'additional_urls',
-            'title',
-            'links',
-            'id',
-            'url_host',
-            'url_path',
-            'url_path_dir3',
-            'body_content',
-            'domains',
-            'url',
-            'url_scheme',
-            'meta_description',
-            'headings',
-            'url_path_dir2',
-            'url_path_dir1',
-          ],
-          source_fields: [
-            'additional_urls',
-            'title',
-            'links',
-            'id',
-            'url_host',
-            'url_path',
-            'url_path_dir3',
-            'body_content',
-            'domains',
-            'url',
-            'url_scheme',
-            'meta_description',
-            'headings',
-            'url_path_dir2',
-            'url_path_dir1',
-          ],
-          skipped_fields: 0,
-        },
-      };
-
-      expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
-        'search-search-labs': [
-          'additional_urls',
-          'title',
-          'links',
-          'id',
-          'url_host',
-          'url_path',
-          'url_path_dir3',
-          'body_content',
-          'domains',
-          'url',
-          'url_scheme',
-          'meta_description',
-          'headings',
-          'url_path_dir2',
-          'url_path_dir1',
-        ],
-      });
-    });
-
-    it('should return undefined with index name when no source fields found', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        'search-search-labs': {
-          elser_query_fields: [],
-          semantic_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-        },
-      };
-
-      const defaultSourceFields = getDefaultSourceFields(fieldDescriptors);
-
-      expect(defaultSourceFields).toEqual({
-        'search-search-labs': [undefined],
-      });
-    });
-  });
-
-  describe('getIndicesWithNoSourceFields', () => {
-    it('should return undefined if all indices have source fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        empty_index: {
-          elser_query_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: [],
-          source_fields: [],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-        non_empty_index: {
-          elser_query_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: ['field2'],
-          source_fields: ['field1'],
-          skipped_fields: 0,
-          semantic_fields: [],
-        },
-      };
-      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toEqual(['empty_index']);
     });
   });
 });
