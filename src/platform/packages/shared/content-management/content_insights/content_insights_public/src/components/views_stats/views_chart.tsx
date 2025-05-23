@@ -51,28 +51,7 @@ export const ViewsChart = ({ data }: { data: Array<[week: number, views: number]
         timeZone={momentTz}
       />
 
-      <Axis
-        id="time"
-        position="bottom"
-        tickFormat={weekOfFormatter}
-        timeAxisLayerCount={2}
-        style={{
-          tickLabel: {
-            visible: true,
-            padding: 0,
-            rotation: 0,
-            alignment: {
-              vertical: 'bottom',
-              horizontal: 'left',
-            },
-          },
-          tickLine: {
-            visible: true,
-            size: 0,
-            padding: 4,
-          },
-        }}
-      />
+      <Axis id="time" position="bottom" tickFormat={weekOfFormatter} />
       <Axis id="views" position="left" maximumFractionDigits={0} />
     </Chart>
   );

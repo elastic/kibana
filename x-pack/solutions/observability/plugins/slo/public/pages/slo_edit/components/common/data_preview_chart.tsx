@@ -287,19 +287,7 @@ export function DataPreviewChart({
                 })}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
-                timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
-                style={{
-                  tickLine: { size: 0, padding: 4, visible: true },
-                  tickLabel: {
-                    alignment: {
-                      horizontal: Position.Left,
-                      vertical: Position.Bottom,
-                    },
-                    padding: 0,
-                    offset: { x: 0, y: 0 },
-                  },
-                }}
               />
 
               <LineSeries
