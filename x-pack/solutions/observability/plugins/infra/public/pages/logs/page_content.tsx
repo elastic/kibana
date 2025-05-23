@@ -21,6 +21,9 @@ import {
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { safeDecode } from '@kbn/rison';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { isDevMode } from '@kbn/xstate-utils';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
@@ -61,7 +64,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const enableDeveloperRoutes = isDevMode();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-
   const routes = getLogsAppRoutes({ isLogsStreamEnabled });
 
   const settingsLinkProps = useLinkProps({
@@ -96,21 +98,28 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
-        {routes.stream ? (
-          <Route path={routes.stream.path} component={StreamPage} />
-        ) : (
-          <Route
-            path="/stream"
-            exact
-            render={() => {
-              share.url.locators
-                .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-                ?.navigate({});
+        <Route
+          path="/stream"
+          exact
+          render={(props) => {
+            const searchParams = new URLSearchParams(props.location.search);
+            const logFilterEncoded = searchParams.get('logFilter');
+            let locatorParams: LogsLocatorParams = {};
 
-              return null;
-            }}
-          />
-        )}
+            if (logFilterEncoded) {
+              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
+
+              locatorParams = {
+                timeRange: logFilter?.timeRange,
+                query: logFilter?.query,
+                filters: logFilter?.filters,
+              };
+            }
+
+            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate(locatorParams);
+            return null;
+          }}
+        />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
         <Route path={routes.settings.path} component={LogsSettingsPage} />
