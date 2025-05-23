@@ -994,7 +994,8 @@ ROW
                     1234567890,
                     1234567890,
                     1234567890,
-                    1234567890]))))))))`);
+                    1234567890
+                  ]))))))))`);
       });
     });
 
@@ -1021,7 +1022,8 @@ ROW
   [
     "..............................................",
     "..............................................",
-    ".............................................."]`);
+    ".............................................."
+  ]`);
       });
     });
   });
@@ -1052,7 +1054,8 @@ FROM a
         (
           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
-          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")`);
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        )`);
     });
   });
 });
