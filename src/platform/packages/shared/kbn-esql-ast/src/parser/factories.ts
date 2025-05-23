@@ -90,7 +90,7 @@ export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields 
   incomplete: Boolean(ctx.exception),
 });
 
-const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
+export const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
   const text = node.getText();
   const symbol = node.symbol;
   const fields: AstNodeParserFields = {

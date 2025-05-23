@@ -77,7 +77,6 @@ import {
   createOption,
   createParam,
   createPolicy,
-  createSetting,
   createTimeUnit,
   createUnknownItem,
   nonNullable,
@@ -152,7 +151,17 @@ export function getPolicyName(ctx: EnrichCommandContext) {
   const policyComponents = ctx._policyName.text.split(':');
   if (policyComponents.length > 1) {
     const [setting, policyName] = policyComponents;
-    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
+    const source = createPolicy(ctx._policyName, policyName);
+    source.cluster = Builder.expression.literal.string(
+      setting,
+      {
+        name: setting,
+        unquoted: true,
+      },
+      // TODO: implement "parser fields"
+      {}
+    );
+    return [source];
   }
   return [createPolicy(ctx._policyName, policyComponents[0])];
 }

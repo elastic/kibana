@@ -152,34 +152,6 @@ describe('structurally can walk all nodes', () => {
       });
     });
 
-    describe('command mode', () => {
-      test('visits "mode" nodes', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitCommandMode: (opt) => modes.push(opt),
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
-      });
-
-      test('"visitAny" can capture a mode node', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitAny: (node) => {
-            if (node.type === 'mode') modes.push(node);
-          },
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
-      });
-    });
-
     describe('expressions', () => {
       describe('sources', () => {
         test('iterates through a single source', () => {

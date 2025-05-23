@@ -16,7 +16,7 @@ const reprint = (src: string) => {
   const { root } = parse(src);
   const text = BasicPrettyPrinter.print(root);
 
-  console.log(JSON.stringify(root, null, 2));
+  // console.log(JSON.stringify(root, null, 2));
 
   return { text };
 };
@@ -142,7 +142,7 @@ describe('single line query', () => {
     });
 
     describe('ENRICH', () => {
-      test.only('policy name with colon', () => {
+      test('policy name with colon', () => {
         const { text } = reprint(
           'FROM a | ENRICH _coordinator:woof ON category WITH col0 = category'
         );
