@@ -58,7 +58,7 @@ export class AiopsPlugin
         const { getPatternAnalysisAvailable } = await import(
           './components/log_categorization/log_categorization_enabled'
         );
-        return getPatternAnalysisAvailable(plugins.licensing);
+        return getPatternAnalysisAvailable(plugins.licensing, core.application);
       },
       PatternAnalysisComponent,
     };
