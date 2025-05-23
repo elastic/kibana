@@ -33,15 +33,15 @@ export function validate(
   }
 
   if (!references.fields.get('_id')) {
-    messages.push(buildMissingMetadataMessage(command, '_id', 'Id'));
+    messages.push(buildMissingMetadataMessage(command, '_id'));
   }
 
   if (!references.fields.get('_index')) {
-    messages.push(buildMissingMetadataMessage(command, '_index', 'Index'));
+    messages.push(buildMissingMetadataMessage(command, '_index'));
   }
 
   if (!references.fields.get('_score')) {
-    messages.push(buildMissingMetadataMessage(command, '_score', 'Score'));
+    messages.push(buildMissingMetadataMessage(command, '_score'));
   }
 
   return messages;
@@ -49,8 +49,7 @@ export function validate(
 
 function buildMissingMetadataMessage(
   command: ESQLCommand<'rrf'>,
-  metadataField: string,
-  fieldName: string
+  metadataField: string
 ): ESQLMessage {
   return {
     location: command.location,
@@ -59,7 +58,7 @@ function buildMissingMetadataMessage(
       values: { metadataField },
     }),
     type: 'error',
-    code: `rrfMissing${fieldName}Metadata`,
+    code: `rrfMissingMetadata`,
   };
 }
 
