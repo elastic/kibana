@@ -19,6 +19,8 @@ export interface SalesforceObjects {
   custom: string[];
 }
 
+const REQUEST_TIMEOUT = 5000; // 5 seconds
+
 export class SalesforceClient {
   private readonly credentials: SalesforceCredentials;
   private accessToken: string | null = null;
@@ -49,6 +51,7 @@ export class SalesforceClient {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
+          timeout: REQUEST_TIMEOUT,
         }
       );
 
@@ -61,6 +64,11 @@ export class SalesforceClient {
       this.accessToken = response.data.access_token;
     } catch (error) {
       if (error instanceof AxiosError) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error(
+            'Connection to Salesforce timed out. Please check your domain and try again.'
+          );
+        }
         this.logger.error(error.message);
         throw new Error(
           `Failed to authenticate with Salesforce: ${
@@ -95,6 +103,7 @@ export class SalesforceClient {
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
         },
+        timeout: REQUEST_TIMEOUT,
       });
 
       const objects = response.data.sobjects as Array<{ name: string; custom: boolean }>;
@@ -110,6 +119,11 @@ export class SalesforceClient {
       };
     } catch (error) {
       if (error instanceof AxiosError) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error(
+            'Connection to Salesforce timed out. Please check your domain and try again.'
+          );
+        }
         this.logger.error('Failed to fetch Salesforce objects', {
           tags: ['salesforce', 'objects', 'error'],
           status: error.response?.status,

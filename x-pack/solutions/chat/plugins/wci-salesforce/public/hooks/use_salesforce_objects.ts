@@ -15,6 +15,8 @@ export interface SalesforceObjectsResponse {
   custom: string[];
 }
 
+const QUERY_TIMEOUT = 5000; // 5 seconds
+
 export const useSalesforceObjects = (credentials: ValidateCredentialsRequest | null) => {
   const {
     services: { http },
@@ -27,14 +29,23 @@ export const useSalesforceObjects = (credentials: ValidateCredentialsRequest | n
         throw new Error('Salesforce credentials are required');
       }
 
-      const response = await http.post<SalesforceObjectsResponse>(
-        '/internal/wci-salesforce/configuration/available_sobjects',
-        {
-          body: JSON.stringify(credentials),
-        }
-      );
-      return response;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), QUERY_TIMEOUT);
+
+      try {
+        const response = await http.post<SalesforceObjectsResponse>(
+          '/internal/wci-salesforce/configuration/available_sobjects',
+          {
+            body: JSON.stringify(credentials),
+            signal: controller.signal,
+          }
+        );
+        return response;
+      } finally {
+        clearTimeout(timeoutId);
+      }
     },
     enabled: !!credentials,
+    retry: false, // Don't retry on failure
   });
 };

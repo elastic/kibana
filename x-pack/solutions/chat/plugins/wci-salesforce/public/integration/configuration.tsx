@@ -161,9 +161,10 @@ export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormP
             name="configuration.clientId"
             control={control}
             render={({ field }) => (
-              <EuiFieldText
+              <EuiFieldPassword
                 data-test-subj="workchatSalesforceToolClientId"
                 placeholder="Enter your Client ID"
+                type="dual"
                 {...field}
               />
             )}
