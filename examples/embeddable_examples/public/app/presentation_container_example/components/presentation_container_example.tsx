@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { EmbeddableStart, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -137,18 +138,20 @@ export const PresentationContainerExample = ({
 
       {layout.map(({ id, type }) => {
         return (
-          <div key={id} style={{ height: '200' }}>
-            <EmbeddableRenderer
-              type={type}
-              maybeId={id}
-              getParentApi={() => pageApi}
-              hidePanelChrome={false}
-              onApiAvailable={(api) => {
-                componentApi.setChild(id, api);
-              }}
-            />
+          <>
+            <div key={id} css={css({ height: '200px' })}>
+              <EmbeddableRenderer
+                type={type}
+                maybeId={id}
+                getParentApi={() => pageApi}
+                hidePanelChrome={false}
+                onApiAvailable={(api) => {
+                  componentApi.setChild(id, api);
+                }}
+              />
+            </div>
             <EuiSpacer size="s" />
-          </div>
+          </>
         );
       })}
 
