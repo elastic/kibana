@@ -11,6 +11,7 @@ import {
   isSerializedToolIdentifier,
   createBuiltinToolId,
   toStructuredToolIdentifier,
+  toSerializedToolIdentifier,
   ToolSourceType,
   StructuredToolIdentifier,
 } from './tools';
@@ -83,6 +84,32 @@ describe('Tool Identifier utilities', () => {
         sourceType: ToolSourceType.builtIn,
         sourceId: 'builtIn',
       });
+    });
+  });
+
+  describe('toSerializedToolIdentifier', () => {
+    it('should return the same string for a serialized identifier', () => {
+      const serializedId = 'my-tool||builtIn||none';
+      expect(toSerializedToolIdentifier(serializedId)).toBe(serializedId);
+    });
+
+    it('should convert a structured identifier to serialized format', () => {
+      const structuredId = {
+        toolId: 'my-tool',
+        sourceType: ToolSourceType.builtIn,
+        sourceId: 'none',
+      };
+      expect(toSerializedToolIdentifier(structuredId)).toBe('my-tool||builtIn||none');
+    });
+
+    it('should convert a plain identifier to serialized format with unknown source', () => {
+      expect(toSerializedToolIdentifier('my-tool')).toBe('my-tool||unknown||unknown');
+    });
+
+    it('should throw an error for malformed identifiers', () => {
+      expect(() => toSerializedToolIdentifier('invalid||format')).toThrow(
+        'Malformed tool identifier'
+      );
     });
   });
 

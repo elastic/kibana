@@ -38,6 +38,9 @@ class MyPlugin {
       id: 'my_tool',
       name: 'My Tool',
       description: 'My very first tool',
+      meta: {
+        tags: ['foo', 'bar'],
+      },
       schema: z.object({
         someNumber: z.number().describe('Some random number'),
       }),

@@ -28,6 +28,7 @@ export {
   isInternalError,
   isToolNotFoundError,
   isOnechatError,
+  type OnechatError,
   type OnechatInternalError,
   type OnechatToolNotFoundError,
 } from './src/errors';

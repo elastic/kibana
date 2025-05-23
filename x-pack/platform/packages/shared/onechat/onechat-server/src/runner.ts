@@ -16,6 +16,9 @@ import type { RunEventHandlerFn } from './events';
  * introducing breaking changes.
  */
 export interface RunToolReturn<TResult = unknown> {
+  /**
+   * The result value as returned by the tool.
+   */
   result: TResult;
 }
 
@@ -27,6 +30,9 @@ export interface RunToolReturn<TResult = unknown> {
  * down a request object.
  */
 export interface ScopedRunner {
+  /**
+   * Execute a tool.
+   */
   runTool: ScopedRunToolFn;
 }
 
@@ -43,7 +49,13 @@ export type ScopedRunToolFn = <TParams = Record<string, unknown>, TResult = unkn
  * Will be attached to errors thrown during a run.
  */
 export interface RunContext {
+  /**
+   * The run identifier, which can be used for tracing
+   */
   runId: string;
+  /**
+   * The current execution stack
+   */
   stack: RunContextStackEntry[];
 }
 
@@ -52,7 +64,9 @@ export interface RunContext {
  * Used to follow nested / chained execution.
  */
 export type RunContextStackEntry =
+  /** tool invocation */
   | { type: 'tool'; toolId: SerializedToolIdentifier }
+  /** agent invocation */
   | { type: 'agent'; agentId: string };
 
 /**
@@ -68,7 +82,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    */
   toolParams: TParams;
   /**
-   * Optional event handler
+   * Optional event handler.
    */
   onEvent?: RunEventHandlerFn;
   /**
@@ -102,5 +116,8 @@ export type RunToolFn = <TParams = Record<string, unknown>, TResult = unknown>(
  * Public onechat runner.
  */
 export interface Runner {
+  /**
+   * Execute a tool.
+   */
   runTool: RunToolFn;
 }

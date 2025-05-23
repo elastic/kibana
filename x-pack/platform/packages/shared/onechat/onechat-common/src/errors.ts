@@ -8,6 +8,9 @@
 import { ServerSentEventError } from '@kbn/sse-utils';
 import type { SerializedToolIdentifier } from './tools';
 
+/**
+ * Code to identify onechat errors
+ */
 export enum OnechatErrorCode {
   internalError = 'internalError',
   toolNotFound = 'toolNotFound',
@@ -18,7 +21,7 @@ const OnechatError = ServerSentEventError;
 /**
  * Base error class used for all onechat errors.
  */
-type OnechatError<
+export type OnechatError<
   TCode extends OnechatErrorCode,
   TMeta extends Record<string, any> = Record<string, any>
 > = ServerSentEventError<TCode, TMeta>;
@@ -32,6 +35,9 @@ export const isOnechatError = (err: unknown): err is OnechatError<OnechatErrorCo
  */
 export type OnechatInternalError = OnechatError<OnechatErrorCode.internalError>;
 
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
 export const isInternalError = (err: unknown): err is OnechatInternalError => {
   return isOnechatError(err) && err.code === OnechatErrorCode.internalError;
 };
@@ -48,6 +54,9 @@ export const createInternalError = (
  */
 export type OnechatToolNotFoundError = OnechatError<OnechatErrorCode.toolNotFound>;
 
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
 export const isToolNotFoundError = (err: unknown): err is OnechatInternalError => {
   return isOnechatError(err) && err.code === OnechatErrorCode.toolNotFound;
 };

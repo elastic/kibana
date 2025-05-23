@@ -123,8 +123,6 @@ describe('Onechat runner', () => {
       );
     });
 
-    // TODO
-
     it('exposes an event emitter to the tool handler caller can attach to using the onEvent param', async () => {
       const emittedEvents: OnechatRunEvent[] = [];
 

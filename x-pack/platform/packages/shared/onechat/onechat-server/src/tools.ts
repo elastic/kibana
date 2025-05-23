@@ -15,19 +15,19 @@ import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './
 import type { RunEventEmitter } from './events';
 
 /**
- * Subset of {@link ToolDescriptorMeta} that are being defined during registration
+ * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
  */
 export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'sourceType' | 'sourceId'>>;
 
 /**
- * Onechat tool, as registered by tool providers
+ * Onechat tool, as registered by built-in tool providers.
  */
 export interface RegisteredTool<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
 > extends Omit<ToolDescriptor, 'meta'> {
   /**
-   * Tool's input schema, in zod format.
+   * Tool's input schema, defined as a zod schema.
    */
   schema: RunInput;
   /**
@@ -41,18 +41,18 @@ export interface RegisteredTool<
 }
 
 /**
- * Onechat tool, as exposed by the onechat tool registry
+ * Onechat tool, as exposed by the onechat tool registry.
  */
 export interface ExecutableTool<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
 > extends ToolDescriptor {
   /**
-   * Tool's input schema, in zod format.
+   * Tool's input schema, defined as a zod schema.
    */
   schema: RunInput;
   /**
-   * Handler attached to the tool
+   * Run handler that can be used to execute the tool.
    */
   execute: ExecutableToolHandlerFn<z.infer<RunInput>, RunOutput>;
 }
@@ -151,5 +151,4 @@ export interface ToolProviderGetOptions {
  */
 export interface ToolProviderListOptions {
   request: KibanaRequest;
-  // TODO later: filtering
 }

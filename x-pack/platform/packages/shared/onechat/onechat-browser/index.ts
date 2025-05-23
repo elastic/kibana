@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
+export function onechat() {
+  return 'You know...';
 }

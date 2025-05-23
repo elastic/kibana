@@ -14,11 +14,15 @@ export type PlainIdToolIdentifier = string;
 
 /**
  * Represents the source type for a tool.
- *
- * Currently limited to a single value - 'built-in'.
  */
 export enum ToolSourceType {
+  /**
+   * Source used for built-in tools
+   */
   builtIn = 'builtIn',
+  /**
+   * Unknown source - used when converting plain ids to structured or serialized format.
+   */
   unknown = 'unknown',
 }
 
@@ -28,13 +32,14 @@ export enum ToolSourceType {
 export interface StructuredToolIdentifier {
   /** The unique ID of this tool, relative to the source **/
   toolId: string;
-  /** The type of source the tool is being provided from, e.g built-in or MCP **/
+  /** The type of source the tool is being provided from, e.g. builtIn or MCP **/
   sourceType: ToolSourceType;
-  /** */
+  /** Id of the source, e.g. for MCP server it will be the server/connector ID */
   sourceId: string;
 }
 
 export const serializedPartsSeparator = '||';
+
 /**
  * The singleton sourceId used for all builtIn tools.
  */
@@ -69,24 +74,36 @@ export type ToolIdentifier =
   | StructuredToolIdentifier
   | SerializedToolIdentifier;
 
+/**
+ * Check if the given {@link ToolIdentifier} is a {@link SerializedToolIdentifier}
+ */
 export const isSerializedToolIdentifier = (
   identifier: ToolIdentifier
 ): identifier is SerializedToolIdentifier => {
   return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 3;
 };
 
+/**
+ * Check if the given {@link ToolIdentifier} is a {@link StructuredToolIdentifier}
+ */
 export const isStructuredToolIdentifier = (
   identifier: ToolIdentifier
 ): identifier is StructuredToolIdentifier => {
   return typeof identifier === 'object' && 'toolId' in identifier && 'sourceType' in identifier;
 };
 
+/**
+ * Check if the given {@link ToolIdentifier} is a {@link PlainIdToolIdentifier}
+ */
 export const isPlainToolIdentifier = (
   identifier: ToolIdentifier
 ): identifier is PlainIdToolIdentifier => {
   return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 1;
 };
 
+/**
+ * Convert the given {@link ToolIdentifier} to a {@link SerializedToolIdentifier}
+ */
 export const toSerializedToolIdentifier = (
   identifier: ToolIdentifier
 ): SerializedToolIdentifier => {
@@ -103,6 +120,9 @@ export const toSerializedToolIdentifier = (
   throw createInternalError(`Malformed tool identifier: "${identifier}"`);
 };
 
+/**
+ * Convert the given {@link ToolIdentifier} to a {@link StructuredToolIdentifier}
+ */
 export const toStructuredToolIdentifier = (
   identifier: ToolIdentifier
 ): StructuredToolIdentifier => {

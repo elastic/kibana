@@ -30,6 +30,9 @@ export interface ToolsServiceStart {
   registry: InternalToolRegistry;
 }
 
+/**
+ * Registered tool with full meta.
+ */
 export type RegisteredToolWithMeta<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown

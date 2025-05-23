@@ -15,7 +15,7 @@ import type { InternalToolProvider, RegisteredToolWithMeta } from '../types';
 /**
  * Creates a tool provider that combines multiple tool providers.
  *
- * Note: order matters - providers will be checked in the order they are provided (e.g. in case of id conflicts).
+ * Note: order matters - providers will be checked in the order they are in the list (in case of ID conflict)
  */
 export const combineToolProviders = (
   ...providers: InternalToolProvider[]
