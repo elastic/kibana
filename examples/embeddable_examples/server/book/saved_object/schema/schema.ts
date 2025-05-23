@@ -9,9 +9,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const savedBookAttributesSchema = schema.object({
+const savedBookAttributesBaseSchema = schema.object({
   bookTitle: schema.string(),
   authorName: schema.string(),
   numberOfPages: schema.number(),
   bookSynopsis: schema.maybe(schema.string()),
+});
+
+export const savedBookAttributesSchema = savedBookAttributesBaseSchema.extends({
+  publicationYear: schema.maybe(schema.number()),
 });

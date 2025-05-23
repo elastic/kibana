@@ -8,4 +8,4 @@
  */
 
 export type { SavedBookAttributes } from './types';
-export { savedBookAttributesSchema } from './v1';
+export { savedBookAttributesSchema } from './schema';

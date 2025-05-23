@@ -12,13 +12,13 @@ import type {
   ItemAttributesWithReferences,
   SavedObjectAttributesWithReferences,
 } from '@kbn/embeddable-plugin/common/types';
-import type { SavedBookAttributesV2 } from '../../../../../server/types';
+import type { SavedBookAttributes } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v2';
 
 function savedObjectToItem({
   attributes,
   references,
-}: SavedObjectAttributesWithReferences<SavedBookAttributesV2>): ItemAttributesWithReferences<BookAttributes> {
+}: SavedObjectAttributesWithReferences<SavedBookAttributes>): ItemAttributesWithReferences<BookAttributes> {
   return {
     attributes: {
       bookTitle: attributes.bookTitle,
@@ -34,7 +34,7 @@ function savedObjectToItem({
 function itemToSavedObject({
   attributes,
   references,
-}: ItemAttributesWithReferences<BookAttributes>): SavedObjectAttributesWithReferences<SavedBookAttributesV2> {
+}: ItemAttributesWithReferences<BookAttributes>): SavedObjectAttributesWithReferences<SavedBookAttributes> {
   return {
     attributes: {
       bookTitle: attributes.bookTitle,
@@ -48,7 +48,7 @@ function itemToSavedObject({
 }
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
-  SavedBookAttributesV2,
+  SavedBookAttributes,
   BookAttributes
 > = {
   itemToSavedObject,

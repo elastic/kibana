@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedBookAttributesSchema } from '../../../saved_object/schema/v1';
+import { savedBookAttributesSchema } from '../../../saved_object/schema';
 
 export const bookAttributesSchema = savedBookAttributesSchema;

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { savedBookAttributesSchema as savedBookAttributesSchemaV1 } from '../v1';
+import { TypeOf } from '@kbn/config-schema';
+import { savedBookAttributesSchema } from './schema';
 
-export const savedBookAttributesSchema = savedBookAttributesSchemaV1.extends({
-  publicationYear: schema.maybe(schema.number()),
-});
+export type SavedBookAttributes = TypeOf<typeof savedBookAttributesSchema>;
