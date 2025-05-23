@@ -1288,7 +1288,7 @@ describe('ConfigureCases', () => {
     it('should not render observable types section if observable feature is not enabled', async () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-        wrappingComponentProps: { features: { observables: { enabled: true } } },
+        wrappingComponentProps: { features: { observables: { enabled: false } } },
       });
 
       expect(
