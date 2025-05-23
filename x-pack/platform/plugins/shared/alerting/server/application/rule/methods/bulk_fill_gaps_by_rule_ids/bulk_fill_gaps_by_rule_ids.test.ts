@@ -71,6 +71,17 @@ const allRules = [
   skippedRule,
   erroredRuleAtScheduling,
 ];
+const rulesThatCalledScheduleBackfill = [...successfulRules, erroredRuleAtScheduling];
+
+const returnedGaps = rulesThatCalledScheduleBackfill.reduce((acc, rule) => {
+  acc[rule.id] = [
+    {
+      id: `some-gap-for-rule-${rule.id}`,
+      range: { start: '2025-05-09T09:15:09.457Z', end: '2025-05-09T09:24:09.457Z' },
+    },
+  ];
+  return acc;
+}, {} as Record<string, object>);
 
 describe('bulkFillGapsByRuleIds', () => {
   let results: BulkFillGapsByRuleIdsResult;
@@ -101,11 +112,17 @@ describe('bulkFillGapsByRuleIds', () => {
 
       const payload: ScheduleBackfillParams[0] = { ruleId, ranges: [] };
       if (ruleId === skippedRule.id) {
-        return payload;
+        return {
+          backfillRequestPayload: payload,
+          gaps: [],
+        };
       }
 
       payload.ranges.push(backfillRange);
-      return payload;
+      return {
+        backfillRequestPayload: payload,
+        gaps: returnedGaps[ruleId],
+      };
     });
 
     scheduleBackfillMock.mockImplementation(async (_, [payload]) => {
@@ -126,6 +143,21 @@ describe('bulkFillGapsByRuleIds', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  it('should call the scheduling function correctly', () => {
+    rulesThatCalledScheduleBackfill.forEach((rule) => {
+      expect(scheduleBackfillMock).toHaveBeenCalledWith(
+        rulesClientContext,
+        [
+          {
+            ruleId: rule.id,
+            ranges: [backfillRange],
+          },
+        ],
+        returnedGaps[rule.id]
+      );
+    });
   });
 
   it('should return a list with rules that succeeded', () => {

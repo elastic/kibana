@@ -26,7 +26,7 @@ describe('processAllGapsInTimeRange', () => {
   const end = '2025-05-21T17:18:03.608Z';
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
-  const processGapsBatchMock = jest.fn(async () => {});
+  const processGapsBatchMock = jest.fn(async (gaps: Gap[]) => {});
 
   const range = (rangeStart: string, rangeEnd: string) => ({
     gte: new Date(rangeStart),
@@ -154,6 +154,46 @@ describe('processAllGapsInTimeRange', () => {
 
     it('should stop fetching gaps when the max number of iterations is reached', () => {
       expect(findGapsSearchAfterMock).toHaveBeenCalledTimes(maxIterations);
+    });
+
+    it('should call closePointInTime when it is done', () => {
+      expect(mockEventLogClient.closePointInTime).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when the max amount of gaps specified in the params is reached', () => {
+    let processedGapsCounts: number[];
+    beforeEach(async () => {
+      findGapsSearchReturnValues.forEach((returnValue) =>
+        findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
+      );
+
+      processedGapsCounts = [];
+
+      processGapsBatchMock.mockImplementation(async (gaps) => {
+        processedGapsCounts.push(gaps.length);
+      });
+
+      await processAllGapsInTimeRange({
+        ruleId,
+        start,
+        end,
+        logger: mockLogger,
+        eventLogClient: mockEventLogClient,
+        processGapsBatch: processGapsBatchMock,
+        options: {
+          maxFetchedGaps: 2,
+        },
+      });
+    });
+
+    it('should stop fetching gaps when the max number of gaps is reached', () => {
+      expect(findGapsSearchAfterMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should only process the amount of gaps specified', () => {
+      // One gap processed in the first run, another in the second, for a total of 2
+      expect(processedGapsCounts).toEqual([1, 1]);
     });
 
     it('should call closePointInTime when it is done', () => {

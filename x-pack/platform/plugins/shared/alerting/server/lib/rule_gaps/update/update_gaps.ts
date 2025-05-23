@@ -8,6 +8,7 @@
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { chunk } from 'lodash';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
@@ -30,6 +31,7 @@ interface UpdateGapsParams {
   shouldRefetchAllBackfills?: boolean;
   backfillClient: BackfillClient;
   actionsClient: ActionsClient;
+  gaps?: Gap[];
 }
 
 const CONFLICT_STATUS_CODE = 409;
@@ -200,6 +202,7 @@ const updateGapBatch = async (
  * Prepare gaps for update
  * Update them in bulk
  * If there are conflicts, retry the failed gaps
+ * If gaps are passed in, it skips fetching and process them instead
  */
 export const updateGaps = async (params: UpdateGapsParams) => {
   const {
@@ -214,6 +217,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     shouldRefetchAllBackfills,
     backfillClient,
     actionsClient,
+    gaps,
   } = params;
 
   if (!eventLogger) {
@@ -224,9 +228,9 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
     let hasErrors = false;
 
-    const processGapsBatch = async (gaps: Gap[]) => {
-      if (gaps.length > 0) {
-        const success = await updateGapBatch(gaps, {
+    const processGapsBatch = async (fetchedGaps: Gap[]) => {
+      if (fetchedGaps.length > 0) {
+        const success = await updateGapBatch(fetchedGaps, {
           backfillSchedule,
           savedObjectsRepository,
           shouldRefetchAllBackfills,
@@ -244,14 +248,22 @@ export const updateGaps = async (params: UpdateGapsParams) => {
       }
     };
 
-    await processAllGapsInTimeRange({
-      ruleId,
-      start: start.toISOString(),
-      end: end.toISOString(),
-      logger,
-      eventLogClient,
-      processGapsBatch,
-    });
+    if (gaps) {
+      // If the list of gaps were passed into the function, proceed to update them
+      for (const gapsChunk of chunk(gaps, 500)) {
+        await processGapsBatch(gapsChunk);
+      }
+    } else {
+      // Otherwise fetch and update them
+      await processAllGapsInTimeRange({
+        ruleId,
+        start: start.toISOString(),
+        end: end.toISOString(),
+        logger,
+        eventLogClient,
+        processGapsBatch,
+      });
+    }
 
     if (hasErrors) {
       throw new Error('Some gaps failed to update');

@@ -8,7 +8,6 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { processAllGapsInTimeRange } from '../../../../lib/rule_gaps/process_all_gaps_in_time_range';
-import type { ScheduleBackfillParams } from '../../../backfill/methods/schedule/types';
 import { getBackfillPayloadForRuleGaps } from './get_backfill_payload_for_rule_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 
@@ -43,7 +42,7 @@ describe('getBackfillPayloadForRuleGaps', () => {
     [createGap([range('2025-05-13T09:15:09.457Z', '2025-05-14T09:15:09.457Z')])],
   ];
 
-  let result: ScheduleBackfillParams[0];
+  let result: Awaited<ReturnType<typeof getBackfillPayloadForRuleGaps>>;
 
   beforeEach(async () => {
     processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
@@ -56,12 +55,30 @@ describe('getBackfillPayloadForRuleGaps', () => {
     });
   });
 
+  it('should trigger the processing of all gaps in the time range correctly', () => {
+    expect(processAllGapsInTimeRangeMock).toHaveBeenCalledTimes(1);
+    expect(processAllGapsInTimeRangeMock).toHaveBeenCalledWith({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      options: {
+        maxFetchedGaps: 1000,
+      },
+      processGapsBatch: expect.any(Function),
+      ruleId,
+      ...backfillingDateRange,
+    });
+  });
+
   it('should return the backfill payload for all fetched gaps', () => {
-    expect(result).toEqual({
+    expect(result.backfillRequestPayload).toEqual({
       ruleId,
       ranges: gapsBatches
         .flatMap((batch) => batch.flatMap((gap) => gap.unfilledIntervals))
         .map(({ gte, lte }) => ({ start: gte.toISOString(), end: lte.toISOString() })),
     });
+  });
+
+  it('should return the gaps that were fetched to build the payloads', () => {
+    expect(result.gaps).toEqual(gapsBatches.flatMap((batch) => batch));
   });
 });

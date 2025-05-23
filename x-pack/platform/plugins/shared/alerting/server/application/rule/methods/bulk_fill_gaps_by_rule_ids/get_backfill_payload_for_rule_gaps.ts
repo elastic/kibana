@@ -23,10 +23,12 @@ export const getBackfillPayloadForRuleGaps = async (
   { ruleId, range }: GetBackfillPayloadForRule
 ) => {
   const rangesToBackfill: ScheduleBackfillParams[0]['ranges'] = [];
+  const gaps: Gap[] = [];
   const { start, end } = range;
 
-  const processGapsBatch = (gaps: Gap[]) => {
-    const gapRanges = gaps.flatMap((gap) => {
+  const processGapsBatch = (gapsBatch: Gap[]) => {
+    gaps.push(...gapsBatch);
+    const gapRanges = gapsBatch.flatMap((gap) => {
       const unfilledIntervals = gap.unfilledIntervals.map(denormalizeInterval);
       const clampedIntervals = clampIntervals(unfilledIntervals, { gte: start, lte: end });
       return clampedIntervals.map(({ gte, lte }) => {
@@ -40,12 +42,20 @@ export const getBackfillPayloadForRuleGaps = async (
     rangesToBackfill.push(...gapRanges);
   };
 
-  await processAllGapsInTimeRange({ ruleId, start, end, eventLogClient, logger, processGapsBatch });
+  await processAllGapsInTimeRange({
+    ruleId,
+    start,
+    end,
+    eventLogClient,
+    logger,
+    processGapsBatch,
+    options: { maxFetchedGaps: 1000 },
+  });
 
   const backfillRequestPayload: ScheduleBackfillParams[0] = {
     ruleId,
     ranges: rangesToBackfill,
   };
 
-  return backfillRequestPayload;
+  return { backfillRequestPayload, gaps };
 };

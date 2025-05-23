@@ -15,8 +15,9 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { getBackfillPayloadForRuleGaps } from './get_backfill_payload_for_rule_gaps';
+import type { Gap } from '../../../../lib/rule_gaps/gap';
 
-const DEFAULT_MAX_BACKFILL_CONCURRENCY = 50;
+const DEFAULT_MAX_BACKFILL_CONCURRENCY = 10;
 
 const logProcessedAsAuditEvent = (
   context: RulesClientContext,
@@ -63,11 +64,18 @@ export const bulkFillGapsByRuleIds = async (
       }
 
       let payload: ScheduleBackfillParams[0];
+      let gaps: Gap[];
       try {
-        payload = await getBackfillPayloadForRuleGaps(eventLogClient, context.logger, {
-          ruleId: id,
-          range,
-        });
+        const { backfillRequestPayload, gaps: allGaps } = await getBackfillPayloadForRuleGaps(
+          eventLogClient,
+          context.logger,
+          {
+            ruleId: id,
+            range,
+          }
+        );
+        payload = backfillRequestPayload;
+        gaps = allGaps;
       } catch (error) {
         logProcessedAsAuditEvent(context, { id, name }, error);
         errored.push(toBulkGapFillError(rule, 'BULK_GAPS_FILL_STEP_GAPS_RESOLUTION', error));
@@ -82,7 +90,7 @@ export const bulkFillGapsByRuleIds = async (
       }
 
       try {
-        const results = await scheduleBackfill(context, [payload]);
+        const results = await scheduleBackfill(context, [payload], gaps);
         outcomes.push(results);
         logProcessedAsAuditEvent(context, rule);
       } catch (error) {

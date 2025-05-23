@@ -21,6 +21,7 @@ interface ProcessAllGapsInTimeRangeParams {
   options?: {
     pageSize?: number;
     maxIterations?: number;
+    maxFetchedGaps?: number;
   };
   eventLogClient: IEventLogClient;
   logger: Logger;
@@ -49,8 +50,13 @@ export const processAllGapsInTimeRange = async ({
   let searchAfter: SortResults[] | undefined;
   let pitId: string | undefined;
   let iterationCount = 0;
+  let gapsCount = 0;
 
-  const { pageSize = DEFAULT_PAGE_SIZE, maxIterations = DEFAULT_MAX_ITERATIONS } = options ?? {};
+  const {
+    pageSize = DEFAULT_PAGE_SIZE,
+    maxIterations = DEFAULT_MAX_ITERATIONS,
+    maxFetchedGaps,
+  } = options ?? {};
 
   try {
     while (true) {
@@ -81,10 +87,19 @@ export const processAllGapsInTimeRange = async ({
       const { data: gaps, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
       pitId = nextPitId;
 
-      await processGapsBatch(gaps);
+      gapsCount += gaps.length;
 
-      // Exit conditions: no more results or no next search_after
-      if (gaps.length === 0 || !nextSearchAfter) {
+      let gapsToProcess = gaps;
+      if (maxFetchedGaps && gapsCount > maxFetchedGaps) {
+        const offset = gapsCount - maxFetchedGaps;
+        gapsToProcess = gapsToProcess.slice(0, gaps.length - offset);
+      }
+
+      await processGapsBatch(gapsToProcess);
+
+      // Exit conditions: no more results or no next search_after or maxFetchedGaps reached
+      const maxGapsReached = maxFetchedGaps !== undefined && gapsCount >= maxFetchedGaps;
+      if (gapsToProcess.length === 0 || !nextSearchAfter || maxGapsReached) {
         break;
       }
 
