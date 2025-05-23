@@ -46,7 +46,7 @@ export const FindingsMisconfigurationPanel = ({
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspFlyout.Component ruleId={ruleId} resourceId={resourceId}>
         {({ finding, createRuleFn }) => {
           return (

@@ -62,7 +62,7 @@ export const FindingsVulnerabilityPanel = ({
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <CspVulnerabilityFlyout.Component
         vulnerabilityId={vulnerabilityId}
         resourceId={resourceId}
