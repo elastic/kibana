@@ -13,9 +13,12 @@ import {
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
 
-const sectionGridDataSchema = schema.object({
-  y: schema.number(),
-  i: schema.string(),
+//
+export const sectionGridDataSchema = schema.object({
+  y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
+  i: schema.string({
+    meta: { description: 'The unique identifier of the section' },
+  }),
 });
 
 // this is used for panels
@@ -27,9 +30,6 @@ export const gridDataSchema = sectionGridDataSchema.extends({
 });
 
 export const sectionSchema = schema.object({
-  id: schema.string({
-    meta: { description: 'The unique ID of the section.' },
-  }),
   title: schema.string({
     meta: { description: 'The title of the section.' },
   }),

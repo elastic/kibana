@@ -14,8 +14,7 @@ import { has } from 'lodash';
 
 import { getDashboardContentManagementCache } from '..';
 import { injectReferences } from '../../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
-import { convertPanelsArrayToPanelMap } from '../../../../common/lib/dashboard_panel_converters';
-import { convertSectionArrayToSectionMap } from '../../../../common/lib/dashboard_section_converters';
+import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
@@ -74,6 +73,7 @@ export const loadDashboardState = async ({
   let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+
   if (cachedDashboard) {
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
@@ -171,8 +171,9 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
-  const sectionsMap = convertSectionArrayToSectionMap(sections ?? []);
+  const { panels: panelMap, sections: sectionsMap } = convertPanelsArrayToPanelSectionMaps(
+    panels ?? []
+  );
 
   return {
     managed,

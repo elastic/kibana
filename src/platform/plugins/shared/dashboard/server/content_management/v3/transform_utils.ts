@@ -21,7 +21,6 @@ import {
   transformOptionsOut,
   transformPanelsIn,
   transformPanelsOut,
-  transformSectionsIn,
   transformSearchSourceIn,
   transformSearchSourceOut,
 } from './transforms';
@@ -55,7 +54,6 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
-
   // Inject any tag names from references into the attributes
   let tags: string[] | undefined;
   if (getTagNamesFromReferences && references && references.length) {
@@ -70,8 +68,7 @@ export function dashboardAttributesOut(
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
-    ...(panelsJSON && { panels: transformPanelsOut(panelsJSON) }),
-    sections,
+    ...((panelsJSON || sections) && { panels: transformPanelsOut(panelsJSON, sections) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
@@ -84,6 +81,7 @@ export function dashboardAttributesOut(
   };
 }
 
+// !!!!!!! DO THIS
 export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
@@ -132,8 +130,8 @@ export const itemAttrsToSavedObject = ({
   incomingReferences = [],
 }: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
   try {
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, sections, ...rest } =
-      attributes;
+    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
+    const { panelsJSON, sections } = transformPanelsIn(panels);
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -143,9 +141,9 @@ export const itemAttrsToSavedObject = ({
         optionsJSON: JSON.stringify(options),
       }),
       ...(panels && {
-        panelsJSON: transformPanelsIn(panels),
+        panelsJSON,
       }),
-      ...(sections && { sections: transformSectionsIn(sections) }),
+      ...(sections?.length && { sections }),
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
@@ -222,7 +220,6 @@ export function savedObjectToItem(
     version,
     managed,
   } = savedObject;
-
   try {
     const attributesOut = allowedAttributes
       ? pick(

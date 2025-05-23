@@ -124,7 +124,7 @@ describe('ShowShareModal', () => {
     ).locatorParams.params;
     const rawDashboardState = {
       ...unsavedDashboardState,
-      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels),
+      panels: convertPanelMapToPanelsArray(unsavedDashboardState.panels, {}),
     };
     unsavedStateKeys.forEach((key) => {
       expect(shareLocatorParams[key]).toStrictEqual(

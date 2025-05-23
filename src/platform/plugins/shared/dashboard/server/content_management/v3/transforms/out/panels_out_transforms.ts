@@ -7,25 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
-import { SavedDashboardPanel } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
+import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
-export function transformPanelsOut(panelsJSON: string): DashboardAttributes['panels'] {
-  return flow(JSON.parse, transformPanelsProperties)(panelsJSON);
+export function transformPanelsOut(
+  panelsJSON: string = '{}',
+  sections: SavedDashboardSection[] = []
+): DashboardAttributes['panels'] {
+  const panels = JSON.parse(panelsJSON);
+  const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
+    (prev, section) => {
+      const sectionId = section.gridData.i;
+      return { ...prev, [sectionId]: { ...section, panels: [] } };
+    },
+    {}
+  );
+  panels.forEach((panel: SavedDashboardPanel) => {
+    const { sectionId } = panel.gridData;
+    if (sectionId) {
+      (sectionsMap[sectionId] as DashboardSection).panels.push(transformPanelProperties(panel));
+    } else {
+      sectionsMap[panel.panelIndex] = transformPanelProperties(panel);
+    }
+  });
+  return Object.values(sectionsMap);
 }
 
-function transformPanelsProperties(panels: SavedDashboardPanel[]) {
-  return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
-      gridData,
-      id,
-      panelConfig: embeddableConfig,
-      panelIndex,
-      panelRefName,
-      title,
-      type,
-      version,
-    })
-  );
+function transformPanelProperties({
+  embeddableConfig,
+  gridData,
+  id,
+  panelIndex,
+  panelRefName,
+  title,
+  type,
+  version,
+}: SavedDashboardPanel) {
+  const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+  return {
+    gridData: rest,
+    id,
+    panelConfig: embeddableConfig,
+    panelIndex,
+    panelRefName,
+    title,
+    type,
+    version,
+  };
 }

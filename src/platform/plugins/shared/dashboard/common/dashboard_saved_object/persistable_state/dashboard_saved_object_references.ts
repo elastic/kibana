@@ -12,7 +12,7 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 
 import {
   convertPanelMapToPanelsArray,
-  convertPanelsArrayToPanelMap,
+  convertPanelsArrayToPanelSectionMaps,
 } from '../../lib/dashboard_panel_converters';
 import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
 import type { DashboardAttributes } from '../../../server/content_management';
@@ -28,9 +28,11 @@ export interface InjectExtractDeps {
 function parseDashboardAttributesWithType({
   panels,
 }: DashboardAttributes): ParsedDashboardAttributesWithType {
+  const { panels: panelsMap, sections } = convertPanelsArrayToPanelSectionMaps(panels); // drop sections
   return {
     type: 'dashboard',
-    panels: convertPanelsArrayToPanelMap(panels),
+    panels: panelsMap,
+    sections,
   } as ParsedDashboardAttributesWithType;
 }
 
@@ -43,11 +45,14 @@ export function injectReferences(
   // inject references back into panels via the Embeddable persistable state service.
   const inject = createInject(deps.embeddablePersistableStateService);
   const injectedState = inject(parsedAttributes, references) as ParsedDashboardAttributesWithType;
-  const injectedPanels = convertPanelMapToPanelsArray(injectedState.panels);
+  const injectedPanels = convertPanelMapToPanelsArray(
+    injectedState.panels,
+    parsedAttributes.sections
+  ); // sections don't have references
 
   const newAttributes = {
     ...attributes,
-    panels: injectedPanels,
+    panels: [...attributes.panels, ...injectedPanels], // spreading the old panels array ensures that sections aren't dropped
   };
 
   return newAttributes;
@@ -73,11 +78,14 @@ export function extractReferences(
     references: Reference[];
     state: ParsedDashboardAttributesWithType;
   };
-  const extractedPanels = convertPanelMapToPanelsArray(extractedState.panels);
+  const extractedPanels = convertPanelMapToPanelsArray(
+    extractedState.panels,
+    parsedAttributes.sections
+  ); // sections don't have references
 
   const newAttributes = {
     ...attributes,
-    panels: extractedPanels,
+    panels: [...attributes.panels, ...extractedPanels], // spreading the old panels array ensures that sections aren't dropped
   };
 
   return {

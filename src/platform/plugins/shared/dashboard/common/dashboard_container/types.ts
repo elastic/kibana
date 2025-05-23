@@ -29,7 +29,7 @@ export interface DashboardPanelMap {
 export interface DashboardPanelState<PanelState = object> {
   type: string;
   explicitInput: PanelState;
-  readonly gridData: GridData;
+  readonly gridData: GridData & { sectionId?: string };
   panelRefName?: string;
 
   /**

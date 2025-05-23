@@ -9,24 +9,48 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+  SavedDashboardSection,
+} from '../../../../dashboard_saved_object';
+import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
-export function transformPanelsIn(
-  panels: DashboardAttributes['panels']
-): DashboardSavedObjectAttributes['panelsJSON'] {
-  const updatedPanels = panels.map(({ panelIndex, gridData, panelConfig, ...restPanel }) => {
-    const idx = panelIndex ?? uuidv4();
-    return {
-      ...restPanel,
-      embeddableConfig: panelConfig,
-      panelIndex: idx,
-      gridData: {
-        ...gridData,
-        i: idx,
-      },
-    };
+export function transformPanelsIn(widgets: DashboardAttributes['panels']): {
+  panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
+  sections: DashboardSavedObjectAttributes['sections'];
+} {
+  const panels: SavedDashboardPanel[] = [];
+  const sections: SavedDashboardSection[] = [];
+
+  widgets.forEach((widget) => {
+    if ('panels' in widget) {
+      // this is a section
+      const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;
+      const idx = gridData.i ?? uuidv4();
+      sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
+      (sectionPanels as DashboardPanel[]).forEach((panel) => {
+        const transformed = transformPanel(panel);
+        panels.push({ ...transformed, gridData: { ...transformed.gridData, sectionId: idx } });
+      });
+    } else {
+      // this is a panel
+      panels.push(transformPanel(widget));
+    }
   });
+  return { panelsJSON: JSON.stringify(panels), sections };
+}
 
-  return JSON.stringify(updatedPanels);
+function transformPanel(panel: DashboardPanel): SavedDashboardPanel {
+  const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
+  const idx = panelIndex ?? uuidv4();
+  return {
+    ...restPanel,
+    embeddableConfig: panelConfig,
+    panelIndex: idx,
+    gridData: {
+      ...gridData,
+      i: idx,
+    },
+  };
 }

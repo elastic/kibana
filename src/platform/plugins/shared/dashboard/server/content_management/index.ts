@@ -11,7 +11,7 @@ export type {
   ControlGroupAttributes,
   GridData,
   DashboardPanel,
-  DashboardSections,
+  DashboardSection,
   DashboardAttributes,
   DashboardItem,
   DashboardGetIn,

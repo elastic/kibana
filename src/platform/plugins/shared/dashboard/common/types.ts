@@ -41,6 +41,7 @@ export interface DashboardCapabilities {
 export interface ParsedDashboardAttributesWithType {
   id: string;
   panels: DashboardPanelMap;
+  sections: DashboardSectionMap;
   type: 'dashboard';
 }
 
@@ -93,6 +94,7 @@ export type SharedDashboardState = Partial<
     controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
 
     panels: DashboardPanel[];
+    // sections????
 
     sections: DashboardSectionState[] & SerializableRecord;
 

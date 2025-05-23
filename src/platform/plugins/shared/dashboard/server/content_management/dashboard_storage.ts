@@ -196,7 +196,6 @@ export class DashboardStorage {
     }
 
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
-
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
       if (this.throwOnResultValidationError) {
@@ -237,7 +236,6 @@ export class DashboardStorage {
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = tagsClient ? await tagsClient?.getAll() : [];
-
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
       DashboardAttributes,
@@ -426,6 +424,7 @@ export class DashboardStorage {
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
+
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {

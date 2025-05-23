@@ -15,8 +15,7 @@ import _ from 'lodash';
 import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 import type { DashboardPanelMap } from '../../../common/dashboard_container/types';
-import { convertPanelsArrayToPanelMap } from '../../../common/lib/dashboard_panel_converters';
-import { convertSectionArrayToSectionMap } from '../../../common/lib/dashboard_section_converters';
+import { convertPanelsArrayToPanelSectionMaps } from '../../../common/lib/dashboard_panel_converters';
 import type { DashboardState, SharedDashboardState } from '../../../common/types';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
@@ -72,7 +71,7 @@ function getPanelsMap(panels?: DashboardPanel[]): DashboardPanelMap | undefined 
     return panel;
   });
 
-  return convertPanelsArrayToPanelMap(standardizedPanels);
+  return convertPanelsArrayToPanelSectionMaps(standardizedPanels).panels;
 }
 
 /**
@@ -88,7 +87,8 @@ export const loadAndRemoveDashboardState = (
   if (!rawAppStateInUrl) return {};
 
   const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
-  const sectionsMap = convertSectionArrayToSectionMap(rawAppStateInUrl.sections ?? []);
+  // const sectionsMap = convertSectionArrayToSectionMap(rawAppStateInUrl.sections ?? []);
+  const sectionsMap = {};
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];

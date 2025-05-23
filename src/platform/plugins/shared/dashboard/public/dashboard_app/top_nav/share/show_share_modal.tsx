@@ -20,7 +20,6 @@ import React, { ReactElement, useState } from 'react';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardLocatorParams } from '../../../../common';
 import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
-import { convertSectionMapToSectionArray } from '../../../../common/lib/dashboard_section_converters';
 import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { coreServices, dataService, shareService } from '../../../services/kibana_services';
@@ -126,11 +125,11 @@ export function ShowShareModal({
     references: unsavedDashboardState.references as SharedDashboardState['references'],
   };
   if (allUnsavedPanelsMap) {
-    unsavedDashboardStateForLocator.panels = convertPanelMapToPanelsArray(allUnsavedPanelsMap);
+    // unsavedDashboardStateForLocator.panels = convertPanelMapToPanelsArray(allUnsavedPanelsMap);
   }
   if (allUnsavedSectionsMap) {
-    unsavedDashboardStateForLocator.sections =
-      convertSectionMapToSectionArray(allUnsavedSectionsMap);
+    // unsavedDashboardStateForLocator.sections = {};
+    // convertSectionMapToSectionArray(allUnsavedSectionsMap);
   }
 
   const locatorParams: DashboardLocatorParams = {

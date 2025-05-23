@@ -33,7 +33,10 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../common/content_management';
 import { getResultV3ToV2 } from './transform_utils';
-import { sectionSchema as sectionSavedObjectSchema } from '../../dashboard_saved_object/schema/v2/v2';
+import {
+  sectionSchema as sectionSavedObjectSchema,
+  sectionGridDataSchema,
+} from '../../dashboard_saved_object/schema/v2/v2';
 
 const apiError = schema.object({
   error: schema.string(),
@@ -249,11 +252,6 @@ export const gridDataSchema = schema.object({
       meta: { description: 'The unique identifier of the panel' },
     })
   ),
-  sectionId: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique ID of the section' },
-    })
-  ),
 });
 
 export const panelSchema = schema.object({
@@ -308,6 +306,22 @@ export const panelSchema = schema.object({
   ),
 });
 
+export const sectionSchema = sectionSavedObjectSchema.extends({
+  // make gridData.i optional for CM schema
+  gridData: sectionGridDataSchema.extends({
+    i: schema.maybe(
+      schema.string({
+        meta: { description: 'The unique identifier of the section.' },
+      })
+    ),
+  }),
+  // panels within a section are contained in an array
+  panels: schema.arrayOf(panelSchema, {
+    meta: { description: 'The panels that belong to the section.' },
+    defaultValue: [],
+  }),
+});
+
 export const optionsSchema = schema.object({
   hidePanelTitles: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
@@ -343,15 +357,6 @@ export const searchResultsAttributesSchema = schema.object({
     schema.arrayOf(
       schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
     )
-  ),
-});
-
-export const sectionSchema = sectionSavedObjectSchema.extends({
-  // make ID optional for CM schema
-  id: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique ID of the section.' },
-    })
   ),
 });
 
@@ -417,8 +422,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
-  panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
-  sections: schema.maybe(schema.arrayOf(sectionSchema)),
+  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });
@@ -433,14 +437,29 @@ export const referenceSchema = schema.object(
 );
 
 const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
+  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
   panels: schema.arrayOf(
-    panelSchema.extends({
-      // Responses always include the panel index and gridData.i
-      panelIndex: schema.string(),
-      gridData: gridDataSchema.extends({
-        i: schema.string(),
+    schema.oneOf([
+      panelSchema.extends({
+        panelIndex: schema.string(),
+        gridData: gridDataSchema.extends({
+          i: schema.string(),
+        }),
       }),
-    }),
+      sectionSchema.extends({
+        gridData: sectionGridDataSchema.extends({
+          i: schema.string(),
+        }),
+        panels: schema.arrayOf(
+          panelSchema.extends({
+            panelIndex: schema.string(),
+            gridData: gridDataSchema.extends({
+              i: schema.string(),
+            }),
+          })
+        ),
+      }),
+    ]),
     { defaultValue: [] }
   ),
 });
