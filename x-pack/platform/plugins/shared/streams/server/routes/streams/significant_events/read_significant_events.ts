@@ -53,7 +53,7 @@ export async function readSignificantEvents(
       }>;
     }
   >({
-    index: '.alerts-observability.streams.alerts-default',
+    index: '.alerts-streams.alerts-default',
     query: {
       bool: {
         filter: [
