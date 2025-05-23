@@ -52,6 +52,7 @@
     "@kbn/charts-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/response-ops-rules-apis",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }
