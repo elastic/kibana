@@ -104,3 +104,5 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+export const SIEM_MIGRATIONS_TRANSLATED_RULES_URL = 'app/security/siem_migrations/rules';
