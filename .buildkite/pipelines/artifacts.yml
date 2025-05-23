@@ -5,7 +5,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c2-standard-16
+      machineType: c2-standard-30
       diskSizeGb: 150
     timeout_in_minutes: 120
     retry:
