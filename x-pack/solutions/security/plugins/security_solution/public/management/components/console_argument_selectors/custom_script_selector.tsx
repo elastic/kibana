@@ -183,7 +183,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
                 },
               }}
               listProps={{
-                rowHeight: 50,
+                rowHeight: 60,
                 showIcons: false,
                 textWrap: 'truncate',
               }}
