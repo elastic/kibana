@@ -36,17 +36,18 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const statusRequest = useAbortableAsync(
     ({ signal }) => {
       return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
-        params: { query: { inference_id: installingInferenceId || '' } },
         signal,
       });
     },
-    [service, installingInferenceId]
+    [service]
   );
 
-  // poll for status when installing, until install is complete and the KB is ready
+  // poll for status when installing, until install is complete, KB is ready, and inference ID matches
   const isPolling =
     ((isInstalling || isWarmingUpModel) &&
-      statusRequest.value?.kbState !== KnowledgeBaseState.READY) ||
+      (statusRequest.value?.kbState !== KnowledgeBaseState.READY ||
+        (installingInferenceId &&
+          statusRequest.value?.currentInferenceId !== installingInferenceId))) ||
     statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL;
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     if (
       isInstalling &&
       statusRequest.value?.kbState === KnowledgeBaseState.READY &&
-      statusRequest.value?.endpoint?.inference_id === installingInferenceId
+      statusRequest.value?.currentInferenceId === installingInferenceId
     ) {
       setIsInstalling(false);
       setInstallingInferenceId(undefined);
@@ -141,7 +142,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
     const interval = setInterval(statusRequest.refresh, 5000);
 
-    if (statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+    if (
+      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.currentInferenceId === installingInferenceId
+    ) {
       // done installing
       clearInterval(interval);
       return;
@@ -151,7 +155,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     return () => {
       clearInterval(interval);
     };
-  }, [statusRequest, isPolling]);
+  }, [statusRequest, isPolling, installingInferenceId]);
 
   return {
     status: statusRequest,

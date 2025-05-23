@@ -41,6 +41,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     useEditableSettings(settingsKeys);
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
+
   async function handleSave() {
     try {
       await saveAll();

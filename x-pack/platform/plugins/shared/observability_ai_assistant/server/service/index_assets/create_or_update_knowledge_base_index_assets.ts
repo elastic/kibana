@@ -34,6 +34,10 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       template: getComponentTemplate(componentTemplateInferenceId),
     });
 
+    logger.debug(
+      `Knowledge base component template updated with inference_id: ${componentTemplateInferenceId}`
+    );
+
     // Knowledge base: index template
     await asInternalUser.indices.putIndexTemplate({
       name: resourceNames.indexTemplate.kb,
@@ -52,6 +56,7 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
     const writeIndexInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(
       () => undefined
     );
+    logger.debug(`Current write index inference id: ${writeIndexInferenceId}`);
 
     // Knowledge base: write index
     // `createConcreteWriteIndex` will create the write index, or update the index mappings if the index already exists

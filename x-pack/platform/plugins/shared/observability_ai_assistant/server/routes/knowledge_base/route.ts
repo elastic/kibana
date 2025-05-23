@@ -24,11 +24,6 @@ import {
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
-  params: t.type({
-    query: t.partial({
-      inference_id: t.string,
-    }),
-  }),
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -47,9 +42,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     isReIndexing: boolean;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    return client.getKnowledgeBaseStatus({
-      inferenceId: resources.params.query.inference_id,
-    });
+    return client.getKnowledgeBaseStatus();
   },
 });
 
