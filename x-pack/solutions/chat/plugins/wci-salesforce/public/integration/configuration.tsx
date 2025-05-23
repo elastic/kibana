@@ -23,14 +23,7 @@ import {
 } from '@elastic/eui';
 import { Controller, useWatch } from 'react-hook-form';
 import { useSalesforceCredentials } from '../hooks/use_salesforce_credentials';
-
-const standardObjects = [
-  { label: 'Account' },
-  { label: 'Contact' },
-  { label: 'Lead' },
-  { label: 'Opportunity' },
-  { label: 'Case' },
-];
+import { useSalesforceObjects } from '../hooks/use_salesforce_objects';
 
 export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
@@ -58,6 +51,15 @@ export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormP
     control,
     name: 'configuration.clientSecret',
   });
+
+  // Prepare credentials object for the objects query
+  const credentials =
+    domain && clientId && clientSecret ? { domain, clientId, clientSecret } : null;
+
+  // Fetch available objects when credentials are valid
+  const { data: objectsData, isLoading: isLoadingObjects } = useSalesforceObjects(
+    isValidated ? credentials : null
+  );
 
   useEffect(() => {
     const validateCredentials = async () => {
@@ -202,20 +204,22 @@ export const SalesforceConfigurationForm: React.FC<IntegrationConfigurationFormP
             <EuiFormRow label="Standard Objects">
               <EuiComboBox
                 placeholder="Select standard objects to sync"
-                options={standardObjects}
+                options={objectsData?.standard.map((name) => ({ label: name })) || []}
                 selectedOptions={selectedStandardObjects}
                 onChange={(options) => setSelectedStandardObjects(options)}
                 isClearable={true}
+                isLoading={isLoadingObjects}
                 data-test-subj="workchatSalesforceToolStandardObjects"
               />
             </EuiFormRow>
             <EuiFormRow label="Custom Objects">
               <EuiComboBox
                 placeholder="Select custom objects to sync"
-                options={[]} // TODO: Fetch custom objects from Salesforce
+                options={objectsData?.custom.map((name) => ({ label: name })) || []}
                 selectedOptions={selectedCustomObjects}
                 onChange={(options) => setSelectedCustomObjects(options)}
                 isClearable={true}
+                isLoading={isLoadingObjects}
                 data-test-subj="workchatSalesforceToolCustomObjects"
               />
             </EuiFormRow>

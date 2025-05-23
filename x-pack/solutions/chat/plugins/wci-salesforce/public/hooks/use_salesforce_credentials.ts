@@ -20,12 +20,23 @@ export interface ValidateCredentialsResponse {
   message: string;
 }
 
+export interface ValidateCredentialsError {
+  message: string;
+  attributes?: {
+    error: string;
+  };
+}
+
 export const useSalesforceCredentials = () => {
   const {
     services: { http },
   } = useKibana<CoreStart>();
 
-  return useMutation({
+  return useMutation<
+    ValidateCredentialsResponse,
+    ValidateCredentialsError,
+    ValidateCredentialsRequest
+  >({
     mutationFn: async (credentials: ValidateCredentialsRequest) => {
       const response = await http.post<ValidateCredentialsResponse>(
         '/internal/wci-salesforce/configuration/ping',
