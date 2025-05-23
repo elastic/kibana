@@ -44,20 +44,13 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   // poll for status when installing, until install is complete, KB is ready, and inference ID matches
   let isPolling = false;
 
-  // Check if model is being deployed
   if (statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL) {
     isPolling = true;
-  }
-  // Check if we're installing or warming up the model
-  else if (installingInferenceId !== undefined || isWarmingUpModel) {
-    // Poll if KB is not ready
-    if (statusRequest.value?.kbState !== KnowledgeBaseState.READY) {
-      isPolling = true;
-    }
-    // Or if we're installing and the inference IDs don't match
-    else if (
-      installingInferenceId &&
-      statusRequest.value?.currentInferenceId !== installingInferenceId
+  } else if (installingInferenceId !== undefined || isWarmingUpModel) {
+    if (
+      statusRequest.value?.kbState !== KnowledgeBaseState.READY ||
+      (installingInferenceId !== undefined &&
+        statusRequest.value?.currentInferenceId !== installingInferenceId)
     ) {
       isPolling = true;
     }
