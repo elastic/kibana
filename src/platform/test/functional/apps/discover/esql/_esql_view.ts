@@ -245,6 +245,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.selectTextBaseLang();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from logstash-* | limit 100`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         const initialTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(initialTimeConfig.start).to.equal(timePicker.defaultStartTime);
