@@ -71,9 +71,7 @@ export async function createAgentAction(
     policyId: newAgentAction.policyId,
     enrollment_token: newAgentAction.enrollment_token,
     target_uri: newAgentAction.target_uri,
-    settings: newAgentAction.additionalSettings
-      ? JSON.stringify(newAgentAction.additionalSettings)
-      : undefined,
+    settings: newAgentAction.additionalSettings ? newAgentAction.additionalSettings : undefined,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
