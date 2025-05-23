@@ -16,6 +16,7 @@ import type {
   ESQLFunction,
   ESQLIdentifier,
   ESQLIntegerLiteral,
+  ESQLList,
   ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
@@ -83,6 +84,9 @@ export const isSource = (node: unknown): node is ESQLSource =>
 
 export const isIdentifier = (node: unknown): node is ESQLIdentifier =>
   isProperNode(node) && node.type === 'identifier';
+
+export const isList = (node: unknown): node is ESQLList =>
+  isProperNode(node) && node.type === 'list';
 
 /**
  * Returns the group of a binary expression:

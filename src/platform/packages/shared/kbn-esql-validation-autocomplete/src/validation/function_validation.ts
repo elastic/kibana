@@ -9,6 +9,9 @@
 
 import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage, isIdentifier } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
+import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import { isStringLiteral, isLiteral, isList } from '@kbn/esql-ast/src/ast/helpers';
+import { resolveItem } from '@kbn/esql-ast/src/visitor/utils';
 import {
   isLiteralItem,
   isTimeIntervalItem,
@@ -23,7 +26,6 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../shared/constants';
-import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   isValidLiteralOption,
   checkFunctionArgMatchesDefinition,
@@ -35,15 +37,35 @@ import {
   isFunctionOperatorParam,
   getSignaturesWithMatchingArity,
   getParamAtPosition,
-  extractSingularType,
+  unwrapArrayOneLevel,
   isArrayType,
   isParametrized,
+  isParam,
 } from '../shared/helpers';
 import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
 import { ReferenceMaps } from './types';
 
 const NO_MESSAGE: ESQLMessage[] = [];
+
+// const validateInExpression = (fn: ESQLBinaryExpression<'in'> | ESQLBinaryExpression<'not_in'>, definition: FunctionDefinition): Signature[] => {
+//   for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
+//     relevantFuncSignatures = definition.signatures.filter(
+//       (s) =>
+//         s.params?.length >= argIndex &&
+//         s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
+//           const arg = enrichedArgs[idx];
+
+//           if (isLiteralItem(arg)) {
+//             return (
+//               dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
+//             );
+//           }
+//           return false; // Non-literal arguments don't match
+//         })
+//     );
+//   }
+// };
 
 /**
  * Performs validation on a function
@@ -240,43 +262,26 @@ export function validateFunction({
   }
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
-  let relevantFuncSignatures = matchingSignatures;
-  const enrichedArgs = fn.args;
-
-  if (fn.name === 'in' || fn.name === 'not_in') {
-    for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
-      relevantFuncSignatures = fnDefinition.signatures.filter(
-        (s) =>
-          s.params?.length >= argIndex &&
-          s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-            const arg = enrichedArgs[idx];
-
-            if (isLiteralItem(arg)) {
-              return (
-                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
-              );
-            }
-            return false; // Non-literal arguments don't match
-          })
-      );
-    }
-  }
+  const relevantFuncSignatures = matchingSignatures;
 
   for (const signature of relevantFuncSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    fn.args.forEach((outerArg, index) => {
-      const argDef = getParamAtPosition(signature, index);
-      if ((!outerArg && argDef?.optional) || !argDef) {
+    for (let index = 0; index < fn.args.length; index++) {
+      const argument = fn.args[index];
+      const parameter = getParamAtPosition(signature, index);
+      if ((!argument && parameter?.optional) || !parameter) {
         // that's ok, just skip it
-        // the else case is already catched with the argument counts check
+        // the else case is already caught with the argument counts check
         // few lines above
-        return;
+        break;
       }
 
       // check every element of the argument (may be an array of elements, or may be a single element)
-      const hasMultipleElements = Array.isArray(outerArg);
-      const argElements = hasMultipleElements ? outerArg : [outerArg];
-      const singularType = extractSingularType(argDef.type);
+      const hasMultipleElements = Array.isArray(argument);
+      const argElements = hasMultipleElements ? argument : [argument];
+      const elementType = hasMultipleElements
+        ? unwrapArrayOneLevel(parameter.type)
+        : parameter.type;
       const messagesFromAllArgElements = argElements.flatMap((arg) => {
         return [
           validateFunctionLiteralArg,
@@ -288,9 +293,9 @@ export function validateFunction({
             fn,
             arg,
             {
-              ...argDef,
-              type: singularType,
-              constantOnly: forceConstantOnly || argDef.constantOnly,
+              ...parameter,
+              type: elementType,
+              constantOnly: forceConstantOnly || parameter.constantOnly,
             },
             references,
             parentCommand
@@ -298,20 +303,20 @@ export function validateFunction({
         });
       });
 
-      const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
+      const shouldCollapseMessages = isArrayType(parameter.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
-              outerArg,
+              argument,
               fn.name,
-              argDef.type as string,
+              parameter.type as string,
               parentCommand,
               references
             )
           : messagesFromAllArgElements)
       );
-    });
+    }
     if (failingSignature.length) {
       failingSignatures.push(failingSignature);
     }
@@ -331,72 +336,160 @@ export function validateFunction({
 
 // #region Arg validation
 
+const formatType = (argument: ESQLAstExpression): string => {
+  if (isLiteral(argument)) {
+    return argument.type + ':' + argument.literalType;
+  }
+
+  return argument.type;
+};
+
+type ValidationError = [expected: ValidationParameter, received: ESQLAstExpression];
+type ValidationParameter = Partial<FunctionParameter> &
+  Pick<FunctionParameter, 'type'> & { parent?: ValidationParameter };
+
+const validateParameter = (
+  parameter: ValidationParameter,
+  argument: ESQLAstExpression
+): ValidationError | undefined => {
+  if (isArrayType(parameter.type)) {
+    if (!isList(argument)) {
+      return [parameter, argument];
+    }
+    const arrayElementParameter: ValidationParameter = {
+      ...parameter,
+      type: unwrapArrayOneLevel(parameter.type),
+      parent: parameter,
+    };
+
+    for (const element of argument.values) {
+      const error = validateParameter(arrayElementParameter, element);
+      if (error) {
+        return error;
+      }
+    }
+  }
+
+  switch (parameter.type) {
+    case 'keyword': {
+      if (isParam(argument) || isStringLiteral(argument)) {
+        return;
+      }
+      return [parameter, argument];
+    }
+    case 'double':
+    case 'unsigned_long':
+    case 'long':
+    case 'integer':
+    case 'counter_integer':
+    case 'counter_long':
+    case 'counter_double':
+    case 'boolean':
+    case 'any':
+    case 'date':
+    case 'date_period':
+    case 'ip':
+    case 'cartesian_point':
+    case 'cartesian_shape':
+    case 'geo_point':
+    case 'geo_shape':
+    case 'version':
+    case 'date_nanos': {
+      throw new Error('Not implemented');
+    }
+  }
+};
+
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
-  actualArg: ESQLAstItem,
-  argDef: FunctionParameter,
+  argument: ESQLAstItem,
+  parameter: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isLiteralItem(actualArg)) {
+
+  // TODO: Currently, we use this special path only fo IN-expressions, but we should
+  // extend the `validateParameter` and run this for all functions.
+  if (astFunction.name === 'in' || astFunction.name === 'not_in') {
+    const error = validateParameter(parameter, resolveItem(argument));
+
+    if (error) {
+      const [errorParameter, errorArgument] = error;
+
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentType',
+          values: {
+            name: astFunction.name,
+            argType: errorParameter.type,
+            value: errorArgument.text,
+            givenType: formatType(errorArgument),
+          },
+          locations: errorArgument.location,
+        })
+      );
+    }
+  }
+
+  if (isLiteralItem(argument)) {
     if (
-      actualArg.literalType === 'keyword' &&
-      argDef.acceptedValues &&
-      isValidLiteralOption(actualArg, argDef)
+      argument.literalType === 'keyword' &&
+      parameter.acceptedValues &&
+      isValidLiteralOption(argument, parameter)
     ) {
       messages.push(
         getMessageFromId({
           messageId: 'unsupportedLiteralOption',
           values: {
             name: astFunction.name,
-            value: actualArg.value,
-            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
+            value: argument.value,
+            supportedOptions: parameter.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     }
 
-    if (!checkFunctionArgMatchesDefinition(actualArg, argDef, references, parentCommand)) {
+    if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type as string,
-            value: actualArg.text,
-            givenType: actualArg.literalType,
+            argType: parameter.type as string,
+            value: argument.text,
+            givenType: argument.literalType,
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     }
   }
-  if (isTimeIntervalItem(actualArg)) {
+  if (isTimeIntervalItem(argument)) {
     // check first if it's a valid interval string
-    if (!inKnownTimeInterval(actualArg.unit)) {
+    if (!inKnownTimeInterval(argument.unit)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownInterval',
           values: {
-            value: actualArg.unit,
+            value: argument.unit,
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     } else {
-      if (!checkFunctionArgMatchesDefinition(actualArg, argDef, references, parentCommand)) {
+      if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
         messages.push(
           getMessageFromId({
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type as string,
-              value: actualArg.name,
+              argType: parameter.type as string,
+              value: argument.name,
               givenType: 'duration',
             },
-            locations: actualArg.location,
+            locations: argument.location,
           })
         );
       }

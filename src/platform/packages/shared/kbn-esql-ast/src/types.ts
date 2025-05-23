@@ -230,7 +230,8 @@ export type BinaryExpressionOperator =
   | BinaryExpressionRegexOperator
   | BinaryExpressionRenameOperator
   | BinaryExpressionWhereOperator
-  | BinaryExpressionMatchOperator;
+  | BinaryExpressionMatchOperator
+  | BinaryExpressionIn;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
@@ -239,6 +240,7 @@ export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
+export type BinaryExpressionIn = 'in' | 'not_in';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
