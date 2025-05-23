@@ -51,7 +51,7 @@ export interface LensServerPluginSetup {
   /**
    * Server side embeddable definition which provides migrations to run if Lens state is embedded into another saved object somewhere
    */
-  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory> | undefined;
+  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory>;
   /**
    * Register custom migration functions for custom third party Lens visualizations
    */
