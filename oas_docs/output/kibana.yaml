@@ -75418,7 +75418,7 @@ components:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
           required:
             - asset
-        generic:
+        entity:
           type: object
           properties:
             asset:
@@ -75428,10 +75428,10 @@ components:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
               required:
                 - criticality
-            name:
+            id:
               type: string
           required:
-            - name
+            - id
         host:
           type: object
           properties:
