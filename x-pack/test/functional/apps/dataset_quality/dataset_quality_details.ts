@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
-    'discover'
+    'discover',
   ]);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('logSynthtraceEsClient');
