@@ -161,9 +161,9 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
       return suggestions;
     }
     ```
-  - [ ] Optionally, we must filter or incorporate fields suggestions after a command is executed, this is supported by adding the fieldsSuggestionsAfter method to the command definition. Read this documentation to understand how it works.
+  - [ ] Optionally, we must filter or incorporate fields suggestions after a command is executed, this is supported by adding the `fieldsSuggestionsAfter` method to the command definition. Read this documentation to understand how it works.
     <br><br/>
-    **Example** ⭐ of “suggestions after” for the DROP command, you can see how the dropped columns are excluded from future suggestions after the command execution:
+    **Example** ⭐ of `suggestionsAfter` for the DROP command, you can see how the dropped columns are excluded from future suggestions after the command execution:
     ```ts
     export const fieldsSuggestionsAfter = (
       command: ESQLAstCommand,

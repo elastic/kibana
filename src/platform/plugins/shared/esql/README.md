@@ -39,4 +39,4 @@ It is also part of the:
 - Alerts
 
 ## Want to add support for a new command?
-Follow this [guide](ADD_COMMAND_GUIDE.md) and you can ask for help at **#kibana-esql-project-team**.
+Follow this [guide](ADD_COMMAND_GUIDE.md).
