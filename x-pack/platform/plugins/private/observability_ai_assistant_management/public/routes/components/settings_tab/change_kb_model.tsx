@@ -281,14 +281,20 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
                       data-test-subj="observabilityAiAssistantKnowledgeBaseStatus"
                       color={
                         knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
-                          ? 'success'
+                          ? isKnowledgeBaseInLoadingState
+                            ? 'warning'
+                            : 'success'
                           : 'default'
                       }
                     >
                       {knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
-                        ? i18n.translate('xpack.aiAssistant.knowledgeBase.stateInstalled', {
-                            defaultMessage: 'Installed',
-                          })
+                        ? isKnowledgeBaseInLoadingState
+                          ? i18n.translate('xpack.aiAssistant.knowledgeBase.stateUpdatingModel', {
+                              defaultMessage: 'Updating model',
+                            })
+                          : i18n.translate('xpack.aiAssistant.knowledgeBase.stateInstalled', {
+                              defaultMessage: 'Installed',
+                            })
                         : knowledgeBase.status.value.kbState}
                     </EuiBadge>
                   </EuiFlexItem>
