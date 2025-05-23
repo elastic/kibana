@@ -14,15 +14,17 @@ export const setupMockServer = () => {
   return server;
 };
 
-interface AgentlessApiResponse {
-  status: number;
+interface AgentlessApiDeploymentResponse {
+  code: string;
+  error: string | null;
 }
 
 const deploymentHandler = http.post(
   'agentless-api/api/v1/ess/deployments',
-  async ({ request }): Promise<StrictResponse<AgentlessApiResponse>> => {
+  async ({ request }): Promise<StrictResponse<AgentlessApiDeploymentResponse>> => {
     return HttpResponse.json({
-      status: 200,
+      code: 'SUCCESS',
+      error: null,
     });
   }
 );
