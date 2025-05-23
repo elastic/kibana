@@ -63,10 +63,10 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
       untilLoaded(id).then(() => {
         setScrollToPanelId(undefined);
         if (scrollPosition !== undefined) {
-          window.scrollTo({ top: scrollPosition });
+          window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
           scrollPosition = undefined;
         } else {
-          panelRef.scrollIntoView({ block: 'start' });
+          panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
         }
       });
     },

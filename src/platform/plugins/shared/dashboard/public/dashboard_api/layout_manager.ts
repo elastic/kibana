@@ -265,9 +265,9 @@ export function initializeLayoutManager(
         title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
-      trackPanel.setScrollToPanelId(uuid);
-      trackPanel.setHighlightPanelId(uuid);
     }
+    trackPanel.setScrollToPanelId(uuid);
+    trackPanel.setHighlightPanelId(uuid);
     return (await getChildApi(uuid)) as ApiType;
   };
 
