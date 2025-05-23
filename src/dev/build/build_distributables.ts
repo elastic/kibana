@@ -49,8 +49,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   log.verbose('building distributables with options:', options);
 
   const config = await Config.create(options);
-
   const globalRun = createRunner({ config, log });
+  const artifactTasks = [];
 
   /**
    * verify, reset, and initialize the build environment
@@ -134,8 +134,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --skip-cloud-dependencies-download
     await globalRun(Tasks.DownloadCloudDependencies);
   }
-
-  const artifactTasks = [];
 
   if (options.createDebPackage || options.createRpmPackage) {
     await globalRun(Tasks.CreatePackageConfig);
