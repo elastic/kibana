@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { KnowledgeBaseState } from '../../common';
+import { CompatibleJSONSchema, KnowledgeBaseState } from '../../common';
 import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
 import { registerSummarizationFunction, SUMMARIZE_FUNCTION_NAME } from './summarize';
 import type { RegistrationCallback } from '../service/types';
@@ -82,8 +82,47 @@ ${
       If the user asks how to change the language, reply in the same language the user asked in.`);
   }
 
-  const { kbState } = await client.getKnowledgeBaseStatus();
+  const inferenceClient = (await resources.plugins.inference.start()).getClient({
+    request: resources.request,
+  });
+
+  // const [{ kbState }, mcpTools] = await Promise.all([
+  //   client.getKnowledgeBaseStatus(),
+  //   inferenceClient.listMCPTools(),
+  // ]);
+
+  const [{ kbState }, mcpTools] = await Promise.all([
+    client.getKnowledgeBaseStatus(),
+    inferenceClient.listMcpToolsViaHub(),
+  ]);
+
+  // console.log('mcpTools', mcpTools);
+
   const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
+
+  mcpTools.servers.forEach((server) => {
+    server.tools.forEach((tool) => {
+      functions.registerFunction(
+        {
+          name: tool.name,
+          description: tool.description ?? '',
+          parameters: tool.inputSchema as CompatibleJSONSchema,
+        },
+        async ({ arguments: args }) => {
+          const result = await inferenceClient.callMcpToolViaHub({
+            connectorId: server.connectorId,
+            serverName: server.serverName,
+            name: tool.name,
+            arguments: args as Record<string, any>,
+          });
+
+          return {
+            content: result?.content?.map((part) => part.text).join(''),
+          };
+        }
+      );
+    });
+  });
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];

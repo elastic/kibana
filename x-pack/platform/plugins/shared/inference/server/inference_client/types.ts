@@ -11,7 +11,12 @@ import type {
   BoundOutputAPI,
   OutputAPI,
   InferenceConnector,
+  InferenceListToolsResponse,
+  InferenceCallToolRequest,
+  InferenceCallToolResponseResolved,
+  InferenceListToolsViaHubResponse,
 } from '@kbn/inference-common';
+import { InferenceCallToolViaHubRequest } from '@kbn/inference-common/src/mcp/tools';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.
@@ -33,6 +38,30 @@ export interface InferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  /**
+   * `listMCPTools` returns the available tools from MCP connectors.
+   */
+  listMCPTools: () => Promise<InferenceListToolsResponse>;
+  /**
+   * `callMCPTool` executes a MCP tool by sending a request to the
+   * specified MCP Server.
+   * @param request
+   * @returns
+   */
+  callMCPTool: (request: InferenceCallToolRequest) => Promise<InferenceCallToolResponseResolved>;
+  /**
+   * `listMcpToolsViaHub` returns the available tools from the MCP Hub.
+   */
+  listMcpToolsViaHub: () => Promise<InferenceListToolsViaHubResponse>;
+  /**
+   * `callMcpToolViaHub` executes a MCP tool by sending a request to the
+   * specified MCP Server via the MCP hub.
+   * @param request
+   * @returns
+   */
+  callMcpToolViaHub: (
+    request: InferenceCallToolViaHubRequest
+  ) => Promise<InferenceCallToolResponseResolved>;
 }
 
 /**
