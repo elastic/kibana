@@ -134,19 +134,6 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       }
     }
 
-    if (this._lifeCycleChanged && isDslLifecycle(this.getLifeCycle())) {
-      const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
-      if (dataStream.ilm_policy !== undefined) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              'Cannot apply DSL lifecycle to a data stream that is already managed by an ILM policy'
-            ),
-          ],
-        };
-      }
-    }
     return { isValid: true, errors: [] };
   }
 

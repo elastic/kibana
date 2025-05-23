@@ -151,7 +151,20 @@ export async function updateDataStreamsLifecycle({
     const isIlm = isIlmLifecycle(lifecycle);
 
     for (const dataStream of dataStreams.data_streams) {
-      logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
+      logger.debug(`updating settings for data stream ${dataStream.name}`);
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.transport.request({
+            method: 'PUT',
+            path: `/_data_stream/${dataStream.name}/_settings`,
+            body: {
+              'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
+            },
+          }),
+        { logger }
+      );
+
       await retryTransientEsErrors(
         () =>
           esClient.indices.putSettings({
