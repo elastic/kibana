@@ -11,8 +11,6 @@ import React, { useMemo } from 'react';
 import { css, cx } from '@emotion/css';
 import { TestCase } from './types';
 
-
-
 const base = {
   outline: 0,
   border: 0,
@@ -39,15 +37,8 @@ const disabledBas = {
   ...disabledBase,
 };
 
-
 // Control Case:  inline style tag
-export const ControlRow = ({
-  disabled,
-  index,
-}: {
-  disabled: boolean;
-  index: number;
-}) => {
+export const ControlRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
   return (
     <div
       style={
@@ -59,16 +50,16 @@ export const ControlRow = ({
           : {
               outline: 0,
               border: 0,
-              margin: "2px 2px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "anchor-center",
-              height: "30px",
-              fontSize: "20px",
-              width: "30px",
+              margin: '2px 2px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'anchor-center',
+              height: '30px',
+              fontSize: '20px',
+              width: '30px',
               opacity: 1,
-              color: "#E2F8F0",
-              backgroundColor: "#008A5E",
+              color: '#E2F8F0',
+              backgroundColor: '#008A5E',
             }
       }
     >
@@ -191,4 +182,3 @@ export const testCases: TestCase[] = [
   },
   { component: ClassNameRow, description: 'An element styled by adding a classname on parent' },
 ];
-

@@ -11,15 +11,13 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { TestCase } from './types';
 
+// Control Case:  inline style tag
+export const ControlRow = ({ disabled, index }: { disabled: boolean; index: number }) => {
+  return <div style={disabled ? disabledBas : base}>{index}</div>;
+};
 
 // Control Case:  inline style tag
-export const ControlRow = ({
-  disabled,
-  index,
-}: {
-  disabled: boolean;
-  index: number;
-}) => {
+export const ControlRow2 = ({ disabled, index }: { disabled: boolean; index: number }) => {
   return (
     <div
       style={
@@ -31,16 +29,16 @@ export const ControlRow = ({
           : {
               outline: 0,
               border: 0,
-              margin: "2px 2px",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "anchor-center",
-              height: "30px",
-              fontSize: "20px",
-              width: "30px",
+              margin: '2px 2px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'anchor-center',
+              height: '30px',
+              fontSize: '20px',
+              width: '30px',
               opacity: 1,
-              color: "#E2F8F0",
-              backgroundColor: "#008A5E",
+              color: '#E2F8F0',
+              backgroundColor: '#008A5E',
             }
       }
     >
@@ -52,22 +50,22 @@ export const ControlRow = ({
 const base = {
   outline: 0,
   border: 0,
-  margin: "2px 2px",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "anchor-center",
-  height: "30px",
-  fontSize: "20px",
-  width: "30px",
+  margin: '2px 2px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'anchor-center',
+  height: '30px',
+  fontSize: '20px',
+  width: '30px',
   opacity: 1,
-  color: "#E2F8F0",
-  backgroundColor: "#008A5E",
+  color: '#E2F8F0',
+  backgroundColor: '#008A5E',
 };
 
 const disabledBase = {
   opacity: 0.5,
-  color: "#E2F9F7",
-  backgroundColor: "#C61E25",
+  color: '#E2F9F7',
+  backgroundColor: '#C61E25',
 };
 
 const disabledBas = {
@@ -98,7 +96,6 @@ export const InlineStylesRow = ({ disabled, index }: { disabled: boolean; index:
     </div>
   );
 };
-
 
 // Case B: The condition is outside of the css prop
 export const ComposedStylesRow = ({ disabled, index }: { disabled: boolean; index: number }) => {

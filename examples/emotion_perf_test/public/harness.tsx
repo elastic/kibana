@@ -9,44 +9,49 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Global } from '@emotion/react';
+import { css } from '@emotion/css';
 import { Stats } from './stats';
 import { euiTestCases } from './cases_eui';
 import { emotionReactTestCases } from './cases_emotion_react';
 import { testCases } from './cases';
-import { css } from '@emotion/css';
 
-type TestCases = 'euiTestCases'| 'testCases'| 'emotionReactTestCases'
+type TestCases = 'euiTestCases' | 'testCases' | 'emotionReactTestCases';
 
 const allTestCases = {
   euiTestCases,
   testCases,
   emotionReactTestCases,
-}
+};
 
-export const HarnessWrapper = (props: { renderCount: number; rowCount: number, wastedRerender: boolean, testCases: TestCases}) => {
+export const HarnessWrapper = (props: {
+  renderCount: number;
+  rowCount: number;
+  wastedRerender: boolean;
+  testCases: TestCases;
+}) => {
   const tCases = allTestCases[props.testCases];
-  const testCaseWidth = Math.floor(100/tCases.length);
+  const testCaseWidth = Math.floor(100 / tCases.length);
   const styles = css({
     '.perfTest__harness': {
       flex: `0 0 ${testCaseWidth}%`,
     },
     '.perfTest__stats': {
       width: `${testCaseWidth}%`,
-    }
+    },
   });
   return (
     <div className={styles}>
-    <div className="perfTest__harnessWrapper">
-      {tCases.map(({ component, description, mountRootVars }) => (
-        <Harness
-          key={component.name}
-          RowComponent={component}
-          description={description}
-          mountRootVars={mountRootVars}
-          {...props}
-        />
-      ))}
-    </div>
+      <div className="perfTest__harnessWrapper">
+        {tCases.map(({ component, description, mountRootVars }) => (
+          <Harness
+            key={component.name}
+            RowComponent={component}
+            description={description}
+            mountRootVars={mountRootVars}
+            {...props}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -114,7 +119,7 @@ function Harness({
       <div className={'perfTest__harness'}>
         <div className={'perfTest__harnessGrid'}>
           {Array.from({ length: rowCount }).map((__, i) => (
-            <RowComponent key={i} disabled={disabled} index={i} />
+            <RowComponent key={Math.random()} disabled={disabled} index={Math.random()} />
           ))}
         </div>
         <Stats
