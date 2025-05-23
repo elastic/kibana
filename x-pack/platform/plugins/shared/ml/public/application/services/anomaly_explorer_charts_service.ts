@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { map as mapObservable } from 'rxjs';
+
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -21,12 +22,12 @@ import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { MlResultsService } from '@kbn/ml-services/results_service_2';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
-import type { MlResultsService } from './results_service';
 import {
   DEFAULT_MAX_SERIES_TO_PLOT,
   MAX_CHARTS_PER_ROW,
