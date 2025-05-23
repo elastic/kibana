@@ -119,6 +119,7 @@ const stateSchemaV2 = stateSchemaV1.extends({
   count_mw_with_filter_alert_toggle_on: schema.number(),
   count_alerts_total: schema.number(),
   count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
+  count_ignored_fields_by_rule_type: schema.recordOf(schema.string(), schema.number()),
 });
 
 const stateSchemaV3 = stateSchemaV2.extends({
@@ -131,9 +132,8 @@ const stateSchemaV4 = stateSchemaV3.extends({
   count_rules_muted_by_type: schema.recordOf(schema.string(), schema.number()),
 });
 
-
 const stateSchemaV5 = stateSchemaV4.extends({
-  max_ignored_fields_by_rule_type: schema.recordOf(schema.string(), schema.number()),
+  count_ignored_fields_by_rule_type: schema.recordOf(schema.string(), schema.number()),
 });
 
 export const stateSchemaByVersion = {
@@ -252,8 +252,8 @@ export const stateSchemaByVersion = {
   },
   5: {
     up: (state: Record<string, unknown>) => ({
-      ...stateSchemaByVersion[3].up(state),
-      max_ignored_fields_by_rule_type: state.max_ignored_fields_by_rule_type || 0,
+      ...stateSchemaByVersion[4].up(state),
+      count_ignored_fields_by_rule_type: state.count_ignored_fields_by_rule_type || {},
     }),
     schema: stateSchemaV5,
   },
@@ -340,7 +340,7 @@ export const emptyState: LatestTaskStateSchema = {
   percentile_num_alerts_by_type_per_day: {},
   count_alerts_total: 0,
   count_alerts_by_rule_type: {},
+  count_ignored_fields_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
-  max_ignored_fields_by_rule_type: {},
 };

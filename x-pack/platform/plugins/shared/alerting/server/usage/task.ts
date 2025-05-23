@@ -30,7 +30,7 @@ import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
 export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
-export const SCHEDULE: IntervalSchedule = { interval: '1d' };
+export const SCHEDULE: IntervalSchedule = { interval: '1m' };
 
 export function initializeAlertingTelemetry(
   logger: Logger,
@@ -220,8 +220,8 @@ export function telemetryTaskRunner(
                 percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
                 count_alerts_total: totalAlertsCountAggregations.count_alerts_total,
                 count_alerts_by_rule_type: totalAlertsCountAggregations.count_alerts_by_rule_type,
-                max_ignored_fields_by_rule_type:
-                  totalAlertsCountAggregations.max_ignored_fields_by_rule_type,
+                count_ignored_fields_by_rule_type:
+                  totalAlertsCountAggregations.count_ignored_fields_by_rule_type,
               };
 
               return {
