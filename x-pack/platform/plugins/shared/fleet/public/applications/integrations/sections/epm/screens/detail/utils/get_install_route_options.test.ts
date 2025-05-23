@@ -248,25 +248,5 @@ describe('getInstallPkgRouteOptions', () => {
 
       expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
     });
-
-    it('should not use multi-page layout if isAgentlessDefault is true', () => {
-      const opts = {
-        currentPath: 'currentPath',
-        integration: 'myintegration',
-        pkgkey: 'myintegration-1.0.0',
-        isFirstTimeAgentUser: true,
-        isGuidedOnboardingActive: false,
-        isCloud: true,
-        isExperimentalAddIntegrationPageEnabled: true,
-        isAgentlessDefault: true,
-      };
-
-      const expectedOptions = {
-        path: '/integrations/myintegration-1.0.0/add-integration/myintegration',
-        state: expect.any(Object),
-      };
-
-      expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
-    });
   });
 });

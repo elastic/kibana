@@ -14,6 +14,8 @@ import {
   useGetPackageInfoByKeyQuery,
   useLink,
   useFleetServerHostsForPolicy,
+  useStartServices,
+  useConfig,
 } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
@@ -64,6 +66,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
   const { getHref } = useLink();
+  const { agentless: { isDefault: isAgentlessDefault } = {} } = useConfig();
+  const { application } = useStartServices();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
   const toggleIsManaged = (newIsManaged: boolean) => {
     setIsManaged(newIsManaged);
@@ -105,6 +109,11 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(integration ? { integration } : {}),
     ...(agentPolicyId ? { agentPolicyId } : {}),
   });
+
+  if (isAgentlessDefault) {
+    // Always skip the splash screen and go directly to the add integration page
+    application.navigateToUrl(cancelUrl);
+  }
 
   if (onSplash || !packageInfo) {
     return (

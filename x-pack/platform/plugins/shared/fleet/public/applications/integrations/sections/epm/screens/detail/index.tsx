@@ -141,7 +141,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { isAgentlessIntegration } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -433,7 +433,6 @@ export function Detail() {
         isGuidedOnboardingActive,
         pkgkey,
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
-        isAgentlessDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -463,7 +462,6 @@ export function Detail() {
       history,
       integration,
       isAgentlessIntegration,
-      isAgentlessDefault,
       isCloud,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
