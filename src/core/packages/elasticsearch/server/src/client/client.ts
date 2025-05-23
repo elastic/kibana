@@ -10,16 +10,28 @@
 import type { Client } from '@elastic/elasticsearch';
 
 /**
+ * List of all the methods that we need to annotate (for deprecation or tracking purposes, or adding remarks).
+ * @public
+ */
+export interface ElasticsearchClientOverrides {
+  /**
+   * @deprecated
+   */
+  search: Client['search'];
+}
+
+/**
  * Client used to query the elasticsearch cluster.
  *
  * @public
  */
-export type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic' | 'search'
-> & {
-  /**
-   * @deprecated Use async search instead
-   */
-  search: Client['search'];
-};
+export type ElasticsearchClient = ElasticsearchClientOverrides &
+  Omit<
+    Client,
+    | 'connectionPool'
+    | 'serializer'
+    | 'extend'
+    | 'close'
+    | 'diagnostic'
+    | keyof ElasticsearchClientOverrides
+  >;

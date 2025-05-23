@@ -9,6 +9,7 @@
 
 export type {
   ElasticsearchClient,
+  ElasticsearchClientOverrides,
   IScopedClusterClient,
   IClusterClient,
   ICustomClusterClient,
