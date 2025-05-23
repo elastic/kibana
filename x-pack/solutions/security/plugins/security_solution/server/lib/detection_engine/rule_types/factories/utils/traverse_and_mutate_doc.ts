@@ -248,20 +248,24 @@ const internalTraverseAndMutateDoc = <T extends SourceFieldRecord>({
     }
 
     // We're keeping the field, but maybe we want to copy it to a different field as well
-    if (!deleted && topLevel && pathNeedsCopying(fullPath)) {
-      // The value might have changed above when we `set` after traversing an array
-      const valueRefetch = document[key];
-      const newKey = getCopyDestinationPath(fullPath);
-      if (isPlainObject(valueRefetch)) {
-        const flattenedObject = flattenWithPrefix(newKey, valueRefetch);
-        for (const [k, v] of Object.entries(flattenedObject)) {
-          fieldsToAdd.push({ key: k, value: v });
+    if (!deleted && topLevel) {
+      const topLevelPath = getTopLevelPath(fullPath);
+
+      if (pathNeedsCopying(topLevelPath)) {
+        // The value might have changed above when we `set` after traversing an array
+        const valueRefetch = document[key];
+        const newKey = getCopyDestinationPath(fullPath, topLevelPath);
+        if (isPlainObject(valueRefetch)) {
+          const flattenedObject = flattenWithPrefix(newKey, valueRefetch);
+          for (const [k, v] of Object.entries(flattenedObject)) {
+            fieldsToAdd.push({ key: k, value: v });
+          }
+        } else {
+          fieldsToAdd.push({
+            key: newKey,
+            value: valueRefetch,
+          });
         }
-      } else {
-        fieldsToAdd.push({
-          key: newKey,
-          value: valueRefetch,
-        });
       }
     }
   });
@@ -323,30 +327,25 @@ const alertingNamespaceCopyMap = {
 
 /**
  *
- * @param fullPath The full path to the field in the document
+ * @param topLevelPath The top-level path to the field in the document
  * @returns whether the path needs to be copied to an additional location
  */
-const pathNeedsCopying = (fullPath: string): boolean => {
-  const topLevelPath = getTopLevelPath(fullPath);
-  if (!topLevelPath) {
-    return false;
-  }
-  return topLevelPath in alertingNamespaceCopyMap;
-};
+const pathNeedsCopying = (
+  topLevelPath: string
+): topLevelPath is keyof typeof alertingNamespaceCopyMap =>
+  topLevelPath in alertingNamespaceCopyMap;
 
 /**
  *
  * @param fullPath The full path to the field in the document
- * @returns the destination path to copy the field to
+ * @param topLevelPath The initial path/namespace of `fullPath`, i.e. `fullPath.startsWith(topLevelPath)`
+ * @returns the full destination path to copy the field into
  */
-const getCopyDestinationPath = (fullPath: string): string => {
-  const topLevelPath = getTopLevelPath(fullPath);
-  const copyPathRoot =
-    alertingNamespaceCopyMap[topLevelPath as keyof typeof alertingNamespaceCopyMap];
-
-  if (!copyPathRoot) {
-    throw new Error(`No copy destination path found for path '${fullPath}'`);
-  }
+const getCopyDestinationPath = (
+  fullPath: string,
+  topLevelPath: keyof typeof alertingNamespaceCopyMap
+): string => {
+  const copyPathRoot = alertingNamespaceCopyMap[topLevelPath];
 
   return `${copyPathRoot}${fullPath.replace(topLevelPath, '')}`;
 };
