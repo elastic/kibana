@@ -23,30 +23,87 @@ export const UseRunQueryRuleset = ({
 }: UseRunQueryRulesetProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
-  const indecesRuleset = queryRulesetData?.rules?.[0]?.actions?.docs?.[0]?._index || 'my_index';
-  // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
-  const TEST_QUERY_RULESET_API_SNIPPET = dedent`
-# Test your query ruleset
-GET ${indecesRuleset}/_search
-{
-  "query": {
-    "rule": {
-      // Defines the match criteria to apply to rules in the given query ruleset
-      "match_criteria": { 
-        "user_query": "pugs"
-      },
-      // An array of one or more unique query ruleset ID with query-based rules to match and apply as applicable
-      "ruleset_ids": ["${rulesetId}"], 
-      // Any choice of query used to return results, that may be modified by matching query rules
-      "organic": { 
-        "match": {
-          "description": "puggles"
+
+  // Loop through all actions children to gather unique _index values
+  const indices: Set<string> = new Set();
+  if (queryRulesetData?.rules) {
+    for (const rule of queryRulesetData.rules) {
+      if (rule.actions?.docs) {
+        for (const doc of rule.actions.docs) {
+          if (doc._index) {
+            indices.add(doc._index);
+          }
         }
       }
     }
   }
-}
-`;
+
+  // Use the found indices or default to 'my_index'
+  const indecesRuleset = indices.size > 0 ? Array.from(indices).join(',') : 'my_index';
+
+  // Extract match criteria metadata and values from the ruleset
+  const criteriaData = [];
+  if (queryRulesetData?.rules) {
+    for (const rule of queryRulesetData.rules) {
+      if (rule.criteria) {
+        // Handle both single criterion and array of criteria
+        const criteriaArray = Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria];
+        for (const criterion of criteriaArray) {
+          if (
+            criterion.values &&
+            typeof criterion.values === 'object' &&
+            !Array.isArray(criterion.values)
+          ) {
+            // Handle nested values inside criterion.values
+            Object.entries(criterion.values).forEach(([key, value]) => {
+              criteriaData.push({
+                metadata: key,
+                values: value,
+              });
+            });
+          } else {
+            criteriaData.push({
+              metadata: criterion.metadata || null,
+              values: criterion.values || null,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
+  const TEST_QUERY_RULESET_API_SNIPPET = dedent`
+  # Test your query ruleset
+  # ℹ️ https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query
+  GET ${indecesRuleset}/_search
+  {
+    "query": {
+      "rule": {
+        "match_criteria": // Defines the match criteria to apply to rules in the given query ruleset ${
+          criteriaData.length > 0
+            ? (() => {
+                const matchCriteria = criteriaData.reduce<Record<string, any>>((acc, criterion) => {
+                  if (criterion.metadata && criterion.values) {
+                    acc[criterion.metadata] = criterion.values;
+                  }
+                  return acc;
+                }, {});
+                // Format with proper indentation (6 spaces to align with the property)
+                return JSON.stringify(matchCriteria, null, 2).split('\n').join('\n         ');
+              })()
+            : '{\n         "user_query": "pugs"\n    }'
+        },
+        "ruleset_ids": ["${rulesetId}"], // An array of one or more unique query ruleset IDs
+        "organic": {
+          "match": { // Any choice of query used to return results
+            "description": "puggles"
+          }
+        }
+      }
+    }
+  }
+  `;
 
   return (
     <TryInConsoleButton
