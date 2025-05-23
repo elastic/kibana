@@ -63,8 +63,18 @@ describe('IntegrationSyncFlyout', () => {
           remote: 'installed',
         },
         updated_at: '2025-05-19T15:40:26.554Z',
-        sync_status: SyncStatus.FAILED,
-        error: 'Uninstall error: - reason: Unable to remove package 1password:1.32.0',
+        sync_status: SyncStatus.WARNING,
+        warning: 'Unable to remove package 1password:1.32.0',
+      },
+      {
+        package_name: 'apache',
+        package_version: '1.0.0',
+        install_status: {
+          main: 'not_installed',
+          remote: 'not_installed',
+        },
+        updated_at: '2025-05-19T15:40:26.554Z',
+        sync_status: SyncStatus.COMPLETED,
       },
     ],
     custom_assets: {
@@ -141,7 +151,8 @@ describe('IntegrationSyncFlyout', () => {
     expect(component.getByTestId('elastic_agent-accordion').textContent).toContain('Completed');
     expect(component.getByTestId('nginx-accordion').textContent).toContain('Failed');
     expect(component.getByTestId('system-accordion').textContent).toContain('Syncing...');
-    expect(component.queryByTestId('1password-accordion')).not.toBeInTheDocument();
+    expect(component.getByTestId('1password-accordion').textContent).toContain('Warning');
+    expect(component.queryByTestId('apache-accordion')).not.toBeInTheDocument();
 
     await userEvent.click(component.getByTestId('nginx-accordion-openCloseToggle'));
     expect(component.getByTestId('integrationSyncIntegrationErrorCallout').textContent).toEqual(

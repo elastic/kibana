@@ -175,6 +175,7 @@ const compareIntegrations = (
             remote: 'not_installed',
           },
           sync_status: SyncStatus.COMPLETED,
+          updated_at: ccrIntegration?.updated_at,
         };
       }
       if (!localIntegrationSO) {
@@ -212,7 +213,7 @@ const compareIntegrations = (
           : '';
         const latestFailedAttempt = localIntegrationSO?.attributes
           ?.latest_install_failed_attempts?.[0]?.error?.message
-          ? ` ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
+          ? `error: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
           : '';
         return {
           ...baseIntegrationData,

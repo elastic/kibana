@@ -355,7 +355,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
   });
 
-  it('should return error when integration failed to uninstall if is_sync_uninstall_enabled', async () => {
+  it('should return a warning when integration failed to uninstall if is_sync_uninstall_enabled', async () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -459,14 +459,87 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           updated_at: expect.any(String),
         },
         {
-          error: 'Uninstall error: - reason: failed to uninstall at Wed, 26 Mar 2025 14:06:27 GMT',
+          warning: 'failed to uninstall at Wed, 26 Mar 2025 14:06:27 GMT',
           install_status: {
             main: 'not_installed',
             remote: 'installed',
           },
           package_name: 'nginx',
           package_version: '0.7.0',
-          sync_status: 'failed',
+          sync_status: 'warning',
+          updated_at: expect.any(String),
+        },
+      ],
+    });
+  });
+  it('should return status = completed when integration was uninstalled from both clusters if is_sync_uninstall_enabled', async () => {
+    esClientMock.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              integrations: [
+                {
+                  package_name: 'nginx',
+                  package_version: '0.7.0',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
+                },
+              ],
+              remote_es_hosts: [
+                {
+                  name: 'remote1',
+                  hosts: ['http://localhost:9500'],
+                  sync_integrations: true,
+                  sync_uninstalled_integrations: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as any);
+    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      page: 1,
+      per_page: 10000,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'epm-packages',
+          id: 'elastic_agent',
+          attributes: {
+            version: '2.2.0',
+            install_status: 'installed',
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+        {
+          type: 'epm-packages',
+          id: 'system',
+          attributes: {
+            version: '1.67.3',
+            install_status: 'installed',
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+      ],
+    });
+    const res = await fetchAndCompareSyncedIntegrations(
+      esClientMock,
+      soClientMock,
+      'fleet-synced-integrations-ccr-*',
+      mockedLogger
+    );
+    expect(res).toEqual({
+      integrations: [
+        {
+          install_status: {
+            main: 'not_installed',
+            remote: 'not_installed',
+          },
+          package_name: 'nginx',
+          package_version: '0.7.0',
+          sync_status: 'completed',
           updated_at: expect.any(String),
         },
       ],
@@ -570,7 +643,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: `Installation status: install_failed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
+          error: `Installation status: install_failed error: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
           install_status: { main: 'installed', remote: 'install_failed' },
