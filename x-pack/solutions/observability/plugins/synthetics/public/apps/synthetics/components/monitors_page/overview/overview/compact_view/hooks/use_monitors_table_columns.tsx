@@ -10,16 +10,13 @@ import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
+import { MonitorStatusCol } from '../components/monitor_status_col';
 import { MonitorLocations } from '../../../../management/monitor_list_table/monitor_locations';
 import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
-import {
-  MonitorTypeEnum,
-  OverviewStatusMetaData,
-} from '../../../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
-import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import {
@@ -82,12 +79,9 @@ export const useMonitorsTableColumns = ({
     () => [
       {
         name: STATUS,
+        width: '150px',
         render: (monitor: OverviewStatusMetaData) => (
-          <BadgeStatus
-            monitor={monitor}
-            isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
-            onClickBadge={() => openFlyout(monitor)}
-          />
+          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
         ),
       },
       {
@@ -136,7 +130,9 @@ export const useMonitorsTableColumns = ({
       {
         name: LOCATIONS,
         render: (monitor: OverviewStatusMetaData) => {
-          return <MonitorLocations configId={monitor.configId} locations={monitor.locations} />;
+          return (
+            <MonitorLocations configId={monitor.configId} locationsWithStatus={monitor.locations} />
+          );
         },
       },
       {
@@ -166,7 +162,7 @@ export const useMonitorsTableColumns = ({
           const uniqId = `${configId}-${locationId}`;
           return (
             <MonitorBarSeries
-              histogramSeries={histogramsById?.[uniqId]?.points}
+              histogramSeries={histogramsById?.[uniqId]?.points ?? histogramsById[configId]?.points}
               minInterval={minInterval!}
             />
           );

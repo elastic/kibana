@@ -5,8 +5,29 @@
  * 2.0.
  */
 
+import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
 import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
 import { SyntheticsAppState } from '../root_reducer';
+
+export const getStatusByConfig = (
+  configId: string,
+  status?: OverviewStatusState | null,
+  locId?: string
+) => {
+  if (!status) {
+    return MONITOR_STATUS_ENUM.PENDING;
+  }
+  const configStatus = status.downConfigs[configId] || status.upConfigs[configId];
+  if (configStatus) {
+    const config = configStatus?.locations.find((loc) => loc.id === locId);
+    return config?.status ?? MONITOR_STATUS_ENUM.PENDING;
+  } else {
+    const configByIdLoc = configId + '-' + locId;
+    const configS = status.downConfigs[configByIdLoc] || status.upConfigs[configByIdLoc];
+    const config = configS?.locations.find((loc) => loc.id === locId);
+    return config?.status ?? MONITOR_STATUS_ENUM.PENDING;
+  }
+};
 
 export const selectOverviewStatus = ({ overviewStatus, overview }: SyntheticsAppState) => {
   if (overview.groupBy.field === 'monitor') {

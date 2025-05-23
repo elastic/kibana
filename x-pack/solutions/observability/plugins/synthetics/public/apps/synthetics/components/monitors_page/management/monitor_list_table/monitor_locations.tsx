@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { MONITOR_STATUS_ENUM } from '../../../../../../../common/constants/monitor_management';
 import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
 import {
@@ -13,28 +14,50 @@ import {
   ServiceLocations,
 } from '../../../../../../../common/runtime_types';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
+import { getStatusByConfig, selectOverviewStatus } from '../../../../state/overview_status';
 
 interface Props {
-  locations: ServiceLocations | OverviewStatusMetaData['locations'];
+  locationsWithStatus?: OverviewStatusMetaData['locations'];
+  locations?: ServiceLocations;
   configId: string;
 }
 
-export const MonitorLocations = ({ locations, configId }: Props) => {
+export const MonitorLocations = ({ locationsWithStatus, locations, configId }: Props) => {
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+
   const getColor = useMonitorHealthColor();
+  if (locationsWithStatus) {
+    const locationsToDisplay = locationsWithStatus.map((loc) => {
+      const status = loc.status ?? MONITOR_STATUS_ENUM.PENDING;
+      const color = getColor(status);
 
-  const locationsToDisplay = locations.map((loc) => {
-    const status = loc.status ?? MONITOR_STATUS_ENUM.PENDING;
-    const color = getColor(status);
+      return {
+        status,
+        color,
+        id: loc.id,
+        label: loc.label ?? loc.id,
+      };
+    });
 
-    return {
-      status,
-      color,
-      id: loc.id,
-      label: loc.label ?? loc.id,
-    };
-  });
+    return (
+      <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={false} />
+    );
+  } else {
+    const locationsToDisplay =
+      locations?.map((loc) => {
+        const status = getStatusByConfig(configId, overviewStatus, loc.id);
 
-  return (
-    <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={false} />
-  );
+        const color = getColor(status);
+
+        return {
+          status,
+          color,
+          id: loc.id,
+          label: loc.label ?? loc.id,
+        };
+      }) ?? [];
+    return (
+      <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={true} />
+    );
+  }
 };
