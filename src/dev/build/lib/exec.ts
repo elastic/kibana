@@ -47,7 +47,7 @@ export async function exec(
       .pipe(takeUntil(close$), toArray())
       .toPromise()
       .then((logs) => {
-        log.write(`--- ${build.buildDesc}`);
+        log.write(`--- ${build.getBuildDesc()} [${build.getBuildArch()}]`);
 
         log.indent(4, () => {
           log[level](chalk.dim('$'), cmd, ...args);
