@@ -137,7 +137,8 @@ export const euiTestCases: TestCase[] = [
   { component: InlineStylesRow, description: 'Styles with euiTheme inlined in the component' },
   {
     component: ComposedStylesRow,
-    description: 'Styles declared outside of the component (with syntatic callback syntax to reach for euiTheme) but composed inside as an array',
+    description:
+      'Styles declared outside of the component (with syntatic callback syntax to reach for euiTheme) but composed inside as an array',
   },
   { component: MemoizedStylesRow, description: 'Styles memoized in the component' },
   {

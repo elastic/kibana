@@ -23,10 +23,12 @@ import { css } from '@emotion/css';
 import { HarnessWrapper } from './harness';
 
 export const PerfTest = () => {
-  const [rowCount, setRowCount] = useState(2000);
-  const [renderCount, setRenderCount] = useState(3);
+  const [rowCount, setRowCount] = useState(100);
+  const [renderCount, setRenderCount] = useState(1);
   const [wastedRerender, setWastedRerender] = useState(false);
-  const [testCases, setTestCases] = useState<'euiTestCases'| 'testCases'| 'emotionReactTestCases'>('testCases');
+  const [testCases, setTestCases] = useState<
+    'euiTestCases' | 'testCases' | 'emotionReactTestCases'
+  >('testCases');
   const euiThemeContext = useEuiTheme();
   return (
     <div className={perfTestStyles(euiThemeContext)}>
@@ -78,10 +80,12 @@ export const PerfTest = () => {
                 {
                   id: 'euiTestCases',
                   label: 'eui test cases (to test eui css variables)',
-                }
+                },
               ]}
               idSelected={testCases}
-              onChange={(id) => setTestCases(id as 'euiTestCases'| 'testCases'| 'emotionReactTestCases')}
+              onChange={(id) =>
+                setTestCases(id as 'euiTestCases' | 'testCases' | 'emotionReactTestCases')
+              }
               name="radio group"
               legend={{
                 children: <span>Choose the test case to run</span>,
@@ -91,7 +95,12 @@ export const PerfTest = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <HarnessWrapper renderCount={renderCount} rowCount={rowCount} wastedRerender={wastedRerender} testCases={testCases}/>
+      <HarnessWrapper
+        renderCount={renderCount}
+        rowCount={rowCount}
+        wastedRerender={wastedRerender}
+        testCases={testCases}
+      />
     </div>
   );
 };
