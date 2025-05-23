@@ -106,15 +106,18 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalDataView = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
 
-  const selectedDataViewId = newDataViewPickerEnabled
-    ? experimentalDataView.dataViewSpec?.id ?? ''
-    : selectedDataViewIdSourcerer;
+  const selectedDataViewId = useMemo(
+    () =>
+      newDataViewPickerEnabled ? experimentalDataViewSpec?.id ?? '' : selectedDataViewIdSourcerer,
+    [experimentalDataViewSpec?.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
+  );
 
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : selectedPatternsSourcerer;
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : selectedPatternsSourcerer),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, selectedPatternsSourcerer]
+  );
 
   useEffect(() => {
     if (!savedObjectId && !initialized) {
