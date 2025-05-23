@@ -10,9 +10,11 @@ jest.mock('@kbn/search-connectors', () => ({
   putUpdateNative: jest.fn(),
 }));
 
+const mockGetEnterpriseSearchAccountCleanupAccounts = jest.fn();
+
 jest.mock('../../deprecations', () => ({
   ...jest.requireActual('../../deprecations'),
-  getEnterpriseSearchAccountCleanupAccounts: jest.fn(),
+  getEnterpriseSearchAccountCleanupAccounts: () => mockGetEnterpriseSearchAccountCleanupAccounts(),
 }));
 
 import { mockDependencies, MockRouter } from '../../__mocks__';
@@ -25,10 +27,7 @@ import {
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
-import {
-  getEnterpriseSearchAccountCleanupAccounts,
-  IEnterpriseSearchAccountCleanupAccounts,
-} from '../../deprecations';
+import { IEnterpriseSearchAccountCleanupAccounts } from '../../deprecations';
 
 import { registerDeprecationRoutes } from './deprecations';
 
@@ -196,7 +195,6 @@ describe('deprecation routes', () => {
 });
 
 describe('POST /internal/enterprise_search/deprecations/clean_ent_search_accounts', () => {
-  // const mockClient = {};
   let mockRouter: MockRouter;
   const mockedDeleteUser = jest.fn();
   const mockedDeleteServiceCredentials = jest.fn();
@@ -235,7 +233,7 @@ describe('POST /internal/enterprise_search/deprecations/clean_ent_search_account
     };
 
     mockRouter.shouldValidate(request);
-    getEnterpriseSearchAccountCleanupAccounts.mockResolvedValue({
+    mockGetEnterpriseSearchAccountCleanupAccounts.mockResolvedValue({
       esUser: undefined,
       credentialTokenIds: [],
       esCloudApiKeys: [],
@@ -365,11 +363,11 @@ describe('POST /internal/enterprise_search/deprecations/clean_ent_search_account
       };
 
       mockRouter.shouldValidate(request);
-      getEnterpriseSearchAccountCleanupAccounts.mockResolvedValue(mockData);
+      mockGetEnterpriseSearchAccountCleanupAccounts.mockResolvedValue(mockData);
 
       await mockRouter.callRoute(request);
 
-      expect(getEnterpriseSearchAccountCleanupAccounts).toHaveBeenCalled();
+      expect(mockGetEnterpriseSearchAccountCleanupAccounts).toHaveBeenCalled();
 
       if (expected.hasUser) {
         expect(mockedDeleteUser).toHaveBeenCalledWith({ username: 'enterprise_search' });
