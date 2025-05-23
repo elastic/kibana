@@ -1829,6 +1829,7 @@ components:
           - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/ProductDocumentationContentReference'
           - $ref: '#/components/schemas/EsqlContentReference'
+          - $ref: '#/components/schemas/HrefContentReference'
             additionalProperties: false
       description: A union of all content reference types
       type: object
@@ -2184,6 +2185,25 @@ components:
         - updated_at
       example: created_at
       type: string
+    HrefContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            href:
+              description: URL to the external resource
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            type:
+              enum:
+                - Href
+              type: string
+          required:
+            - type
+            - href
+      description: References an external URL
     IndexEntry:
       allOf:
         - type: object
