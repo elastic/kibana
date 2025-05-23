@@ -43,7 +43,11 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import {
+  PackagePolicyNotAllowedError,
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -263,6 +267,16 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       savedObjectsClient: soClient,
       pkgName: pkg!.name,
     });
+
+    const isCustomIntegration =
+      installation?.install_source === 'custom' || installation?.install_source === 'upload';
+
+    if (isCustomIntegration && newPackagePolicy.supports_agentless) {
+      throw new PackagePolicyNotAllowedError(
+        'Custom integration agentless deployments are not allowed'
+      );
+    }
+
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy

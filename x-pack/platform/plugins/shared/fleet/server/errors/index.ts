@@ -96,6 +96,7 @@ export class PackagePolicyRequestError extends FleetError {}
 export class PackagePolicyMultipleAgentPoliciesError extends FleetError {}
 export class PackagePolicyOutputError extends FleetError {}
 export class PackagePolicyContentPackageError extends FleetError {}
+export class PackagePolicyNotAllowedError extends FleetError {}
 
 export class EnrollmentKeyNameExistsError extends FleetError {}
 export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
