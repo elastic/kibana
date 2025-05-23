@@ -105,17 +105,14 @@ export async function getKbModelStatus({
   isReIndexing: boolean;
 }> {
   const enabled = config.enableKnowledgeBase;
-  const concreteWriteIndex = await getConcreteWriteIndex(esClient);
+  const concreteWriteIndex = await getConcreteWriteIndex(esClient, logger);
   const isReIndexing = await isReIndexInProgress({ esClient, logger, core });
 
-  let inferenceId: string;
-  try {
-    inferenceId = await getInferenceIdFromWriteIndex(esClient);
-  } catch (error) {
-    logger.error(`Unable to retrieve inference id from write index: ${error.message}`);
+  const inferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+  if (!inferenceId) {
     return {
       enabled,
-      errorMessage: error.message,
+      errorMessage: 'Inference ID not found in write index',
       kbState: KnowledgeBaseState.NOT_INSTALLED,
       currentInferenceId: undefined,
       concreteWriteIndex,

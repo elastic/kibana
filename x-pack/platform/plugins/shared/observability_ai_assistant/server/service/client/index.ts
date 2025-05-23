@@ -674,16 +674,13 @@ export class ObservabilityAIAssistantClient {
 
     logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
 
-    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
-      logger.debug(
-        `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
-      );
-      return undefined;
-    });
-
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
     if (currentInferenceId === nextInferenceId) {
       logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
+      const p = warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
+      if (waitUntilComplete) {
+        await p;
+      }
       return { reindex: false, currentInferenceId, nextInferenceId };
     }
 

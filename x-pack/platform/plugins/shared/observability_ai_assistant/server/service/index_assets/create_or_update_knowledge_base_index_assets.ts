@@ -49,9 +49,7 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       },
     });
 
-    const writeIndexInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(
-      () => undefined
-    );
+    const writeIndexInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
 
     // Knowledge base: write index
     // `createConcreteWriteIndex` will create the write index, or update the index mappings if the index already exists
