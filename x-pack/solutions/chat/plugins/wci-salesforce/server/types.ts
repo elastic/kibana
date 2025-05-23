@@ -7,7 +7,7 @@
 
 import { IntegrationConfiguration } from '@kbn/wci-common';
 import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
-
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCISalesforcePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -17,8 +17,9 @@ export interface WCISalesforcePluginSetupDependencies {
   workchatApp: WorkChatAppPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCISalesforcePluginStartDependencies {}
+export interface WCISalesforcePluginStartDependencies {
+  actions: ActionsPluginStart;
+}
 
 export interface WCISalesforceConfiguration extends IntegrationConfiguration {
   index: string;
