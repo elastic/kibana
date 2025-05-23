@@ -85,7 +85,8 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/content-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }
