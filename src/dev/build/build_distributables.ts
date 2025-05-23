@@ -48,6 +48,8 @@ export interface BuildOptions {
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
+  log.write('--- Running global Kibana build tasks');
+
   const config = await Config.create(options);
   const globalRun = createRunner({ config, log });
   const artifactTasks = [];
@@ -191,5 +193,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
    */
+  log.write('--- Finalizing Kibana artifacts');
   await globalRun(Tasks.WriteShaSums);
 }
