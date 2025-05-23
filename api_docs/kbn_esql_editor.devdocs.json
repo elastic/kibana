@@ -667,6 +667,22 @@
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.expandToFitQueryOnMount",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expandToFitQueryOnMount",
+            "description": [
+              "Resize the editor to fit the initially passed query on mount"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
