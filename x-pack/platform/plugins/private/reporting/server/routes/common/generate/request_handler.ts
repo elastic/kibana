@@ -16,6 +16,7 @@ import type { BaseParams } from '@kbn/reporting-common/types';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { type Counters, getCounters } from '..';
 import type { ReportingCore } from '../../..';
 import { checkParamsVersion } from '../../../lib';
@@ -85,6 +86,8 @@ export class RequestHandler {
     // 3. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = await exportType.createJob(jobParams, context, req);
 
+    const spaceId = reporting.getSpaceId(req, logger);
+
     const payload = {
       ...job,
       headers,
@@ -92,7 +95,7 @@ export class RequestHandler {
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
-      spaceId: reporting.getSpaceId(req, logger),
+      spaceId,
     };
 
     // 4. Add the report to ReportingStore to show as pending
@@ -102,6 +105,7 @@ export class RequestHandler {
         created_by: user ? user.username : false,
         payload,
         migration_version: jobParams.version,
+        space_id: spaceId || DEFAULT_SPACE_ID,
         meta: {
           // telemetry fields
           objectType: jobParams.objectType,
