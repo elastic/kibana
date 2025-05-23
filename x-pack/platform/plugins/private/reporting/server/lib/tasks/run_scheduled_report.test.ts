@@ -14,6 +14,7 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 
 import { RunScheduledReportTask, SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import { ReportingCore } from '../..';
@@ -27,6 +28,7 @@ import {
 import { Frequency } from '@kbn/rrule';
 import { ReportingStore, SavedReport } from '../store';
 import { ScheduledReportType } from '../../types';
+import { EmailNotificationService } from '../../services/notifications/email_notification_service';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -101,6 +103,8 @@ describe('Run Scheduled Report Task', () => {
   let configType: ReportingConfigType;
   let soClient: SavedObjectsClientContract;
   let reportStore: ReportingStore;
+  const notifications = notificationsMock.createStart();
+  let emailNotificationService: EmailNotificationService;
 
   const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
   beforeAll(async () => {
@@ -123,6 +127,11 @@ describe('Run Scheduled Report Task', () => {
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
+
+    notifications.isEmailServiceAvailable.mockReturnValue(true);
+    emailNotificationService = new EmailNotificationService({
+      notifications,
+    });
   });
 
   beforeEach(async () => {
@@ -177,7 +186,7 @@ describe('Run Scheduled Report Task', () => {
       config: configType,
       logger,
     });
-    expect(task.init(mockTaskManager));
+    expect(task.init(mockTaskManager, emailNotificationService));
     expect(task.getStatus()).toBe('initialized');
   });
 
@@ -230,7 +239,7 @@ describe('Run Scheduled Report Task', () => {
       logger,
     });
     const mockTaskManager = taskManagerMock.createStart();
-    await task.init(mockTaskManager);
+    await task.init(mockTaskManager, emailNotificationService);
 
     await task.scheduleTask(fakeRawRequest as unknown as KibanaRequest, {
       id: 'report-so-id',
@@ -270,7 +279,7 @@ describe('Run Scheduled Report Task', () => {
       .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
-    await task.init(mockTaskManager);
+    await task.init(mockTaskManager, emailNotificationService);
 
     const taskDef = task.getTaskDefinition();
     const taskRunner = taskDef.createTaskRunner({
@@ -332,7 +341,7 @@ describe('Run Scheduled Report Task', () => {
     });
 
     const mockTaskManager = taskManagerMock.createStart();
-    await task.init(mockTaskManager);
+    await task.init(mockTaskManager, emailNotificationService);
 
     const taskDef = task.getTaskDefinition();
     const taskRunner = taskDef.createTaskRunner({
@@ -403,7 +412,7 @@ describe('Run Scheduled Report Task', () => {
       } as never);
 
     const mockTaskManager = taskManagerMock.createStart();
-    await task.init(mockTaskManager);
+    await task.init(mockTaskManager, emailNotificationService);
 
     const taskDef = task.getTaskDefinition();
     const taskRunner = taskDef.createTaskRunner({

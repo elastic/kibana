@@ -197,6 +197,7 @@ describe('send_email module', () => {
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "attachments": undefined,
           "headers": Object {
             "Authorization": "Bearer dfjsdfgdjhfgsjdf",
             "Content-Type": "application/json",
