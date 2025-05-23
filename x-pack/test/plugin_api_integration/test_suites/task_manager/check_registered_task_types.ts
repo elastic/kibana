@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         'ProductDocBase:UninstallAll',
         'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
         'Synthetics:Clean-Up-Package-Policies',
+        'Synthetics:Sync-Private-Location-Monitors',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
         'actions:.cases',
