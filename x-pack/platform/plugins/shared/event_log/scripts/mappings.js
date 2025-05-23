@@ -207,6 +207,9 @@ exports.EcsCustomPropertyMappings = {
                         type: 'date_range',
                         format: 'strict_date_optional_time||epoch_millis',
                       },
+                      frozen_indices_queried_count: {
+                        type: 'long',
+                      },
                       rule_type_run_duration_ms: {
                         type: 'long',
                       },

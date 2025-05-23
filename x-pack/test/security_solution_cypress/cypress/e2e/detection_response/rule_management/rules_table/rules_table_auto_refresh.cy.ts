@@ -24,6 +24,7 @@ import {
   selectRulesByName,
   getRuleRow,
   setRulesTableAutoRefreshIntervalSetting,
+  enableAutoRefresh,
 } from '../../../../tasks/alerts_detection_rules';
 import { login } from '../../../../tasks/login';
 
@@ -68,8 +69,11 @@ describe(
 
     describe('when enabled', () => {
       beforeEach(() => {
-        mockGlobalClock();
         visitRulesManagementTable();
+        // Mocking global clock after the page load, otherwise deep links are not registered properly as they use debounceTime
+        disableAutoRefresh();
+        mockGlobalClock();
+        enableAutoRefresh();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -94,8 +98,12 @@ describe(
 
     describe('when disabled', () => {
       beforeEach(() => {
-        mockGlobalClock();
         visitRulesManagementTable();
+        // Mocking global clock after the page load, otherwise deep links are not registered properly as they use debounceTime
+        disableAutoRefresh();
+        mockGlobalClock();
+        enableAutoRefresh();
+
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
 
@@ -141,8 +149,11 @@ describe(
 
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
-        mockGlobalClock();
         visitRulesManagementTable();
+        // Mocking global clock after the page load, otherwise deep links are not registered properly as they use debounceTime
+        disableAutoRefresh();
+        mockGlobalClock();
+        enableAutoRefresh();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 

@@ -19,10 +19,12 @@ import {
   EuiSelect,
   EuiConfirmModal,
   EuiButtonEmpty,
+  EuiTextArea,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
@@ -30,8 +32,8 @@ import { IntegrationEditState, useIntegrationEdit } from '../../../hooks/use_int
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
 import { appPaths } from '../../../app_paths';
-import { integrationLabels } from '../i18n';
-import { integrationTypeToLabel } from '../utils';
+import { toolLabels } from '../i18n';
+import { integrationTypeToLabel, isIntegrationDisabled } from '../utils';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -46,26 +48,26 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: integrationLabels.breadcrumb.integrationsPill, path: appPaths.integrations.list },
+      { text: toolLabels.breadcrumb.toolsPill, path: appPaths.tools.list },
       integrationId
-        ? { text: integrationLabels.breadcrumb.editIntegrationPill }
-        : { text: integrationLabels.breadcrumb.createIntegrationPill },
+        ? { text: toolLabels.editView.editToolTitle }
+        : { text: toolLabels.editView.createToolTitle },
     ];
   }, [integrationId]);
 
   useBreadcrumb(breadcrumb);
 
   const handleCancel = useCallback(() => {
-    navigateToWorkchatUrl(appPaths.integrations.list);
+    navigateToWorkchatUrl(appPaths.tools.catalog);
   }, [navigateToWorkchatUrl]);
 
   const onSaveSuccess = useCallback(() => {
     notifications.toasts.addSuccess(
       integrationId
-        ? integrationLabels.notifications.integrationUpdatedToastText
-        : integrationLabels.notifications.integrationCreatedToastText
+        ? toolLabels.notifications.toolUpdatedToastText
+        : toolLabels.notifications.toolCreatedToastText
     );
-    navigateToWorkchatUrl(appPaths.integrations.list);
+    navigateToWorkchatUrl(appPaths.tools.list);
   }, [integrationId, navigateToWorkchatUrl, notifications]);
 
   const onSaveError = useCallback(
@@ -85,21 +87,23 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const integrationTypes = [
     { value: '', text: 'Pick a type' },
-    ...Object.values(IntegrationType).map((type) => ({
-      value: type,
-      text: integrationTypeToLabel(type),
-    })),
+    ...Object.values(IntegrationType)
+      .filter((type) => !isIntegrationDisabled(type))
+      .map((type) => ({
+        value: type,
+        text: integrationTypeToLabel(type),
+      })),
   ];
 
   const onDeleteSuccess = useCallback(() => {
-    notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
-    navigateToWorkchatUrl(appPaths.integrations.list);
+    notifications.toasts.addSuccess(toolLabels.notifications.toolDeletedToastText);
+    navigateToWorkchatUrl(appPaths.tools.list);
   }, [navigateToWorkchatUrl, notifications]);
 
   const onDeleteError = useCallback(
     (err: Error) => {
       notifications.toasts.addError(err, {
-        title: 'Error deleting integration',
+        title: 'Error deleting tool',
       });
     },
     [notifications]
@@ -125,8 +129,14 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     setIsDeleteModalVisible(false);
   };
 
+  const params = new URLSearchParams(location.search);
+  const type = params.get('type');
+
   const formMethods = useForm<IntegrationEditState>({
-    values: state,
+    values: {
+      ...state,
+      type: type || state.type,
+    },
   });
 
   const {
@@ -142,9 +152,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     <KibanaPageTemplate panelled>
       <KibanaPageTemplate.Header
         pageTitle={
-          integrationId
-            ? integrationLabels.editView.editIntegrationTitle
-            : integrationLabels.editView.createIntegrationTitle
+          integrationId ? toolLabels.editView.editToolTitle : toolLabels.editView.createToolTitle
         }
       />
 
@@ -154,36 +162,53 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
             <EuiForm component="form" fullWidth onSubmit={handleSubmit((data) => submit(data))}>
               <EuiDescribedFormGroup
                 ratio="third"
-                title={<h3>Base configuration</h3>}
-                description="Configure your integration"
+                title={<h3>{toolLabels.editView.baseConfigurationTitle}</h3>}
+                description={toolLabels.editView.baseConfigurationDescription}
               >
-                <EuiFormRow label="Name">
+                <EuiFormRow
+                  label={toolLabels.editView.nameLabel}
+                  isInvalid={!!formMethods.formState.errors.name}
+                  error={
+                    formMethods.formState.errors.name ? toolLabels.editView.nameRequired : undefined
+                  }
+                >
                   <Controller
-                    rules={{ required: true }}
+                    rules={{ required: toolLabels.editView.nameRequired }}
                     name="name"
                     control={control}
                     render={({ field }) => (
                       <EuiFieldText
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        isInvalid={!!formMethods.formState.errors.name}
                         {...field}
                       />
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow label="Description">
+                <EuiFormRow
+                  label={toolLabels.editView.descriptionLabel}
+                  isInvalid={!!formMethods.formState.errors.description}
+                  error={
+                    formMethods.formState.errors.description
+                      ? toolLabels.editView.descriptionRequired
+                      : undefined
+                  }
+                >
                   <Controller
-                    rules={{ required: true }}
+                    rules={{ required: toolLabels.editView.descriptionRequired }}
                     name="description"
                     control={control}
                     render={({ field }) => (
-                      <EuiFieldText
+                      <EuiTextArea
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        rows={3}
+                        isInvalid={!!formMethods.formState.errors.description}
                         {...field}
                       />
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow label="Type">
+                <EuiFormRow label={toolLabels.editView.typeLabel}>
                   <Controller
                     name="type"
                     control={control}
@@ -216,7 +241,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                         color="warning"
                         onClick={handleCancel}
                       >
-                        {integrationLabels.editView.cancelButtonLabel}
+                        {toolLabels.editView.cancelButtonLabel}
                       </EuiButton>
                     </EuiFlexItem>
                     {integrationId && (
@@ -241,7 +266,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                     fill
                     disabled={isSubmitting}
                   >
-                    {integrationLabels.editView.saveButtonLabel}
+                    {toolLabels.editView.saveButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -249,16 +274,19 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
             {isDeleteModalVisible && (
               <EuiConfirmModal
-                title="Delete integration"
+                title={toolLabels.editView.deleteModalTitle}
                 onCancel={closeDeleteModal}
                 onConfirm={handleDelete}
-                cancelButtonText="Cancel"
-                confirmButtonText="Delete"
+                cancelButtonText={toolLabels.editView.cancelButtonLabel}
+                confirmButtonText={toolLabels.editView.deleteButtonLabel}
                 buttonColor="danger"
                 defaultFocusedButton="confirm"
               >
                 <p>
-                  Are you sure you want to delete this integration? This action cannot be undone.
+                  {i18n.translate('workchatApp.integrations.editView.deleteMessage', {
+                    defaultMessage:
+                      'Are you sure you want to delete this tool? This action cannot be undone.',
+                  })}
                 </p>
               </EuiConfirmModal>
             )}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -125,6 +125,7 @@ const previouslyRegisteredTypes = [
   'search',
   'search-session',
   'search-telemetry',
+  'search_playground',
   'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',

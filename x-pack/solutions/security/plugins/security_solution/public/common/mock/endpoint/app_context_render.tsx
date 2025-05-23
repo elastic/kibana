@@ -45,7 +45,7 @@ import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
-import { appLinks } from '../../../app_links';
+import { appLinks } from '../../../app/links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';

@@ -6,12 +6,11 @@
  */
 
 import {
-  IngestStreamGetResponse,
+  Streams,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
-  isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import React, { ReactNode } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -48,7 +47,7 @@ export function RetentionMetadata({
   isLoadingStats,
   statsError,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
@@ -120,7 +119,7 @@ export function RetentionMetadata({
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
-      {isWiredStreamGetResponse(definition) ? (
+      {Streams.WiredStream.GetResponse.is(definition) ? (
         <EuiLink
           data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
@@ -171,6 +170,7 @@ export function RetentionMetadata({
           </EuiFlexGroup>
         }
         button={contextualMenu}
+        dataTestSubj="streamsAppRetentionMetadataRetentionPeriod"
       />
       <EuiHorizontalRule margin="s" />
       <MetadataRow
@@ -239,14 +239,21 @@ function MetadataRow({
   value,
   tip,
   button,
+  dataTestSubj,
 }: {
   metadata: string;
   value: ReactNode;
   tip?: string;
   button?: ReactNode;
+  dataTestSubj?: string;
 }) {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xl"
+      responsive={false}
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={1}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>

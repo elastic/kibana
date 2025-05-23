@@ -68,16 +68,20 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
   useEffect(() => {
     let dv: DataView;
     const createDataView = async () => {
-      dv = await data.dataViews.create(dataViewSpec);
-      setDataView(dv);
-      setLoading(false);
+      try {
+        dv = await data.dataViews.create(dataViewSpec);
+        setDataView(dv);
+        setLoading(false);
+      } catch (err) {
+        setLoading(false);
+      }
     };
     createDataView();
 
     // clearing after leaving the page
     return () => {
       if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv?.id);
+        data.dataViews.clearInstanceCache(dv.id);
       }
     };
   }, [data.dataViews]);

@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
 import { GROUPED_TABLE_TEST_ID, TableSection } from './table_section';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-const dataView: DataView = createStubDataView({ spec: {} });
+const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
+const dataView: DataView = createStubDataView({ spec: dataViewSpec });
 const packages: PackageListItem[] = [
   {
     id: 'splunk',
@@ -39,6 +40,6 @@ describe('<TableSection />', () => {
     );
 
     expect(getByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId('alertsTableErrorPrompt')).toBeInTheDocument();
+    expect(getByTestId('internalAlertsPageLoading')).toBeInTheDocument();
   });
 });
