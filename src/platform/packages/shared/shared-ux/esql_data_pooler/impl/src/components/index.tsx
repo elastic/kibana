@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren, createContext } from 'react';
+import React, { type ComponentProps, type PropsWithChildren } from 'react';
+import { DataPoolerProvider, useDataPoolerState } from '../lib';
 
-interface ESQLDataPoolerContextType {
-  query: string;
-}
+type ESQLDataPoolerProps = Pick<ComponentProps<typeof DataPoolerProvider>, 'query'>;
 
-const ESQLDataPoolerContext = createContext<ESQLDataPoolerContextType | null>(null);
+export function ESQLDataPooler({ query }: PropsWithChildren<ESQLDataPoolerProps>) {
+  const state = useDataPoolerState();
 
-const ESQLDataPoolerProvider = ({ children }: PropsWithChildren) => {
   return (
-    <ESQLDataPoolerContext.Provider value={{ query: '' }}>
-      {children}
-    </ESQLDataPoolerContext.Provider>
+    <div>
+      <h1>ESQL Data Pooler</h1>
+      <p>Query: {state.currentQueryString}</p>
+    </div>
   );
-};
+}
