@@ -1,5 +1,11 @@
 # Observability Project config
 
+## Core pricing tier for observability project
+pricing.tiers.enabled: true
+pricing.tiers.products:
+  - name: observability
+    tier: complete
+
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
 
