@@ -12,7 +12,7 @@ import * as helpers from '../helpers';
 export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
-      describe('RFF', () => {
+      describe('RRF', () => {
         test('no errors for valid command', async () => {
           const { expectErrors } = await setup();
 
