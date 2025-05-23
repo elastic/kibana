@@ -57,7 +57,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useMemo(() => {
     const comboBox = (
-      <EuiToolTip position="top" content={entry.field?.name}>
+      <EuiToolTip display="block" position="top" content={entry.field?.name}>
         <EsFieldSelector
           placeholder={i18n.FIELD_PLACEHOLDER}
           indexPattern={indexPattern}
@@ -88,7 +88,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
-      <EuiToolTip position="top" content={entry.value?.name}>
+      <EuiToolTip display="block" position="top" content={entry.value?.name}>
         <EsFieldSelector
           placeholder={i18n.FIELD_PLACEHOLDER}
           indexPattern={threatIndexPatterns}
@@ -125,7 +125,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
       justifyContent="spaceAround"
       data-test-subj="itemEntryContainer"
     >
-      <EuiFlexItem grow={2}>{renderFieldInput}</EuiFlexItem>
+      <EuiFlexItem grow={3}>{renderFieldInput}</EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
           {showLabel ? (
@@ -135,7 +135,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>{renderThreatFieldInput}</EuiFlexItem>
+      <EuiFlexItem grow={3}>{renderThreatFieldInput}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
