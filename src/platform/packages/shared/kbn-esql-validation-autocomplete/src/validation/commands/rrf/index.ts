@@ -7,24 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
+import { ESQLAst, ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { ReferenceMaps } from '../../types';
 
-export function validate(command: ESQLCommand<'rrf'>, references: ReferenceMaps): ESQLMessage[] {
+export function validate(
+  command: ESQLCommand<'rrf'>,
+  references: ReferenceMaps,
+  ast: ESQLAst
+): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
-  if (!references.fields.get('_fork')) {
+  if (!isRrfImmediatelyAfterFork(ast)) {
     messages.push({
       location: command.location,
       text: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.validation.rrfMissingScoreMetadata',
         {
-          defaultMessage: '[RRF] Must be preceded by a FORK command.',
+          defaultMessage: '[RRF] Must be immediately preceded by a FORK command.',
         }
       ),
       type: 'error',
-      code: 'rrfMissingScoreMetadata',
+      code: 'rrfNotImmediatelyAfterFork',
     });
   }
 
@@ -57,4 +61,11 @@ function buildMissingMetadataMessage(
     type: 'error',
     code: `rrfMissing${fieldName}Metadata`,
   };
+}
+
+function isRrfImmediatelyAfterFork(ast: ESQLAst): boolean {
+  const forkIndex = ast.findIndex((cmd) => cmd.name === 'fork');
+  const rrfIndex = ast.findIndex((cmd) => cmd.name === 'rrf');
+
+  return forkIndex !== -1 && rrfIndex === forkIndex + 1;
 }

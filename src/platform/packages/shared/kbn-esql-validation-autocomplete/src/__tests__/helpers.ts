@@ -13,6 +13,14 @@ import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 
+export const metadataFields: ESQLFieldWithMetadata[] = [
+  { name: '_id', type: 'keyword' },
+  { name: '_index', type: 'keyword' },
+  { name: '_score', type: 'double' },
+  { name: '_type', type: 'keyword' },
+  { name: '_source', type: 'keyword' },
+];
+
 export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
@@ -106,6 +114,9 @@ export function getCallbackMocks(): ESQLCallbacks {
           hasConflict: true,
         };
         return [field];
+      }
+      if (/METADATA/.test(query)) {
+        return [...fields, ...metadataFields];
       }
       return fields;
     }),
