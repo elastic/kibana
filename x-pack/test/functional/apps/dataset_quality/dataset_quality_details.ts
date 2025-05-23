@@ -244,9 +244,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in discover
-        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+        await retry.tryForTime(5000, async () => {
+          // Confirm dataset selector text in discover
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+        });
       });
 
       it('should show the degraded fields table with data and spark plots when present', async () => {
