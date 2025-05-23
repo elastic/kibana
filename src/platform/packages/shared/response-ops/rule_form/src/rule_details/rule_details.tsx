@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import {
@@ -28,6 +29,7 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from '../rule_definition/rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
+import { i18n } from '@kbn/i18n';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
@@ -137,7 +139,28 @@ export const RuleDetails = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <EuiFormRow fullWidth label={RULE_INVESTIGATION_GUIDE_LABEL} labelAppend={OptionalFieldLabel}>
+      <EuiFormRow
+        fullWidth
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>{RULE_INVESTIGATION_GUIDE_LABEL}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="questionInCircle"
+                content={
+                  <p>
+                    {i18n.translate('xpack.triggersActionsUI.ruleDetails.investigationGuideHelp', {
+                      defaultMessage:
+                        'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
+                    })}
+                  </p>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        labelAppend={OptionalFieldLabel}
+      >
         <InvestigationGuideEditor
           setRuleParams={onSetArtifacts}
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
