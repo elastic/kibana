@@ -138,6 +138,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           actions: newFormData.actions,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
+          artifacts: newFormData.artifacts,
         },
       });
     },

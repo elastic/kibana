@@ -17,7 +17,12 @@
     "@kbn/deeplinks-observability",
     "@kbn/i18n",
     "@kbn/shared-ux-router",
-    "@kbn/deeplinks-analytics",
+    "@kbn/rison",
+    "@kbn/data-plugin",
+    "@kbn/es-query",
+    "@kbn/discover-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }
