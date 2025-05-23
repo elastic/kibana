@@ -627,9 +627,8 @@ export function getFormBasedDatasource({
               'terms',
               layer.columns[link.from.columnId]
             );
-          } else {
-            return false;
           }
+          return false;
         })
         .forEach(({ from, to }) => {
           const fromLayer = newState.layers[from.layerId];
@@ -955,7 +954,7 @@ export function getFormBasedDatasource({
           // but map fields to the top referencing column
           if (!layer || !isFormBasedLayer(layer)) {
             return (
-              layer.columns.map((column) => ({
+              layer?.columns.map((column) => ({
                 columnId: column.columnId,
                 fields: [column.fieldName],
               })) || []
@@ -1061,9 +1060,7 @@ export function getFormBasedDatasource({
         const fieldList = query ? getColumnsFromCache(query) : [];
         const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
         if (!field) return [];
-        return Object.entries(state.layers)?.map((entry) => {
-          const [id] = entry;
-          const layer = entry[1] as TextBasedLayer;
+        return Object.entries(state.layers)?.map(([id, layer]) => {
           const newId = generateId();
           const newColumn = {
             columnId: newId,
@@ -1077,7 +1074,7 @@ export function getFormBasedDatasource({
                 ...state.layers,
                 [id]: {
                   ...layer,
-                  columns: [...layer.columns, newColumn],
+                  columns: layer.columns.concat(newColumn),
                 },
               },
             },
