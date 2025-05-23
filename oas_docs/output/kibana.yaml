@@ -41225,6 +41225,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -41265,6 +41266,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
@@ -41272,6 +41274,8 @@ paths:
                         - sync_status
                         - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -41330,6 +41334,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -41370,6 +41375,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
@@ -41377,6 +41383,8 @@ paths:
                         - sync_status
                         - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
