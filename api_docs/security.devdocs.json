@@ -1158,6 +1158,8 @@
           "ThemeServiceSetup",
           "; userProfile: ",
           "UserProfileService",
+          "; rendering: ",
+          "RenderingService",
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/security/public/index.ts",
