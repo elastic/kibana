@@ -455,7 +455,9 @@ export function getTextBasedDatasource({
       return (
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
-          return layer.indexPatternId && Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName);
+          return (
+            layer.indexPatternId && Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName)
+          );
         })
       );
     },
