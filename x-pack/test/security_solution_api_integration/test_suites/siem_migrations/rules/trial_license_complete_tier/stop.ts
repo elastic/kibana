@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { defaultOriginalRule, migrationRulesRouteHelpersFactory } from '../../utils';
+import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Stop Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
-      migrationId = uuidv4();
-      await migrationRulesRoutes.create({
+      const createMigrationRespose = await migrationRulesRoutes.create({});
+      migrationId = createMigrationRespose.body.migration_id;
+      await migrationRulesRoutes.addRulesToMigration({
         migrationId,
         payload: [defaultOriginalRule],
       });
