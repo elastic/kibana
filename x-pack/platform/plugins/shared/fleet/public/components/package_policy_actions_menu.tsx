@@ -56,7 +56,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isAddAgentVisible =
     showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
 
-  const datasetName = useMemo(() => getDatasetName(packagePolicy.inputs), [packagePolicy.inputs]);
+  const datasetName = useMemo(() => getDatasetName(packagePolicy?.inputs), [packagePolicy.inputs]);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);

@@ -32,7 +32,7 @@ import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { cleanupAssets } from './remove';
 
 export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
-  packagePolicyInput[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
+  packagePolicyInput[0].streams[0]?.vars?.[DATASET_VAR_NAME]?.value;
 
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,

@@ -47,7 +47,7 @@ import { AgentBasedPackagePoliciesTable } from './components/agent_based_table';
 import { AgentlessPackagePoliciesTable } from './components/agentless_table';
 
 export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
-  packagePolicyInput[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
+  packagePolicyInput[0].streams[0]?.vars?.[DATASET_VAR_NAME]?.value;
 
 export const PackagePoliciesPage = ({
   packageInfo,
