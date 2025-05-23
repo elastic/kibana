@@ -69,16 +69,43 @@ interface SSLOverridesInput {
  * @param description - A description of the data being validated.
  * @throws Will throw an error if the PEM data is not in the correct format.
  */
+const PEM_HEADERS: Record<'PRIVATE KEY' | 'CERTIFICATE', string[]> = {
+  'PRIVATE KEY': ['-----BEGIN PRIVATE KEY-----', '-----BEGIN RSA PRIVATE KEY-----'],
+  CERTIFICATE: ['-----BEGIN CERTIFICATE-----'],
+};
+const PEM_FOOTERS: Record<'PRIVATE KEY' | 'CERTIFICATE', string[]> = {
+  'PRIVATE KEY': ['-----END PRIVATE KEY-----', '-----END RSA PRIVATE KEY-----'],
+  CERTIFICATE: ['-----END CERTIFICATE-----'],
+};
+
+function getPEMHeaderFooter(
+  type: 'CERTIFICATE' | 'PRIVATE KEY',
+  content: string
+): { header: string; footer: string } | undefined {
+  const headers = PEM_HEADERS[type];
+  const footers = PEM_FOOTERS[type];
+  for (let i = 0; i < headers.length; ++i) {
+    if (content.includes(headers[i])) {
+      return { header: headers[i], footer: footers[i] };
+    }
+  }
+  return undefined;
+}
+
 const validatePEMData = (
   data: string | undefined,
   type: 'CERTIFICATE' | 'PRIVATE KEY',
   description: string
 ): void => {
-  const decodedData = data ? Buffer.from(data, 'base64') : undefined;
-
-  if (decodedData && !decodedData.includes(`-----BEGIN ${type}-----`)) {
+  const decodedData = data ? Buffer.from(data, 'base64').toString() : undefined;
+  if (!decodedData) return;
+  const headers = PEM_HEADERS[type];
+  const found = headers.some((h) => decodedData.includes(h));
+  if (!found) {
+    const headerMsg =
+      headers.length === 1 ? `"${headers[0]}"` : headers.map((h) => `"${h}"`).join(' or ');
     throw new Error(
-      `Invalid ${description} file format: The file must be a PEM-encoded ${type.toLowerCase()} beginning with "-----BEGIN ${type}-----".`
+      `Invalid ${description} file format: The file must be a PEM-encoded ${type.toLowerCase()} beginning with ${headerMsg}.`
     );
   }
 };
@@ -158,22 +185,19 @@ export const getPKISSLOverrides = ({
  */
 function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY'): string {
   if (!pemContent) return pemContent;
-
-  const header = `-----BEGIN ${type}-----`;
-  const footer = `-----END ${type}-----`;
-
   const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
-
+  const headerFooter = getPEMHeaderFooter(type, normalizedContent);
+  if (!headerFooter) {
+    return pemContent;
+  }
+  const { header, footer } = headerFooter;
   if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
     return pemContent;
   }
-
   const base64Content = normalizedContent
     .slice(header.length, normalizedContent.length - footer.length)
     .replace(/\s+/g, '');
-
   const formattedBase64 = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
-
   return `${header}\n${formattedBase64}\n${footer}`;
 }
 

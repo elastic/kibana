@@ -208,6 +208,18 @@ describe('Other (OpenAI Compatible Service) Utils', () => {
       );
     });
 
+    it('validates PEM format for privateKeyData in pkiSecretsValidator', () => {
+      const secretsObject = {
+        certificateData: Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----'
+        ).toString('base64'),
+        privateKeyData: 'bad',
+      } as Secrets;
+      expect(() => pkiSecretsValidator(secretsObject)).toThrow(
+        'Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".'
+      );
+    });
+
     it('validates PEM format for certificateData in pkiSecretsValidator', () => {
       const secretsObject = {
         certificateData: 'invalidCertificate',
