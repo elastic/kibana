@@ -28,10 +28,10 @@ import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
-  ML_ALERT_TYPES,
   ML_RULE_TYPE_IDS,
   ML_VALID_CONSUMERS,
 } from '@kbn/ml-common-constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
 import { StateService } from '../../services/state_service';
 import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
 
