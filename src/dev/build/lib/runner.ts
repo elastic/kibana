@@ -37,8 +37,6 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   async function execTask(desc: string, task: Task, build: Build): Promise<void>;
   async function execTask(desc: string, task: GlobalTask | Task, build?: Build): Promise<void> {
     if (!task.global && build && bufferLogs) {
-      build.setBuildDesc(desc);
-      log.warning(`---- Starting task: ${build.buildDesc}`);
       log.info(`Buffering logs for Task: ${desc}`);
     } else {
       log.info(desc);
@@ -83,8 +81,6 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   const builds: Build[] = [];
   builds.push(new Build(config, bufferLogs));
 
-  log.warning(`---- Builds: ${builds.map((b) => b.buildDesc).join(', ')}`);
-
   /**
    * Run a task by calling its `run()` method with three arguments:
    *    `config`: an object with methods for determining top-level config values, see `./config.js`
@@ -96,9 +92,10 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
       await execTask(chalk`{dim [  global  ]} ${task.description}`, task);
     } else {
       for (const build of builds) {
-        log.warning(`---- Calling build task: ${build.buildDesc}`);
+        const desc = `${build.getLogTag()} ${task.description}`;
+        build.setBuildDesc(desc);
 
-        await execTask(`${build.getLogTag()} ${task.description}`, task, build);
+        await execTask(desc, task, build);
       }
     }
   };
