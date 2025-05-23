@@ -82,7 +82,7 @@ export type ToolResponseEvent = OnechatRunEvent<
 
 export interface ToolResponseEventData {
   toolId: string;
-  toolParams: Record<string, unknown>;
+  toolResult: unknown;
 }
 
 export const isToolResponseEvent = (
