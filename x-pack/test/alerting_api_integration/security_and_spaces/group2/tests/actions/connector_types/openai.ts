@@ -312,7 +312,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----".',
+                'error validating action type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
             });
           });
       });

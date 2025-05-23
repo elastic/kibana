@@ -89,7 +89,7 @@ export const CERT_DATA_DESC = i18n.translate(
 export const KEY_DATA_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.privateKeyDataLabel',
   {
-    defaultMessage: 'Private Key file',
+    defaultMessage: 'Private key file',
   }
 );
 
@@ -103,7 +103,7 @@ export const KEY_DATA_DESC = i18n.translate(
 export const VERIFICATION_MODE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.verificationModeLabel',
   {
-    defaultMessage: 'SSL Verification Mode',
+    defaultMessage: 'SSL verification mode',
   }
 );
 
@@ -111,7 +111,7 @@ export const VERIFICATION_MODE_DESC = i18n.translate(
   'xpack.stackConnectors.components.genAi.verificationModeDocumentation',
   {
     defaultMessage:
-      "Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing).",
+      'Controls SSL/TLS certificate verification: `Full` verifies both certificate and hostname, `Certificate` verifies the certificate but not the hostname, `None` skips all verification. Use `None` cautiously for testing purposes.',
   }
 );
 
