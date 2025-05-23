@@ -12,14 +12,8 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type {
-  ObservabilityOnboardingLocatorParams,
-  AllDatasetsLocatorParams,
-} from '@kbn/deeplinks-observability';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { safeDecode } from '@kbn/rison';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
