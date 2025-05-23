@@ -8,7 +8,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { tiersConfigSchema } from '@kbn/core-pricing-common';
+import { tiersConfigSchema } from '@kbn/core-pricing-common/src/pricing_tiers_config';
 
 export const pricingConfig = {
   path: 'pricing',

@@ -9,6 +9,5 @@
 
 export { ProductFeaturesRegistry } from './src/product_features_registry';
 export type { IPricingTiersClient, PricingProductFeature } from './src/types';
-export { tiersConfigSchema } from './src/pricing_tiers_config';
 export type { PricingProduct, TiersConfig } from './src/pricing_tiers_config';
 export { PricingTiersClient } from './src/pricing_tiers_client';
