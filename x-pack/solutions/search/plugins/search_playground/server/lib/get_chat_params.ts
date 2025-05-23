@@ -16,7 +16,6 @@ import type { Connector } from '@kbn/actions-plugin/server/application/connector
 import { getDefaultArguments } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
-import { PLUGIN_ID } from '@kbn/search-playground/common';
 
 export const getChatParams = async (
   {
