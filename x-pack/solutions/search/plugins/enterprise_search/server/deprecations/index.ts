@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { SecurityApiKey, SecurityGetUserResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext, RegisterDeprecationsConfig } from '@kbn/core-deprecations-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
@@ -283,6 +285,39 @@ export async function getNativeConnectorDeprecations(
   }
 }
 
+export interface IEnterpriseSearchAccountCleanupAccounts {
+  esUser?: SecurityGetUserResponse;
+  credentialTokenIds: string[];
+  esCloudApiKeys: SecurityApiKey[];
+}
+
+export const getEnterpriseSearchAccountCleanupAccounts = async (client: ElasticsearchClient) => {
+  const esUser = await client.security.getUser({ username: 'enterprise_search' });
+
+  const esCloudApiKeys =
+    (await client.security.getApiKey({ username: 'cloud-internal-enterprise_search-server' }))
+      .api_keys || [];
+
+  const esServerCredentials =
+    (await client.security.getServiceCredentials({
+      namespace: 'elastic',
+      service: 'enterprise-search-server',
+    })) || undefined;
+
+  const credentialTokenIds: string[] = [];
+  if (esServerCredentials) {
+    Object.entries(esServerCredentials.tokens).forEach(([tokenId]) => {
+      credentialTokenIds.push(tokenId);
+    });
+  }
+
+  return {
+    esUser,
+    credentialTokenIds,
+    esCloudApiKeys,
+  } as IEnterpriseSearchAccountCleanupAccounts;
+};
+
 export async function getEnterpriseSearchAccountCleanups(
   ctx: GetDeprecationsContext,
   config: ConfigType
@@ -294,20 +329,8 @@ export async function getEnterpriseSearchAccountCleanups(
 
   const client = ctx.esClient.asCurrentUser;
 
-  const esUser = await client.security.getUser({ username: 'enterprise_search' });
-  const esServerCredentials =
-    (await client.security.getServiceCredentials({
-      namespace: 'elastic',
-      service: 'enterprise-search-server',
-    })) || {};
-  const esCloudApiKeys =
-    (await client.security.getApiKey({ username: 'cloud-internal-enterprise_search-server' }))
-      .api_keys || [];
-
-  const credentialTokenIds: string[] = [];
-  Object.entries(esServerCredentials.tokens).forEach(([tokenId]) => {
-    credentialTokenIds.push(tokenId);
-  });
+  const { esUser, credentialTokenIds, esCloudApiKeys } =
+    await getEnterpriseSearchAccountCleanupAccounts(client);
 
   if (!esUser && credentialTokenIds.length === 0 && esCloudApiKeys.length === 0) {
     return [];
@@ -327,7 +350,7 @@ export async function getEnterpriseSearchAccountCleanups(
 
   if (credentialTokenIds.length > 0) {
     message += "- Invalidate any 'elastic/enterprise-search-server' service account credentials\n";
-    credentialTokenIds.forEach((tokenId) => {
+    credentialTokenIds.forEach((tokenId: string) => {
       manualStepsToAdd.push(
         "Invalidate the 'elastic/enterprise-search-server' token '" +
           tokenId +
