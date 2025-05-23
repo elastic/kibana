@@ -348,7 +348,7 @@ export function AlertDetails() {
               word-wrap: break-word;
             `}
           >
-            {(rule?.artifacts?.investigation_guide?.blob as string) ?? ''}
+            {rule?.artifacts?.investigation_guide?.blob ?? ''}
           </EuiMarkdownFormat>
         </>
       ),
