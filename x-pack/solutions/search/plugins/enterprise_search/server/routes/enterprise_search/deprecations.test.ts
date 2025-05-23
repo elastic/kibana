@@ -252,108 +252,121 @@ describe('POST /internal/enterprise_search/deprecations/clean_ent_search_account
     hasApiKeys: boolean;
   }
 
-  const cleanupTestCases = [
+  const cleanupTestCases: Array<[IEnterpriseSearchAccountCleanupAccounts, AccountCleanupExpected]> =
     [
-      {
-        esUser: {
-          enterprise_search: {
-            username: 'enterprise_search',
+      [
+        {
+          esUser: {
+            enterprise_search: {
+              username: 'enterprise_search',
+              metadata: {},
+              enabled: true,
+              roles: [],
+            },
           },
+          credentialTokenIds: ['test_token_id'],
+          esCloudApiKeys: ['test_api_key'],
         },
-        credentialTokenIds: ['test_token_id'],
-        esCloudApiKeys: ['test_api_key'],
-      },
-      {
-        hasUser: true,
-        hasCredentials: true,
-        hasApiKeys: true,
-      },
-    ],
-    [
-      {
-        esUser: undefined,
-        credentialTokenIds: ['test_token_id'],
-        esCloudApiKeys: ['test_api_key'],
-      },
-      {
-        hasUser: false,
-        hasCredentials: true,
-        hasApiKeys: true,
-      },
-    ],
-    [
-      {
-        esUser: undefined,
-        credentialTokenIds: [],
-        esCloudApiKeys: ['test_api_key'],
-      },
-      {
-        hasUser: false,
-        hasCredentials: false,
-        hasApiKeys: true,
-      },
-    ],
-    [
-      {
-        esUser: undefined,
-        credentialTokenIds: [],
-        esCloudApiKeys: [],
-      },
-      {
-        hasUser: false,
-        hasCredentials: false,
-        hasApiKeys: false,
-      },
-    ],
-    [
-      {
-        esUser: {
-          enterprise_search: {
-            username: 'enterprise_search',
+        {
+          hasUser: true,
+          hasCredentials: true,
+          hasApiKeys: true,
+        },
+      ],
+      [
+        {
+          esUser: undefined,
+          credentialTokenIds: ['test_token_id'],
+          esCloudApiKeys: ['test_api_key'],
+        },
+        {
+          hasUser: false,
+          hasCredentials: true,
+          hasApiKeys: true,
+        },
+      ],
+      [
+        {
+          esUser: undefined,
+          credentialTokenIds: [],
+          esCloudApiKeys: ['test_api_key'],
+        },
+        {
+          hasUser: false,
+          hasCredentials: false,
+          hasApiKeys: true,
+        },
+      ],
+      [
+        {
+          esUser: undefined,
+          credentialTokenIds: [],
+          esCloudApiKeys: [],
+        },
+        {
+          hasUser: false,
+          hasCredentials: false,
+          hasApiKeys: false,
+        },
+      ],
+      [
+        {
+          esUser: {
+            enterprise_search: {
+              username: 'enterprise_search',
+              metadata: {},
+              enabled: true,
+              roles: [],
+            },
           },
+          credentialTokenIds: [],
+          esCloudApiKeys: ['test_api_key'],
         },
-        credentialTokenIds: [],
-        esCloudApiKeys: ['test_api_key'],
-      },
-      {
-        hasUser: true,
-        hasCredentials: false,
-        hasApiKeys: true,
-      },
-    ],
-    [
-      {
-        esUser: {
-          enterprise_search: {
-            username: 'enterprise_search',
+        {
+          hasUser: true,
+          hasCredentials: false,
+          hasApiKeys: true,
+        },
+      ],
+      [
+        {
+          esUser: {
+            enterprise_search: {
+              username: 'enterprise_search',
+              metadata: {},
+              enabled: true,
+              roles: [],
+            },
           },
+          credentialTokenIds: [],
+          esCloudApiKeys: [],
         },
-        credentialTokenIds: [],
-        esCloudApiKeys: [],
-      },
-      {
-        hasUser: true,
-        hasCredentials: false,
-        hasApiKeys: false,
-      },
-    ],
-    [
-      {
-        esUser: {
-          enterprise_search: {
-            username: 'enterprise_search',
+        {
+          hasUser: true,
+          hasCredentials: false,
+          hasApiKeys: false,
+        },
+      ],
+      [
+        {
+          esUser: {
+            enterprise_search: {
+              username: 'enterprise_search',
+              metadata: {},
+              enabled: true,
+              roles: [],
+            },
           },
+          credentialTokenIds: ['test_token_id'],
+          esCloudApiKeys: [],
         },
-        credentialTokenIds: ['test_token_id'],
-        esCloudApiKeys: [],
-      },
-      {
-        hasUser: true,
-        hasCredentials: true,
-        hasApiKeys: false,
-      },
-    ],
-  ];
+        {
+          hasUser: true,
+          hasCredentials: true,
+          hasApiKeys: false,
+        },
+      ],
+    ];
 
   test.each(cleanupTestCases)(
     'should clean up accounts, credentials, and tokens for (%p): %p',
