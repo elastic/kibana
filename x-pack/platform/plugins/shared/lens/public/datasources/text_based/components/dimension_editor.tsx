@@ -90,6 +90,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props,
     props.expressions,
     query,
+    esqlVariables,
   ]);
 
   const selectedField = useMemo(() => {
