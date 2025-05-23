@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiPanel,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
@@ -155,6 +154,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           panelStyle={{
             padding: 0,
             transform: 'translateY(-10px)',
+            minWidth: 400,
           }}
           closePopover={handleClosePopover}
           button={
@@ -166,37 +166,35 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
           }
         >
           {state.isPopoverOpen && (
-            <EuiPanel paddingSize="none" css={{ minWidth: 400 }}>
-              <EuiSelectable
-                id="options-combobox"
-                searchable={true}
-                options={scriptsOptions}
-                onChange={handleScriptSelection}
-                renderOption={renderOption}
-                singleSelection
-                searchProps={{
-                  autoFocus: true,
-                  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
-                    // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
-                    if (!['Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
-                      event.stopPropagation();
-                    }
-                  },
-                }}
-                listProps={{
-                  rowHeight: 60,
-                  showIcons: false,
-                  textWrap: 'truncate',
-                }}
-              >
-                {(list, search) => (
-                  <>
-                    {search}
-                    {list}
-                  </>
-                )}
-              </EuiSelectable>
-            </EuiPanel>
+            <EuiSelectable
+              id="options-combobox"
+              searchable={true}
+              options={scriptsOptions}
+              onChange={handleScriptSelection}
+              renderOption={renderOption}
+              singleSelection
+              searchProps={{
+                autoFocus: true,
+                onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
+                  // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
+                  if (!['Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
+                    event.stopPropagation();
+                  }
+                },
+              }}
+              listProps={{
+                rowHeight: 50,
+                showIcons: false,
+                textWrap: 'truncate',
+              }}
+            >
+              {(list, search) => (
+                <>
+                  {search}
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
           )}
         </EuiPopover>
       );
