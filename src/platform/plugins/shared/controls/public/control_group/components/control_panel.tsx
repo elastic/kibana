@@ -104,8 +104,8 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     api?.blockingError$,
     api?.title$,
     api?.defaultTitle$,
-    api?.grow,
-    api?.width,
+    api?.grow$,
+    api?.width$,
     api?.parentApi?.labelPosition,
     api?.parentApi?.disabledActionIds$,
     viewModeSubject
