@@ -25,7 +25,10 @@ import {
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
-import { getEnterpriseSearchAccountCleanupAccounts } from '../../deprecations';
+import {
+  getEnterpriseSearchAccountCleanupAccounts,
+  IEnterpriseSearchAccountCleanupAccounts,
+} from '../../deprecations';
 
 import { registerDeprecationRoutes } from './deprecations';
 
@@ -245,6 +248,12 @@ describe('POST /internal/enterprise_search/deprecations/clean_ent_search_account
     });
   });
 
+  interface AccountCleanupExpected {
+    hasUser: boolean;
+    hasCredentials: boolean;
+    hasApiKeys: boolean;
+  }
+
   const cleanupTestCases = [
     [
       {
@@ -350,7 +359,7 @@ describe('POST /internal/enterprise_search/deprecations/clean_ent_search_account
 
   test.each(cleanupTestCases)(
     'should clean up accounts, credentials, and tokens for (%p): %p',
-    async (mockData: any, expected: any) => {
+    async (mockData: IEnterpriseSearchAccountCleanupAccounts, expected: AccountCleanupExpected) => {
       const request = {
         body: { deprecationDetails: { domainId: 'enterpriseSearch' } },
       };

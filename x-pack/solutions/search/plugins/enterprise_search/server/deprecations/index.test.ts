@@ -16,6 +16,7 @@ jest.mock('@kbn/search-connectors', () => {
   };
 });
 
+import { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 
 import { Connector } from '@kbn/search-connectors';
@@ -187,9 +188,9 @@ describe('Enterprise Search service account cleanups', () => {
       'Enterprise Search user accounts and credentials should be removed'
     );
 
-    const messageContent = deprecations[0].message.content;
-    expect(messageContent).toMatch('There are leftover accounts or credentials');
-    expect(messageContent).toMatch("Remove the 'enterprise_search' user account");
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch("Remove the 'enterprise_search' user account");
   });
 
   it('Should return a deprecation if service account credentials are present', async () => {
@@ -216,9 +217,9 @@ describe('Enterprise Search service account cleanups', () => {
       'Enterprise Search user accounts and credentials should be removed'
     );
 
-    const messageContent = deprecations[0].message.content;
-    expect(messageContent).toMatch('There are leftover accounts or credentials');
-    expect(messageContent).toMatch(
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch(
       "Invalidate any 'elastic/enterprise-search-server' service account credentials"
     );
   });
@@ -244,9 +245,9 @@ describe('Enterprise Search service account cleanups', () => {
       'Enterprise Search user accounts and credentials should be removed'
     );
 
-    const messageContent = deprecations[0].message.content;
-    expect(messageContent).toMatch('There are leftover accounts or credentials');
-    expect(messageContent).toMatch(
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch(
       "Invalidate any 'cloud-internal-enterprise_search-server' API keys"
     );
   });
@@ -281,13 +282,13 @@ describe('Enterprise Search service account cleanups', () => {
       'Enterprise Search user accounts and credentials should be removed'
     );
 
-    const messageContent = deprecations[0].message.content;
-    expect(messageContent).toMatch('There are leftover accounts or credentials');
-    expect(messageContent).toMatch("Remove the 'enterprise_search' user account");
-    expect(messageContent).toMatch(
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch("Remove the 'enterprise_search' user account");
+    expect(message.content).toMatch(
       "Invalidate any 'elastic/enterprise-search-server' service account credentials"
     );
-    expect(messageContent).toMatch(
+    expect(message.content).toMatch(
       "Invalidate any 'cloud-internal-enterprise_search-server' API keys"
     );
   });
