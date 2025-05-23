@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 
-import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_component';
+import { SecurityIntegrationsGridTabs } from './security_integrations_grid_tabs';
 import * as module from '@kbn/fleet-plugin/public';
 
 import {
@@ -75,13 +75,13 @@ describe('IntegrationsCardGridTabsComponent', () => {
         isLoading: true,
       },
     };
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...testProps} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...testProps} />);
 
     expect(getByTestId('loadingPackages')).toBeInTheDocument();
   });
 
   it('renders the package list when data is available', async () => {
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...props} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />);
 
     await waitFor(() => {
       expect(getByTestId('packageList')).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   it('saves the selected tab to storage', () => {
     (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
 
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...props} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />);
 
     const tabButton = getByTestId('user');
 
@@ -104,7 +104,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   it('tracks the tab clicks', () => {
     (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
 
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...props} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />);
 
     const tabButton = getByTestId('user');
 
@@ -116,7 +116,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   });
 
   it('renders no search tools when showSearchTools is false', async () => {
-    render(<IntegrationsCardGridTabsComponent {...props} />);
+    render(<SecurityIntegrationsGridTabs {...props} />);
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].showSearchTools).toEqual(false);
@@ -130,7 +130,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
       mockSetSearchTermToStorage,
     ]);
 
-    render(<IntegrationsCardGridTabsComponent {...props} />);
+    render(<SecurityIntegrationsGridTabs {...props} />);
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].searchTerm).toEqual('new search term');

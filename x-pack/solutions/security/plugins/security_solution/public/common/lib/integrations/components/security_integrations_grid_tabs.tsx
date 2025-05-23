@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react';
-import {
-  COLOR_MODES_STANDARD,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
 
@@ -25,19 +18,19 @@ import {
   SEARCH_FILTER_CATEGORIES,
   TELEMETRY_INTEGRATION_TAB,
 } from '../constants';
-import type { AvailablePackagesResult, TopCalloutRenderer } from '../types';
+import type { TopCalloutRenderer } from '../types';
 import { IntegrationTabId } from '../types';
-import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
+import { useSelectedTab } from '../hooks/use_selected_tab';
 import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
 import { useIntegrationContext } from '../hooks/integration_context';
+import type { AvailablePackages } from './with_available_packages';
 
-export interface IntegrationsCardGridTabsProps {
+export interface SecurityIntegrationsGridTabsProps {
   activeIntegrationsCount: number;
   isAgentRequired?: boolean;
-  availablePackagesResult: AvailablePackagesResult;
+  availablePackages: AvailablePackages;
   topCalloutRenderer?: TopCalloutRenderer;
   integrationList: IntegrationCardItem[];
-  selectedTabResult: UseSelectedTabReturn;
   packageListGridOptions?: {
     showCardLabels?: boolean;
   };
@@ -52,14 +45,13 @@ export const PackageListGrid = lazy(async () => ({
 }));
 
 // beware if local storage, need to add project id to the key
-export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
+export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridTabsProps>(
   ({
     isAgentRequired,
     activeIntegrationsCount,
     topCalloutRenderer: TopCallout,
     integrationList,
-    availablePackagesResult,
-    selectedTabResult,
+    availablePackages,
     packageListGridOptions,
   }) => {
     const {
@@ -67,10 +59,9 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       telemetry: { reportLinkClick },
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const { colorMode } = useEuiTheme();
-    const isDark = colorMode === COLOR_MODES_STANDARD.dark;
     const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
-      selectedTabResult;
+      useSelectedTab();
+
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
     const onTabChange = useCallback(
       (stringId: string) => {
@@ -84,7 +75,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     );
 
     const { isLoading, searchTerm, setCategory, setSearchTerm, setSelectedSubCategory } =
-      availablePackagesResult;
+      availablePackages;
 
     const buttonGroupStyles = useIntegrationCardGridTabsStyles();
 
@@ -148,7 +139,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
         {integrationTabs.length > 1 && (
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              css={isDark ? buttonGroupStyles : undefined}
+              css={buttonGroupStyles}
               buttonSize="compressed"
               color="primary"
               idSelected={toggleIdSelected}
@@ -205,4 +196,4 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     );
   }
 );
-IntegrationsCardGridTabsComponent.displayName = 'IntegrationsCardGridTabsComponent';
+SecurityIntegrationsGridTabs.displayName = 'IntegrationsCardGridTabsComponent';
