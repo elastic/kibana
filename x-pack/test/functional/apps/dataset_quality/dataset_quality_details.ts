@@ -260,16 +260,18 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldTable
         );
 
-        const rows =
-          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
+        await retry.tryForTime(5000, async () => {
+          const rows =
+            await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
-        expect(rows.length).to.eql(1);
+          expect(rows.length).to.eql(1);
 
-        const sparkPlots = await testSubjects.findAll(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
-        );
+          const sparkPlots = await testSubjects.findAll(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
+          );
 
-        expect(rows.length).to.be(sparkPlots.length);
+          expect(rows.length).to.be(sparkPlots.length);
+        });
       });
     });
 
