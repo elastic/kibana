@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
@@ -20,6 +20,7 @@ import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 import { QueryRuleDetailPanel } from './query_rule_detail_panel';
+import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
 
 export const QueryRulesetDetail: React.FC = () => {
   const {
@@ -72,19 +73,13 @@ export const QueryRulesetDetail: React.FC = () => {
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="database"
-                  color="primary"
-                  data-test-subj="queryRulesetDetailHeaderDataButton"
-                  onClick={() => {
-                    // Logic to handle data button click
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.queryRules.queryRulesetDetail.dataButton"
-                    defaultMessage="Data"
-                  />
-                </EuiButtonEmpty>
+                <UseRunQueryRuleset
+                  rulesetId={rulesetId}
+                  type="contextMenuItem"
+                  content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
+                    defaultMessage: 'Test in Console',
+                  })}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
