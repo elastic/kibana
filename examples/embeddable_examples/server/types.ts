@@ -11,7 +11,7 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/se
 
 export type { SavedBookAttributes } from './book/saved_object/schema';
 
-export type { SavedFieldListAttributes as SavedFieldListAttributesV1 } from './field_list/saved_object/schema/v1';
+export type { SavedFieldListAttributes } from './field_list/saved_object/schema';
 
 export interface SetupDeps {
   embeddable: EmbeddableSetup;

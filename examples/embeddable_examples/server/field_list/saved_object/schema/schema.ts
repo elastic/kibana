@@ -9,7 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const savedFieldListAttributesSchema = schema.object({
+const savedFieldListAttributesBaseSchema = schema.object({
   // dataViewId is not included in the saved object state since it is stored in the references
   selectedFieldNames: schema.maybe(schema.arrayOf(schema.string())),
 });
+
+export const savedFieldListAttributesSchema = savedFieldListAttributesBaseSchema.extends({});

@@ -9,12 +9,12 @@
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type { SavedFieldListAttributesV1 } from '../../../../../server/types';
+import type { SavedFieldListAttributes } from '../../../../../server/types';
 import type { FieldListAttributes } from '../../../../../server/field_list/content_management/schema/v2';
 import { FIELD_LIST_DATA_VIEW_REF_NAME } from '../../../constants';
 
 export const fieldListAttributesDefinition: VersionableEmbeddableObject<
-  SavedFieldListAttributesV1,
+  SavedFieldListAttributes,
   FieldListAttributes
 > = {
   itemToSavedObject: ({ attributes, references }) => {
