@@ -14,7 +14,7 @@ import {
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { castArray, isFunction } from 'lodash';
+import { castArray } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
@@ -100,7 +100,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async refresh() {
-    const allIndices = this.dataStreams.concat(this.indices);
+    const allIndices = this.getAllIndices();
     this.logger.info(`Refreshing "${allIndices.join(',')}"`);
 
     return this.client.indices.refresh({
@@ -111,7 +111,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
     });
   }
 
-  pipeline(cb: (base: Readable) => NodeJS.WritableStream) {
+  setPipeline(cb: (base: Readable) => NodeJS.WritableStream) {
     this.pipelineCallback = cb;
   }
 
@@ -121,70 +121,73 @@ export class SynthtraceEsClient<TFields extends Fields> {
   ): Promise<void> {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
-    const previousPipelineCallback = this.pipelineCallback;
-    if (isFunction(pipelineCallback)) {
-      this.pipeline(pipelineCallback);
-    }
+    const pipelineFn = pipelineCallback ?? this.pipelineCallback;
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
 
-      return this.pipelineCallback(base);
+      return pipelineFn(base);
     }) as Transform[];
 
     let count: number = 0;
 
     const stream = sequential(...allStreams);
 
-    await this.client.helpers.bulk({
-      concurrency: this.concurrency,
-      refresh: false,
-      refreshOnCompletion: false,
-      flushBytes: 250000,
-      datasource: stream,
-      filter_path: 'errors,items.*.error,items.*.status',
-      onDocument: (doc: ESDocumentWithOperation<TFields>) => {
-        let action: SynthtraceESAction;
-        count++;
+    await this.client.helpers.bulk(
+      {
+        concurrency: this.concurrency,
+        refresh: false,
+        refreshOnCompletion: false,
+        flushBytes: 250000,
+        datasource: stream,
+        filter_path: 'errors,items.*.error,items.*.status',
+        onDocument: (doc: ESDocumentWithOperation<TFields>) => {
+          let action: SynthtraceESAction;
+          count++;
 
-        if (count % 100000 === 0) {
-          this.logger.debug(`Indexed ${count} documents`);
-        } else if (count % 1000 === 0) {
-          this.logger.verbose(`Indexed ${count} documents`);
-        }
-
-        if (doc._action) {
-          action = doc._action!;
-          delete doc._action;
-        } else if (doc._index) {
-          action = { create: { _index: doc._index, dynamic_templates: doc._dynamicTemplates } };
-          delete doc._index;
-          if (doc._dynamicTemplates) {
-            delete doc._dynamicTemplates;
+          if (count % 100000 === 0) {
+            this.logger.debug(`Indexed ${count} documents`);
+          } else if (count % 1000 === 0) {
+            this.logger.verbose(`Indexed ${count} documents`);
           }
-        } else {
-          this.logger.debug(doc);
-          throw new Error(
-            `Could not determine operation: _index and _action not defined in document`
-          );
-        }
 
-        return action;
+          if (doc._action) {
+            action = doc._action!;
+            delete doc._action;
+          } else if (doc._index) {
+            action = { create: { _index: doc._index, dynamic_templates: doc._dynamicTemplates } };
+            delete doc._index;
+            if (doc._dynamicTemplates) {
+              delete doc._dynamicTemplates;
+            }
+          } else {
+            this.logger.debug(doc);
+            throw new Error(
+              `Could not determine operation: _index and _action not defined in document`
+            );
+          }
+
+          return action;
+        },
+        onDrop: (doc) => {
+          this.logger.error(`Dropped document: ${JSON.stringify(doc, null, 2)}`);
+        },
       },
-      onDrop: (doc) => {
-        this.logger.error(`Dropped document: ${JSON.stringify(doc, null, 2)}`);
-      },
-    });
+      {
+        headers: {
+          'user-agent': 'synthtrace',
+        },
+      }
+    );
 
     this.logger.info(`Produced ${count} events`);
-
-    // restore pipeline callback
-    if (pipelineCallback) {
-      this.pipeline(previousPipelineCallback);
-    }
 
     if (this.refreshAfterIndex) {
       await this.refresh();
     }
+  }
+
+  getAllIndices() {
+    return this.dataStreams.concat(this.indices);
   }
 }

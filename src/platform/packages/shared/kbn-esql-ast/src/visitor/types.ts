@@ -113,6 +113,7 @@ export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitEnrichCommand'> &
       VisitorInput<Methods, 'visitMvExpandCommand'> &
       VisitorInput<Methods, 'visitJoinCommand'> &
+      VisitorInput<Methods, 'visitRerankCommand'> &
       VisitorInput<Methods, 'visitChangePointCommand'>
 >;
 
@@ -142,6 +143,7 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitEnrichCommand'>
   | VisitorOutput<Methods, 'visitMvExpandCommand'>
   | VisitorOutput<Methods, 'visitJoinCommand'>
+  | VisitorOutput<Methods, 'visitRerankCommand'>
   | VisitorOutput<Methods, 'visitChangePointCommand'>;
 
 export interface VisitorMethods<
@@ -179,6 +181,7 @@ export interface VisitorMethods<
   visitEnrichCommand?: Visitor<contexts.EnrichCommandVisitorContext<Visitors, Data>, any, any>;
   visitMvExpandCommand?: Visitor<contexts.MvExpandCommandVisitorContext<Visitors, Data>, any, any>;
   visitJoinCommand?: Visitor<contexts.JoinCommandVisitorContext<Visitors, Data>, any, any>;
+  visitRerankCommand?: Visitor<contexts.RerankCommandVisitorContext<Visitors, Data>, any, any>;
   visitChangePointCommand?: Visitor<
     contexts.ChangePointCommandVisitorContext<Visitors, Data>,
     any,
