@@ -8,12 +8,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
-import { SecurityRoutePageWrapper } from '.';
+import { SecurityRoutePageWrapper } from './security_route_page_wrapper';
 import { SecurityPageName } from '../../../../common';
 import { TestProviders } from '../../mock';
 import { generateHistoryMock } from '../../utils/route/mocks';
 import type { LinkInfo } from '../../links';
-import { useLinkInfo, useNavLinkExists } from '../../links';
+import { useLinkInfo } from '../../links';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
@@ -24,7 +24,6 @@ jest.mock('../../utils/route/spy_routes', () => ({
 }));
 
 const mockUseLinkInfo = useLinkInfo as jest.Mock;
-const mockUseNavLinkExists = useNavLinkExists as jest.Mock;
 const mockUseUpsellingPage = useUpsellingPage as jest.Mock;
 
 const defaultLinkInfo: LinkInfo = {
@@ -33,8 +32,7 @@ const defaultLinkInfo: LinkInfo = {
   path: '/test',
 };
 
-const REDIRECT_COMPONENT_SUBJ = 'redirect-component';
-const mockRedirect = jest.fn(() => <div data-test-subj={REDIRECT_COMPONENT_SUBJ} />);
+const mockRedirect = jest.fn(() => null);
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   Redirect: () => mockRedirect(),
@@ -59,11 +57,21 @@ describe('SecurityRoutePageWrapper', () => {
     jest.clearAllMocks();
 
     mockUseLinkInfo.mockReturnValue(defaultLinkInfo);
-    mockUseNavLinkExists.mockReturnValue(true);
     mockUseUpsellingPage.mockReturnValue(undefined);
   });
 
-  it('should render UpsellPage when it is available', () => {
+  it('should render children the link allowed', () => {
+    const { getByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+  });
+
+  it('should render the upselling when it is returned', () => {
     mockUseUpsellingPage.mockReturnValue(TestUpsellPage);
 
     const { getByTestId } = render(
@@ -76,18 +84,17 @@ describe('SecurityRoutePageWrapper', () => {
     expect(getByTestId(TEST_UPSELL_SUBJ)).toBeInTheDocument();
   });
 
-  it('should render NoPrivilegesPage when link missing', () => {
+  it('should redirect to landing when link is missing', () => {
     mockUseLinkInfo.mockReturnValue(undefined);
-    mockUseNavLinkExists.mockReturnValue(false);
 
-    const { getByTestId } = render(
+    render(
       <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
         <TestComponent />
       </SecurityRoutePageWrapper>,
       { wrapper: Wrapper }
     );
 
-    expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(mockRedirect).toHaveBeenCalled();
   });
 
   it('should render NoPrivilegesPage when unauthorized', () => {
@@ -103,75 +110,33 @@ describe('SecurityRoutePageWrapper', () => {
     expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
   });
 
-  it('should render children when authorized', () => {
-    mockUseLinkInfo.mockReturnValue(defaultLinkInfo);
-    mockUseUpsellingPage.mockReturnValue(undefined);
+  it('should redirect when unavailable', () => {
+    mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unavailable: true });
 
-    const { getByTestId } = render(
+    render(
       <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
         <TestComponent />
       </SecurityRoutePageWrapper>,
       { wrapper: Wrapper }
     );
 
-    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(mockRedirect).toHaveBeenCalled();
   });
 
-  describe('with redirectOnMissing flag', () => {
-    it('should redirect when app link is missing', () => {
-      mockUseLinkInfo.mockReturnValue(undefined);
-
-      const { getByTestId } = render(
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} redirectOnMissing>
-          <TestComponent />
-        </SecurityRoutePageWrapper>,
-        { wrapper: Wrapper }
-      );
-
-      expect(getByTestId(REDIRECT_COMPONENT_SUBJ)).toBeInTheDocument();
-    });
-
-    it('should redirect when the nav link does not exist', () => {
-      mockUseNavLinkExists.mockReturnValue(false);
-
-      const { getByTestId } = render(
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} redirectOnMissing>
-          <TestComponent />
-        </SecurityRoutePageWrapper>,
-        { wrapper: Wrapper }
-      );
-
-      expect(getByTestId(REDIRECT_COMPONENT_SUBJ)).toBeInTheDocument();
-    });
-
-    it('should render NoPrivilegesPage when unauthorized', () => {
-      mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
-
-      const { getByTestId } = render(
+  describe('when omitSpyRoute flag is missing', () => {
+    it('should render SpyRoute', () => {
+      render(
         <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
           <TestComponent />
         </SecurityRoutePageWrapper>,
         { wrapper: Wrapper }
       );
 
-      expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
-    });
-
-    it('should render UpsellPage when it is available', () => {
-      mockUseUpsellingPage.mockReturnValue(TestUpsellPage);
-
-      const { getByTestId } = render(
-        <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
-          <TestComponent />
-        </SecurityRoutePageWrapper>,
-        { wrapper: Wrapper }
-      );
-
-      expect(getByTestId(TEST_UPSELL_SUBJ)).toBeInTheDocument();
+      expect(SpyRoute).toHaveBeenCalled();
     });
   });
 
-  describe('when omitSpyRoute flag', () => {
+  describe('when omitSpyRoute flag is present', () => {
     it('should not render SpyRoute', () => {
       render(
         <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} omitSpyRoute>

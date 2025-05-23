@@ -13,14 +13,8 @@ import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { useNavLinkExists } from '../../links/links_hooks';
 
 interface SecurityRoutePageWrapperOptionProps {
-  /**
-   * Property to redirect to the Security home page instead of rendering the generic "NoPrivileges" page when the `pageName` is missing in the links registry.
-   * @default false
-   */
-  redirectOnMissing?: boolean;
   /**
    * Used to disable the SpyRoute for the page, if e.g. the page's need to render their own specific SpyRoute.
    * @default false
@@ -50,9 +44,8 @@ type SecurityRoutePageWrapperProps = {
  * ```
  */
 export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRoutePageWrapperProps>> =
-  React.memo(({ children, pageName, omitSpyRoute = false, redirectOnMissing = false }) => {
+  React.memo(({ children, pageName, omitSpyRoute = false }) => {
     const link = useLinkInfo(pageName);
-    const navLinkExists = useNavLinkExists(pageName);
     const UpsellingPage = useUpsellingPage(pageName);
 
     // The upselling page is only returned when the license/product requirements are not met.
@@ -66,14 +59,14 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
       );
     }
 
-    // Redirect to the home page if the link is not found in the application links or in the registered navigation links.
-    // If the `link == null` the `navLinkExists` will always be false, but adding the condition to avoid confusion.
-    if (redirectOnMissing && (link == null || !navLinkExists)) {
+    // Redirect to the home page if the link does not exist in the application links (has been filtered out).
+    // or if the link is unavailable (payment plan not met, if it had upselling page associated it would have been rendered above).
+    if (link == null || link.unavailable) {
       return <Redirect to="" />;
     }
 
-    // Show the no privileges page if the link is not found or unauthorized.
-    if (link == null || link.unauthorized) {
+    // Show the no privileges page if the link is unauthorized.
+    if (link.unauthorized) {
       return (
         <>
           <SpyRoute pageName={pageName} />
@@ -85,7 +78,6 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
       );
     }
 
-    // Show the actual application page.
     return (
       <TrackApplicationView viewId={pageName}>
         {children}
