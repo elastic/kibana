@@ -338,7 +338,8 @@ export async function getEnterpriseSearchAccountCleanups(
 
   let message =
     'There are leftover accounts or credentials from the Enterprise Search service.' +
-    'It is not necessary to remove or invalidate these items to proceed with the upgrade, but it is recommended to do so for security reasons.\n\n';
+    ' It is not necessary to remove or invalidate these items to proceed with the' +
+    ' upgrade, but it is recommended to do so for security reasons.\n\n';
   const manualStepsToAdd = [];
 
   if (esUser) {
