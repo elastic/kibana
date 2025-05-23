@@ -1116,7 +1116,7 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - asset
-        generic:
+        entity:
           type: object
           properties:
             asset:
@@ -1126,10 +1126,10 @@ components:
                   $ref: '#/components/schemas/AssetCriticalityLevel'
               required:
                 - criticality
-            name:
+            id:
               type: string
           required:
-            - name
+            - id
         host:
           type: object
           properties:
