@@ -11,6 +11,7 @@ import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
@@ -667,6 +668,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     | 'docLinks'
   >;
   dateRange: DateRange;
+  esqlVariables?: ESQLControlVariable[] | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
