@@ -688,13 +688,12 @@ describe('BedrockConnector', () => {
         const preconfiguredCommand = { input: { modelId: 'preconfigured' } };
         const response = { some: 'response' };
         mockSend.mockResolvedValue(response);
-        const expectedModel = connector['model'];
 
         await connector.bedrockClientSend(
           { signal: undefined, command: preconfiguredCommand },
           connectorUsageCollector
         );
-        expect(preconfiguredCommand.input.modelId).toBe(expectedModel);
+        expect(preconfiguredCommand.input.modelId).toBe(DEFAULT_BEDROCK_MODEL);
       });
     });
 
