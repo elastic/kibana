@@ -21,8 +21,8 @@ import {
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { cx } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { useMemoizedStyles2 } from '@kbn/core/public';
 import { flyoutContainerStyles } from './flyout.styles';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
@@ -67,6 +67,9 @@ export function SettingWithSiblingFlyout({
     }
   }, [isInlineEditing, isFlyoutOpen]);
 
+  const styles = useMemoizedStyles2(siblingflyoutContainerStyles);
+  const {flyoutStyles} = useMemoizedStyles2(flyoutContainerStyles);
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <SettingTrigger onClick={toggleFlyout} />
@@ -79,13 +82,13 @@ export function SettingWithSiblingFlyout({
                 aria-labelledby="lnsSettingWithSiblingFlyoutTitle"
                 data-test-subj={dataTestSubj}
                 className={cx(
-                  flyoutContainerStyles(euiThemeContext),
-                  siblingflyoutContainerStyles.self(euiThemeContext)
+                  flyoutStyles,
+                  styles.self
                 )}
               >
                 <EuiFlyoutHeader
                   hasBorder
-                  className={siblingflyoutContainerStyles.header(euiThemeContext)}
+                  className={styles.header}
                 >
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -112,16 +115,14 @@ export function SettingWithSiblingFlyout({
                   <div
                     className={cx(
                       'eui-yScroll',
-                      css`
-                        flex: 1;
-                      `
+                     styles.flex,
                     )}
                   >
                     {children}
                   </div>
                 )}
 
-                <EuiFlyoutFooter className={siblingflyoutContainerStyles.footer(euiThemeContext)}>
+                <EuiFlyoutFooter className={styles.footer}>
                   <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
                     {i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
                       defaultMessage: 'Back',
@@ -153,4 +154,7 @@ const siblingflyoutContainerStyles = {
   footer: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${euiTheme.size.base};
   `,
+  flex:  css`
+  flex: 1;
+`
 };

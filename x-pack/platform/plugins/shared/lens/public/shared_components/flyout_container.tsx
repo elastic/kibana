@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { css, cx, keyframes } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -18,47 +18,12 @@ import {
   EuiFocusTrap,
   type UseEuiTheme,
   euiBreakpoint,
-  useEuiTheme,
-  euiShadow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
+import { useMemoizedStyles2 } from '@kbn/core/public';
+import { flyoutContainerStyles } from './flyout.styles';
 
-const flyoutOpenCloseAnimation = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  75% {
-    opacity: 1;
-    transform: translateX(0%);
-  }
-`;
-
-export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
-  border-left: ${euiThemeContext.euiTheme.border.thin};
-  ${euiShadow(euiThemeContext, 'xl')};
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  height: 100%;
-  z-index: ${euiThemeContext.euiTheme.levels.flyout};
-  background: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  animation: ${flyoutOpenCloseAnimation} ${euiThemeContext.euiTheme.animation.normal}
-    ${euiThemeContext.euiTheme.animation.resistance};
-  .lnsIndexPatternDimensionEditor--padded {
-    padding: ${euiThemeContext.euiTheme.size.base};
-  }
-  .lnsIndexPatternDimensionEditor--collapseNext {
-    margin-bottom: -${euiThemeContext.euiTheme.size.l};
-    border-top: ${euiThemeContext.euiTheme.border.thin};
-    margin-top: 0 !important;
-  }
-`;
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -99,7 +64,8 @@ export function FlyoutContainer({
   isInlineEditing?: boolean;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
-  const euiThemeContext = useEuiTheme();
+  const {flyoutStyles} = useMemoizedStyles2(flyoutContainerStyles);
+  const dimensionContainerStyles = useMemoizedStyles2(styles);
 
   const closeFlyout = useCallback(() => {
     setFocusTrapIsEnabled(false);
@@ -124,6 +90,7 @@ export function FlyoutContainer({
     return null;
   }
 
+
   return (
     <div ref={panelRef}>
       <EuiFocusTrap
@@ -142,11 +109,8 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           className={cx(
-            css`
-              box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
-            `,
-            flyoutContainerStyles(euiThemeContext),
-            dimensionContainerStyles.self(euiThemeContext)
+            flyoutStyles,
+            dimensionContainerStyles.self
           )}
           onAnimationEnd={() => {
             if (isOpen) {
@@ -156,7 +120,7 @@ export function FlyoutContainer({
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder className={dimensionContainerStyles.header(euiThemeContext)}>
+          <EuiFlyoutHeader hasBorder className={dimensionContainerStyles.header}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -197,10 +161,6 @@ export function FlyoutContainer({
 
           <div
             className={cx(
-              css`
-                flex: 1;
-                z-index: 1;
-              `,
               'eui-yScroll'
             )}
           >
@@ -208,7 +168,7 @@ export function FlyoutContainer({
           </div>
 
           {customFooter || (
-            <EuiFlyoutFooter className={dimensionContainerStyles.footer(euiThemeContext)}>
+            <EuiFlyoutFooter className={dimensionContainerStyles.footer}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
@@ -232,7 +192,7 @@ export function FlyoutContainer({
   );
 }
 
-const dimensionContainerStyles = {
+const styles = {
   self: (euiThemeContext: UseEuiTheme) => {
     return css`
       // But with custom positioning to keep it within the sidebar contents

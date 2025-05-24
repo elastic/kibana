@@ -22,10 +22,41 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
+
+const styles = {
+  flyoutHeader: css`
+    pointer-events: auto;
+    background-color: ${euiThemeVars.euiColorEmptyShade};
+  `,
+  beaker: css`
+    vertical-align: middle;
+  `,
+  flyoutBody: css`
+  // styles needed to display extra drop targets that are outside of the config panel main area
+  overflow-y: auto;
+  padding-left: ${euiThemeVars.euiFormMaxWidth};
+  margin-left: -${euiThemeVars.euiFormMaxWidth};
+  pointer-events: none;
+  .euiFlyoutBody__overflow {
+    transform: initial;
+    -webkit-mask-image: none;
+    padding-left: inherit;
+    margin-left: inherit;
+   
+    > * {
+      pointer-events: auto;
+    }
+  }
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+    block-size: 100%;
+  }
+`
+}
 
 export const FlyoutWrapper = ({
   children,
@@ -45,10 +76,7 @@ export const FlyoutWrapper = ({
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
           hasBorder
-          className={css`
-            pointer-events: auto;
-            background-color: ${euiThemeVars.euiColorEmptyShade};
-          `}
+          className={styles.flyoutHeader}
           data-test-subj="editFlyoutHeader"
         >
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -78,9 +106,7 @@ export const FlyoutWrapper = ({
                           label=""
                           iconType="beaker"
                           size="s"
-                          className={css`
-                            vertical-align: middle;
-                          `}
+                          className={styles.beaker}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -114,31 +140,7 @@ export const FlyoutWrapper = ({
       ) : null}
 
       <EuiFlyoutBody
-        className="lnsEditFlyoutBody"
-        className={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
-          pointer-events: none;
-          .euiFlyoutBody__overflow {
-            transform: initial;
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            ${!isScrollable &&
-            `
-                overflow-y: hidden;
-              `}
-            > * {
-              pointer-events: auto;
-            }
-          }
-          .euiFlyoutBody__overflowContent {
-            padding: 0;
-            block-size: 100%;
-          }
-        `}
+        className={cx('lnsEditFlyoutBody',styles.flyoutBody)}
       >
         {children}
       </EuiFlyoutBody>
