@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
@@ -328,7 +328,7 @@ export function LensEditConfigurationFlyout({
         isReadOnly={isReadOnly}
       >
         <EuiFlexGroup
-          css={css`
+          className={css`
             block-size: 100%;
             .euiFlexItem,
             .euiAccordion,
@@ -369,7 +369,7 @@ export function LensEditConfigurationFlyout({
           <div ref={editorContainer} />
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
-            css={css`
+            className={css`
               .euiAccordion__childWrapper {
                 flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
@@ -381,7 +381,7 @@ export function LensEditConfigurationFlyout({
               buttonContent={
                 <EuiTitle
                   size="xxs"
-                  css={css`
+                  className={css`
                 padding: 2px;
               }
             `}
@@ -437,7 +437,7 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
-            css={css`
+            className={css`
               border-top: ${euiThemeVars.euiBorderThin};
               border-bottom: ${euiThemeVars.euiBorderThin};
               padding-left: ${euiThemeVars.euiSize};

@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import {
   EuiListGroup,
   EuiFormRow,
@@ -482,7 +482,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
               <span
-                css={css`
+                className={css`
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
@@ -741,7 +741,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
+          className={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1065,7 +1065,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       <div className="lnsIndexPatternDimensionEditor--padded">
         <EuiText
           size="s"
-          css={css`
+          className={css`
             margin-bottom: ${euiTheme.size.base};
           `}
         >
@@ -1168,7 +1168,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {!incompleteInfo && temporaryState === 'none' && selectedColumn && (
             <EuiText
               size="s"
-              css={css`
+              className={css`
                 margin-bottom: ${euiTheme.size.base};
               `}
             >

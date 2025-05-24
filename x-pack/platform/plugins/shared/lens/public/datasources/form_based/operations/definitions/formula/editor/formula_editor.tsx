@@ -11,7 +11,7 @@ import {
   LanguageDocumentationPopover,
   LanguageDocumentationPopoverContent,
 } from '@kbn/language-documentation';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiButtonEmpty,
@@ -56,6 +56,7 @@ import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { getDocumentationSections } from './formula_help';
 import { nonNullable } from '../../../../../../utils';
+import { cx } from '@emotion/css';
 
 function tableHasData(
   activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],
@@ -685,14 +686,14 @@ export function FormulaEditor({
   // in the behavior of Monaco when it's first loaded and then reloaded.
   return (
     <div
-      css={[
+      className={cx(
         sharedEditorStyles.self(euiThemeContext),
         isFullscreen ? fullscreenEditorStyles : defaultEditorStyles,
-      ]}
+      )}
     >
       {!isFullscreen && (
         <EuiFormLabel
-          css={css`
+          className={css`
             margin-top: ${euiTheme.size.base};
             margin-bottom: ${euiTheme.size.xs};
           `}
@@ -704,26 +705,24 @@ export function FormulaEditor({
       )}
 
       <div
-        className="lnsFormula"
-        css={css({
+        className={cx('lnsFormula', css({
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           border: isFullscreen ? 'none' : euiTheme.border.thin,
           borderRadius: isFullscreen ? 0 : euiTheme.border.radius.medium,
           height: isFullscreen ? '100%' : 'auto',
-        })}
+        }))}
       >
         <div
-          className="lnsFormula__editor"
-          css={css`
+          className={cx("lnsFormula__editor",css`
             & > * + * {
               border-top: ${euiTheme.border.thin};
             }
-          `}
+          `)}
         >
-          <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
+          <div className={sharedEditorStyles.editorHeader(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem
-                css={css`
+                className={css`
                   display: block;
                 `}
               >
@@ -764,7 +763,7 @@ export function FormulaEditor({
               </EuiFlexItem>
 
               <EuiFlexItem
-                css={css`
+                className={css`
                   display: block;
                 `}
                 grow={false}
@@ -819,7 +818,7 @@ export function FormulaEditor({
             />
 
             {!text ? (
-              <div css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}>
+              <div className={sharedEditorStyles.editorPlaceholder(euiThemeContext)}>
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.lens.formulaPlaceholderText', {
                     defaultMessage: 'Type a formula by combining functions with math, like:',
@@ -831,7 +830,7 @@ export function FormulaEditor({
             ) : null}
           </div>
 
-          <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
+          <div className={sharedEditorStyles.editorFooter(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
                 {isFullscreen ? (
@@ -852,8 +851,7 @@ export function FormulaEditor({
                       aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
                         defaultMessage: 'Hide function reference',
                       })}
-                      className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
-                      css={sharedEditorStyles.editorHelpLink(euiThemeContext)}
+                      className={cx("lnsFormula__editorHelp", "lnsFormula__editorHelp--inline", sharedEditorStyles.editorHelpLink(euiThemeContext))}
                       color="text"
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
@@ -891,10 +889,9 @@ export function FormulaEditor({
                     button={
                       <EuiButtonEmpty
                         color={errorCount ? 'danger' : 'warning'}
-                        css={css`
+                        className={cx('lnsFormula__editorError',css`
                           white-space: nowrap;
-                        `}
-                        className="lnsFormula__editorError"
+                        `)}
                         iconType="warning"
                         size="xs"
                         flush="right"
@@ -919,14 +916,14 @@ export function FormulaEditor({
                     }
                   >
                     <div
-                      css={css`
+                      className={css`
                         max-width: ${euiTheme.components.forms.maxWidth};
                       `}
                     >
                       {warnings.map(({ message, severity }, index) => (
                         <div
                           key={index}
-                          css={index !== 0 && sharedEditorStyles.warningText(euiThemeContext)}
+                          className={index !== 0 ? sharedEditorStyles.warningText(euiThemeContext): undefined}
                         >
                           <EuiText
                             size="s"
@@ -949,8 +946,7 @@ export function FormulaEditor({
         {/* fix the css here */}
         {isFullscreen && isHelpOpen ? (
           <div
-            className="documentation__docs--inline"
-            css={sharedEditorStyles.formulaDocs(euiThemeContext)}
+            className={cx('documentation__docs--inline', sharedEditorStyles.formulaDocs(euiThemeContext))}
           >
             <LanguageDocumentationPopoverContent
               language="Formula"

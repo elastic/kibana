@@ -27,6 +27,7 @@ import { FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
+import { cx } from '@emotion/css';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -269,14 +270,13 @@ export const FilterList = ({
                 }}
                 button={
                   <EuiLink
-                    className="lnsFiltersOperation__popoverButton"
+                    className={cx("lnsFiltersOperation__popoverButton", draggablePopoverButtonStyles(euiThemeContext))}
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
                     onClick={() => changeActiveFilter(filter.id)}
                     color={isInvalid ? 'danger' : 'text'}
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
                     })}
-                    css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
                     {filter.label || (filter.input.query as string) || defaultLabel}
                   </EuiLink>

@@ -22,7 +22,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
@@ -45,7 +45,7 @@ export const FlyoutWrapper = ({
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
           hasBorder
-          css={css`
+          className={css`
             pointer-events: auto;
             background-color: ${euiThemeVars.euiColorEmptyShade};
           `}
@@ -78,7 +78,7 @@ export const FlyoutWrapper = ({
                           label=""
                           iconType="beaker"
                           size="s"
-                          css={css`
+                          className={css`
                             vertical-align: middle;
                           `}
                         />
@@ -115,7 +115,7 @@ export const FlyoutWrapper = ({
 
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
-        css={css`
+        className={css`
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
           padding-left: ${euiThemeVars.euiFormMaxWidth};

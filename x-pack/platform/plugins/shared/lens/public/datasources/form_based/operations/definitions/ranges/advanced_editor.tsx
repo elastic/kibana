@@ -27,7 +27,7 @@ import {
   DraggableBucketContainer,
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
@@ -102,7 +102,7 @@ export const RangePopover = ({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
-              css={css`
+              className={css`
                 width: 14ch; // Roughly 10 characters plus extra for the padding
               `}
               value={isValidNumber(from) ? Number(from) : ''}
@@ -135,7 +135,7 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
-              css={css`
+              className={css`
                 width: 14ch; // Roughly 10 characters plus extra for the padding
               `}
               value={isValidNumber(to) ? Number(to) : ''}
@@ -310,7 +310,7 @@ export const AdvancedRangeEditor = ({
                     color="text"
                     onClick={() => changeActiveRange(range.id)}
                     data-test-subj="dataView-ranges-popover-trigger"
-                    css={draggablePopoverButtonStyles(euiThemeContext)}
+                    className={draggablePopoverButtonStyles(euiThemeContext)}
                   >
                     <EuiText
                       size="s"

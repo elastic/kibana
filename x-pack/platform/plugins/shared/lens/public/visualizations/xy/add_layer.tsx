@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -30,6 +30,7 @@ import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './sta
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
 import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
+import { cx } from '@emotion/css';
 
 interface AddLayerButtonProps {
   state: XYState;
@@ -281,8 +282,7 @@ const ChartOptionWrapper = ({
     <button
       data-test-subj={`lnsXY_seriesType-${type}`}
       onClick={onClick}
-      className="euiContextMenuItem"
-      css={chartOptionWrapperStyles(euiThemeContext)}
+      css={cx('euiContextMenuItem',chartOptionWrapperStyles(euiThemeContext))}
     >
       <ChartOption option={{ icon, label, description }} />
     </button>

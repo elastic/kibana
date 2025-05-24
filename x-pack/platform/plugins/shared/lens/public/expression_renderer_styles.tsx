@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 
-export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
-  return css`
+export const lnsExpressionRendererStyle =  css`
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     overflow: auto;
   `;
-};

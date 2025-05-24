@@ -25,7 +25,7 @@ import {
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
@@ -1009,7 +1009,7 @@ The top values of a specified field ranked by the chosen metric.
           <>
             <EuiSpacer size="m" />
             <EuiAccordion
-              css={css`
+              className={css`
                 color: ${euiTheme.colors.primary};
               `}
               id="lnsTermsAdvanced"

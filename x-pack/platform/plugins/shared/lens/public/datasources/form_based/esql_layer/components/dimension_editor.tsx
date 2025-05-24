@@ -12,7 +12,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import { FormatSelector, FormatSelectorProps } from '../../dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
@@ -186,7 +186,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
           <EuiText
             size="s"
-            css={css`
+            className={css`
               margin-bottom: ${euiTheme.size.base};
             `}
           >

@@ -139,7 +139,7 @@ export function TextBasedDataPanel({
       }}
     >
       <FieldList
-        css={dataPanelStyles(euiThemeContext)}
+        className={dataPanelStyles(euiThemeContext)}
         isProcessing={!dataHasLoaded}
         prepend={
           <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />

@@ -92,6 +92,7 @@ import {
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { cx } from '@emotion/css';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -792,16 +793,12 @@ export const VisualizationWrapper = ({
 
   return (
     <div
-      className="lnsExpressionRenderer eui-scrollBar"
-      css={[
-        lnsExpressionRendererStyle,
-        `
-       .domDroppable--active & {
-          filter: blur(${euiTheme.size.xs}) !important;
-          opacity: .25 !important;
-          transition: filter ${euiTheme.animation.normal} ease-in-out, opacity ${euiTheme.animation.normal} ease-in-out;
-        }`,
-      ]}
+      className={cx("lnsExpressionRenderer eui-scrollBar",  lnsExpressionRendererStyle,  `.domDroppable--active & {
+        filter: blur(${euiTheme.size.xs}) !important;
+        opacity: .25 !important;
+        transition: filter ${euiTheme.animation.normal} ease-in-out, opacity ${euiTheme.animation.normal} ease-in-out;
+      }`)}
+
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""

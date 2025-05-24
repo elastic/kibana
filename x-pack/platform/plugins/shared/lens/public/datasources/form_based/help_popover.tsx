@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { css } from '@emotion/react';
+import { css, cx } from '@emotion/css';
 import { StartServices } from '../../types';
 
 export const HelpPopoverButton = ({
@@ -34,7 +34,7 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="help" css={helpPopoverStyles.button(euiThemeContext)} />
+        <EuiIcon size="s" type="help" className={helpPopoverStyles.button(euiThemeContext)} />
         {children}
       </EuiLink>
     </EuiText>
@@ -46,7 +46,7 @@ const HelpPopoverContent = ({ title, children }: { title?: string; children: Rea
   return (
     <>
       {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-      <EuiText className="eui-yScroll" size="s" css={helpPopoverStyles.content(euiThemeContext)}>
+      <EuiText size="s" className={cx(helpPopoverStyles.content(euiThemeContext), 'eui-yScroll')}>
         {children}
       </EuiText>
     </>

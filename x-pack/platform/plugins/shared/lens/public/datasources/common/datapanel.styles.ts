@@ -6,7 +6,7 @@
  */
 
 import { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 
 export const dataPanelStyles = ({ euiTheme }: UseEuiTheme) => {
   return css`

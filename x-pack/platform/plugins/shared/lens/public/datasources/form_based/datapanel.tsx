@@ -119,7 +119,7 @@ export function FormBasedDataPanel({
       {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
         <EuiFlexGroup
           gutterSize="m"
-          css={dataPanelStyles(euiThemeContext)}
+          className={dataPanelStyles(euiThemeContext)}
           direction="column"
           responsive={false}
         >
@@ -402,7 +402,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
 
   return (
     <FieldList
-      css={dataPanelStyles(euiThemeContext)}
+      className={dataPanelStyles(euiThemeContext)}
       isProcessing={isProcessing}
       prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
     >

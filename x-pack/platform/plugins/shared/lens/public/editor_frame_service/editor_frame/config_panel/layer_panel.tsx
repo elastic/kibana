@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
@@ -44,6 +44,7 @@ import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { ESQLEditor } from './esql_editor';
+import { cx } from '@emotion/css';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -376,7 +377,7 @@ export function LayerPanel(props: LayerPanelProps) {
       <section
         tabIndex={-1}
         ref={registerLayerRef}
-        css={css`
+        className={css`
           margin-bottom: ${euiTheme.size.base};
           // disable focus ring for mouse clicks, leave it for keyboard users
           &:focus:not(:focus-visible) {
@@ -387,16 +388,15 @@ export function LayerPanel(props: LayerPanelProps) {
       >
         <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
           <header
-            className="lnsLayerPanel__layerHeader"
-            css={css`
+            className={cx("lnsLayerPanel__layerHeader", css`
               padding: ${euiTheme.size.base};
               border-bottom: ${euiTheme.border.thin};
-            `}
+            `)}
           >
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem
                 grow
-                css={css`
+                className={css`
                   min-width: 0; // fixes truncation for too long chart switcher labels
                 `}
               >
@@ -512,7 +512,7 @@ export function LayerPanel(props: LayerPanelProps) {
               const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
               return (
                 <EuiFormRow
-                  css={css`
+                  className={cx(css`
                     padding: ${euiTheme.size.base};
                     &:last-child {
                       border-radius: 0 0 ${euiTheme.border.radius.medium}
@@ -536,8 +536,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         margin-top: ${euiTheme.size.s};
                       }
                     }
-                  `}
-                  className="lnsLayerPanel__row"
+                  `, "lnsLayerPanel__row")}
                   fullWidth
                   label={
                     <>
@@ -576,7 +575,7 @@ export function LayerPanel(props: LayerPanelProps) {
                     {group.accessors.length ? (
                       <ReorderProvider
                         dataTestSubj="lnsDragDrop"
-                        css={css`
+                        className={css`
                           margin: -${euiTheme.size.xs} -${euiTheme.size.base};
                           padding: ${euiTheme.size.xs} ${euiTheme.size.base};
                         `}
@@ -740,7 +739,7 @@ export function LayerPanel(props: LayerPanelProps) {
               {layerDatasource?.LayerSettingsComponent || visualizationLayerSettings.data ? (
                 <EuiText
                   size="s"
-                  css={css`
+                  className={css`
                     margin-bottom: ${euiThemeVars.euiSize};
                   `}
                 >
@@ -767,7 +766,7 @@ export function LayerPanel(props: LayerPanelProps) {
               {visualizationLayerSettings.appearance ? (
                 <EuiText
                   size="s"
-                  css={css`
+                  className={css`
                     margin-bottom: ${euiThemeVars.euiSize};
                   `}
                 >
@@ -848,7 +847,7 @@ export function LayerPanel(props: LayerPanelProps) {
               openColumnGroup?.enableDimensionEditor && (
                 <>
                   <div
-                    css={css`
+                    className={css`
                       padding: ${euiTheme.size.base};
                     `}
                   >

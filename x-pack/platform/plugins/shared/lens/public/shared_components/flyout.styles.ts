@@ -6,7 +6,7 @@
  */
 
 import { UseEuiTheme, euiShadow } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css, keyframes } from '@emotion/css';
 
 const flyoutOpenCloseAnimation = keyframes`
   0% {

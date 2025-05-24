@@ -21,7 +21,7 @@ import {
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -161,7 +161,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
-          css={dimensionEditorWarningStyles(euiThemeContext)}
+          className={dimensionEditorWarningStyles(euiThemeContext)}
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
             defaultMessage: 'Static value currently applied',
@@ -181,7 +181,7 @@ export const CalloutWarning = ({
   return (
     <>
       <EuiCallOut
-        css={dimensionEditorWarningStyles(euiThemeContext)}
+        className={dimensionEditorWarningStyles(euiThemeContext)}
         size="s"
         title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
           defaultMessage: 'Formula currently applied',

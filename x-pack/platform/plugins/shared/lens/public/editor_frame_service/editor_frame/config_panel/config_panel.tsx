@@ -15,7 +15,7 @@ import {
 } from '@kbn/unified-search-plugin/public';
 
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -257,7 +257,7 @@ export function LayerPanels(
 
   return (
     <EuiForm
-      css={css`
+      className={css`
         .lnsApp & {
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
             calc(400px + ${euiTheme.size.base});

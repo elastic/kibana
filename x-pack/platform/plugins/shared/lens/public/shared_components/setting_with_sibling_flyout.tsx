@@ -21,8 +21,9 @@ import {
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { flyoutContainerStyles } from './flyout.styles';
+import { cx } from '@emotion/css';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
   defaultMessage: 'Color',
@@ -77,14 +78,14 @@ export function SettingWithSiblingFlyout({
                 role="dialog"
                 aria-labelledby="lnsSettingWithSiblingFlyoutTitle"
                 data-test-subj={dataTestSubj}
-                css={[
+                className={cx(
                   flyoutContainerStyles(euiThemeContext),
                   siblingflyoutContainerStyles.self(euiThemeContext),
-                ]}
+            )}
               >
                 <EuiFlyoutHeader
                   hasBorder
-                  css={siblingflyoutContainerStyles.header(euiThemeContext)}
+                  className={siblingflyoutContainerStyles.header(euiThemeContext)}
                 >
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -109,16 +110,15 @@ export function SettingWithSiblingFlyout({
 
                 {children && (
                   <div
-                    className="eui-yScroll"
-                    css={css`
+                    className={cx('eui-yScroll', css`
                       flex: 1;
-                    `}
+                    `)}
                   >
                     {children}
                   </div>
                 )}
 
-                <EuiFlyoutFooter css={siblingflyoutContainerStyles.footer(euiThemeContext)}>
+                <EuiFlyoutFooter className={siblingflyoutContainerStyles.footer(euiThemeContext)}>
                   <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
                     {i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
                       defaultMessage: 'Back',

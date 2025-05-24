@@ -24,7 +24,7 @@ import {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { LensDocument } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -137,7 +137,7 @@ export class EditorFrameService {
         }) => {
           return (
             <div
-              css={css`
+              className={css`
                 position: relative;
                 display: flex;
                 flex-direction: column;

@@ -26,7 +26,7 @@ import {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   FORMATS_UI_SETTINGS,
 } from '@kbn/field-formats-plugin/common';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import type { DocLinksStart } from '@kbn/core/public';
 import { TextBasedLayerColumn } from '../esql_layer/types';
 import { LensAppServices } from '../../../app_plugin/types';
@@ -347,7 +347,7 @@ export function FormatSelector(props: FormatSelectorProps) {
                       compressed
                       label={
                         <EuiFormLabel
-                          css={css`
+                          className={css`
                             font-weight: ${euiTheme.font.weight.regular};
                           `}
                         >
