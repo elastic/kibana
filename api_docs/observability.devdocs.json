@@ -7974,6 +7974,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.data",
             "type": "Object",
             "tags": [],
