@@ -1,17 +1,16 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React, { useState, memo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { useLensSelector, selectVisualization } from '../../../../state_management';
 import { ChartSwitch, ChartSwitchProps } from './chart_switch';
+
+const styles = {
+  popover: css`
+    display: flex;
+  `,
+};
 
 export const ChartSwitchPopover = memo(function ChartSwitchPopover(
   props: Omit<ChartSwitchProps, 'onChartSelect'>
@@ -32,9 +31,7 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
 
   return (
     <EuiPopover
-      css={css`
-        display: flex;
-      `}
+      className={styles.popover}
       id="lnsChartSwitchPopover"
       ownFocus
       initialFocus=".lnsChartSwitch__popoverPanel"

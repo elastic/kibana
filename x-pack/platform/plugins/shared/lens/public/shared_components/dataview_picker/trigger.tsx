@@ -1,12 +1,11 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTextColor } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiTextColor,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 import React from 'react';
 import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
 
@@ -27,34 +26,41 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
     isDisabled?: boolean;
   };
 
+const styles = {
+  labelTruncate: css`
+    display: block;
+    min-width: 0;
+  `,
+  iconWrapper: css`
+    display: block;
+    *:hover &,
+    *:focus & {
+      text-decoration: none !important;
+    }
+  `,
+  fullWidthText: css`
+    width: 100%;
+    line-height: 1.2em;
+  `,
+};
+
 function TriggerLabel({ label, extraIcons }: TriggerLabelProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!extraIcons?.length) {
     return <>{label}</>;
   }
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem
-        className="eui-textTruncate"
-        css={css`
-          display: block;
-          min-width: 0;
-        `}
-      >
+      <EuiFlexItem className="eui-textTruncate" className={styles.labelTruncate}>
         {label}
       </EuiFlexItem>
       {extraIcons.map((icon) => (
         <EuiFlexItem
           grow={false}
           data-test-subj={icon['data-test-subj']}
-          css={css`
-            display: block;
-            *:hover &,
-            *:focus & {
-              text-decoration: none !important;
-            }
-          `}
+          className={styles.iconWrapper}
           key={icon['data-test-subj']}
         >
           <EuiToolTip
@@ -66,7 +72,9 @@ function TriggerLabel({ label, extraIcons }: TriggerLabelProps) {
               <EuiFlexItem grow={false}>{icon.component}</EuiFlexItem>
               {icon.value ? (
                 <EuiFlexItem grow={false}>
-                  <EuiTextColor color={euiTheme.colors.disabledText}>{icon.value}</EuiTextColor>
+                  <EuiTextColor color={euiTheme.colors.disabledText}>
+                    {icon.value}
+                  </EuiTextColor>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
@@ -88,12 +96,12 @@ export function TriggerButton({
   togglePopover: () => void;
   isMissingCurrent?: boolean;
 }) {
-  // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
     ? {
         color: 'danger' as const,
       }
     : {};
+
   return (
     <ToolbarButton
       title={title}
@@ -101,7 +109,7 @@ export function TriggerButton({
       fullWidth
       {...colorProp}
       {...rest}
-      textProps={{ style: { width: '100%', lineHeight: '1.2em' } }}
+      textProps={{ className: styles.fullWidthText }}
     >
       <TriggerLabel label={label} extraIcons={extraIcons} />
     </ToolbarButton>

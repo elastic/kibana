@@ -1,14 +1,13 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
+import { css } from '@emotion/css';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiText,
+  useEuiTheme,
+  EuiComboBox,
+} from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationDimensionEditorProps } from '../../../types';
@@ -32,13 +31,11 @@ function updateColumnWith(
   columnId: string,
   newColumnProps: Partial<ColumnType>
 ) {
-  return state.columns.map((currentColumn) => {
-    if (currentColumn.columnId === columnId) {
-      return { ...currentColumn, ...newColumnProps };
-    } else {
-      return currentColumn;
-    }
-  });
+  return state.columns.map((currentColumn) =>
+    currentColumn.columnId === columnId
+      ? { ...currentColumn, ...newColumnProps }
+      : currentColumn
+  );
 }
 
 export function TableDimensionEditorAdditionalSection(
@@ -57,15 +54,14 @@ export function TableDimensionEditorAdditionalSection(
     },
     [accessor, setState, state]
   );
-  const { inputValue: summaryLabel, handleInputChange: onSummaryLabelChange } = useDebouncedValue<
-    string | undefined
-  >(
-    {
-      onChange: onSummaryLabelChangeToDebounce,
-      value: column?.summaryLabel,
-    },
-    { allowFalsyValue: true } // falsy values are valid for this feature
-  );
+  const { inputValue: summaryLabel, handleInputChange: onSummaryLabelChange } =
+    useDebouncedValue<string | undefined>(
+      {
+        onChange: onSummaryLabelChangeToDebounce,
+        value: column?.summaryLabel,
+      },
+      { allowFalsyValue: true }
+    );
 
   const { euiTheme } = useEuiTheme();
 
@@ -76,7 +72,6 @@ export function TableDimensionEditorAdditionalSection(
     frame.activeData?.[state.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
 
   const isNumeric = isNumericFieldForDatatable(currentData, accessor);
-  // when switching from one operation to another, make sure to keep the configuration consistent
   const { summaryRow, summaryLabel: fallbackSummaryLabel } = getFinalSummaryConfiguration(
     accessor,
     column,
@@ -86,13 +81,8 @@ export function TableDimensionEditorAdditionalSection(
   return (
     <>
       {isNumeric && (
-        <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
-          <EuiText
-            size="s"
-            css={css`
-              margin-bottom: ${euiTheme.size.base};
-            `}
-          >
+        <div className={`${styles.container}`}>
+          <EuiText size="s" className={styles.headingText}>
             <h4>
               {i18n.translate('xpack.lens.indexPattern.dimensionEditor.headingSummary', {
                 defaultMessage: 'Summary',
@@ -158,3 +148,12 @@ export function TableDimensionEditorAdditionalSection(
     </>
   );
 }
+
+const styles = {
+  container: css({
+    paddingBottom: '16px', // lnsIndexPatternDimensionEditor--padded approximation
+  }),
+  headingText: css({
+    marginBottom: 'var(--euiSizeBase)', // euiTheme.size.base but no euiTheme access outside component
+  }),
+};

@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React from 'react';
 import classNames from 'classnames';
 import {
@@ -15,7 +8,7 @@ import {
   euiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, cx } from '@emotion/css';
 
 const groupPositionToClassMap = {
   none: null,
@@ -33,21 +26,9 @@ export const WEIGHTS = ['normal', 'bold'] as Weights[];
 export const TOOLBAR_BUTTON_SIZES: Array<EuiButtonProps['size']> = ['s', 'm'];
 
 export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
-  /**
-   * Determines prominence
-   */
   fontWeight?: Weights;
-  /**
-   * Smaller buttons also remove extra shadow for less prominence
-   */
   size?: EuiButtonProps['size'];
-  /**
-   * Determines if the button will have a down arrow or not
-   */
   hasArrow?: boolean;
-  /**
-   * Adjusts the borders for groupings
-   */
   groupPosition?: ButtonPositions;
   dataTestSubj?: string;
   textProps?: EuiButtonProps['textProps'];
@@ -65,11 +46,15 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   ...rest
 }) => {
   const euiThemeContext = useEuiTheme();
-  const classes = classNames(
+
+  const dynamicClass = styles.toolbarButtonStyles(euiThemeContext);
+
+  const classes = cx(
     'kbnToolbarButton',
     groupPositionToClassMap[groupPosition],
     [`kbnToolbarButton--${fontWeight}`, `kbnToolbarButton--${size}`],
-    className
+    className,
+    dynamicClass
   );
 
   return (
@@ -77,7 +62,6 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       data-test-subj={dataTestSubj}
       className={classes}
       iconSide="right"
-      css={toolbarButtonStyles(euiThemeContext)}
       iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
@@ -95,33 +79,27 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   );
 };
 
-const toolbarButtonStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
-  return css`
+const styles = {
+  toolbarButtonStyles: (euiThemeContext: UseEuiTheme) => css`
     &.kbnToolbarButton {
-      line-height: ${euiTheme.size.xxl}; // Keeps alignment of text and chart icon
-
-      // todo: once issue https://github.com/elastic/eui/issues/4730 is merged, this code might be safe to remove
-      // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
+      line-height: ${euiThemeContext.euiTheme.size.xxl};
       min-width: 0;
-      border-width: ${euiTheme.border.width.thin};
+      border-width: ${euiThemeContext.euiTheme.border.width.thin};
       border-style: solid;
-      border-color: ${euiTheme.border.color}; // Lighten the border color for all states
+      border-color: ${euiThemeContext.euiTheme.border.color};
 
-      // Override background color for non-disabled buttons
       &:not(:disabled) {
-        background-color: ${euiTheme.colors.backgroundBasePlain};
+        background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
       }
 
       &.kbnToolbarButton__text > svg {
-        margin-top: -1px; // Just some weird alignment issue when icon is the child not the iconType
+        margin-top: -1px;
       }
 
       &.kbnToolbarButton__text:empty {
         margin: 0;
       }
 
-      // Toolbar buttons don't look good with centered text when fullWidth
       &[class*='fullWidth'] {
         text-align: left;
 
@@ -148,16 +126,16 @@ const toolbarButtonStyles = (euiThemeContext: UseEuiTheme) => {
     }
 
     &.kbnToolbarButton--bold {
-      font-weight: ${euiTheme.font.weight.bold};
+      font-weight: ${euiThemeContext.euiTheme.font.weight.bold};
     }
 
     &.kbnToolbarButton--normal {
-      font-weight: ${euiTheme.font.weight.regular};
+      font-weight: ${euiThemeContext.euiTheme.font.weight.regular};
     }
 
     &.kbnToolbarButton--s {
-      box-shadow: none !important; // sass-lint:disable-line no-important
+      box-shadow: none !important;
       font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
     }
-  `;
+  `,
 };
