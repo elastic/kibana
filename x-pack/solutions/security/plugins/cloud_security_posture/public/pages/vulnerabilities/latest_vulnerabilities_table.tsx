@@ -106,7 +106,7 @@ export const LatestVulnerabilitiesTable = ({
     });
 
   const createVulnerabilityRuleFn = (rowIndex: number) => {
-    const vulnerabilityFinding = getCspVulnerabilityFinding(rows[rowIndex].raw._source);
+    const vulnerabilityFinding = getCspVulnerabilityFinding(rows[rowIndex]?.raw._source);
     if (!vulnerabilityFinding) return;
 
     return async (http: HttpSetup) =>
