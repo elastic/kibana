@@ -22,8 +22,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { flyoutContainerStyles } from './flyout.styles';
 import { cx } from '@emotion/css';
+import { flyoutContainerStyles } from './flyout.styles';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
   defaultMessage: 'Color',
@@ -80,8 +80,8 @@ export function SettingWithSiblingFlyout({
                 data-test-subj={dataTestSubj}
                 className={cx(
                   flyoutContainerStyles(euiThemeContext),
-                  siblingflyoutContainerStyles.self(euiThemeContext),
-            )}
+                  siblingflyoutContainerStyles.self(euiThemeContext)
+                )}
               >
                 <EuiFlyoutHeader
                   hasBorder
@@ -110,9 +110,12 @@ export function SettingWithSiblingFlyout({
 
                 {children && (
                   <div
-                    className={cx('eui-yScroll', css`
-                      flex: 1;
-                    `)}
+                    className={cx(
+                      'eui-yScroll',
+                      css`
+                        flex: 1;
+                      `
+                    )}
                   >
                     {children}
                   </div>

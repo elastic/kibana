@@ -16,12 +16,12 @@ import {
   IconType,
   transparentize,
   type UseEuiTheme,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
+import { useMemoizedStyles2 } from '@kbn/core/public';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -30,7 +30,6 @@ import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './sta
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
 import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
-import { cx } from '@emotion/css';
 
 interface AddLayerButtonProps {
   state: XYState;
@@ -277,31 +276,33 @@ const ChartOptionWrapper = ({
   onClick: () => void;
   type: string;
 }) => {
-  const euiThemeContext = useEuiTheme();
+  const { chartOptionWrapperStyles } = useMemoizedStyles2(styles);
   return (
     <button
       data-test-subj={`lnsXY_seriesType-${type}`}
       onClick={onClick}
-      css={cx('euiContextMenuItem',chartOptionWrapperStyles(euiThemeContext))}
+      css={cx('euiContextMenuItem', chartOptionWrapperStyles)}
     >
       <ChartOption option={{ icon, label, description }} />
     </button>
   );
 };
 
-const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s};
-  border-bottom: ${euiTheme.border.thin};
-  border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
-  width: 100%;
-  &:hover,
-  &:focus {
-    color: ${euiTheme.colors.primary};
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-    span,
-    .euiText {
-      text-decoration: underline;
+const styles = {
+  chartOptionWrapperStyles: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.s};
+    border-bottom: ${euiTheme.border.thin};
+    border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
+    width: 100%;
+    &:hover,
+    &:focus {
       color: ${euiTheme.colors.primary};
+      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+      span,
+      .euiText {
+        text-decoration: underline;
+        color: ${euiTheme.colors.primary};
+      }
     }
-  }
-`;
+  `,
+};

@@ -1,10 +1,11 @@
-import {
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiTextColor,
-} from '@elastic/eui';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
 import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
@@ -72,9 +73,7 @@ function TriggerLabel({ label, extraIcons }: TriggerLabelProps) {
               <EuiFlexItem grow={false}>{icon.component}</EuiFlexItem>
               {icon.value ? (
                 <EuiFlexItem grow={false}>
-                  <EuiTextColor color={euiTheme.colors.disabledText}>
-                    {icon.value}
-                  </EuiTextColor>
+                  <EuiTextColor color={euiTheme.colors.disabledText}>{icon.value}</EuiTextColor>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>

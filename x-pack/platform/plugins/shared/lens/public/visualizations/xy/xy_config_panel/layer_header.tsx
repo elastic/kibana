@@ -81,9 +81,7 @@ export function AnnotationsLayerHeader({
       }
       indicator={
         hasUnsavedChanges && (
-          <div
-            className={styles.unsavedChanges}
-          >
+          <div className={styles.unsavedChanges}>
             <EuiIconTip
               content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
                 defaultMessage: 'Unsaved changes',
@@ -100,10 +98,10 @@ export function AnnotationsLayerHeader({
 
 const styles = {
   unsavedChanges: css`
-  padding-bottom: 3px;
-  padding-left: 4px;
-`
-}
+    padding-bottom: 3px;
+    padding-left: 4px;
+  `,
+};
 
 function AnnotationLayerHeaderContent({
   frame,

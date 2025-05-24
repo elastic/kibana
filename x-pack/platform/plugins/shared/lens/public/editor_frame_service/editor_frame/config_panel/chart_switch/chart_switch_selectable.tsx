@@ -1,12 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
 import {
   EuiSelectable,
   EuiPopoverTitle,
   EuiSelectableProps,
+  EuiSelectableOption,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { ChartOption } from './chart_option';
 
 export type SelectableEntry = EuiSelectableOption<{
@@ -47,8 +56,7 @@ export const ChartSwitchSelectable = ({
       singleSelection
       isPreFiltered
       data-test-subj="lnsChartSwitchList"
-      className="lnsChartSwitch__options"
-      className={styles.selectable}
+      className={cx('lnsChartSwitch__options', styles.selectable)}
       height={computeListHeight(props.options as SelectableEntry[])}
       searchProps={{
         compressed: true,

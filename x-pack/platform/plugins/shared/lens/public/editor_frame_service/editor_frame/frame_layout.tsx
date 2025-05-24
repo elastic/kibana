@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 import { cx } from '@emotion/css';
+import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -75,21 +75,23 @@ export function FrameLayout(props: FrameLayoutProps) {
           <EuiPageBody
             restrictWidth={false}
             aria-labelledby="lns_ChartTitle"
-            className={cx('lnsFrameLayout__pageContent',css`
-              overflow: hidden;
-              flex-grow: 1;
-              flex-direction: row;
-              ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-                flex-wrap: wrap;
-                overflow: auto;
-                > * {
-                  flex-basis: 100%;
+            className={cx(
+              'lnsFrameLayout__pageContent',
+              css`
+                overflow: hidden;
+                flex-grow: 1;
+                flex-direction: row;
+                ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+                  flex-wrap: wrap;
+                  overflow: auto;
+                  > * {
+                    flex-basis: 100%;
+                  }
                 }
-              }
-            `)}
+              `
+            )}
           >
             <section
-
               aria-labelledby="dataPanelId"
               className={cx(
                 'hide-for-sharing',
@@ -99,8 +101,8 @@ export function FrameLayout(props: FrameLayoutProps) {
                     // Hide the datapanel in fullscreen mode. Using display: none does trigger
                     // a rerender when the container becomes visible again, maybe pushing offscreen is better
                     display: none;
-                  `,
-        )}
+                  `
+              )}
             >
               <EuiScreenReaderOnly>
                 <h2 id="dataPanelId">
@@ -112,28 +114,31 @@ export function FrameLayout(props: FrameLayoutProps) {
               {props.dataPanel}
             </section>
             <section
-              className={cx('eui-scrollBar',css`
-                min-width: 432px;
-                overflow: hidden auto;
-                display: flex;
-                flex-direction: column;
-                flex: 1 1 100%;
-                // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
-                // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
-                // This also means needing to add same amount of margin to page content and suggestion items
-                padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
-                position: relative;
-                z-index: 1;
-                border-left: ${euiTheme.border.thin};
-                border-right: ${euiTheme.border.thin};
-                &:first-child {
-                  padding-left: ${euiTheme.size.base};
-                }
-                ${isFullscreen &&
-                `
+              className={cx(
+                'eui-scrollBar',
+                css`
+                  min-width: 432px;
+                  overflow: hidden auto;
+                  display: flex;
+                  flex-direction: column;
+                  flex: 1 1 100%;
+                  // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
+                  // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
+                  // This also means needing to add same amount of margin to page content and suggestion items
+                  padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
+                  position: relative;
+                  z-index: 1;
+                  border-left: ${euiTheme.border.thin};
+                  border-right: ${euiTheme.border.thin};
+                  &:first-child {
+                    padding-left: ${euiTheme.size.base};
+                  }
+                  ${isFullscreen &&
+                  `
                   flex: 1;
                   padding: 0;`}
-              `)}
+                `
+              )}
               aria-labelledby="workspaceId"
             >
               <EuiScreenReaderOnly>
@@ -147,7 +152,8 @@ export function FrameLayout(props: FrameLayoutProps) {
               <div className="hide-for-sharing">{props.suggestionsPanel}</div>
             </section>
             <section
-              className={cx('hide-for-sharing',
+              className={cx(
+                'hide-for-sharing',
                 sidebarStyles(euiThemeContext),
                 css`
                   flex-basis: 25%;
@@ -158,8 +164,8 @@ export function FrameLayout(props: FrameLayoutProps) {
                     max-width: 100%;
                   }
                   ${isFullscreen && `flex: 1; max-width: none;`}
-                `,
-      )}
+                `
+              )}
               aria-labelledby="configPanel"
             >
               <EuiScreenReaderOnly>

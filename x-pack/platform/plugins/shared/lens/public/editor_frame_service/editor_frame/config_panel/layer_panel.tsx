@@ -24,6 +24,7 @@ import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-dro
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { cx } from '@emotion/css';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -44,7 +45,6 @@ import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { ESQLEditor } from './esql_editor';
-import { cx } from '@emotion/css';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -388,10 +388,13 @@ export function LayerPanel(props: LayerPanelProps) {
       >
         <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
           <header
-            className={cx("lnsLayerPanel__layerHeader", css`
-              padding: ${euiTheme.size.base};
-              border-bottom: ${euiTheme.border.thin};
-            `)}
+            className={cx(
+              'lnsLayerPanel__layerHeader',
+              css`
+                padding: ${euiTheme.size.base};
+                border-bottom: ${euiTheme.border.thin};
+              `
+            )}
           >
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem
@@ -512,31 +515,34 @@ export function LayerPanel(props: LayerPanelProps) {
               const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
               return (
                 <EuiFormRow
-                  className={cx(css`
-                    padding: ${euiTheme.size.base};
-                    &:last-child {
-                      border-radius: 0 0 ${euiTheme.border.radius.medium}
-                        ${euiTheme.border.radius.medium};
-                    }
-
-                    // Add border to the top of the next same panel
-                    & + & {
-                      border-top: ${euiTheme.border.thin};
-                      margin-top: 0;
-                    }
-
-                    & > * {
-                      margin-bottom: 0;
-                    }
-
-                    // Targeting EUI class as we are unable to apply a class to this element in component
-                    &,
-                    .euiFormRow__fieldWrapper {
-                      & > * + * {
-                        margin-top: ${euiTheme.size.s};
+                  className={cx(
+                    css`
+                      padding: ${euiTheme.size.base};
+                      &:last-child {
+                        border-radius: 0 0 ${euiTheme.border.radius.medium}
+                          ${euiTheme.border.radius.medium};
                       }
-                    }
-                  `, "lnsLayerPanel__row")}
+
+                      // Add border to the top of the next same panel
+                      & + & {
+                        border-top: ${euiTheme.border.thin};
+                        margin-top: 0;
+                      }
+
+                      & > * {
+                        margin-bottom: 0;
+                      }
+
+                      // Targeting EUI class as we are unable to apply a class to this element in component
+                      &,
+                      .euiFormRow__fieldWrapper {
+                        & > * + * {
+                          margin-top: ${euiTheme.size.s};
+                        }
+                      }
+                    `,
+                    'lnsLayerPanel__row'
+                  )}
                   fullWidth
                   label={
                     <>

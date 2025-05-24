@@ -38,7 +38,6 @@ export function HeatmapDimensionEditor(
     state?.palette && state.palette.accessor === accessor ? state.palette : undefined
   );
 
-
   return (
     <>
       <EuiFormRow

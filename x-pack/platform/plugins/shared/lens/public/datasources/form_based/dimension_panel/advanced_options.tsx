@@ -8,8 +8,8 @@
 import { EuiSpacer, EuiAccordion, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AdvancedOption } from '../operations/definitions';
 import { css, cx } from '@emotion/css';
+import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {
   const { euiTheme } = useEuiTheme();
@@ -18,10 +18,13 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       id="advancedOptionsAccordion"
       arrowProps={{ color: 'primary' }}
       data-test-subj="indexPattern-advanced-accordion"
-      className={cx("lnsIndexPatternDimensionEditor-advancedOptions", css`
-        padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
-        color: ${euiTheme.colors.primary};
-      `)}
+      className={cx(
+        'lnsIndexPatternDimensionEditor-advancedOptions',
+        css`
+          padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+          color: ${euiTheme.colors.primary};
+        `
+      )}
       buttonContent={
         <EuiTitle size="xxs">
           <h5>

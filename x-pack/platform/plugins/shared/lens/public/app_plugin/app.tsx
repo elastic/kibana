@@ -20,14 +20,13 @@ import { LensDocument } from '../persistence/saved_object_store';
 
 const styles = {
   lnsApp: css`
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-`
-}
-
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  `,
+};
 
 import {
   setState,
@@ -445,14 +444,9 @@ export function App({
     visualizationState: visualization,
   });
 
-
   return (
     <>
-      <div
-        data-test-subj="lnsApp"
-        className={cx("lnsApp", styles.lnsApp)}
-        role="main"
-      >
+      <div data-test-subj="lnsApp" className={cx('lnsApp', styles.lnsApp)} role="main">
         <LensTopNavMenu
           initialInput={initialInput}
           redirectToOrigin={redirectToOrigin}

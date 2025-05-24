@@ -504,10 +504,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <div
-        className={datatableContainerStyles}
-        data-test-subj="lnsVisualizationContainer"
-      >
+      <div className={datatableContainerStyles} data-test-subj="lnsVisualizationContainer">
         <EmptyPlaceholder icon={IconChartDatatable} />
       </div>
     );
@@ -520,10 +517,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <div
-      className={datatableContainerStyles}
-      data-test-subj="lnsVisualizationContainer"
-    >
+    <div className={datatableContainerStyles} data-test-subj="lnsVisualizationContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,

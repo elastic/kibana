@@ -16,6 +16,7 @@ import {
   EuiText,
   useEuiTheme,
   EuiColorPalettePicker,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -33,6 +34,7 @@ import { css } from '@emotion/css';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import { useMemoizedStyles2 } from '@kbn/core/public';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
@@ -800,9 +802,11 @@ function StaticColorControls({
   );
 }
 
-const supportingVisTitleStyle = (euiTheme: any) => css`
-  margin-bottom: ${euiTheme.size.base};
-`;
+const styles = {
+  supportingVisTitleStyle: ({ euiTheme }: UseEuiTheme) => css`
+    margin-bottom: ${euiTheme.size.base};
+  `,
+};
 
 export function DimensionEditorAdditionalSection({
   state,
@@ -868,12 +872,11 @@ export function DimensionEditorAdditionalSection({
 
   const buttonIdPrefix = `${idPrefix}--`;
 
+  const { supportingVisTitleStyle } = useMemoizedStyles2(styles);
+
   return (
     <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
-      <EuiText
-        size="s"
-        className={supportingVisTitleStyle(euiTheme)}
-      >
+      <EuiText size="s" className={supportingVisTitleStyle}>
         <h4>
           {i18n.translate('xpack.lens.metric.supportingVis.label', {
             defaultMessage: 'Supporting visualization',

@@ -741,7 +741,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          className={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
+          className={
+            sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined
+          }
           gutterSize="none"
           color="primary"
           listItems={

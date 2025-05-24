@@ -14,11 +14,11 @@ import {
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import { cx } from '@emotion/css';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { LensInspector } from '../lens_inspector_service';
 import { UserMessage } from '../types';
 import { lnsExpressionRendererStyle } from '../expression_renderer_styles';
-import { cx } from '@emotion/css';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -77,7 +77,12 @@ export function ExpressionWrapper({
   if (!expression) return null;
   return (
     <div
-      className={cx('lnsExpressionRenderer', 'eui-scrollBar', className, lnsExpressionRendererStyle)}
+      className={cx(
+        'lnsExpressionRenderer',
+        'eui-scrollBar',
+        className,
+        lnsExpressionRendererStyle
+      )}
       style={style}
       data-test-subj="lens-embeddable"
     >

@@ -60,7 +60,6 @@ export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
   }
 `;
 
-
 function fromExcludedClickTarget(event: Event) {
   for (
     let node: HTMLElement | null = event.target as HTMLElement;
@@ -147,7 +146,7 @@ export function FlyoutContainer({
               box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
             `,
             flyoutContainerStyles(euiThemeContext),
-            dimensionContainerStyles.self(euiThemeContext),
+            dimensionContainerStyles.self(euiThemeContext)
           )}
           onAnimationEnd={() => {
             if (isOpen) {
@@ -197,10 +196,13 @@ export function FlyoutContainer({
           </EuiFlyoutHeader>
 
           <div
-            className={cx(css`
-              flex: 1;
-              z-index: 1;
-            `, 'eui-yScroll')}
+            className={cx(
+              css`
+                flex: 1;
+                z-index: 1;
+              `,
+              'eui-yScroll'
+            )}
           >
             {children}
           </div>

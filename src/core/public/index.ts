@@ -313,4 +313,5 @@ export {
   kibanaFullBodyHeightCss,
   fullScreenGraphicsMixinStyles,
   useMemoizedStyles,
+  useMemoizedStyles2
 } from './css_utils';

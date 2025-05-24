@@ -1,14 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
 import classNames from 'classnames';
-import {
-  EuiButton,
-  PropsOf,
-  EuiButtonProps,
-  type UseEuiTheme,
-  euiFontSize,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButton, PropsOf, EuiButtonProps, type UseEuiTheme, euiFontSize } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
+import { useMemoizedStyles2 } from '@kbn/core/public';
 
 const groupPositionToClassMap = {
   none: null,
@@ -45,16 +46,14 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   textProps,
   ...rest
 }) => {
-  const euiThemeContext = useEuiTheme();
-
-  const dynamicClass = styles.toolbarButtonStyles(euiThemeContext);
+  const { toolbarButtonStyles } = useMemoizedStyles2(styles);
 
   const classes = cx(
     'kbnToolbarButton',
     groupPositionToClassMap[groupPosition],
     [`kbnToolbarButton--${fontWeight}`, `kbnToolbarButton--${size}`],
     className,
-    dynamicClass
+    toolbarButtonStyles
   );
 
   return (

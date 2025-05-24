@@ -9,12 +9,9 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-export const ToolbarDivider = () => (
-  <EuiHorizontalRule
-    margin="s"
-    className={css`
-      margin-inline: -8px;
-      inline-size: calc(100% + 16px);
-    `}
-  />
-);
+const styles = css`
+  margin-inline: -8px;
+  inline-size: calc(100% + 16px);
+`;
+
+export const ToolbarDivider = () => <EuiHorizontalRule margin="s" className={styles} />;

@@ -7,10 +7,10 @@
 
 import { css } from '@emotion/css';
 
-export const lnsExpressionRendererStyle =  css`
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    overflow: auto;
-  `;
+export const lnsExpressionRendererStyle = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: auto;
+`;

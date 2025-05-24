@@ -21,11 +21,13 @@ import {
   useEuiTheme,
   EuiTitle,
   EuiTextColor,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/css';
+import { useMemoizedStyles2 } from '@kbn/core/public';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
@@ -75,6 +77,13 @@ export type { TermsIndexPatternColumn } from './types';
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
   defaultMessage: 'Missing field',
 });
+
+const styles = {
+  accordion: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      color: ${euiTheme.colors.primary};
+    `,
+};
 
 function ofName(
   name?: string,
@@ -708,6 +717,7 @@ The top values of a specified field ranked by the chosen metric.
       : 0;
 
     const { euiTheme } = useEuiTheme();
+    const { accordion } = useMemoizedStyles2(styles);
 
     return (
       <>
@@ -1009,9 +1019,7 @@ The top values of a specified field ranked by the chosen metric.
           <>
             <EuiSpacer size="m" />
             <EuiAccordion
-              className={css`
-                color: ${euiTheme.colors.primary};
-              `}
+              className={accordion}
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
               buttonContent={

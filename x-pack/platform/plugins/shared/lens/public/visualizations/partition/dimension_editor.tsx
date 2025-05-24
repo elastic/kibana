@@ -20,6 +20,7 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } f
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import { css } from '@emotion/css';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
 import {
@@ -36,7 +37,6 @@ import {
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
-import { css } from '@emotion/css';
 
 export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   formatFactory: FormatFactory;

@@ -21,6 +21,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/css';
 import type { TagcloudState } from './types';
 import {
   PalettePanelContainer,
@@ -30,7 +31,6 @@ import {
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
-import { css } from '@emotion/css';
 
 interface Props {
   paletteService: PaletteRegistry;

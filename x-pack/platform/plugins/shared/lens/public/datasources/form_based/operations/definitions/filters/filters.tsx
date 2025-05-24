@@ -19,6 +19,7 @@ import {
   DraggableBucketContainer,
   isQueryValid,
 } from '@kbn/visualization-ui-components';
+import { cx } from '@emotion/css';
 import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
@@ -27,7 +28,6 @@ import { FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
-import { cx } from '@emotion/css';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -270,7 +270,10 @@ export const FilterList = ({
                 }}
                 button={
                   <EuiLink
-                    className={cx("lnsFiltersOperation__popoverButton", draggablePopoverButtonStyles(euiThemeContext))}
+                    className={cx(
+                      'lnsFiltersOperation__popoverButton',
+                      draggablePopoverButtonStyles(euiThemeContext)
+                    )}
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
                     onClick={() => changeActiveFilter(filter.id)}
                     color={isInvalid ? 'danger' : 'text'}

@@ -116,3 +116,20 @@ export const useMemoizedStyles = (styleMap: StyleMap) => {
   }, [euiThemeContext, styleMap]);
   return outputStyles;
 };
+
+type StyleMap2= Record<
+  string,
+  string | ((theme: UseEuiTheme) => string)
+>;
+type StaticStyleMapClass = Record<string, string>;
+
+export const useMemoizedStyles2 = (styleMap: StyleMap2) => {
+  const euiThemeContext = useEuiTheme();
+  const outputStyles = useMemo(() => {
+    return Object.entries(styleMap).reduce<StaticStyleMapClass>((acc, [key, value]) => {
+      acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
+      return acc;
+    }, {});
+  }, [euiThemeContext, styleMap]);
+  return outputStyles;
+};
