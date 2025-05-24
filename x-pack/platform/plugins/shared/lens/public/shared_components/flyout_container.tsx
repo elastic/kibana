@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { css } from '@emotion/react';
+import { css, cx, keyframes } from '@emotion/css';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -19,10 +19,47 @@ import {
   type UseEuiTheme,
   euiBreakpoint,
   useEuiTheme,
+  euiShadow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
-import { flyoutContainerStyles } from './flyout.styles';
+
+const flyoutOpenCloseAnimation = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+`;
+
+export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
+  border-left: ${euiThemeContext.euiTheme.border.thin};
+  ${euiShadow(euiThemeContext, 'xl')};
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  z-index: ${euiThemeContext.euiTheme.levels.flyout};
+  background: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  animation: ${flyoutOpenCloseAnimation} ${euiThemeContext.euiTheme.animation.normal}
+    ${euiThemeContext.euiTheme.animation.resistance};
+  .lnsIndexPatternDimensionEditor--padded {
+    padding: ${euiThemeContext.euiTheme.size.base};
+  }
+  .lnsIndexPatternDimensionEditor--collapseNext {
+    margin-bottom: -${euiThemeContext.euiTheme.size.l};
+    border-top: ${euiThemeContext.euiTheme.border.thin};
+    margin-top: 0 !important;
+  }
+`;
+
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -105,13 +142,13 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
-          css={[
+          className={cx(
             css`
               box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
             `,
             flyoutContainerStyles(euiThemeContext),
             dimensionContainerStyles.self(euiThemeContext),
-          ]}
+          )}
           onAnimationEnd={() => {
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
@@ -120,7 +157,7 @@ export function FlyoutContainer({
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header(euiThemeContext)}>
+          <EuiFlyoutHeader hasBorder className={dimensionContainerStyles.header(euiThemeContext)}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -160,17 +197,16 @@ export function FlyoutContainer({
           </EuiFlyoutHeader>
 
           <div
-            className="eui-yScroll"
-            css={css`
+            className={cx(css`
               flex: 1;
               z-index: 1;
-            `}
+            `, 'eui-yScroll')}
           >
             {children}
           </div>
 
           {customFooter || (
-            <EuiFlyoutFooter css={dimensionContainerStyles.footer(euiThemeContext)}>
+            <EuiFlyoutFooter className={dimensionContainerStyles.footer(euiThemeContext)}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
