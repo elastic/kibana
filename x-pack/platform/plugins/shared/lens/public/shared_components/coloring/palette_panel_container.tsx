@@ -1,17 +1,21 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { i18n } from '@kbn/i18n';
 import React, { MutableRefObject } from 'react';
-import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiColorPaletteDisplay,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FIXED_PROGRESSION } from '@kbn/coloring';
-
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
+
+const styles = {
+  palette: css({
+    cursor: 'pointer',
+  }),
+};
+
 export function PalettePanelContainer(props: {
   palette: string[];
   siblingRef: MutableRefObject<HTMLDivElement | null>;
@@ -31,9 +35,7 @@ export function PalettePanelContainer(props: {
               palette={props.palette}
               type={FIXED_PROGRESSION}
               onClick={onClick}
-              css={css`
-                cursor: pointer;
-              `}
+              className={styles.palette}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

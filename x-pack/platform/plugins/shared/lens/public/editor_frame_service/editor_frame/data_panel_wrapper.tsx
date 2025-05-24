@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React, { useMemo, memo, useEffect, useCallback } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -13,7 +6,7 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { css } from '@emotion/react';
+import { css, cx } from '@emotion/css'; // changed import from @emotion/react to @emotion/css
 import { Easteregg } from './easteregg';
 import {
   StateSetter,
@@ -55,6 +48,13 @@ interface DataPanelWrapperProps {
 }
 
 const memoizeStrictlyEqual = memoizeOne((arg) => arg, isEqual);
+
+const styles = {
+  dataPanelWrapper: css`
+    flex: 1 0 100%;
+    overflow: hidden;
+  `,
+};
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const externalContext = useLensSelector(selectExecutionContext);
@@ -194,12 +194,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       <Easteregg query={externalContext?.query} />
       {DataPanelComponent && (
         <div
-          className="lnsDataPanelWrapper"
           data-test-subj="lnsDataPanelWrapper"
-          css={css`
-            flex: 1 0 100%;
-            overflow: hidden;
-          `}
+          className={cx(styles.dataPanelWrapper,'lnsDataPanelWrapper') }
         >
           {DataPanelComponent(datasourceProps)}
         </div>

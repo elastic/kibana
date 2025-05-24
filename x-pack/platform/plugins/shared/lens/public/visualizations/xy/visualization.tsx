@@ -1419,7 +1419,6 @@ const SubtypeSwitch = ({
         anchorPosition="downLeft"
       >
         <EuiSelectable
-          css={{ width: 200 }}
           singleSelection
           data-test-subj="lnsChartSwitchList"
           options={options}
