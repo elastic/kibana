@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiIconTip } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
 import type {
   VisualizationLayerHeaderContentProps,
@@ -82,10 +82,7 @@ export function AnnotationsLayerHeader({
       indicator={
         hasUnsavedChanges && (
           <div
-            css={css`
-              padding-bottom: 3px;
-              padding-left: 4px;
-            `}
+            className={styles.unsavedChanges}
           >
             <EuiIconTip
               content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
@@ -99,6 +96,13 @@ export function AnnotationsLayerHeader({
       }
     />
   );
+}
+
+const styles = {
+  unsavedChanges: css`
+  padding-bottom: 3px;
+  padding-left: 4px;
+`
 }
 
 function AnnotationLayerHeaderContent({

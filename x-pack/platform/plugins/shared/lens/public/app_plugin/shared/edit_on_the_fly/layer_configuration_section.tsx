@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { createIndexPatternService } from '../../../data_views_service/service';
@@ -85,12 +85,13 @@ export function LayerConfiguration({
     canEditTextBasedQuery,
     editorContainer,
   };
+
+  const paddingStyle = css`
+    padding: ${hasPadding ? euiTheme.size.s : 0};
+  `;
+
   return (
-    <div
-      css={css`
-        padding: ${hasPadding ? euiTheme.size.s : 0};
-      `}
-    >
+    <div className={paddingStyle}>
       <EuiSpacer size="xs" />
       <VisualizationToolbar
         activeVisualization={activeVisualization}

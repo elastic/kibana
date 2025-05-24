@@ -12,11 +12,22 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { css } from '@emotion/react';
+import { css, cx } from '@emotion/css';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
 import { LensDocument } from '../persistence/saved_object_store';
+
+const styles = {
+  lnsApp: css`
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+`
+}
+
 
 import {
   setState,
@@ -434,19 +445,13 @@ export function App({
     visualizationState: visualization,
   });
 
+
   return (
     <>
       <div
         data-test-subj="lnsApp"
-        className="lnsApp"
+        className={cx("lnsApp", styles.lnsApp)}
         role="main"
-        css={css`
-          flex: 1 1 auto;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          overflow: hidden;
-        `}
       >
         <LensTopNavMenu
           initialInput={initialInput}

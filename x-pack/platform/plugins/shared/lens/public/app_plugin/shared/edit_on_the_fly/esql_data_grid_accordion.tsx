@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { EuiTitle, EuiAccordion, EuiSpacer, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -22,6 +22,26 @@ interface ESQLDataGridAccordionProps {
   setIsAccordionOpen: (flag: boolean) => void;
   onAccordionToggleCb: (status: boolean) => void;
 }
+
+const flexItemStyle = (isAccordionOpen: boolean) => css`
+  .euiAccordion__childWrapper {
+    flex: ${isAccordionOpen ? 1 : 'none'};
+  }
+  padding: 0 ${euiThemeVars.euiSize};
+  border-bottom: ${euiThemeVars.euiBorderThin};
+`;
+
+const accordionStyle = css`
+  .euiAccordion__children {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+`;
+
+const titleStyle = css`
+  padding: 2px;
+`;
 
 export const ESQLDataGridAccordion = ({
   isAccordionOpen,
@@ -42,31 +62,13 @@ export const ESQLDataGridAccordion = ({
     <EuiFlexItem
       grow={isAccordionOpen ? 1 : false}
       data-test-subj="ESQLQueryResults"
-      css={css`
-        .euiAccordion__childWrapper {
-          flex: ${isAccordionOpen ? 1 : 'none'};
-        }
-        padding: 0 ${euiThemeVars.euiSize};
-        border-bottom: ${euiThemeVars.euiBorderThin};
-      `}
+      className={flexItemStyle(isAccordionOpen)}
     >
       <EuiAccordion
         id="esql-results"
-        css={css`
-          .euiAccordion__children {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-          }
-        `}
+        className={accordionStyle}
         buttonContent={
-          <EuiTitle
-            size="xxs"
-            css={css`
-                padding: 2px;
-              }
-            `}
-          >
+          <EuiTitle size="xxs" className={titleStyle}>
             <h5>
               {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
                 defaultMessage: 'ES|QL Query Results',

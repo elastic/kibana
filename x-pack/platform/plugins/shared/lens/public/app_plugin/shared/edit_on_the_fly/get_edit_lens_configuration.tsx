@@ -10,7 +10,7 @@ import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -88,6 +88,10 @@ export const updatingMiddleware =
     }
   };
 
+const flyoutClipPathStyle = css`
+  clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+`;
+
 const MaybeWrapper = ({
   wrapInFlyout,
   closeFlyout,
@@ -115,9 +119,7 @@ const MaybeWrapper = ({
       role="dialog"
       size="s"
       hideCloseButton
-      css={css`
-        clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
-      `}
+      className={flyoutClipPathStyle}
     >
       {children}
     </EuiFlyout>
