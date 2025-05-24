@@ -1,20 +1,12 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 import React from 'react';
 import {
   EuiSelectable,
   EuiPopoverTitle,
-  EuiSelectableOption,
   EuiSelectableProps,
-  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { ChartOption } from './chart_option';
 
 export type SelectableEntry = EuiSelectableOption<{
@@ -33,6 +25,18 @@ function computeListHeight(list: SelectableEntry[]) {
   }
 }
 
+const styles = {
+  selectable: css`
+    width: 384px;
+  `,
+  searchInput: css`
+    width: 400px;
+  `,
+  noMatches: css`
+    display: inline;
+  `,
+};
+
 export const ChartSwitchSelectable = ({
   setSearchTerm,
   searchTerm,
@@ -44,20 +48,15 @@ export const ChartSwitchSelectable = ({
       isPreFiltered
       data-test-subj="lnsChartSwitchList"
       className="lnsChartSwitch__options"
-      css={css`
-        width: 384px;
-      `}
+      className={styles.selectable}
       height={computeListHeight(props.options as SelectableEntry[])}
       searchProps={{
         compressed: true,
-        autoFocus: false, // focused manually below - see https://github.com/elastic/eui/issues/8287
+        autoFocus: false,
         inputRef: (ref) => {
           ref?.focus({ preventScroll: true });
         },
-        css: css`
-          width: 400px;
-        `,
-        className: 'lnsChartSwitch__search',
+        className: styles.searchInput,
         'data-test-subj': 'lnsChartSwitchSearch',
         onChange: setSearchTerm,
         placeholder: i18n.translate('xpack.lens.chartSwitch.search', {
@@ -73,11 +72,7 @@ export const ChartSwitchSelectable = ({
         <ChartOption option={option} searchValue={searchValue} />
       )}
       noMatchesMessage={
-        <div
-          css={css`
-            display: inline;
-          `}
-        >
+        <div className={styles.noMatches}>
           <FormattedMessage
             id="xpack.lens.chartSwitch.noResults"
             defaultMessage="No results found for {term}."

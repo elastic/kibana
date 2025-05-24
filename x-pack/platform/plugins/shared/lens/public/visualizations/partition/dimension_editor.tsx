@@ -36,6 +36,7 @@ import {
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
+import { css } from '@emotion/css';
 
 export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   formatFactory: FormatFactory;
@@ -43,6 +44,10 @@ export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualiz
   palettes: KbnPalettes;
   isDarkMode: boolean;
 };
+
+const alignItemsCenterStyle = css`
+  align-items: center;
+`;
 
 export function DimensionEditor(props: DimensionEditorProps) {
   const { inputValue: localState, handleInputChange: setLocalState } =
@@ -144,7 +149,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
             defaultMessage: 'Color mapping',
           })}
-          css={{ alignItems: 'center' }}
+          className={alignItemsCenterStyle}
           fullWidth
         >
           <PalettePanelContainer

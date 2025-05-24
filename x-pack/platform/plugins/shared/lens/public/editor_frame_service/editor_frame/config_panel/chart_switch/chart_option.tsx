@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React from 'react';
 import {
   EuiFlexItem,
@@ -16,8 +9,14 @@ import {
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+
+const styles = {
+  flexGroup: css`
+    text-align: left;
+  `,
+};
 
 export const ChartOption = ({
   option,
@@ -27,13 +26,7 @@ export const ChartOption = ({
   searchValue?: string;
 }) => {
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      css={css`
-        text-align: left;
-      `}
-    >
+    <EuiFlexGroup gutterSize="s" alignItems="center" className={styles.flexGroup}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={option.icon || 'empty'} />
       </EuiFlexItem>
@@ -65,10 +58,10 @@ export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything'
       defaultMessage:
         'Changing to this visualization modifies currently selected layer`s configuration and removes all other layers.',
     });
-  } else
-    return i18n.translate('xpack.lens.chartSwitch.dataLossColumns', {
-      defaultMessage: `Changing to this visualization modifies the current configuration.`,
-    });
+  }
+  return i18n.translate('xpack.lens.chartSwitch.dataLossColumns', {
+    defaultMessage: `Changing to this visualization modifies the current configuration.`,
+  });
 };
 
 const CheckIcon = () => {

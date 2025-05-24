@@ -33,7 +33,7 @@ import { getOriginalId } from '@kbn/transpose-utils';
 import { useKbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
@@ -505,8 +505,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   if (isEmpty) {
     return (
       <div
-        css={datatableContainerStyles}
-        className="eui-scrollBar"
+        className={datatableContainerStyles}
         data-test-subj="lnsVisualizationContainer"
       >
         <EmptyPlaceholder icon={IconChartDatatable} />
@@ -522,8 +521,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   return (
     <div
-      css={datatableContainerStyles}
-      className="eui-scrollBar"
+      className={datatableContainerStyles}
       data-test-subj="lnsVisualizationContainer"
     >
       <DataContext.Provider

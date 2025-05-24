@@ -29,7 +29,7 @@ import {
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
@@ -800,6 +800,10 @@ function StaticColorControls({
   );
 }
 
+const supportingVisTitleStyle = (euiTheme: any) => css`
+  margin-bottom: ${euiTheme.size.base};
+`;
+
 export function DimensionEditorAdditionalSection({
   state,
   datasource,
@@ -868,9 +872,7 @@ export function DimensionEditorAdditionalSection({
     <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
       <EuiText
         size="s"
-        css={css`
-          margin-bottom: ${euiTheme.size.base};
-        `}
+        className={supportingVisTitleStyle(euiTheme)}
       >
         <h4>
           {i18n.translate('xpack.lens.metric.supportingVis.label', {

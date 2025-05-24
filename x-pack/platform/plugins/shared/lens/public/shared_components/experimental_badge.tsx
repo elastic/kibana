@@ -7,7 +7,13 @@
 import React from 'react';
 import { EuiBetaBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
+
+const styles = {
+  badge: css`
+    vertical-align: middle;
+  `,
+};
 
 const defaultLabel = i18n.translate('xpack.lens.experimentalLabel', {
   defaultMessage: 'Technical preview',
@@ -25,9 +31,7 @@ export const ExperimentalBadge = ({
   return (
     <EuiToolTip content={label}>
       <EuiBetaBadge
-        css={css`
-          vertical-align: middle;
-        `}
+        className={styles.badge}
         iconType="beaker"
         label={label}
         size={size}

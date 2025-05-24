@@ -15,6 +15,10 @@ import { PalettePanelContainer } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
 
+const alignItemsCenterStyle = css`
+  align-items: center;
+`;
+
 export function HeatmapDimensionEditor(
   props: VisualizationDimensionEditorProps<HeatmapVisualizationState> & {
     paletteService: PaletteRegistry;
@@ -34,6 +38,7 @@ export function HeatmapDimensionEditor(
     state?.palette && state.palette.accessor === accessor ? state.palette : undefined
   );
 
+
   return (
     <>
       <EuiFormRow
@@ -42,9 +47,7 @@ export function HeatmapDimensionEditor(
         label={i18n.translate('xpack.lens.paletteHeatmapGradient.label', {
           defaultMessage: 'Color',
         })}
-        css={css`
-          align-items: center;
-        `}
+        css={alignItemsCenterStyle}
       >
         <PalettePanelContainer
           palette={displayStops.map(({ color }) => color)}

@@ -23,6 +23,10 @@ import { defaultPaletteParams } from './palette_config';
 
 const idPrefix = htmlIdGenerator()();
 
+const alignItemsCenterStyle = css`
+  align-items: center;
+`;
+
 export function MetricDimensionEditor(
   props: VisualizationDimensionEditorProps<LegacyMetricState> & {
     paletteService: PaletteRegistry;
@@ -138,9 +142,7 @@ export function MetricDimensionEditor(
           label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
             defaultMessage: 'Color mapping',
           })}
-          css={css`
-            align-items: center;
-          `}
+          css={alignItemsCenterStyle}
         >
           <PalettePanelContainer
             palette={stops.map(({ color }) => color)}

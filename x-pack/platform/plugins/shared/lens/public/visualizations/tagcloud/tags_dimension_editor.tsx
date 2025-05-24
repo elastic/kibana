@@ -30,6 +30,7 @@ import {
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
+import { css } from '@emotion/css';
 
 interface Props {
   paletteService: PaletteRegistry;
@@ -42,6 +43,10 @@ interface Props {
   isInlineEditing?: boolean;
   formatFactory: FormatFactory;
 }
+
+const alignItemsCenterStyle = css`
+  align-items: center;
+`;
 
 export function TagsDimensionEditor({
   state,
@@ -100,7 +105,7 @@ export function TagsDimensionEditor({
       label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
-      css={{ alignItems: 'center' }}
+      className={alignItemsCenterStyle}
       fullWidth
     >
       <PalettePanelContainer

@@ -17,7 +17,7 @@ import {
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
@@ -65,6 +65,10 @@ export function GaugeDimensionEditor(
 
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
+  const alignItemsCenterStyle = css`
+    align-items: center;
+  `;
+
   return (
     <>
       <EuiFormRow
@@ -73,9 +77,7 @@ export function GaugeDimensionEditor(
         label={i18n.translate('xpack.lens.gauge.dynamicColoring.label', {
           defaultMessage: 'Band colors',
         })}
-        css={css`
-          align-items: center;
-        `}
+        className={alignItemsCenterStyle}
       >
         <EuiSwitch
           data-test-subj="lnsDynamicColoringGaugeSwitch"
@@ -117,9 +119,7 @@ export function GaugeDimensionEditor(
             label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
               defaultMessage: 'Color mapping',
             })}
-            css={css`
-              align-items: center;
-            `}
+            className={alignItemsCenterStyle}
           >
             <PalettePanelContainer
               palette={displayStops.map(({ color }) => color)}
