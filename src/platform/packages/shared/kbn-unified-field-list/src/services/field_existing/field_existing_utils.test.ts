@@ -9,7 +9,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { existingFields, fetchFieldExistence } from './field_existing_utils';
+import { existingFields, buildFieldList, fetchFieldExistence } from './field_existing_utils';
 
 describe('existingFields', () => {
   it('should remove missing fields by matching names', () => {
@@ -40,6 +40,53 @@ describe('existingFields', () => {
         ]
       )
     ).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('buildFieldList', () => {
+  const indexPattern = {
+    title: 'testpattern',
+    type: 'type',
+    typeMeta: 'typemeta',
+    fields: [
+      { name: 'foo', scripted: true, lang: 'painless', script: '2+2' },
+      {
+        name: 'runtime_foo',
+        isMapped: false,
+        runtimeField: { type: 'long', script: { source: '2+2' } },
+      },
+      { name: 'bar' },
+      { name: '@bar' },
+      { name: 'baz' },
+      { name: '_mymeta' },
+    ],
+  };
+
+  it('supports scripted fields', () => {
+    const fields = buildFieldList(indexPattern as unknown as DataView, []);
+    expect(fields.find((f) => f.isScript)).toMatchObject({
+      isScript: true,
+      name: 'foo',
+      lang: 'painless',
+      script: '2+2',
+    });
+  });
+
+  it('supports runtime fields', () => {
+    const fields = buildFieldList(indexPattern as unknown as DataView, []);
+    expect(fields.find((f) => f.runtimeField)).toMatchObject({
+      name: 'runtime_foo',
+      runtimeField: { type: 'long', script: { source: '2+2' } },
+    });
+  });
+
+  it('supports meta fields', () => {
+    const fields = buildFieldList(indexPattern as unknown as DataView, ['_mymeta']);
+    expect(fields.find((f) => f.isMeta)).toMatchObject({
+      isScript: false,
+      isMeta: true,
+      name: '_mymeta',
+    });
   });
 });
 
