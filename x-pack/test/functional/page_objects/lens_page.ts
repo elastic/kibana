@@ -347,7 +347,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async waitForDatatableVisualization() {
+    async waitForWorkspaceWithVisualization() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsVisualizationContainer`);
       });

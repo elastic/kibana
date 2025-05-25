@@ -29,7 +29,7 @@ import {
 } from '../../../shared_components';
 import type { Orientation, AxesSettingsConfigKeys } from '../../../shared_components';
 import { XYLayerConfig } from '../types';
-
+import './axis_settings_popover.scss';
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';
 import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
 
@@ -243,9 +243,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
       groupPosition={config.groupPosition}
       isDisabled={isDisabled}
       buttonDataTestSubj={config.buttonDataTestSubj}
-      panelStyle={{
-        width: '500px',
-      }}
+      panelClassName="lnsVisToolbarAxis__popover"
     >
       <ToolbarTitleSettings
         settingId={axis}

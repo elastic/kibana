@@ -44,9 +44,6 @@ export const ChartSwitchSelectable = ({
       isPreFiltered
       data-test-subj="lnsChartSwitchList"
       className="lnsChartSwitch__options"
-      css={css`
-        width: 384px;
-      `}
       height={computeListHeight(props.options as SelectableEntry[])}
       searchProps={{
         compressed: true,
@@ -54,9 +51,6 @@ export const ChartSwitchSelectable = ({
         inputRef: (ref) => {
           ref?.focus({ preventScroll: true });
         },
-        css: css`
-          width: 400px;
-        `,
         className: 'lnsChartSwitch__search',
         'data-test-subj': 'lnsChartSwitchSearch',
         onChange: setSearchTerm,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFormLabel, EuiFormRow, EuiFormRowProps } from '@elastic/eui';
-import { css } from '@emotion/react';
+import './form_row.scss';
 
 type FormRowProps = EuiFormRowProps & { isInline?: boolean };
 
@@ -20,11 +20,7 @@ export const FormRow = ({ children, label, isInline, ...props }: FormRowProps) =
     <div data-test-subj={props['data-test-subj']}>
       {React.cloneElement(children, {
         prepend: (
-          <EuiFormLabel
-            css={css`
-              min-width: 96px;
-            `}
-          >
+          <EuiFormLabel className="lnsIndexPatternDimensionEditor__labelCustomRank">
             {label}
           </EuiFormLabel>
         ),

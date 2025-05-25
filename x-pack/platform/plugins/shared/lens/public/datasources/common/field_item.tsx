@@ -268,10 +268,6 @@ export function InnerFieldItem(props: FieldItemProps) {
         isOpen={infoIsOpen}
         closePopover={closePopover}
         panelClassName="lnsFieldItem__fieldPanel"
-        panelStyle={{
-          minWidth: '260px',
-          maxWidth: '300px',
-        }}
         initialFocus=".lnsFieldItem__fieldPanel"
         data-test-subj="lnsFieldListPanelField"
         panelProps={{

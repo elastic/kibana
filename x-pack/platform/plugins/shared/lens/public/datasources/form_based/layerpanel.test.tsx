@@ -8,11 +8,10 @@
 import React from 'react';
 import { FormBasedPrivateState } from './types';
 import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders } from '../../test_utils/test_utils';
 
 Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { value: 400 });
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { value: 200 });
@@ -226,7 +225,7 @@ describe('Layer Data Panel', () => {
     };
   });
 
-  const renderLayerPanel = () => renderWithProviders(<LayerPanel {...defaultProps} />);
+  const renderLayerPanel = () => render(<LayerPanel {...defaultProps} />);
 
   it('should list all index patterns', async () => {
     renderLayerPanel();

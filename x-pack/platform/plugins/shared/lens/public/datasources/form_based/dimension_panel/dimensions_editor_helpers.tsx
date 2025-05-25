@@ -12,16 +12,10 @@
  * 2.0.
  */
 
+import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiCallOut,
-  EuiButtonGroup,
-  EuiFormRow,
-  type UseEuiTheme,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -147,7 +141,6 @@ export const CalloutWarning = ({
   currentOperationType: keyof typeof operationDefinitionMap | undefined;
   temporaryStateType: TemporaryState;
 }) => {
-  const euiThemeContext = useEuiTheme();
   if (
     temporaryStateType === 'none' ||
     (currentOperationType != null && isQuickFunction(currentOperationType))
@@ -161,7 +154,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
-          css={dimensionEditorWarningStyles(euiThemeContext)}
+          className="lnsIndexPatternDimensionEditor__warning"
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
             defaultMessage: 'Static value currently applied',
@@ -181,7 +174,7 @@ export const CalloutWarning = ({
   return (
     <>
       <EuiCallOut
-        css={dimensionEditorWarningStyles(euiThemeContext)}
+        className="lnsIndexPatternDimensionEditor__warning"
         size="s"
         title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
           defaultMessage: 'Formula currently applied',
@@ -258,11 +251,4 @@ export const DimensionEditorButtonGroups = ({
       />
     </EuiFormRow>
   );
-};
-
-const dimensionEditorWarningStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    margin-bottom: ${euiTheme.size.base};
-    margin-top: ${euiTheme.size.s};
-  `;
 };

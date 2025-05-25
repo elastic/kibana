@@ -26,6 +26,7 @@ import {
 } from '@kbn/chart-icons';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
+import './gauge_config_panel.scss';
 import { gaugeTitlesByType, type GaugeVisualizationState } from '../constants';
 
 const PREFIX = `lns_gaugeOrientation_`;
@@ -108,9 +109,7 @@ const AppearancePopover = (props: VisualizationToolbarProps<GaugeVisualizationSt
       })}
       type="visualOptions"
       buttonDataTestSubj="lnsVisualOptionsButton"
-      panelStyle={{
-        width: '500px',
-      }}
+      panelClassName="lnsGaugeToolbar__popover"
       data-test-subj="lnsVisualOptionsPopover"
     >
       <EuiFormRow
@@ -191,9 +190,7 @@ const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizatio
       })}
       type="titlesAndText"
       buttonDataTestSubj="lnsTextOptionsButton"
-      panelStyle={{
-        width: '500px',
-      }}
+      panelClassName="lnsGaugeToolbar__popover"
       data-test-subj="lnsTextOptionsPopover"
     >
       <EuiFormRow

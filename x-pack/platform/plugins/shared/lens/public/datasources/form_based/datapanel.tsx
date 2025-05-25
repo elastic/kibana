@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import './datapanel.scss';
 import { uniq } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -40,7 +41,6 @@ import type {
 import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
-import { dataPanelStyles } from '../common/datapanel.styles';
 
 export type FormBasedDataPanelProps = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState, Query>,
@@ -102,7 +102,6 @@ export function FormBasedDataPanel({
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
 
-  const euiThemeContext = useEuiTheme();
   const activeIndexPatterns = useMemo(() => {
     return uniq(
       (
@@ -119,7 +118,7 @@ export function FormBasedDataPanel({
       {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
         <EuiFlexGroup
           gutterSize="m"
-          css={dataPanelStyles(euiThemeContext)}
+          className="lnsInnerIndexPatternDataPanel"
           direction="column"
           responsive={false}
         >
@@ -202,7 +201,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   layerFields?: string[];
   activeIndexPatterns: IndexPattern[];
 }) {
-  const euiThemeContext = useEuiTheme();
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
@@ -402,7 +400,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
 
   return (
     <FieldList
-      css={dataPanelStyles(euiThemeContext)}
+      className="lnsInnerIndexPatternDataPanel"
       isProcessing={isProcessing}
       prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
     >

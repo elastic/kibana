@@ -8,9 +8,11 @@
 import React from 'react';
 import { FormatSelector, FormatSelectorProps } from './format_selector';
 import { GenericIndexPatternColumn } from '../../..';
-import { renderWithProviders } from '../../../test_utils/test_utils';
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { LensAppServices } from '../../../app_plugin/types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 const props = {
@@ -28,10 +30,39 @@ const props = {
   docLinks: docLinksServiceMock.createStartContract(),
 };
 
+function createMockServices(): LensAppServices {
+  const services = coreMock.createStart();
+  services.uiSettings.get.mockImplementation(() => '0.0');
+  return {
+    ...services,
+    docLinks: {
+      links: {
+        indexPatterns: { fieldFormattersNumber: '' },
+      },
+    },
+  } as unknown as LensAppServices;
+}
+
 const renderFormatSelector = (propsOverrides?: Partial<FormatSelectorProps>) => {
-  return renderWithProviders(<FormatSelector {...props} {...propsOverrides} />);
+  const WrappingComponent: React.FC<{
+    children: React.ReactNode;
+  }> = ({ children }) => {
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={createMockServices()}>{children}</KibanaContextProvider>
+      </I18nProvider>
+    );
+  };
+  return render(<FormatSelector {...props} {...propsOverrides} />, {
+    wrapper: WrappingComponent,
+  });
 };
 
+// Skipped for update of userEvent v14: https://github.com/elastic/kibana/pull/189949
+// It looks like the individual tests within each it block are not really pure,
+// see for example the first two tests, they run the same code but expect
+// different results. With the updated userEvent code the tests no longer work
+// with this setup and should be refactored.
 describe('FormatSelector', () => {
   let user: UserEvent;
 

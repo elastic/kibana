@@ -24,7 +24,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
-import { mountWithReduxStore } from '../../../mocks';
+import { mountWithProvider } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ReactWrapper } from 'enzyme';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
@@ -82,7 +82,7 @@ describe('ConfigPanel', () => {
     query?: Query | AggregateQuery
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
-    return mountWithReduxStore(
+    return mountWithProvider(
       <LayerPanels {...props} />,
       {
         preloadedState: {

@@ -24,7 +24,6 @@ import {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { css } from '@emotion/react';
 import { LensDocument } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -136,14 +135,7 @@ export class EditorFrameService {
           addUserMessages,
         }) => {
           return (
-            <div
-              css={css`
-                position: relative;
-                display: flex;
-                flex-direction: column;
-                flex-grow: 1;
-              `}
-            >
+            <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 core={core}

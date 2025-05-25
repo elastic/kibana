@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { FramePublicAPI } from '../../../types';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { LayerHeader } from './layer_header';
 import {
   XYByReferenceAnnotationLayerConfig,
@@ -15,7 +16,6 @@ import {
   XYLayerConfig,
   XYState,
 } from '../types';
-import { mountWithProviders } from '../../../test_utils/test_utils';
 
 describe('layer header', () => {
   describe('annotation layer header', () => {
@@ -61,20 +61,20 @@ describe('layer header', () => {
       };
 
       expect(
-        mountWithProviders(<LayerHeader {...props} state={getStateWithLayers([byValueLayer])} />)
+        mountWithIntl(<LayerHeader {...props} state={getStateWithLayers([byValueLayer])} />)
           .text()
           .trim()
       ).toBe('Annotations');
 
       expect(
-        mountWithProviders(<LayerHeader {...props} state={getStateWithLayers([byRefLayer])} />)
+        mountWithIntl(<LayerHeader {...props} state={getStateWithLayers([byRefLayer])} />)
           .text()
           .trim()
       ).toBe(byRefGroupTitle);
 
       const cachedMetadata = { title: 'A cached title', description: '', tags: [] };
       expect(
-        mountWithProviders(
+        mountWithIntl(
           <LayerHeader {...props} state={getStateWithLayers([{ ...byRefLayer, cachedMetadata }])} />
         )
           .text()

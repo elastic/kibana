@@ -403,6 +403,8 @@ export async function mountApp(
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
+  params.element.classList.add('lnsAppWrapper');
+
   render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={lensServices}>

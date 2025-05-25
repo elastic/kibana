@@ -118,13 +118,13 @@ describe('Initializing the store', () => {
       },
     });
 
-    const { store } = makeLensStore({
+    const { store, deps } = makeLensStore({
       storeDeps,
       preloadedState,
     });
 
     await loadInitialAppState(store, defaultProps);
-    const { datasourceMap } = storeDeps;
+    const { datasourceMap } = deps;
 
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalledWith(
       datasource1State,

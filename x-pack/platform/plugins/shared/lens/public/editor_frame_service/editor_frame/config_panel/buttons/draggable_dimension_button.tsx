@@ -15,8 +15,6 @@ import {
   Droppable,
   DroppableProps,
 } from '@kbn/dom-drag-drop';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import { isDraggedField } from '../../../../utils';
 import {
   Datasource,
@@ -66,7 +64,6 @@ export function DraggableDimensionButton({
   indexPatterns: IndexPatternMap;
 }) {
   const [{ dragging }] = useDragDropContext();
-  const { euiTheme } = useEuiTheme();
 
   let getDropProps;
 
@@ -142,12 +139,6 @@ export function DraggableDimensionButton({
       ref={registerNewButtonRefMemoized}
       className="lnsLayerPanel__dimensionContainer"
       data-test-subj={group.dataTestSubj}
-      css={css`
-        position: relative;
-        & + & {
-          margin-top: ${euiTheme.size.s};
-        }
-      `}
     >
       <Draggable
         dragType={isOperation(dragging) ? 'move' : 'copy'}

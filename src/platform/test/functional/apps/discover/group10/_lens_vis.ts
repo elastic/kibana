@@ -256,6 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '10'
       );
 
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await getCurrentVisTitle()).to.be('Line');
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
     });

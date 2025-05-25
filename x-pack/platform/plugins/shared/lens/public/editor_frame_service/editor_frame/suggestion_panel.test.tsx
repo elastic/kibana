@@ -13,16 +13,14 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-  renderWithReduxStore,
 } from '../../mocks';
-import { screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { IconChartDatatable } from '@kbn/chart-icons';
-import { mountWithReduxStore } from '../../mocks';
+import { mountWithProvider } from '../../mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import {
@@ -34,7 +32,6 @@ import {
   VisualizationState,
 } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
-import { userEvent } from '@testing-library/user-event';
 
 const SELECTORS = {
   APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
@@ -116,7 +113,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
-    const { instance, lensStore } = mountWithReduxStore(
+    const { instance, lensStore } = await mountWithProvider(
       <SuggestionPanelWrapper {...defaultProps} />
     );
     expect(instance.find(SuggestionPanel).exists()).toBe(true);
@@ -131,7 +128,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should display apply-changes prompt when changes not applied', async () => {
-    const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance, lensStore } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState: {
         ...preloadedState,
         visualization: {
@@ -163,7 +160,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should list passed in suggestions', async () => {
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
 
@@ -199,9 +196,10 @@ describe('suggestion_panel', () => {
     });
 
     it('should not update suggestions if current state is moved to staged preview', async () => {
-      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-        preloadedState,
-      });
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />,
+        { preloadedState }
+      );
       getSuggestionsMock.mockClear();
       lensStore.dispatch(setState({ stagedPreview }));
       instance.update();
@@ -209,9 +207,10 @@ describe('suggestion_panel', () => {
     });
 
     it('should update suggestions if staged preview is removed', async () => {
-      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-        preloadedState,
-      });
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />,
+        { preloadedState }
+      );
       getSuggestionsMock.mockClear();
       lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
       instance.update();
@@ -220,19 +219,25 @@ describe('suggestion_panel', () => {
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should select currently active suggestion', async () => {
-      const getSuggestionByName = (name: string) => screen.getByRole('listitem', { name });
-
-      renderWithReduxStore(<SuggestionPanel {...defaultProps} />, undefined, {
+    it('should highlight currently active suggestion', async () => {
+      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
         preloadedState,
       });
-      expect(getSuggestionByName('Current visualization')).toHaveAttribute('aria-current', 'true');
-      await userEvent.click(getSuggestionByName('Suggestion1'));
-      expect(getSuggestionByName('Suggestion1')).toHaveAttribute('aria-current', 'true');
+      act(() => {
+        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
+      });
+
+      instance.update();
+
+      expect(instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).prop('className')).toContain(
+        'lnsSuggestionPanel__button-isSelected'
+      );
     });
 
     it('should rollback suggestion if current panel is clicked', async () => {
-      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
+      const { instance, lensStore } = await mountWithProvider(
+        <SuggestionPanel {...defaultProps} />
+      );
 
       act(() => {
         instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
@@ -257,7 +262,7 @@ describe('suggestion_panel', () => {
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', async () => {
-    const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance, lensStore } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
 
@@ -311,7 +316,7 @@ describe('suggestion_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState,
     });
 
@@ -339,14 +344,14 @@ describe('suggestion_panel', () => {
       },
     };
 
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
       preloadedState: newPreloadedState,
     });
     expect(instance.html()).toEqual(null);
   });
 
   it('should hide the selections when the accordion is hidden', async () => {
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
+    const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />);
     expect(instance.find(EuiAccordion)).toHaveLength(1);
     act(() => {
       instance.find(EuiAccordion).at(0).simulate('change');
@@ -381,7 +386,7 @@ describe('suggestion_panel', () => {
       .mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    mountWithReduxStore(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);
+    mountWithProvider(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;

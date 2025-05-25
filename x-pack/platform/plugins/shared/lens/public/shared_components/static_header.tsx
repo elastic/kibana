@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, IconType, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const StaticHeader = ({
@@ -18,15 +18,12 @@ export const StaticHeader = ({
   icon?: IconType;
   indicator?: React.ReactNode;
 }) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
       responsive={false}
-      css={css`
-        padding-left: ${euiTheme.size.xs};
-      `}
+      className={'lnsLayerPanel__settingsStaticHeader'}
     >
       {icon && (
         <EuiFlexItem grow={false}>

@@ -1,0 +1,6 @@
+.lnsFiltersOperation__popoverButton {
+  @include euiTextBreakWord;
+  @include euiFontSizeS;
+  min-height: $euiSizeXL;
+  width: 100%;
+}

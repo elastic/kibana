@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ReactWrapper, ShallowWrapper } from 'enzyme';
+import { ReactWrapper, ShallowWrapper, ComponentType, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
-import { screen, act, within } from '@testing-library/react';
+import { screen, act, render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
@@ -17,6 +17,7 @@ import {
   EuiRange,
   EuiSelect,
   EuiComboBoxProps,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -47,7 +48,9 @@ import { TimeShift } from './time_shift';
 import { ReducedTimeRange } from './reduced_time_range';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
-import { mountWithProviders, renderWithProviders } from '../../../test_utils/test_utils';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { LensAppServices } from '../../../app_plugin/types';
 
 jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,
@@ -164,6 +167,25 @@ const bytesColumn: GenericIndexPatternColumn = {
   params: { format: { id: 'bytes' } },
 };
 
+const wrappingComponent: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  return (
+    <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
+      <EuiThemeProvider>{children}</EuiThemeProvider>
+    </KibanaContextProvider>
+  );
+};
+
+function mountWithServices(component: React.ReactElement): ReactWrapper {
+  return mount(component, {
+    // This is an elegant way to wrap a component in Enzyme
+    // preserving the root at the component level rather than
+    // at the wrapper one
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
+}
+
 /**
  * The datasource exposes four main pieces of code which are tested at
  * an integration test level. The main reason for this fairly high level
@@ -270,8 +292,21 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   const renderDimensionPanel = (propsOverrides = {}) => {
-    const rtlRender = renderWithProviders(
-      <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />
+    const Wrapper: React.FC<{
+      children: React.ReactNode;
+    }> = ({ children }) => {
+      return (
+        <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
+          {children}
+        </KibanaContextProvider>
+      );
+    };
+
+    const rtlRender = render(
+      <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />,
+      {
+        wrapper: Wrapper,
+      }
     );
 
     const getVisibleFieldSelectOptions = () => {
@@ -361,14 +396,14 @@ describe('FormBasedDimensionEditor', () => {
       };
     });
 
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     const options = getFieldSelectComboBox(wrapper).prop('options');
     expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
   });
 
   it('should indicate fields which are incompatible for the operation of the current column', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({ col1: bytesColumn })}
@@ -388,7 +423,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should indicate operations which are incompatible for the field of the current column', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({ col1: bytesColumn })}
@@ -412,7 +447,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should indicate when a transition is invalid due to filterOperations', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({
@@ -437,7 +472,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not display hidden operation types', () => {
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
@@ -447,7 +482,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({
@@ -484,7 +519,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should indicate that reference-based operations are compatible sometimes', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({
@@ -531,7 +566,7 @@ describe('FormBasedDimensionEditor', () => {
   it('should keep the operation when switching to another field compatible with this operation', async () => {
     const initialState: FormBasedPrivateState = getStateWithColumns({ col1: bytesColumn });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={initialState} />
     );
 
@@ -566,7 +601,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should switch operations when selecting a field that requires another operation', async () => {
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     const comboBox = getFieldSelectComboBox(wrapper);
     const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
@@ -598,7 +633,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should keep the field when switching to another operation compatible for this field', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({ col1: bytesColumn })}
@@ -630,7 +665,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not set the state if selecting the currently active operation', () => {
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     act(() => {
       wrapper
@@ -642,7 +677,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should update label and custom label flag on label input changes', () => {
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     act(() => {
       wrapper
@@ -670,7 +705,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not keep the label as long as it is the default label', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({ col1: bytesColumn })}
@@ -699,7 +734,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should keep the label on operation change if it is custom', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({
@@ -735,7 +770,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should remove customLabel flag if label is set to default', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({
@@ -775,7 +810,7 @@ describe('FormBasedDimensionEditor', () => {
 
   describe('transient invalid state', () => {
     it('should set the state if selecting an operation incompatible with the current field', async () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       await act(async () => {
         await wrapper
@@ -801,7 +836,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show error message in invalid state', () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
         wrapper
@@ -815,7 +850,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should leave error state if a compatible operation is selected', () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
         wrapper
@@ -833,7 +868,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should leave error state if the original operation is re-selected', () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       act(() => {
         wrapper
@@ -851,7 +886,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should leave error state when switching from incomplete state to fieldless operation', async () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       await act(async () => {
         await wrapper
@@ -866,7 +901,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should leave error state when re-selecting the original fieldless function', () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent
           {...defaultProps}
           state={getStateWithColumns({
@@ -898,7 +933,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should indicate fields compatible with selected operation', async () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
       await act(async () => {
         await wrapper
@@ -919,7 +954,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should select compatible operation if field not compatible with selected operation', async () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
       );
 
@@ -987,7 +1022,7 @@ describe('FormBasedDimensionEditor', () => {
           references: ['ref'],
         },
       });
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent {...defaultProps} state={baseState} columnId={'col2'} />
       );
 
@@ -1014,7 +1049,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should select the Records field when count is selected on non-existing column', async () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent
           {...defaultProps}
           state={getStateWithColumns({})}
@@ -1034,7 +1069,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should indicate document and field compatibility with selected document operation', async () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent
           {...defaultProps}
           state={getStateWithColumns({
@@ -1066,7 +1101,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should set datasource state if compatible field is selected for operation', async () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
       await act(async () => {
         await wrapper
           .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
@@ -1130,7 +1165,7 @@ describe('FormBasedDimensionEditor', () => {
     }
 
     it('should default to None if time scaling is not set', () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...getProps({})} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...getProps({})} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1144,7 +1179,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show current time scaling if set', () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent {...getProps({ timeScale: 'd' })} />
       );
       act(() => {
@@ -1160,7 +1195,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should allow to set time scaling initially', () => {
       const props = getProps({});
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1197,7 +1232,7 @@ describe('FormBasedDimensionEditor', () => {
         operationType: 'sum',
         label: 'Sum of bytes per hour',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       });
@@ -1226,7 +1261,7 @@ describe('FormBasedDimensionEditor', () => {
         operationType: 'sum',
         label: 'Sum of bytes per hour',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper
           .find('button[data-test-subj="lns-indexPatternDimension-average"]')
@@ -1252,7 +1287,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should allow to change time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1285,7 +1320,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should not adjust label if it is custom', () => {
       const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper
           .find('[data-test-subj="indexPattern-time-scaling-unit"] select')
@@ -1355,7 +1390,7 @@ describe('FormBasedDimensionEditor', () => {
         }),
         columnId: 'col2',
       };
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1365,7 +1400,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show current reduced time range if set', () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent {...getProps({ reducedTimeRange: '5m' })} />
       );
       expect(
@@ -1375,7 +1410,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should allow to set reduced time range initially', () => {
       const props = getProps({});
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1407,7 +1442,7 @@ describe('FormBasedDimensionEditor', () => {
         operationType: 'sum',
         label: 'Sum of bytes per hour',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       });
@@ -1431,7 +1466,7 @@ describe('FormBasedDimensionEditor', () => {
       const props = getProps({
         timeShift: '1d',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onCreateOption')!('7m', []);
       });
@@ -1455,7 +1490,7 @@ describe('FormBasedDimensionEditor', () => {
       const props = getProps({
         reducedTimeRange: '5 months',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
 
       expect(wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
 
@@ -1512,7 +1547,7 @@ describe('FormBasedDimensionEditor', () => {
         }),
         columnId: 'col2',
       };
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent
           {...props}
           indexPatterns={{
@@ -1531,7 +1566,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show custom options if time shift is available', () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...getProps({})} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...getProps({})} />);
       expect(
         wrapper
           .find(DimensionEditor)
@@ -1541,7 +1576,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show current time shift if set', () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent {...getProps({ timeShift: '1d' })} />
       );
       expect(wrapper.find(TimeShift).find(EuiComboBox).prop('selectedOptions')[0].value).toEqual(
@@ -1551,7 +1586,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should allow to set time shift initially', () => {
       const props = getProps({});
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1581,7 +1616,7 @@ describe('FormBasedDimensionEditor', () => {
         operationType: 'sum',
         label: 'Sum of bytes per hour',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       });
@@ -1605,7 +1640,7 @@ describe('FormBasedDimensionEditor', () => {
       const props = getProps({
         timeShift: '1d',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper.find(TimeShift).find(EuiComboBox).prop('onCreateOption')!('1h', []);
       });
@@ -1629,7 +1664,7 @@ describe('FormBasedDimensionEditor', () => {
       const props = getProps({
         timeShift: '5 months',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
 
       expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
 
@@ -1646,7 +1681,7 @@ describe('FormBasedDimensionEditor', () => {
       const props = getProps({
         timeShift: 'startAt(2022-11-02T00:00:00.000Z)',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
 
       expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
 
@@ -1690,7 +1725,7 @@ describe('FormBasedDimensionEditor', () => {
     }
 
     it('should not show custom options if time scaling is not available', () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent
           {...getProps({
             operationType: 'terms',
@@ -1709,7 +1744,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show custom options if filtering is available', () => {
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...getProps({})} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...getProps({})} />);
       act(() => {
         findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       });
@@ -1719,7 +1754,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should show current filter if set', () => {
-      wrapper = mountWithProviders(
+      wrapper = mountWithServices(
         <FormBasedDimensionEditorComponent
           {...getProps({ filter: { language: 'kuery', query: 'a: b' } })}
         />
@@ -1740,7 +1775,7 @@ describe('FormBasedDimensionEditor', () => {
         operationType: 'sum',
         label: 'Sum of bytes per hour',
       });
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       });
@@ -1766,7 +1801,7 @@ describe('FormBasedDimensionEditor', () => {
         filter: { language: 'kuery', query: 'a: b' },
       });
 
-      wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
+      wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...props} />);
 
       act(() => {
         const { updateLayer, columnId, layer } = wrapper.find(Filtering).props();
@@ -1797,7 +1832,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should render invalid field if field reference is broken', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={{
@@ -1826,7 +1861,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should support selecting the operation before the field', async () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
     );
     await act(async () => {
@@ -1880,7 +1915,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should select operation directly if only one field is possible', async () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         columnId={'col2'}
@@ -1924,7 +1959,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should select operation directly if only document is possible', async () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
     );
     await act(async () => {
@@ -1956,7 +1991,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should indicate compatible fields when selecting the operation first', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
     );
 
@@ -1980,7 +2015,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should indicate document compatibility when document operation is selected', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={getStateWithColumns({
@@ -2002,7 +2037,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should not update when selecting the current field again', async () => {
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     const comboBox = getFieldSelectComboBox(wrapper);
 
@@ -2018,7 +2053,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should show all operations that are not filtered out', () => {
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         filterOperations={(op: OperationMetadata) => !op.isBucketed && op.dataType === 'number'}
@@ -2051,7 +2086,7 @@ describe('FormBasedDimensionEditor', () => {
     // Prevents field format from being loaded
     setState.mockImplementation(() => {});
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} columnId={'col2'} />
     );
 
@@ -2094,7 +2129,7 @@ describe('FormBasedDimensionEditor', () => {
     const initialState: FormBasedPrivateState = getStateWithColumns({
       col1: bytesColumn,
     });
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={initialState} />
     );
     act(() => {
@@ -2114,7 +2149,7 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   it('should keep the latest valid dimension when removing the selection in field combobox', () => {
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
     act(() => {
       getFieldSelectComboBox(wrapper as ReactWrapper).prop('onChange')!([]);
     });
@@ -2134,7 +2169,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithNumberCol} />
     );
 
@@ -2178,7 +2213,7 @@ describe('FormBasedDimensionEditor', () => {
         },
       },
     });
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithNumberCol} />
     );
 
@@ -2219,7 +2254,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithNumberCol} />
     );
 
@@ -2251,7 +2286,7 @@ describe('FormBasedDimensionEditor', () => {
 
   it('should hide the top level field selector when switching from non-reference to reference', async () => {
     (generateId as jest.Mock).mockReturnValue(`second`);
-    wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...defaultProps} />);
+    wrapper = mountWithServices(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
 
@@ -2276,7 +2311,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithReferences} />
     );
 
@@ -2302,7 +2337,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithInvalidCol} />
     );
 
@@ -2327,7 +2362,7 @@ describe('FormBasedDimensionEditor', () => {
       }),
     };
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={stateWithoutTime}
@@ -2390,7 +2425,7 @@ describe('FormBasedDimensionEditor', () => {
       }),
     };
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...props} state={stateWithInvalidCol} />
     );
 
@@ -2409,7 +2444,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithFormulaColumn} />
     );
 
@@ -2430,7 +2465,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithFormulaColumn} />
     );
 
@@ -2449,7 +2484,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         supportStaticValue
@@ -2465,7 +2500,7 @@ describe('FormBasedDimensionEditor', () => {
   it('should select the quick function tab by default', () => {
     const stateWithNoColumn: FormBasedPrivateState = getStateWithColumns({});
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent {...defaultProps} state={stateWithNoColumn} />
     );
 
@@ -2480,7 +2515,7 @@ describe('FormBasedDimensionEditor', () => {
   it('should select the static value tab when supported by default', () => {
     const stateWithNoColumn: FormBasedPrivateState = getStateWithColumns({});
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         supportStaticValue
@@ -2505,7 +2540,7 @@ describe('FormBasedDimensionEditor', () => {
       },
     });
 
-    wrapper = mountWithProviders(
+    wrapper = mountWithServices(
       <FormBasedDimensionEditorComponent
         {...defaultProps}
         state={stateWithFormulaColumn}

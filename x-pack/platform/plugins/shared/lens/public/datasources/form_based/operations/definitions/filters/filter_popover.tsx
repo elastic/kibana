@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import './filter_popover.scss';
+
 import React, { useState } from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
@@ -64,9 +66,7 @@ export const FilterPopover = ({
   return (
     <EuiPopover
       data-test-subj="indexPattern-filters-existingFilterContainer"
-      panelStyle={{
-        width: '960px',
-      }}
+      panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpen}
       ownFocus
       closePopover={closePopover}

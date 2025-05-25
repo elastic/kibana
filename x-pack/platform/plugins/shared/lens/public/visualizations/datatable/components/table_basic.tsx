@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import './table_basic.scss';
 import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
@@ -30,14 +31,12 @@ import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public'
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { useKbnPalettes } from '@kbn/palettes';
-import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
-import { css } from '@emotion/react';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
+import { CoreTheme } from '@kbn/core/public';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
+import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
   DataContextType,
@@ -65,6 +64,7 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -504,13 +504,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <div
-        css={datatableContainerStyles}
-        className="eui-scrollBar"
-        data-test-subj="lnsVisualizationContainer"
-      >
+      <VisualizationContainer className="lnsDataTableContainer">
         <EmptyPlaceholder icon={IconChartDatatable} />
-      </div>
+      </VisualizationContainer>
     );
   }
 
@@ -521,11 +517,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <div
-      css={datatableContainerStyles}
-      className="eui-scrollBar"
-      data-test-subj="lnsVisualizationContainer"
-    >
+    <VisualizationContainer className="lnsDataTableContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -570,28 +562,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           ref={dataGridRef}
         />
       </DataContext.Provider>
-    </div>
+    </VisualizationContainer>
   );
 };
-
-const datatableContainerStyles = css`
-  height: 100%;
-  overflow: auto hidden;
-  user-select: text;
-
-  .lnsTableCell--multiline {
-    white-space: pre-wrap;
-  }
-
-  .lnsTableCell--left {
-    text-align: left;
-  }
-
-  .lnsTableCell--right {
-    text-align: right;
-  }
-
-  .lnsTableCell--center {
-    text-align: center;
-  }
-`;

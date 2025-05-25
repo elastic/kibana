@@ -18,7 +18,6 @@ import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { LensInspector } from '../lens_inspector_service';
 import { UserMessage } from '../types';
-import { lnsExpressionRendererStyle } from '../expression_renderer_styles';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -77,12 +76,12 @@ export function ExpressionWrapper({
   if (!expression) return null;
   return (
     <div
-      className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}
-      css={lnsExpressionRendererStyle}
+      className={classNames('lnsExpressionRenderer', className)}
       style={style}
       data-test-subj="lens-embeddable"
     >
       <ExpressionRendererComponent
+        className="lnsExpressionRenderer__component"
         padding={noPadding ? undefined : 's'}
         variables={variables}
         allowCache={true}

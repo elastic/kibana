@@ -15,13 +15,12 @@ import {
   EuiFlexGroup,
   IconType,
   transparentize,
-  type UseEuiTheme,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -69,12 +68,15 @@ export function AddLayerButton({
       disabled,
       name: (
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={true}>{label}</EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <span className="lnsLayerAddButton__label">{label}</span>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ExperimentalBadge color={disabled ? 'subdued' : undefined} size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+      className: 'lnsLayerAddButton',
       icon: icon && <EuiIcon size="m" type={icon} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
@@ -91,7 +93,8 @@ export function AddLayerButton({
       panel: AddLayerPanelType.compatibleVisualizationTypes,
       toolTipContent,
       disabled,
-      name: label,
+      name: <span className="lnsLayerAddButtonLabel">{label}</span>,
+      className: 'lnsLayerAddButton',
       icon: icon && <EuiIcon size="m" type={icon} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
@@ -154,7 +157,8 @@ export function AddLayerButton({
                     return {
                       toolTipContent,
                       disabled,
-                      name: label,
+                      name: <span className="lnsLayerAddButtonLabel">{label}</span>,
+                      className: 'lnsLayerAddButton',
                       icon: icon && <EuiIcon size="m" type={icon} />,
                       ['data-test-subj']: `lnsLayerAddButton-${type}`,
                       onClick: () => {
@@ -168,7 +172,8 @@ export function AddLayerButton({
                 return {
                   toolTipContent,
                   disabled,
-                  name: label,
+                  name: <span className="lnsLayerAddButtonLabel">{label}</span>,
+                  className: 'lnsLayerAddButton',
                   icon: icon && <EuiIcon size="m" type={icon} />,
                   ['data-test-subj']: `lnsLayerAddButton-${type}`,
                   onClick: () => {
@@ -276,32 +281,27 @@ const ChartOptionWrapper = ({
   onClick: () => void;
   type: string;
 }) => {
-  const euiThemeContext = useEuiTheme();
   return (
     <button
       data-test-subj={`lnsXY_seriesType-${type}`}
       onClick={onClick}
-      className="euiContextMenuItem"
-      css={chartOptionWrapperStyles(euiThemeContext)}
+      className="euiContextMenuItem lnsLayerAddButton"
+      css={css`
+        padding: ${euiThemeVars.euiSizeS};
+        border-bottom: ${euiThemeVars.euiBorderThin};
+        border-bottom-color: ${euiThemeVars.euiColorLightestShade};
+        width: 100%;
+        &: hover, &: focus {
+          color: ${euiThemeVars.euiColorPrimary};
+          background-color: ${transparentize(euiThemeVars.euiColorPrimary, 0.1)};
+          span, .euiText {
+            text-decoration: underline;
+            color: ${euiThemeVars.euiColorPrimary}};
+          }
+        }
+      `}
     >
       <ChartOption option={{ icon, label, description }} />
     </button>
   );
 };
-
-const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s};
-  border-bottom: ${euiTheme.border.thin};
-  border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
-  width: 100%;
-  &:hover,
-  &:focus {
-    color: ${euiTheme.colors.primary};
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-    span,
-    .euiText {
-      text-decoration: underline;
-      color: ${euiTheme.colors.primary};
-    }
-  }
-`;

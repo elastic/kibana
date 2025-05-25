@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import './toolbar_popover.scss';
 import React, { PropsWithChildren, useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
@@ -40,8 +41,6 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   handleClose?: () => void;
 };
 
-const defaultPanelStyles = { width: '410px' };
-
 export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
   title,
@@ -50,7 +49,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
   groupPosition,
   buttonDataTestSubj,
   handleClose,
-  panelStyle = defaultPanelStyles,
+  panelClassName = 'lnsVisToolbar__popover',
   ...euiPopoverProps
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,7 +59,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
-        panelStyle={panelStyle}
+        panelClassName={panelClassName}
         ownFocus
         aria-label={title}
         button={
