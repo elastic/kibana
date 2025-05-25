@@ -189,38 +189,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       allFields,
       searchMode,
     });
-
-    // When workspaceSelectedFieldNames is provided, we need to ensure all fields are present in the dataView
-    // This helps handle the case where fields may have been added but not refreshed in all parts of the UI
-    if (dataView && result.selectedFields.length > 0) {
-      // Check if any fields use the "unknown_selected" type which indicates they weren't found in the dataView
-      const unknownFields = result.selectedFields.filter(
-        (field) => field.type === 'unknown_selected'
-      );
-
-      if (unknownFields.length > 0 && services.dataViews) {
-        // Some selected fields couldn't be found - this suggests we need to refresh the dataView
-        setTimeout(() => {
-          // Use timeout to avoid triggering state updates during render
-          services.dataViews
-            .refreshFields(dataView, false, true)
-            .then(() => {
-              // Recalculate selected fields after refresh
-              const updatedResult = getSelectedFields({
-                dataView,
-                workspaceSelectedFieldNames,
-                allFields,
-                searchMode,
-              });
-              setSelectedFieldsState(updatedResult);
-            })
-            .catch(() => {
-              // Silently handle errors - we've tried our best to refresh
-            });
-        }, 0);
-      }
-    }
-
     setSelectedFieldsState(result);
   }, [
     dataView,
@@ -229,47 +197,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     allFields,
     searchMode,
     onSelectedFieldFilter,
-    services.dataViews,
-  ]);
-
-  // This useEffect refreshes the data view when unknown selected fields are detected
-  useEffect(() => {
-    if (!dataView || !services.dataViews || !selectedFieldsState.selectedFields.length) {
-      return;
-    }
-
-    // Check if any fields have type "unknown_selected", which means they weren't found in the data view
-    const unknownFields = selectedFieldsState.selectedFields.filter(
-      (field) => field.type === 'unknown_selected'
-    );
-
-    if (unknownFields.length > 0) {
-      // Some selected fields are missing from the data view, try refreshing to get the latest fields
-      setTimeout(() => {
-        services.dataViews
-          .refreshFields(dataView, false, true)
-          .then(() => {
-            // After refresh, recalculate selected fields
-            const updatedResult = getSelectedFields({
-              dataView,
-              workspaceSelectedFieldNames,
-              allFields,
-              searchMode,
-            });
-            setSelectedFieldsState(updatedResult);
-          })
-          .catch(() => {
-            // Silently handle errors - we've tried our best to refresh
-          });
-      }, 0);
-    }
-  }, [
-    dataView,
-    services.dataViews,
-    selectedFieldsState.selectedFields,
-    workspaceSelectedFieldNames,
-    allFields,
-    searchMode,
   ]);
 
   const popularFieldsLimit = useMemo(
