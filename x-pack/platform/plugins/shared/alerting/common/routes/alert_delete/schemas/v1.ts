@@ -6,11 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  MIN_ALERT_DELETE_THRESHOLD_DAYS,
-  MAX_ALERT_DELETE_THRESHOLD_DAYS,
-} from '../../../constants/alert_delete';
 import { alertDeleteCategoryIds } from '../../../constants';
+
+const MAX_ALERT_DELETE_THRESHOLD_DAYS = 3 * 365; // 3 years
+const MIN_ALERT_DELETE_THRESHOLD_DAYS = 1;
 
 const alertDeleteSettingsSchema = {
   active_alert_delete_threshold: schema.maybe(
