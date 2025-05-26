@@ -101,7 +101,7 @@ const queryBaseState = {
         },
       ],
       query: { esql: 'FROM foo' },
-      index: '1',
+      indexPatternId: '1',
     },
   },
   indexPatternRefs: [
@@ -137,7 +137,7 @@ describe('Textbased Data Source', () => {
               },
             },
           ],
-          index: 'foo',
+          indexPatternId: 'foo',
           query: { esql: 'FROM foo' },
         },
       },
@@ -164,7 +164,7 @@ describe('Textbased Data Source', () => {
               },
             },
           ],
-          index: 'foo',
+          indexPatternId: 'foo',
         },
       },
     } as unknown as TextBasedPrivateState;
@@ -212,7 +212,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState,
@@ -277,7 +277,7 @@ describe('Textbased Data Source', () => {
           a: {
             columns: [],
             query: { esql: 'FROM foo' },
-            index: 'foo',
+            indexPatternId: 'foo',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -311,7 +311,7 @@ describe('Textbased Data Source', () => {
           ...baseState.layers,
           newLayer: {
             type: 'esql',
-            index: 'foo',
+            indexPatternId: 'foo',
             query: { esql: 'FROM foo' },
             columns: [],
           },
@@ -331,7 +331,7 @@ describe('Textbased Data Source', () => {
               type: 'esql',
               columns: [],
               query: { esql: 'FROM foo' },
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         },
@@ -371,7 +371,7 @@ describe('Textbased Data Source', () => {
                 },
               ],
               query: { esql: 'FROM foo' },
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState)
@@ -450,7 +450,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            index: '1',
+            indexPatternId: '1',
             query: {
               esql: 'FROM "foo"',
             },
@@ -594,7 +594,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            index: '1',
+            indexPatternId: '1',
             query: {
               esql: 'from foo',
             },
@@ -653,7 +653,7 @@ describe('Textbased Data Source', () => {
             ],
             errors: [new Error('error 1'), new Error('error 2')],
             query: { esql: 'FROM foo' },
-            index: 'foo',
+            indexPatternId: 'foo',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -722,7 +722,7 @@ describe('Textbased Data Source', () => {
               },
             ],
             query: { esql: 'FROM foo' },
-            index: '1',
+            indexPatternId: '1',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -754,7 +754,7 @@ describe('Textbased Data Source', () => {
               },
             ],
             query: { esql: 'FROM foo' },
-            index: '1',
+            indexPatternId: '1',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -823,7 +823,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState;
@@ -887,7 +887,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState;

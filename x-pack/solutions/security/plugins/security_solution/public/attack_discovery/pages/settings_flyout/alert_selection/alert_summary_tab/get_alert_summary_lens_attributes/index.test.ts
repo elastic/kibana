@@ -41,7 +41,7 @@ describe('getAlertSummaryLensAttributes', () => {
                     },
                   },
                 ],
-                index: 'F2772070-4F12-4603-A318-82F98BA69DAB',
+                indexPatternId: 'F2772070-4F12-4603-A318-82F98BA69DAB',
                 query: {
                   esql: esqlQuery,
                 },
