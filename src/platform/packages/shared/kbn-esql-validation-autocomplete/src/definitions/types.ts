@@ -439,11 +439,6 @@ export interface CommandDefinition<CommandName extends string> {
     previousCommandFields: ESQLFieldWithMetadata[],
     userDefinedColumns: ESQLFieldWithMetadata[]
   ) => ESQLFieldWithMetadata[];
-
-  /**
-   * This method is called to define the commands available after this command is applied.
-   */
-  commandsSuggestionsAfter?: (suggestions: SuggestionRawDefinition[]) => SuggestionRawDefinition[];
 }
 
 export interface CommandTypeDefinition {
