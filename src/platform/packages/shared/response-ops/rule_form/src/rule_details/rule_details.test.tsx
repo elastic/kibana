@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { RuleDetails } from './rule_details';
 
 const mockOnChange = jest.fn();
@@ -24,6 +25,9 @@ const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 describe('RuleDetails', () => {
   beforeEach(() => {
     useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+      },
       formData: {
         name: 'test',
         tags: [],
@@ -55,7 +59,10 @@ describe('RuleDetails', () => {
   test('Should allow tags to be changed', async () => {
     render(<RuleDetails />);
 
-    await userEvent.type(screen.getByTestId('comboBoxInput'), 'tag{enter}');
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'tag{enter}'
+    );
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setTags',
       payload: ['tag'],
@@ -64,6 +71,9 @@ describe('RuleDetails', () => {
 
   test('Should display error', () => {
     useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+      },
       formData: {
         name: 'test',
         tags: [],
