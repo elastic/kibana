@@ -7,43 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
+import {
+  SERVICE_NAME_FIELD,
+  TRANSACTION_ID_FIELD,
+  TRANSACTION_NAME_FIELD,
+} from '@kbn/discover-utils';
 import React from 'react';
+import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
+import { HighlightField } from '../../components/highlight_field.tsx';
 import { TransactionNameLink } from '../../components/transaction_name_link';
 
 export interface TransactionSummaryTitleProps {
   serviceName: string;
-  name?: string;
+  transactionName?: string;
+  formattedTransactionName?: string;
   id?: string;
+  formattedId?: string;
 }
-
-const renderTransactionTitle = (transactionName: string) => <strong>{transactionName}</strong>;
 
 export const TransactionSummaryTitle = ({
   serviceName,
-  name,
+  transactionName,
   id,
+  formattedId,
+  formattedTransactionName,
 }: TransactionSummaryTitleProps) => {
   return (
     <>
       <EuiTitle size="xs">
         <h2>
-          {name ? (
-            <TransactionNameLink
-              serviceName={serviceName}
-              transactionName={name}
-              renderContent={renderTransactionTitle}
-            />
+          {transactionName ? (
+            <FieldHoverActionPopover
+              title={transactionName}
+              value={transactionName}
+              field={TRANSACTION_NAME_FIELD}
+            >
+              <HighlightField
+                value={transactionName}
+                formattedValue={formattedTransactionName}
+                as="strong"
+              >
+                {({ content }) => (
+                  <TransactionNameLink
+                    serviceName={serviceName}
+                    transactionName={transactionName}
+                    renderContent={() => content}
+                  />
+                )}
+              </HighlightField>
+            </FieldHoverActionPopover>
           ) : (
-            serviceName
+            <FieldHoverActionPopover
+              title={serviceName}
+              value={serviceName}
+              field={SERVICE_NAME_FIELD}
+            >
+              {serviceName}
+            </FieldHoverActionPopover>
           )}
         </h2>
       </EuiTitle>
 
       {id && (
-        <EuiText size="xs" color="subdued">
-          {id}
-        </EuiText>
+        <FieldHoverActionPopover title={id} value={id} field={TRANSACTION_ID_FIELD}>
+          <HighlightField value={id} formattedValue={formattedId} textSize="xs" />
+        </FieldHoverActionPopover>
       )}
     </>
   );

@@ -18,7 +18,7 @@ import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { getDataActions } from '../../../services';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { BasicVislibParams } from '../../../types';
@@ -28,6 +28,7 @@ export interface VisLegendProps {
   visData: unknown;
   uiState?: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
+  hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   addLegend: BasicVislibParams['addLegend'];
   position: 'top' | 'bottom' | 'left' | 'right';
 }
@@ -104,8 +105,13 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await getDataActions().createFiltersFromValueClickAction({ data: item.values });
-    return Boolean(filters.length);
+    const filters = this.props.hasCompatibleActions
+      ? await this.props.hasCompatibleActions({
+          name: VALUE_CLICK_TRIGGER,
+          data: item.values,
+        })
+      : false;
+    return filters;
   };
 
   toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
