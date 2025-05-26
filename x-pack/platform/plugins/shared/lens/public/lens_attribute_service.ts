@@ -89,7 +89,7 @@ export function getLensAttributeService(
               textBasedState.layers[layerId].indexPatternId = (textBasedState.layers[layerId] as unknown as { index: string }).index;
               delete (textBasedState.layers[layerId] as unknown as { index?: string }).index;
             }
-          }
+          }); 
         }
       }
       return {
