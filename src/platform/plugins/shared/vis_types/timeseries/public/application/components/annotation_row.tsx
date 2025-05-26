@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  type UseEuiTheme,
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
@@ -65,6 +66,11 @@ const getAnnotationDefaults = () => ({
   query_string: { query: '', language: getDefaultQueryLanguage() },
 });
 
+const editorStyles = ({ euiTheme }: UseEuiTheme) => css`
+  margin-bottom: ${euiTheme.size.base};
+  padding: ${euiTheme.size.s};
+`;
+
 export const AnnotationRow = ({
   annotation,
   fields,
@@ -77,7 +83,8 @@ export const AnnotationRow = ({
 
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -134,14 +141,7 @@ export const AnnotationRow = ({
   );
 
   return (
-    <div
-      className="tvbAnnotationsEditor"
-      key={model.id}
-      css={css`
-        margin-bottom: ${euiTheme.size.base};
-        padding: ${euiTheme.size.s};
-      `}
-    >
+    <div className="tvbAnnotationsEditor" key={model.id} css={editorStyles(euiThemeContext)}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />

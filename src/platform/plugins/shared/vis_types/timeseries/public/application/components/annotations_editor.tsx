@@ -9,7 +9,14 @@
 
 import React, { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { EuiSpacer, EuiTitle, EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiButton,
+  EuiText,
+  useEuiTheme,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -19,6 +26,11 @@ import { collectionActions, CollectionActionsProps } from './lib/collection_acti
 
 import type { Panel, Annotation } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
+
+const containerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.base};
+  background-color: ${euiTheme.colors.lightestShade};
+`;
 
 interface AnnotationsEditorProps {
   fields: VisFields;
@@ -64,7 +76,7 @@ const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;
 
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
 
   const handleAdd = useCallback(
     () =>
@@ -93,13 +105,7 @@ export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   );
 
   return (
-    <div
-      className="tvbAnnotationsEditor__container"
-      css={css`
-        padding: ${euiTheme.size.base};
-        background-color: ${euiTheme.colors.lightestShade};
-      `}
-    >
+    <div className="tvbAnnotationsEditor__container" css={containerStyles(euiThemeContext)}>
       {annotations?.length ? (
         <div>
           <EuiTitle size="s">
