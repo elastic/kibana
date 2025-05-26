@@ -6,36 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
-
-interface TriggerMetaData {
-  lastInteractedInterceptId: number;
-}
-
-export interface InterceptInteractionUserRecordAttributes {
-  userId: string;
-  triggerId: string; // id of the trigger that the user interacted with
-  metadata: TriggerMetaData;
-}
-
-type InterceptInteractionUserRecordSavedObjectProperties = Record<
-  keyof InterceptInteractionUserRecordAttributes,
-  SavedObjectsFieldMapping
->;
-
-const interceptInteractionUserRecordProperties: InterceptInteractionUserRecordSavedObjectProperties =
-  {
-    userId: {
-      type: 'keyword',
-    },
-    triggerId: {
-      type: 'keyword',
-    },
-    metadata: {
-      type: 'object',
-      dynamic: false,
-    },
-  };
+import type { SavedObjectsType } from '@kbn/core/server';
+import { InferObjectSchema } from './types';
 
 const interceptInteractionV1 = schema.object({
   userId: schema.string(),
@@ -48,6 +20,10 @@ const interceptInteractionV1 = schema.object({
   ),
 });
 
+export type InterceptInteractionUserRecordAttributes = InferObjectSchema<
+  typeof interceptInteractionV1
+>;
+
 export const interceptInteractionUserRecordSavedObject: SavedObjectsType = {
   name: 'intercept_interaction_record',
   hidden: true,
@@ -55,7 +31,7 @@ export const interceptInteractionUserRecordSavedObject: SavedObjectsType = {
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
-    properties: interceptInteractionUserRecordProperties,
+    properties: {},
   },
   modelVersions: {
     1: {

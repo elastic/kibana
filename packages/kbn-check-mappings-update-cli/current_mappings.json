@@ -2486,18 +2486,7 @@
   },
   "intercept_interaction_record": {
     "dynamic": false,
-    "properties": {
-      "metadata": {
-        "dynamic": false,
-        "type": "object"
-      },
-      "triggerId": {
-        "type": "keyword"
-      },
-      "userId": {
-        "type": "keyword"
-      }
-    }
+    "properties": {}
   },
   "intercept_trigger_record": {
     "dynamic": false,

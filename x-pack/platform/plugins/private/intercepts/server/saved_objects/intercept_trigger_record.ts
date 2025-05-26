@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import { ObjectType, Type, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
-
-type InferObjectSchema<S> = {
-  [Property in keyof (S extends ObjectType<infer O> ? O : never)]: (S extends ObjectType<infer O>
-    ? O
-    : never)[Property] extends Type<infer T>
-    ? T extends ObjectType
-      ? InferObjectSchema<T>
-      : T
-    : never;
-};
+import type { InferObjectSchema } from './types';
 
 const interceptTriggerV1 = schema.object({
   firstRegisteredAt: schema.string(),
