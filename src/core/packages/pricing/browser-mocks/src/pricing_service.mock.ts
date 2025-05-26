@@ -13,9 +13,6 @@ import type { PricingService } from '@kbn/core-pricing-browser-internal';
 
 const createStartContractMock = (): jest.Mocked<PricingServiceStart> => ({
   tiers: {
-    getActiveProducts: jest.fn(),
-    isActiveProduct: jest.fn(),
-    isEnabled: jest.fn(),
     isFeatureAvailable: jest.fn(),
   },
 });

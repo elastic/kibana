@@ -21,7 +21,7 @@ interface StartDeps {
  */
 export class PricingService {
   public async start({ http }: StartDeps): Promise<PricingServiceStart> {
-    const pricingResponse = await http.get<GetPricingResponse>('/api/core/pricing');
+    const pricingResponse = await http.get<GetPricingResponse>('/internal/core/pricing');
 
     return {
       tiers: new PricingTiersClient(
