@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.18.2>>
 * <<release-notes-8.18.1>>
 * <<release-notes-8.18.0>>
 * <<release-notes-8.17.7>>
@@ -95,6 +96,23 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.18.2]]
+== {kib} 8.18.2
+
+The 8.18.2 release includes the following fixes.
+
+[float]
+[[fixes-v8.18.2]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes success message and auto-scroll behavior after adding a panel to a dashboard from the library ({kibana-pull}220122[#220122]).
+* Allows ES|QL queries to suggest a chart even when there is no data returned from a query. ({kibana-pull}218085[#218085]).
+Elastic Observability Solution::
+* Updates SLO created in a previous version to handle `createdBy` and `updatedBy` fields in an ingest pipeline ({kibana-pull}221158[#221158]).
+* Fixes errors in `error_marker.tsx` to support **Mobile Services** ({kibana-pull}220424[#220424]).
+Elastic Security solution::
+For the Elastic Security 8.18.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [[release-notes-8.18.1]]
 == {kib} 8.18.1
