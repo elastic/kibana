@@ -162,7 +162,7 @@ describe('Extensions registry utils', () => {
       registry.set('pattern*', [{ name: 'pattern', query: 'from pattern*' }]);
     });
 
-    // Test case 1: Matching with a wildcard at the end (e.g., "logs*")
+    // Matching with a wildcard at the end (e.g., "logs*")
     test('should return all indices matching a wildcard pattern like "logs*"', () => {
       const result = findMatchingIndicesFromPattern(registry, 'logs*');
       const expected = ['logs-2023-10-01', 'logs-2024-01-15', 'logs-nginx-access', 'logs'].sort(); // Sort for consistent order
@@ -170,39 +170,39 @@ describe('Extensions registry utils', () => {
       expect(result.sort()).toEqual(expected);
     });
 
-    // Test case 2: Matching with a wildcard in the middle (e.g., "metrics-*")
+    // Matching with a wildcard in the middle (e.g., "metrics-*")
     test('should return all indices matching a wildcard pattern like "metrics-*"', () => {
       const result = findMatchingIndicesFromPattern(registry, 'metrics-*');
       const expected = ['metrics-cpu'].sort();
       expect(result.sort()).toEqual(expected);
     });
 
-    // Test case 3: Exact match (e.g., "my_logs")
+    // Exact match (e.g., "my_logs")
     test('should return the exact index name for an exact match pattern', () => {
       const result = findMatchingIndicesFromPattern(registry, 'my_logs');
       const expected = ['my_logs'].sort();
       expect(result.sort()).toEqual(expected);
     });
 
-    // Test case 4: No matching indices
+    // No matching indices
     test('should return an empty array if no indices match the pattern', () => {
       const result = findMatchingIndicesFromPattern(registry, 'nonexistent*');
       expect(result).toEqual([]);
     });
 
-    // Test case 5: Matching a single character wildcard (e.g., "data*")
+    // Matching a single character wildcard (e.g., "data*")
     test('should match an index that is just the prefix for a wildcard pattern', () => {
       const result = findMatchingIndicesFromPattern(registry, 'data*');
       expect(result).toEqual(['data']);
     });
 
-    // Test case 6: More specific wildcard match
+    // More specific wildcard match
     test('should correctly match a more specific wildcard like "another-logs-*"', () => {
       const result = findMatchingIndicesFromPattern(registry, 'another-logs-*');
       expect(result).toEqual(['another-logs-index']);
     });
 
-    // Test case 7: Pattern that looks like a regex special character
+    // Pattern that looks like a regex special character
     test('should correctly handle patterns that contain regex special characters', () => {
       registry.set('my.special.index', []);
       registry.set('my-special-index', []);
@@ -210,20 +210,20 @@ describe('Extensions registry utils', () => {
       expect(result).toEqual(['my.special.index']);
     });
 
-    // Test case 8: Empty registry
+    // Empty registry
     test('should return an empty array if the registry is empty', () => {
       const emptyRegistry = new Map<string, RecommendedQuery[]>();
       const result = findMatchingIndicesFromPattern(emptyRegistry, 'logs*');
       expect(result).toEqual([]);
     });
 
-    // Test case 9: Pattern that matches part of the index name
+    // Pattern that matches part of the index name
     test('should not match partial names without wildcard', () => {
       const result = findMatchingIndicesFromPattern(registry, 'logs'); // Looking for exact 'logs'
       expect(result).toEqual(['logs']); // Should only return "logs", not "logs-..."
     });
 
-    // Test case 10: Case sensitivity (assuming patterns are case-sensitive)
+    //  Case sensitivity (assuming patterns are case-sensitive)
     test('should respect case sensitivity', () => {
       registry.set('Logs', []);
       const result = findMatchingIndicesFromPattern(registry, 'logs*');
@@ -231,27 +231,27 @@ describe('Extensions registry utils', () => {
       expect(result.sort()).toEqual(expected); // "Logs" should not be included
     });
 
-    // Test case 11: Pattern with no wildcard but common prefix
+    //  Pattern with no wildcard but common prefix
     test('should not match common prefix if no wildcard is used', () => {
       const result = findMatchingIndicesFromPattern(registry, 'orders');
       expect(result).toEqual([]);
     });
 
-    // Test case 12: Pattern with no wildcard but common prefix and exact match
+    //  Pattern with no wildcard but common prefix and exact match
     test('should match exact pattern even if it has a common prefix with others', () => {
       registry.set('my-order', []);
       const result = findMatchingIndicesFromPattern(registry, 'my-order');
       expect(result).toEqual(['my-order']);
     });
 
-    // Test case 13: Wildcard with numerical suffix
+    //  Wildcard with numerical suffix
     test('should match wildcard patterns with numerical suffixes correctly', () => {
       const result = findMatchingIndicesFromPattern(registry, 'errors_*');
       const expected = ['errors_123', 'errors_abc'].sort();
       expect(result.sort()).toEqual(expected);
     });
 
-    // Test case 14: Matching a pattern that looks like a regex special character
+    //  Matching a pattern that looks like a regex special character
     test('should correctly match a single string that matches a wildcard', () => {
       const result = findMatchingIndicesFromPattern(registry, 'pattern-01022024');
       expect(result).toEqual(['pattern*']);

@@ -8,6 +8,12 @@
  */
 import type { ResolveIndexResponse, RecommendedQuery } from './types';
 
+/**
+ * Returns a boolean if the pattern exists in the sources.
+ * @param pattern The pattern string (e.g., "logs*", "my_index").
+ * @param sources The ResolveIndexResponse object containing indices, aliases, and data streams.
+ * @returns A boolean indicating if the pattern exists in the sources.
+ */
 export function checkSourceExistence(sources: ResolveIndexResponse, inputString: string): boolean {
   const searchTerms = inputString.split(',').map((term) => term.trim());
 
@@ -65,21 +71,6 @@ export function checkSourceExistence(sources: ResolveIndexResponse, inputString:
 
   return true; // All search terms were found
 }
-
-// console.log(checkExistence(esData, "logs*")); // true
-// console.log(checkExistence(esData, "logs-")); // true (because "logs-*" would match)
-// console.log(checkExistence(esData, "logs")); // false (exact match "logs" doesn't exist)
-// console.log(checkExistence(esData, "logstash-0,movies")); // true
-// console.log(checkExistence(esData, "logstash-0,nonexistent")); // false
-// console.log(checkExistence(esData, "metrics-*")); // true
-// console.log(checkExistence(esData, "nonexistent*")); // false
-// console.log(checkExistence(esData, "logs-apache_error")); // true
-// console.log(checkExistence(esData, ".alerts-security.alerts-default")); // true
-// console.log(checkExistence(esData, ".alerts-security*")); // true
-// console.log(checkExistence(esData, "kibana_sample_data_logs")); // true
-// console.log(checkExistence(esData, "kibana_sample_data_flights,nonexistent,metrics-system.cpu-default")); // false
-// console.log(checkExistence(esData, "logstash-")); // true (matches logstash-0 etc.)
-// console.log(checkExistence(esData, "logstash-*")); // true (matches logstash-0 etc.)
 
 /**
  * Creates a RegExp object from a given pattern string, handling wildcards (*).
