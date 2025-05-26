@@ -412,6 +412,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [],
       };
 
+      let clean: () => Promise<void>;
+      afterEach(() => clean?.());
+
       const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {
         await esClient.indices.putIndexTemplate({
           name,
@@ -437,7 +440,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         await esClient.indices.createDataStream({ name });
 
-        return async () => {
+        clean = async () => {
           await esClient.indices.deleteDataStream({ name });
           await esClient.indices.deleteIndexTemplate({ name });
         };
@@ -445,21 +448,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('noop when inherit lifecycle', async () => {
         const indexName = 'unwired-stream-inherit';
-        const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
+        await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
-        try {
-          await putStream(apiClient, indexName, unwiredPutBody);
-          await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
-        } finally {
-          await clean();
-        }
+        await putStream(apiClient, indexName, unwiredPutBody);
+        await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
       });
 
       it('overrides dsl retention', async () => {
         const indexName = 'unwired-stream-override-dsl';
-        const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
+        await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
-        try {
+        await putStream(apiClient, indexName, {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              ...unwiredPutBody.stream.ingest,
+              lifecycle: { dsl: { data_retention: '11d' } },
+            },
+          },
+        });
+
+        await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
+      });
+
+      if (!isServerless) {
+        it('updates from ilm to dsl', async () => {
+          const indexName = 'unwired-stream-ilm-to-dsl';
+          await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
+
           await putStream(apiClient, indexName, {
             dashboards: [],
             queries: [],
@@ -467,42 +485,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 ...unwiredPutBody.stream.ingest,
-                lifecycle: { dsl: { data_retention: '11d' } },
+                lifecycle: { dsl: { data_retention: '1d' } },
               },
             },
           });
 
-          await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
-        } finally {
-          await clean();
-        }
-      });
+          await expectLifecycle([indexName], { dsl: { data_retention: '1d' } });
+        });
 
-      if (!isServerless) {
-        it('does not allow dsl lifecycle if the data stream is managed by ilm', async () => {
-          const indexName = 'unwired-stream-ilm-to-dsl';
-          const clean = await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
+        it('updates from dsl to ilm', async () => {
+          const indexName = 'unwired-stream-dsl-to-ilm';
+          await createDataStream(indexName, { dsl: { data_retention: '10d' } });
 
-          try {
-            await putStream(
-              apiClient,
-              indexName,
-              {
-                dashboards: [],
-                queries: [],
-                stream: {
-                  description: '',
-                  ingest: {
-                    ...unwiredPutBody.stream.ingest,
-                    lifecycle: { dsl: { data_retention: '1d' } },
-                  },
-                },
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { ilm: { policy: 'my-policy' } },
               },
-              400
-            );
-          } finally {
-            await clean();
-          }
+            },
+          });
+
+          await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
         });
       }
     });
