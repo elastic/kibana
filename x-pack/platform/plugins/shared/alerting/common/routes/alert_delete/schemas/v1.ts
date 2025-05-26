@@ -6,13 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  MIN_ALERT_DELETE_THRESHOLD_DAYS,
+  MAX_ALERT_DELETE_THRESHOLD_DAYS,
+} from '../../../constants/alert_delete';
 import { alertDeleteCategoryIds } from '../../../constants';
 
 const alertDeleteSettingsSchema = {
   active_alert_delete_threshold: schema.maybe(
     schema.number({
-      min: 1,
-      max: 3 * 365,
+      min: MIN_ALERT_DELETE_THRESHOLD_DAYS,
+      max: MAX_ALERT_DELETE_THRESHOLD_DAYS,
       meta: {
         description: 'Threshold (in days) for deleting active alerts older than this value',
       },
@@ -20,8 +24,8 @@ const alertDeleteSettingsSchema = {
   ),
   inactive_alert_delete_threshold: schema.maybe(
     schema.number({
-      min: 1,
-      max: 3 * 365,
+      min: MIN_ALERT_DELETE_THRESHOLD_DAYS,
+      max: MAX_ALERT_DELETE_THRESHOLD_DAYS,
       meta: {
         description:
           'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value',

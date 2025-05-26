@@ -17,7 +17,8 @@ import {
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
-import { THRESHOLD_UNITS, MAX_THRESHOLD_DAYS } from '../constants';
+import { MAX_ALERT_DELETE_THRESHOLD_DAYS } from '@kbn/alerting-plugin/common/constants/alert_delete';
+import { THRESHOLD_UNITS } from '../constants';
 
 interface ModalThresholdSelectorProps {
   title: string;
@@ -58,7 +59,7 @@ export const ModalThresholdSelector = ({
             <EuiFieldNumber
               key={error.join('')} // Force re-render when error changes because the error might happen when changing the threshold
               min={1}
-              max={MAX_THRESHOLD_DAYS}
+              max={MAX_ALERT_DELETE_THRESHOLD_DAYS}
               value={threshold}
               onChange={onChangeThreshold}
               disabled={isDisabled}

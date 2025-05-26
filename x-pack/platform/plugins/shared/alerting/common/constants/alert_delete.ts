@@ -13,3 +13,6 @@ export const alertDeleteCategoryIds = {
 
 export type AlertDeleteCategoryIds =
   | (typeof alertDeleteCategoryIds)[keyof typeof alertDeleteCategoryIds];
+
+export const MAX_ALERT_DELETE_THRESHOLD_DAYS = 3 * 365; // 3 years
+export const MIN_ALERT_DELETE_THRESHOLD_DAYS = 1;
