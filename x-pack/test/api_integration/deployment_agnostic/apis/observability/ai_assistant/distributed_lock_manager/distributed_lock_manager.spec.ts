@@ -495,7 +495,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           runWithLock = async () => {
             return withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
               executions++;
-              await sleep(100);
+              await sleep(500);
               return 'was called';
             });
           };
