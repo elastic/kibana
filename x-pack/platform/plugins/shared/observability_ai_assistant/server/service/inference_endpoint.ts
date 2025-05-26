@@ -89,11 +89,13 @@ export async function getKbModelStatus({
   esClient,
   logger,
   config,
+  inferenceId,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
+  inferenceId?: string;
 }): Promise<{
   enabled: boolean;
   endpoint?: InferenceInferenceEndpointInfo;
@@ -107,17 +109,21 @@ export async function getKbModelStatus({
   const enabled = config.enableKnowledgeBase;
   const concreteWriteIndex = await getConcreteWriteIndex(esClient, logger);
   const isReIndexing = await isReIndexInProgress({ esClient, logger, core });
+  const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
 
-  const inferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
   if (!inferenceId) {
-    return {
-      enabled,
-      errorMessage: 'Inference ID not found in write index',
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
-      currentInferenceId: undefined,
-      concreteWriteIndex,
-      isReIndexing,
-    };
+    if (!currentInferenceId) {
+      return {
+        enabled,
+        errorMessage: 'Inference ID not found in write index',
+        currentInferenceId: undefined,
+        kbState: KnowledgeBaseState.NOT_INSTALLED,
+        concreteWriteIndex,
+        isReIndexing,
+      };
+    }
+
+    inferenceId = currentInferenceId;
   }
 
   // check if inference ID is an EIS inference ID
@@ -137,7 +143,7 @@ export async function getKbModelStatus({
         endpoint,
         enabled,
         kbState: KnowledgeBaseState.READY,
-        currentInferenceId: undefined,
+        currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
       };
@@ -152,7 +158,7 @@ export async function getKbModelStatus({
       enabled,
       errorMessage: error.message,
       kbState: KnowledgeBaseState.NOT_INSTALLED,
-      currentInferenceId: inferenceId,
+      currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
     };
@@ -175,7 +181,7 @@ export async function getKbModelStatus({
       endpoint,
       errorMessage: error.message,
       kbState: KnowledgeBaseState.NOT_INSTALLED,
-      currentInferenceId: inferenceId,
+      currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
     };
@@ -219,8 +225,8 @@ export async function getKbModelStatus({
     enabled,
     modelStats,
     kbState,
-    currentInferenceId: inferenceId,
     concreteWriteIndex,
+    currentInferenceId,
     isReIndexing,
   };
 }
@@ -238,21 +244,27 @@ export async function waitForKbModel({
   config: ObservabilityAIAssistantConfig;
   inferenceId: string;
 }) {
+  logger.debug(
+    `!! Waiting for knowledge base model to be ready for inference ID "${inferenceId}" !!`
+  );
+
   // Run a dummy inference to trigger the model to deploy
   // This is a workaround for the fact that the model may not be deployed yet
   await warmupModel({ esClient, logger, inferenceId }).catch(() => {});
 
   return pRetry(
     async () => {
-      const { kbState, currentInferenceId } = await getKbModelStatus({
+      logger.debug(`Checking knowledge base model status for inference ID "${inferenceId}"`);
+      const { kbState } = await getKbModelStatus({
         core,
         esClient,
         logger,
         config,
+        inferenceId,
       });
 
-      if (kbState !== KnowledgeBaseState.READY || currentInferenceId !== inferenceId) {
-        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, currentInferenceId = ${currentInferenceId}`;
+      if (kbState !== KnowledgeBaseState.READY) {
+        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, inferenceId = ${inferenceId}`;
         logger.debug(message);
         throw new Error(message);
       }
@@ -272,7 +284,7 @@ export async function warmupModel({
   logger: Logger;
   inferenceId: string;
 }) {
-  logger.debug(`Running inference to trigger model deployment for "${inferenceId}"`);
+  logger.debug(`Warming up model for "${inferenceId}"`);
   await pRetry(
     () =>
       esClient.asInternalUser.inference.inference({
@@ -281,6 +293,6 @@ export async function warmupModel({
       }),
     { retries: 10 }
   ).catch((error) => {
-    logger.error(`Unable to run inference on endpoint "${inferenceId}": ${error.message}`);
+    logger.error(`Unable to warm up model for "${inferenceId}": ${error.message}`);
   });
 }
