@@ -26,7 +26,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
-import { seriesBodyStyles } from '../../_series_editor';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -45,6 +45,7 @@ function MarkdownSeriesUi(props) {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const defaults = { label: '', var_name: '' };
   const model = { ...defaults, ...props.model };

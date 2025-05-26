@@ -27,7 +27,7 @@ import { Split } from '../../split';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
-import { seriesBodyStyles } from '../../_series_editor';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 function MetricSeriesUi(props) {
   const {
@@ -46,6 +46,7 @@ function MetricSeriesUi(props) {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const defaults = { label: '' };
   const model = { ...defaults, ...props.model };

@@ -27,7 +27,7 @@ import { SeriesDragHandler } from '../../series_drag_handler';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
-import { seriesBodyStyles } from '../../_series_editor';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -47,6 +47,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const defaults = {
     label: '',

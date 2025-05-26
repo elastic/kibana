@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useMemo } from 'react';
 
-export const seriesBodyStyles = ({ euiTheme }: UseEuiTheme) => css`
-  margin-left: ${euiTheme.size.xl};
-  margin-top: ${euiTheme.size.s};
-`;
+const seriesBodyStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    marginLeft: euiTheme.size.xl,
+    marginTop: euiTheme.size.s,
+  });
+
+export const useSeriesBodyStyles = () => {
+  const euiThemeContext = useEuiTheme();
+  const styles = useMemo(() => {
+    return seriesBodyStyles(euiThemeContext);
+  }, [euiThemeContext]);
+  return styles;
+};

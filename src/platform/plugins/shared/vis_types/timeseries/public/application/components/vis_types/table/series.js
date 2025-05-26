@@ -23,7 +23,7 @@ import {
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { Aggs } from '../../aggs/aggs';
-import { seriesBodyStyles } from '../../_series_editor';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 function TableSeriesUI(props) {
   const {
@@ -41,6 +41,8 @@ function TableSeriesUI(props) {
     intl,
     uiRestrictions,
   } = props;
+
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const handleChange = createTextHandler(onChange);
 
