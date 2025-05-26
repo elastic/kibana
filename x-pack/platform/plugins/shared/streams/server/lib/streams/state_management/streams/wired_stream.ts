@@ -460,7 +460,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'upsert_index_template',
-        request: generateIndexTemplate(this._definition.name, this.dependencies.isServerless),
+        request: generateIndexTemplate(this._definition.name),
       },
       {
         type: 'upsert_datastream',
