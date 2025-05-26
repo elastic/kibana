@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiPopover,
   EuiFlexGroup,
@@ -75,13 +75,25 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state, value, valueText]
     );
 
-    const { data = [] } = useGetCustomScripts(agentType);
+    const { data = [], isLoading: isLoadingScripts } = useGetCustomScripts(agentType);
     const scriptsOptions: SelectableOption[] = useMemo(() => {
       return data.map((script: CustomScript) => ({
         label: script.name,
         description: script.description,
       }));
     }, [data]);
+
+    // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
+    // This is a workaround to ensure the popover is not shown until the input is focused
+    const [isLoading, setIsLoading] = useState(true);
+    // Add a slight delay before showing the popover
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }, []);
 
     const renderOption = (option: SelectableOption) => {
       return (
@@ -138,59 +150,61 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
-    if (scriptsOptions.length) {
-      return (
-        <EuiPopover
-          isOpen={state.isPopoverOpen}
-          offset={10}
-          panelStyle={{
-            padding: 0,
-            minWidth: 400,
-          }}
-          closePopover={handleClosePopover}
-          button={
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false} onClick={handleOpenPopover}>
-                <div title={valueText}>{valueText || INITIAL_DISPLAY_LABEL}</div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          {state.isPopoverOpen && (
-            <EuiSelectable
-              id="options-combobox"
-              searchable={true}
-              options={scriptsOptions}
-              onChange={handleScriptSelection}
-              renderOption={renderOption}
-              singleSelection
-              searchProps={{
-                autoFocus: true,
-                onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
-                  // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
-                  if (!['Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
-                    event.stopPropagation();
-                  }
-                },
-              }}
-              listProps={{
-                rowHeight: 60,
-                showIcons: false,
-                textWrap: 'truncate',
-              }}
-            >
-              {(list, search) => (
-                <>
-                  <div css={{ margin: 5 }}>{search}</div>
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
-          )}
-        </EuiPopover>
-      );
+    if (isLoading || isLoadingScripts) {
+      return <EuiLoadingSpinner />;
     }
-    return <EuiLoadingSpinner />;
+
+    return (
+      <EuiPopover
+        isOpen={state.isPopoverOpen}
+        offset={10}
+        panelStyle={{
+          padding: 0,
+          minWidth: 400,
+        }}
+        closePopover={handleClosePopover}
+        button={
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false} onClick={handleOpenPopover}>
+              <div title={valueText}>{valueText || INITIAL_DISPLAY_LABEL}</div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        {state.isPopoverOpen && (
+          <EuiSelectable
+            id="options-combobox"
+            searchable={true}
+            options={scriptsOptions}
+            onChange={handleScriptSelection}
+            renderOption={renderOption}
+            singleSelection
+            searchProps={{
+              autoFocus: true,
+              defaultValue: value,
+              onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
+                // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
+                if (!['Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
+                  event.stopPropagation();
+                }
+              },
+            }}
+            listProps={{
+              rowHeight: 60,
+              showIcons: false,
+              textWrap: 'truncate',
+            }}
+          >
+            {(list, search) => (
+              <>
+                <div css={{ margin: 5 }}>{search}</div>
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        )}
+      </EuiPopover>
+    );
   });
 
   CustomScriptSelectorComponent.displayName = 'CustomScriptSelector';
