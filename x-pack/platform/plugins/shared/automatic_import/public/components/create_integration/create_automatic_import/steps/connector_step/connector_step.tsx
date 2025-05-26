@@ -19,6 +19,12 @@ import {
   EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  ELASTIC_LLM_ADDITIONAL_COST,
+  ELASTIC_LLM_THIRD_PARTY,
+  ELASTIC_LLM_TOUR_PERFORMANCE,
+} from '@kbn/elastic-assistant/impl/tour/elastic_llm/translations';
 import {
   AuthorizationWrapper,
   MissingPrivilegesTooltip,
@@ -37,9 +43,49 @@ import * as i18n from './translations';
  */
 const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
 
+const ElasticLLMNewIntegrationMessage = React.memo(() => {
+  const {
+    docLinks: {
+      links: {
+        securitySolution: {
+          thirdPartyLlmProviders: ELASTIC_LLM_TOUR_THIRD_PARTY_LINK,
+          llmPerformanceMatrix: ELASTIC_LLM_TOUR_PERFORMANCE_LINK,
+        },
+        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_TOUR_EXTRA_COST_LINK },
+      },
+    },
+  } = useKibana().services;
+
+  return (
+    <FormattedMessage
+      id="xpack.automaticImport.steps.connector.esLLM.supportedModelsInfo"
+      defaultMessage="The Elastic LLM connector is selected by default. Review its {usageCost} or {thirdParty}. Model {performance} varies by task."
+      values={{
+        usageCost: (
+          <EuiLink href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK} external>
+            {ELASTIC_LLM_ADDITIONAL_COST}
+          </EuiLink>
+        ),
+        thirdParty: (
+          <EuiLink href={ELASTIC_LLM_TOUR_THIRD_PARTY_LINK} external>
+            {ELASTIC_LLM_THIRD_PARTY}
+          </EuiLink>
+        ),
+        performance: (
+          <EuiLink href={ELASTIC_LLM_TOUR_PERFORMANCE_LINK} external>
+            {ELASTIC_LLM_TOUR_PERFORMANCE}
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+});
+ElasticLLMNewIntegrationMessage.displayName = 'ElasticLLMNewIntegrationMessage';
+
 interface ConnectorStepProps {
   connector: AIConnector | undefined;
 }
+
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications, triggersActionsUi } = useKibana().services;
@@ -119,14 +165,18 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiText size="s" color="subdued">
-          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
-            <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
-              <EuiIcon type="iInCircle" />
-            </EuiFlexItem>
-            <EuiFlexItem>{i18n.SUPPORTED_MODELS_INFO}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiText>
+        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
+          <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
+            <EuiText size="xs" color="subdued">
+              <EuiIcon type="iInCircle" size="s" className="eui-alignTop" />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued">
+              <ElasticLLMNewIntegrationMessage />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </StepContentWrapper>
     </EuiForm>
   );

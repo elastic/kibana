@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiButtonEmpty,
+  EuiText,
+  EuiTitle,
+  EuiTourStep,
+  EuiTourStepProps,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { css } from '@emotion/react';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
+import { elasticLLMTourStep1 } from './step_config';
+import { ELASTIC_LLM_TOUR_FINISH_TOUR } from './translations';
+import { useAssistantContext } from '../../assistant_context';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+
+interface Props {
+  children?: EuiTourStepProps['children'];
+  isDisabled: boolean;
+}
+
+const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({ children, isDisabled }) => {
+  const { http, inferenceEnabled } = useAssistantContext();
+  const { euiTheme } = useEuiTheme();
+  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(
+    NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM,
+    false
+  );
+
+  const [showTour, setShowTour] = useState(!tourCompleted && !isDisabled);
+
+  const [isTimerExhausted, setIsTimerExhausted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTimerExhausted(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const finishTour = useCallback(() => {
+    setTourCompleted(true);
+    setShowTour(false);
+  }, [setTourCompleted, setShowTour]);
+
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+    inferenceEnabled,
+  });
+
+  useEffect(() => {
+    if (!inferenceEnabled || isDisabled || tourCompleted || aiConnectors?.length === 0) {
+      setShowTour(false);
+    } else {
+      setShowTour(true);
+    }
+  }, [tourCompleted, isDisabled, children, showTour, inferenceEnabled, aiConnectors?.length]);
+
+  if (!children) {
+    return null;
+  }
+
+  if (!showTour) {
+    return children;
+  }
+
+  return (
+    <EuiTourStep
+      anchorPosition="leftCenter"
+      content={<EuiText size="m">{elasticLLMTourStep1.content}</EuiText>}
+      // Open the tour step after flyout is open
+      isStepOpen={isTimerExhausted}
+      maxWidth={384}
+      onFinish={finishTour}
+      panelProps={{
+        'data-test-subj': `elasticLLMTourStepPanel`,
+      }}
+      step={1}
+      stepsTotal={1}
+      title={
+        <EuiTitle size="xs">
+          <h2>{elasticLLMTourStep1.title}</h2>
+        </EuiTitle>
+      }
+      subtitle={
+        <EuiTitle
+          size="xxs"
+          css={css`
+            color: ${euiTheme.colors.textSubdued};
+          `}
+        >
+          <h3>{elasticLLMTourStep1.subTitle}</h3>
+        </EuiTitle>
+      }
+      footerAction={[
+        <EuiButtonEmpty size="s" color="text" flush="right" onClick={finishTour}>
+          {ELASTIC_LLM_TOUR_FINISH_TOUR}
+        </EuiButtonEmpty>,
+      ]}
+      panelStyle={{
+        fontSize: euiTheme.size.m,
+      }}
+    >
+      <div
+        id="elasticLLMTourStepContent"
+        css={css`
+          padding-left: ${euiTheme.size.m};
+        `}
+      >
+        {children}
+      </div>
+    </EuiTourStep>
+  );
+};
+
+export const ElasticLLMCostAwarenessTour = React.memo(ElasticLLMCostAwarenessTourComponent);

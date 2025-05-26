@@ -28,6 +28,7 @@ import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 import { AddConnectorModal } from '../add_connector_modal';
+import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -198,25 +199,27 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             {i18n.ADD_CONNECTOR}
           </EuiButtonEmpty>
         ) : (
-          <EuiSuperSelect
-            aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-            className={css`
-              .euiSuperSelectControl__placeholder {
-                color: ${euiTheme.colors.textPrimary};
-                margin-right: ${euiTheme.size.xs};
-              }
-            `}
-            compressed={true}
-            data-test-subj="connector-selector"
-            disabled={localIsDisabled}
-            hasDividers={true}
-            isOpen={modalForceOpen}
-            onChange={onChange}
-            options={allConnectorOptions}
-            valueOfSelected={selectedConnectorId}
-            placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
-            popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
-          />
+          <ElasticLLMCostAwarenessTour isDisabled={localIsDisabled}>
+            <EuiSuperSelect
+              aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
+              className={css`
+                .euiSuperSelectControl__placeholder {
+                  color: ${euiTheme.colors.textPrimary};
+                  margin-right: ${euiTheme.size.xs};
+                }
+              `}
+              compressed={true}
+              data-test-subj="connector-selector"
+              disabled={localIsDisabled}
+              hasDividers={true}
+              isOpen={modalForceOpen}
+              onChange={onChange}
+              options={allConnectorOptions}
+              valueOfSelected={selectedConnectorId}
+              placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
+              popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
+            />
+          </ElasticLLMCostAwarenessTour>
         )}
         {isConnectorModalVisible && (
           // Crashing management app otherwise

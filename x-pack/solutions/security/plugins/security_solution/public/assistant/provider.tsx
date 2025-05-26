@@ -140,7 +140,14 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
     storage,
     triggersActionsUi: { actionTypeRegistry },
-    docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    docLinks: {
+      ELASTIC_WEBSITE_URL,
+      links: {
+        securitySolution: { elasticAiFeatures, thirdPartyLlmProviders, llmPerformanceMatrix },
+        alerting: { elasticManagedLlm, elasticManagedLlmUsageCost },
+      },
+      DOC_LINK_VERSION,
+    },
     userProfile,
     chrome,
     productDocBase,
@@ -226,7 +233,15 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
-      docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
+      docLinks={{
+        ELASTIC_WEBSITE_URL,
+        ELASTIC_LLM_LINK: elasticManagedLlm,
+        ELASTIC_LLM_TOUR_EXTRA_COST_LINK: elasticManagedLlmUsageCost,
+        ELASTIC_LLM_TOUR_THIRD_PARTY_LINK: thirdPartyLlmProviders,
+        ELASTIC_LLM_TOUR_AI_FEATURES_LINK: elasticAiFeatures,
+        ELASTIC_LLM_TOUR_PERFORMANCE_LINK: llmPerformanceMatrix,
+        DOC_LINK_VERSION,
+      }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
       getComments={getComments}

@@ -7,9 +7,38 @@
 
 import React from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionTypeModel } from '../../../..';
+import { ActionTypeModel, useKibana } from '../../../..';
+
+const ElasticLLMReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }) => {
+  const { docLinks } = useKibana().services;
+  return (
+    <EuiText size="xs">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.descriptionText"
+        defaultMessage="This Elastic-managed connector is read-only. Learn more about {elasticLLM} and its {usageCost}."
+        values={{
+          elasticLLM: (
+            <EuiLink href={href} external>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.title.link"
+                defaultMessage="Elastic LLM"
+              />
+            </EuiLink>
+          ),
+          usageCost: (
+            <EuiLink href={docLinks.links.alerting.elasticManagedLlmUsageCost} external>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.usageCost.link"
+                defaultMessage="usage cost"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
+  );
+};
 
 export const ReadOnlyConnectorMessage: React.FC<{
   connectorId: string;
@@ -20,17 +49,7 @@ export const ReadOnlyConnectorMessage: React.FC<{
   const ExtraComponent = extraComponent;
   return (
     <>
-      <EuiText>
-        {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.descriptionText', {
-          defaultMessage: 'This connector is read-only.',
-        })}
-      </EuiText>
-      <EuiLink data-test-subj="read-only-link" href={href} target="_blank">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
-          defaultMessage="Learn more about preconfigured connectors."
-        />
-      </EuiLink>
+      <ElasticLLMReadOnlyConnectorMessage href={href} />
       {ExtraComponent && (
         <>
           <EuiSpacer size="m" />
