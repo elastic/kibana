@@ -31,10 +31,6 @@ export const ColorGradient = ({ colorPaletteId }: Props) => {
   const palette = getColorPalette(colorPaletteId);
   const styles = useMemoizedStyles(componentStyles);
   return palette.length ? (
-    <div
-      className="mapColorGradient"
-      css={styles.mapColorGradientStyles}
-      style={{ background: getLinearGradient(palette) }}
-    />
+    <div css={styles.mapColorGradientStyles} style={{ background: getLinearGradient(palette) }} />
   ) : null;
 };
