@@ -21,6 +21,7 @@ export interface Tab {
   overflow?: 'hidden' | 'scroll';
   showSearchTools?: boolean;
   subCategory?: string;
+  appendAutoImportCard?: boolean;
   sortByFeaturedIntegrations: boolean;
   height?: string;
 }

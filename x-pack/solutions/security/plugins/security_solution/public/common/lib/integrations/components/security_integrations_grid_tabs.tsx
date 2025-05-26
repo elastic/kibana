@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
@@ -24,6 +25,7 @@ import { useSelectedTab } from '../hooks/use_selected_tab';
 import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
 import { useIntegrationContext } from '../hooks/integration_context';
 import type { AvailablePackages } from './with_available_packages';
+import { useCreateAutoImportCard } from '../hooks/use_create_auto_import_card';
 
 export interface SecurityIntegrationsGridTabsProps {
   activeIntegrationsCount: number;
@@ -59,8 +61,27 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       telemetry: { reportLinkClick },
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabOptions } =
+    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
       useSelectedTab();
+    const createAutoImportCard = useCreateAutoImportCard();
+
+    const integrationTabOptions = useMemo<EuiButtonGroupOptionProps[]>(
+      () =>
+        integrationTabs.map((tab) => ({
+          id: tab.id,
+          label: tab.label,
+          iconType: tab.iconType,
+          'data-test-subj': `securitySolutionIntegrationsTab-${tab.id}`,
+        })),
+      [integrationTabs]
+    );
+
+    const list = useMemo(() => {
+      if (!selectedTab.appendAutoImportCard) {
+        return integrationList;
+      }
+      return [...integrationList, createAutoImportCard()];
+    }, [integrationList, createAutoImportCard, selectedTab.appendAutoImportCard]);
 
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
     const onTabChange = useCallback(
@@ -175,7 +196,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
               calloutTopSpacerSize="m"
               categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
               emptyStateStyles={emptyStateStyles}
-              list={integrationList}
+              list={list}
               scrollElementId={SCROLL_ELEMENT_ID}
               searchTerm={searchTerm}
               selectedCategory={selectedTab.category ?? ''}

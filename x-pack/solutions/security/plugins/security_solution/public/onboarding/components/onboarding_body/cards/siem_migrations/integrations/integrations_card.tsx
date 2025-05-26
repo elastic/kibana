@@ -13,6 +13,7 @@ import type { RuleMigrationAllIntegrationsStats } from '../../../../../../../com
 import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import type {
   IntegrationCardMetadata,
+  Tab,
   TopCalloutRenderer,
 } from '../../../../../../common/lib/integrations/types';
 import { IntegrationContextProvider } from '../../../../../../common/lib/integrations/hooks/integration_context';
@@ -127,17 +128,21 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
     }, [getIntegrationsStats, isMigrationsCardComplete]);
 
     // Replace the static "recommended" tab by the dynamic "detected" tab, based on the migrations integrations stats
-    const integrationTabs = useMemo(() => {
+    const integrationTabs = useMemo((): Tab[] => {
+      const [recommendedTab, ...rest] = INTEGRATION_TABS;
       if (!integrationsStats?.length) {
-        return INTEGRATION_TABS;
+        return [
+          { ...recommendedTab, appendAutoImportCard: true, overflow: 'scroll' as const },
+          ...rest,
+        ];
       }
       const featuredCardIds = integrationsStats.map(({ id }) => id);
-      const [recommendedTab, ...rest] = INTEGRATION_TABS;
       return [
         {
           ...recommendedTab,
           label: i18n.DETECTED_TAB_LABEL,
           featuredCardIds,
+          appendAutoImportCard: true,
           overflow: 'scroll' as const,
         },
         ...rest,

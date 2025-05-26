@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { useStoredIntegrationTabId } from './use_stored_state';
 import type { Tab } from '../types';
 import { useIntegrationContext } from './integration_context';
@@ -34,15 +33,5 @@ export const useSelectedTab = () => {
     [integrationTabs, integrationTabsById, toggleIdSelected]
   );
 
-  const integrationTabOptions = useMemo<EuiButtonGroupOptionProps[]>(
-    () =>
-      integrationTabs.map((tab) => ({
-        id: tab.id,
-        label: tab.label,
-        'data-test-subj': `securitySolutionIntegrationsTab-${tab.id}`,
-      })),
-    [integrationTabs]
-  );
-
-  return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabOptions };
+  return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs };
 };
