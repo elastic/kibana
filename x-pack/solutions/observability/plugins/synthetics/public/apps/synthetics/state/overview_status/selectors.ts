@@ -57,6 +57,7 @@ const separateByLocation = (status: Record<string, OverviewStatusMetaData>, grou
         const newKey = `${key}-${location.id}`;
         newStatus[newKey] = {
           ...value,
+          overallStatus: location.status,
           locations: [location],
         };
       });
