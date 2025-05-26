@@ -9,6 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type {
+  FindingVulnerabilityPanelExpandableFlyoutProps,
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
   FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
@@ -71,6 +72,8 @@ import {
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { VulnerabilityFindingsPanelKey } from './csp_details/vulnerabilities_flyout/constants';
+import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -221,6 +224,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <FindingsMisconfigurationPanel
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
+      />
+    ),
+  },
+  {
+    key: VulnerabilityFindingsPanelKey,
+    component: (props) => (
+      <FindingsVulnerabilityPanel
+        {...(props as FindingVulnerabilityPanelExpandableFlyoutProps).params}
       />
     ),
   },
