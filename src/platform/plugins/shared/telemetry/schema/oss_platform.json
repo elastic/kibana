@@ -11421,12 +11421,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:apmTraceExplorerTab": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmEnableProfilingIntegration": {
           "type": "boolean",
           "_meta": {
@@ -11470,12 +11464,6 @@
           }
         },
         "observability:enableInfrastructureProfilingIntegration": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInfrastructureAssetCustomDashboards": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -11667,6 +11655,16 @@
                 "version": {
                   "type": "keyword"
                 }
+              }
+            }
+          }
+        },
+        "start-local": {
+          "properties": {
+            "version": {
+              "type": "keyword",
+              "_meta": {
+                "description": "version of the start-local script used to launch Kibana"
               }
             }
           }

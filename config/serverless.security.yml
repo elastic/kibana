@@ -172,3 +172,12 @@ xpack.task_manager.capacity: 20
 
 ## Enable uiSettings validations
 xpack.securitySolution.enableUiSettingsValidations: true
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 10m
+  - id: siem.eqlRule
+    timeout: 5m
+  - id: attack-discovery
+    timeout: 10m
