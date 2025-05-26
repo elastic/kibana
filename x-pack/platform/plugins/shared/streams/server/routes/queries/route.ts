@@ -9,7 +9,6 @@ import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
 import {
   StreamQuery,
-  StreamQueryKql,
   streamQuerySchema,
   upsertStreamQueryRequestSchema,
 } from '@kbn/streams-schema';
@@ -34,14 +33,14 @@ export interface DeleteQueryResponse {
 export type BulkUpdateAssetsResponse = { acknowledged: boolean } | { errors: ErrorCause[] };
 
 function isDeleteOperation(
-  operation: { index: StreamQueryKql } | { delete: { id: string } }
+  operation: { index: StreamQuery } | { delete: { id: string } }
 ): operation is { delete: { id: string } } {
   return 'delete' in operation;
 }
 
 function isIndexOperation(
-  operation: { index: StreamQueryKql } | { delete: { id: string } }
-): operation is { index: StreamQueryKql } {
+  operation: { index: StreamQuery } | { delete: { id: string } }
+): operation is { index: StreamQuery } {
   return 'index' in operation;
 }
 
