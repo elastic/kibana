@@ -113,12 +113,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   );
 
   return (
-    <EuiModal
-      onClose={onClose}
-      initialFocus="[name=name]"
-      css={{ minWidth: '600px' }}
-      aria-labelledby={editTagModalTitleId}
-    >
+    <EuiModal onClose={onClose} css={{ minWidth: '600px' }} aria-labelledby={editTagModalTitleId}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={editTagModalTitleId}>
           {isEdit ? (

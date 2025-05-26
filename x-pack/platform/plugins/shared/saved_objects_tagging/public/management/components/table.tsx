@@ -66,6 +66,12 @@ export const TagTable: FC<TagTableProps> = ({
   actions,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const connectionsLabel = i18n.translate(
+    'xpack.savedObjectsTagging.management.table.columns.connections',
+    {
+      defaultMessage: 'Connections',
+    }
+  );
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',
@@ -113,9 +119,7 @@ export const TagTable: FC<TagTableProps> = ({
     },
     {
       field: 'relationCount',
-      name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.connections', {
-        defaultMessage: 'Connections',
-      }),
+      name: connectionsLabel,
       sortable: (tag: TagWithRelations) => tag.relationCount,
       'data-test-subj': 'tagsTableRowConnections',
       render: (relationCount: number, tag: TagWithRelations) => {
@@ -144,7 +148,7 @@ export const TagTable: FC<TagTableProps> = ({
                 onShowRelations(tag);
               }
             }}
-            aria-label={`View connections ${tag.name} tag`}
+            aria-label={`${connectionsLabel} of ${tag.name} tag`}
           >
             {columnText}
           </EuiLink>
