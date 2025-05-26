@@ -18,6 +18,9 @@
     "@kbn/core-base-server-internal",
     "@kbn/logging",
     "@kbn/core-http-server-internal",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",
