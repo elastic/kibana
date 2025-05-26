@@ -41,7 +41,7 @@ describe('UseRunQueryRuleset', () => {
         console: mockConsole,
       },
     });
-    
+
     // Default mock for ruleset data
     (useFetchQueryRuleset as jest.Mock).mockReturnValue({
       data: {
@@ -119,7 +119,7 @@ describe('UseRunQueryRuleset', () => {
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('my_index');
   });
-  
+
   it('handles multiple indices from ruleset data', () => {
     (useFetchQueryRuleset as jest.Mock).mockReturnValue({
       data: {
