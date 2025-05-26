@@ -511,7 +511,6 @@
     "@kbn/esql-ast": "link:src/platform/packages/shared/kbn-esql-ast",
     "@kbn/esql-ast-inspector-plugin": "link:examples/esql_ast_inspector",
     "@kbn/esql-datagrid": "link:src/platform/plugins/shared/esql_datagrid",
-    "@kbn/esql-registry": "link:src/platform/plugins/shared/esql_registry",
     "@kbn/esql-editor": "link:src/platform/packages/private/kbn-esql-editor",
     "@kbn/esql-types": "link:src/platform/packages/shared/kbn-esql-types",
     "@kbn/esql-utils": "link:src/platform/packages/shared/kbn-esql-utils",

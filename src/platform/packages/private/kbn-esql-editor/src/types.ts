@@ -100,6 +100,8 @@ interface ESQLVariableService {
 export interface EsqlPluginStartBase {
   getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  // change the string[] to the correct type, need to move to esql-types first
+  getEditorExtensionsAutocomplete: (queryString: string) => Promise<string[]>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
 }

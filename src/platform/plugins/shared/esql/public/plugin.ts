@@ -125,9 +125,19 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
 
+    const getEditorExtensionsAutocomplete = async (queryString: string) => {
+      const result = await core.http.get(`/internal/esql_registry/extensions/${queryString}`);
+      if (!result) {
+        throw new Error('Failed to fetch ESQL editor extensions');
+      }
+
+      return result;
+    };
+
     const start = {
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
+      getEditorExtensionsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };

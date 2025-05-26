@@ -12,9 +12,11 @@ import { schema } from '@kbn/config-schema';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
+import { ESQLExtensionsRegistry } from './extensions_registry';
 
 export class EsqlServerPlugin implements Plugin {
   private readonly initContext: PluginInitializerContext;
+  private extensionsRegistry: ESQLExtensionsRegistry = new ESQLExtensionsRegistry();
 
   constructor(initContext: PluginInitializerContext) {
     this.initContext = { ...initContext };
@@ -33,7 +35,17 @@ export class EsqlServerPlugin implements Plugin {
       }),
     });
 
-    registerRoutes(core, initContext);
+    registerRoutes(core, this.extensionsRegistry, initContext);
+    this.extensionsRegistry.setRecommendedQueries([
+      {
+        name: 'Logs count by log level',
+        query: 'from logs* | STATS count(*) by log_level',
+      },
+      {
+        name: 'Meow and woof counts',
+        query: 'from logs* | STATS count(*)',
+      },
+    ]);
 
     return {};
   }

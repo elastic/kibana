@@ -595,6 +595,16 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
   useEffect(() => {
+    const getEditorExtensions = async () => {
+      const extensions = await kibana.services?.esql?.getEditorExtensionsAutocomplete('from logs*');
+      if (extensions) {
+        console.dir(extensions);
+      }
+    };
+    getEditorExtensions();
+  }, [kibana.services?.esql]);
+
+  useEffect(() => {
     async function fetchLicense() {
       try {
         const ls = await kibana.services?.esql?.getLicense();
