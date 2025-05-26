@@ -19,6 +19,7 @@ import {
   getTransactionDocumentOverview,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
+import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
@@ -27,8 +28,9 @@ import { TransactionDurationSummary } from './sub_components/transaction_duratio
 import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
-export type TransactionOverviewProps = Omit<DocViewRenderProps, 'dataView'> & {
+export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
   showWaterfall?: boolean;
   showActions?: boolean;
@@ -43,15 +45,24 @@ export function TransactionOverview({
   tracesIndexPattern,
   showWaterfall = true,
   showActions = true,
+  dataView,
 }: TransactionOverviewProps) {
-  const parsedDoc = useMemo(() => getTransactionDocumentOverview(hit), [hit]);
-  const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
-  const traceId = parsedDoc[TRACE_ID_FIELD];
-  const fieldConfigurations = useMemo(
-    () => getTransactionFieldConfiguration(parsedDoc),
-    [parsedDoc]
+  const { fieldFormats } = getUnifiedDocViewerServices();
+  const { formattedDoc, flattenedDoc } = useMemo(
+    () => ({
+      formattedDoc: getTransactionDocumentOverview(hit, { dataView, fieldFormats }),
+      flattenedDoc: getFlattenedTransactionDocumentOverview(hit),
+    }),
+    [dataView, fieldFormats, hit]
   );
-  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
+
+  const transactionDuration = flattenedDoc[TRANSACTION_DURATION_FIELD];
+  const fieldConfigurations = useMemo(
+    () => getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
+    [formattedDoc, flattenedDoc]
+  );
+  const traceId = flattenedDoc[TRACE_ID_FIELD];
+  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
     <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
@@ -64,9 +75,11 @@ export function TransactionOverview({
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
           <TransactionSummaryTitle
-            serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+            serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+            transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
+            formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
             id={transactionId}
-            name={parsedDoc[TRANSACTION_NAME_FIELD]}
+            formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (
@@ -83,9 +96,9 @@ export function TransactionOverview({
               <EuiSpacer size="m" />
               <TransactionDurationSummary
                 transactionDuration={transactionDuration}
-                transactionName={parsedDoc[TRANSACTION_NAME_FIELD]}
-                transactionType={parsedDoc[TRANSACTION_TYPE_FIELD]}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
+                serviceName={formattedDoc[SERVICE_NAME_FIELD]}
               />
             </>
           )}

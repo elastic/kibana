@@ -38,7 +38,9 @@ export function TransactionSummaryField({
         fieldMetadata={fieldConfiguration.fieldMetadata}
         showActions={showActions}
       >
-        <div>{fieldConfiguration.content(fieldConfiguration.value)}</div>
+        <div>
+          {fieldConfiguration.content(fieldConfiguration.value, fieldConfiguration.formattedValue)}
+        </div>
       </FieldWithActions>
       <EuiHorizontalRule margin="xs" />
     </>

@@ -54,7 +54,7 @@ export function SpanSummaryField({
         loading={isTransactionNameFieldWithoutValue && loading}
         showActions={showActions}
       >
-        <div>{fieldConfiguration.content(fieldValue)}</div>
+        <div>{fieldConfiguration.content(fieldValue, fieldConfiguration.formattedValue)}</div>
       </FieldWithActions>
       <EuiHorizontalRule margin="xs" />
     </>
