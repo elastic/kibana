@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
