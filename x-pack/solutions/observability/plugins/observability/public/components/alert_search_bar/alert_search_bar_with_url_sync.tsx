@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import {
   alertSearchBarStateContainer,
   Provider,
@@ -20,22 +21,40 @@ import { useToasts } from '../../hooks/use_toast';
 function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   const { urlStorageKey, defaultState = DEFAULT_STATE, ...searchBarProps } = props;
   const stateProps = useAlertSearchBarStateContainer(urlStorageKey, undefined, defaultState);
+  const [filterControls, setFilterControls] = useState<Filter[]>([]);
   const {
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    data,
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
     uiSettings,
+    http,
+    dataViews,
+    spaces,
+    notifications,
   } = useKibana().services;
+  const {
+    query: {
+      timefilter: { timefilter: timeFilterService },
+    },
+  } = data;
 
   return (
     <ObservabilityAlertSearchBar
       {...stateProps}
       {...searchBarProps}
+      filterControls={filterControls}
+      onFilterControlsChange={setFilterControls}
       showFilterBar
-      services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
+      services={{
+        timeFilterService,
+        AlertsSearchBar,
+        http,
+        data,
+        dataViews,
+        notifications,
+        spaces,
+        useToasts,
+        uiSettings,
+      }}
     />
   );
 }
