@@ -85,12 +85,12 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
 
     // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
     // This is a workaround to ensure the popover is not shown until the input is focused
-    const [isLoading, setIsLoading] = useState(true);
+    const [isAwaitingRenderDelay, setIsAwaitingRenderDelay] = useState(true);
     // Add a slight delay before showing the popover
     useEffect(() => {
       const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
+        setIsAwaitingRenderDelay(false);
+      }, 0);
 
       return () => clearTimeout(timer);
     }, []);
@@ -150,7 +150,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
-    if (isLoading || isLoadingScripts) {
+    if (isAwaitingRenderDelay || isLoadingScripts) {
       return <EuiLoadingSpinner />;
     }
 
