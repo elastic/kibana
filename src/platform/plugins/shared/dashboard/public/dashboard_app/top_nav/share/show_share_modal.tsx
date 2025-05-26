@@ -19,7 +19,6 @@ import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DashboardLocatorParams } from '../../../../common';
-import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { coreServices, dataService, shareService } from '../../../services/kibana_services';
