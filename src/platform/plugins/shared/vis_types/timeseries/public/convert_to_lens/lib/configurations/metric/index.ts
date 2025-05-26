@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import chroma from 'chroma-js';
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { getValidColor } from '@kbn/coloring';
 import { Panel } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
 import { getPalette } from '../palette';
@@ -62,7 +62,9 @@ export const getConfigurationForGauge = (
   }
 
   const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
-  const primaryColor = primarySeries.color ? chroma(primarySeries.color).hex() : undefined;
+  const primaryColor = primarySeries.color
+    ? getValidColor(primarySeries.color, { shouldBeCompatibleWithColorJs: true }).hex()
+    : undefined;
 
   const gaugePalette = getPalette(model.gauge_color_rules ?? [], primaryColor);
   if (gaugePalette === null) {

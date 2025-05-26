@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getValidColor } from '@kbn/coloring';
 import chroma from 'chroma-js';
 
 const MAX_LIGHTNESS = 0.93;
@@ -17,7 +18,7 @@ export function lightenColor(baseColor: string, step: number, totalSteps: number
     return baseColor;
   }
 
-  const [h, s, l] = chroma(baseColor).hsl();
+  const [h, s, l] = getValidColor(baseColor, { shouldBeCompatibleWithColorJs: true }).hsl();
   const lightnessSpace = Math.min(MAX_LIGHTNESS - l, MAX_LIGHTNESS_SPACE);
   const currentLevelTargetLightness = l + lightnessSpace * ((step - 1) / (totalSteps - 1));
   return chroma.hsl(h, s, currentLevelTargetLightness).hex();
