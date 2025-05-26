@@ -19,7 +19,6 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { getEcsGroups, getFormattedGroups, unflattenGrouping } from '@kbn/alerting-rule-utils';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
