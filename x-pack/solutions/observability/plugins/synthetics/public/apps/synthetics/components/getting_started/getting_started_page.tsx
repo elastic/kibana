@@ -27,11 +27,11 @@ import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_
 import { getServiceLocations, cleanMonitorListState } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
+import { AddOrEditLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
 import { selectAddingNewPrivateLocation } from '../../state/settings/selectors';
-import { setIsCreatePrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
+import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
@@ -130,14 +130,14 @@ export const GettingStartedOnPrem = () => {
   const isAddingNewLocation = useSelector(selectAddingNewPrivateLocation);
 
   const setIsAddingNewLocation = useCallback(
-    (val: boolean) => dispatch(setIsCreatePrivateLocationFlyoutVisible(val)),
+    (val: boolean) => dispatch(setIsPrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
 
-  const { onSubmit, privateLocations } = usePrivateLocationsAPI();
+  const { onCreateLocationAPI, privateLocations } = usePrivateLocationsAPI();
 
   const handleSubmit = (formData: NewLocation) => {
-    onSubmit(formData);
+    onCreateLocationAPI(formData);
   };
 
   // make sure flyout is closed when first visiting the page
@@ -174,8 +174,8 @@ export const GettingStartedOnPrem = () => {
       />
 
       {isAddingNewLocation ? (
-        <AddLocationFlyout
-          setIsOpen={setIsAddingNewLocation}
+        <AddOrEditLocationFlyout
+          onCloseFlyout={() => setIsAddingNewLocation(false)}
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
         />

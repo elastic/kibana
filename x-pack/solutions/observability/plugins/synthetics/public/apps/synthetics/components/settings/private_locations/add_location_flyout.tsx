@@ -35,20 +35,22 @@ import { selectPrivateLocationsState } from '../../../state/private_locations/se
 export type NewLocation = Omit<PrivateLocation, 'id'>;
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-export const AddLocationFlyout = ({
+export const AddOrEditLocationFlyout = ({
   onSubmit,
-  setIsOpen,
+  onCloseFlyout,
   privateLocations,
+  privateLocationToEdit,
 }: {
   onSubmit: (val: NewLocation) => void;
-  setIsOpen: (val: boolean) => void;
+  onCloseFlyout: () => void;
   privateLocations: PrivateLocation[];
+  privateLocationToEdit?: PrivateLocation;
 }) => {
   const form = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
-    defaultValues: {
+    defaultValues: privateLocationToEdit || {
       label: '',
       agentPolicyId: '',
       geo: {
@@ -59,9 +61,11 @@ export const AddLocationFlyout = ({
     },
   });
 
+  const isEditingLocation = privateLocationToEdit !== undefined;
+
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
-  const { createLoading } = useSelector(selectPrivateLocationsState);
+  const { createLoading, editLoading } = useSelector(selectPrivateLocationsState);
 
   const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
 
@@ -72,22 +76,22 @@ export const AddLocationFlyout = ({
   );
 
   const { handleSubmit } = form;
-  const closeFlyout = () => {
-    setIsOpen(false);
-  };
 
   return (
     <ContextWrapper>
       <FormProvider {...form}>
-        <EuiFlyout onClose={closeFlyout} style={{ width: 540 }}>
+        <EuiFlyout onClose={onCloseFlyout} css={{ width: 540 }}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>{ADD_PRIVATE_LOCATION}</h2>
+              <h2>{isEditingLocation ? EDIT_PRIVATE_LOCATION : ADD_PRIVATE_LOCATION}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <ManageEmptyState privateLocations={privateLocations} showEmptyLocations={false}>
-              <LocationForm privateLocations={privateLocations} />
+              <LocationForm
+                privateLocations={privateLocations}
+                isEditingLocation={isEditingLocation}
+              />
             </ManageEmptyState>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
@@ -96,9 +100,9 @@ export const AddLocationFlyout = ({
                 <EuiButtonEmpty
                   data-test-subj="syntheticsAddLocationFlyoutButton"
                   iconType="cross"
-                  onClick={closeFlyout}
+                  onClick={onCloseFlyout}
                   flush="left"
-                  isLoading={createLoading}
+                  isLoading={createLoading || editLoading}
                 >
                   {CANCEL_LABEL}
                 </EuiButtonEmpty>
@@ -109,7 +113,7 @@ export const AddLocationFlyout = ({
                     data-test-subj="syntheticsAddLocationFlyoutButton"
                     fill
                     onClick={handleSubmit(onSubmit)}
-                    isLoading={createLoading}
+                    isLoading={createLoading || editLoading}
                     isDisabled={!canSave || !canManagePrivateLocations}
                   >
                     {SAVE_LABEL}
@@ -128,6 +132,13 @@ const ADD_PRIVATE_LOCATION = i18n.translate(
   'xpack.synthetics.monitorManagement.createPrivateLocations',
   {
     defaultMessage: 'Create private location',
+  }
+);
+
+const EDIT_PRIVATE_LOCATION = i18n.translate(
+  'xpack.synthetics.monitorManagement.editPrivateLocations',
+  {
+    defaultMessage: 'Edit private location',
   }
 );
 

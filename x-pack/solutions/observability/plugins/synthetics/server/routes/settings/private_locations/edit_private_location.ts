@@ -7,6 +7,7 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { SyntheticsRestApiRouteFactory } from '../../types';
@@ -24,7 +25,10 @@ const EditPrivateLocationQuery = schema.object({
   locationId: schema.string(),
 });
 
-export type EditPrivateLocationAttributes = keyof TypeOf<typeof EditPrivateLocationSchema>;
+export type EditPrivateLocationAttributes = Pick<
+  PrivateLocationAttributes,
+  keyof TypeOf<typeof EditPrivateLocationSchema>
+>;
 
 export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   PrivateLocation,

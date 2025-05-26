@@ -18,7 +18,13 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
 
-export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
+export const LocationForm = ({
+  privateLocations,
+  isEditingLocation,
+}: {
+  privateLocations: PrivateLocation[];
+  isEditingLocation: boolean;
+}) => {
   const { data } = useSelector(selectAgentPolicies);
   const { control, register } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
@@ -56,13 +62,18 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField privateLocations={privateLocations} />
+        <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
         <EuiSpacer />
-        <TagsField tagsList={tagsList} control={control} errors={errors} />
+        <TagsField
+          tagsList={tagsList}
+          control={control}
+          errors={errors}
+          isDisabled={isEditingLocation}
+        />
         <EuiSpacer />
         <BrowserMonitorCallout />
         <EuiSpacer />
-        <SpaceSelector helpText={LOCATION_HELP_TEXT} />
+        <SpaceSelector helpText={LOCATION_HELP_TEXT} isDisabled={isEditingLocation} />
       </EuiForm>
     </>
   );

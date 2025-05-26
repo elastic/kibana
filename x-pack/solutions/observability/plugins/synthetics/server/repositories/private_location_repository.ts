@@ -44,10 +44,7 @@ export class PrivateLocationRepository {
     );
   }
 
-  async editPrivateLocation(
-    locationId: string,
-    newAttributes: Pick<PrivateLocationAttributes, EditPrivateLocationAttributes>
-  ) {
+  async editPrivateLocation(locationId: string, newAttributes: EditPrivateLocationAttributes) {
     const { savedObjectsClient } = this.routeContext;
 
     return savedObjectsClient.update<PrivateLocationAttributes>(
