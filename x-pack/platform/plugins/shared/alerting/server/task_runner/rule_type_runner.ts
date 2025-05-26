@@ -291,6 +291,7 @@ export class RuleTypeRunner<
                     ...(startedAtOverridden ? { forceNow: startedAt } : {}),
                   }),
                 isServerless: context.isServerless,
+                ruleExecutionTimeout: ruleType.ruleTaskTimeout,
               })
             )
           );

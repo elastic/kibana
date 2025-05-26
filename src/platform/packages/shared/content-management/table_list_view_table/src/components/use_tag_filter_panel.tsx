@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
@@ -48,23 +48,12 @@ export const useTagFilterPanel = ({
   addOrRemoveIncludeTagFilter,
 }: Params) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  // When the panel is "in use" it means that it is opened and the user is interacting with it.
-  // When the user clicks on a tag to select it, the component is unmounted and mounted immediately, which
-  // creates a new EUI transition "IN" which makes the UI "flicker". To avoid that we pass this
-  // "isInUse" state which disable the transition.
-  const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const totalActiveFilters = Object.keys(tagSelection).length;
-  const onClickTime = useRef<number>(0);
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
-      // onSelectChange() handler is to support keyboard navigation. When user clicks on a tag
-      // we call the onOptionClick() imperatively below and we don't need to do anything here.
-      const timeSinceOptionClick = Date.now() - onClickTime.current;
-      if (timeSinceOptionClick < 100) return;
-
       const diff = updatedOptions.find((item, index) => item.checked !== options[index].checked);
       if (diff) {
         addOrRemoveIncludeTagFilter(diff.tag);
@@ -75,8 +64,10 @@ export const useTagFilterPanel = ({
 
   const onOptionClick = useCallback(
     (tag: Tag) => (e: MouseEvent) => {
+      // Make sure we don't trigger the default behavior of the EuiSelectable and onSelectChange isn't called
+      e.stopPropagation();
+
       const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
-      onClickTime.current = Date.now();
 
       if (withModifierKey) {
         addOrRemoveExcludeTagFilter(tag);
@@ -174,20 +165,11 @@ export const useTagFilterPanel = ({
     if (isPopoverOpen) {
       // Refresh the tag list whenever we open the pop over
       updateTagList();
-
-      // To avoid "cutting" the inflight css transition when opening the popover
-      // we add a slight delay to switch the "isInUse" flag.
-      setTimeout(() => {
-        setIsInUse(true);
-      }, 250);
-    } else {
-      setIsInUse(false);
     }
   }, [isPopoverOpen, updateTagList]);
 
   return {
     isPopoverOpen,
-    isInUse,
     options,
     totalActiveFilters,
     onFilterButtonClick,

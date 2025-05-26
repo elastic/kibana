@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import type { OnboardingCardId } from '../../../../constants';
 import type { RulesCardItemId } from '../rules/types';
 import type { AlertsCardItemId } from '../alerts/types';
 import type { DashboardsCardItemId } from '../dashboards/types';
 import { useCardSelectorListStyles } from './card_selector_list.styles';
 import { HEIGHT_ANIMATION_DURATION } from '../../onboarding_card_panel.styles';
+import { useOnboardingContext } from '../../../onboarding_context';
+import type { KnowledgeSourceCardItemId } from '../search_ai_lake/knowledge_source/types';
 
 export interface CardSelectorListItem {
-  id: RulesCardItemId | AlertsCardItemId | DashboardsCardItemId;
+  id: RulesCardItemId | AlertsCardItemId | DashboardsCardItemId | KnowledgeSourceCardItemId;
   title: string;
   description: string;
 }
@@ -23,6 +26,7 @@ export interface CardSelectorListProps {
   onSelect: (item: CardSelectorListItem) => void;
   selectedItem: CardSelectorListItem;
   title?: string;
+  cardId: OnboardingCardId;
 }
 
 const scrollToSelectedItem = (cardId: string) => {
@@ -35,13 +39,22 @@ const scrollToSelectedItem = (cardId: string) => {
 };
 
 export const CardSelectorList = React.memo<CardSelectorListProps>(
-  ({ items, onSelect, selectedItem, title }) => {
+  ({ items, onSelect, selectedItem, title, cardId }) => {
+    const { telemetry } = useOnboardingContext();
     const styles = useCardSelectorListStyles();
 
     useEffect(() => {
       scrollToSelectedItem(selectedItem.id);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const handleSelect = useCallback(
+      (item: CardSelectorListItem) => {
+        onSelect(item);
+        telemetry.reportCardSelectorClicked(cardId, item.id);
+      },
+      [cardId, onSelect, telemetry]
+    );
 
     return (
       <EuiFlexGroup
@@ -72,9 +85,7 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
                   className={selectedItem.id === item.id ? 'selectedCardPanelItem' : ''}
                   color={selectedItem.id === item.id ? 'subdued' : 'plain'}
                   element="button"
-                  onClick={() => {
-                    onSelect(item);
-                  }}
+                  onClick={() => handleSelect(item)}
                 >
                   <EuiTitle size="xxs">
                     <h5>{item.title}</h5>

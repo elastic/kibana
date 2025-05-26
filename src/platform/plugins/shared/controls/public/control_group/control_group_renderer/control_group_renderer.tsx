@@ -181,7 +181,8 @@ export const ControlGroupRenderer = ({
         },
         compressed: compressed ?? true,
       })}
-      onApiAvailable={(controlGroupApi) => {
+      onApiAvailable={async (controlGroupApi) => {
+        await controlGroupApi.untilInitialized();
         const controlGroupRendererApi: ControlGroupRendererApi = {
           ...controlGroupApi,
           reload: () => reload$.next(),

@@ -20,6 +20,7 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
 import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
@@ -36,6 +37,7 @@ import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
+import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -178,6 +180,23 @@ export function ActionsPopover({
     },
   };
 
+  const { MaybeSavedObjectSaveModalDashboard, setDashboardAttachmentReady } = useAddToDashboard({
+    type: SYNTHETICS_MONITORS_EMBEDDABLE,
+    embeddableInput: {
+      filters: {
+        monitorIds: [{ label: monitor.name, value: monitor.configId }],
+        tags: [],
+        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
+        monitorTypes: [],
+        projects: [],
+      },
+    },
+    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
+      defaultMessage: 'Monitor Overview',
+    }),
+  });
+
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
   let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
@@ -291,6 +310,14 @@ export function ActionsPopover({
         }
       },
     },
+    {
+      name: addMonitorToDashboardLabel,
+      icon: 'dashboardApp',
+      onClick: () => {
+        setIsPopoverOpen(false);
+        setDashboardAttachmentReady(true);
+      },
+    },
   ];
   if (isInspectView) popoverItems = popoverItems.filter((i) => i !== quickInspectPopoverItem);
 
@@ -331,6 +358,7 @@ export function ActionsPopover({
         </EuiPopover>
       </Container>
       {CreateSLOFlyout}
+      {MaybeSavedObjectSaveModalDashboard}
     </>
   );
 }
@@ -418,6 +446,13 @@ const enableMonitorAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableAlert',
   {
     defaultMessage: 'Enable status alerts (all locations)',
+  }
+);
+
+const addMonitorToDashboardLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.addToDashboard',
+  {
+    defaultMessage: 'Add to dashboard',
   }
 );
 

@@ -11,15 +11,26 @@ import {
   AttackDiscoveryPostResponse,
   API_VERSIONS,
   ATTACK_DISCOVERY,
+  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+  getAttackDiscoveryLoadingMessage,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { v4 as uuidv4 } from 'uuid';
 
+import {
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+} from '../../../../common/constants';
+import { getDurationNanoseconds } from './get_duration_nanoseconds';
+import { performChecks } from '../../helpers';
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
+import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
-import { generateAttackDiscoveries } from '../helpers/generate_discoveries';
+import { generateAndUpdateAttackDiscoveries } from '../helpers/generate_and_update_discoveries';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
@@ -56,24 +67,45 @@ export const postAttackDiscoveryRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryPostResponse>> => {
+        const performChecksContext = await context.resolve([
+          'core',
+          'elasticAssistant',
+          'licensing',
+        ]);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
+        const { featureFlags } = await context.core;
+
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
         const savedObjectsClient = assistantContext.savedObjectsClient;
 
+        const checkResponse = await performChecks({
+          context: performChecksContext,
+          request,
+          response,
+        });
+
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
+        }
+
         try {
+          const eventLogger = (await context.elasticAssistant).eventLogger;
+
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
           const authenticatedUser = await assistantContext.getCurrentUser();
+
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
               statusCode: 401,
             });
           }
+
           if (!dataClient) {
             return resp.error({
               body: `Attack discovery data client not initialized`,
@@ -101,6 +133,11 @@ export const postAttackDiscoveryRoute = (
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
+          const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
+            ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+            false
+          );
+
           const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
             dataClient,
             authenticatedUser,
@@ -108,10 +145,36 @@ export const postAttackDiscoveryRoute = (
             size
           );
 
+          const executionUuid = attackDiscoveryAlertsEnabled ? uuidv4() : attackDiscoveryId;
+
+          // event log details:
+          const connectorId = apiConfig.connectorId;
+          const spaceId = (await context.elasticAssistant).getSpaceId();
+          const generatedStarted = new Date();
+          const loadingMessage = getAttackDiscoveryLoadingMessage({
+            alertsCount: size,
+            end: request.body.end,
+            start: request.body.start,
+          });
+
+          writeAttackDiscoveryEvent({
+            action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
+            attackDiscoveryAlertsEnabled,
+            authenticatedUser,
+            connectorId,
+            eventLogger,
+            executionUuid,
+            loadingMessage,
+            message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} started`,
+            spaceId,
+            start: generatedStarted,
+          });
+
           // Don't await the results of invoking the graph; (just the metadata will be returned from the route handler):
-          generateAttackDiscoveries({
+          generateAndUpdateAttackDiscoveries({
             actionsClient,
-            executionUuid: attackDiscoveryId,
+            attackDiscoveryAlertsEnabled,
+            executionUuid,
             authenticatedUser,
             config: request.body,
             dataClient,
@@ -119,7 +182,72 @@ export const postAttackDiscoveryRoute = (
             logger,
             savedObjectsClient,
             telemetry,
-          }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+          })
+            .then((result) => {
+              const end = new Date();
+              const durationNanoseconds = getDurationNanoseconds({
+                end,
+                start: generatedStarted,
+              });
+
+              // NOTE: the (legacy) implementation of generateAttackDiscoveries returns an "error" object when failures occur (instead of rejecting):
+              if (result.error == null) {
+                writeAttackDiscoveryEvent({
+                  action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+                  alertsContextCount: result.anonymizedAlerts?.length,
+                  attackDiscoveryAlertsEnabled,
+                  authenticatedUser,
+                  connectorId,
+                  duration: durationNanoseconds,
+                  end,
+                  eventLogger,
+                  executionUuid,
+                  message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} succeeded`,
+                  newAlerts: result.attackDiscoveries?.length ?? 0,
+                  outcome: 'success',
+                  spaceId,
+                });
+              } else {
+                writeAttackDiscoveryEvent({
+                  action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+                  alertsContextCount: result.anonymizedAlerts?.length,
+                  attackDiscoveryAlertsEnabled,
+                  authenticatedUser,
+                  connectorId,
+                  duration: durationNanoseconds,
+                  end,
+                  eventLogger,
+                  executionUuid,
+                  message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} failed: ${result.error?.message}`,
+                  outcome: 'failure',
+                  reason: result.error?.message,
+                  spaceId,
+                });
+              }
+            })
+            .catch((error) => {
+              // This is a fallback in case the promise is rejected (in a future implementation):
+              const end = new Date();
+              const durationNanoseconds = getDurationNanoseconds({
+                end,
+                start: generatedStarted,
+              });
+
+              writeAttackDiscoveryEvent({
+                action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+                attackDiscoveryAlertsEnabled,
+                authenticatedUser,
+                connectorId,
+                duration: durationNanoseconds,
+                end,
+                eventLogger,
+                executionUuid,
+                message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} failed: ${error.message}`,
+                outcome: 'failure',
+                reason: error?.message,
+                spaceId,
+              });
+            });
 
           return response.ok({
             body: currentAd,

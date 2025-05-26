@@ -20,19 +20,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import type { IShareContext } from '../../context';
+import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
 
 type LinkProps = Pick<
   IShareContext,
   | 'objectType'
   | 'objectId'
   | 'isDirty'
-  | 'urlService'
   | 'shareableUrl'
-  | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
-> & { objectConfig?: ShareContextObjectTypeConfig };
+> &
+  LinkShareConfig['config'] & {
+    objectConfig?: LinkShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -45,10 +47,9 @@ export const LinkContent = ({
   objectType,
   objectConfig = {},
   shareableUrl,
-  urlService,
+  shortUrlService,
   shareableUrlLocatorParams,
   allowShortUrl,
-  delegatedShareUrlHandler,
 }: LinkProps) => {
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
@@ -56,6 +57,8 @@ export const LinkContent = ({
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const { delegatedShareUrlHandler, draftModeCallOut: DraftModeCallout } = objectConfig;
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -80,22 +83,20 @@ export const LinkContent = ({
   }, [getUrlWithUpdatedParams, shareableUrl]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
       const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
       return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
     }
-  }, [shareableUrlLocatorParams, urlService.shortUrls, snapshotUrl]);
+  }, [shareableUrlLocatorParams, shortUrlService, snapshotUrl]);
 
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);
 
     if (!urlToCopy.current) {
       urlToCopy.current = delegatedShareUrlHandler
-        ? delegatedShareUrlHandler()
+        ? await delegatedShareUrlHandler()
         : allowShortUrl
         ? await createShortUrl()
         : snapshotUrl;
@@ -115,8 +116,6 @@ export const LinkContent = ({
     });
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
-
-  const { draftModeCallOut: DraftModeCallout } = objectConfig;
 
   return (
     <>

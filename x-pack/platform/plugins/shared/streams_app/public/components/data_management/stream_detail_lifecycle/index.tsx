@@ -111,7 +111,6 @@ export function StreamDetailLifecycle({
   const {
     stats,
     isLoading: isLoadingStats,
-    refresh: refreshStats,
     error: statsError,
   } = useDataStreamStats({ definition });
 
@@ -200,7 +199,6 @@ export function StreamDetailLifecycle({
               <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
                 <IngestionRate
                   definition={definition}
-                  refreshStats={refreshStats}
                   isLoadingStats={isLoadingStats}
                   stats={stats}
                 />

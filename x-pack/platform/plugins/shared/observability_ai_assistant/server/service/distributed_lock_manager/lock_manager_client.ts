@@ -13,9 +13,7 @@ import prettyMilliseconds from 'pretty-ms';
 import { once } from 'lodash';
 import { duration } from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
-
-export const LOCKS_INDEX_ALIAS = '.kibana_locks';
-export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
+import { LOCKS_CONCRETE_INDEX_NAME, setuplockManagerIndex } from './setup_lock_manager_index';
 
 export type LockId = string;
 export interface LockDocument {
@@ -38,7 +36,12 @@ export interface AcquireOptions {
   ttl?: number;
 }
 
-const createLocksWriteIndexOnce = once(createLocksWriteIndex);
+// The index assets should only be set up once
+// For testing purposes, we need to be able to set it up every time
+let runSetupIndexAssetOnce = once(setuplockManagerIndex);
+export function runSetupIndexAssetEveryTime() {
+  runSetupIndexAssetOnce = setuplockManagerIndex;
+}
 
 export class LockManager {
   private token = uuid();
@@ -58,7 +61,8 @@ export class LockManager {
     ttl = duration(30, 'seconds').asMilliseconds(),
   }: AcquireOptions = {}): Promise<boolean> {
     let response: Awaited<ReturnType<ElasticsearchClient['update']>>;
-    await createLocksWriteIndexOnce(this.esClient);
+
+    await runSetupIndexAssetOnce(this.esClient, this.logger);
     this.token = uuid();
 
     try {
@@ -301,45 +305,6 @@ export async function withLock<T>(
       logger.debug(error);
     }
   }
-}
-
-export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClient): Promise<void> {
-  const COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
-  const INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
-  const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
-
-  await esClient.cluster.putComponentTemplate({
-    name: COMPONENT_TEMPLATE_NAME,
-    template: {
-      mappings: {
-        dynamic: false,
-        properties: {
-          token: { type: 'keyword' },
-          metadata: { enabled: false },
-          createdAt: { type: 'date' },
-          expiresAt: { type: 'date' },
-        },
-      },
-    },
-  });
-
-  await esClient.indices.putIndexTemplate({
-    name: INDEX_TEMPLATE_NAME,
-    index_patterns: [INDEX_PATTERN],
-    composed_of: [COMPONENT_TEMPLATE_NAME],
-    priority: 500,
-    template: {
-      settings: {
-        number_of_shards: 1,
-        auto_expand_replicas: '0-1',
-        hidden: true,
-      },
-    },
-  });
-}
-
-export async function createLocksWriteIndex(esClient: ElasticsearchClient): Promise<void> {
-  await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
 }
 
 function isVersionConflictException(e: Error): boolean {

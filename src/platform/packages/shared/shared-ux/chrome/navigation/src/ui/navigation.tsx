@@ -96,6 +96,11 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
+        {navigationTree.callout && (
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>{renderNodes(navigationTree.callout)}</EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         {/* Footer */}
         {navigationTree.footer && (
           <EuiCollapsibleNavBeta.Footer>

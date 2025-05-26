@@ -20,6 +20,7 @@ import {
   AgentPolicyNotFoundError,
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
+import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
 import { NotFoundError } from '../../errors';
 import type { SavedObjectsClientFactory } from '../saved_objects';
@@ -47,12 +48,18 @@ export interface EndpointFleetServicesInterface {
   ): Promise<void>;
 
   /**
-   * Retrieves the `namespace` assigned to Endpoint Integration Policies
+   * Retrieves the `namespace` assigned to Integration Policies
    * @param options
    */
   getPolicyNamespace(
-    options: Pick<FetchEndpointPolicyNamespaceOptions, 'integrationPolicies'>
-  ): Promise<FetchEndpointPolicyNamespaceResponse>;
+    options: Pick<FetchIntegrationPolicyNamespaceOptions, 'integrationPolicies'>
+  ): Promise<FetchIntegrationPolicyNamespaceResponse>;
+
+  /**
+   * Retrieves a list of all `namespace`'s in use by a given integration
+   * @param integrationNames
+   */
+  getIntegrationNamespaces(integrationNames: string[]): Promise<Record<string, string[]>>;
 }
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
@@ -113,7 +120,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
       }
 
-      return fetchEndpointPolicyNamespace({
+      return fetchIntegrationPolicyNamespace({
         ...options,
         soClient,
         logger: this.logger,
@@ -121,6 +128,21 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         agentPolicyService: agentPolicy,
       });
     };
+
+    const getIntegrationNamespaces: EndpointFleetServicesInterface['getIntegrationNamespaces'] =
+      async (integrationNames) => {
+        if (!soClient) {
+          soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
+        }
+
+        return fetchIntegrationNamespaces({
+          soClient,
+          logger: this.logger,
+          packagePolicyService: packagePolicy,
+          agentPolicyService: agentPolicy,
+          integrationNames,
+        });
+      };
 
     return {
       agent,
@@ -134,6 +156,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
       ensureInCurrentSpace,
       getPolicyNamespace,
+      getIntegrationNamespaces,
     };
   }
 }
@@ -197,27 +220,33 @@ const checkInCurrentSpace = async ({
   ]);
 };
 
-interface FetchEndpointPolicyNamespaceOptions {
+interface FetchIntegrationPolicyNamespaceOptions {
   logger: Logger;
   soClient: SavedObjectsClientContract;
   packagePolicyService: PackagePolicyClient;
   agentPolicyService: AgentPolicyServiceInterface;
   /** A list of integration policies IDs */
   integrationPolicies: string[];
+  /** A list of Integration names */
+  integrationNames?: string[];
 }
 
-export interface FetchEndpointPolicyNamespaceResponse {
+export interface FetchIntegrationPolicyNamespaceResponse {
+  /**
+   * A map with the policy ids provided to `integrationPolicies` param along with a list of
+   * namespaces for that policy
+   */
   integrationPolicy: Record<string, string[]>;
 }
 
-const fetchEndpointPolicyNamespace = async ({
+const fetchIntegrationPolicyNamespace = async ({
   logger,
   soClient,
   packagePolicyService,
   agentPolicyService,
   integrationPolicies,
-}: FetchEndpointPolicyNamespaceOptions): Promise<FetchEndpointPolicyNamespaceResponse> => {
-  const response: FetchEndpointPolicyNamespaceResponse = {
+}: FetchIntegrationPolicyNamespaceOptions): Promise<FetchIntegrationPolicyNamespaceResponse> => {
+  const response: FetchIntegrationPolicyNamespaceResponse = {
     integrationPolicy: {},
   };
   const agentPolicyIdsToRetrieve = new Set<string>();
@@ -229,7 +258,9 @@ const fetchEndpointPolicyNamespace = async ({
       () => `Retrieving package policies from fleet for:\n${stringify(integrationPolicies)}`
     );
     const packagePolicies =
-      (await packagePolicyService.getByIDs(soClient, integrationPolicies)) ?? [];
+      (await packagePolicyService
+        .getByIDs(soClient, integrationPolicies)
+        .catch(catchAndWrapError)) ?? [];
 
     logger.trace(() => `Fleet package policies retrieved:\n${stringify(packagePolicies)}`);
 
@@ -251,7 +282,7 @@ const fetchEndpointPolicyNamespace = async ({
 
     logger.debug(() => `Retrieving agent policies from fleet for:\n${stringify(ids)}`);
 
-    const agentPolicies = await agentPolicyService.getByIds(soClient, ids);
+    const agentPolicies = await agentPolicyService.getByIds(soClient, ids).catch(catchAndWrapError);
 
     logger.trace(() => `Fleet agent policies retrieved:\n${stringify(agentPolicies)}`);
 
@@ -271,6 +302,98 @@ const fetchEndpointPolicyNamespace = async ({
   }
 
   logger.debug(() => `Policy namespaces:\n${stringify(response)}`);
+
+  return response;
+};
+
+interface FetchIntegrationNamespacesOptions {
+  logger: Logger;
+  soClient: SavedObjectsClientContract;
+  packagePolicyService: PackagePolicyClient;
+  agentPolicyService: AgentPolicyServiceInterface;
+  /** A list of Integration names */
+  integrationNames: string[];
+}
+
+const fetchIntegrationNamespaces = async ({
+  logger,
+  soClient,
+  packagePolicyService,
+  agentPolicyService,
+  integrationNames = [],
+}: FetchIntegrationNamespacesOptions): Promise<Record<string, string[]>> => {
+  const integrationToNamespaceMap = integrationNames.reduce((acc, name) => {
+    acc[name] = new Set<string>();
+    return acc;
+  }, {} as Record<string, Set<string>>);
+  const agentPolicyIdsToRetrieve: Record<string, Set<Set<string>>> = {};
+
+  if (integrationNames.length > 0) {
+    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${integrationNames.join(
+      ' OR '
+    )})`;
+
+    logger.debug(() => `Fetch of policies for integrations using Kuery [${kuery}]`);
+
+    const policiesFound = await packagePolicyService
+      .list(soClient, { perPage: 10_000, kuery })
+      .catch(catchAndWrapError);
+
+    logger.trace(
+      () =>
+        `Fetch of policies for integrations using Kuery [${kuery}] returned:\n${stringify(
+          policiesFound
+        )}`
+    );
+
+    for (const packagePolicy of policiesFound.items) {
+      if (packagePolicy.package?.name) {
+        const integrationName = packagePolicy.package.name;
+
+        if (packagePolicy.namespace) {
+          integrationToNamespaceMap[integrationName].add(packagePolicy.namespace);
+        } else {
+          // Integration policy does not have an explicit namespace, which means it
+          // inherits it from the associated agent policies. We'll retrieve these next
+          packagePolicy.policy_ids.forEach((agentPolicyId) => {
+            if (!agentPolicyIdsToRetrieve[agentPolicyId]) {
+              agentPolicyIdsToRetrieve[agentPolicyId] = new Set();
+            }
+
+            agentPolicyIdsToRetrieve[agentPolicyId].add(integrationToNamespaceMap[integrationName]);
+          });
+        }
+      }
+    }
+  }
+
+  const agentPolicyIds = Object.keys(agentPolicyIdsToRetrieve);
+
+  if (agentPolicyIds.length > 0) {
+    logger.debug(() => `Retrieving agent policies from fleet for:\n${stringify(agentPolicyIds)}`);
+
+    const agentPolicies = await agentPolicyService
+      .getByIds(soClient, agentPolicyIds)
+      .catch(catchAndWrapError);
+
+    logger.trace(() => `Fleet agent policies retrieved:\n${stringify(agentPolicies)}`);
+
+    for (const agentPolicy of agentPolicies) {
+      for (const nameSpaceSet of agentPolicyIdsToRetrieve[agentPolicy.id]) {
+        nameSpaceSet.add(agentPolicy.namespace);
+      }
+    }
+  }
+
+  const response = Object.entries(integrationToNamespaceMap).reduce(
+    (acc, [integrationName, namespaceSet]) => {
+      acc[integrationName] = Array.from(namespaceSet.values());
+      return acc;
+    },
+    {} as Record<string, string[]>
+  );
+
+  logger.debug(() => `Integration namespaces in use:\n${stringify(response)}`);
 
   return response;
 };

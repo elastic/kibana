@@ -9,7 +9,7 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export const enrichLensAttributesWithTablesData = ({

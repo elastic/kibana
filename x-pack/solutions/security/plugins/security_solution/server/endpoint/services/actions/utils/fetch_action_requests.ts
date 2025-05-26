@@ -139,7 +139,14 @@ export const fetchActionRequests = async ({
   return {
     data: (actionRequests?.hits?.hits ?? []).map((esHit) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return esHit._source!;
+      const action = esHit._source!;
+
+      // Ensure `agent.policy` is an array
+      if (!Array.isArray(action.agent.policy)) {
+        action.agent.policy = action.agent.policy ? [action.agent.policy] : [];
+      }
+
+      return action;
     }),
     size,
     from,

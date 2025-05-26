@@ -1533,3 +1533,10 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION = i18n.translate(
     defaultMessage: 'Unfilled gaps duration',
   }
 );
+
+export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
+  {
+    defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
+  }
+);

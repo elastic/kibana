@@ -54,4 +54,5 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   view_in_app_relative_url?: RuleResponseSchemaType['view_in_app_relative_url'];
   alert_delay?: RuleResponseSchemaType['alert_delay'];
   flapping?: RuleResponseSchemaType['flapping'];
+  artifacts?: RuleResponseSchemaType['artifacts'];
 }

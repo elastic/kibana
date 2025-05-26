@@ -189,4 +189,27 @@ describe('postDefendInsightsRoute', () => {
       status_code: 500,
     });
   });
+
+  describe('runExternalCallbacks', () => {
+    it('should handle error thrown by runExternalCallbacks', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+
+      const response = await server.inject(
+        postDefendInsightsRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: {
+          error: 'External callback failed',
+          success: false,
+        },
+        status_code: 500,
+      });
+
+      expect(createDefendInsight).not.toHaveBeenCalled();
+    });
+  });
 });

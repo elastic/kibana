@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { OnboardingContextProvider } from '../../../onboarding/components/onboarding_context';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { AssetInventoryTitle } from '../asset_inventory_title';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import illustration from '../../../common/images/integrations_light.png';
-import { IntegrationsCardGridTabs } from '../../../onboarding/components/onboarding_body/cards/integrations/integration_card_grid_tabs';
 import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
+import { SecurityIntegrations } from '../../../common/lib/integrations/components';
+import { IntegrationContextProvider } from '../../../common/lib/integrations/hooks/integration_context';
 
 export const NoDataFound = () => {
   const spaceId = useSpaceId();
@@ -68,9 +68,9 @@ export const NoDataFound = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <OnboardingContextProvider spaceId={spaceId}>
-          <IntegrationsCardGridTabs installedIntegrationsCount={0} isAgentRequired={false} />
-        </OnboardingContextProvider>
+        <IntegrationContextProvider spaceId={spaceId}>
+          <SecurityIntegrations />
+        </IntegrationContextProvider>
       </EuiPanel>
     </>
   );

@@ -108,6 +108,7 @@ export const initializeSession: InternalStateThunkActionCreator<
      * Session initialization
      */
 
+    // TODO: Needs to happen when switching tabs too?
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       if (persistedDiscoverSession.id) {
         services.chrome.recentlyAccessed.add(

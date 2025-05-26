@@ -70,7 +70,7 @@ describe('When using `getActionDetailsById()', () => {
       agents: ['agent-a'],
       agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      command: 'kill-process',
+      command: 'running-processes',
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
       errors: undefined,

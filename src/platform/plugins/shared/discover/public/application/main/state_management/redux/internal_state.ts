@@ -32,6 +32,7 @@ import { selectAllTabs, selectTab } from './selectors';
 import { createTabItem } from './utils';
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
+  lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {},

@@ -15,6 +15,9 @@ import { usePollApi } from './use_poll_api/use_poll_api';
 import { useAttackDiscovery } from '.';
 import { ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+
+jest.mock('../use_kibana_feature_flags');
 
 jest.mock('../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(() => ({
@@ -124,6 +127,9 @@ describe('useAttackDiscovery', () => {
     (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
     (useFetchAnonymizationFields as jest.Mock).mockReturnValue({ data: [] });
     (usePollApi as jest.Mock).mockReturnValue(mockPollApi);
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
   });
 
   it('initializes with correct default values', () => {

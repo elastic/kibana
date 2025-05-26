@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import { ApiConfig, INVOKE_LL_CLIENT_TIMEOUT, Replacements } from '@kbn/elastic-assistant-common';
+import { ApiConfig, INVOKE_LLM_CLIENT_TIMEOUT, Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
@@ -43,7 +43,7 @@ export const useSendMessage = (): UseSendMessage => {
       const timeoutId = setTimeout(() => {
         abortController.current.abort(i18n.FETCH_MESSAGE_TIMEOUT_ERROR);
         abortController.current = new AbortController();
-      }, INVOKE_LL_CLIENT_TIMEOUT);
+      }, INVOKE_LLM_CLIENT_TIMEOUT);
 
       try {
         return await fetchConnectorExecuteAction({

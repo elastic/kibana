@@ -24,8 +24,10 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 import { usePollApi } from './use_poll_api/use_poll_api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getErrorToastText } from '../helpers';
-import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import { getGenAiConfig, getRequestBody } from './helpers';
+import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
+import * as i18n from './translations';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface FetchAttackDiscoveriesOptions {
   end?: string;
@@ -52,13 +54,16 @@ export interface UseAttackDiscovery {
 
 export const useAttackDiscovery = ({
   connectorId,
+  connectorName,
   size,
   setLoadingConnectorId,
 }: {
   connectorId: string | undefined;
+  connectorName?: string;
   size: number;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   // get Kibana services and connectors
   const {
     http,
@@ -114,6 +119,7 @@ export const useAttackDiscovery = ({
 
   useEffect(() => {
     if (
+      !attackDiscoveryAlertsEnabled &&
       connectorId != null &&
       connectorId !== '' &&
       aiConnectors != null &&
@@ -129,9 +135,20 @@ export const useAttackDiscovery = ({
       setGenerationIntervals([]);
       setPollStatus(null);
     }
-  }, [aiConnectors, connectorId, pollApi, setLoadingConnectorId, setPollStatus]);
+  }, [
+    aiConnectors,
+    attackDiscoveryAlertsEnabled,
+    connectorId,
+    pollApi,
+    setLoadingConnectorId,
+    setPollStatus,
+  ]);
 
   useEffect(() => {
+    if (attackDiscoveryAlertsEnabled) {
+      return;
+    }
+
     if (pollStatus === 'running') {
       setIsLoading(true);
       setLoadingConnectorId?.(connectorId ?? null);
@@ -139,9 +156,13 @@ export const useAttackDiscovery = ({
       setIsLoading(false);
       setLoadingConnectorId?.(null);
     }
-  }, [pollStatus, connectorId, setLoadingConnectorId]);
+  }, [pollStatus, connectorId, setLoadingConnectorId, attackDiscoveryAlertsEnabled]);
 
   useEffect(() => {
+    if (attackDiscoveryAlertsEnabled) {
+      return;
+    }
+
     if (pollData !== null && pollData.connectorId === connectorId) {
       if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
       if (pollData.attackDiscoveries.length && pollData.attackDiscoveries[0].timestamp != null) {
@@ -157,7 +178,7 @@ export const useAttackDiscovery = ({
       setAttackDiscoveries(pollData.attackDiscoveries);
       setGenerationIntervals(pollData.generationIntervals);
     }
-  }, [connectorId, pollData]);
+  }, [attackDiscoveryAlertsEnabled, connectorId, pollData]);
 
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(
@@ -173,6 +194,7 @@ export const useAttackDiscovery = ({
 
         const bodyWithOverrides = {
           ...requestBody,
+          connectorName,
           end,
           filter,
           size,
@@ -196,11 +218,19 @@ export const useAttackDiscovery = ({
           body: JSON.stringify(bodyWithOverrides),
           version: API_VERSIONS.internal.v1,
         });
+
         setIsLoadingPost(false);
         const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
 
         if (!parsedResponse.success) {
           throw new Error('Failed to parse the response');
+        }
+
+        if (attackDiscoveryAlertsEnabled) {
+          toasts?.addSuccess({
+            title: i18n.GENERATION_STARTED_TITLE,
+            text: i18n.GENERATION_STARTED_TEXT(connectorName),
+          });
         }
       } catch (error) {
         setIsLoadingPost(false);
@@ -211,7 +241,17 @@ export const useAttackDiscovery = ({
         });
       }
     },
-    [connectorId, http, requestBody, setLoadingConnectorId, setPollStatus, size, toasts]
+    [
+      attackDiscoveryAlertsEnabled,
+      connectorId,
+      connectorName,
+      http,
+      requestBody,
+      setLoadingConnectorId,
+      setPollStatus,
+      size,
+      toasts,
+    ]
   );
 
   return {

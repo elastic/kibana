@@ -91,16 +91,7 @@ export const getNavigationTreeDefinition = ({
                   },
                   link: 'enterpriseSearch',
                 },
-                {
-                  getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                  },
-                  id: 'dev_tools',
-                  link: 'dev_tools',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
-                    defaultMessage: 'Dev Tools',
-                  }),
-                },
+
                 {
                   children: [
                     {
@@ -113,9 +104,9 @@ export const getNavigationTreeDefinition = ({
                       link: 'dashboards',
                     },
                   ],
-                  id: 'kibana',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.kibana', {
-                    defaultMessage: 'Kibana',
+                  id: 'analyze',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.analyze', {
+                    defaultMessage: 'Analyze',
                   }),
                 },
                 {
@@ -133,13 +124,23 @@ export const getNavigationTreeDefinition = ({
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },
                   ],
-                  id: 'content',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.content', {
-                    defaultMessage: 'Content',
+                  id: 'data',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.data', {
+                    defaultMessage: 'Data',
                   }),
                 },
                 {
                   children: [
+                    {
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+                      },
+                      id: 'dev_tools',
+                      link: 'dev_tools',
+                      title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
+                        defaultMessage: 'Dev Tools',
+                      }),
+                    },
                     {
                       link: 'searchPlayground',
                     },

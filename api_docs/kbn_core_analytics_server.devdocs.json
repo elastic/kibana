@@ -627,6 +627,10 @@
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx"
               },
               {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
@@ -1056,10 +1060,6 @@
               },
               {
                 "plugin": "observabilityOnboarding",
-                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/custom_logs/install_elastic_agent.tsx"
-              },
-              {
-                "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/kubernetes/data_ingest_status.tsx"
               },
               {
@@ -1269,6 +1269,14 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.test.ts"
               },
               {
                 "plugin": "@kbn/core",

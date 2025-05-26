@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        branch: [ 'main', '7.17', '8.x' ]
+        branch: [ 'main', '8.19' ]
 
     steps:
     - name: Checkout repository
@@ -81,7 +81,7 @@ jobs:
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
         CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}
         CODE_SCANNING_ES_API_KEY: ${{secrets.CODE_SCANNING_ES_API_KEY}}
-        CODE_SCANNING_BRANCHES: 7.17,8.x,main
+        CODE_SCANNING_BRANCHES: main,8.19
       run: |
         npm ci --omit=dev
         node codeql-alert

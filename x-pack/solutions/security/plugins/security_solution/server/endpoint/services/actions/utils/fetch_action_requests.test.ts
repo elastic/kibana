@@ -32,27 +32,7 @@ describe('fetchActionRequests()', () => {
 
   it('should return an array of items', async () => {
     await expect(fetchActionRequests(fetchOptions)).resolves.toEqual({
-      data: [
-        {
-          '@timestamp': '2022-04-27T16:08:47.449Z',
-          EndpointActions: {
-            action_id: '123',
-            data: {
-              command: 'kill-process',
-              comment: '5wb6pu6kh2xix5i',
-            },
-            expiration: '2022-05-10T16:08:47.449Z',
-            input_type: 'endpoint',
-            type: 'INPUT_ACTION',
-          },
-          agent: {
-            id: 'agent-a',
-          },
-          user: {
-            id: 'Shanel',
-          },
-        },
-      ],
+      data: expect.any(Array),
       total: 1,
       from: 0,
       size: 10,
