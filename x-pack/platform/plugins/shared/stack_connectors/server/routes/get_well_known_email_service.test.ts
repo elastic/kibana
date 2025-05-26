@@ -9,10 +9,11 @@ import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 describe('getWellKnownEmailServiceRoute', () => {
+  const emptyAwsSesConfig = {};
   it('returns config for well known email service', async () => {
     const router = httpServiceMock.createRouter();
 
-    getWellKnownEmailServiceRoute(router);
+    getWellKnownEmailServiceRoute(router, emptyAwsSesConfig);
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(
@@ -37,7 +38,7 @@ describe('getWellKnownEmailServiceRoute', () => {
   it('returns config for elastic cloud email service', async () => {
     const router = httpServiceMock.createRouter();
 
-    getWellKnownEmailServiceRoute(router);
+    getWellKnownEmailServiceRoute(router, emptyAwsSesConfig);
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(
@@ -63,7 +64,7 @@ describe('getWellKnownEmailServiceRoute', () => {
   it('returns empty for unknown service', async () => {
     const router = httpServiceMock.createRouter();
 
-    getWellKnownEmailServiceRoute(router);
+    getWellKnownEmailServiceRoute(router, emptyAwsSesConfig);
 
     const [config, handler] = router.get.mock.calls[0];
     expect(config.path).toMatchInlineSnapshot(
@@ -78,6 +79,30 @@ describe('getWellKnownEmailServiceRoute', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: {},
+    });
+  });
+
+  it('returns aws simple email service (ses) config if set', async () => {
+    const awsSesConfig = {
+      host: 'fake-email-smtp.us-east-1.amazonaws.com',
+      port: 1,
+    };
+    const router = httpServiceMock.createRouter();
+    getWellKnownEmailServiceRoute(router, awsSesConfig);
+    const [_, handler] = router.get.mock.calls[0];
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest({
+      params: { service: 'ses' },
+    });
+
+    await handler({}, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: {
+        host: awsSesConfig.host,
+        port: awsSesConfig.port,
+        secure: true,
+      },
     });
   });
 });
