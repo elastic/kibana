@@ -12,7 +12,6 @@ import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper
 import type { ParsedCommandInterface } from '../../../service/types';
 import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
 
-// Import the InputFocusInterface type
 interface InputFocusInterface {
   focus: (force?: boolean) => void;
   blur: () => void;
