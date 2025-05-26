@@ -45,7 +45,6 @@ import {
   type IKibanaMigrator,
   DEFAULT_INDEX_TYPES_MAP,
   HASH_TO_VERSION_MAP,
-  REMOVED_TYPES,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -67,7 +66,7 @@ import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
 
 /**
  * @internal
