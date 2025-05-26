@@ -6,7 +6,7 @@
  */
 
 import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import {
   addListener as originalAddListener,
@@ -18,6 +18,7 @@ import { createDataViewSelectedListener } from '../redux/listeners/data_view_sel
 import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
+import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -39,6 +40,27 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
+
+  const onSignalIndexUpdated = useCallback(() => {
+    if (!loadingSignalIndex && signalIndexName != null) {
+      dispatch(sharedDataViewManagerSlice.actions.setSignalIndexName(signalIndexName));
+    }
+  }, [dispatch, loadingSignalIndex, signalIndexName]);
+
+  useEffect(() => {
+    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
+    // Also, make sure it works exactly as x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/use_init_sourcerer.tsx
+    if (!newDataViewPickerEnabled) {
+      return;
+    }
+
+    onSignalIndexUpdated();
+    // because we only want onSignalIndexUpdated to run when signalIndexName updates,
+    // but we want to know about the updates from the dependencies of onSignalIndexUpdated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signalIndexName]);
 
   useEffect(() => {
     // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
