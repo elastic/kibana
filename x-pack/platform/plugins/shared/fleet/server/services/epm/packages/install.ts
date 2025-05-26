@@ -50,6 +50,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
   DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
   GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
@@ -1288,7 +1289,11 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const dataStreamType =
+    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+    packagePolicy.inputs[0].streams[0].data_stream?.type ||
+    'logs';
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,
