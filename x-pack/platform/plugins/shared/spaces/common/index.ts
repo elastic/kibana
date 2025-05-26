@@ -13,7 +13,10 @@ export {
   DEFAULT_SPACE_ID,
   API_VERSIONS,
 } from './constants';
-export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';
+export {
+  addSpaceIdToPath,
+  getSpaceIdFromPath,
+} from '../../../../../../src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser';
 export type {
   Space,
   GetAllSpacesOptions,
