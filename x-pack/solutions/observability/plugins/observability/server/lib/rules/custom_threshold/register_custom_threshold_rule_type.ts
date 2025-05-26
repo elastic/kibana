@@ -43,15 +43,7 @@ import { CustomThresholdAlert } from './types';
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
   mappings: {
-    fieldMap: {
-      ...legacyExperimentalFieldMap,
-      ...Array(412)
-        .fill(0)
-        .reduce((acc, val, i) => {
-          acc[`${i + 1}`] = { type: 'keyword', array: false, required: false };
-          return acc;
-        }, {}),
-    },
+    fieldMap: legacyExperimentalFieldMap,
     dynamicTemplates: [
       {
         strings_as_keywords: {
