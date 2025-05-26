@@ -28,6 +28,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -90,6 +91,13 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
   onChange,
 }: FieldTypeFilterProps<T>) {
   const testSubj = `${dataTestSubject}FieldTypeFilter`;
+
+  // This id is used to describe the popover title from the menu for screen readers.
+  const popoverTitleId = useGeneratedHtmlId({
+    prefix: 'unifiedFieldList.fieldTypeFilter',
+    suffix: 'popoverTitle',
+  });
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [typeCounts, setTypeCounts] = useState<Map<string, number>>();
 
@@ -181,7 +189,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           <EuiFlexGroup responsive={false} gutterSize="xs" css={titleStyle} alignItems="center">
             <EuiFlexItem css={popoverTitleStyle}>
               <EuiTitle size="xxs">
-                <h5 className="eui-textBreakWord">
+                <h5 id={popoverTitleId} className="eui-textBreakWord">
                   {i18n.translate('unifiedFieldList.fieldTypeFilter.title', {
                     defaultMessage: 'Filter by field type',
                   })}
@@ -203,6 +211,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           <EuiContextMenuPanel
             data-test-subj={`${testSubj}Options`}
             role="menu"
+            aria-labelledby={popoverTitleId}
             items={availableFieldTypes.map((type) => {
               const fieldTypeName = getFieldTypeName(type);
               const fieldTypeCount = typeCounts?.get(type) ?? 0;
