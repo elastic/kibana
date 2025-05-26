@@ -65,7 +65,8 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           aria-label={i18n.translate('xpack.infra.dropdownButton.button.ariaLabel', {
-            defaultMessage: label,
+            defaultMessage: '{label} options',
+            values: { label },
           })}
           data-test-subj={props['data-test-subj']}
           color="text"
