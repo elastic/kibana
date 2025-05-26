@@ -62,7 +62,7 @@ const streams: StreamPutItem[] = [
             'body.text': {
               type: 'match_only_text',
             },
-            'severity_number': {
+            severity_number: {
               type: 'long',
             },
             'resource.attributes.host.name': {
