@@ -177,7 +177,7 @@ export const IntegrationStatus: React.FunctionComponent<{
         <>
           {integration?.error && (
             <>
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiCallOut
                 title={
                   <FormattedMessage
@@ -192,13 +192,12 @@ export const IntegrationStatus: React.FunctionComponent<{
               >
                 <EuiText size="s">{integration.error}</EuiText>
               </EuiCallOut>
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
             </>
           )}
 
           {integration.sync_status === 'warning' && (
             <>
-              <EuiSpacer size="m" />
               <EuiCallOut
                 title={
                   syncUninstalledIntegrations ? (
@@ -244,7 +243,7 @@ export const IntegrationStatus: React.FunctionComponent<{
               </EuiCallOut>
             </>
           )}
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
 
           {customAssets.map((customAsset) => {
             return (
@@ -288,7 +287,7 @@ export const IntegrationStatus: React.FunctionComponent<{
               >
                 {customAsset.error && (
                   <>
-                    <EuiSpacer size="m" />
+                    <EuiSpacer size="s" />
                     <EuiCallOut
                       title={
                         <FormattedMessage
@@ -303,7 +302,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                     >
                       <EuiText size="s">{customAsset.error}</EuiText>
                     </EuiCallOut>
-                    <EuiSpacer size="m" />
+                    <EuiSpacer size="s" />
                   </>
                 )}
               </EuiAccordion>
