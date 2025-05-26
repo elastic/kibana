@@ -68,7 +68,7 @@ export async function syncWiredStreamDefinitionObjects({
   await upsertTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    template: generateIndexTemplate(definition.name, isServerless),
+    template: generateIndexTemplate(definition.name),
   });
 
   await upsertDataStream({

@@ -20,23 +20,29 @@ export interface DragHandleApi {
 
 export const useDragHandleApi = ({
   panelId,
-  rowId,
+  sectionId,
 }: {
   panelId: string;
-  rowId: string;
+  sectionId?: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const { startDrag } = useGridLayoutPanelEvents({
+  const startDrag = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
-    rowId,
+    sectionId,
   });
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);
 
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
+      /**
+       * if new `startDrag` reference (which happens when, for example, panels change sections),
+       * then clean up the old event listeners
+       */
+      removeEventListenersRef.current?.();
+
       for (const handle of dragHandles) {
         if (handle === null) return;
         handle.addEventListener('mousedown', startDrag, { passive: true });

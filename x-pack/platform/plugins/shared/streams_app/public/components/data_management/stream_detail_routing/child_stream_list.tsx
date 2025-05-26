@@ -55,7 +55,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap gutterSize="s">
           <EuiText
             size="s"
             className={css`
