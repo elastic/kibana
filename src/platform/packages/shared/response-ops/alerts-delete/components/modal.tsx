@@ -40,6 +40,8 @@ import {
   DEFAULT_THRESHOLD,
   DEFAULT_THRESHOLD_ENABLED,
   DEFAULT_THRESHOLD_UNIT,
+  MAX_ALERT_DELETE_THRESHOLD_DAYS,
+  MIN_ALERT_DELETE_THRESHOLD_DAYS,
   THRESHOLD_UNITS,
 } from '../constants';
 import { useAlertDeletePreview } from '../api/preview/use_alert_delete_preview';
