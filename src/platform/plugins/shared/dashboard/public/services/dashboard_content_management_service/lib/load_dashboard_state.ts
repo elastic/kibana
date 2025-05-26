@@ -160,7 +160,6 @@ export const loadDashboardState = async ({
     version,
     timeTo,
     title,
-    sections,
   } = attributes;
 
   const timeRange =

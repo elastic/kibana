@@ -44,7 +44,13 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
+import {
+  DashboardLocatorParams,
+  DashboardPanelMap,
+  DashboardSectionMap,
+  DashboardSettings,
+  DashboardState,
+} from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import {
   LoadDashboardReturn,
@@ -174,4 +180,9 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
+  serializeLayout: () => {
+    references: Reference[];
+    panels: DashboardPanelMap;
+    sections: DashboardSectionMap;
+  };
 }

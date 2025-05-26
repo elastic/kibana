@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 import { v4 } from 'uuid';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardPanelMap, ∂DashboardSectionMap } from '..';
+import type { DashboardPanelMap, DashboardSectionMap } from '..';
 import type {
   DashboardAttributes,
   DashboardPanel,

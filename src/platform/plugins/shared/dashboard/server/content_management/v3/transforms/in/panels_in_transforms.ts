@@ -16,7 +16,10 @@ import {
 } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
-export function transformPanelsIn(widgets: DashboardAttributes['panels']): {
+export function transformPanelsIn(
+  widgets: DashboardAttributes['panels'],
+  dropSections: boolean = false
+): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
 } {
@@ -31,7 +34,10 @@ export function transformPanelsIn(widgets: DashboardAttributes['panels']): {
       sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
       (sectionPanels as DashboardPanel[]).forEach((panel) => {
         const transformed = transformPanel(panel);
-        panels.push({ ...transformed, gridData: { ...transformed.gridData, sectionId: idx } });
+        panels.push({
+          ...transformed,
+          gridData: { ...transformed.gridData, ...(!dropSections && { sectionId: idx }) },
+        });
       });
     } else {
       // this is a panel

@@ -81,7 +81,7 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
-  const { panels, references } = dashboardInternalApi.serializePanels();
+  const { panels, sections, references } = dashboardInternalApi.serializeLayout();
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -104,7 +104,10 @@ function getLocatorParams({
     ...(savedObjectId
       ? {}
       : {
-          panels: convertPanelSectionMapsToPanelsArray(panels) as DashboardLocatorParams['panels'],
+          panels: convertPanelSectionMapsToPanelsArray(
+            panels,
+            sections
+          ) as DashboardLocatorParams['panels'],
           references: references as DashboardLocatorParams['references'],
         }),
   };

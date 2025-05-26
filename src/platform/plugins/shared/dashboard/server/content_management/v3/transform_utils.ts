@@ -108,7 +108,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
       kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
     }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
-    panelsJSON: panels ? transformPanelsIn(panels) : '[]',
+    panelsJSON: panels ? transformPanelsIn(panels, true).panelsJSON : '[]',
     refreshInterval,
     ...(timeFrom && { timeFrom }),
     timeRestore,

@@ -9,9 +9,11 @@
 
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { cloneDeep, forOwn } from 'lodash';
+
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/content_management';
 import type { GridData } from '../../server/content_management';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
+import { DashboardPanel } from '../dashboard_api/types';
 
 interface IplacementDirection {
   grid: Omit<GridData, 'i'>;
@@ -51,7 +53,7 @@ export function placeClonePanel({
   }
   const beside = panelToPlaceBeside.gridData;
   const otherPanelGridData: GridData[] = [];
-  forOwn(currentPanels, (panel: DashboardPanelState) => {
+  forOwn(currentPanels, (panel: DashboardPanel) => {
     if (panel.gridData.sectionId === sectionId) {
       // only check against panels that are in the same section as the cloned panel
       otherPanelGridData.push(panel.gridData);

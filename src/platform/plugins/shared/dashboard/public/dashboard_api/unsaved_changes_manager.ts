@@ -77,7 +77,7 @@ export function initializeUnsavedChangesManager({
 
   const hasPanelChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
     tap((childrenWithChanges) => {
-      // propagate the latest serialized state back to the panels manager.
+      // propagate the latest serialized state back to the layout manager.
       for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
         const childApi = layoutManager.api.children$.value[uuid];
         if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
@@ -129,10 +129,9 @@ export function initializeUnsavedChangesManager({
 
         // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
         dashboardStateToBackup.viewMode = viewMode;
-
         // Backup latest state from children that have unsaved changes
         if (hasPanelChanges || hasControlGroupChanges) {
-          const { panels, sections, references } = layoutManager.internalApi.serializeLayout();
+          const { panels, references } = layoutManager.internalApi.serializeLayout();
           const { controlGroupInput, controlGroupReferences } =
             controlGroupManager.internalApi.serializeControlGroup();
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
