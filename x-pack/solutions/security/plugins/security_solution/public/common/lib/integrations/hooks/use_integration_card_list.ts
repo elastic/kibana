@@ -23,15 +23,8 @@ import { addPathParamToUrl } from '../../../utils/integrations';
 import { useSelectedTab } from './use_selected_tab';
 
 export type GetCardItemExtraProps = (card: IntegrationCardItem) => Partial<IntegrationCardItem>;
-interface UseAddSecurityProps {
-  activeIntegrations: GetInstalledPackagesResponse['items'];
-  getCardItemExtraProps?: GetCardItemExtraProps;
-}
 
-const useAddSecurityProps = ({
-  activeIntegrations,
-  getCardItemExtraProps,
-}: UseAddSecurityProps) => {
+const useAddSecurityProps = (activeIntegrations: GetInstalledPackagesResponse['items']) => {
   const { navigateTo, getAppUrl } = useNavigation();
   const { telemetry } = useIntegrationContext();
 
@@ -43,8 +36,6 @@ const useAddSecurityProps = ({
         ? addPathParamToUrl(card.url, ONBOARDING_PATH)
         : card.url;
       const isActive = activeIntegrations.some((integration) => integration.name === card.name);
-
-      const extraProps = getCardItemExtraProps ? getCardItemExtraProps(card) : {};
 
       return {
         ...card,
@@ -69,27 +60,24 @@ const useAddSecurityProps = ({
             navigateTo({ url, state });
           }
         },
-        ...extraProps,
       };
     },
-    [activeIntegrations, navigateTo, getAppUrl, telemetry, getCardItemExtraProps]
+    [activeIntegrations, navigateTo, getAppUrl, telemetry]
   );
 };
 
 interface UseIntegrationCardListProps {
   integrationsList: IntegrationCardItem[];
   activeIntegrations: GetInstalledPackagesResponse['items'];
-  getCardItemExtraProps?: (card: IntegrationCardItem) => Partial<IntegrationCardItem>;
 }
 export const useIntegrationCardList = ({
   integrationsList,
   activeIntegrations,
-  getCardItemExtraProps,
 }: UseIntegrationCardListProps): IntegrationCardItem[] => {
   const selectedTabResult = useSelectedTab();
   const featuredCardIds = selectedTabResult.selectedTab?.featuredCardIds;
 
-  const addSecurityProps = useAddSecurityProps({ activeIntegrations, getCardItemExtraProps });
+  const addSecurityProps = useAddSecurityProps(activeIntegrations);
 
   const integrationCards = useMemo(
     () => integrationsList.map((card) => addSecurityProps(card)),

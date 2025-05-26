@@ -22,7 +22,10 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigrationAllIntegrationsStats,
+  RuleMigrationRule,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
@@ -45,6 +48,8 @@ export interface RuleMigrationGetRulesOptions {
   size?: number;
 }
 
+/** Maximum size for searches, aggregations and terms queries */
+const QUERY_MAX_SIZE = 10_000 as const;
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
 const BULK_MAX_SIZE = 500 as const;
@@ -301,7 +306,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const aggregations: { migrationIds: AggregationsAggregationContainer } = {
       migrationIds: {
-        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: 10000 },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: QUERY_MAX_SIZE },
         aggregations: {
           status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },
@@ -328,6 +333,33 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         ?.value_as_string as string,
       last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
         ?.value_as_string as string,
+    }));
+  }
+
+  /** Retrieves the stats for the integrations of all the migration rules */
+  async getAllIntegrationsStats(): Promise<RuleMigrationAllIntegrationsStats> {
+    const index = await this.getIndexName();
+    const aggregations: { integrationIds: AggregationsAggregationContainer } = {
+      integrationIds: {
+        terms: {
+          field: 'elastic_rule.integration_ids', // aggregate by integration ids
+          exclude: '', // excluding empty string integration ids
+          size: QUERY_MAX_SIZE,
+        },
+      },
+    };
+    const result = await this.esClient
+      .search({ index, aggregations, _source: false })
+      .catch((error) => {
+        this.logger.error(`Error getting all integrations stats: ${error.message}`);
+        throw error;
+      });
+
+    const integrationsAgg = result.aggregations?.integrationIds as AggregationsStringTermsAggregate;
+    const buckets = (integrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
+    return buckets.map((bucket) => ({
+      id: `${bucket.key}`,
+      total_rules: bucket.doc_count,
     }));
   }
 
@@ -424,7 +456,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    * */
   async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
     const index = await this.getIndexName();
-    const rulesToBeDeleted = await this.get(migrationId, { size: 10000 });
+    const rulesToBeDeleted = await this.get(migrationId, { size: QUERY_MAX_SIZE });
     const rulesToBeDeletedDocIds = rulesToBeDeleted.data.map((rule) => rule.id);
 
     return rulesToBeDeletedDocIds.map((docId) => ({

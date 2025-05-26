@@ -11,11 +11,24 @@ export const START_MIGRATION_INTEGRATIONS_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.migrationIntegrations.title',
   { defaultMessage: 'Add SIEM data with Integrations' }
 );
+
 export const MIGRATION_MISSING_TEXT = i18n.translate(
   'xpack.securitySolution.onboarding.migrationIntegrations.missingMigration.title',
-  { defaultMessage: 'Complete a rule migration to receive integration recommendations' }
+  { defaultMessage: 'Complete a rule migration to get integration recommendations' }
 );
+
 export const MIGRATION_MISSING_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.migrationIntegrations.missingMigration.button',
   { defaultMessage: 'Start rule migration' }
 );
+
+export const DETECTED_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.onboarding.migrationIntegrations.detectedTabLabel',
+  { defaultMessage: 'Detected' }
+);
+
+export const TOTAL_RULES = (count: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.migrationIntegrations.totalRules', {
+    values: { count },
+    defaultMessage: '{count} rules',
+  });

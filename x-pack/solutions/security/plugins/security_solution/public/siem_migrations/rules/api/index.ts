@@ -26,6 +26,7 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
   SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -44,6 +45,7 @@ import type {
   GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationRulesResponse,
   CreateRuleMigrationRulesRequestBody,
+  GetRuleMigrationIntegrationsStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -309,9 +311,23 @@ export interface GetIntegrationsParams {
 /** Retrieves existing integrations. */
 export const getIntegrations = async ({
   signal,
-}: GetIntegrationsParams): Promise<GetRuleMigrationIntegrationsResponse> => {
+}: GetIntegrationsParams = {}): Promise<GetRuleMigrationIntegrationsResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationIntegrationsResponse>(
     SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
+    { version: '1', signal }
+  );
+};
+
+export interface GetIntegrationsStatsParams {
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves existing integrations. */
+export const getIntegrationsStats = async ({
+  signal,
+}: GetIntegrationsParams = {}): Promise<GetRuleMigrationIntegrationsStatsResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationIntegrationsStatsResponse>(
+    SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
     { version: '1', signal }
   );
 };
