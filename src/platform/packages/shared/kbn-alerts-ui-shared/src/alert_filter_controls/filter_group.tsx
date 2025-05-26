@@ -296,6 +296,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       const initialState: Partial<ControlGroupRuntimeState> = {
         ...defaultState,
         chainingSystem,
+        initialChildControlState: {},
         ignoreParentSettings: {
           ignoreValidations: true,
         },
