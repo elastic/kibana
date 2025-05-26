@@ -33,7 +33,7 @@ import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { TABS_ENABLED } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
-import { useStataManagers } from './state_management/hooks/use_state_managers';
+import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
 
 export interface MainRouteProps {
@@ -67,7 +67,7 @@ export const DiscoverMainRoute = ({
       })
   );
 
-  const { internalState, runtimeStateManager } = useStataManagers({
+  const { internalState, runtimeStateManager } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,

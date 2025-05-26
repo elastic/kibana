@@ -21,22 +21,22 @@ import { TABS_ENABLED } from '../../../../constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 
-interface UseStataManagers {
+interface UseStateManagers {
   customizationContext: DiscoverCustomizationContext;
   services: DiscoverServices;
   urlStateStorage: IKbnUrlStateStorage;
 }
 
-interface UseStataManagersReturn {
+interface UseStateManagersReturn {
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
 }
 
-export const useStataManagers = ({
+export const useStateManagers = ({
   services,
   urlStateStorage,
   customizationContext,
-}: UseStataManagers): UseStataManagersReturn => {
+}: UseStateManagers): UseStateManagersReturn => {
   // syncing with the _t part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
