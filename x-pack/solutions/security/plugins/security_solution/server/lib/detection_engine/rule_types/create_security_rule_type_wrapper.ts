@@ -63,6 +63,7 @@ import {
   SECURITY_RULE_ID,
   SECURITY_TO,
 } from './utils/apm_field_names';
+import { checkErrorDetails } from './utils/check_error_details';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -567,7 +568,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                   frozenIndicesQueriedCount,
                 },
-                userError: result.userError,
+                userError:
+                  result.userError ||
+                  result.errors.every((err) => checkErrorDetails(err).isUserError),
               });
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
@@ -597,6 +600,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: `An error occurred during rule execution: message: "${errorMessage}"`,
+              userError: checkErrorDetails(errorMessage).isUserError,
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,

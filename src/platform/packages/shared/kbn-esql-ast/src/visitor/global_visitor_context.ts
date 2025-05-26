@@ -14,6 +14,7 @@ import type {
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRenameExpression,
+  ESQLAstRerankCommand,
   ESQLColumn,
   ESQLFunction,
   ESQLIdentifier,
@@ -112,11 +113,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitRowCommand) break;
         return this.visitRowCommand(parent, commandNode, input as any);
       }
-      // TODO: uncomment this when the command is implemented
-      // case 'ts': {
-      //   if (!this.methods.visitTimeseriesCommand) break;
-      //   return this.visitTimeseriesCommand(parent, commandNode, input as any);
-      // }
+      case 'ts': {
+        if (!this.methods.visitTimeseriesCommand) break;
+        return this.visitTimeseriesCommand(parent, commandNode, input as any);
+      }
       case 'show': {
         if (!this.methods.visitShowCommand) break;
         return this.visitShowCommand(parent, commandNode, input as any);
@@ -180,6 +180,10 @@ export class GlobalVisitorContext<
       case 'join': {
         if (!this.methods.visitJoinCommand) break;
         return this.visitJoinCommand(parent, commandNode as ESQLAstJoinCommand, input as any);
+      }
+      case 'rerank': {
+        if (!this.methods.visitRerankCommand) break;
+        return this.visitRerankCommand(parent, commandNode as ESQLAstRerankCommand, input as any);
       }
       case 'change_point': {
         if (!this.methods.visitChangePointCommand) break;
@@ -384,6 +388,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitJoinCommand'> {
     const context = new contexts.JoinCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitJoinCommand', context, input);
+  }
+
+  public visitRerankCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstRerankCommand,
+    input: types.VisitorInput<Methods, 'visitRerankCommand'>
+  ): types.VisitorOutput<Methods, 'visitRerankCommand'> {
+    const context = new contexts.RerankCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitRerankCommand', context, input);
   }
 
   public visitChangePointCommand(
