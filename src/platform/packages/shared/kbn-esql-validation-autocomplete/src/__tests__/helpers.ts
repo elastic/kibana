@@ -12,14 +12,12 @@ import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
+import { METADATA_FIELDS } from '../shared/constants';
 
-export const metadataFields: ESQLFieldWithMetadata[] = [
-  { name: '_id', type: 'keyword' },
-  { name: '_index', type: 'keyword' },
-  { name: '_score', type: 'double' },
-  { name: '_type', type: 'keyword' },
-  { name: '_source', type: 'keyword' },
-];
+export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((it) => ({
+  name: it,
+  type: 'keyword',
+}));
 
 export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
