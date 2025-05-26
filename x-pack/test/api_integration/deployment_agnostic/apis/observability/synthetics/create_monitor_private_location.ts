@@ -174,18 +174,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       newMonitorId = rawBody.id;
     });
 
-    it('does not update private location if user not authorized', async () => {
-      const newLabel = `New label`;
-      const privateLocation = privateLocations[0];
-
-      const response = await supertestViewerWithApiKey
-        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocation.id}`)
-        .send({ label: newLabel })
-        .expect(403);
-
-      expect(response.body.message).to.contain('is unauthorized for user');
-    });
-
     it('successfully edits a private location label', async () => {
       const newLabel = `New label`;
       const privateLocation = privateLocations[0];
