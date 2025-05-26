@@ -218,13 +218,14 @@ export const TemplateForm = ({
             lifecycle: wizardData.logistics.lifecycle
               ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
               : undefined,
+            ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
           },
           ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
         };
 
         return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
       },
-    []
+    [dataStreamOptions]
   );
 
   const onWizardContentChange = useCallback((content: Forms.Content<WizardContent>) => {
