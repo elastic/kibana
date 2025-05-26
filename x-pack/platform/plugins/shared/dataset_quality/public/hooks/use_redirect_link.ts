@@ -122,6 +122,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
     share.url.locators,
     selector,
     sendTelemetry,
+    forceDiscover,
   ]);
 };
 
