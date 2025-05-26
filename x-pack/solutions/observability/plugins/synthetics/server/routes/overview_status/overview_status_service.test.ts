@@ -174,35 +174,8 @@ describe('current status route', () => {
           "disabledCount": 0,
           "disabledMonitorQueryIds": Array [],
           "disabledMonitorsCount": 0,
-          "down": 1,
-          "downConfigs": Object {
-            "id2": Object {
-              "configId": "id2",
-              "isEnabled": true,
-              "isStatusAlertEnabled": false,
-              "locationLabel": "Europe - Germany",
-              "locations": Array [
-                Object {
-                  "id": "europe_germany",
-                  "label": "Europe - Germany",
-                  "status": "down",
-                },
-              ],
-              "monitorQueryId": "id2",
-              "name": "test monitor 2",
-              "projectId": "project-id",
-              "schedule": "1",
-              "spaceId": undefined,
-              "tags": Array [
-                "tag-1",
-                "tag-2",
-              ],
-              "timestamp": "2022-09-15T16:19:16.724Z",
-              "type": "browser",
-              "updated_at": undefined,
-              "urls": "undefined",
-            },
-          },
+          "down": 0,
+          "downConfigs": Object {},
           "enabledMonitorQueryIds": Array [
             "id1",
             "id2",
@@ -216,7 +189,6 @@ describe('current status route', () => {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationLabel": "Asia/Pacific - Japan",
               "locations": Array [
                 Object {
                   "id": "asia_japan",
@@ -226,6 +198,7 @@ describe('current status route', () => {
               ],
               "monitorQueryId": "id1",
               "name": "test monitor 1",
+              "overallStatus": "up",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -242,16 +215,21 @@ describe('current status route', () => {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationLabel": "Asia/Pacific - Japan",
               "locations": Array [
                 Object {
                   "id": "asia_japan",
                   "label": "Asia/Pacific - Japan",
                   "status": "up",
                 },
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "down",
+                },
               ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
+              "overallStatus": "down",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -351,35 +329,8 @@ describe('current status route', () => {
           "disabledCount": 0,
           "disabledMonitorQueryIds": Array [],
           "disabledMonitorsCount": 0,
-          "down": 1,
-          "downConfigs": Object {
-            "id2": Object {
-              "configId": "id2",
-              "isEnabled": true,
-              "isStatusAlertEnabled": false,
-              "locationLabel": "Europe - Germany",
-              "locations": Array [
-                Object {
-                  "id": "europe_germany",
-                  "label": "Europe - Germany",
-                  "status": "down",
-                },
-              ],
-              "monitorQueryId": "id2",
-              "name": "test monitor 2",
-              "projectId": "project-id",
-              "schedule": "1",
-              "spaceId": undefined,
-              "tags": Array [
-                "tag-1",
-                "tag-2",
-              ],
-              "timestamp": "2022-09-15T16:19:16.724Z",
-              "type": "browser",
-              "updated_at": undefined,
-              "urls": "undefined",
-            },
-          },
+          "down": 0,
+          "downConfigs": Object {},
           "enabledMonitorQueryIds": Array [
             "id1",
             "id2",
@@ -393,7 +344,6 @@ describe('current status route', () => {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationLabel": "Asia/Pacific - Japan",
               "locations": Array [
                 Object {
                   "id": "asia_japan",
@@ -403,6 +353,7 @@ describe('current status route', () => {
               ],
               "monitorQueryId": "id1",
               "name": "test monitor 1",
+              "overallStatus": "up",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -419,16 +370,21 @@ describe('current status route', () => {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationLabel": "Asia/Pacific - Japan",
               "locations": Array [
                 Object {
                   "id": "asia_japan",
                   "label": "Asia/Pacific - Japan",
                   "status": "up",
                 },
+                Object {
+                  "id": "europe_germany",
+                  "label": "Europe - Germany",
+                  "status": "down",
+                },
               ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
+              "overallStatus": "down",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -484,7 +440,6 @@ describe('current status route', () => {
               "configId": "id1",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationLabel": "Asia/Pacific - Japan",
               "locations": Array [
                 Object {
                   "id": "asia_japan",
@@ -494,6 +449,7 @@ describe('current status route', () => {
               ],
               "monitorQueryId": "id1",
               "name": "test monitor 1",
+              "overallStatus": "pending",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -510,7 +466,6 @@ describe('current status route', () => {
               "configId": "id2",
               "isEnabled": true,
               "isStatusAlertEnabled": false,
-              "locationLabel": "Asia/Pacific - Japan",
               "locations": Array [
                 Object {
                   "id": "asia_japan",
@@ -525,6 +480,7 @@ describe('current status route', () => {
               ],
               "monitorQueryId": "id2",
               "name": "test monitor 2",
+              "overallStatus": "pending",
               "projectId": "project-id",
               "schedule": "1",
               "spaceId": undefined,
@@ -740,8 +696,8 @@ describe('current status route', () => {
     it.each([
       [['US Central QA'], 1],
       [['North America - US Central'], 1],
-      [['North America - US Central', 'US Central QA'], 2],
-      [undefined, 2],
+      [['North America - US Central', 'US Central QA'], 1],
+      [undefined, 1],
     ])('handles pending count when using location filters', async (locations, pending) => {
       const getAll = jest.fn().mockResolvedValue([
         {
