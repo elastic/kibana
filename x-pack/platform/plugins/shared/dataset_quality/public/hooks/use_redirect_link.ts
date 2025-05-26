@@ -70,8 +70,11 @@ export const useRedirectLink = <T extends BasicDataStream>({
     navigate: () => void;
     isLogsExplorerAvailable: boolean;
   }>(() => {
-    const isLogsExplorerAvailable = !forceDiscover &&
-      isLogsExplorerAppAccessible && !!logsExplorerLocator && dataStreamStat.type === 'logs';
+    const isLogsExplorerAvailable =
+      !forceDiscover &&
+      isLogsExplorerAppAccessible &&
+      !!logsExplorerLocator &&
+      dataStreamStat.type === 'logs';
     const config = isLogsExplorerAvailable
       ? buildLogsExplorerConfig({
           locator: logsExplorerLocator,
