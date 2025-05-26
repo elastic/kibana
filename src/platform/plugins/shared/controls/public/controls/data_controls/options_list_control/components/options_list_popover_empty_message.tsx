@@ -20,12 +20,12 @@ export const OptionsListPopoverEmptyMessage = ({
 }: {
   showOnlySelected: boolean;
 }) => {
-  const { api, stateManager } = useOptionsListContext();
+  const { componentApi } = useOptionsListContext();
 
   const [searchTechnique, searchStringValid, field] = useBatchedPublishingSubjects(
-    stateManager.searchTechnique,
-    stateManager.searchStringValid,
-    api.field$
+    componentApi.searchTechnique$,
+    componentApi.searchStringValid$,
+    componentApi.field$
   );
 
   const noResultsMessage = useMemo(() => {
