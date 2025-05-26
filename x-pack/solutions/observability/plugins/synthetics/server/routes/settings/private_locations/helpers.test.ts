@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { allLocationsToClientContract } from './helpers';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
 
 const testLocations = {
   locations: [
@@ -112,5 +113,79 @@ describe('toClientContract', () => {
         tags: ['a tag'],
       },
     ]);
+  });
+});
+
+describe('updatePrivateLocationMonitors', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const LOCATION_ID = 'test-location-id';
+  const NEW_LABEL = 'New location label';
+  const mockMonitors = [
+    {
+      id: 'monitor-1',
+      attributes: {
+        name: 'Test Monitor 1',
+        locations: [{ id: 'other-location', label: 'Other Location' }],
+        // Other required monitor fields
+        type: 'http',
+        enabled: true,
+        schedule: { number: '10', unit: 'm' },
+      },
+    },
+    {
+      id: 'monitor-2',
+      attributes: {
+        name: 'Test Monitor 2',
+        locations: [
+          { id: 'different-location', label: 'Different Location' },
+          { id: LOCATION_ID, label: 'Old Label' },
+        ],
+        // Other required monitor fields
+        type: 'http',
+        enabled: true,
+        schedule: { number: '5', unit: 'm' },
+      },
+    },
+  ];
+
+  it('updates monitor locations with the new label', async () => {
+    // Mock the monitorConfigRepository
+    const mockMonitorConfigRepository = {
+      findDecryptedMonitors: jest.fn().mockResolvedValue(mockMonitors),
+      bulkUpdate: jest.fn().mockResolvedValue({}),
+    };
+
+    // Call the function
+    await updatePrivateLocationMonitors({
+      locationId: LOCATION_ID,
+      newLocationLabel: NEW_LABEL,
+      monitorConfigRepository: mockMonitorConfigRepository as any,
+    });
+
+    // Verify findDecryptedMonitors was called correctly
+    expect(mockMonitorConfigRepository.findDecryptedMonitors).toHaveBeenCalledWith({
+      spaceId: ALL_SPACES_ID,
+      filter: `synthetics-monitor.attributes.locations.id:("${LOCATION_ID}")`,
+    });
+
+    // Verify bulkUpdate was called with the updated monitors
+    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenCalledWith({
+      monitors: [
+        mockMonitors[0],
+        {
+          ...mockMonitors[1],
+          attributes: {
+            ...mockMonitors[1].attributes,
+            locations: [
+              mockMonitors[1].attributes.locations[0],
+              { ...mockMonitors[1].attributes.locations[1], label: NEW_LABEL },
+            ],
+          },
+        },
+      ],
+    });
   });
 });
