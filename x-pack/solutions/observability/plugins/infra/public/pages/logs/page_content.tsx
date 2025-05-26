@@ -13,13 +13,13 @@ import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
+  ALL_DATASETS_LOCATOR_ID,
   OBSERVABILITY_ONBOARDING_LOCATOR,
   type ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { safeDecode } from '@kbn/rison';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { isDevMode } from '@kbn/xstate-utils';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
@@ -107,15 +107,15 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
               if (logFilterEncoded) {
                 const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
-
                 locatorParams = {
                   timeRange: logFilter?.timeRange,
                   query: logFilter?.query,
                   filters: logFilter?.filters,
+                  refreshInterval: logFilter?.refreshInterval
                 };
               }
 
-              share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate(locatorParams);
+              share.url.locators.get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)?.navigate(locatorParams);
               return null;
             }}
           />
