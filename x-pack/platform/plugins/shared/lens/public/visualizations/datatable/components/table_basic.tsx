@@ -25,6 +25,7 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -586,13 +587,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 };
 
-const datatableContainerStyles = css`
+const datatableContainerStyles = ({euiTheme}: UseEuiTheme) => css`
   height: 100%;
   overflow: auto hidden;
   user-select: text;
+  // color: ${euiTheme.colors.text};
 
   .lnsTableCell--multiline {
     white-space: pre-wrap;
+    color:  ${euiTheme.colors.danger};
+    outline: 0,
+    border: 0,
   }
 
   .lnsTableCell--left {
@@ -601,6 +606,7 @@ const datatableContainerStyles = css`
 
   .lnsTableCell--right {
     text-align: right;
+    color: blue;
   }
 
   .lnsTableCell--center {
