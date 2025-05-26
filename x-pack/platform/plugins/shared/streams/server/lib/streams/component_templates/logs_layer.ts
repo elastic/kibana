@@ -124,7 +124,7 @@ export const baseMappings: Record<string, MappingProperty> = {
         subobjects: false,
       },
     }
-  }
+  },
   'span.id': {
     path: 'span_id',
     type: 'alias',
