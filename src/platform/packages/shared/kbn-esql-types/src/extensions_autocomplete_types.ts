@@ -14,7 +14,7 @@ export interface RecommendedQuery {
   query: string;
 }
 
-export interface ResolveIndexResponseItem {
+interface ResolveIndexResponseItem {
   name: string;
 }
 

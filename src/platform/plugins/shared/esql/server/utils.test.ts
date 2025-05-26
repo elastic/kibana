@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
 import { findMatchingIndicesFromPattern, checkSourceExistence } from './utils';
-import type { RecommendedQuery, ResolveIndexResponse } from './types';
 
 describe('Extensions registry utils', () => {
   describe('checkSourceExistence', () => {

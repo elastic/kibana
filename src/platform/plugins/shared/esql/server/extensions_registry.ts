@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
+import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
-import type { ResolveIndexResponse, RecommendedQuery } from './types';
 
 /**
  * `ESQLExtensionsRegistry` serves as a central hub for managing and retrieving extrensions of the ES|QL editor.

@@ -8,8 +8,8 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
+import type { ResolveIndexResponse } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
-import type { ResolveIndexResponse } from '../types';
 
 export const registerESQLExtensionsRoute = (
   router: IRouter,
