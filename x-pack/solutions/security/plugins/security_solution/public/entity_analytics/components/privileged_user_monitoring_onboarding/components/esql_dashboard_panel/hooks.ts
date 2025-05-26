@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
@@ -48,7 +48,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
 
   const { deleteQuery, setQuery } = useGlobalTime();
 
-  const index = ''; // TODO
+  const index = getIndexPatternFromESQLQuery(tableQuery);
 
   const response = result?.response;
 
@@ -59,7 +59,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
       ],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
-  }, [tableQuery, response]);
+  }, [tableQuery, response, index]);
 
   useQueryInspector({
     deleteQuery,

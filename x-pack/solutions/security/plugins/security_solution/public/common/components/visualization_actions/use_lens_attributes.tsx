@@ -25,7 +25,6 @@ import {
 } from './utils';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useKibana } from '../../lib/kibana';
 import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
 export const useLensAttributes = ({
@@ -93,18 +92,6 @@ export const useLensAttributes = ({
 
     return [];
   }, [detailName, pageName]);
-
-  // const esqlQuery = useMemo(
-  //   () => (esql ? buildESQLWithKQLQuery(esql, globalQuery.query as string) : undefined),
-  //   [esql, globalQuery.query]
-  // );
-  const { uiSettings } = useKibana().services;
-
-  // const kqlFilterQuery = useMemo(
-  //   () => buildEsQuery(dataView, [globalQuery], [], getEsQueryConfig(uiSettings)),
-  //   [dataView, globalQuery, uiSettings]
-  // );
-
   const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
 
   const attrs: LensAttributes = useMemo(
@@ -141,7 +128,7 @@ export const useLensAttributes = ({
               meta: {
                 alias: null,
                 disabled: false,
-                key: 'bleh',
+                key: 'globalFilterKey',
                 negate: false,
                 params: {},
                 type: 'string',

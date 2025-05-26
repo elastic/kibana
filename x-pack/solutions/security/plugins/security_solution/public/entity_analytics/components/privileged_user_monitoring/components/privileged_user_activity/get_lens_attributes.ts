@@ -29,7 +29,6 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
           maxLines: 1,
           showSingleSeries: true,
           layout: 'list',
-          // shouldTruncate: true,
         },
         valueLabels: 'hide',
         fittingFunction: 'Linear',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +44,9 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   timerange,
   pageSize = DEFAULT_PAGE_SIZE,
   showInspectTable = false,
+  title,
 }: {
+  title: ReactNode;
   stackByField: string;
   generateVisualizationQuery: (stackByValue: string) => string;
   generateTableQuery: (
@@ -102,7 +105,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
         <VisualizationEmbeddable
           stackByField={stackByField}
           esql={visualizationQuery}
-          data-test-subj="embeddable-matrix-histogram"
+          data-test-subj="genericDashboardEmbeddableHistogram"
           getLensAttributes={getLensAttributes}
           height={260}
           id="GenericDashboard"
@@ -142,15 +145,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
                   `}
                 >
                   {showInspectTable && (
-                    <InspectButton
-                      queryId={DASHBOARD_TABLE_QUERY_ID}
-                      title={
-                        <FormattedMessage
-                          id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
-                          defaultMessage="Risk Summary Table"
-                        />
-                      }
-                    />
+                    <InspectButton queryId={DASHBOARD_TABLE_QUERY_ID} title={title} />
                   )}
                 </div>
                 <EuiBasicTable

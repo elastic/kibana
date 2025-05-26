@@ -48,18 +48,16 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
   const [selectedStackByOption, setSelectedStackByOption] =
     useState<VisualizationStackByOption>(defaultStackByOption);
 
+  const title = (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.grantedRights.title"
+      defaultMessage="Granted rights"
+    />
+  );
+
   return (
-    <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
-      <HeaderSection
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.grantedRights.title"
-            defaultMessage="Granted rights"
-          />
-        }
-        titleSize="s"
-        outerDirection={'column'}
-      >
+    <EuiPanel hasBorder hasShadow={false} data-test-subj="privMonSampleDashboard">
+      <HeaderSection title={title} titleSize="s" outerDirection={'column'}>
         <EuiSelect
           onChange={setSelectedChartOptionCallback}
           options={GRANTED_RIGHTS_STACK_BY_OPTIONS}
@@ -71,6 +69,7 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
       </HeaderSection>
 
       <EsqlDashboardPanel<TableItemType>
+        title={title}
         timerange={bucketTimerange}
         stackByField={selectedStackByOption.value}
         getLensAttributes={getLensAttributes}

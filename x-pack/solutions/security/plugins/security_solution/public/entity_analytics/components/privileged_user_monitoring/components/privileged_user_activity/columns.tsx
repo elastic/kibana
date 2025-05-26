@@ -49,7 +49,9 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
     user != null
       ? getRowItemsWithActions({
           values: isArray(user) ? user : [user],
-          fieldName, // TODO can we have an array of field names and do an OR?
+          // TODO can we have an array of field names and do an OR?
+          // that would be helpful for when the source indices have different field names
+          fieldName,
           idPrefix: 'privileged-user-monitoring-privileged-user',
           render: (item) => <UserName userName={item} />,
           displayCount: 1,
@@ -69,7 +71,7 @@ const getTargetUserColumn = (fieldName: string) => ({
     user != null
       ? getRowItemsWithActions({
           values: isArray(user) ? user : [user],
-          fieldName, // TODO can we have an array of field names and do an OR?
+          fieldName,
           idPrefix: 'privileged-user-monitoring-target-user',
           render: (item) => <UserName userName={item} />,
           displayCount: 1,
@@ -226,6 +228,7 @@ export const buildAuthenticationsColumns = (
       />
     ),
     render: (method: string) => {
+      // TODO: Implement method rendering logic
       return '// TODO';
     },
   },

@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import { UserDetailsLink } from '../../common/components/links';
+import { NetworkDetailsLink } from '../../common/components/links';
 import { TruncatableText } from '../../common/components/truncatable_text';
 import { getEmptyTagValue } from '../../common/components/empty_value';
 import { NetworkPanelKey } from '../../flyout/network_details';
@@ -20,31 +20,26 @@ interface Props {
 
 const NetworkDetailsComponent: React.FC<Props> = ({ ip }) => {
   const { openFlyout } = useExpandableFlyoutApi();
-  const openNetworkDetailsSidePanel = useCallback(
-    (e: React.SyntheticEvent) => {
-      e.preventDefault();
-
-      openFlyout({
-        right: {
-          id: NetworkPanelKey,
-          params: {
-            ip,
-            flowTarget: FlowTargetSourceDest.source,
-          },
+  const openNetworkDetailsSidePanel = useCallback(() => {
+    openFlyout({
+      right: {
+        id: NetworkPanelKey,
+        params: {
+          ip,
+          flowTarget: FlowTargetSourceDest.source,
         },
-      });
-    },
-    [ip, openFlyout]
-  );
+      },
+    });
+  }, [ip, openFlyout]);
 
   if (!ip) {
     return getEmptyTagValue();
   }
 
   return (
-    <UserDetailsLink userName={ip} onClick={openNetworkDetailsSidePanel}>
+    <NetworkDetailsLink ip={ip} onClick={openNetworkDetailsSidePanel}>
       <TruncatableText>{ip}</TruncatableText>
-    </UserDetailsLink>
+    </NetworkDetailsLink>
   );
 };
 

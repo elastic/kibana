@@ -30,19 +30,31 @@ import {
   GRANTED_RIGHTS_STACK_BY,
 } from './constants';
 
+const toggleOptionsConfig = {
+  [VisualizationToggleOptions.GRANTED_RIGHTS]: {
+    generateEsqlSource: getGrantedRightsEsqlSource,
+    buildColumns: buildGrantedRightsColumns,
+    stackByOptions: GRANTED_RIGHTS_STACK_BY,
+  },
+  [VisualizationToggleOptions.ACCOUNT_SWITCHES]: {
+    generateEsqlSource: getAccountSwitchesEsqlSource,
+    buildColumns: buildAccountSwitchesColumns,
+    stackByOptions: ACCOUNT_SWITCH_STACK_BY,
+  },
+  [VisualizationToggleOptions.AUTHENTICATIONS]: {
+    generateEsqlSource: getAuthenticationsEsqlSource,
+    buildColumns: buildAuthenticationsColumns,
+    stackByOptions: AUTHENTICATIONS_STACK_BY,
+  },
+};
+
 export const usePrivilegedUserActivityParams = (
   selectedToggleOption: VisualizationToggleOptions
 ) => {
-  const esqlSource = useMemo(() => {
-    switch (selectedToggleOption) {
-      case VisualizationToggleOptions.GRANTED_RIGHTS:
-        return getGrantedRightsEsqlSource();
-      case VisualizationToggleOptions.ACCOUNT_SWITCHES:
-        return getAccountSwitchesEsqlSource();
-      case VisualizationToggleOptions.AUTHENTICATIONS:
-        return getAuthenticationsEsqlSource();
-    }
-  }, [selectedToggleOption]);
+  const esqlSource = useMemo(
+    () => toggleOptionsConfig[selectedToggleOption].generateEsqlSource(),
+    [selectedToggleOption]
+  );
 
   const generateTableQuery = useMemo(() => generateListESQLQuery(esqlSource), [esqlSource]);
   const generateVisualizationQuery = useMemo(
@@ -52,16 +64,10 @@ export const usePrivilegedUserActivityParams = (
 
   const { openRightPanel } = useExpandableFlyoutApi();
 
-  const columns = useMemo(() => {
-    switch (selectedToggleOption) {
-      case VisualizationToggleOptions.GRANTED_RIGHTS:
-        return buildGrantedRightsColumns(openRightPanel);
-      case VisualizationToggleOptions.ACCOUNT_SWITCHES:
-        return buildAccountSwitchesColumns(openRightPanel);
-      case VisualizationToggleOptions.AUTHENTICATIONS:
-        return buildAuthenticationsColumns(openRightPanel);
-    }
-  }, [selectedToggleOption, openRightPanel]);
+  const columns = useMemo(
+    () => toggleOptionsConfig[selectedToggleOption].buildColumns(openRightPanel),
+    [selectedToggleOption, openRightPanel]
+  );
 
   return {
     getLensAttributes,
@@ -106,15 +112,5 @@ export const useToggleOptions = () =>
     []
   );
 
-export const useStackByOptions = (selectedToggleOption: VisualizationToggleOptions) => {
-  if (selectedToggleOption === VisualizationToggleOptions.GRANTED_RIGHTS) {
-    return GRANTED_RIGHTS_STACK_BY;
-  }
-  if (selectedToggleOption === VisualizationToggleOptions.ACCOUNT_SWITCHES) {
-    return ACCOUNT_SWITCH_STACK_BY;
-  }
-  if (selectedToggleOption === VisualizationToggleOptions.AUTHENTICATIONS) {
-    return AUTHENTICATIONS_STACK_BY;
-  }
-  return [];
-};
+export const useStackByOptions = (selectedToggleOption: VisualizationToggleOptions) =>
+  toggleOptionsConfig[selectedToggleOption].stackByOptions;

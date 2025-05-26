@@ -102,6 +102,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EsqlDashboardPanel<TableItemType>
+            title={TITLE}
             stackByField={selectedStackByOption.value}
             timerange={{ from, to }}
             getLensAttributes={getLensAttributes}
@@ -116,27 +117,3 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
     </EuiPanel>
   );
 };
-
-// [x, it doesn't sow much when not enough data] TODO Fix visualizations not working
-// [x] TODO add timerange filter to table
-// [x] TODO Make the columns renderer as good as possible
-// [x] TODO add missing column from slack
-// [x] TODO cell action?
-// [x] TODO Fix when timerange changes the table doesn't refetch
-// [x] TODO refetch when timerange/kql/filter changes
-// [x] TODO Expand event panel
-// [x] TODO update pagination button text
-// [x] TODO Make stack by options dynamic
-// [x] TODO add query url for saving state between page refresh
-// [x] TODO add inspect button to the table
-// [x] TODO make sure cell actions are targeting the right field, it might have to be dynamic depending of where the data comes from
-
-// To create PR
-// [ ] TODO Fix types
-// [ ] TODO unit and integration tests
-// [ ] TODO add join to esql query
-
-// Next steps
-// [ ] TODO View all events by privileged users DISCOVERY LINK
-// [ ] TODO Should cell actions target many fields with an or?
-// [ ] make data generator
