@@ -92,7 +92,6 @@ import {
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import { PerfTest } from '../../../app_plugin/perf_test/perf_test';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -685,7 +684,19 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   return (
-<div> <PerfTest/></div>
+    <WorkspacePanelWrapper
+      framePublicAPI={framePublicAPI}
+      visualizationId={visualization.activeId}
+      datasourceStates={datasourceStates}
+      datasourceMap={datasourceMap}
+      visualizationMap={visualizationMap}
+      isFullscreen={isFullscreen}
+      lensInspector={lensInspector}
+      getUserMessages={getUserMessages}
+      displayOptions={chartSizeSpec}
+    >
+      {renderWorkspace()}
+    </WorkspacePanelWrapper>
   );
 });
 
@@ -781,9 +792,55 @@ export const VisualizationWrapper = ({
   }
 
   return (
-  <div>
-    <PerfTest/>
-   </div>
+    <div
+      className="lnsExpressionRenderer eui-scrollBar"
+      css={[
+        lnsExpressionRendererStyle,
+        `
+       .domDroppable--active & {
+          filter: blur(${euiTheme.size.xs}) !important;
+          opacity: .25 !important;
+          transition: filter ${euiTheme.animation.normal} ease-in-out, opacity ${euiTheme.animation.normal} ease-in-out;
+        }`,
+      ]}
+      data-shared-items-container
+      data-render-complete={isRenderComplete}
+      data-shared-item=""
+      data-render-error={hasRequestError ? dataLoadingErrorTitle : undefined}
+      ref={nodeRef}
+    >
+      <ExpressionRendererComponent
+        padding={displayOptions?.noPadding ? undefined : 'm'}
+        expression={expression!}
+        allowCache={true}
+        searchContext={searchContext}
+        searchSessionId={searchSessionId}
+        onEvent={onEvent}
+        hasCompatibleActions={hasCompatibleActions}
+        // @ts-expect-error upgrade typescript v4.9.5
+        onData$={onData$}
+        onRender$={onRenderHandler}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
+        executionContext={executionContext}
+        renderMode="edit"
+        renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null);
+          const visibleErrorMessages = errorsFromRequest.length
+            ? errorsFromRequest
+            : errorMessage
+            ? [errorMessage]
+            : [];
+
+          return (
+            <WorkspaceErrors
+              errors={visibleErrorMessages}
+              title={dataLoadingErrorTitle}
+              onRender={() => setHasRequestError(true)}
+            />
+          );
+        }}
+      />
+    </div>
   );
 };
 
