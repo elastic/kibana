@@ -21,14 +21,9 @@ export interface SamplesFetchInput {
   streamName: string;
 }
 
-export function createSamplesFetchActor({
-  data,
-  timeState$,
-}: Pick<SimulationMachineDeps, 'data' | 'timeState$'>) {
+export function createSamplesFetchActor({ data }: Pick<SimulationMachineDeps, 'data'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const abortController = new AbortController();
-    // const { asAbsoluteTimeRange } = timeState$.getValue();
-
     const { query, filters, time } = input.search;
 
     return new Observable((observer) => {

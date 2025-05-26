@@ -34,7 +34,6 @@ export interface SimulationSearchParams extends Required<QueryState> {
 
 export interface SimulationInput {
   processors: ProcessorDefinitionWithUIAttributes[];
-  search?: SimulationSearchParams;
   streamName: string;
 }
 
@@ -45,7 +44,6 @@ export type SimulationEvent =
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-  | { type: 'simulation.changeSearchParams'; search: Partial<SimulationSearchParams> }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.reset' };
@@ -57,7 +55,6 @@ export interface SimulationContext {
   processors: ProcessorDefinitionWithUIAttributes[];
   samples: SampleDocument[];
   samplingCondition?: Condition;
-  search: SimulationSearchParams;
   simulation?: Simulation;
   streamName: string;
 }

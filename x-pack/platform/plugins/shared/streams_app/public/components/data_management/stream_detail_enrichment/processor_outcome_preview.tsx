@@ -12,17 +12,15 @@ import {
   EuiEmptyPrompt,
   EuiSpacer,
   EuiProgress,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import useAsync from 'react-use/lib/useAsync';
-import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -30,7 +28,6 @@ import {
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -42,11 +39,9 @@ export const ProcessorOutcomePreview = () => {
 
   return (
     <>
-      <div>
-        <PreviedDocumentsSearchBar />
-        <EuiSpacer size="s" />
+      <EuiFlexItem grow={false}>
         <PreviewDocumentsGroupBy />
-      </div>
+      </EuiFlexItem>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
@@ -54,44 +49,44 @@ export const ProcessorOutcomePreview = () => {
   );
 };
 
-const PreviedDocumentsSearchBar = () => {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
-  const search = useSimulatorSelector((state) => state.context.search);
-  const { changeSearchParams } = useStreamEnrichmentEvents();
+// const PreviedDocumentsSearchBar = () => {
+//   const {
+//     dependencies: {
+//       start: { data },
+//     },
+//   } = useKibana();
+//   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+//   const search = useSimulatorSelector((state) => state.context.search);
+//   const { changeSearchParams } = useStreamEnrichmentEvents();
 
-  const { value: streamDataView } = useAsync(() =>
-    data.dataViews.create({
-      title: definition.stream.name,
-      timeFieldName: '@timestamp',
-    })
-  );
+//   const { value: streamDataView } = useAsync(() =>
+//     data.dataViews.create({
+//       title: definition.stream.name,
+//       timeFieldName: '@timestamp',
+//     })
+//   );
 
-  return (
-    streamDataView && (
-      <StreamsAppSearchBar
-        showDatePicker
-        showFilterBar
-        showQueryInput
-        filters={search.filters}
-        query={search.query}
-        isRefreshPaused={search.refreshInterval.pause}
-        refreshInterval={search.refreshInterval.value}
-        onFiltersUpdated={(filters) => changeSearchParams({ filters })}
-        onQuerySubmit={({ query, dateRange }) => changeSearchParams({ query, time: dateRange })}
-        onRefresh={() => changeSearchParams({})}
-        onRefreshChange={({ isPaused, refreshInterval }) => {
-          changeSearchParams({ refreshInterval: { pause: isPaused, value: refreshInterval } });
-        }}
-        indexPatterns={[streamDataView]}
-      />
-    )
-  );
-};
+//   return (
+//     streamDataView && (
+//       <StreamsAppSearchBar
+//         showDatePicker
+//         showFilterBar
+//         showQueryInput
+//         filters={search.filters}
+//         query={search.query}
+//         isRefreshPaused={search.refreshInterval.pause}
+//         refreshInterval={search.refreshInterval.value}
+//         onFiltersUpdated={(filters) => changeSearchParams({ filters })}
+//         onQuerySubmit={({ query, dateRange }) => changeSearchParams({ query, time: dateRange })}
+//         onRefresh={() => changeSearchParams({})}
+//         onRefreshChange={({ isPaused, refreshInterval }) => {
+//           changeSearchParams({ refreshInterval: { pause: isPaused, value: refreshInterval } });
+//         }}
+//         indexPatterns={[streamDataView]}
+//       />
+//     )
+//   );
+// };
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',

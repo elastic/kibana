@@ -31,7 +31,6 @@ import {
   SimulationEvent,
   Simulation,
   SimulationMachineDeps,
-  SimulationSearchParams,
 } from './types';
 import { PreviewDocsFilterOption, defaultSearch } from './simulation_documents_search';
 import {
@@ -87,13 +86,6 @@ export const simulationMachine = setup({
     storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
       samples: params.samples,
     })),
-    storeSearchParams: assign(
-      ({ context }, params: { search: Partial<SimulationSearchParams> }) => {
-        return {
-          search: { ...context.search, ...params.search },
-        };
-      }
-    ),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
@@ -139,7 +131,7 @@ export const simulationMachine = setup({
       ),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBFlHSXplFXVDPRl1ZVlNUwsES2VJR3oRw0dDeXUXR04ZX390MODSUKCI+hTYMDxy0WqUYLrEKdcx9T15ecNJPVlO6X6rQ3V6SddDdzd5K-llRyLEDrcIkUhMJJ5OCwQhJWD0ABU+0qh2OlXqkhmikc8kkhmU6hm+n08meg3xzU4-3aUy0kmmyiBINWEKhsBhSWitCiYCwyP4giOtXRpxGynoBhmhkMsipLlJ5isb2U13u8mk6qmRl0TOWGzBrJ57Nh0TidA4PAOgrRoHqhL07w6elpBL0GjJlkcDoBvWkcr0k0ahl1gVBZEN0JNEF5uwtFQFNREIoQ0oU9GmOlusr9KrJNkULlkmLdk2l6g0IZWEXBkKNHPo0awsfYknjVWtwttpzmdnkuNubk6KscZL7dkL8g+-3V0hllf1kRQxCFOCwKAAXkuoKR+e3E8QTggRo43r9NGOs6m87J6L0epxnZcFPIOvOw-Qlyu15u6DvW1b90PMVmnUdwvC8GxnSuMkXCUSCvE6B4mimN9ggbMAACNCAwYgoi3ABhM0YFgGs2XrWJ4jjAChSTLsEF+aQJXuTgNT0J9Og9HF7FVV4Az9RwCVkVDNmjLCcLwuhCMokixFgPBKHoHAADNSgAClE7DcLAAAVdAwAASjWPV3w08SCKIuBd1RTtxCkWwQJfRxpFAjwNUmPNOBvGQix0dUNHuV5hJIdCxNw8zpNIWT5LYRSVLAJJ1MwzSeV0tADKM0M0NMsLJIs2AWzbazaNso8WJvbR-leTRhlkExFRTXp7G0bQOmkcZXCEvxgWMtCsEIHAIC3ABlHA0CYJsSIgEgwA-YhUkIABrGbYFG8a4AKXZYnigBBKI8FhKyO2KjEVE4JrGnmRwvSuiYPLsVRJ1eB9XAEq4gsiPqBuG1aJtIeLIU5cb8CU2E0HoFaxomja8C2pJdv2spLRRI6D2TQx5jeSQeh6X4XxkBUBhse6qUmctB1e+R3sU9l4oIOghp6iIqDAABHDAUBSNLiDwEjDsA5N6SaehbhYr08SlOqBiLM7CU8kYri+Nr1CpnAaaSOmoAZzKmdZ9nObAbnef-ZH+bowWzvslVZVuFVMRgnRhZmOR3AZS6qaSHDl3pxmwSm4gZqXealvBn3iCoT2dr2g6kYTGjUbouQb1UVQ5g8IwVFkUdJiUUDdCcAE3Wmd3PeG0O-qSAH6CBvAQaSMHmSZiO4ajxHCpRw9nbGDx5kHbQvT0MkCUYrHrnkHR3C0QEgWIQho3gSoG+Kor45KvsHT0ZjWPYyROJPFpqSxhRug1Tgp6WbXgs-AhVw3LdqJtEqxRvOZBJUMeRnUAmlRvNr+-+XRMTlmkFTFAEAmz3xsvUQs9BP7qjxP8DeFIyQakUAhF2fxdAbyptlCSUApLmnnrHB+doRhKF6P8ekWhuh23qpILG6YaqT0QqfZ0VNPqDXpj9OAEDjpSF6M0CYk41StC9EYD01wmq2FlAGB4rw+yUy6ovSIqsdjq1LhfMOusOZgC5jzHhK8MQPAdNoDebhpTox6E8eqXxRi3BGM5U+E8R7F2IF7TWod9FAVsGdAk-9nSunlIPboYw5jZjmE5ekytfDeCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBAU7Rz09WUdOR0NDSU7TCwRLWVb6WSd5bXlDTj15aUNff3Qw4NJQoIjouLowAGUwHCTYhIOcNFhy0WqUYLrEQ1dJJVnZKacbPXu+q3kvej1HSRuOZ6SSAzQLEBrcIkVZLdYkegpWBgPAXSpXG6VeqGWZ6eiSdQzTiSbqtEHSL4DQzqeidVz3VzSeQzeTKRwQqErJhJPJwWCEJKwegAKjR-EE11qWKk6gUtPkJOU6ll+n08kplkMykenFZ6i6Ctkknk6mUHLh0LI3N5sH5SWitCiYCwYqqEsxoGxPWUfyVL0Msl1LnV5isNOUP1as1mOKMunNgUtpGtTttAs28Q4PEu7qlnsQyrxnRaOMkSr0Gg1zXobNG0iD-wDnQTywiyZ5qbt9AgzpRWYq4pqImlCC6cpNOm6gfrEcpNkULiNhI6XWpGhb8KtHb56Z7WD77EkA7dQ+It1H7Ts8gVpIeEcclOvdkX8jprNmc1kG8t9BQEH3sKJsE9AAGYZFgEBCmgOBMK6GJ5uIBaBvKswkqyJbapSQx2B43TSGW7haOyfiQhawF-gBnIbGBzqQYwxDQbB2bormw75ggsqcCh+GxhhkiUuoxK0jYhitMohFtN+wE9gARoQGDEFEKB0AAwlsMCwO2NpdrEmZwaxZ4jsy0h-K0nBMnohJDPxoYDI4ii6tM1L-PWjh+lJGyyfJinKVAamZppYiwHglD0DgIGlAAFF5ClOgAKugYAAJSAa2CIxT5qnqXA+mnueImPOokyONI6juCVr4mLZNiyPichaBG9ZWdSHnpWAcmxb5-nbIFwWheFUUZfFiUpVRbUdZlfnZecR45nlI42HIIwKEYyplloVX9AGNKcNo2iifhdKtK1kRYIQOAQL5OynEw+6aWASQ8vat34CBApoPQsA3XdBQorED0AIJRHgAq5ZKbGIaOxI0mWOgKDMeEhv0Ik1rqnSCW4-xqidYW2g9BB0DsZERFQYAAI4YCgKRoGAxB4JpYMepDxoAvQ3Tmc0JKyl0WE2PQyq7T0COEeoOM4HjSQE1ARNAST5OU9TtP06Qh7HvBEP1CzXG2GW4w6xGBJYTobOynI7gmqoPQ40kCnEFdxMwhAJBgL+xCpIQADWLtjcQVC24DwOg8xg7g4Z7FyLVqiqO0HhGCosiPp0ShlboThshWJrW7b9uyzCD1PfQL14G9SQfT7fvEMQAcg2UwcnqH55m3V7SAq42jNHolJKiZutBuJ+GSRCxCED28CVD7c0N0ZzKmdOzJWSCGq6Hir5goSarmfIOMUWAk9M-Ui789ePHoR8mG2UyDn6ObLLL3oONDV1017wh9SaI4SijKyxpaKahvVWWeg38jRtBBIGZo8wSI+3oGdC6V1vpwBfhrKQoxHiGHss0FaHgDCbW+NrQMAZpjOA+EVa8YsJZSxlmlX28sqZgBpnTMeId94oJaMtFobhVxeBcJSe4H9ug9FKh0Qiuss6VxztQpBYdma2C4kqVk+gtRWSZF3U0+J2jTnaCVY0otfDeCAA */
   id: 'simulation',
   context: ({ input }) => ({
     detectedSchemaFields: [],
@@ -148,7 +140,6 @@ export const simulationMachine = setup({
     processors: input.processors,
     samples: [],
     samplingCondition: composeSamplingCondition(input.processors),
-    search: input.search ?? defaultSearch,
     streamName: input.streamName,
   }),
   initial: 'loadingSamples',
@@ -160,10 +151,6 @@ export const simulationMachine = setup({
     'dateRange.update': '.loadingSamples',
     'simulation.changePreviewDocsFilter': {
       actions: [{ type: 'storePreviewDocsFilter', params: ({ event }) => event }],
-    },
-    'simulation.changeSearchParams': {
-      target: '.loadingSamples',
-      actions: [{ type: 'storeSearchParams', params: ({ event }) => event }],
     },
     'simulation.reset': {
       target: '.idle',
@@ -238,7 +225,7 @@ export const simulationMachine = setup({
         src: 'fetchSamples',
         input: ({ context }) => ({
           condition: context.samplingCondition,
-          search: context.search,
+          search: defaultSearch,
           streamName: context.streamName,
         }),
         onSnapshot: [
@@ -324,7 +311,7 @@ export const createSimulationMachineImplementations = ({
   timeState$,
 }: SimulationMachineDeps): MachineImplementationsFrom<typeof simulationMachine> => ({
   actors: {
-    fetchSamples: createSamplesFetchActor({ data, timeState$ }),
+    fetchSamples: createSamplesFetchActor({ data }),
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
     subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
