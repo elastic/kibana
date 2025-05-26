@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               },
             },
-            generic: {
+            entity: {
               properties: {
                 asset: {
                   properties: {
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                   },
                 },
-                name: {
+                id: {
                   type: 'keyword',
                 },
               },
