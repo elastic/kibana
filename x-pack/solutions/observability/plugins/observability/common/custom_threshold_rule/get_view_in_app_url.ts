@@ -44,6 +44,7 @@ export const getViewInAppUrl = ({
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
   const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
+  timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
     query: '',
