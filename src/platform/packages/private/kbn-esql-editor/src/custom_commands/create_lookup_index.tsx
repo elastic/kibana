@@ -72,11 +72,12 @@ export const useLookupIndexCommand = (
   const { euiTheme } = useEuiTheme();
   const inQueryLookupIndices = useRef<string[]>([]);
 
+  const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
 
   const lookupIndexBadgeStyle = css`
-    .${lookupIndexAddBadgeClassName} {
+    .${lookupIndexBaseBadgeClassName} {
       cursor: pointer;
       display: inline-block;
       vertical-align: middle;
@@ -88,26 +89,17 @@ export const useLookupIndexCommand = (
       font-weight: 500;
       white-space: nowrap;
       text-decoration: none;
-      border: 1px solid ${euiTheme.colors.danger};
       border-radius: 3px;
       text-align: start;
+      border-width: 1px;
+      border-style: solid;
+    }
+    .${lookupIndexAddBadgeClassName} {
+      border-color: ${euiTheme.colors.danger};
       background-color: ${euiTheme.colors.danger};
     }
     .${lookupIndexEditBadgeClassName} {
-      cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
-      padding-inline: 2px;
-      max-inline-size: 100%;
-      font-size: 0.8571rem;
-      line-height: 18px;
-      font-weight: 500;
-      white-space: nowrap;
-      text-decoration: none;
-      border: 1px solid ${euiTheme.colors.primary};
-      border-radius: 3px;
-      text-align: start;
+      border-color: ${euiTheme.colors.primary};
       background-color: ${euiTheme.colors.primary};
     }
   `;
@@ -181,8 +173,6 @@ export const useLookupIndexCommand = (
       // TODO extract aliases as well
       const lookupIndices: string[] = inQueryLookupIndices.current;
 
-      // TODO parse the query and find the lookup indices in the query that do not exist
-
       for (let i = 0; i < lookupIndices.length; i++) {
         const lookupIndex = lookupIndices[i];
 
@@ -205,9 +195,10 @@ export const useLookupIndexCommand = (
               options: {
                 isWholeLine: false,
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-                inlineClassName: isExistingIndex
-                  ? lookupIndexEditBadgeClassName
-                  : lookupIndexAddBadgeClassName,
+                inlineClassName:
+                  lookupIndexBaseBadgeClassName +
+                  ' ' +
+                  (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
               },
             },
           ]);

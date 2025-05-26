@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy, useCallback, useEffect, useState } from 'react';
+import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
@@ -47,7 +47,7 @@ interface IndexInfo {
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const isMounted = useMountedState();
 
-  const { runRequest, cancelRequest } = useCancellableSearch(deps.data);
+  const { runRequest, cancelRequest, isLoading } = useCancellableSearch(deps.data);
 
   const [columns, setColumns] = useState<DatatableColumn[]>([]);
   const [rows, setRows] = useState<DataTableRecord[]>([]);
@@ -75,18 +75,41 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     [deps.data.dataViews, isMounted, props.indexName]
   );
 
+  const dataViewColumns = useMemo<DatatableColumn[]>(() => {
+    if (!dataView) return [];
+    return dataView.fields;
+  }, [dataView]);
+
   const fetchRows = useCallback(async () => {
     cancelRequest();
-    const { rawResponse } = await runRequest(
-      {
-        params: {
-          index: props.indexName,
+    try {
+      const response = await runRequest(
+        {
+          params: {
+            index: props.indexName,
+          },
         },
-      },
-      { searchStrategy: ESQL_SEARCH_STRATEGY }
-    );
-    setRows(rawResponse.hits.hits);
-  }, [cancelRequest, props.indexName, runRequest]);
+        { searchStrategy: ESQL_SEARCH_STRATEGY }
+      );
+
+      if (!response || !isMounted()) {
+        return;
+      }
+      const hits = response.rawResponse.hits.hits;
+
+      const resultRows: DataTableRecord[] = hits.map((hit: unknown, idx: number) => {
+        return {
+          id: String(idx),
+          raw: hit,
+          flattened: hit,
+        } as unknown as DataTableRecord;
+      });
+
+      setRows(resultRows);
+    } catch (e) {
+      // TODO error handling
+    }
+  }, [cancelRequest, isMounted, props.indexName, runRequest]);
 
   useEffect(
     function fetchIndexInfo() {
@@ -98,7 +121,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     [fetchRows]
   );
 
-  if (!dataView) return null;
+  if (!dataView || !dataViewColumns.length) return null;
 
   return (
     <KibanaContextProvider
@@ -125,7 +148,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
               share={deps.share}
               {...props}
               dataView={dataView}
-              columns={columns}
+              columns={dataViewColumns}
               rows={rows}
             />
           </CellActionsProvider>
