@@ -21,6 +21,7 @@ import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 import { SharingSavedObjectProps } from './types';
 import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
+import { TextBasedPersistedState } from './datasources/form_based/types';
 
 type Reference = LensSavedObject['references'][number];
 
@@ -78,6 +79,19 @@ export function getLensAttributeService(
       managed: boolean;
     }> => {
       const { meta, item } = await savedObjectStore.load(savedObjectId);
+
+      const state = item.attributes.state as LensSavedObjectAttributes['state'];
+      if (state.datasourceStates.textBased) {
+        const textBasedState = state.datasourceStates.textBased as TextBasedPersistedState;
+        if (Object.values(textBasedState.layers).length > 0) {
+          Object.keys(textBasedState.layers).forEach((layerId) => {
+            if ('index' in textBasedState.layers[layerId]) {
+              textBasedState.layers[layerId].indexPatternId = (textBasedState.layers[layerId] as unknown as { index: string }).index;
+              delete (textBasedState.layers[layerId] as unknown as { index?: string }).index;
+            }
+          }
+        }
+      }
       return {
         attributes: {
           ...item.attributes,
