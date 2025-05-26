@@ -7,6 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -62,6 +63,7 @@ export const renderApp = ({
     kibanaEnvironment,
     licensing: pluginsStart.licensing,
   };
+  const queryClient = new QueryClient();
 
   // render APM feedback link in global help menu
   setHelpExtension(coreStart);
@@ -82,11 +84,13 @@ export const renderApp = ({
           },
         }}
       >
-        <ApmAppRoot
-          apmPluginContextValue={apmPluginContextValue}
-          pluginsStart={pluginsStart}
-          apmServices={apmServices}
-        />
+        <QueryClientProvider client={queryClient}>
+          <ApmAppRoot
+            apmPluginContextValue={apmPluginContextValue}
+            pluginsStart={pluginsStart}
+            apmServices={apmServices}
+          />
+        </QueryClientProvider>
       </KibanaThemeProvider>
     </KibanaRenderContextProvider>,
     element
