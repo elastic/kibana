@@ -63,7 +63,7 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         'body.text': {
           type: 'match_only_text',
         },
-        'severity.number': {
+        'severity_number': {
           type: 'long',
         },
         'resource.attributes.host.name': {

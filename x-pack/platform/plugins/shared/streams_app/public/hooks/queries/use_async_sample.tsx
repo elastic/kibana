@@ -218,11 +218,9 @@ const getRuntimeMappings = (
   return Object.fromEntries(
     getConditionFields(condition)
       .filter((field) => !mappedFields.includes(field.name))
-      .flatMap((field) => [
-        [
-          field.name,
-          { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
-        ],
+      .map((field) => [
+        field.name,
+        { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
       ])
   );
 };

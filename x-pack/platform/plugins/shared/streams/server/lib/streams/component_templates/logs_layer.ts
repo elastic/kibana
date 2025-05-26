@@ -67,13 +67,16 @@ export const baseFields: FieldDefinition = {
   span_id: {
     type: 'keyword',
   },
+  event_name: {
+    type: 'keyword',
+  },
   severity_text: {
     type: 'keyword',
   },
   'body.text': {
     type: 'match_only_text',
   },
-  'severity.number': {
+  'severity_number': {
     type: 'long',
   },
   'resource.attributes.host.name': {
@@ -113,6 +116,15 @@ export const baseMappings: Record<string, MappingProperty> = {
       },
     },
   },
+  scope: {
+    type: 'object',
+    properties: {
+      attributes: {
+        type: 'object',
+        subobjects: false,
+      },
+    }
+  }
   'span.id': {
     path: 'span_id',
     type: 'alias',

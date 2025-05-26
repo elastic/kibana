@@ -28,7 +28,6 @@ export function validateAncestorFields({
         continue;
       }
       if (
-        Object.hasOwn(fields, fieldName) &&
         Object.entries(ancestor.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
             attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
@@ -49,8 +48,8 @@ export function validateAncestorFields({
       for (const prefix of namespacePrefixes) {
         const prefixedName = `${prefix}${fieldName}`;
         if (
-          Object.prototype.hasOwnProperty.call(fields, prefixedName) ||
-          Object.prototype.hasOwnProperty.call(ancestor.ingest.wired.fields, prefixedName)
+          Object.hasOwn(fields, prefixedName) ||
+          Object.hasOwn(ancestor.ingest.wired.fields, prefixedName)
         ) {
           throw new MalformedFieldsError(
             `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
@@ -58,7 +57,7 @@ export function validateAncestorFields({
         }
       }
       // check the otelMappings - they are aliases and are not allowed to have the same name as a field
-      if (Object.keys(baseMappings).some((otelFieldName) => otelFieldName === fieldName)) {
+      if (fieldName in baseMappings) {
         throw new MalformedFieldsError(
           `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
         );

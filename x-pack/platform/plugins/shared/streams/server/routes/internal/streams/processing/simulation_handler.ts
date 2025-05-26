@@ -149,9 +149,11 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
 }: SimulateProcessingDeps) => {
-  const stream = await streamsClient.getStream(params.path.name);
   /* 0. Retrieve required data to prepare the simulation */
-  const streamIndex = await getStreamIndex(scopedClusterClient, streamsClient, params.path.name);
+  const [stream, streamIndex] = await Promise.all([
+    streamsClient.getStream(params.path.name),
+    getStreamIndex(scopedClusterClient, streamsClient, params.path.name)
+  ]);
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);
