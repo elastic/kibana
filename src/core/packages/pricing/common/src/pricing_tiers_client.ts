@@ -26,7 +26,7 @@ export class PricingTiersClient implements IPricingTiersClient {
     return this.tiers.enabled;
   }
 
-  isFeatureAvailable(featureId: string): boolean {
+  isFeatureAvailable<TFeatureId extends string>(featureId: TFeatureId): boolean {
     /**
      * We assume that when the pricing tiers are disabled, features are available globally
      * and not constrained by any product tier.

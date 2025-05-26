@@ -10,3 +10,5 @@ export interface ElasticAgentVersionInfo {
   agentBaseVersion: string;
   agentDockerImageVersion: string;
 }
+
+export type CompleteOnboardingFeatureId = 'observability-complete-onboarding';

@@ -15,5 +15,5 @@ export interface PricingProductFeature {
 }
 
 export interface IPricingTiersClient {
-  isFeatureAvailable(featureId: string): boolean;
+  isFeatureAvailable<TFeatureId extends string>(featureId: TFeatureId): boolean;
 }
