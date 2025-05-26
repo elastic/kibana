@@ -9,7 +9,7 @@ yarn storybook apm &
 STORYBOOK_PID=$!
 
 echo "Waiting for Storybook to be ready..."
-sleep 10
+sleep 50
 
 echo "Running Storybook tests..."
 yarn test:storybook --url "$STORYBOOK_URL"
