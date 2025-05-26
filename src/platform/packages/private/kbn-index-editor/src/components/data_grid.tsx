@@ -33,7 +33,6 @@ interface ESQLDataGridProps {
   columns: DatatableColumn[];
   query: AggregateQuery;
   flyoutType?: 'overlay' | 'push';
-  isTableView?: boolean;
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
   controlColumnIds?: string[];
@@ -53,7 +52,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
-    (props.initialColumns || (props.isTableView ? props.columns : [])).map((c) => c.name)
+    (props.initialColumns || props.columns).map((c) => c.name)
   );
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
@@ -193,7 +192,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       showTimeCol
       enableComparisonMode
       sort={sortOrder}
-      ariaLabelledBy="esqlDataGrid"
+      ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}
       renderDocumentView={renderDocumentView}
       showFullScreenButton={false}

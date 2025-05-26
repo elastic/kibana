@@ -54,7 +54,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const [dataView, setDataView] = useState<DataView>();
 
   // Index
-  const [indexInfo, setIndexInfp] = useState<IndexInfo>();
+  const [indexInfo, setIndexInfo] = useState<IndexInfo>();
 
   const { coreStart, ...restDeps } = deps;
 
@@ -77,7 +77,32 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const dataViewColumns = useMemo<DatatableColumn[]>(() => {
     if (!dataView) return [];
-    return dataView.fields;
+
+    return (
+      dataView.fields
+        // Exclude metadata fields. TODO check if this is the right way to do it
+        // @ts-ignore
+        .filter((field) => field.spec.metadata_field !== true)
+        .map((field) => {
+          return {
+            name: field.name,
+            id: field.name,
+            isNull: field.isNull,
+            meta: {
+              type: field.type,
+              params: {
+                id: field.name,
+                sourceParams: {
+                  fieldName: field.name,
+                },
+              },
+              aggregatable: field.aggregatable,
+              searchable: field.searchable,
+              esTypes: field.esTypes,
+            },
+          } as DatatableColumn;
+        })
+    );
   }, [dataView]);
 
   const fetchRows = useCallback(async () => {
@@ -97,11 +122,11 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       }
       const hits = response.rawResponse.hits.hits;
 
-      const resultRows: DataTableRecord[] = hits.map((hit: unknown, idx: number) => {
+      const resultRows: DataTableRecord[] = hits.map((hit: any, idx: number) => {
         return {
           id: String(idx),
-          raw: hit,
-          flattened: hit,
+          raw: hit._source,
+          flattened: hit._source,
         } as unknown as DataTableRecord;
       });
 
