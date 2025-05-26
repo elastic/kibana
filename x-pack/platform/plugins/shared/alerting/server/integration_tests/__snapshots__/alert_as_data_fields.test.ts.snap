@@ -140,6 +140,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
     "labels": Object {
       "dynamic": true,
       "required": false,
@@ -231,6 +237,12 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "labels": Object {
       "dynamic": true,
@@ -324,6 +336,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
     "labels": Object {
       "dynamic": true,
       "required": false,
@@ -416,6 +434,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
     "labels": Object {
       "dynamic": true,
       "required": false,
@@ -488,6 +512,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
   },
 }
 `;
@@ -531,6 +561,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
   },
 }
 `;
@@ -573,6 +609,12 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
   },
 }
@@ -664,6 +706,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: observability.rules.custom_threshold 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "kibana.alert.context": Object {
       "array": false,
@@ -700,6 +754,12 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
   },
 }
@@ -9734,6 +9794,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
     "slo.id": Object {
       "array": false,
       "required": false,
@@ -10055,6 +10121,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
     "labels": Object {
       "required": false,
       "type": "object",
@@ -10198,6 +10270,12 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "labels": Object {
       "required": false,
@@ -10343,6 +10421,12 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
+    },
     "labels": Object {
       "required": false,
       "type": "object",
@@ -10486,6 +10570,12 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "labels": Object {
       "required": false,
@@ -10636,6 +10726,12 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "labels": Object {
       "required": false,
