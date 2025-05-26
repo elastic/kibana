@@ -76,7 +76,7 @@ export const baseFields: FieldDefinition = {
   'body.text': {
     type: 'match_only_text',
   },
-  'severity_number': {
+  severity_number: {
     type: 'long',
   },
   'resource.attributes.host.name': {
@@ -123,7 +123,7 @@ export const baseMappings: Record<string, MappingProperty> = {
         type: 'object',
         subobjects: false,
       },
-    }
+    },
   },
   'span.id': {
     path: 'span_id',
