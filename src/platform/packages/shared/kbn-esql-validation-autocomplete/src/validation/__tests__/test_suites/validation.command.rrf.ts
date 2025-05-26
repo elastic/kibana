@@ -58,9 +58,9 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
   (SORT doubleField ASC NULLS LAST)
 | RRF`,
             [
-              '[RRF] _id metadata must be selected in the FROM command.',
-              '[RRF] _index metadata must be selected in the FROM command.',
-              '[RRF] _score metadata must be selected in the FROM command.',
+              '[RRF] The FROM command is missing the _id METADATA field.',
+              '[RRF] The FROM command is missing the _index METADATA field.',
+              '[RRF] The FROM command is missing the _score METADATA field.',
             ]
           );
         });

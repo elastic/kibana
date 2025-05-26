@@ -716,7 +716,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Combines multiple result sets with different scoring functions into a single result set.',
     }),
-    declaration: `RRF`, // TODO: update when options are added
+    declaration: `RRF`,
     examples: ['… FORK (LIMIT 1) (LIMIT 2) | RRF'],
     suggest: suggestForRrf,
     validate: validateRrf,

@@ -54,7 +54,7 @@ function buildMissingMetadataMessage(
   return {
     location: command.location,
     text: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.rrfMissingMetadata', {
-      defaultMessage: `[RRF] {metadataField} metadata must be selected in the FROM command.`,
+      defaultMessage: `[RRF] The FROM command is missing the {metadataField} METADATA field.`,
       values: { metadataField },
     }),
     type: 'error',
