@@ -20,7 +20,7 @@ export function registerPricingRoutes(
 ) {
   router.get(
     {
-      path: '/api/core/pricing',
+      path: '/internal/core/pricing',
       security: {
         authz: {
           enabled: false,
@@ -30,6 +30,7 @@ export function registerPricingRoutes(
           enabled: 'optional',
         },
       },
+      options: { access: 'internal' },
       validate: false,
     },
     async (_context, _req, res) => {
