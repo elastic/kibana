@@ -386,11 +386,31 @@ interface ExceptionListEntry {
   namespace_type: string;
 }
 
+export interface ResponseActionsRuleTemplate {
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
+  response_actions?: TelemetryEvent;
+}
+export interface RulesParamsResponseActionsEntry {
+  actionTypeId: '.endpoint' | '.osquery';
+  params:
+    | {
+        command: string;
+        comment?: string;
+      }
+    | {
+        query: string;
+      };
+}
+
 interface DetectionRuleParms {
   ruleId: string;
   version: number;
   type: string;
   exceptionsList: ExceptionListEntry[];
+  responseActions: RulesParamsResponseActionsEntry[];
 }
 
 export interface RuleSearchResult {

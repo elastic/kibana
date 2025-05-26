@@ -15,6 +15,7 @@ import type {
   IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
@@ -54,6 +55,8 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+import { findRulesSo } from '@kbn/alerting-plugin/server/data/rule';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -218,6 +221,8 @@ export interface ITelemetryReceiver {
       unknown
     >
   >;
+
+  fetchResponseActionsRules(): Promise<SavedObjectsFindResponse<RawRule, Record<string, unknown>>>;
 
   fetchDetectionExceptionList(
     listId: string,
@@ -747,6 +752,34 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
     return this.esClient().search<RuleSearchResult>(query, { meta: true });
+  }
+
+  /**
+   * Find elastic rules SOs which are the rules that have immutable set to true and are of a particular rule type
+   * @returns custom elastic rules SOs with response actions enabled
+   */
+  public async fetchResponseActionsRules() {
+    if (this.soClient === undefined || this.soClient === null) {
+      throw Error(
+        'saved object client is unavailable: cannot retrieve custom detection rules with response actions enabled'
+      );
+    }
+
+    const timeFrom = `alert.updated_at >= ${moment.utc().subtract(24, 'hours').valueOf()}`;
+    const enabledCustomRules = `alert.attributes.params.immutable: false AND alert.attributes.enabled: true`;
+    const responseActionsRules = `alert.attributes.params.responseActions: *`;
+    const combinedFilters = [enabledCustomRules, responseActionsRules, timeFrom].join(' AND ');
+
+    return findRulesSo({
+      savedObjectsClient: this.soClient,
+      savedObjectsFindOptions: {
+        filter: combinedFilters,
+        perPage: this.maxRecords,
+        page: 1,
+        sortField: 'updatedAt',
+        sortOrder: 'desc',
+      },
+    });
   }
 
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
