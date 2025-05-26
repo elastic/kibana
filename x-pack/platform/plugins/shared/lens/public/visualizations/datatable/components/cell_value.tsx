@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiLink, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { PaletteOutput } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
@@ -79,7 +79,7 @@ export const createGridCell = (
           data-test-subj="lnsTableCellContent"
           className={classNames({
             'lnsTableCell--multiline': fitRowToContent,
-            [`lnsTableCell--${currentAlignment}`]: true,
+            [`lnsTableCell--${currentAlignment}`]: true, 
           })}
         >
           <EuiLink
@@ -106,6 +106,11 @@ export const createGridCell = (
           'lnsTableCell--colored': colorMode !== 'none',
           [`lnsTableCell--${currentAlignment}`]: true,
         })}
+        // css= {{
+        //   color: fitRowToContent ? euiTheme.euiTheme.colors.danger: euiTheme.euiTheme.colors.text,
+        //   outline: 0,
+        //   border: 0,
+        // }}
       />
     );
   };
