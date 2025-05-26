@@ -15,6 +15,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
+  CanAddNewSection,
   CanExpandPanels,
   HasLastSavedChildState,
   HasSerializedChildState,
@@ -47,6 +48,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   DashboardLocatorParams,
   DashboardPanelMap,
+  DashboardPanelState,
   DashboardSectionMap,
   DashboardSettings,
   DashboardState,
@@ -61,16 +63,10 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
-export type DashboardPanel = { gridData: GridData & { sectionId?: string } } & HasType;
-export interface DashboardSection {
-  gridData: Pick<GridData, 'i' | 'y'>; // sections only have a vertical position for grid data
-  title: string;
-  collapsed: boolean;
-}
-
+export type DashboardPanel = Pick<DashboardPanelState, 'gridData'> & HasType;
 export interface DashboardLayout {
-  panels: { [uuid: string]: DashboardPanel };
-  sections: { [uuid: string]: DashboardSection };
+  panels: { [uuid: string]: DashboardPanel }; // partial of DashboardPanelState
+  sections: DashboardSectionMap;
 }
 
 export interface DashboardChildState {
@@ -112,6 +108,7 @@ export interface DashboardCreationOptions {
 }
 
 export type DashboardApi = CanExpandPanels &
+  CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
   HasLastSavedChildState &

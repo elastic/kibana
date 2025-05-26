@@ -126,19 +126,18 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     timeRestore: false,
     viewMode: 'view',
     panels: {},
+    sections: {},
     ...overrides,
   };
 }
 
-export function getMockDashboardPanels<WithSections extends boolean | undefined = undefined>(
-  withSections?: WithSections,
+export function getMockDashboardPanels(
+  withSections: boolean = false,
   overrides?: {
     panels?: DashboardPanelMap;
-    sections?: WithSections extends true ? DashboardSectionMap : undefined;
+    sections?: DashboardSectionMap;
   }
-): WithSections extends false | undefined
-  ? { panels: DashboardPanelMap }
-  : { panels: DashboardPanelMap; sections: DashboardSectionMap } {
+): { panels: DashboardPanelMap; sections: DashboardSectionMap } {
   const panels = {
     '1': {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
@@ -152,7 +151,7 @@ export function getMockDashboardPanels<WithSections extends boolean | undefined 
     },
     ...overrides?.panels,
   };
-  if (!withSections) return { panels } as any;
+  if (!withSections) return { panels, sections: {} };
 
   return {
     panels: {
@@ -169,8 +168,24 @@ export function getMockDashboardPanels<WithSections extends boolean | undefined 
       },
     },
     sections: {
-      section1: { id: 'section1', title: 'Section One', collapsed: true, order: 1 },
-      section2: { id: 'section2', title: 'Section Two', collapsed: false, order: 2 },
+      section1: {
+        id: 'section1',
+        title: 'Section One',
+        collapsed: true,
+        gridData: {
+          y: 6,
+          i: 'section1',
+        },
+      },
+      section2: {
+        id: 'section2',
+        title: 'Section Two',
+        collapsed: false,
+        gridData: {
+          y: 7,
+          i: 'section2',
+        },
+      },
       ...overrides?.sections,
     },
   } as any;

@@ -426,9 +426,11 @@ export function initializeLayoutManager(
             maxY = Math.max(maxY, y + h);
           }
         );
+
         // add the new section
         newLayout.sections[newId] = {
-          gridData: { i: newId, y: maxY + 1 },
+          id: newId,
+          gridData: { i: newId, y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',
           }),

@@ -101,6 +101,7 @@ export const DashboardGrid = ({
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
+            id: widget.id,
             gridData: {
               i: widget.id,
               y: widget.row,
