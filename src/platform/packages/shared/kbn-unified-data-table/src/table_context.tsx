@@ -20,7 +20,6 @@ export interface DataTableContext {
   getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
   dataView: DataView;
-  isDarkMode: boolean;
   selectedDocsState: UseSelectedDocsState;
   valueToStringConverter: ValueToStringConverter;
   componentsTourSteps?: Record<string, string>;
