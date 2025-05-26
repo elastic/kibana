@@ -9,6 +9,17 @@
 
 import { setup } from './helpers';
 
+jest.mock('../../definitions/commands', () => {
+  const actual = jest.requireActual('../../definitions/commands');
+  const modifiedDefinitions = actual.commandDefinitions.map((def: any) =>
+    def.name === 'rrf' ? { ...def, hidden: false } : def
+  );
+  return {
+    ...actual,
+    commandDefinitions: modifiedDefinitions,
+  };
+});
+
 describe('autocomplete.suggest', () => {
   describe('RRF', () => {
     it('does not suggest RRF in the general list of commands', async () => {

@@ -711,7 +711,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     commandsSuggestionsAfter: commandsSuggestionsAfterFork,
   },
   {
-    hidden: true, // This command should be keep as hidden as it only must be shown after a FORK command
+    hidden: true,
     preview: true,
     name: 'rrf',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
