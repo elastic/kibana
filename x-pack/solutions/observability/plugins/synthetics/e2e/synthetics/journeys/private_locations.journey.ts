@@ -87,6 +87,28 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     });
   });
 
+  step('Edit private location label and verify disabled fields', async () => {
+    // Click on the edit button for the location
+    await page.click('[data-test-subj="action-edit"]');
+
+    // Verify that agent policy selector is disabled
+    expect(await page.locator('[aria-label="Select agent policy"]').isDisabled()).toBe(true);
+
+    // Verify that tags field is disabled
+    expect(await page.locator('[aria-label="Tags"]').isDisabled()).toBe(true);
+
+    // Verify that spaces selector is disabled
+    expect(await page.locator('[aria-label="Spaces "]').isDisabled()).toBe(true);
+
+    await page.fill('[aria-label="Location name"]', 'Updated Test Location');
+
+    // Save the changes
+    await page.click('[data-test-subj="syntheticsLocationFlyoutSaveButton"]');
+
+    // Wait for the save to complete and verify the updated label appears in the table
+    await page.waitForSelector('td:has-text("Updated Test Location")');
+  });
+
   step('Integration cannot be edited in Fleet', async () => {
     await page.goto(`${params.kibanaUrl}/app/integrations/detail/synthetics/policies`);
     await page.waitForSelector('h1:has-text("Elastic Synthetics")');
@@ -111,14 +133,14 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('h1:has-text("Settings")');
     await page.click('text=Private Locations');
     await page.waitForSelector('td:has-text("1")');
-    await page.waitForSelector('td:has-text("Test private")');
+    await page.waitForSelector('td:has-text("Updated Test Location")');
     await page.click('.euiTableRowCell .euiToolTipAnchor');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=Area51');
     await page.click(
       'main div:has-text("Private locations allow you to run monitors from your own premises. They require")'
     );
-    await page.click('text=Test private');
+    await page.click('text=Updated Test Location');
 
     await page.click('.euiTableRowCell .euiToolTipAnchor');
 
