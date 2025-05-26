@@ -19,9 +19,11 @@ import {
 import { RULE_NAME_INPUT_TITLE, RULE_TAG_INPUT_TITLE, RULE_TAG_PLACEHOLDER } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
+import { RuleDashboards } from './rule_dashboards';
 
 export const RuleDetails = () => {
-  const { formData, baseErrors } = useRuleFormState();
+  const { formData, baseErrors, plugins } = useRuleFormState();
+  const { contentManagement } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
@@ -71,44 +73,47 @@ export const RuleDetails = () => {
   }, [dispatch, tags]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow
-          data-test-subj="ruleDetails"
-          fullWidth
-          label={RULE_NAME_INPUT_TITLE}
-          isInvalid={!!baseErrors?.name?.length}
-          error={baseErrors?.name}
-        >
-          <EuiFieldText
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            data-test-subj="ruleDetails"
             fullWidth
-            value={name}
-            placeholder={RULE_NAME_INPUT_TITLE}
-            onChange={onNameChange}
-            data-test-subj="ruleDetailsNameInput"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={RULE_TAG_INPUT_TITLE}
-          labelAppend={OptionalFieldLabel}
-          isInvalid={!!baseErrors?.tags?.length}
-          error={baseErrors?.tags}
-        >
-          <EuiComboBox
+            label={RULE_NAME_INPUT_TITLE}
+            isInvalid={!!baseErrors?.name?.length}
+            error={baseErrors?.name}
+          >
+            <EuiFieldText
+              fullWidth
+              value={name}
+              placeholder={RULE_NAME_INPUT_TITLE}
+              onChange={onNameChange}
+              data-test-subj="ruleDetailsNameInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
             fullWidth
-            noSuggestions
-            placeholder={RULE_TAG_PLACEHOLDER}
-            data-test-subj="ruleDetailsTagsInput"
-            selectedOptions={tagsOptions}
-            onCreateOption={onAddTag}
-            onChange={onSetTag}
-            onBlur={onBlur}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            label={RULE_TAG_INPUT_TITLE}
+            labelAppend={OptionalFieldLabel}
+            isInvalid={!!baseErrors?.tags?.length}
+            error={baseErrors?.tags}
+          >
+            <EuiComboBox
+              fullWidth
+              noSuggestions
+              placeholder={RULE_TAG_PLACEHOLDER}
+              data-test-subj="ruleDetailsTagsInput"
+              selectedOptions={tagsOptions}
+              onCreateOption={onAddTag}
+              onChange={onSetTag}
+              onBlur={onBlur}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
+    </>
   );
 };

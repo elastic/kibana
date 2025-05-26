@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-import { useDarkMode } from '../kibana';
-
-export const useEuiTheme = () => {
-  const darkMode = useDarkMode();
-  return darkMode ? darkTheme : lightTheme;
-};
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

@@ -120,6 +120,7 @@
     "@kbn/core-capabilities-common",
     "@kbn/presentation-panel-plugin",
     "@kbn/esql-types",
+    "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/alerts-ui-shared",
