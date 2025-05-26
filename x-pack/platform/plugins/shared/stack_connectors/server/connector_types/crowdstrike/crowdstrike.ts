@@ -372,7 +372,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   public async getRTRCloudScripts(
-    payload: unknown,
+    payload: {},
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetScriptsResponse> {
     return await this.crowdstrikeApiRequest(
