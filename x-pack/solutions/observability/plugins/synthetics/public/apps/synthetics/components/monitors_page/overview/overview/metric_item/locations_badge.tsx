@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiIcon, EuiPopover, useGeneratedHtmlId, EuiBadge } from '@elastic/eui';
+import { throttle } from 'lodash';
 import { useMonitorHealthColor } from '../../../hooks/use_monitor_health_color';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const [isPopoverOpen, setPopover] = useState(false);
+
+  const throttledOpenPopover = useMemo(
+    () => throttle(() => setPopover(true), 500, { trailing: false }),
+    []
+  );
 
   const locationsLabel = i18n.translate(
     'xpack.synthetics.locationsBadge.clickMeToLoadButtonLabel',
@@ -40,6 +46,7 @@ export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData })
       title: locationsLabel,
       items: monitor.locations.map((location) => {
         return {
+          key: location.id,
           name: location.label,
           icon: <EuiIcon type="dot" color={getColor(location.status)} />,
           onClick: () => {
@@ -54,8 +61,9 @@ export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData })
   const button = (
     <div
       onMouseOver={() => {
-        setPopover(true);
+        throttledOpenPopover();
       }}
+      onFocus={() => setPopover(true)}
     >
       <EuiBadge
         data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"
