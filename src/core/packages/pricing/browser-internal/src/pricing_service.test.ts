@@ -6,3 +6,78 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { GetPricingResponse } from '@kbn/core-pricing-browser';
+import { PricingService } from './pricing_service';
+
+describe('PricingService', () => {
+  let service: PricingService;
+  let http: ReturnType<typeof httpServiceMock.createStartContract>;
+  let mockPricingResponse: GetPricingResponse;
+
+  beforeEach(() => {
+    service = new PricingService();
+    http = httpServiceMock.createStartContract();
+
+    mockPricingResponse = {
+      tiers: {
+        enabled: true,
+        products: [
+          { name: 'observability', tier: 'complete' },
+          { name: 'security', tier: 'essentials' },
+        ],
+      },
+      product_features: {
+        feature1: {
+          id: 'feature1',
+          products: [{ name: 'observability', tier: 'complete' }],
+        },
+        feature2: {
+          id: 'feature2',
+          products: [{ name: 'security', tier: 'essentials' }],
+        },
+      },
+    };
+
+    http.get.mockResolvedValue(mockPricingResponse);
+  });
+
+  describe('#start()', () => {
+    it('fetches pricing data from the API', async () => {
+      await service.start({ http });
+
+      expect(http.get).toHaveBeenCalledWith('/internal/core/pricing');
+    });
+
+    it('returns a PricingTiersClient with the fetched data', async () => {
+      const startContract = await service.start({ http });
+
+      expect(startContract).toHaveProperty('tiers');
+      expect(startContract.tiers).toHaveProperty('isFeatureAvailable');
+    });
+
+    it('initializes the client with the correct tiers configuration', async () => {
+      const startContract = await service.start({ http });
+
+      // Since our mock has feature1 with observability product which is enabled in tiers
+      expect(startContract.tiers.isFeatureAvailable('feature1')).toBe(true);
+    });
+
+    it('initializes the client with empty data when API returns empty response', async () => {
+      const emptyResponse: GetPricingResponse = {
+        tiers: {
+          enabled: false,
+          products: [],
+        },
+        product_features: {},
+      };
+      http.get.mockResolvedValue(emptyResponse);
+
+      const startContract = await service.start({ http });
+
+      // When tiers are disabled, all features should be available
+      expect(startContract.tiers.isFeatureAvailable('any-feature')).toBe(true);
+    });
+  });
+});
