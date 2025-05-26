@@ -8,9 +8,22 @@
 import { findReferenceLink } from './find_reference_link.util';
 
 describe('findReferenceLink', () => {
-  it('should find reference with ID in search params', () => {
-    const references = ['https://nvd.nist.gov/vuln/detail?name=CVE-2023-12345'];
+  it('should find reference with ID in any search param', () => {
+    const references = [
+      'https://nvd.nist.gov/vuln/detail?name=CVE-2023-12345',
+      'https://nvd.nist.gov/vuln/detail?id=CVE-2023-54321',
+    ];
     expect(findReferenceLink(references, 'CVE-2023-12345')).toBe(references[0]);
+    expect(findReferenceLink(references, 'CVE-2023-54321')).toBe(references[1]);
+  });
+
+  it('should find reference from multiple links', () => {
+    const references = [
+      'http://www.nessus.org/u?5b3cb0db',
+      'https://www.cve.org/CVERecord?id=CVE-2022-2068',
+      'https://www.openssl.org/news/secadv/20220621.txt',
+    ];
+    expect(findReferenceLink(references, 'CVE-2022-2068')).toBe(references[1]);
   });
 
   it('should find reference with ID in pathname', () => {
