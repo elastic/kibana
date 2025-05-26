@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from './client';
+import { ElasticsearchClient, type ElasticsearchClientInternal } from './client';
 
 /**
  * Serves the same purpose as the normal {@link IClusterClient | cluster client} but exposes
@@ -22,7 +22,7 @@ export interface IScopedClusterClient {
    * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the internal Kibana user.
    */
-  readonly asInternalUser: ElasticsearchClient;
+  readonly asInternalUser: ElasticsearchClientInternal;
 
   /**
    * A {@link ElasticsearchClient | client} to be used to query the elasticsearch cluster

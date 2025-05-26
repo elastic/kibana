@@ -9,7 +9,17 @@
 
 export type {
   ElasticsearchClient,
-  ElasticsearchClientOverrides,
+  ElasticsearchClientOverridesAsCurrentUser,
+  ElasticsearchClientOverridesAsCurrentUserIndices,
+  ElasticsearchClientOverridesAsCurrentUserEsql,
+  ElasticsearchClientOverridesAsCurrentUserSql,
+  ElasticsearchClientOverridesAsCurrentUserEql,
+  ElasticsearchClientInternal,
+  ElasticsearchClientOverridesAsInternal,
+  ElasticsearchClientOverridesAsInternalIndices,
+  ElasticsearchClientOverridesAsInternalEsql,
+  ElasticsearchClientOverridesAsInternalSql,
+  ElasticsearchClientOverridesAsInternalEql,
   IScopedClusterClient,
   IClusterClient,
   ICustomClusterClient,
