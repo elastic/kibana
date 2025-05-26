@@ -10,6 +10,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FindDashboardsByIdResponse } from '@kbn/dashboard-plugin/public';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -19,6 +20,7 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -32,6 +34,7 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
+import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
@@ -55,6 +58,7 @@ import { CustomThresholdRule } from '../../components/custom_threshold/component
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
+import { RelatedDashboards } from './components/related_dashboards';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -73,6 +77,7 @@ const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
+const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
 export const getPageTitle = (ruleCategory: string) => {
@@ -96,6 +101,7 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
+    contentManagement,
   } = useKibana().services;
   const { onPageReady } = usePerformanceContext();
 
@@ -122,6 +128,8 @@ export function AlertDetails() {
       ? (urlTabId as TabId)
       : OVERVIEW_TAB_ID;
   });
+  const [validDashboards, setValidDashboards] = useState<FindDashboardsByIdResponse[]>([]);
+  const linkedDashboards = React.useMemo(() => rule?.artifacts?.dashboards ?? [], [rule]);
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
@@ -188,6 +196,18 @@ export function AlertDetails() {
       onPageReady();
     }
   }, [onPageReady, alertDetail, isLoading, activeTabId]);
+
+  useEffect(() => {
+    const fetchValidDashboards = async () => {
+      const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
+      const findDashboardsService = dashboardServiceProvider(contentManagement);
+      const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
+
+      setValidDashboards(existingDashboards.length ? existingDashboards : []);
+    };
+
+    fetchValidDashboards();
+  }, [rule, contentManagement, linkedDashboards]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -275,6 +295,12 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
+  const relatedDashboardsTab = alertDetail ? (
+    <RelatedDashboards relatedDashboards={validDashboards || []} alert={alertDetail.formatted} />
+  ) : (
+    <EuiLoadingSpinner />
+  );
+
   const tabs: EuiTabbedContentTab[] = [
     {
       id: OVERVIEW_TAB_ID,
@@ -307,6 +333,26 @@ export function AlertDetails() {
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alertData={alertDetail} />,
     },
+    ...(validDashboards?.length
+      ? [
+          {
+            id: RELATED_DASHBOARDS_TAB_ID,
+            name: (
+              <>
+                <FormattedMessage
+                  id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
+                  defaultMessage="Related dashboards"
+                />{' '}
+                <EuiNotificationBadge color="success">
+                  {validDashboards?.length}
+                </EuiNotificationBadge>
+              </>
+            ),
+            'data-test-subj': 'relatedDashboardsTab',
+            content: relatedDashboardsTab,
+          },
+        ]
+      : []),
   ];
 
   return (

@@ -187,7 +187,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
                     return (
                       <DocumentationButton
                         processorLabel={formDescriptor.label}
-                        docLink={esDocsBasePath + formDescriptor.docLinkPath}
+                        docLink={formDescriptor.docLinkPath}
                       />
                     );
                   }
