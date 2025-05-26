@@ -22,9 +22,9 @@ import {
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
 import {
-  BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
-  BASELINE_DOCUMENTS_PER_TYPE_500K,
-  BASELINE_TEST_ARCHIVE_500K,
+  BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+  BASELINE_TEST_ARCHIVE_LARGE,
 } from '../kibana_migrator_archive_utils';
 import {
   getRelocatingMigratorTestKit,
@@ -52,7 +52,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     }
     await clearLog(logFileSecondRun);
 
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_500K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
     client = await getEsClient();
     await checkBeforeState();
   });
@@ -91,13 +91,13 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
   async function checkBeforeState() {
     await expect(getAggregatedTypesCount(client, [defaultKibanaIndex])).resolves.toEqual({
-      basic: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      complex: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      deprecated: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      server: BASELINE_DOCUMENTS_PER_TYPE_500K,
+      basic: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      complex: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      deprecated: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      server: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [defaultKibanaTaskIndex])).resolves.toEqual({
-      task: BASELINE_DOCUMENTS_PER_TYPE_500K,
+      task: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [kibanaSplitIndex])).resolves.toEqual({});
   }
@@ -146,12 +146,12 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
   async function checkSavedObjectDocuments() {
     // check documents have been migrated
     await expect(getAggregatedTypesCount(client, [defaultKibanaIndex])).resolves.toEqual({
-      complex: BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
+      complex: BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
     });
     await expect(getAggregatedTypesCount(client, [defaultKibanaTaskIndex])).resolves.toEqual({});
     await expect(getAggregatedTypesCount(client, [kibanaSplitIndex])).resolves.toEqual({
-      basic: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      task: BASELINE_DOCUMENTS_PER_TYPE_500K,
+      basic: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      task: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expectDocumentsMigratedToHighestVersion(client, [defaultKibanaIndex, kibanaSplitIndex]);
   }

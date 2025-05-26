@@ -50,7 +50,7 @@ describe('checkVersionCompatibility', () => {
     });
 
     expect(getVirtualVersionMapMock).toHaveBeenCalledTimes(1);
-    expect(getVirtualVersionMapMock).toHaveBeenCalledWith(types);
+    expect(getVirtualVersionMapMock).toHaveBeenCalledWith({ types, useModelVersionsOnly: true });
   });
 
   it('calls getModelVersionsFromMappings with the correct parameters', () => {

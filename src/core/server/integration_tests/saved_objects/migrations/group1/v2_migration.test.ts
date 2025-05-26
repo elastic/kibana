@@ -25,9 +25,9 @@ import {
   nextMinor,
 } from '../kibana_migrator_test_kit';
 import {
-  BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
-  BASELINE_DOCUMENTS_PER_TYPE_500K,
-  BASELINE_TEST_ARCHIVE_500K,
+  BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+  BASELINE_TEST_ARCHIVE_LARGE,
 } from '../kibana_migrator_archive_utils';
 import {
   getReindexingBaselineTypes,
@@ -43,7 +43,7 @@ describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
 
   beforeAll(async () => {
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_500K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
   });
 
   afterAll(async () => {
@@ -339,12 +339,12 @@ describe('v2 migration', () => {
           });
 
           it('copies all of the documents', () => {
-            expect(primaryIndexCounts.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
-            expect(taskIndexCounts.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
+            expect(primaryIndexCounts.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
+            expect(taskIndexCounts.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
           });
 
           it('executes the excludeOnUpgrade hook', () => {
-            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_500K_AFTER);
+            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER);
           });
         });
 

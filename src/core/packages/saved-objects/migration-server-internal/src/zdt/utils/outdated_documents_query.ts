@@ -21,7 +21,7 @@ export const getOutdatedDocumentsQuery = ({
   // Note: in theory, we could check the difference of model version with the index's
   // and narrow the search filter only on the type that have different versions.
   // however, it feels safer to just search for all outdated document, just in case.
-  const virtualVersions = getVirtualVersionMap(types);
+  const virtualVersions = getVirtualVersionMap({ types, useModelVersionsOnly: false });
   return {
     bool: {
       should: types.map((type) => {

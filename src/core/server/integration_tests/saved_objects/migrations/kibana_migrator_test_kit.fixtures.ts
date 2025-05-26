@@ -62,6 +62,15 @@ interface ComplexTypeV1 {
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
+    // an old type with no model versions defined
+    ...defaultType,
+    modelVersions: undefined,
+    name: 'old',
+    migrations: {
+      '8.8.0': ((doc) => doc) as SavedObjectMigration,
+    },
+  },
+  {
     ...defaultType,
     name: 'server',
   },
@@ -100,15 +109,7 @@ export const baselineTypes: Array<SavedObjectsType<any>> = [
 
 export const getUpToDateBaselineTypes = (removedTypes: string[]) => [
   ...baselineTypes.filter((type) => !removedTypes.includes(type.name)),
-  // we add a few SO types
-  {
-    ...defaultType,
-    modelVersions: undefined,
-    name: 'old',
-    migrations: {
-      '8.8.0': ((doc) => doc) as SavedObjectMigration,
-    },
-  },
+  // we add a new SO type
   {
     ...defaultType,
     name: 'recent',
@@ -230,6 +231,12 @@ export const getBaselineDocuments = (
   const documentsPerType = params.documentsPerType ?? 4;
 
   return [
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'old',
+      attributes: {
+        name: `old-${index}`,
+      },
+    })),
     ...new Array(documentsPerType).fill(true).map((_, index) => ({
       type: 'server',
       attributes: {

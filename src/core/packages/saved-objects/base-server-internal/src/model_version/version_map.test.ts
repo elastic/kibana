@@ -145,7 +145,7 @@ describe('ModelVersion map utilities', () => {
   });
 
   describe('getCurrentVirtualVersion', () => {
-    it('returns the default modelVersion (10.0.0) if modelVersions are not defined', () => {
+    it('returns the latest migration if modelVersions are not defined', () => {
       expect(
         getCurrentVirtualVersion(
           buildType({
@@ -153,7 +153,22 @@ describe('ModelVersion map utilities', () => {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
-          })
+          }),
+          false
+        )
+      ).toEqual('8.6.0');
+    });
+
+    it('returns the default modelVersion (10.0.0) if modelVersions are not defined and we disregard legacy migrations', () => {
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
+            },
+          }),
+          true
         )
       ).toEqual('10.0.0');
     });
@@ -169,40 +184,81 @@ describe('ModelVersion map utilities', () => {
             modelVersions: {
               1: dummyModelVersion(),
             },
-          })
+          }),
+          false
         )
       ).toEqual('10.1.0');
     });
   });
 
   describe('getVirtualVersionMap', () => {
-    it('returns the virtual version for each of the provided types', () => {
+    it('returns the latest type version for each of the provided types', () => {
       expect(
-        getVirtualVersionMap([
-          buildType({
-            name: 'foo',
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-            modelVersions: {
-              1: dummyModelVersion(),
-            },
-          }),
-          buildType({
-            name: 'bar',
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-          }),
-          buildType({
-            name: 'dolly',
-            modelVersions: {
-              0: dummyModelVersion(),
-            },
-          }),
-        ])
+        getVirtualVersionMap({
+          types: [
+            buildType({
+              name: 'foo',
+              migrations: {
+                '7.17.2': dummyMigration,
+                '8.6.0': dummyMigration,
+              },
+              modelVersions: {
+                1: dummyModelVersion(),
+              },
+            }),
+            buildType({
+              name: 'bar',
+              migrations: {
+                '7.17.2': dummyMigration,
+                '8.6.0': dummyMigration,
+              },
+            }),
+            buildType({
+              name: 'dolly',
+              modelVersions: {
+                0: dummyModelVersion(),
+              },
+            }),
+          ],
+          useModelVersionsOnly: false,
+        })
+      ).toEqual({
+        foo: '10.1.0',
+        bar: '8.6.0',
+        dolly: '10.0.0',
+      });
+    });
+
+    it('returns the latest virtual version for each of the provided types', () => {
+      expect(
+        getVirtualVersionMap({
+          types: [
+            buildType({
+              name: 'foo',
+              migrations: {
+                '7.17.2': dummyMigration,
+                '8.6.0': dummyMigration,
+              },
+              modelVersions: {
+                1: dummyModelVersion(),
+              },
+            }),
+            buildType({
+              name: 'bar',
+              migrations: {
+                '7.17.2': dummyMigration,
+                '8.6.0': dummyMigration,
+              },
+            }),
+            buildType({
+              name: 'dolly',
+              modelVersions: {
+                0: dummyModelVersion(),
+              },
+            }),
+          ],
+          useModelVersionsOnly: true,
+        })
       ).toEqual({
         foo: '10.1.0',
         bar: '10.0.0',

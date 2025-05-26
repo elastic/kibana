@@ -45,7 +45,7 @@ export const generateAdditiveMappingDiff = ({
     throw new Error('Cannot generate additive mapping diff: meta not present on index');
   }
 
-  const typeVersions = getVirtualVersionMap(types);
+  const typeVersions = getVirtualVersionMap({ types, useModelVersionsOnly: true });
   const mappingVersion = getVirtualVersionsFromMappingMeta({
     meta,
     source: 'mappingVersions',

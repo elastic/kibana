@@ -161,7 +161,10 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   indicesWithRelocatingTypes.forEach((index) => migratorIndices.add(index));
 
   // we will store model versions instead of hashes (to be FIPS compliant)
-  const appVersions = getVirtualVersionMap(options.typeRegistry.getAllTypes());
+  const appVersions = getVirtualVersionMap({
+    types: options.typeRegistry.getAllTypes(),
+    useModelVersionsOnly: true,
+  });
 
   const migrators = Array.from(migratorIndices).map((indexName, i) => {
     return {
