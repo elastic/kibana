@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Adapters, StoredSiemMigration } from '../types';
 import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
-import type { SearchResponseBody } from 'elasticsearch-8.x/lib/api/types';
+import type { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 
 const mockRuleIndexAggregationsResult = {
   aggregations: {
