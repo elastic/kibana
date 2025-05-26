@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { PRIVATE_LOCATIOSN_ROUTE as PRIVATE_LOCATION_ROUTE } from '../../../../../../common/constants';
+import { PRIVATE_LOCATIONS_ROUTE } from '../../../../../../common/constants';
 import {
   setIsPrivateLocationFlyoutVisible,
   setManageFlyoutOpen,
@@ -52,7 +52,7 @@ export const EmptyLocations = ({
               fill
               isDisabled={!canSave}
               href={history.createHref({
-                pathname: PRIVATE_LOCATION_ROUTE,
+                pathname: PRIVATE_LOCATIONS_ROUTE,
               })}
             >
               {ADD_LOCATION}

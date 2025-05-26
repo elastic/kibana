@@ -27,11 +27,14 @@ import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_
 import { getServiceLocations, cleanMonitorListState } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import { AddOrEditLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
+import {
+  AddOrEditLocationFlyout,
+  NewLocation,
+} from '../settings/private_locations/add_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
-import { selectAddingNewPrivateLocation } from '../../state/settings/selectors';
 import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
+import { selectPrivateLocationFlyoutVisible } from '../../state/private_locations/selectors';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
@@ -127,9 +130,9 @@ export const GettingStartedOnPrem = () => {
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
-  const isAddingNewLocation = useSelector(selectAddingNewPrivateLocation);
+  const isPrivateLocationFlyoutVisible = useSelector(selectPrivateLocationFlyoutVisible);
 
-  const setIsAddingNewLocation = useCallback(
+  const setIsFlyoutOpen = useCallback(
     (val: boolean) => dispatch(setIsPrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
@@ -142,8 +145,8 @@ export const GettingStartedOnPrem = () => {
 
   // make sure flyout is closed when first visiting the page
   useEffect(() => {
-    setIsAddingNewLocation(false);
-  }, [setIsAddingNewLocation]);
+    setIsFlyoutOpen(false);
+  }, [setIsFlyoutOpen]);
 
   return (
     <>
@@ -163,7 +166,7 @@ export const GettingStartedOnPrem = () => {
                 fill
                 iconType="plusInCircleFilled"
                 data-test-subj="gettingStartedAddLocationButton"
-                onClick={() => setIsAddingNewLocation(true)}
+                onClick={() => setIsFlyoutOpen(true)}
               >
                 {CREATE_LOCATION_LABEL}
               </EuiButton>
@@ -173,9 +176,9 @@ export const GettingStartedOnPrem = () => {
         footer={<GettingStartedLink />}
       />
 
-      {isAddingNewLocation ? (
+      {isPrivateLocationFlyoutVisible ? (
         <AddOrEditLocationFlyout
-          onCloseFlyout={() => setIsAddingNewLocation(false)}
+          onCloseFlyout={() => setIsFlyoutOpen(false)}
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
         />

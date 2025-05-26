@@ -150,7 +150,7 @@ export const PrivateLocationsTable = ({
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
 
-  const setIsAddingNew = (val: boolean) => dispatch(setIsPrivateLocationFlyoutVisible(val));
+  const openFlyout = () => dispatch(setIsPrivateLocationFlyoutVisible(true));
 
   const renderToolRight = () => {
     return [
@@ -164,7 +164,7 @@ export const PrivateLocationsTable = ({
           data-test-subj={'addPrivateLocationButton'}
           isLoading={loading}
           disabled={!canSave || !canManagePrivateLocations}
-          onClick={() => setIsAddingNew(true)}
+          onClick={openFlyout}
           iconType="plusInCircle"
         >
           {ADD_LABEL}

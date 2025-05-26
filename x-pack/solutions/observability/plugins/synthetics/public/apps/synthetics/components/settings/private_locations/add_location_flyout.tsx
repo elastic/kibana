@@ -98,7 +98,7 @@ export const AddOrEditLocationFlyout = ({
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="syntheticsAddLocationFlyoutButton"
+                  data-test-subj="syntheticsLocationFlyoutCancelButton"
                   iconType="cross"
                   onClick={onCloseFlyout}
                   flush="left"
@@ -110,7 +110,7 @@ export const AddOrEditLocationFlyout = ({
               <EuiFlexItem grow={false}>
                 <NoPermissionsTooltip canEditSynthetics={canSave}>
                   <EuiButton
-                    data-test-subj="syntheticsAddLocationFlyoutButton"
+                    data-test-subj="syntheticsLocationFlyoutSaveButton"
                     fill
                     onClick={handleSubmit(onSubmit)}
                     isLoading={createLoading || editLoading}

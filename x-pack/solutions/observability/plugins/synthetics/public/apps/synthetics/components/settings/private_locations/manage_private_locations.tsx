@@ -77,7 +77,9 @@ export const ManagePrivateLocations = () => {
   };
 
   const onCloseFlyout = () => {
-    dispatch(setPrivateLocationToEdit(undefined));
+    if (privateLocationToEdit) {
+      dispatch(setPrivateLocationToEdit(undefined));
+    }
     setIsFlyoutOpen(false);
   };
 
