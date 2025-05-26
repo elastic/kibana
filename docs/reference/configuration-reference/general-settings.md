@@ -306,7 +306,7 @@ $$$server-basePath$$$ `server.basePath`
 :   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
 % TBD: Applicable only to Elastic Cloud?
 
-$$$server-publicBaseUrl$$$ `server.publicBaseUrl`
+$$$server-publicBaseUrl$$$ `server.publicBaseUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
 $$$server-compression$$$ `server.compression.enabled`
