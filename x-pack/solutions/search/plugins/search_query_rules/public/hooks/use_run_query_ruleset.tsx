@@ -73,36 +73,42 @@ export const UseRunQueryRuleset = ({
   }
   // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
   const TEST_QUERY_RULESET_API_SNIPPET = dedent`
-  # Test your query ruleset
-  # ℹ️ https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query
-  GET ${indecesRuleset}/_search
-  {
-    "query": {
-      "rule": {
-        // Defines the match criteria to apply to rules in the given query ruleset
-        "match_criteria": ${
-          criteriaData.length > 0
-            ? (() => {
-                const matchCriteria = criteriaData.reduce<Record<string, any>>((acc, criterion) => {
-                  if (criterion.metadata && criterion.values) {
-                    acc[criterion.metadata] = criterion.values;
-                  }
-                  return acc;
-                }, {});
-                // Format with proper indentation (6 spaces to align with the property)
-                return JSON.stringify(matchCriteria, null, 2).split('\n').join('\n         ');
-              })()
-            : '{\n         "user_query": "pugs"\n    }'
-        },
-        "ruleset_ids": ["${rulesetId}"], // An array of one or more unique query ruleset IDs
-        "organic": {
-          "match": { // Any choice of query used to return results
-            "description": "puggles"
+# Query Rules Retriever Example
+# https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrievers#rule-retriever
+GET ${indecesRuleset}/_search
+{
+  "retriever": {
+    "rule": {
+      "match_criteria": ${
+        criteriaData.length > 0
+          ? (() => {
+              const matchCriteria = criteriaData.reduce<Record<string, any>>((acc, criterion) => {
+                if (criterion.metadata && criterion.values) {
+                  acc[criterion.metadata] = criterion.values;
+                }
+                return acc;
+              }, {});
+              // Format with proper indentation (6 spaces to align with the property)
+              return JSON.stringify(matchCriteria, null, 2).split('\n').join('\n         ');
+            })()
+          : '{\n         "user_query": "pugs"\n    }'
+      },
+      "ruleset_ids": [
+        "${rulesetId}" // An array of one or more unique query ruleset IDs
+      ],
+      "retriever": {
+        "standard": {
+          "query": {
+            "query_string": { // Any choice of query used to return results
+              "query": "pugs"
+            }
           }
         }
       }
     }
   }
+}
+  
   `;
 
   return (
