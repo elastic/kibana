@@ -9,10 +9,7 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, LATEST_FINDINGS_INDEX } from '../../common/constants';
 
 const LATEST_FINDINGS_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
 const LATEST_FINDINGS_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
@@ -33,7 +30,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
     index: FINDINGS_INDEX_PATTERN,
   },
   dest: {
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    index: LATEST_FINDINGS_INDEX(),
   },
   frequency: '5m',
   sync: {

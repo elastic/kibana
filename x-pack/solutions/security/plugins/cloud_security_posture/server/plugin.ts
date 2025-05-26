@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
   SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 import {
@@ -29,6 +30,7 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { getIsNewIntegration, setIsNewIntegration } from '@kbn/cloud-security-posture-common';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -153,8 +155,37 @@ export class CspPlugin
             packagePolicy: UpdatePackagePolicy,
             soClient: SavedObjectsClientContract
           ): Promise<UpdatePackagePolicy> => {
+            console.log('55555555555555');
+            console.log('55555555555555');
+            console.log('55555555555555');
+            console.log('55555555555555');
             if (isCspPackage(packagePolicy.package?.name)) {
               return cleanupCredentials(packagePolicy);
+            }
+
+            return packagePolicy;
+          }
+        );
+
+        plugins.fleet.registerExternalCallback(
+          'packagePolicyPostUpdate',
+          async (
+            packagePolicy: PackagePolicy,
+            soClient: SavedObjectsClientContract,
+            esClient: ElasticsearchClient
+          ): Promise<PackagePolicy> => {
+            console.log('%%%%%%%%%%%%%%%%%%%%%');
+            console.log('%%%%%%%%%%%%%%%%%%%%%');
+            console.log('%%%%%%%%%%%%%%%%%%%%%');
+            console.log('%%%%%%%%%%%%%%%%%%%%%');
+            // get left digit of package version and checj if it is greater than or equal to 2
+            const packageVersion = packagePolicy.package?.version;
+            const isNew = packageVersion ? parseInt(packageVersion.split('.')[0], 10) >= 2 : false;
+            console.log('update integration version flag ', packageVersion);
+            console.log('is new? ', isNew);
+            if (isNew && !getIsNewIntegration()) {
+              console.log("updating state to 'true'");
+              setIsNewIntegration(true);
             }
 
             return packagePolicy;

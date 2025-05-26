@@ -7,7 +7,7 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   BenchmarkData,
@@ -65,7 +65,7 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
-  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX());
   const benchmarkScoreIndex = new EsIndexDataProvider(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
 
   // Failing: See https://github.com/elastic/kibana/issues/214191

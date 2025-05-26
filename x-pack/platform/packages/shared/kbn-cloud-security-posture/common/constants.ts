@@ -9,6 +9,8 @@ import { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
+export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN_NEW =
+  'security_solution-cloud_security_posture.misconfiguration_latest-v*';
 export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
   'logs-cloud_security_posture.findings_latest-default';
 export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
@@ -66,6 +68,18 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingFlyoutEvidence: true,
 } as const;
 
+export let IS_NEW_INTEGRATION: boolean | undefined;
+
+export const setIsNewIntegration = (value: boolean) => {
+  IS_NEW_INTEGRATION = value;
+};
+
+export const getIsNewIntegration = (): boolean => {
+  if (IS_NEW_INTEGRATION) {
+    return true;
+  }
+  return false;
+};
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';

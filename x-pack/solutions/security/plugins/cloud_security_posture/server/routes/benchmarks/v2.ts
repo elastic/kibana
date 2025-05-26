@@ -12,7 +12,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX,
 } from '../../../common/constants';
 
 import { Benchmark } from '../../../common/types/latest';
@@ -59,7 +59,7 @@ export const getBenchmarksData = async (
   const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
   const { id: pitId } = await esClient.openPointInTime({
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    index: LATEST_FINDINGS_INDEX(),
     keep_alive: '30s',
   });
   // Transform response to a benchmark row: {id, name, version}

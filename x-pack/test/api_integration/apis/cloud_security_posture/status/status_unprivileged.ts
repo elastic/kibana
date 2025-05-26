@@ -13,7 +13,7 @@ import {
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -31,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
   const security = getService('security');
 
   const allIndices = [
-    LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    LATEST_FINDINGS_INDEX(),
     FINDINGS_INDEX_PATTERN,
     BENCHMARK_SCORE_INDEX_DEFAULT_NS,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
@@ -139,7 +139,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return unprivileged when missing access to findings_latest index`, async () => {
-        const privilegedIndices = without(allIndices, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        const privilegedIndices = without(allIndices, LATEST_FINDINGS_INDEX());
         await createCSPRole(security, UNPRIVILEGED_ROLE, privilegedIndices);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
@@ -173,7 +173,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         expect(res).to.have.property('indicesDetails');
-        expect(find(res.indicesDetails, { index: LATEST_FINDINGS_INDEX_DEFAULT_NS })?.status).eql(
+        expect(find(res.indicesDetails, { index: LATEST_FINDINGS_INDEX() })?.status).eql(
           'unprivileged'
         );
 

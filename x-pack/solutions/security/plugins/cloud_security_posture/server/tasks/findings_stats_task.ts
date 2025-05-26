@@ -25,9 +25,8 @@ import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_i
 import { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
@@ -53,7 +52,8 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
+        // interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
+        interval: `30s`,
       },
       state: emptyState,
       params: {},
@@ -218,7 +218,7 @@ const getScoreAggregationQuery = () => ({
 });
 
 const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: LATEST_FINDINGS_INDEX(),
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },

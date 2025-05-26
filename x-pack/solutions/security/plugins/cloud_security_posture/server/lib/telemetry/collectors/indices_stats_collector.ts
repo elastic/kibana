@@ -14,7 +14,7 @@ import type { CspmIndicesStats, IndexStats } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
 
@@ -80,7 +80,7 @@ export const getIndicesStats = async (
 ): Promise<CspmIndicesStats> => {
   const [findings, latestFindings, vulMng, vulMngLatest, score] = await Promise.all([
     getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS, logger),
-    getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    getIndexStats(esClient, LATEST_FINDINGS_INDEX(), logger),
     getIndexStats(esClient, VULNERABILITIES_INDEX_DEFAULT_NS, logger),
     getIndexStats(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger),
     getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),

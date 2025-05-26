@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import {
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  getIsNewIntegration,
+} from '@kbn/cloud-security-posture-common';
 
 import { AwsCredentialsTypeFieldMap, GcpCredentialsTypeFieldMap, PostureTypes } from './types_old';
 
@@ -40,8 +44,16 @@ export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
-  'logs-cloud_security_posture.findings_latest-default';
+export const LATEST = 'logs-cloud_security_posture.findings_latest-default';
+
+export const LATEST_FINDINGS_INDEX_DEFAULT_NS_NEW =
+  'security_solution-cloud_security_posture.misconfiguration_latest';
+
+export const LATEST_FINDINGS_INDEX = (): string => {
+  return getIsNewIntegration()
+    ? LATEST_FINDINGS_INDEX_DEFAULT_NS_NEW
+    : 'logs-cloud_security_posture.findings_latest-default';
+};
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';

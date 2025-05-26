@@ -12,7 +12,7 @@ import {
 import {
   FINDINGS_INDEX_NAME,
   LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX,
   VULNERABILITIES_INDEX_NAME,
   LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
 } from '../../common/constants';
@@ -23,7 +23,7 @@ export const latestIndexConfigs: LatestIndexConfig = {
     indexName: FINDINGS_INDEX_NAME,
     indexPattern: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     indexTemplateName: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
-    indexDefaultName: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    indexDefaultName: LATEST_FINDINGS_INDEX(),
   },
   vulnerabilities: {
     indexName: VULNERABILITIES_INDEX_NAME,
