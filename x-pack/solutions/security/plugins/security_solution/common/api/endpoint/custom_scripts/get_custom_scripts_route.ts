@@ -11,9 +11,13 @@ import { AgentTypeSchemaLiteral } from '..';
 export const CustomScriptsRequestSchema = {
   query: schema.object({
     agentType: schema.maybe(
-      schema.oneOf(AgentTypeSchemaLiteral, {
-        defaultValue: 'endpoint',
-      })
+      schema.oneOf(
+        // @ts-expect-error TS2769: No overload matches this call
+        AgentTypeSchemaLiteral,
+        {
+          defaultValue: 'endpoint',
+        }
+      )
     ),
   }),
 };
