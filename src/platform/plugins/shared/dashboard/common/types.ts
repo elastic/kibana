@@ -17,15 +17,12 @@ import type {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/common';
 
-import type {
-  DashboardPanelMap,
-  DashboardSectionMap,
-  DashboardSectionState,
-} from './dashboard_container/types';
+import type { DashboardPanelMap, DashboardSectionMap } from './dashboard_container/types';
 import type {
   DashboardAttributes,
   DashboardOptions,
   DashboardPanel,
+  DashboardSection,
 } from '../server/content_management';
 
 export interface DashboardCapabilities {
@@ -93,10 +90,7 @@ export type SharedDashboardState = Partial<
      */
     controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
 
-    panels: DashboardPanel[];
-    // sections????
-
-    sections: DashboardSectionState[] & SerializableRecord;
+    panels: Array<DashboardPanel | DashboardSection>;
 
     references?: DashboardState['references'] & SerializableRecord;
   }

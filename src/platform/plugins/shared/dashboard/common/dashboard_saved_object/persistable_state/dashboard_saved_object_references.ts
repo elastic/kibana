@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 
 import {
-  convertPanelMapToPanelsArray,
+  convertPanelSectionMapsToPanelsArray,
   convertPanelsArrayToPanelSectionMaps,
 } from '../../lib/dashboard_panel_converters';
 import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
@@ -45,7 +45,7 @@ export function injectReferences(
   // inject references back into panels via the Embeddable persistable state service.
   const inject = createInject(deps.embeddablePersistableStateService);
   const injectedState = inject(parsedAttributes, references) as ParsedDashboardAttributesWithType;
-  const injectedPanels = convertPanelMapToPanelsArray(
+  const injectedPanels = convertPanelSectionMapsToPanelsArray(
     injectedState.panels,
     parsedAttributes.sections
   ); // sections don't have references
@@ -77,7 +77,7 @@ export function extractReferences(
     references: Reference[];
     state: ParsedDashboardAttributesWithType;
   };
-  const extractedPanels = convertPanelMapToPanelsArray(
+  const extractedPanels = convertPanelSectionMapsToPanelsArray(
     extractedState.panels,
     parsedAttributes.sections
   ); // sections don't have references

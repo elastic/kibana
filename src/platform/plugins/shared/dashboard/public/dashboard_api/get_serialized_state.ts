@@ -14,7 +14,7 @@ import moment, { Moment } from 'moment';
 import type { Reference } from '@kbn/content-management-utils';
 import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import {
-  convertPanelMapToPanelsArray,
+  convertPanelSectionMapsToPanelsArray,
   generateNewPanelIds,
 } from '../../common/lib/dashboard_panel_converters';
 import type { DashboardAttributes } from '../../server';
@@ -103,7 +103,7 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelMapToPanelsArray(panels, sections, true);
+  const savedPanels = convertPanelSectionMapsToPanelsArray(panels, sections, true);
 
   /**
    * Parse global time filter settings
