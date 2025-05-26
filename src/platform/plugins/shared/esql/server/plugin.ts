@@ -10,11 +10,16 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { RecommendedQuery } from '@kbn/esql-types';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
 
-export class EsqlServerPlugin implements Plugin {
+export interface EsqlServerPluginSetup {
+  registerESQLQueries: (queries: RecommendedQuery[]) => void;
+}
+
+export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
   private readonly initContext: PluginInitializerContext;
   private extensionsRegistry: ESQLExtensionsRegistry = new ESQLExtensionsRegistry();
 

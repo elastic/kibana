@@ -42,12 +42,6 @@ export const registerESQLExtensionsRoute = (
         })) as ResolveIndexResponse;
         // return the recommended queries for now, we will add more extensions later
         const recommendedQueries = extensionsRegistry.getRecommendedQueries(query, sources);
-        if (recommendedQueries.length === 0) {
-          return response.notFound({
-            body: { message: `No ESQL extensions found for query: ${query}` },
-          });
-        }
-
         return response.ok({
           body: recommendedQueries,
         });

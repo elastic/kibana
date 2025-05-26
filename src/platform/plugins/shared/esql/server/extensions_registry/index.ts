@@ -57,10 +57,15 @@ export class ESQLExtensionsRegistry {
   }
 
   // ToDo: allow to get recommended queries per solution
-  getRecommendedQueries(queryString: string, sources: ResolveIndexResponse): RecommendedQuery[] {
-    // check that the sources contain the index pattern from the query string
+  getRecommendedQueries(
+    queryString: string,
+    availableDatasources: ResolveIndexResponse
+  ): RecommendedQuery[] {
+    // Validates that the index pattern extracted from the ES|QL `FROM` command
+    // exists within the available `sources` (indices, aliases, or data streams).
+    // If the specified source isn't found, no recommended queries will be returned.
     const indexPattern = getIndexPatternFromESQLQuery(queryString);
-    if (!checkSourceExistence(sources, indexPattern)) {
+    if (!checkSourceExistence(availableDatasources, indexPattern)) {
       return [];
     }
 
