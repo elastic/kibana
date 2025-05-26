@@ -11,7 +11,7 @@ import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, Search } fro
 import { PAGINATION_CONFIG } from '../constants';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 import { ResolutionTableCell } from './resolution_table_cell';
-import { DeprecationBadge } from '../shared';
+import { DeprecationBadge, WarningLevels } from '../shared';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -121,7 +121,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (level: KibanaDeprecationDetails['level']) => {
-        return <DeprecationBadge level={level} />;
+        return <DeprecationBadge level={level as WarningLevels} />;
       },
     },
     {

@@ -12,7 +12,6 @@ import { useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AutoDetectPage,
-  CustomLogsPage,
   KubernetesPage,
   LandingPage,
   OtelLogsPage,
@@ -40,9 +39,6 @@ export function ObservabilityOnboardingFlow() {
       <Routes>
         <Route path="/auto-detect">
           <AutoDetectPage />
-        </Route>
-        <Route path="/customLogs">
-          <CustomLogsPage />
         </Route>
         <Route path="/kubernetes">
           <KubernetesPage />

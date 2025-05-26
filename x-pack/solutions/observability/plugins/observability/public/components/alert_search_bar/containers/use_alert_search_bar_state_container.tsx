@@ -38,6 +38,7 @@ export const alertSearchBarState = t.partial({
     t.literal(ALERT_STATUS_RECOVERED),
     t.literal(ALERT_STATUS_ALL),
   ]),
+  groupings: t.array(t.string),
 });
 
 export function useAlertSearchBarStateContainer(
@@ -50,12 +51,18 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace, defaultState);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
-    stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const {
+    setRangeFrom,
+    setRangeTo,
+    setKuery,
+    setStatus,
+    setFilters,
+    setSavedQueryId,
+    setControlConfigs,
+    setGroupings,
+  } = stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId, controlConfigs, groupings } =
+    useContainerSelector(stateContainer, (state) => state);
 
   useEffect(() => {
     if (!savedQuery) {
@@ -94,12 +101,16 @@ export function useAlertSearchBarStateContainer(
     onRangeToChange: setRangeTo,
     onStatusChange: setStatus,
     onFiltersChange: setFilters,
+    onControlConfigsChange: setControlConfigs,
+    onGroupingsChange: setGroupings,
+    controlConfigs,
     filters,
     rangeFrom,
     rangeTo,
     status,
     savedQuery,
     setSavedQuery,
+    groupings,
   };
 }
 
