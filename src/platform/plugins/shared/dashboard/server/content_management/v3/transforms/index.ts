@@ -14,9 +14,4 @@ export {
   transformSearchSourceOut,
 } from './out';
 
-export {
-  transformControlGroupIn,
-  transformPanelsIn,
-  transformSearchSourceIn,
-  transformSectionsIn,
-} from './in';
+export { transformControlGroupIn, transformPanelsIn, transformSearchSourceIn } from './in';

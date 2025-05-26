@@ -168,7 +168,7 @@ describe('getSerializedState', () => {
     expect(result.references).toEqual(panelReferences);
   });
 
-  it('should serialize sections as array', () => {
+  it('should serialize sections', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
       panels: {
@@ -178,8 +178,18 @@ describe('getSerializedState', () => {
         } as unknown as DashboardPanelState,
       },
       sections: {
-        section1: { id: 'section1', title: 'Section One', collapsed: false, order: 1 },
-        section2: { id: 'section2', title: 'Section Two', collapsed: true, order: 2 },
+        section1: {
+          id: 'section1',
+          title: 'Section One',
+          collapsed: false,
+          gridData: { y: 1, i: 'section1' },
+        },
+        section2: {
+          id: 'section2',
+          title: 'Section Two',
+          collapsed: true,
+          gridData: { y: 2, i: 'section2' },
+        },
       },
     };
     const result = getSerializedState({
@@ -193,30 +203,31 @@ describe('getSerializedState', () => {
     expect(result.attributes.panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
-            "i": "54321",
-            "sectionId": "section1",
-          },
-          "panelConfig": Object {},
-          "panelIndex": "54321",
-          "type": "visualization",
-          "version": undefined,
-        },
-      ]
-    `);
-
-    expect(result.attributes.sections).toMatchInlineSnapshot(`
-      Array [
-        Object {
           "collapsed": false,
-          "id": "section1",
-          "order": 1,
+          "gridData": Object {
+            "i": "section1",
+            "y": 1,
+          },
+          "panels": Array [
+            Object {
+              "gridData": Object {
+                "i": "54321",
+              },
+              "panelConfig": Object {},
+              "panelIndex": "54321",
+              "type": "visualization",
+              "version": undefined,
+            },
+          ],
           "title": "Section One",
         },
         Object {
           "collapsed": true,
-          "id": "section2",
-          "order": 2,
+          "gridData": Object {
+            "i": "section2",
+            "y": 2,
+          },
+          "panels": Array [],
           "title": "Section Two",
         },
       ]
