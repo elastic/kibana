@@ -16,6 +16,7 @@ import {
 } from '../hooks/use_stored_state';
 import { INTEGRATION_TABS } from '../configs/integration_tabs_configs';
 import { mockReportLinkClick } from '../hooks/__mocks__/mocks';
+import type { AvailablePackages } from './with_available_packages';
 
 jest.mock('../hooks/integration_context');
 jest.mock('../hooks/use_stored_state');
@@ -45,13 +46,13 @@ describe('IntegrationsCardGridTabsComponent', () => {
   const props = {
     activeIntegrationsCount: 1,
     isAgentRequired: false,
-    availablePackagesResult: {
+    availablePackages: {
       isLoading: false,
       setCategory: mockSetCategory,
       setSelectedSubCategory: mockSetSelectedSubCategory,
       setSearchTerm: mockSetSearchTerm,
       searchTerm: 'new search term',
-    },
+    } as unknown as AvailablePackages,
     integrationList: [],
     selectedTabResult: {
       selectedTab: INTEGRATION_TABS[0],
@@ -70,8 +71,8 @@ describe('IntegrationsCardGridTabsComponent', () => {
   it('renders loading skeleton when data is loading', () => {
     const testProps = {
       ...props,
-      availablePackagesResult: {
-        ...props.availablePackagesResult,
+      availablePackages: {
+        ...props.availablePackages,
         isLoading: true,
       },
     };
@@ -93,7 +94,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
 
     const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />);
 
-    const tabButton = getByTestId('user');
+    const tabButton = getByTestId('securitySolutionIntegrationsTab-user');
 
     act(() => {
       fireEvent.click(tabButton);
@@ -106,7 +107,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
 
     const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />);
 
-    const tabButton = getByTestId('user');
+    const tabButton = getByTestId('securitySolutionIntegrationsTab-user');
 
     act(() => {
       fireEvent.click(tabButton);

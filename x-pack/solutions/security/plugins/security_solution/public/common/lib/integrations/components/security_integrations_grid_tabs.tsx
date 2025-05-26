@@ -59,7 +59,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       telemetry: { reportLinkClick },
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
+    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabOptions } =
       useSelectedTab();
 
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
@@ -136,7 +136,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
           height: ${selectedTab.height ?? DEFAULT_INTEGRATION_CARD_CONTENT_HEIGHT};
         `}
       >
-        {integrationTabs.length > 1 && (
+        {integrationTabOptions.length > 1 && (
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               css={buttonGroupStyles}
@@ -146,7 +146,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
               isFullWidth
               legend="Categories"
               onChange={onTabChange}
-              options={integrationTabs}
+              options={integrationTabOptions}
               type="single"
             />
           </EuiFlexItem>

@@ -38,14 +38,14 @@ interface IntegrationsCardGridTabsProps {
 const IntegrationsCardGridTabs = withAvailablePackages<IntegrationsCardGridTabsProps>(
   ({ availablePackages, checkCompleteMetadata = DEFAULT_CHECK_COMPLETE_METADATA }) => {
     const { activeIntegrations, isAgentRequired } = checkCompleteMetadata;
-    const selectedTabResult = useSelectedTab();
+    const { selectedTab } = useSelectedTab();
 
     const allowedIntegrations = useMemo(
       () =>
         availablePackages.filteredCards.filter(
-          (card) => selectedTabResult.selectedTab?.featuredCardIds?.includes(card.id) ?? true
+          (card) => selectedTab?.featuredCardIds?.includes(card.id) ?? true
         ),
-      [availablePackages.filteredCards, selectedTabResult]
+      [availablePackages.filteredCards, selectedTab]
     );
 
     const { available: list } = useEnhancedIntegrationCards(

@@ -52,7 +52,6 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
   }) => {
     const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
     const activeIntegrationsCount = activeIntegrations?.length ?? 0;
-
     const list = useIntegrationCardList({
       integrationsList: availablePackages.filteredCards,
       activeIntegrations,
@@ -63,16 +62,27 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
       if (!integrationsStats?.length) {
         return list;
       }
-      return integrationsStats.reduce<IntegrationCardItem[]>((acc, { id, total_rules: total }) => {
-        const card = list.find((cardItem) => cardItem.id === `epr:${id}`);
-        if (!card) {
-          // should never happen, but just in case
+      const indexedStats = Object.fromEntries(
+        integrationsStats.map((stats) => [stats.id, stats.total_rules])
+      );
+      // Process the list to include only the cards that have integrations stats and set the title badge
+      // Use indexedStats to keep O(n) complexity
+      const indexedCards = list.reduce<Record<string, IntegrationCardItem>>((acc, card) => {
+        const totalRules = indexedStats[card.id];
+        if (!totalRules) {
           return acc;
         }
-        acc.push({
-          ...card,
-          titleBadge: <EuiBadge color="hollow">{i18n.TOTAL_RULES(total)}</EuiBadge>,
-        });
+        const titleBadge = <EuiBadge color="hollow">{i18n.TOTAL_RULES(totalRules)}</EuiBadge>;
+        acc[card.id] = { ...card, titleBadge };
+        return acc;
+      }, {});
+
+      // Use the same order as the integrationsStats (descending by total rules from API)
+      return integrationsStats.reduce<IntegrationCardItem[]>((acc, { id }) => {
+        const card = indexedCards[id];
+        if (card) {
+          acc.push(card);
+        }
         return acc;
       }, []);
     }, [list, integrationsStats]);
@@ -99,24 +109,29 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
       setExpandedCardId(OnboardingCardId.siemMigrationsRules);
     }, [setExpandedCardId]);
 
-    const [integrationsStats, setIntegrationsStats] = useState<
-      RuleMigrationAllIntegrationsStats | undefined
-    >();
-    const { getIntegrationsStats, isLoading } = useGetIntegrationsStats(setIntegrationsStats);
+    const [integrationsStats, setIntegrationsStats] = useState<RuleMigrationAllIntegrationsStats>(
+      []
+    );
+    const processIntegrationsStats = useCallback((stats: RuleMigrationAllIntegrationsStats) => {
+      // Prefix IDs with 'epr:' to match the integration card IDs
+      setIntegrationsStats(stats.map((stat) => ({ ...stat, id: `epr:${stat.id}` })));
+    }, []);
+
+    const { getIntegrationsStats, isLoading } = useGetIntegrationsStats(processIntegrationsStats);
 
     useEffect(() => {
+      // fetch integrations stats only if the migrations card is complete (al least one migration is complete),
       if (isMigrationsCardComplete) {
         getIntegrationsStats();
-      } else {
-        setIntegrationsStats([]);
       }
     }, [getIntegrationsStats, isMigrationsCardComplete]);
 
+    // Replace the static "recommended" tab by the dynamic "detected" tab, based on the migrations integrations stats
     const integrationTabs = useMemo(() => {
       if (!integrationsStats?.length) {
         return INTEGRATION_TABS;
       }
-      const featuredCardIds = integrationsStats.map((integration) => `epr:${integration.id}`);
+      const featuredCardIds = integrationsStats.map(({ id }) => id);
       const [recommendedTab, ...rest] = INTEGRATION_TABS;
       return [
         {
@@ -129,6 +144,7 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
       ];
     }, [integrationsStats]);
 
+    // Wrap the top callout renderer to include the missing migration callout
     const topCalloutRenderer = useCallback<TopCalloutRenderer>(
       ({ activeIntegrationsCount, isAgentRequired, selectedTabId }) => {
         return (
@@ -149,7 +165,8 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
       },
       [isMigrationsCardComplete, expandMigrationsCard]
     );
-    if (!checkCompleteMetadata || isLoading || !integrationsStats) {
+
+    if (!checkCompleteMetadata || isLoading) {
       return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
     }
 

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
 
-export const IntegrationsCardGridTabs = () => <div data-test-subj="integrationsCardGridTabs" />;
+export const SecurityIntegrationsGridTabs = jest.fn(() => (
+  <div data-test-subj="securityIntegrationsGridTabs" />
+));
