@@ -7,59 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
-  const testSubjects = getService('testSubjects');
 
   describe('edit field', function () {
-    before(async function () {
-      await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
+    before(async () => {
+      const es = getService('es');
+      await es.index({
+        index: 'data-view-edit-field',
+        id: '1',
+        document: {
+          extension: 'css',
+        },
+        refresh: true,
+      });
     });
 
-    after(async function afterAll() {
-      await kibanaServer.importExport.unload(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
+    after(async function () {
+      // Delete the index after tests
+      const es = getService('es');
+      await es.indices.delete({
+        index: 'data-view-edit-field',
+        ignore_unavailable: true,
+      });
     });
 
     describe('field preview', function fieldPreview() {
       before(async () => {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.createIndexPattern('data-view-edit-field', null);
+      });
+      after(async function () {
+        // Delete the data view (index pattern) after the test
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternByName('data-view-edit-field');
+        await PageObjects.settings.removeIndexPattern();
       });
 
       it('should show preview for fields in _source', async function () {
-        await PageObjects.settings.filterField('extension');
-        await testSubjects.click('editFieldFormat');
-        await testSubjects.find('value');
-        let previewText = '';
-        await retry.waitForWithTimeout('get preview value', 1000, async () => {
-          previewText = await testSubjects.getVisibleText('value');
-          return previewText !== 'Value not set';
+        await PageObjects.settings.changeAndValidateFieldFormat({
+          name: 'extension',
+          fieldType: 'text',
+          expectedPreviewText: 'css',
         });
-        expect(previewText).to.be('css');
-        await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
       it('should show preview for fields not in _source', async function () {
-        await PageObjects.settings.filterField('extension.raw');
-        await testSubjects.click('editFieldFormat');
-        await testSubjects.find('value');
-        let previewText = '';
-        await retry.waitForWithTimeout('get preview value', 1000, async () => {
-          previewText = await testSubjects.getVisibleText('value');
-          return previewText !== 'Value not set';
+        await PageObjects.settings.changeAndValidateFieldFormat({
+          name: 'extension.keyword',
+          fieldType: 'keyword',
+          expectedPreviewText: 'css',
         });
-        expect(previewText).to.be('css');
-        await PageObjects.settings.closeIndexPatternFieldEditor();
       });
     });
   });
