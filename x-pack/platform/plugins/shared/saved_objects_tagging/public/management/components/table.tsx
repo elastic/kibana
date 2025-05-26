@@ -148,7 +148,13 @@ export const TagTable: FC<TagTableProps> = ({
                 onShowRelations(tag);
               }
             }}
-            aria-label={`${connectionsLabel} of ${tag.name} tag`}
+            aria-label={i18n.translate(
+              'xpack.savedObjectsTagging.management.table.connectionsAriaLabel',
+              {
+                defaultMessage: `{connectionsLabel} of {tagName} tag`,
+                values: { connectionsLabel, tagName: tag.name },
+              }
+            )}
           >
             {columnText}
           </EuiLink>
