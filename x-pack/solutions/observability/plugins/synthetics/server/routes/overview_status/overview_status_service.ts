@@ -303,6 +303,16 @@ export class OverviewStatusService {
           locations: [location],
           overallStatus: status,
         };
+        switch (status) {
+          case MONITOR_STATUS_ENUM.DOWN:
+            down += 1;
+            break;
+          case MONITOR_STATUS_ENUM.UP:
+            up += 1;
+            break;
+          default:
+            break;
+        }
 
         if (
           downConfigs[meta.configId] ||
@@ -329,11 +339,9 @@ export class OverviewStatusService {
         } else {
           switch (status) {
             case MONITOR_STATUS_ENUM.DOWN:
-              down += 1;
               downConfigs[meta.configId] = meta;
               break;
             case MONITOR_STATUS_ENUM.UP:
-              up += 1;
               upConfigs[meta.configId] = meta;
               break;
             default:

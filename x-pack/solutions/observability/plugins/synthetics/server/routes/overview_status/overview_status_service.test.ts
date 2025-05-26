@@ -174,7 +174,7 @@ describe('current status route', () => {
           "disabledCount": 0,
           "disabledMonitorQueryIds": Array [],
           "disabledMonitorsCount": 0,
-          "down": 0,
+          "down": 1,
           "downConfigs": Object {},
           "enabledMonitorQueryIds": Array [
             "id1",
@@ -329,7 +329,7 @@ describe('current status route', () => {
           "disabledCount": 0,
           "disabledMonitorQueryIds": Array [],
           "disabledMonitorsCount": 0,
-          "down": 0,
+          "down": 1,
           "downConfigs": Object {},
           "enabledMonitorQueryIds": Array [
             "id1",
