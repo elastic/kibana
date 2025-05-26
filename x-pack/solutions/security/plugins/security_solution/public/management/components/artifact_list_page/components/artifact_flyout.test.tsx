@@ -144,9 +144,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       let getByTestId: (typeof renderResult)['getByTestId'];
 
       beforeEach(async () => {
-        await act(async () => {
-          await render();
-        });
+        await render();
 
         getByTestId = renderResult.getByTestId;
 
@@ -186,9 +184,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     describe('and submit is successful', () => {
       beforeEach(async () => {
-        await act(async () => {
-          await render();
-        });
+        await render();
 
         await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 
@@ -268,9 +264,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           return new ExceptionsListItemGenerator().generateTrustedApp(item);
         });
 
-        await act(async () => {
-          await render({ onFormSubmit: handleSubmitCallback });
-        });
+        await render({ onFormSubmit: handleSubmitCallback });
 
         await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
       });
@@ -422,9 +416,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     it('should show error toast and close flyout if item for edit does not exist', async () => {
       mockedApi.responseProvider.trustedApp.mockRejectedValue(new Error('does not exist') as never);
 
-      await act(async () => {
-        await render();
-      });
+      await render();
 
       await waitFor(() => {
         expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();

@@ -9,6 +9,7 @@
 
 export {
   MIGRATION_CLIENT_OPTIONS,
+  REMOVED_TYPES,
   SavedObjectsService,
   CoreSavedObjectsRouteHandlerContext,
 } from './src';

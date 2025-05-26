@@ -12,7 +12,7 @@ import { from } from 'rxjs';
 import { take } from 'rxjs';
 import { render, act as renderAct, renderHook, act } from '@testing-library/react';
 
-import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME, AMSTERDAM_DARK_THEME } from '@elastic/charts';
 
 import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -56,7 +56,9 @@ describe('ThemeService', () => {
       const themeService = new ThemeService();
       themeService.init(setUpMockTheme);
 
-      expect(await themeService.chartsBaseTheme$.pipe(take(1)).toPromise()).toEqual(LIGHT_THEME);
+      expect(await themeService.chartsBaseTheme$.pipe(take(1)).toPromise()).toEqual(
+        AMSTERDAM_LIGHT_THEME
+      );
     });
 
     describe('in dark mode', () => {
@@ -67,7 +69,7 @@ describe('ThemeService', () => {
         themeService.init(setUpMockTheme);
         const result = await themeService.chartsBaseTheme$.pipe(take(1)).toPromise();
 
-        expect(result).toEqual(DARK_THEME);
+        expect(result).toEqual(AMSTERDAM_DARK_THEME);
       });
     });
   });
@@ -80,19 +82,19 @@ describe('ThemeService', () => {
       const { useChartsBaseTheme } = themeService;
 
       const { result } = renderHook(() => useChartsBaseTheme());
-      expect(result.current).toBe(LIGHT_THEME);
+      expect(result.current).toBe(AMSTERDAM_LIGHT_THEME);
 
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(true);
         themeService.init(setUpMockTheme);
       });
-      expect(result.current).toBe(DARK_THEME);
+      expect(result.current).toBe(AMSTERDAM_DARK_THEME);
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(false);
         themeService.init(setUpMockTheme);
       });
       // act(() => darkMode$.next(false));
-      expect(result.current).toBe(LIGHT_THEME);
+      expect(result.current).toBe(AMSTERDAM_LIGHT_THEME);
     });
 
     it('should not rerender when emitting the same value', () => {
