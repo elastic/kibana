@@ -14,8 +14,8 @@ import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 import { METADATA_FIELDS } from '../shared/constants';
 
-export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((it) => ({
-  name: it,
+export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
+  name: field,
   type: 'keyword',
 }));
 
