@@ -192,21 +192,14 @@ export const createTabsStorageManager = ({
   });
 
   const readFromLocalStorage = (): TabsStateInLocalStorage => {
-    const storedTabsState = storage.get(TABS_LOCAL_STORAGE_KEY);
-    let parsedTabsState: TabsStateInLocalStorage | null = null;
-    if (storedTabsState) {
-      try {
-        parsedTabsState = JSON.parse(storedTabsState);
-      } catch {
-        // suppress error
-      }
-    }
+    const storedTabsState: TabsStateInLocalStorage | undefined =
+      storage.get(TABS_LOCAL_STORAGE_KEY);
 
     return {
-      userId: parsedTabsState?.userId || '',
-      spaceId: parsedTabsState?.spaceId || '',
-      openTabs: parsedTabsState?.openTabs || [],
-      closedTabs: parsedTabsState?.closedTabs || [],
+      userId: storedTabsState?.userId || '',
+      spaceId: storedTabsState?.spaceId || '',
+      openTabs: storedTabsState?.openTabs || [],
+      closedTabs: storedTabsState?.closedTabs || [],
     };
   };
 
@@ -286,7 +279,7 @@ export const createTabsStorageManager = ({
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
 
-    storage.set(TABS_LOCAL_STORAGE_KEY, JSON.stringify(nextTabsInStorage));
+    storage.set(TABS_LOCAL_STORAGE_KEY, nextTabsInStorage);
   };
 
   const updateTabStateLocally: TabsStorageManager['updateTabStateLocally'] = (
@@ -317,7 +310,7 @@ export const createTabsStorageManager = ({
     };
 
     if (hasModifications) {
-      storage.set(TABS_LOCAL_STORAGE_KEY, JSON.stringify(updatedTabsState));
+      storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
     }
   };
 
