@@ -64,6 +64,8 @@ export const LocationsBadge = ({ monitor }: { monitor: OverviewStatusMetaData })
         throttledOpenPopover();
       }}
       onFocus={() => setPopover(true)}
+      onMouseOut={() => setPopover(false)}
+      onBlur={() => setPopover(false)}
     >
       <EuiBadge
         data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"

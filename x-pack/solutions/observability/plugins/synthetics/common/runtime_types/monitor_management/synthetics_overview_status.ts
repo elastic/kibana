@@ -51,6 +51,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     tags: t.array(t.string),
     isStatusAlertEnabled: t.boolean,
     type: t.string,
+    overallStatus: t.string,
   }),
   t.partial({
     projectId: t.string,

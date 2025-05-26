@@ -7,6 +7,7 @@
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 import { useMonitorHealthColor } from '../components/monitors_page/hooks/use_monitor_health_color';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
@@ -80,7 +81,11 @@ export function useStatusByLocation({
         const fullLoc = allLocations.find((l) => l.id === loc.id);
         if (fullLoc) {
           const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
-          const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
+          const status = ping
+            ? ping.summary?.down ?? 0 > 0
+              ? MONITOR_STATUS_ENUM.DOWN
+              : MONITOR_STATUS_ENUM.UP
+            : MONITOR_STATUS_ENUM.PENDING;
           return {
             status,
             id: fullLoc?.id,

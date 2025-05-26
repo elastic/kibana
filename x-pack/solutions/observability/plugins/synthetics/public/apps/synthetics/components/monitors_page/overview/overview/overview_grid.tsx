@@ -188,7 +188,7 @@ export const OverviewGrid = memo(
                                   <EuiFlexGroup
                                     data-test-subj={`overview-grid-row-${listIndex}`}
                                     gutterSize="m"
-                                    css={{ ...style }}
+                                    css={{ ...style, marginLeft: 5 }}
                                   >
                                     {listData[listIndex].map((_, idx) => (
                                       <EuiFlexItem

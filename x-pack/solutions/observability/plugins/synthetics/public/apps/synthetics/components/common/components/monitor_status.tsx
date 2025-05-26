@@ -24,7 +24,7 @@ export const BadgeStatus = ({
   isBrowserType: boolean;
   onClickBadge?: () => void;
 }) => {
-  const monStatus = status ? status : monitor?.locations[0]?.status;
+  const monStatus = status ? status : monitor?.overallStatus;
   const { color, dataTestSubj, labels } = badgeMapping[monStatus || MONITOR_STATUS_ENUM.PENDING];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
 

@@ -72,6 +72,7 @@ export const MetricItem = ({
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
+  const status = monitor.overallStatus;
   const locationId = monitor.locations[0].id;
   const { euiTheme } = useEuiTheme();
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + locationId];
@@ -79,7 +80,7 @@ export const MetricItem = ({
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const metricSubtitle = useMetricSubtitle(monitor);
   const locationName = useLocationName(monitor);
-  const { status, timestamp, configIdByLocation } = useStatusByLocationOverview({
+  const { timestamp, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
     locationId,
   });

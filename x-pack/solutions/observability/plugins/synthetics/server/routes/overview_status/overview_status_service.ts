@@ -261,6 +261,7 @@ export class OverviewStatusService {
         } else {
           disabledConfigs[meta.configId] = {
             monitorQueryId,
+            overallStatus: MONITOR_STATUS_ENUM.DISABLED,
             locations: [
               {
                 id: location.id,
@@ -288,59 +289,76 @@ export class OverviewStatusService {
         }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
         const metaInfo = this.getMonitorMeta(monitor);
+        const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
+        const location = {
+          status,
+          id: monLocation.id,
+          label: monLocation.label,
+        };
         const meta = {
           ...metaInfo,
           monitorQueryId: monitorId,
           timestamp: locData?.timestamp,
-          locationLabel: monLocation.label,
           urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
+          locations: [location],
+          overallStatus: status,
         };
-        const location = {
-          id: monLocation.id,
-          label: monLocation.label,
-          status: locData?.status || MONITOR_STATUS_ENUM.PENDING,
-        };
-        if (locData) {
-          if (downConfigs[meta.configId]) {
-            downConfigs[meta.configId].locations.push(location);
-          } else {
-            if (locData.status === MONITOR_STATUS_ENUM.DOWN) {
-              down += 1;
-              downConfigs[meta.configId] = {
-                ...meta,
-                locations: [location],
-              };
-            } else if (locData.status === MONITOR_STATUS_ENUM.UP) {
-              up += 1;
-              if (upConfigs[meta.configId]) {
-                upConfigs[meta.configId].locations.push(location);
-              } else {
-                upConfigs[meta.configId] = {
-                  ...meta,
-                  locations: [location],
-                };
-              }
-            }
+
+        if (
+          downConfigs[meta.configId] ||
+          upConfigs[meta.configId] ||
+          pendingConfigs[meta.configId]
+        ) {
+          const existingMeta =
+            downConfigs[meta.configId] || upConfigs[meta.configId] || pendingConfigs[meta.configId];
+          existingMeta.locations.push(location);
+          // check if urls is missing from existing meta and update it
+          if (!existingMeta.urls && meta.urls) {
+            existingMeta.urls = meta.urls;
+          }
+          // also update timestamp if it is missing or older
+          if (
+            !existingMeta.timestamp ||
+            (meta.timestamp && moment(meta.timestamp).isAfter(existingMeta.timestamp))
+          ) {
+            existingMeta.timestamp = meta.timestamp;
+          }
+          if (status === MONITOR_STATUS_ENUM.DOWN) {
+            existingMeta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
           }
         } else {
-          if (downConfigs[meta.configId] || upConfigs[meta.configId]) {
-            if (downConfigs[meta.configId]) {
-              downConfigs[meta.configId].locations.push(location);
-            } else {
-              upConfigs[meta.configId].locations.push(location);
-            }
-          } else {
-            if (pendingConfigs[meta.configId]) {
-              pendingConfigs[meta.configId].locations.push(location);
-            } else {
-              pendingConfigs[meta.configId] = {
-                ...meta,
-                locations: [location],
-              };
-            }
+          switch (status) {
+            case MONITOR_STATUS_ENUM.DOWN:
+              down += 1;
+              downConfigs[meta.configId] = meta;
+              break;
+            case MONITOR_STATUS_ENUM.UP:
+              up += 1;
+              upConfigs[meta.configId] = meta;
+              break;
+            default:
+              pendingConfigs[meta.configId] = meta;
+              break;
           }
         }
       });
+    });
+    // check if any pending config have any up/down location, move it there instead of keeping it in pending and delete it from pending
+    Object.values(pendingConfigs).forEach((pendingMeta) => {
+      if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
+        down += 1;
+        // sort locations and move pending to end
+        pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
+        downConfigs[pendingMeta.configId] = pendingMeta;
+        delete pendingConfigs[pendingMeta.configId];
+      } else if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.UP)) {
+        up += 1;
+        upConfigs[pendingMeta.configId] = pendingMeta;
+        pendingMeta.overallStatus = MONITOR_STATUS_ENUM.UP;
+        // sort locations and move pending to end
+        pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
+        delete pendingConfigs[pendingMeta.configId];
+      }
     });
 
     return {
@@ -408,4 +426,16 @@ export class OverviewStatusService {
       urls: monitor.attributes[ConfigKey.URLS],
     };
   }
+}
+
+function movePendingToEnd(locations: Array<{ id: string; label: string; status: string }>) {
+  return locations.sort((a, b) => {
+    if (a.status === MONITOR_STATUS_ENUM.PENDING && b.status !== MONITOR_STATUS_ENUM.PENDING) {
+      return 1;
+    }
+    if (b.status === MONITOR_STATUS_ENUM.PENDING && a.status !== MONITOR_STATUS_ENUM.PENDING) {
+      return -1;
+    }
+    return 0;
+  });
 }
