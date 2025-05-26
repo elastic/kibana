@@ -92,6 +92,7 @@ export const createGridCell = (
         </div>
       );
     }
+    const { euiTheme } = useEuiTheme();
 
     return (
       <div
@@ -106,11 +107,11 @@ export const createGridCell = (
           'lnsTableCell--colored': colorMode !== 'none',
           [`lnsTableCell--${currentAlignment}`]: true,
         })}
-        // css= {{
-        //   color: fitRowToContent ? euiTheme.euiTheme.colors.danger: euiTheme.euiTheme.colors.text,
-        //   outline: 0,
-        //   border: 0,
-        // }}
+        css= {{
+          color: fitRowToContent ? euiTheme.colors.danger: euiTheme.colors.text,
+          outline: 0,
+          border: 0,
+        }}
       />
     );
   };
