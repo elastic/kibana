@@ -30,7 +30,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
+import { type AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import * as translations from '../translations';
@@ -40,8 +40,8 @@ import {
   DEFAULT_THRESHOLD,
   DEFAULT_THRESHOLD_ENABLED,
   DEFAULT_THRESHOLD_UNIT,
-  MAX_THRESHOLD_DAYS,
-  MIN_THRESHOLD_DAYS,
+  MAX_ALERT_DELETE_THRESHOLD_DAYS,
+  MIN_ALERT_DELETE_THRESHOLD_DAYS,
   THRESHOLD_UNITS,
 } from '../constants';
 import { useAlertDeletePreview } from '../api/preview/use_alert_delete_preview';
@@ -118,10 +118,10 @@ const PreviewMessage = ({
 const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOption) => {
   const thresholdInDays = getThresholdInDays(threshold, thresholdUnit);
   const errorMessages = [];
-  if (thresholdInDays < MIN_THRESHOLD_DAYS) {
+  if (thresholdInDays < MIN_ALERT_DELETE_THRESHOLD_DAYS) {
     errorMessages.push(translations.THRESHOLD_ERROR_MIN);
   }
-  if (thresholdInDays > MAX_THRESHOLD_DAYS) {
+  if (thresholdInDays > MAX_ALERT_DELETE_THRESHOLD_DAYS) {
     errorMessages.push(translations.THRESHOLD_ERROR_MAX);
   }
   return errorMessages;

@@ -210,6 +210,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             .send({
               active_alert_delete_threshold: 90,
               inactive_alert_delete_threshold: undefined,
+              category_ids: ['management', 'securitySolution', 'observability'],
             });
 
           switch (scenario.id) {
@@ -347,6 +348,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             .send({
               active_alert_delete_threshold: 90,
               inactive_alert_delete_threshold: 90,
+              category_ids: ['management', 'securitySolution', 'observability'],
             });
 
           switch (scenario.id) {
@@ -1291,6 +1293,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             .send({
               active_alert_delete_threshold: 90,
               inactive_alert_delete_threshold: 90,
+              category_ids: ['management', 'observability', 'securitySolution'],
             });
 
           switch (scenario.id) {
@@ -1374,6 +1377,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             active_alert_delete_threshold: undefined,
             inactive_alert_delete_threshold: 90,
             space_ids: [Space1.id, 'default'],
+            category_ids: ['management', 'observability', 'securitySolution'],
           })
           .expect(204);
 
@@ -1452,6 +1456,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         .send({
           active_alert_delete_threshold: undefined,
           inactive_alert_delete_threshold: 90,
+          category_ids: ['management'],
           space_ids: [Space1.id, Space2.id], // no space2 privileges
         });
 

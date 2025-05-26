@@ -16,8 +16,7 @@ export const transformRequestToAlertDeletePreview = ({
 }: AlertDeletePreviewQueryV1): RulesSettingsAlertDeleteProperties => {
   // Accepting single category id or array of category ids because
   // sending an array of just one element in decoded as a simple string
-  const getCategoryIds = (input: AlertDeleteCategoryIds | AlertDeleteCategoryIds[] | undefined) => {
-    if (!input) return undefined;
+  const getCategoryIds = (input: AlertDeleteCategoryIds | AlertDeleteCategoryIds[]) => {
     return Array.isArray(input) ? input : [input];
   };
 

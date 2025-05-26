@@ -6,7 +6,6 @@
  */
 
 import type {
-  RulesSettingsAlertDeleteProperties,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-types';
@@ -75,11 +74,4 @@ export const DEFAULT_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
 };
 export const DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
   delay: DEFAULT_SERVERLESS_QUERY_DELAY,
-};
-
-export const DEFAULT_ALERT_DELETE_SETTINGS: RulesSettingsAlertDeleteProperties = {
-  isActiveAlertDeleteEnabled: false,
-  isInactiveAlertDeleteEnabled: false,
-  activeAlertDeleteThreshold: 90,
-  inactiveAlertDeleteThreshold: 90,
 };

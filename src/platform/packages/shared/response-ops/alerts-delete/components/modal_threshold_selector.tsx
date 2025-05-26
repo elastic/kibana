@@ -17,6 +17,7 @@ import {
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
+import { MIN_ALERT_DELETE_THRESHOLD_DAYS, MAX_ALERT_DELETE_THRESHOLD_DAYS } from '../constants';
 import { THRESHOLD_UNITS } from '../constants';
 
 interface ModalThresholdSelectorProps {
@@ -57,8 +58,8 @@ export const ModalThresholdSelector = ({
           <EuiFlexItem grow={1}>
             <EuiFieldNumber
               key={error.join('')} // Force re-render when error changes because the error might happen when changing the threshold
-              min={1}
-              max={1000}
+              min={MIN_ALERT_DELETE_THRESHOLD_DAYS}
+              max={MAX_ALERT_DELETE_THRESHOLD_DAYS}
               value={threshold}
               onChange={onChangeThreshold}
               disabled={isDisabled}
