@@ -1226,12 +1226,12 @@ export class SearchSource {
     let m;
     const indexPatternSet: Set<string> = new Set();
     // Updated regex to capture full index names including dashes, numbers, and periods
-    const regex = /\s?(_index)\s*:\s*['"]?([^\s'"]+)['"]?/g;
+    const indexNameRegExp = /\s?(_index)\s*:\s*['"]?([^\s'"]+)['"]?/g;
 
-    while ((m = regex.exec(queryString)) !== null) {
+    while ((m = indexNameRegExp.exec(queryString)) !== null) {
       // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
+      if (m.index === indexNameRegExp.lastIndex) {
+        indexNameRegExp.lastIndex++;
       }
 
       m.forEach((match, groupIndex) => {
