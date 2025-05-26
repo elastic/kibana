@@ -20,7 +20,6 @@ import {
   useEuiTheme,
   EuiSpacer,
   type UseEuiTheme,
-  hexToRgb,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -37,6 +36,7 @@ import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
+import chromajs from 'chroma-js';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -499,7 +499,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const isDarkMode = useKibanaIsDarkMode();
 
-  const rgbaShadowAlpha20 = `rgba(${hexToRgb(euiTheme.colors.shadow)}, 0.2)`;
+  const shadowAlpha20 = chromajs(euiTheme.colors.shadow).alpha(0.2).css();
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
@@ -513,9 +513,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             aria-hidden={true}
             css={[
               css`
-                filter: drop-shadow(0 6px 12px ${rgbaShadowAlpha20})
-                  drop-shadow(0 4px 4px ${rgbaShadowAlpha20})
-                  drop-shadow(0 2px 2px ${rgbaShadowAlpha20});
+                filter: drop-shadow(0 6px 12px ${shadowAlpha20})
+                  drop-shadow(0 4px 4px ${shadowAlpha20}) drop-shadow(0 2px 2px ${shadowAlpha20});
               `,
               promptIllustrationStyle,
             ]}

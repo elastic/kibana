@@ -25,7 +25,6 @@ import {
   euiFocusRing,
   useEuiFontSize,
   euiTextTruncate,
-  hexToRgb,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
@@ -38,6 +37,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { CoreStart } from '@kbn/core/public';
+import chromajs from 'chroma-js';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -607,7 +607,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
-  const rgbaDangerAlpha10 = `rgba(${hexToRgb(euiTheme.colors.danger)}, 0.1)`;
+  const dangerAlpha10 = chromajs(euiTheme.colors.danger).alpha(0.1).css();
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -672,10 +672,10 @@ export function SuggestionPanel({
           padding-top: ${euiTheme.size.xs};
           mask-image: linear-gradient(
             to right,
-            ${rgbaDangerAlpha10} 0%,
+            ${dangerAlpha10} 0%,
             ${euiTheme.colors.danger} 5px,
             ${euiTheme.colors.danger} calc(100% - 5px),
-            ${rgbaDangerAlpha10} 100%
+            ${dangerAlpha10} 100%
           );
         `}
       >
