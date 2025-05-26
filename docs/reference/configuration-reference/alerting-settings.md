@@ -134,6 +134,18 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
+`xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   A string that specifies the host name of the Amazon SES service provider. Email connectors utilize this hostname to send emails via Amazon SES.
+
+    Data type: `string`
+    Default: `email-smtp.us-east-1.amazonaws.com`
+
+`xpack.actions.email.services.ses.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   A string that specifies the port name of the Amazon SES service provider. Email connectors utilize this port to send emails via Amazon SES.
+
+    Data type: `int`
+    Default: `465`
+
 `xpack.actions.enableFooterInEmail` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions.
 

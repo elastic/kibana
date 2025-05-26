@@ -10,9 +10,6 @@ export enum AdditionalEmailServices {
   ELASTIC_CLOUD = 'elastic_cloud',
   EXCHANGE = 'exchange_server',
   OTHER = 'other',
-}
-
-export enum EmailServices {
   AWS_SES = 'ses',
 }
 

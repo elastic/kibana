@@ -238,7 +238,7 @@ describe('config validation', () => {
 
     config.email = {};
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email.domain_allowlist]: expected value of type [array] but got [undefined]"`
+      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
     );
 
     config.email = { domain_allowlist: [] };
@@ -248,6 +248,39 @@ describe('config validation', () => {
     config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
+
+  test('email.services.ses', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {};
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+    );
+
+    config.email = { services: {} };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+    );
+
+    config.email = { services: { ses: {} } };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+    );
+
+    config.email = { services: { ses: { host: 'ses.host.com' } } };
+    result = configSchema.validate(config);
+    expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com' });
+
+    config.email = { services: { ses: { port: 1 } } };
+    result = configSchema.validate(config);
+    expect(result.email?.services?.ses).toEqual({ port: 1 });
+
+    config.email = { services: { ses: { host: 'ses.host.com', port: 1 } } };
+    result = configSchema.validate(config);
+    expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com', port: 1 });
   });
 });
 

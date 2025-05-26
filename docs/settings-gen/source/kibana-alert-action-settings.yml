@@ -282,6 +282,50 @@ groups:
             self: all
             ess: all
          # example: |
+      
+      - setting: xpack.actions.email.services.ses.host 
+        id: action-config-email-services-ses-host
+        description: |
+          A string that specifies the host name of the Amazon SES service provider. Email connectors utilize this hostname to send emails via Amazon SES.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: "email-smtp.us-east-1.amazonaws.com"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.ses.port
+        id: action-config-email-services-ses-port
+        description: |
+          A string that specifies the port name of the Amazon SES service provider. Email connectors utilize this port to send emails via Amazon SES.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 465
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
 
       - setting: xpack.actions.enableFooterInEmail
         # id:

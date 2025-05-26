@@ -33,7 +33,7 @@ import type {
 import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
-import { EmailServices } from '../../../common';
+import { AdditionalEmailServices } from '../../../common';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -1283,7 +1283,7 @@ describe('validateConfig AWS_SES specific checks', () => {
 
   test('throws if both host and port do not match AWS SES config', () => {
     const config = {
-      service: EmailServices.AWS_SES,
+      service: AdditionalEmailServices.AWS_SES,
       from: 'bob@example.com',
       host: 'wrong-host',
       port: 123,
@@ -1299,7 +1299,7 @@ describe('validateConfig AWS_SES specific checks', () => {
 
   test('throws if host does not match AWS SES config', () => {
     const config = {
-      service: EmailServices.AWS_SES,
+      service: AdditionalEmailServices.AWS_SES,
       from: 'bob@example.com',
       host: 'wrong-host',
       port: awsSesPort,
@@ -1315,7 +1315,7 @@ describe('validateConfig AWS_SES specific checks', () => {
 
   test('throws if port does not match AWS SES config', () => {
     const config = {
-      service: EmailServices.AWS_SES,
+      service: AdditionalEmailServices.AWS_SES,
       from: 'bob@example.com',
       host: awsSesHost,
       port: 123,
@@ -1331,7 +1331,7 @@ describe('validateConfig AWS_SES specific checks', () => {
 
   test('throws if secure is not true for AWS SES', () => {
     const config = {
-      service: EmailServices.AWS_SES,
+      service: AdditionalEmailServices.AWS_SES,
       from: 'bob@example.com',
       host: awsSesHost,
       port: awsSesPort,

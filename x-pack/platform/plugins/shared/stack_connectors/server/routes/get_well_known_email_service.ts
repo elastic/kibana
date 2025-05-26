@@ -16,11 +16,7 @@ import type {
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type { AwsSesConfig } from '@kbn/actions-plugin/server/types';
-import {
-  AdditionalEmailServices,
-  EmailServices,
-  INTERNAL_BASE_STACK_CONNECTORS_API_PATH,
-} from '../../common';
+import { AdditionalEmailServices, INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { ELASTIC_CLOUD_SERVICE } from '../connector_types/email';
 
 const paramSchema = schema.object({
@@ -58,7 +54,7 @@ export const getWellKnownEmailServiceRoute = (router: IRouter, awsSesConfig: Aws
     let response: SMTPConnection.Options = {};
     if (service === AdditionalEmailServices.ELASTIC_CLOUD) {
       response = ELASTIC_CLOUD_SERVICE;
-    } else if (service === EmailServices.AWS_SES && awsSesConfig) {
+    } else if (service === AdditionalEmailServices.AWS_SES && awsSesConfig) {
       response = {
         host: awsSesConfig.host,
         port: awsSesConfig.port,
