@@ -380,6 +380,7 @@ import type {
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationIntegrationsStatsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationPrivilegesResponse,
@@ -1553,6 +1554,21 @@ finalize it.
     return this.kbnClient
       .request<GetRuleMigrationIntegrationsResponse>({
         path: '/internal/siem_migrations/rules/integrations',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+   */
+  async getRuleMigrationIntegrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationIntegrationsStats`);
+    return this.kbnClient
+      .request<GetRuleMigrationIntegrationsStatsResponse>({
+        path: '/internal/siem_migrations/rules/integrations/stats',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
