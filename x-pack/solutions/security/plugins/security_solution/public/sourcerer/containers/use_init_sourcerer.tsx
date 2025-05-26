@@ -24,6 +24,7 @@ import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/glo
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 import { useKibana } from '../../common/lib/kibana';
 import { useSourcererDataView } from '.';
+import { sharedDataViewManagerSlice } from '../../data_view_manager/redux/slices';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -305,6 +306,7 @@ export const useInitSourcerer = (
     ) {
       updateSourcererDataView(signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
+      dispatch(sharedDataViewManagerSlice.actions.setSignalIndexName(signalIndexName));
     }
   }, [
     defaultDataView.id.length,

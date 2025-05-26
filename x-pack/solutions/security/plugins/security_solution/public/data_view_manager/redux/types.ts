@@ -23,6 +23,7 @@ export interface SharedDataViewSelectionState {
   dataViews: DataViewSpec[];
   adhocDataViews: DataViewSpec[];
   status: 'pristine' | 'loading' | 'error' | 'ready';
+  signalIndexName: string;
 }
 
 export { type DataViewSpec };

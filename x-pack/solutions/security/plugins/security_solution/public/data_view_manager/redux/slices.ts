@@ -22,6 +22,7 @@ export const initialSharedState: SharedDataViewSelectionState = {
   dataViews: [],
   adhocDataViews: [],
   status: 'pristine',
+  signalIndexName: '',
 };
 
 export const sharedDataViewManagerSlice = createSlice({
@@ -31,6 +32,9 @@ export const sharedDataViewManagerSlice = createSlice({
     setDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
       state.dataViews = action.payload;
       state.status = 'ready';
+    },
+    setSignalIndexName: (state, action: PayloadAction<string>) => {
+      state.signalIndexName = action.payload;
     },
     addDataView: (state, action: PayloadAction<DataView>) => {
       const dataViewSpec = action.payload.toSpec();

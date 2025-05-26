@@ -16,7 +16,8 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useUserInfo } from '../../detections/components/user_info';
+import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */
@@ -33,19 +34,27 @@ export const useSignalHelpers = (): {
     data: { dataViews },
   } = useKibana().services;
 
-  const { signalIndexName: signalIndexNameSourcerer } = useUserInfo();
+  const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const experimentalSignalIndexName = useSignalIndexName();
 
   const oldDefaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalSignalIndexName
+    : signalIndexNameSourcerer;
+
   const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
 
-  const defaultDataViewPattern = experimentalDefaultDataView
-    ? experimentalDefaultDataView.getIndexPattern()
+  const defaultDataViewPattern = newDataViewPickerEnabled
+    ? experimentalDefaultDataView?.getIndexPattern() ?? ''
     : oldDefaultDataView.title;
 
   const signalIndexNeedsInit = useMemo(
-    () => !defaultDataViewPattern.includes(`${signalIndexNameSourcerer}`),
-    [defaultDataViewPattern, signalIndexNameSourcerer]
+    () => !defaultDataViewPattern.includes(`${signalIndexName}`),
+    [defaultDataViewPattern, signalIndexName]
   );
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,
@@ -64,8 +73,8 @@ export const useSignalHelpers = (): {
         });
 
         if (
-          signalIndexNameSourcerer !== null &&
-          sourcererDataView?.defaultDataView.patternList.includes(signalIndexNameSourcerer)
+          signalIndexName !== null &&
+          sourcererDataView?.defaultDataView.patternList.includes(signalIndexName)
         ) {
           // first time signals is defined and validated in the sourcerer
           // redo indexFieldsSearch
@@ -88,7 +97,7 @@ export const useSignalHelpers = (): {
       }
     };
 
-    if (signalIndexNameSourcerer !== null) {
+    if (signalIndexName !== null) {
       abortCtrl.current.abort();
       asyncSearch();
     }
@@ -99,7 +108,7 @@ export const useSignalHelpers = (): {
     defaultDataViewPattern,
     dispatch,
     indexFieldsSearch,
-    signalIndexNameSourcerer,
+    signalIndexName,
   ]);
 
   return {
