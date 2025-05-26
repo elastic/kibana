@@ -18,15 +18,11 @@ export class PricingTiersClient implements IPricingTiersClient {
     private readonly productFeaturesRegistry: ProductFeaturesRegistry
   ) {}
 
-  getActiveProducts(): PricingProduct[] {
-    return this.tiers.products ?? [];
-  }
-
-  isActiveProduct(product: PricingProduct) {
+  private isActiveProduct(product: PricingProduct) {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   }
 
-  isEnabled() {
+  private isEnabled() {
     return this.tiers.enabled;
   }
 

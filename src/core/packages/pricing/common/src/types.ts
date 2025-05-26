@@ -15,8 +15,5 @@ export interface PricingProductFeature {
 }
 
 export interface IPricingTiersClient {
-  getActiveProducts(): PricingProduct[];
-  isActiveProduct(product: PricingProduct): boolean;
-  isEnabled(): boolean;
   isFeatureAvailable(featureId: string): boolean;
 }
