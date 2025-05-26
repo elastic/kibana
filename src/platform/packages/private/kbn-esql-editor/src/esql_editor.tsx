@@ -594,9 +594,12 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
+  // Temporary, for testing purposes only
   useEffect(() => {
     const getEditorExtensions = async () => {
-      const extensions = await kibana.services?.esql?.getEditorExtensionsAutocomplete('from logs*');
+      const extensions = await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+        'from logs-apache_error'
+      );
       if (extensions) {
         console.dir(extensions);
       }

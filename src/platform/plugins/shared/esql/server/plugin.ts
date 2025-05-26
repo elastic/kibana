@@ -36,6 +36,7 @@ export class EsqlServerPlugin implements Plugin {
     });
 
     registerRoutes(core, this.extensionsRegistry, initContext);
+    // temporary
     this.extensionsRegistry.setRecommendedQueries([
       {
         name: 'Logs count by log level',
@@ -45,9 +46,20 @@ export class EsqlServerPlugin implements Plugin {
         name: 'Meow and woof counts',
         query: 'from logs* | STATS count(*)',
       },
+      {
+        name: 'Zzzzz',
+        query: 'from logs-apache_error | STATS count(*)',
+      },
+      {
+        name: 'ouch',
+        query: 'from kibana_sample_data_ecommerce | STATS count(*)',
+      },
     ]);
 
-    return {};
+    // should allow to register the solution too
+    return {
+      registerESQLQueries: this.extensionsRegistry.setRecommendedQueries,
+    };
   }
 
   public start(core: CoreStart) {

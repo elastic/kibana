@@ -6,34 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export enum ResolveIndexResponseItemIndexAttrs {
-  OPEN = 'open',
-  CLOSED = 'closed',
-  HIDDEN = 'hidden',
-  FROZEN = 'frozen',
-}
 
-export interface ResolveIndexResponseItemDataStream {
+export interface RecommendedQuery {
   name: string;
-  backing_indices: string[];
-  timestamp_field: string;
+  query: string;
 }
 
-export interface ResolveIndexResponseItemAlias {
+export interface ResolveIndexResponseItem {
   name: string;
-  indices: string[];
 }
 
-export interface ResolveIndexResponseItemIndex {
-  name: string;
-  aliases?: string[];
-  attributes?: ResolveIndexResponseItemIndexAttrs[];
-  data_stream?: string;
-}
-
-// for showing index matches
 export interface ResolveIndexResponse {
-  indices?: ResolveIndexResponseItemIndex[];
-  aliases?: ResolveIndexResponseItemAlias[];
-  data_streams?: ResolveIndexResponseItemDataStream[];
+  indices?: ResolveIndexResponseItem[];
+  aliases?: ResolveIndexResponseItem[];
+  data_streams?: ResolveIndexResponseItem[];
 }

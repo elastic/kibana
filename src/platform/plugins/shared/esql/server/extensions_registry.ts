@@ -6,19 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { uniqBy } from 'lodash';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { checkSourceExistence } from './utils';
-import type { ResolveIndexResponse } from './types';
-
-interface RecommendedQuery {
-  name: string;
-  query: string;
-}
+import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
+import type { ResolveIndexResponse, RecommendedQuery } from './types';
 
 export class ESQLExtensionsRegistry {
   private recommendedQueries: Map<string, RecommendedQuery[]> = new Map();
 
-  async setRecommendedQueries(recommendedQueries: RecommendedQuery[]) {
+  // ToDo: allow to register recommended queries from the solution
+  setRecommendedQueries(recommendedQueries: RecommendedQuery[]) {
     if (!Array.isArray(recommendedQueries)) {
       throw new Error('Recommended queries must be an array');
     }
@@ -48,13 +45,28 @@ export class ESQLExtensionsRegistry {
     }
   }
 
+  // ToDo: allow to get recommended queries per solution
   getRecommendedQueries(queryString: string, sources: ResolveIndexResponse): RecommendedQuery[] {
     // check that the sources contain the index pattern from the query string
     const indexPattern = getIndexPatternFromESQLQuery(queryString);
     if (!checkSourceExistence(sources, indexPattern)) {
       return [];
     }
-    const recommendedQueries = this.recommendedQueries.get(indexPattern);
-    return recommendedQueries ?? [];
+
+    const recommendedQueries: RecommendedQuery[] = [];
+
+    // 1. if the index pattern is a pattern, for example "logs-*", we need to check all the recommended queries
+    // and return the ones that match the pattern
+    // i.e. the indexPattern is logs* and I have a recommended query with index pattern logs-2023-10-01, I need to return that query
+    // 2. if the index pattern is a single index, we need to return the recommended queries for that index but also
+    // check that a pattern in the recommended queries matches the index pattern
+    // i.e. the indexPattern is logs-2023-10-01 and I have a recommended query with index pattern logs*, I need to return that query
+    const matchingIndices = findMatchingIndicesFromPattern(this.recommendedQueries, indexPattern);
+    if (matchingIndices.length > 0) {
+      recommendedQueries.push(
+        ...matchingIndices.map((index) => this.recommendedQueries.get(index)!).flat()
+      );
+    }
+    return uniqBy(recommendedQueries, 'query');
   }
 }
