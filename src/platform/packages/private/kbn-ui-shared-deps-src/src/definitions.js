@@ -43,6 +43,7 @@ const externals = {
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
+  'chroma-js': '__kbnSharedDeps__.ChromaJs',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
@@ -76,6 +77,7 @@ const externals = {
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  'chroma-js': '__kbnSharedDeps__.ChromaJs',
   // cache some used methods of the react-use library
   ...[
     'useAsync',
