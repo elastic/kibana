@@ -30,6 +30,8 @@ import { InterceptDialogApi } from '../../service/intercept_dialog_api';
 
 export type Intercept = Rx.ObservedValueOf<ReturnType<InterceptDialogApi['get$']>>[number];
 
+const INTERCEPT_ILLUSTRATION_WIDTH = 89; // Magic number was provided by Ryan
+
 interface InterceptDialogManagerProps {
   ackIntercept: (args: Parameters<InterceptDialogApi['ack']>[0] & Pick<Intercept, 'runId'>) => void;
   /**
@@ -79,13 +81,12 @@ export function InterceptDisplayManager({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentIntercept, setCurrentIntercept] = useState<Intercept | null>(null);
   const feedbackStore = useRef<Record<string, unknown>>({});
-  const startIllustrationWidth = useRef(89); // Magic number was provided by Ryan
   const startIllustrationStyle = useRef(css`
     background: var(
       --intercept-background,
       url(${staticAssetsHelper.getPluginAssetHref('communication.svg')})
     );
-    background-size: ${startIllustrationWidth.current}px 64px;
+    background-size: ${INTERCEPT_ILLUSTRATION_WIDTH}px 64px;
     background-repeat: no-repeat;
     background-position: top ${euiTheme.size.base} right ${euiTheme.size.base};
   `);
@@ -198,7 +199,7 @@ export function InterceptDisplayManager({
             css={css({
               ...(isStartStep
                 ? {
-                    width: `calc(100% - ${startIllustrationWidth.current}px - ${euiTheme.size.base})`,
+                    width: `calc(100% - ${INTERCEPT_ILLUSTRATION_WIDTH}px - ${euiTheme.size.base})`,
                   }
                 : {}),
             })}

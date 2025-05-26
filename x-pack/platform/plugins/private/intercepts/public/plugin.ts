@@ -11,6 +11,7 @@ import type { ServerConfigSchema } from '../common/config';
 
 export class InterceptPublicPlugin implements Plugin {
   private readonly prompter?: InterceptPrompter;
+  private interceptsTargetDomElement?: HTMLDivElement;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ServerConfigSchema>();
@@ -30,13 +31,13 @@ export class InterceptPublicPlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
-    const interceptsTargetDomElement = document.createElement('div');
+    this.interceptsTargetDomElement = document.createElement('div');
 
     const prompterStart = this.prompter?.start({
       http: core.http,
       analytics: core.analytics,
       rendering: core.rendering,
-      targetDomElement: interceptsTargetDomElement,
+      targetDomElement: this.interceptsTargetDomElement,
     });
 
     return {
@@ -45,7 +46,7 @@ export class InterceptPublicPlugin implements Plugin {
   }
 
   public stop() {
-    // TODO: cleanup interceptsTargetDomElement
+    this.interceptsTargetDomElement?.remove();
   }
 }
 
