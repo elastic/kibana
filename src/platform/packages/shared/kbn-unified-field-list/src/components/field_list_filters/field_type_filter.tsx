@@ -202,9 +202,11 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
         {availableFieldTypes.length > 0 ? (
           <EuiContextMenuPanel
             data-test-subj={`${testSubj}Options`}
+            role="menu"
             items={availableFieldTypes.map((type) => {
               const fieldTypeName = getFieldTypeName(type);
               const fieldTypeCount = typeCounts?.get(type) ?? 0;
+              const isSelected = selectedFieldTypes.includes(type);
 
               return (
                 <EuiContextMenuItem
@@ -218,8 +220,10 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                       },
                     }
                   )}
+                  aria-checked={isSelected}
+                  role="menuitemcheckbox"
                   key={type}
-                  icon={selectedFieldTypes.includes(type) ? 'check' : 'empty'}
+                  icon={isSelected ? 'check' : 'empty'}
                   data-test-subj={`typeFilter-${type}`}
                   css={itemStyle}
                   onClick={() => {
