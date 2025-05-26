@@ -56,7 +56,7 @@ export const DashboardGrid = ({
         id: sectionId,
         type: 'section',
         row: section.gridData.y,
-        isCollapsed: section.collapsed,
+        isCollapsed: Boolean(section.collapsed),
         title: section.title,
         panels: {},
       };
