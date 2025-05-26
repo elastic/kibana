@@ -11,6 +11,7 @@ import React from 'react';
 import { getActionsColumn } from './actions_column';
 import { RowControlColumn } from '@kbn/discover-utils';
 import { render, within, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import * as actionsHeader from './actions_header';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { dataTableContextComplexMock } from '../../../../__mocks__/table_context';
@@ -302,9 +303,79 @@ describe('getActionsColumn', () => {
 
         // Then
         expectedTexts.forEach((text) => {
-          within(screen.getByTestId('actions-control-column')).getByText(text);
+          within(screen.getByTestId('unifiedDataTable_actionsColumnCell')).getByText(text);
         });
       });
     }
   );
+
+  describe('given 4 row additional leading control columns', () => {
+    const rowAdditionalLeadingControls: RowControlColumn[] = [
+      {
+        id: 'row-control-column-1',
+        render: (Control) => (
+          <Control iconType="empty" label="Row control column 1" onClick={jest.fn()} />
+        ),
+      },
+      {
+        id: 'row-control-column-2',
+        render: (Control) => (
+          <Control iconType="empty" label="Row control column 2" onClick={jest.fn()} />
+        ),
+      },
+      {
+        id: 'row-control-column-3',
+        render: (Control) => (
+          <Control iconType="empty" label="Row control column 3" onClick={jest.fn()} />
+        ),
+      },
+      {
+        id: 'row-control-column-4',
+        render: (Control) => (
+          <Control iconType="empty" label="Row control column 4" onClick={jest.fn()} />
+        ),
+      },
+    ];
+
+    it('should return a menu control column', async () => {
+      // Given
+      const user = userEvent.setup();
+
+      // When
+      const result = getActionsColumn({
+        baseColumns: [],
+        rowAdditionalLeadingControls,
+        externalControlColumns: [],
+      });
+
+      render(
+        <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
+          {result?.rowCellRender({
+            setCellProps: jest.fn(),
+            rowIndex: 0,
+            colIndex: 0,
+            columnId: 'actions',
+            isExpandable: false,
+            isExpanded: false,
+            isDetails: false,
+          })}
+        </UnifiedDataTableContext.Provider>
+      );
+
+      // Then
+
+      // The first item appears by itself
+      expect(
+        screen.getByTestId(`unifiedDataTable_rowControl_${rowAdditionalLeadingControls[0].id}`)
+      );
+
+      // The rest of the items are in a menu
+      expect(screen.getByLabelText('Additional actions')).toBeVisible();
+      await user.click(screen.getByLabelText('Additional actions'));
+
+      rowAdditionalLeadingControls.slice(1).forEach((control) => {
+        expect(screen.getByTestId(`unifiedDataTable_rowMenu_${control.id}`)).toBeVisible();
+      });
+    });
+  });
 });

@@ -37,11 +37,11 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
       </EuiScreenReaderOnly>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         {showText ? (
-          <EuiFlexItem data-test-subj="actions-text" grow={false}>
+          <EuiFlexItem data-test-subj="unifiedDataTable_actionsColumnHeaderText" grow={false}>
             <span>{actionsText}</span>
           </EuiFlexItem>
         ) : (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem data-test-subj="unifiedDataTable_actionsColumnHeaderIcon" grow={false}>
             <EuiIconTip type="iInCircle" content={actionsText} />
           </EuiFlexItem>
         )}

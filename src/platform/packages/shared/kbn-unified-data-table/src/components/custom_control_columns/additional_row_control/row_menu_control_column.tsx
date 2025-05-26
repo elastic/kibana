@@ -79,7 +79,7 @@ export const RowMenuControlCell = ({
       button={
         <EuiToolTip content={buttonLabel} delay="long">
           <EuiButtonIcon
-            data-test-subj={`unifiedDataTable_${props.columnId}`}
+            data-test-subj={`unifiedDataTable_additionalRowControl_${props.columnId}`}
             iconSize="s"
             iconType="boxesVertical"
             color="text"

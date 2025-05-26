@@ -21,16 +21,34 @@ describe('<ActionsHeader />', () => {
       const maxWidth = 500;
       setup({ maxWidth });
 
-      expect(screen.getByTestId('actions-text')).toBeVisible();
+      expect(screen.getByTestId('unifiedDataTable_actionsColumnHeaderText')).toBeVisible();
+    });
+
+    it('should NOT show the icon', () => {
+      const maxWidth = 500;
+      setup({ maxWidth });
+
+      expect(
+        screen.queryByTestId('unifiedDataTable_actionsColumnHeaderIcon')
+      ).not.toBeInTheDocument();
     });
   });
 
   describe('when the maxWidth is less than the text width', () => {
-    it('should not show the text', () => {
+    it('should NOT show the text', () => {
       const maxWidth = 0;
       setup({ maxWidth });
 
-      expect(screen.queryByTestId('actions-text')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDataTable_actionsColumnHeaderText')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show the icon', () => {
+      const maxWidth = 0;
+      setup({ maxWidth });
+
+      expect(screen.getByTestId('unifiedDataTable_actionsColumnHeaderIcon')).toBeVisible();
     });
   });
 });

@@ -974,7 +974,7 @@ export const UnifiedDataTable = ({
       filteredLeadColumns.push(actionsColumn);
     }
 
-    return filteredLeadColumns as EuiDataGridControlColumn[];
+    return filteredLeadColumns;
   }, [
     canSetExpandedDoc,
     controlColumnIds,

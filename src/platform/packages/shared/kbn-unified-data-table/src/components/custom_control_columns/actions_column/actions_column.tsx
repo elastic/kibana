@@ -19,6 +19,8 @@ import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { getAdditionalRowControlColumns } from '../additional_row_control';
 import { ActionsHeader } from './actions_header';
 
+const COLUMN_ID = 'actions';
+
 export const getActionsColumn = ({
   baseColumns,
   externalControlColumns,
@@ -37,24 +39,29 @@ export const getActionsColumn = ({
   }
 
   let columnWidth = baseColumns.length * DEFAULT_CONTROL_COLUMN_WIDTH;
-  const extraColumns = [...baseColumns];
+  const actions = [...baseColumns];
   if (externalControlColumns) {
-    extraColumns.push(...externalControlColumns.map((column) => column.rowCellRender));
+    actions.push(...externalControlColumns.map((column) => column.rowCellRender));
     columnWidth += externalControlColumns.reduce((acc, column) => acc + column.width, 0);
   }
   if (rowAdditionalLeadingControls?.length) {
     const additionalRowControColumns = getAdditionalRowControlColumns(rowAdditionalLeadingControls);
-    extraColumns.push(...additionalRowControColumns);
+    actions.push(...additionalRowControColumns);
     columnWidth += DEFAULT_CONTROL_COLUMN_WIDTH * additionalRowControColumns.length;
   }
 
   return {
-    id: 'actions',
+    id: COLUMN_ID,
     width: columnWidth,
     rowCellRender: (props: EuiDataGridCellValueElementProps) => (
-      <EuiFlexGroup data-test-subj="actions-control-column" alignItems="center" gutterSize="none">
-        {extraColumns.map((Content, idx) => (
-          <Content key={idx} {...props} />
+      <EuiFlexGroup
+        data-test-subj="unifiedDataTable_actionsColumnCell"
+        responsive={false}
+        alignItems="center"
+        gutterSize="none"
+      >
+        {actions.map((Action, idx) => (
+          <Action key={idx} {...props} />
         ))}
       </EuiFlexGroup>
     ),

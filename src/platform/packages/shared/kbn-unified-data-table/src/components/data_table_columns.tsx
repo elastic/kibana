@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
+  type EuiDataGridControlColumn,
   EuiListGroupItemProps,
   type EuiDataGridColumnSortingConfig,
   RenderCellValue,
@@ -81,7 +82,7 @@ export function getLeadControlColumns({
   rows: DataTableRecord[];
   canSetExpandedDoc: boolean;
 }): {
-  leadColumns: EuiDataGridColumn[];
+  leadColumns: EuiDataGridControlColumn[];
   leadColumnsExtraContent: RenderCellValue[];
 } {
   return {

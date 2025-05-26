@@ -40,7 +40,7 @@ export const RowControlCell = ({
           <EuiButtonIcon
             aria-label={label}
             color={color ?? 'text'}
-            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${rowControlColumn.id}`}
             disabled={disabled}
             iconSize="s"
             iconType={iconType}
@@ -68,7 +68,7 @@ export const RowControlCell = ({
 
         return control;
       },
-    [props.columnId, record, rowIndex]
+    [rowControlColumn.id, record, rowIndex]
   );
 
   return record ? rowControlColumn.render(Control, { record, rowIndex }) : null;
