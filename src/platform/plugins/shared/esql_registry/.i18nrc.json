@@ -1,0 +1,6 @@
+{
+  "prefix": "esqlRegistry",
+  "paths": {
+    "esqlRegistry": "."
+  }
+}

@@ -894,6 +894,8 @@
       "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
       "@kbn/esql-datagrid": ["src/platform/plugins/shared/esql_datagrid"],
       "@kbn/esql-datagrid/*": ["src/platform/plugins/shared/esql_datagrid/*"],
+      "@kbn/esql-registry": ["src/platform/plugins/shared/esql_registry"],
+      "@kbn/esql-registry/*": ["src/platform/plugins/shared/esql_registry/*"],
       "@kbn/esql-editor": ["src/platform/packages/private/kbn-esql-editor"],
       "@kbn/esql-editor/*": ["src/platform/packages/private/kbn-esql-editor/*"],
       "@kbn/esql-types": ["src/platform/packages/shared/kbn-esql-types"],
