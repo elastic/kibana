@@ -15,22 +15,22 @@ import { TELEMETRY_MANAGE_INTEGRATIONS } from '../constants';
 import { useIntegrationContext } from '../../../../../../../common/lib/integrations/hooks/integration_context';
 
 export const ManageIntegrationsCallout = React.memo(
-  ({ installedIntegrationsCount }: { installedIntegrationsCount: number }) => {
+  ({ activeIntegrationsCount }: { activeIntegrationsCount: number }) => {
     const { href: integrationUrl, onClick: onAddIntegrationClicked } = useAddIntegrationsUrl();
     const {
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useIntegrationContext();
 
     const onClick = useCallback(
       (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
-        trackLinkClick?.(TELEMETRY_MANAGE_INTEGRATIONS);
+        reportLinkClick?.(TELEMETRY_MANAGE_INTEGRATIONS);
         onAddIntegrationClicked(e);
       },
-      [onAddIntegrationClicked, trackLinkClick]
+      [onAddIntegrationClicked, reportLinkClick]
     );
 
-    if (!installedIntegrationsCount) {
+    if (!activeIntegrationsCount) {
       return null;
     }
 
@@ -50,7 +50,7 @@ export const ManageIntegrationsCallout = React.memo(
                   data-test-subj="integrationsCompleteText"
                   id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
                   defaultMessage="{count} {count, plural, one {integration has} other {integrations have}} been added"
-                  values={{ count: installedIntegrationsCount }}
+                  values={{ count: activeIntegrationsCount }}
                 />
               ),
               link: (

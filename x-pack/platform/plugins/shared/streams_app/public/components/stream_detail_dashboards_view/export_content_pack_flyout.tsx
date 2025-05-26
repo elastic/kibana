@@ -8,11 +8,11 @@
 import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import {
   ContentPackEntry,
   ContentPackManifest,
-  findIndexPatterns,
+  findConfiguration,
   isIndexPlaceholder,
 } from '@kbn/content-packs-schema';
 import {
@@ -43,7 +43,7 @@ export function ExportContentPackFlyout({
   onExport,
   onClose,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   onClose: () => void;
   onExport: () => void;
 }) {
@@ -88,7 +88,7 @@ export function ExportContentPackFlyout({
       });
 
       const indexPatterns = uniq(
-        contentPack.entries.flatMap((object) => findIndexPatterns(object))
+        contentPack.entries.flatMap((object) => findConfiguration(object).patterns)
       ).filter((index) => !isIndexPlaceholder(index));
 
       setManifest({

@@ -89,8 +89,10 @@ export interface IndicesSettings {
 
 export interface IndexSettings {
   index_name: string;
+  index_mode?: string;
   default_pipeline?: string;
   final_pipeline?: string;
+  source_mode?: string;
 }
 
 export interface Index {

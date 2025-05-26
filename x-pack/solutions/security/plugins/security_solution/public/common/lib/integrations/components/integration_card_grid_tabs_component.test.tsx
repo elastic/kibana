@@ -15,7 +15,7 @@ import {
   useStoredIntegrationTabId,
 } from '../hooks/use_stored_state';
 import { INTEGRATION_TABS } from '../configs/integration_tabs_configs';
-import { mockTrackLinkClick } from '../hooks/__mocks__/mocks';
+import { mockReportLinkClick } from '../hooks/__mocks__/mocks';
 
 jest.mock('../hooks/integration_context');
 jest.mock('../hooks/use_stored_state');
@@ -43,7 +43,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   const mockSetSelectedSubCategory = jest.fn();
   const mockSetSearchTerm = jest.fn();
   const props = {
-    installedIntegrationsCount: 1,
+    activeIntegrationsCount: 1,
     isAgentRequired: false,
     availablePackagesResult: {
       isLoading: false,
@@ -112,7 +112,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
       fireEvent.click(tabButton);
     });
 
-    expect(mockTrackLinkClick).toHaveBeenCalledWith('tab_user');
+    expect(mockReportLinkClick).toHaveBeenCalledWith('tab_user');
   });
 
   it('renders no search tools when showSearchTools is false', async () => {
