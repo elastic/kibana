@@ -12,25 +12,25 @@ import {
   type PluginInitializerContext,
   type Logger,
 } from '@kbn/core/server';
-import { InterceptsTriggerCore } from './core';
+import { InterceptsTriggerOrchestrator } from './orchestrator';
 import type { ServerConfigSchema } from '../common/config';
 
 export class InterceptsServerPlugin implements Plugin<object, object, object, never> {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
-  private readonly interceptsCore?: InterceptsTriggerCore;
+  private readonly interceptsOrchestrator?: InterceptsTriggerOrchestrator;
 
   constructor(private initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<ServerConfigSchema>();
 
     if (this.config.enabled) {
-      this.interceptsCore = new InterceptsTriggerCore();
+      this.interceptsOrchestrator = new InterceptsTriggerOrchestrator();
     }
   }
 
   public setup(core: CoreSetup) {
-    this.interceptsCore?.setup(core, this.logger, {
+    this.interceptsOrchestrator?.setup(core, this.logger, {
       kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
@@ -38,10 +38,12 @@ export class InterceptsServerPlugin implements Plugin<object, object, object, ne
   }
 
   public start(core: CoreStart) {
-    const interceptCore = this.interceptsCore?.start(core);
+    const interceptOrchestratorStart = this.interceptsOrchestrator?.start(core);
 
     return {
-      registerTriggerDefinition: interceptCore?.registerTriggerDefinition.bind(interceptCore),
+      registerTriggerDefinition: interceptOrchestratorStart?.registerTriggerDefinition.bind(
+        interceptOrchestratorStart
+      ),
     };
   }
 

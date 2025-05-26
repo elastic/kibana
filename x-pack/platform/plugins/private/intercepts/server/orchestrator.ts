@@ -29,7 +29,7 @@ interface InterceptTriggerCoreSetup {
   kibanaVersion: string;
 }
 
-export class InterceptsTriggerCore {
+export class InterceptsTriggerOrchestrator {
   private logger?: Logger;
   private interceptTriggerService = new InterceptTriggerService();
   private interceptUserInteractionService = new InterceptUserInteractionService();
