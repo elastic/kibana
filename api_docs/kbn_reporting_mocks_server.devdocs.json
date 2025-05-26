@@ -28,7 +28,7 @@
         "description": [],
         "signature": [
           "(overrides?: ",
-          "_DeepPartialObject",
+          "DeepPartial",
           "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
           {
             "pluginId": "@kbn/config-schema",
@@ -59,7 +59,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "_DeepPartialObject",
+              "DeepPartial",
               "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
               {
                 "pluginId": "@kbn/config-schema",
