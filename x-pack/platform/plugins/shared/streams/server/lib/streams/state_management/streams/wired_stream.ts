@@ -49,6 +49,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   private _routingChanged: boolean = false;
   private _processingChanged: boolean = false;
   private _lifeCycleChanged: boolean = false;
+  private _descriptionChanged: boolean = false;
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
@@ -125,6 +126,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     this._lifeCycleChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    this._descriptionChanged =
+      !startingStateStreamDefinition ||
+      this._definition.description !== startingStateStreamDefinition.description;
 
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
@@ -562,10 +567,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    actions.push({
-      type: 'upsert_dot_streams_document',
-      request: this._definition,
-    });
+    const somethingChangedInStreamDefinition =
+      this._ownFieldsChanged ||
+      this._routingChanged ||
+      this._processingChanged ||
+      this._lifeCycleChanged ||
+      this._descriptionChanged;
+
+    if (somethingChangedInStreamDefinition) {
+      actions.push({
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      });
+    }
 
     return actions;
   }
