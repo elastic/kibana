@@ -51,6 +51,32 @@ export function getSpaceIdFromPath(
   };
 }
 
+/**
+ * Given a server base path, space id, and requested resource, this will construct a space-aware path
+ * that includes a URL identifier with the space id.
+ *
+ * @param basePath the server's base path.
+ * @param spaceId the space id.
+ * @param requestedPath the requested path (e.g. `/app/dashboard`).
+ * @returns the space-aware version of the requested path, inclusive of the server's base path.
+ */
+export function addSpaceIdToPath(
+  basePath: string = '/',
+  spaceId: string = '',
+  requestedPath: string = ''
+): string {
+  if (requestedPath && !requestedPath.startsWith('/')) {
+    throw new Error(`path must start with a /`);
+  }
+
+  const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+
+  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    return `${normalizedBasePath}/s/${spaceId}${requestedPath}`;
+  }
+  return `${normalizedBasePath}${requestedPath}` || '/';
+}
+
 function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
   if (serverBasePath && serverBasePath !== '/' && requestBasePath.startsWith(serverBasePath)) {
     return requestBasePath.substr(serverBasePath.length);
