@@ -10,7 +10,7 @@ import type {
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import { isDslLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
