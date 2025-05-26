@@ -111,11 +111,13 @@ export const LogsPageContent: React.FunctionComponent = () => {
                   timeRange: logFilter?.timeRange,
                   query: logFilter?.query,
                   filters: logFilter?.filters,
-                  refreshInterval: logFilter?.refreshInterval
+                  refreshInterval: logFilter?.refreshInterval,
                 };
               }
 
-              share.url.locators.get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)?.navigate(locatorParams);
+              share.url.locators
+                .get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                ?.navigate(locatorParams);
               return null;
             }}
           />
