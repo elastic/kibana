@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
 import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
@@ -17,6 +17,7 @@ import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/spa
 import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { FieldConfiguration } from '../resources/get_field_configuration';
+import { FullScreenWaterfall } from './full_screen_waterfall';
 
 export interface TraceProps {
   fields: Record<string, FieldConfiguration>;
@@ -34,6 +35,7 @@ export const Trace = ({
   showWaterfall = true,
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
+  const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
@@ -66,6 +68,16 @@ export const Trace = ({
 
   return (
     <>
+      {showFullScreenWaterfall && (
+        <FullScreenWaterfall
+          traceId={traceId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          onCloseFullScreen={() => {
+            setShowFullScreenWaterfall(false);
+          }}
+        />
+      )}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
