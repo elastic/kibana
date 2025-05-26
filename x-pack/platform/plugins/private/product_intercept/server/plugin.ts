@@ -43,10 +43,12 @@ export class ProductInterceptServerPlugin
   }
 
   start(core: CoreStart, { intercepts }: ProductInterceptServerPluginStart) {
-    void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
-      this.logger.debug('Registering kibana product trigger definition');
-      return { triggerAfter: this.config.interval };
-    });
+    if (this.config.enabled) {
+      void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
+        this.logger.debug('Registering kibana product trigger definition');
+        return { triggerAfter: this.config.interval };
+      });
+    }
 
     return {};
   }

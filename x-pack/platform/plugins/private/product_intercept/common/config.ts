@@ -13,8 +13,15 @@ import type { PluginConfigDescriptor, ExposedToBrowserDescriptor } from '@kbn/co
  * and if the product intercept gets displayed on the client.
  */
 export const configSchema = schema.object({
+  /**
+   * Whether the product intercept orchestration is enabled.
+   * It's worth noting that if the intercept plugin is disabled this setting will have no effect.
+   */
+  enabled: schema.boolean({
+    defaultValue: false,
+  }),
   interval: schema.string({
-    defaultValue: '30s',
+    defaultValue: '30m',
     validate(value) {
       if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
         return 'must be a supported duration string';
@@ -27,6 +34,7 @@ export type ServerConfigSchema = TypeOf<typeof configSchema>;
 
 const browserConfigSchemaDescriptor: ExposedToBrowserDescriptor<ServerConfigSchema> = {
   interval: false,
+  enabled: false,
 };
 
 export const config: PluginConfigDescriptor<ServerConfigSchema> = {

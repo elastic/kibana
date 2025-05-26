@@ -4,4 +4,6 @@ This is a standalone plugin that leverages the intercept plugin to display produ
 
 This plugin exposes no public APIs, but however exposes the following config
 
-- `xpack.intercept.interval`: Expects a limited subset of duration string; (d,m,h,s) , denotes the cadence at which a user would be prompted to provide feedback about kibana
+- `xpack.product_intercept.enabled`: Expects a boolean value, determines if the product intercept would be allowed to run given that the intercept plugin is enabled.
+
+- `xpack.product_intercept.interval`: Expects a limited subset of duration string; (d,m,h,s) , denotes the cadence at which a user would be prompted to provide feedback about kibana

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { InferObjectSchema } from './types';
+import type { InferObjectSchema } from './types';
 
 const interceptInteractionV1 = schema.object({
   userId: schema.string(),
