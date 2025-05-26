@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  type UseEuiTheme,
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
@@ -51,6 +50,17 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const INDEX_PATTERN_KEY = 'index_pattern';
 const TIME_FIELD_KEY = 'time_field';
 
+const useEditorStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return css({
+      marginBottom: euiTheme.size.base,
+      padding: euiTheme.size.s,
+    });
+  }, [euiTheme]);
+  return styles;
+};
+
 export interface AnnotationRowProps {
   annotation: Annotation;
   fields: VisFields;
@@ -66,11 +76,6 @@ const getAnnotationDefaults = () => ({
   query_string: { query: '', language: getDefaultQueryLanguage() },
 });
 
-const editorStyles = ({ euiTheme }: UseEuiTheme) => css`
-  margin-bottom: ${euiTheme.size.base};
-  padding: ${euiTheme.size.s};
-`;
-
 export const AnnotationRow = ({
   annotation,
   fields,
@@ -83,8 +88,8 @@ export const AnnotationRow = ({
 
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
+  const editorStyles = useEditorStyles();
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -141,7 +146,7 @@ export const AnnotationRow = ({
   );
 
   return (
-    <div className="tvbAnnotationsEditor" key={model.id} css={editorStyles(euiThemeContext)}>
+    <div className="tvbAnnotationsEditor" key={model.id} css={editorStyles}>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
