@@ -62,7 +62,7 @@ export class CasePlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
-  private lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
@@ -92,7 +92,7 @@ export class CasePlugin
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
 
     this.securityPluginSetup = plugins.security;
-    this.lensEmbeddableFactory = plugins.lens?.lensEmbeddableFactory;
+    this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
     if (this.caseConfig.stack.enabled) {
       // V1 is deprecated, but has to be maintained for the time being
@@ -209,7 +209,12 @@ export class CasePlugin
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
       licensingPluginStart: plugins.licensing,
-      lensEmbeddableFactory: this.lensEmbeddableFactory,
+      /**
+       * Lens will be always defined as
+       * it is declared as required plugin in kibana.json
+       */
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,

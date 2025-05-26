@@ -86,6 +86,7 @@
     "@kbn/esql-utils",
     "@kbn/esql-ast",
     "@kbn/response-ops-alerts-delete",
+    "@kbn/content-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }
