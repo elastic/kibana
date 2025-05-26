@@ -9,8 +9,9 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
-import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
+import { StreamsClient } from './client';
+import { createFakeRequestBoundToDefaultSpace } from './helpers/fake_request_factory';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -46,7 +47,9 @@ export class StreamsService {
     const logger = this.logger;
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(request);
+
+    const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
+    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
