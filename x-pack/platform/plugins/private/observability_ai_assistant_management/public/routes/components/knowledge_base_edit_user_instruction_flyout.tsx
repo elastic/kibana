@@ -44,7 +44,7 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
 
   const handleSubmit = async () => {
     if (newEntryId && !newEntryText) {
-      deleteEntry({ id: newEntryId });
+      deleteEntry({ id: newEntryId, isUserInstruction: true });
     } else {
       await createOrUpdateEntry({
         entry: {
