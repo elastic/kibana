@@ -77,7 +77,7 @@ export function checkSourceExistence(sources: ResolveIndexResponse, inputString:
  * @param pattern The pattern string (e.g., "logs*", "my_index").
  * @returns A RegExp object.
  */
-export function createPatternRegex(pattern: string): RegExp {
+function createPatternRegex(pattern: string): RegExp {
   const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   if (escapedPattern.endsWith('\\*')) {
@@ -92,6 +92,12 @@ export function createPatternRegex(pattern: string): RegExp {
   }
 }
 
+/**
+ * Finds matches from the registry, given a pattern.
+ * @param registry The registry map containing index names and their corresponding queries.
+ * @param pattern The pattern string (e.g., "logs*", "my_index", "logs-02122024").
+ * @returns An array of matching index names.
+ */
 export function findMatchingIndicesFromPattern(
   registry: Map<string, RecommendedQuery[]>,
   indexPattern: string

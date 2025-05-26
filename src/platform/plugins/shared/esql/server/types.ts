@@ -8,7 +8,9 @@
  */
 
 export interface RecommendedQuery {
+  // The name of the recommended query, appears in the editor as a suggestion
   name: string;
+  // The actual ESQL query string
   query: string;
 }
 

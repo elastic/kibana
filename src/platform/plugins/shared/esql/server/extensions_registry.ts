@@ -11,6 +11,17 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 import type { ResolveIndexResponse, RecommendedQuery } from './types';
 
+/**
+ * `ESQLExtensionsRegistry` serves as a central hub for managing and retrieving extrensions of the ES|QL editor.
+ *
+ * It allows for the registration of queries, associating them with specific index patterns.
+ * This registry is designed to intelligently provide relevant recommended queries
+ * based on the index patterns present in an active ES|QL query or available data sources.
+ *
+ * The class handles both exact index pattern matches (e.g., "logs-2023-10-01")
+ * and wildcard patterns (e.g., "logs*"), ensuring that users receive contextually
+ * appropriate suggestions for their data exploration.
+ */
 export class ESQLExtensionsRegistry {
   private recommendedQueries: Map<string, RecommendedQuery[]> = new Map();
 
@@ -55,12 +66,11 @@ export class ESQLExtensionsRegistry {
 
     const recommendedQueries: RecommendedQuery[] = [];
 
-    // 1. if the index pattern is a pattern, for example "logs-*", we need to check all the recommended queries
-    // and return the ones that match the pattern
-    // i.e. the indexPattern is logs* and I have a recommended query with index pattern logs-2023-10-01, I need to return that query
-    // 2. if the index pattern is a single index, we need to return the recommended queries for that index but also
-    // check that a pattern in the recommended queries matches the index pattern
-    // i.e. the indexPattern is logs-2023-10-01 and I have a recommended query with index pattern logs*, I need to return that query
+    // Determines relevant recommended queries based on the ESQL `FROM` command's index pattern.
+    // This includes:
+    // 1. **Direct matches**: If the command uses a specific index (e.g., `logs-2023`), it retrieves queries registered for that exact index.
+    // 2. **Pattern coverage**: If the command uses a wildcard pattern (e.g., `logs-*`), it returns queries registered for concrete indices that match this pattern (e.g., a recommended query for `logs-2023`).
+    // 3. **Reverse coverage**: If the command specifies a concrete index, it also includes queries whose *registered pattern* covers that specific index (e.g., a recommended query for `logs*` would be returned for `logs-2023`).
     const matchingIndices = findMatchingIndicesFromPattern(this.recommendedQueries, indexPattern);
     if (matchingIndices.length > 0) {
       recommendedQueries.push(
