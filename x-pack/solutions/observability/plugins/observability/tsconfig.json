@@ -120,6 +120,7 @@
     "@kbn/object-utils",
     "@kbn/task-manager-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/response-ops-rule-params",
     "@kbn/controls-plugin",
     "@kbn/core-http-browser"
   ],
