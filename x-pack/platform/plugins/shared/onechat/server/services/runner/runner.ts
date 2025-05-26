@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import { isOnechatError, createInternalError } from '@kbn/onechat-common';
 import type {
   ToolHandlerContext,
   ScopedRunner,
@@ -51,7 +52,15 @@ export class RunnerManager {
       runTool: <TParams = Record<string, unknown>, TResult = unknown>(
         toolExecutionParams: ScopedRunnerRunToolsParams<TParams>
       ): Promise<RunToolReturn<TResult>> => {
-        return runTool<TParams, TResult>({ toolExecutionParams, parentManager: this });
+        try {
+          return runTool<TParams, TResult>({ toolExecutionParams, parentManager: this });
+        } catch (e) {
+          if (isOnechatError(e)) {
+            throw e;
+          } else {
+            throw createInternalError(e.message);
+          }
+        }
       },
     };
   }
@@ -77,14 +86,9 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
 
   const tool = await toolsService.registry.get({ toolId, request });
 
-  // TODO: send toolCall event
-
   const toolHandlerContext = createToolHandlerContext<TParams>({ toolExecutionParams, manager });
 
-  // TODO: try/catch errors
   const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
-
-  // TODO: send toolResult event
 
   return {
     result: toolResult as TResult,

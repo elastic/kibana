@@ -28,6 +28,8 @@ export {
   isInternalError,
   isToolNotFoundError,
   isOnechatError,
+  createInternalError,
+  createToolNotFoundError,
   type OnechatError,
   type OnechatInternalError,
   type OnechatToolNotFoundError,
