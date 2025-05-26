@@ -88,7 +88,6 @@ const AllAssetsComponent = () => {
         <AssetInventoryTitle />
         <EuiSpacer size="l" />
         <OnboardingSuccessCallout />
-        <EuiSpacer size="l" />
         <AssetInventoryFilters setQuery={setUrlQuery} />
         <EuiSpacer size="l" />
         <AssetInventoryBarChart
@@ -96,7 +95,7 @@ const AllAssetsComponent = () => {
           isFetching={isFetchingChartData}
           assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
         />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="xl" />
         <AssetInventoryTableSection state={state} />
       </EuiPageTemplate.Section>
     </I18nProvider>
