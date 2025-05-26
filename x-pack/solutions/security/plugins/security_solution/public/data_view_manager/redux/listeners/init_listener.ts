@@ -7,6 +7,8 @@
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DataViewManagerScopeName } from '../../constants';
@@ -14,11 +16,11 @@ import { selectDataViewAsync } from '../actions';
 import { bootstrapSourcererDataViews } from '../../utils/create_default_data_view';
 
 export const createInitListener = (dependencies: {
+  http: CoreStart['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
   dataViews: DataViewsServicePublic;
-  http: any;
-  spaces: any;
-  application: any;
-  uiSettings: any;
+  spaces: SpacesPluginStart;
 }) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,

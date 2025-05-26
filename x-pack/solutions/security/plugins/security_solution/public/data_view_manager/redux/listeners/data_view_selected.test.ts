@@ -65,6 +65,7 @@ const mockedState: RootState = {
         },
       ],
       status: 'pristine',
+      signalIndexName: '',
     },
   },
 };

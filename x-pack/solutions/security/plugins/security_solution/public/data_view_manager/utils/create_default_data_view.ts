@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
 import { initDataView } from '../../sourcerer/store/model';
 import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
@@ -23,11 +26,11 @@ export const bootstrapSourcererDataViews = async ({
   http,
   application,
 }: {
-  dataViewService: any;
-  uiSettings: any;
-  spaces: any;
-  http: any;
-  application: any;
+  http: CoreStart['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
+  dataViewService: DataViewsServicePublic;
+  spaces: SpacesPluginStart;
   skip?: boolean;
 }) => {
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
