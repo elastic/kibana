@@ -10,7 +10,7 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { get_cdr_misconfigurations_index_pattern } from '@kbn/cloud-security-posture-common';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
@@ -72,7 +72,7 @@ export interface FindingsGroupingAggregation {
 
 export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
   ...query,
-  index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  index: get_cdr_misconfigurations_index_pattern(),
   ignore_unavailable: true,
   size: 0,
 });

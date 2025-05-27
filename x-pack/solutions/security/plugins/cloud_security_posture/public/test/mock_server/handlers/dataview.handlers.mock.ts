@@ -6,7 +6,7 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { get_cdr_misconfigurations_index_pattern } from '@kbn/cloud-security-posture-common';
 import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 
 const generateDataViewField = (name: string, type: 'string' | 'date' = 'string') => ({
@@ -67,7 +67,7 @@ export const defaultDataViewGetHandler = http.get(
           generateDataViewField('rule.name'),
           generateDataViewField('rule.section'),
         ],
-        indices: [CDR_MISCONFIGURATIONS_INDEX_PATTERN],
+        indices: [get_cdr_misconfigurations_index_pattern()],
       });
     }
 

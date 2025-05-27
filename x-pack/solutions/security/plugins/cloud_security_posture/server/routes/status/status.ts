@@ -11,7 +11,7 @@ import {
   CSPM_POLICY_TEMPLATE,
   STATUS_ROUTE_PATH,
   LATEST_FINDINGS_RETENTION_POLICY,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  get_cdr_misconfigurations_index_pattern,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   CDR_VULNERABILITIES_INDEX_PATTERN,
@@ -36,7 +36,7 @@ import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  LATEST_FINDINGS_INDEX,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
   POSTURE_TYPES,
@@ -218,7 +218,7 @@ export const getCspStatus = async ({
   ] = await Promise.all([
     checkIndexHasFindings(
       esClient,
-      CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+      get_cdr_misconfigurations_index_pattern(),
       CDR_3RD_PARTY_RETENTION_POLICY,
       logger
     ),
@@ -228,7 +228,7 @@ export const getCspStatus = async ({
       CDR_3RD_PARTY_RETENTION_POLICY,
       logger
     ),
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX(), logger, {
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS(), logger, {
       postureType: POSTURE_TYPE_ALL,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -241,7 +241,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX(), logger, {
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS(), logger, {
       postureType: CSPM_POLICY_TEMPLATE,
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
@@ -254,7 +254,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX(), logger, {
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS(), logger, {
       postureType: KSPM_POLICY_TEMPLATE,
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
@@ -340,7 +340,7 @@ export const getCspStatus = async ({
   const MIN_DATE = 0;
   const indicesDetails = [
     {
-      index: LATEST_FINDINGS_INDEX(),
+      index: LATEST_FINDINGS_INDEX_DEFAULT_NS(),
       status: findingsLatestIndexStatus,
     },
     {

@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { get_cdr_misconfigurations_index_pattern } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { showErrorToast } from '../..';
@@ -29,7 +29,7 @@ const GET_MISCONFIGURATIONS_SOURCE_FIELDS = [
 
 export const buildGetMisconfigurationsFindingsQuery = ({ query }: UseCspOptions) => {
   return {
-    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+    index: get_cdr_misconfigurations_index_pattern(),
     size: 1,
     ignore_unavailable: true,
     query: buildFindingsQueryWithFilters(query),

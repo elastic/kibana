@@ -16,6 +16,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  get_latest_findings_index_pattern,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
@@ -26,7 +27,6 @@ import { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } f
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
@@ -218,7 +218,7 @@ const getScoreAggregationQuery = () => ({
 });
 
 const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX(),
+  index: get_latest_findings_index_pattern(),
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },

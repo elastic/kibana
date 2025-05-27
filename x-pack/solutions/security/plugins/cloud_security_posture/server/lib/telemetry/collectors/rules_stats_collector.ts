@@ -10,9 +10,9 @@ import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { get_latest_findings_index_pattern } from '@kbn/cloud-security-posture-common';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmRulesStats } from './types';
-import { LATEST_FINDINGS_INDEX } from '../../../../common/constants';
 
 interface BenchmarkName {
   metrics: { 'rule.benchmark.name': string };
@@ -69,7 +69,7 @@ interface RuleEntity {
 }
 
 const getRulesStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX(),
+  index: get_latest_findings_index_pattern(),
   query: {
     match_all: {},
   },
@@ -264,7 +264,7 @@ export const getRulesStats = async (
 ): Promise<CspmRulesStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX(),
+      index: get_latest_findings_index_pattern(),
     });
 
     if (isIndexExists) {

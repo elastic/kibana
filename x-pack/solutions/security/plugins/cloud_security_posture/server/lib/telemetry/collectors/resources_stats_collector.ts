@@ -7,9 +7,9 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { get_latest_findings_index_pattern } from '@kbn/cloud-security-posture-common';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmResourcesStats } from './types';
-import { LATEST_FINDINGS_INDEX } from '../../../../common/constants';
 
 interface ResourcesStats {
   accounts: {
@@ -144,12 +144,12 @@ export const getResourcesStats = async (
 ): Promise<CspmResourcesStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX(),
+      index: get_latest_findings_index_pattern(),
     });
 
     if (isIndexExists) {
       const resourcesStatsResponse = await esClient.search<unknown, ResourcesStats>(
-        getResourcesStatsQuery(LATEST_FINDINGS_INDEX())
+        getResourcesStatsQuery(get_latest_findings_index_pattern())
       );
 
       const cspmResourcesStats = resourcesStatsResponse.aggregations

@@ -16,7 +16,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  get_cdr_misconfigurations_index_pattern,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
   CDR_VULNERABILITIES_INDEX_PATTERN,
@@ -117,7 +117,7 @@ export const setupCdrDataViews = async (
     dataViewsService,
     request,
     CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
-    CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+    get_cdr_misconfigurations_index_pattern(),
     CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
     logger
   );

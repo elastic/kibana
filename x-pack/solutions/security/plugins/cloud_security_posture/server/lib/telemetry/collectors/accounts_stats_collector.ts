@@ -6,6 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
+import { getLatestFindingsIndexPattern } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type {
   AggregationsMultiBucketBase,
   SearchRequest,
@@ -13,7 +14,6 @@ import type {
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
-import { LATEST_FINDINGS_INDEX } from '../../../../common/constants';
 
 interface Value {
   value: number;
@@ -57,7 +57,7 @@ interface AccountEntity {
 }
 
 const getAccountsStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX(),
+  index: getLatestFindingsIndexPattern(),
   runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
@@ -234,7 +234,7 @@ export const getAccountsStats = async (
 ): Promise<CspmAccountsStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX(),
+      index: getLatestFindingsIndexPattern(),
     });
 
     if (isIndexExists) {

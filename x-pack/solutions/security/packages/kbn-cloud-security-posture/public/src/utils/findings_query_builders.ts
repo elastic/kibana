@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import {
   buildMutedRulesFilter,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  get_cdr_misconfigurations_index_pattern,
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
@@ -79,7 +79,7 @@ export const buildMisconfigurationsFindingsQuery = (
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
   return {
-    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+    index: get_cdr_misconfigurations_index_pattern(),
     size: isPreview ? 0 : 500,
     aggs: getFindingsCountAggQueryMisconfiguration(),
     ignore_unavailable: true,

@@ -23,7 +23,7 @@ import React, { useMemo } from 'react';
 import type { EuiDescriptionListProps, EuiAccordionProps, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  get_cdr_misconfigurations_index_pattern,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   INTERNAL_FEATURE_FLAGS,
 } from '@kbn/cloud-security-posture-common';
@@ -171,9 +171,9 @@ const getDetailsList = (
       defaultMessage: 'Data View',
     }),
     description: discoverDataViewLink ? (
-      <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
+      <EuiLink href={discoverDataViewLink}>{get_cdr_misconfigurations_index_pattern()}</EuiLink>
     ) : (
-      CDR_MISCONFIGURATIONS_INDEX_PATTERN
+      get_cdr_misconfigurations_index_pattern()
     ),
   },
 ];

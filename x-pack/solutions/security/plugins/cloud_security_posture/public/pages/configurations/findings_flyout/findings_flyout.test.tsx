@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { get_cdr_misconfigurations_index_pattern } from '@kbn/cloud-security-posture-common';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
@@ -49,7 +49,7 @@ describe('<FindingsFlyout/>', () => {
       getAllByText(mockFindingsHit.resource.name);
       getByText(mockFindingsHit.resource.id);
       getAllByText(mockFindingsHit.rule.section);
-      getByText(CDR_MISCONFIGURATIONS_INDEX_PATTERN);
+      getByText(get_cdr_misconfigurations_index_pattern());
       mockFindingsHit.rule.tags.forEach((tag) => {
         getAllByText(tag);
       });
