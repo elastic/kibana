@@ -37,7 +37,6 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import { BetaBadge } from '../../components/experimental_badge';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -326,8 +325,6 @@ export function AlertDetails() {
             id="xpack.observability.alertDetails.tab.relatedAlertsLabe"
             defaultMessage="Related alerts"
           />
-          &nbsp;
-          <BetaBadge size="s" iconType="beta" style={{ verticalAlign: 'middle' }} />
         </>
       ),
       'data-test-subj': 'relatedAlertsTab',
