@@ -47,6 +47,5 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     locationsThreshold: condition?.locationsThreshold ?? 1,
     downThreshold: condition?.downThreshold ?? 1,
     isDefaultRule: isEmpty(condition),
-    alertOnNoData: condition.alertOnNoData !== undefined,
   };
 };

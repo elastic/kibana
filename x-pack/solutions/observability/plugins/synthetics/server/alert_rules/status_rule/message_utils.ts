@@ -124,7 +124,7 @@ export const getMonitorSummary = ({
             .tz(tz || 'UTC')
             .format(dateFormat),
         }
-      : { timestamp: 'unavailable', checkedAt: 'unavailable' };
+      : { timestamp: undefined, checkedAt: undefined };
 
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
