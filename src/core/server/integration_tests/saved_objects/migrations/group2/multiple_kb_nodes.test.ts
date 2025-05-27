@@ -94,6 +94,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
       basic: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
       complex: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
       deprecated: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      old: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
       server: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [defaultKibanaTaskIndex])).resolves.toEqual({

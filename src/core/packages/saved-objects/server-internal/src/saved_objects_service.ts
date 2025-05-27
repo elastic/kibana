@@ -424,6 +424,7 @@ export class SavedObjectsService
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
       esCapabilities,
+      kibanaVersionCheck: '8.18.0', // enforce upgrades from a compatible Kibana version
     });
   }
 }

@@ -72,6 +72,8 @@ export interface RunV2MigrationOpts {
   waitForMigrationCompletion: boolean;
   /** Capabilities of the ES cluster we're using */
   esCapabilities: ElasticsearchCapabilities;
+  /** If we are upgrading from an older Kibana, ensure that the previous version is at least the specified value (e.g. kibanaVersionCheck: '8.18.0') */
+  kibanaVersionCheck: string | undefined;
 }
 
 export const runV2Migration = async (options: RunV2MigrationOpts): Promise<MigrationResult[]> => {
@@ -95,7 +97,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   }
 
   // if the .kibana index exists, ensure previous Kibana version is >= 8.18.0
-  if (indexDetails?.aliases) {
+  if (options.kibanaVersionCheck && indexDetails?.aliases) {
     // .kibana index exists and should have version aliases
     const previousKibanaVersion = extractVersionFromKibanaIndexAliases(indexDetails.aliases);
     if (!previousKibanaVersion) {
@@ -103,7 +105,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         `Cannot determine Kibana version from the ${mainIndex} aliases [${indexDetails.aliases}]. If you are running a Kibana version <= 7.11.0, please upgrade to 8.18.0 or 8.19.0 before upgrading to 9.x series`
       );
     }
-    if (new SemVer('8.18.0').compare(previousKibanaVersion) === 1) {
+    if (new SemVer(options.kibanaVersionCheck).compare(previousKibanaVersion) === 1) {
       throw new Error(
         `Kibana ${previousKibanaVersion} deployment detected. Please upgrade to Kibana 8.18.0 or 8.19.0 before upgrading to 9.x series.`
       );

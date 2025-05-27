@@ -328,5 +328,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     serializer: new SavedObjectsSerializer(typeRegistry),
     mappingProperties: buildTypesMappings(typeRegistry.getAllTypes()),
     esCapabilities: elasticsearchServiceMock.createCapabilities(),
+    kibanaVersionCheck: '8.18.0',
   };
 };
