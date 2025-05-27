@@ -162,6 +162,7 @@ export const RangeSliderControl: FC<Props> = ({
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
+        'aria-label': ariaLabel,
       };
     },
     [isInvalid, step, styles]
