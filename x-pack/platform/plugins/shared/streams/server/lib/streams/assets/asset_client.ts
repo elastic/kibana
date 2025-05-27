@@ -198,7 +198,7 @@ export class AssetClient {
   async syncAssetList(
     name: string,
     links: AssetLinkRequest[]
-  ): Promise<{ deleted: AssetLink[]; indexed: AssetLink[] }> {
+  ): Promise<{ deleted: AssetLink[]; indexed: AssetLink[]; updated: AssetLink[] }> {
     const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -213,17 +213,22 @@ export class AssetClient {
       return fromStorage(hit._source);
     });
 
-    const newStoredLinks = links.map((link) => {
+    const newAssetLinks = links.map((link) => {
       return toAssetLink(name, link);
     });
 
-    const nextIds = newStoredLinks.map((link) => link[ASSET_UUID]);
+    const nextIds = newAssetLinks.map((link) => link[ASSET_UUID]);
 
-    const docsToRemove = existingAssetLinks.filter((link) => !nextIds.includes(link[ASSET_UUID]));
+    const assetLinksDeleted = existingAssetLinks.filter(
+      (link) => !nextIds.includes(link[ASSET_UUID])
+    );
+    const assetLinksUpdated = existingAssetLinks.filter((link) =>
+      nextIds.includes(link[ASSET_UUID])
+    );
 
     const operations: AssetBulkOperation[] = [
-      ...docsToRemove.map((asset) => ({ delete: { asset } })),
-      ...newStoredLinks.map((asset) => ({ index: { asset } })),
+      ...assetLinksDeleted.map((asset) => ({ delete: { asset } })),
+      ...newAssetLinks.map((asset) => ({ index: { asset } })),
     ];
 
     if (operations.length) {
@@ -231,8 +236,9 @@ export class AssetClient {
     }
 
     return {
-      deleted: docsToRemove,
-      indexed: newStoredLinks,
+      deleted: assetLinksDeleted,
+      indexed: newAssetLinks,
+      updated: assetLinksUpdated,
     };
   }
 

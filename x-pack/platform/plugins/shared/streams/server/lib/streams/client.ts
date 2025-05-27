@@ -213,21 +213,25 @@ export class StreamsClient {
 
     const { dashboards, queries } = request;
 
-    const { deleted, indexed } = await this.dependencies.assetClient.syncAssetList(stream.name, [
-      ...dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      ...queries.map((query) => ({
-        [ASSET_ID]: query.id,
-        [ASSET_TYPE]: 'query' as const,
-        query,
-      })),
-    ]);
+    const { deleted, indexed, updated } = await this.dependencies.assetClient.syncAssetList(
+      stream.name,
+      [
+        ...dashboards.map((dashboard) => ({
+          [ASSET_ID]: dashboard,
+          [ASSET_TYPE]: 'dashboard' as const,
+        })),
+        ...queries.map((query) => ({
+          [ASSET_ID]: query.id,
+          [ASSET_TYPE]: 'query' as const,
+          query,
+        })),
+      ]
+    );
 
     await this.manageQueries(name, {
       deleted: deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
       indexed: indexed.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
+      updated: updated.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
     });
 
     return {
@@ -238,17 +242,27 @@ export class StreamsClient {
 
   async manageQueries(
     name: string,
-    { deleted = [], indexed = [] }: { deleted?: QueryLink[]; indexed?: QueryLink[] }
+    {
+      deleted = [],
+      indexed = [],
+      updated = [],
+    }: { deleted?: QueryLink[]; indexed?: QueryLink[]; updated?: QueryLink[] }
   ) {
-    await Promise.all([this.installQueries(name, indexed), this.uninstallQueries(name, deleted)]);
+    await Promise.all([
+      this.installQueries(name, { indexed, updated }),
+      this.uninstallQueries(name, deleted),
+    ]);
   }
 
-  private async installQueries(name: string, queries: QueryLink[]) {
+  private async installQueries(
+    name: string,
+    { indexed = [], updated = [] }: { indexed: QueryLink[]; updated: QueryLink[] }
+  ) {
     const { rulesClient } = this.dependencies;
-    await this.uninstallQueries(name, queries);
+    await this.uninstallQueries(name, updated);
 
     await Promise.all(
-      queries.map((query) => {
+      indexed.map((query) => {
         const ruleId = getRuleIdFromQueryLink(query);
         return rulesClient.create<EsqlRuleParams>({
           data: {
@@ -692,7 +706,10 @@ export class StreamsClient {
       throw result.error;
     }
 
-    await this.dependencies.assetClient.syncAssetList(definition.name, []);
+    const { deleted } = await this.dependencies.assetClient.syncAssetList(name, []);
+    await this.manageQueries(name, {
+      deleted: deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
+    });
 
     return { acknowledged: true, result: 'deleted' };
   }

@@ -5,18 +5,12 @@
  * 2.0.
  */
 
+import objectHash from 'object-hash';
 import { v5 } from 'uuid';
 import { QueryLink } from '../../../../../common/assets';
-import { getUuid } from '../asset_client';
 import { ASSET_UUID } from '../fields';
 
-export function getRuleIdFromQueryLink(query: Pick<QueryLink, 'asset.uuid'>) {
-  return v5(query[ASSET_UUID], v5.DNS);
-}
-
-export function getRuleIdFromAsset(
-  name: string,
-  asset: Pick<QueryLink, 'asset.id' | 'asset.type'>
-) {
-  return v5(getUuid(name, asset), v5.DNS);
+export function getRuleIdFromQueryLink(query: QueryLink) {
+  const queryHash = objectHash([query[ASSET_UUID], query.query.kql.query]);
+  return v5(queryHash, v5.DNS);
 }
