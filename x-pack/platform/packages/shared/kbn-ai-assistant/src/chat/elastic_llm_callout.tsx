@@ -17,7 +17,7 @@ import {
 import { useKibana } from '../hooks/use_kibana';
 
 export const ElasticLlmCallout = () => {
-  const { http, spaces } = useKibana().services;
+  const { http, spaces, application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
@@ -86,9 +86,9 @@ export const ElasticLlmCallout = () => {
             ),
             settingsLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
-                href={http!.basePath.prepend(
-                  `/app/management/kibana/spaces/edit/${currentSpaceId}`
-                )}
+                href={application!.getUrlForApp('management', {
+                  path: `/kibana/spaces/edit/${currentSpaceId}`,
+                })}
                 target="_blank"
                 rel="noopener noreferrer"
                 external
