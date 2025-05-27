@@ -55,5 +55,8 @@
     "@kbn/test-suites-src",
     "@kbn/openapi-common",
     "@kbn/security-plugin-types-common",
+    "@kbn/scout-info",
+    "@kbn/babel-register",
+    "@kbn/config-schema"
   ]
 }

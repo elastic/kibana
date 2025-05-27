@@ -49,12 +49,6 @@ export const RULE_MIGRATION_TRANSLATING = i18n.translate(
   { defaultMessage: `Translating rules` }
 );
 
-export const RULE_MIGRATION_COMPLETE_TITLE = (number: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.result.title', {
-    defaultMessage: 'SIEM rules migration #{number} complete',
-    values: { number },
-  });
-
 export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.result.description', {
     defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',
@@ -77,7 +71,7 @@ export const RULE_MIGRATION_SUMMARY_CHART_TITLE = i18n.translate(
 
 export const RULE_MIGRATION_VIEW_TRANSLATED_RULES_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.result.summary.button',
-  { defaultMessage: 'View translated rules' }
+  { defaultMessage: 'View rules' }
 );
 
 export const RULE_MIGRATION_TRANSLATION_FAILED = i18n.translate(
@@ -85,9 +79,9 @@ export const RULE_MIGRATION_TRANSLATION_FAILED = i18n.translate(
   { defaultMessage: 'Failed' }
 );
 
-export const RULE_MIGRATION_TABLE_COLUMN_RESULT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.result',
-  { defaultMessage: 'Result' }
+export const RULE_MIGRATION_TABLE_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.status',
+  { defaultMessage: 'Status' }
 );
 export const RULE_MIGRATION_TABLE_COLUMN_RULES = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.rules',
@@ -96,12 +90,16 @@ export const RULE_MIGRATION_TABLE_COLUMN_RULES = i18n.translate(
 
 export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources',
-  { defaultMessage: 'Upload missing Macros and Lookups.' }
+  { defaultMessage: 'Upload missing macros and lookup lists.' }
 );
-export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
-  { defaultMessage: 'Click upload for step-by-step guidance to finish partially translated rules.' }
-);
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = (partialRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
+    {
+      defaultMessage: 'Click Upload to continue translating {partialRulesCount} rules',
+      values: { partialRulesCount },
+    }
+  );
 
 export const RULE_MIGRATION_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button',
@@ -115,4 +113,8 @@ export const RULE_MIGRATION_EXPAND = i18n.translate(
 export const RULE_MIGRATION_COLLAPSE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.collapse',
   { defaultMessage: 'Collapse rule migration' }
+);
+export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.error',
+  { defaultMessage: 'The last execution of this migration failed with the following message:' }
 );

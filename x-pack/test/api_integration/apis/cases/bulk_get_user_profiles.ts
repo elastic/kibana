@@ -21,9 +21,10 @@ import {
   casesReadUser,
   obsCasesAllUser,
   obsCasesReadUser,
-  secAllCasesNoneUser,
   secAllUser,
   secReadCasesReadUser,
+  secAllCasesNoneUser,
+  secNoneUser,
 } from './common/users';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -67,6 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secReadCasesReadUser },
       { user: casesReadUser },
       { user: obsCasesReadUser },
+      { user: secAllCasesNoneUser },
     ]) {
       it(`User ${
         user.username
@@ -82,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const { user } of [{ user: secAllCasesNoneUser }]) {
+    for (const { user } of [{ user: secNoneUser }]) {
       it(`User ${
         user.username
       } with roles(s) ${user.roles.join()} cannot bulk get user profiles because they lack the bulkGetUserProfiles privilege`, async () => {

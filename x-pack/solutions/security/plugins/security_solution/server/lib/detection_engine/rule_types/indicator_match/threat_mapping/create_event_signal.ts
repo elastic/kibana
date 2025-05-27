@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
-import type { CreateEventSignalOptions } from './types';
-import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import type { CreateEventSignalOptions, GetThreatListOptions } from './types';
+import type {
+  SearchAfterAndBulkCreateParams,
+  SearchAfterAndBulkCreateReturnType,
+} from '../../types';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
@@ -22,46 +26,34 @@ import {
 } from './utils';
 
 export const createEventSignal = async ({
-  bulkCreate,
+  sharedParams,
   currentResult,
   currentEventList,
   eventsTelemetry,
   filters,
-  inputIndex,
-  language,
-  listClient,
-  query,
-  ruleExecutionLogger,
-  savedId,
-  searchAfterSize,
   services,
-  threatMapping,
-  tuple,
-  type,
-  wrapHits,
   wrapSuppressedHits,
-  threatQuery,
   threatFilters,
-  threatLanguage,
-  threatIndex,
-  threatIndicatorPath,
   threatPitId,
   reassignThreatPitId,
-  runtimeMappings,
-  runOpts,
-  primaryTimestamp,
-  secondaryTimestamp,
-  exceptionFilter,
-  unprocessedExceptions,
   allowedFieldsForTermsQuery,
   threatMatchedFields,
   inputIndexFields,
   threatIndexFields,
-  completeRule,
   sortOrder = 'desc',
   isAlertSuppressionActive,
   experimentalFeatures,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const {
+    ruleExecutionLogger,
+    exceptionFilter,
+    inputIndex,
+    completeRule: {
+      ruleParams: { threatMapping, type, language, query, savedId },
+    },
+  } = sharedParams;
+  const threatIndicatorPath =
+    sharedParams.completeRule.ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH;
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
     threatList: currentEventList,
@@ -77,22 +69,16 @@ export const createEventSignal = async ({
     );
     return currentResult;
   } else {
-    const threatSearchParams = {
+    const threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'> = {
+      sharedParams,
       esClient: services.scopedClusterClient.asCurrentUser,
       threatFilters: [...threatFilters, threatFiltersFromEvents],
-      query: threatQuery,
-      language: threatLanguage,
-      index: threatIndex,
-      ruleExecutionLogger,
       threatListConfig: {
         _source: threatMatchedFields.threat,
         fields: undefined,
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
-      runtimeMappings,
-      listClient,
-      exceptionFilter,
       indexFields: threatIndexFields,
     };
 
@@ -157,34 +143,22 @@ export const createEventSignal = async ({
     });
 
     let createResult: SearchAfterAndBulkCreateReturnType;
-    const searchAfterBulkCreateParams = {
+    const searchAfterBulkCreateParams: SearchAfterAndBulkCreateParams = {
+      sharedParams,
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      bulkCreate,
       enrichment,
       eventsTelemetry,
-      exceptionsList: unprocessedExceptions,
       filter: esFilter,
-      inputIndexPattern: inputIndex,
-      listClient,
-      pageSize: searchAfterSize,
-      ruleExecutionLogger,
       services,
       sortOrder,
       trackTotalHits: false,
-      tuple,
-      wrapHits,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
     };
 
     if (isAlertSuppressionActive) {
       createResult = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
-        alertTimestampOverride: runOpts.alertTimestampOverride,
-        alertWithSuppression: runOpts.alertWithSuppression,
-        alertSuppression: completeRule.ruleParams.alertSuppression,
+        alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
         experimentalFeatures,
       });
     } else {

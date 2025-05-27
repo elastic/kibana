@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Patch Integration Tests - Serverless Env - Essentials Tier ',
+      'Rules Management - Rule Import/Export Integration Tests - Serverless Env - Essentials Tier',
   },
 });

@@ -33,6 +33,7 @@ exports[`scaling form should disable clusters option when clustering is not supp
       <EuiToolTip
         content="Simulated clustering disabled"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="left"
       >

@@ -14,6 +14,9 @@ const createEventLogClientMock = () => {
     aggregateEventsBySavedObjectIds: jest.fn(),
     aggregateEventsWithAuthFilter: jest.fn(),
     findEventsByDocumentIds: jest.fn(),
+    findEventsBySavedObjectIdsSearchAfter: jest.fn(),
+    closePointInTime: jest.fn(),
+    refreshIndex: jest.fn(),
   };
   return mock;
 };

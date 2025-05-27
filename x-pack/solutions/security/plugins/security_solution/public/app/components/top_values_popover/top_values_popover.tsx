@@ -41,7 +41,6 @@ export const TopValuesPopover = React.memo(() => {
     >
       <StatefulTopN
         field={data.fieldName}
-        showLegend
         scopeId={data.scopeId}
         toggleTopN={onClose}
         dataViewSpec={sourcererDataView}

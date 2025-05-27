@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { Port } from '.';
 
@@ -25,23 +24,23 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('Port', () => {
-  const mount = useMountAppended();
-
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <Port
-        contextId="test"
-        eventId="abcd"
-        fieldName="destination.port"
-        isDraggable={true}
-        value="443"
-      />
+    const { container } = render(
+      <TestProviders>
+        <Port
+          contextId="test"
+          eventId="abcd"
+          fieldName="destination.port"
+          isDraggable={true}
+          value="443"
+        />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the port', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Port
           contextId="test"
@@ -54,12 +53,12 @@ describe('Port', () => {
     );
 
     expect(
-      removeExternalLinkText(wrapper.find('[data-test-subj="port"]').first().text())
+      removeExternalLinkText(screen.getByTestId('port-or-service-name-link')?.textContent || '')
     ).toContain('443');
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Port
           contextId="test"
@@ -71,15 +70,13 @@ describe('Port', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="port-or-service-name-link"]').first().props().href
-    ).toEqual(
+    expect(screen.getByTestId('port-or-service-name-link').getAttribute('href')).toEqual(
       'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=443'
     );
   });
 
   test('it renders only one external link icon', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <Port
           contextId="test"
@@ -91,6 +88,8 @@ describe('Port', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('span [data-euiicon-type="popout"]').length).toBe(1);
+    expect(
+      wrapper.container.querySelector('span [data-euiicon-type="popout"]')
+    ).toBeInTheDocument();
   });
 });

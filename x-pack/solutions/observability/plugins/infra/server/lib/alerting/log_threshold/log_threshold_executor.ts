@@ -920,6 +920,7 @@ const processRecoveredAlerts = ({
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
+      reason: alertHits?.[ALERT_REASON],
       ...additionalContext,
     };
 

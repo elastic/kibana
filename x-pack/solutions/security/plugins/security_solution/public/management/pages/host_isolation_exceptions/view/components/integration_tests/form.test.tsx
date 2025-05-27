@@ -20,10 +20,7 @@ import {
   exceptionsListAllHttpMocks,
   fleetGetEndpointPackagePolicyListHttpMock,
 } from '../../../../../mocks';
-import {
-  clickOnEffectedPolicy,
-  isEffectedPolicySelected,
-} from '../../../../../components/effected_policy_select/test_utils';
+import { isEffectedPolicySelected } from '../../../../../components/effected_policy_select/test_utils';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
 import type { HttpFetchOptionsWithPath, IHttpFetchError } from '@kbn/core/public';
 import { testIdPrefix } from '../form';
@@ -149,40 +146,6 @@ describe('When on the host isolation exceptions entry form', () => {
           .getByTestId(`${testIdPrefix}-effectedPolicies-global`)
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
-    });
-
-    it('should show policy as selected when user clicks on it', async () => {
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
-      );
-      await clickOnEffectedPolicy(renderResult, testIdPrefix);
-
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
-    });
-
-    it('should retain the previous policy selection when switching from per-policy to global', async () => {
-      // move to per-policy and select the first
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
-      );
-      await clickOnEffectedPolicy(renderResult, testIdPrefix);
-
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
-
-      // move back to global
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-global')
-      );
-
-      expect(
-        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeFalsy();
-
-      // move back to per-policy
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
-      );
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
     });
   });
 

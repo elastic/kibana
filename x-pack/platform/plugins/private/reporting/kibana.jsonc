@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/reporting-plugin",
   "owner": [
-    "@elastic/appex-sharedux"
+    "@elastic/response-ops"
   ],
   "group": "platform",
   "visibility": "private",

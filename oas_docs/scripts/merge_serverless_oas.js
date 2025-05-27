@@ -18,6 +18,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/src/platform/plugins/shared/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/ml/common/openapi/ml_apis_serverless.yaml`,
       `${REPO_ROOT}/src/core/packages/saved-objects/docs/openapi/bundled_serverless.yaml`,
+      `${REPO_ROOT}/x-pack/platform/plugins/shared/task_manager/docs/openapi/bundled_serverless.yaml`,
 
       // Observability Solution
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/apm/docs/openapi/apm/bundled.yaml`,
@@ -32,8 +33,6 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/platform/plugins/shared/osquery/docs/openapi/serverless/*.schema.yaml`,
     ],
     outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.serverless.yaml`,
-    options: {
-      prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.serverless.yaml`,
-    },
+    options: {},
   });
 })();

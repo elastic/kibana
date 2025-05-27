@@ -9,18 +9,15 @@ import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_que
 import * as api from './api';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { initialConfiguration } from './utils';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
 describe('Use get case configurations query hook', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -30,7 +27,7 @@ describe('Use get case configurations query hook', () => {
     renderHook(
       () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -50,7 +47,7 @@ describe('Use get case configurations query hook', () => {
     renderHook(
       () => useGetCaseConfigurationsQuery({ select: (data) => data || initialConfiguration }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -71,7 +68,7 @@ describe('Use get case configurations query hook', () => {
     spy.mockResolvedValue(data);
 
     renderHook(() => useGetCaseConfigurationsQuery({ select }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {

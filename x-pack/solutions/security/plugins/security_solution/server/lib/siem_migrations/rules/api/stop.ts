@@ -45,7 +45,7 @@ export const registerSiemRuleMigrationsStopRoute = (
             const { exists, stopped } = await ruleMigrationsClient.task.stop(migrationId);
 
             if (!exists) {
-              return res.noContent();
+              return res.notFound();
             }
             await siemMigrationAuditLogger.logStop({ migrationId });
 

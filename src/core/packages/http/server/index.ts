@@ -119,6 +119,8 @@ export type {
   AuthcEnabled,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
   RouteSecurity,
   RouteSecurityGetter,
   InternalRouteSecurity,

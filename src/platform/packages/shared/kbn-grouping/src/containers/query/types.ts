@@ -32,7 +32,6 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
-  from: string;
   groupByField: string;
   rootAggregations?: NamedAggregation[];
   runtimeMappings?: RunTimeMappings;
@@ -42,7 +41,10 @@ export interface GroupingQueryArgs {
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   statsAggregations?: NamedAggregation[];
-  to: string;
+  timeRange?: {
+    from: string;
+    to: string;
+  };
 }
 
 export interface MainAggregation extends NamedAggregation {

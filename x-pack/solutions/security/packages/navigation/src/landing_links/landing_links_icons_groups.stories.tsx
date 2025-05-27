@@ -93,21 +93,23 @@ const mockCore = {
   },
 } as unknown as CoreStart;
 
-export const LandingLinksIconsGroups = (params: LandingLinksIconsGroupsProps) => (
-  <div style={{ padding: '25px' }}>
-    <NavigationProvider core={mockCore}>
-      <LandingLinksIconsGroupsComponent {...params} />
-    </NavigationProvider>
-  </div>
-);
+export const LandingLinksIconsGroups = {
+  render: (params: LandingLinksIconsGroupsProps) => (
+    <div style={{ padding: '25px' }}>
+      <NavigationProvider core={mockCore}>
+        <LandingLinksIconsGroupsComponent {...params} />
+      </NavigationProvider>
+    </div>
+  ),
 
-LandingLinksIconsGroups.argTypes = {
-  items: {
-    control: 'object',
-    defaultValue: items,
+  argTypes: {
+    items: {
+      control: 'object',
+      defaultValue: items,
+    },
   },
-};
 
-LandingLinksIconsGroups.parameters = {
-  layout: 'fullscreen',
+  parameters: {
+    layout: 'fullscreen',
+  },
 };

@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { OnboardingTopicId } from './constants';
 import {
   defaultBodyConfig,
@@ -18,18 +17,16 @@ export const onboardingConfig: TopicConfig[] = [
   {
     id: OnboardingTopicId.default,
     title: i18n.translate('xpack.securitySolution.onboarding.topic.default', {
-      defaultMessage: 'Set up security',
+      defaultMessage: 'Set up Security',
     }),
     body: defaultBodyConfig,
   },
   {
     id: OnboardingTopicId.siemMigrations,
     title: i18n.translate('xpack.securitySolution.onboarding.topic.siemMigrations', {
-      defaultMessage: 'SIEM Rule migration',
+      defaultMessage: 'SIEM rule migration',
     }),
     body: siemMigrationsBodyConfig,
-    licenseTypeRequired: 'enterprise',
-    capabilitiesRequired: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
   },
 ];

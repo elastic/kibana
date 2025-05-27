@@ -6,6 +6,7 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { getSpaceId } from './utils/get_space_id';
@@ -38,6 +39,10 @@ export const createSLORoute = createSloServerRoute({
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = core.savedObjects.client;
+    const [coreStart] = await corePlugins.getStartServices();
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     const basePath = corePlugins.http.basePath;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
@@ -66,6 +71,7 @@ export const createSLORoute = createSloServerRoute({
       esClient,
       scopedClusterClient,
       repository,
+      internalSoClient,
       transformManager,
       summaryTransformManager,
       logger,

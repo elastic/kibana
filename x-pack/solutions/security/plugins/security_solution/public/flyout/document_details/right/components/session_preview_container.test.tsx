@@ -235,7 +235,7 @@ describe('SessionPreviewContainer', () => {
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
         ...mockContextValue,
-        isPreview: true,
+        isPreviewMode: true,
       });
 
       expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import React from 'react';
 
 import * as styledComponents from 'styled-components';
@@ -52,7 +52,7 @@ const KibanaStyledComponentsThemeProvider = <
  *
  * @deprecated All Kibana components need to migrate to Emotion.
  */
-export const KibanaStyledComponentsThemeProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
+export const KibanaStyledComponentsThemeProviderDecorator: Decorator = (storyFn, { globals }) => {
   const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
 
   return (

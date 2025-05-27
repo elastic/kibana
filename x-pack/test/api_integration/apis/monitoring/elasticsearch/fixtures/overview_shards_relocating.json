@@ -15,19 +15,19 @@
     ]
   },
   "logs": {
-    "enabled": false,
+    "enabled": true,
     "limit": 10,
-    "reason": {
-      "clusterExists": false,
-      "indexPatternExists": false,
-      "indexPatternInTimeRangeExists": false,
-      "typeExistsAtAnyTime": false,
-      "usingStructuredLogs": false,
-      "nodeExists": null,
-      "indexExists": null,
-      "typeExists": false
-    },
-    "logs": []
+    "logs": [
+      {
+        "component": "o.e.c.m.MetaDataMappingService",
+        "index": "phone-home",
+        "level": "INFO",
+        "message": "update_mapping [_doc]",
+        "node": "whatever-01",
+        "timestamp": 1507235724641,
+        "type": "server"
+      }
+    ]
   },
   "metrics": {
     "cluster_index_latency": [

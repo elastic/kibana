@@ -28,3 +28,10 @@ export const ENTITY_ANALYTICS_TITLE = i18n.translate(
     defaultMessage: 'Entity Analytics',
   }
 );
+
+export const SIEM_MIGRATION_UPSELLING_PAGE_TITLE = i18n.translate(
+  'securitySolutionPackages.siemMigration.pageTitle',
+  {
+    defaultMessage: 'Translate Rules',
+  }
+);

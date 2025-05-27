@@ -24,7 +24,8 @@ export const contractStartServicesMock: ContractStartServices = {
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
-  experimentalFeatures: allowedExperimentalValues, // default values
+  experimentalFeatures: allowedExperimentalValues, // default values,
+  setProductFeatureKeys: jest.fn(),
 });
 
 const startMock = (): PluginStart => ({

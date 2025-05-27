@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
@@ -18,6 +19,8 @@ export default async function ({ readConfigFile }) {
     services,
 
     servers: commonConfig.get('servers'),
+
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
 
     esTestCluster: {
       ...commonConfig.get('esTestCluster'),

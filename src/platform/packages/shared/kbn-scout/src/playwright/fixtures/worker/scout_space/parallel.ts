@@ -19,13 +19,13 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
 >({
   scoutSpace: [
     async ({ log, kbnClient }, use, workerInfo) => {
-      const spaceId = `test-space-${workerInfo.workerIndex}`;
+      const spaceId = `test-space-${workerInfo.parallelIndex + 1}`;
       const spacePayload = {
         id: spaceId,
         name: spaceId,
         disabledFeatures: [],
       };
-      await measurePerformanceAsync(log, `scoutSpace:${spaceId} 'spaces.create'`, async () => {
+      await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
         return kbnClient.spaces.create(spacePayload);
       });
 
@@ -35,7 +35,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const load = async (path: string) => {
         return measurePerformanceAsync(
           log,
-          `scoutSpace:${spaceId} 'savedObjects.load'`,
+          `savedObjects.load({spaceId:'${spaceId}'})`,
           async () => {
             const response = await kbnClient.importExport.load(path, {
               space: spaceId,
@@ -58,7 +58,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const cleanStandardList = async () => {
         return measurePerformanceAsync(
           log,
-          `scoutSpace:${spaceId} 'savedObjects.cleanStandardList'`,
+          `savedObjects.cleanStandardList({spaceId:'${spaceId}'})`,
           async () => {
             savedObjectsCache.clear();
             await kbnClient.savedObjects.cleanStandardList({
@@ -70,7 +70,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       const setDefaultIndex = async (dataViewName: string) => {
         return measurePerformanceAsync(
           log,
-          `scoutSpace:${spaceId} 'savedObjects.setDefaultIndex'`,
+          `savedObjects.setDefaultIndex({spaceId:'${spaceId}'})`,
           async () => {
             if (savedObjectsCache.has(dataViewName)) {
               return kbnClient.uiSettings.update(
@@ -86,31 +86,27 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         );
       };
       const set = async (values: UiSettingValues) => {
-        return measurePerformanceAsync(log, `scoutSpace:${spaceId} 'uiSettings.set'`, async () => {
+        return measurePerformanceAsync(log, `uiSettings.set({spaceId:'${spaceId}'})`, async () => {
           return kbnClient.uiSettings.update(values, { space: spaceId });
         });
       };
       const unset = async (...keys: string[]) => {
-        return measurePerformanceAsync(
-          log,
-          `scoutSpace:${spaceId} 'uiSettings.unset'`,
-          async () => {
-            return Promise.all(
-              keys.map((key) => kbnClient.uiSettings.unset(key, { space: spaceId }))
-            );
-          }
-        );
+        return measurePerformanceAsync(log, `${spaceId}: 'uiSettings.unset'`, async () => {
+          return Promise.all(
+            keys.map((key) => kbnClient.uiSettings.unset(key, { space: spaceId }))
+          );
+        });
       };
       const setDefaultTime = async ({ from, to }: { from: string; to: string }) => {
         return measurePerformanceAsync(
           log,
-          `scoutSpace:${spaceId} 'uiSettings.setDefaultTime'`,
+          `uiSettings.setDefaultTime({spaceId:'${spaceId}')`,
           async () => {
             const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
-            const untcTo = isValidUTCDate(to) ? to : formatTime(to);
+            const utcTo = isValidUTCDate(to) ? to : formatTime(to);
             return kbnClient.uiSettings.update(
               {
-                'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${untcTo}"}`,
+                'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${utcTo}"}`,
               },
               { space: spaceId }
             );
@@ -130,11 +126,12 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
-      log.serviceLoaded(`scoutSpace:${spaceId}`);
+      log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
       await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call
-      await measurePerformanceAsync(log, `scoutSpace:${spaceId} 'space.delete'`, async () => {
+      await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {
+        log.debug(`Deleting space ${spaceId}`);
         return kbnClient.spaces.delete(spaceId);
       });
     },

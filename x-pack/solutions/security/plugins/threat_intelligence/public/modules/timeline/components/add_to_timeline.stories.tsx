@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EuiContextMenuPanel } from '@elastic/eui';
@@ -24,7 +24,7 @@ const KibanaReactContext = createKibanaReactContext({
   timelines: mockKibanaTimelinesService,
 } as unknown as CoreStart);
 
-export const ButtonIcon: Story<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   const mockData: Indicator = generateMockIndicator();
 
   return (
@@ -34,7 +34,7 @@ export const ButtonIcon: Story<void> = () => {
   );
 };
 
-export const ContextMenu: Story<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const mockData: Indicator = generateMockIndicator();
   const items = [<AddToTimelineContextMenu data={mockData} field={mockField} />];
 

@@ -24,6 +24,7 @@ import { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
 import { AIConnector } from '../connectorland/connector_selector';
+import { localStorageLastConversationIdSubject$ } from './use_space_aware_context/use_last_conversation';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -130,7 +131,7 @@ describe('Assistant', () => {
     } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
     jest
       .mocked(useLocalStorage)
-      .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
+      .mockReturnValue([mockData.welcome_id.id, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
       >);
     jest
@@ -138,6 +139,8 @@ describe('Assistant', () => {
       .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
         typeof useSessionStorage
       >);
+
+    localStorageLastConversationIdSubject$.next(null);
   });
 
   describe('persistent storage', () => {

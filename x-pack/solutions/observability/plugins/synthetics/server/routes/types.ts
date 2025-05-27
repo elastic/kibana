@@ -21,6 +21,7 @@ import {
   HttpResponsePayload,
   ResponseError,
 } from '@kbn/core-http-server';
+import { MonitorConfigRepository } from '../services/monitor_config_repository';
 import { SyntheticsEsClient } from '../lib';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -108,6 +109,7 @@ export interface RouteContext<
   syntheticsMonitorClient: SyntheticsMonitorClient;
   subject?: Subject<unknown>;
   spaceId: string;
+  monitorConfigRepository: MonitorConfigRepository;
 }
 
 export type SyntheticsRouteHandler<

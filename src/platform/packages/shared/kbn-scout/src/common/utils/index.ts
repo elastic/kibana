@@ -14,7 +14,19 @@ export async function silence(log: ToolingLog, milliseconds: number) {
   await Rx.firstValueFrom(
     log.getWritten$().pipe(
       Rx.startWith(null),
-      Rx.switchMap(() => Rx.timer(milliseconds))
+      Rx.switchMap((message) => {
+        if (
+          // TODO: remove workaround to ignore ES authc debug logs for stateful run
+          message?.args[0]?.includes(
+            'Authentication of [kibana_system] using realm [reserved/reserved]'
+          ) ||
+          message?.args[0]?.includes('realm [reserved] authenticated user [kibana_system]')
+        ) {
+          return Rx.of(null);
+        } else {
+          return Rx.timer(milliseconds);
+        }
+      })
     )
   );
 }

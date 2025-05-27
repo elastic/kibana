@@ -124,6 +124,12 @@ describe('getDefaultGraphState', () => {
     expect(graphAnnotation.spec.unrefinedResults.value).toBeNull();
   });
 
+  it('returns the expected default continuePrompt state', () => {
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
+
+    expect(graphAnnotation.spec.continuePrompt.value).toBe(prompts.continue);
+  });
+
   it('returns the expected default end', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 

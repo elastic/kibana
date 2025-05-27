@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useDeleteAction } from './use_delete_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
+import { TestProviders } from '../../../common/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 
 jest.mock('../../../containers/api');
 
 describe('useDeleteAction', () => {
-  let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -29,7 +28,7 @@ describe('useDeleteAction', () => {
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -57,7 +56,7 @@ describe('useDeleteAction', () => {
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -87,7 +86,7 @@ describe('useDeleteAction', () => {
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -106,16 +105,17 @@ describe('useDeleteAction', () => {
 
     await waitFor(() => {
       expect(result.current.isModalVisible).toBe(false);
-      expect(onActionSuccess).toHaveBeenCalled();
-      expect(deleteSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
     });
+
+    expect(onActionSuccess).toHaveBeenCalled();
+    expect(deleteSpy).toHaveBeenCalledWith({ caseIds: ['basic-case-id'] });
   });
 
   it('closes the modal', async () => {
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -137,10 +137,12 @@ describe('useDeleteAction', () => {
   });
 
   it('shows the success toaster correctly when delete one case', async () => {
+    const coreStart = coreMock.createStart();
+
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
       }
     );
 
@@ -155,7 +157,7 @@ describe('useDeleteAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Deleted case',
         className: 'eui-textBreakWord',
       });
@@ -163,10 +165,12 @@ describe('useDeleteAction', () => {
   });
 
   it('shows the success toaster correctly when delete multiple case', async () => {
+    const coreStart = coreMock.createStart();
+
     const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
       }
     );
 
@@ -181,7 +185,7 @@ describe('useDeleteAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Deleted 2 cases',
         className: 'eui-textBreakWord',
       });

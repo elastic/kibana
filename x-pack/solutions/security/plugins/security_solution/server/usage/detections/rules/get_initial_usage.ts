@@ -12,6 +12,7 @@ import type {
   SingleEventLogStatusMetric,
   SingleEventMetric,
   AlertSuppressionUsage,
+  SpacesUsage,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -27,6 +28,11 @@ export const initialAlertSuppression: AlertSuppressionUsage = {
   suppresses_missing_fields: 0,
   does_not_suppress_missing_fields: 0,
 };
+
+export const getInitialSpacesUsage = (): SpacesUsage => ({
+  total: 0,
+  rules_in_spaces: [],
+});
 
 /**
  * Default detection rule usage count, split by type + elastic/custom
@@ -161,6 +167,8 @@ export const getInitialEventLogUsage = (): EventLogStatusMetric => ({
  */
 export const getInitialSingleEventLogUsage = (): SingleEventLogStatusMetric => ({
   eql: getInitialSingleEventMetric(),
+  new_terms: getInitialSingleEventMetric(),
+  esql: getInitialSingleEventMetric(),
   threat_match: getInitialSingleEventMetric(),
   machine_learning: getInitialSingleEventMetric(),
   query: getInitialSingleEventMetric(),

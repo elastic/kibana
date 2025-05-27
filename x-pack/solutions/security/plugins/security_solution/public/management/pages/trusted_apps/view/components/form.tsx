@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
@@ -29,23 +29,17 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { useGetUpdatedTags } from '../../../../hooks/artifacts';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
-  PolicyData,
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/artifacts/validations';
 
-import {
-  isArtifactGlobal,
-  getPolicyIdsFromArtifact,
-  getArtifactTagsByPolicySelection,
-} from '../../../../../../common/endpoint/service/artifacts';
 import { isSignerFieldExcluded } from '../../state/type_guards';
 
 import {
@@ -63,8 +57,7 @@ import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/tran
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
@@ -202,12 +195,16 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           type: entry.type as EntryTypes,
         })
       ) {
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          INPUT_ERRORS.wildcardPathWarning(index)
-        );
+        if (entry.type === 'wildcard') {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardPathWarning(index)
+          );
+        } else {
+          addResultToValidation(validation, 'entries', 'warnings', INPUT_ERRORS.pathWarning(index));
+        }
       }
     });
   }
@@ -244,41 +241,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         [key in keyof NewTrustedApp]: boolean;
       }>
     >({});
-
-    const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
-    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
-
-    useEffect(() => {
-      if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
-      }
-    }, [item.tags, hasFormChanged]);
-
-    // select policies if editing
-    useEffect(() => {
-      if (hasFormChanged) {
-        return;
-      }
-      const policyIds = item.tags ? getPolicyIdsFromArtifact({ tags: item.tags }) : [];
-      if (!policyIds.length) {
-        return;
-      }
-      const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
-
-      setSelectedPolicies(policiesData);
-    }, [hasFormChanged, item, policies]);
-
-    const showAssignmentSection = useMemo(() => {
-      return (
-        isPlatinumPlus ||
-        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
-      );
-    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
-
+    const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateValues(item)
     );
@@ -302,19 +266,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [onChange]
     );
 
-    const handleOnPolicyChange = useCallback(
-      (change: EffectedPolicySelection) => {
-        const tags = getTagsUpdatedBy('policySelection', getArtifactTagsByPolicySelection(change));
-        const nextItem = { ...item, tags };
-
-        // Preserve old selected policies when switching to global
-        if (!change.isGlobal) {
-          setSelectedPolicies(change.selected);
-        }
-        processChanged(nextItem);
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        processChanged(updatedItem);
         setHasFormChanged(true);
       },
-      [getTagsUpdatedBy, item, processChanged]
+      [processChanged]
     );
 
     const handleOnNameOrDescriptionChange = useCallback<
@@ -589,14 +546,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiHorizontalRule />
             <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
-                isGlobal={isGlobal}
-                isPlatinumPlus={isPlatinumPlus}
-                selected={selectedPolicies}
+                item={item}
                 options={policies}
-                onChange={handleOnPolicyChange}
-                isLoading={policiesIsLoading}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
+                isLoading={policiesIsLoading}
+                onChange={handleEffectedPolicyOnChange}
               />
             </EuiFormRow>
           </>

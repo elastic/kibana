@@ -48,7 +48,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<ElasticAssistantApiRequestHandlerContext> {
     const { options } = this;
-    const { core } = options;
+    const { core, plugins } = options;
 
     const [coreStart, startPlugins] = await core.getStartServices();
     const coreContext = await context.core;
@@ -77,6 +77,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       return contextUser;
     };
 
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
     return {
       core: coreContext,
 
@@ -99,10 +101,10 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
-      savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+      savedObjectsClient,
       telemetry: core.analytics,
 
-      // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
+      // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
       getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
         const currentUser = await getCurrentUser();
@@ -118,9 +120,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           licensing: context.licensing,
           currentUser,
-          modelIdOverride: params?.modelIdOverride,
+          elserInferenceId: params?.elserInferenceId,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
+          // uses internal user to interact with ML API
+          getTrainedModelsProvider: () =>
+            plugins.ml.trainedModelsProvider(
+              {} as KibanaRequest,
+              coreStart.savedObjects.createInternalRepository()
+            ),
         });
       }),
 

@@ -7,35 +7,44 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
+import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull } from 'lodash';
-import OpenAI from 'openai';
+import { isString, once, pull, isFunction, last } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
+import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
+type LLMMessage = string[] | ToolMessage | string | undefined;
+
 type RequestHandler = (
   request: Request,
   response: Response,
-  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+  requestBody: ChatCompletionStreamParams
 ) => void;
 
 interface RequestInterceptor {
   name: string;
-  when: (body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) => boolean;
+  when: (body: ChatCompletionStreamParams) => boolean;
 }
 
 export interface ToolMessage {
   content?: string;
   tool_calls?: ChatCompletionChunkToolCall[];
 }
+
+export interface RelevantField {
+  id: string;
+  name: string;
+}
+
 export interface LlmResponseSimulator {
-  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  status: (code: number) => Promise<void>;
+  requestBody: ChatCompletionStreamParams;
+  status: (code: number) => void;
   next: (msg: string | ToolMessage) => Promise<void>;
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
@@ -46,35 +55,47 @@ export interface LlmResponseSimulator {
 export class LlmProxy {
   server: Server;
   interval: NodeJS.Timeout;
-
   interceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
+  interceptedRequests: Array<{
+    requestBody: ChatCompletionStreamParams;
+    matchingInterceptorName: string | undefined;
+  }> = [];
 
   constructor(private readonly port: number, private readonly log: ToolingLog) {
-    this.interval = setInterval(() => this.log.debug(`LLM proxy listening on port ${port}`), 1000);
+    this.interval = setInterval(() => this.log.debug(`LLM proxy listening on port ${port}`), 5000);
 
     this.server = http
       .createServer()
       .on('request', async (request, response) => {
-        this.log.info(`LLM request received`);
-
-        const interceptors = this.interceptors.concat();
         const requestBody = await getRequestBody(request);
 
-        while (interceptors.length) {
-          const interceptor = interceptors.shift()!;
+        const matchingInterceptor = this.interceptors.find(({ when }) => when(requestBody));
+        this.interceptedRequests.push({
+          requestBody,
+          matchingInterceptorName: matchingInterceptor?.name,
+        });
+        if (matchingInterceptor) {
+          this.log.info(`Handling interceptor "${matchingInterceptor.name}"`);
+          matchingInterceptor.handle(request, response, requestBody);
 
-          if (interceptor.when(requestBody)) {
-            pull(this.interceptors, interceptor);
-            interceptor.handle(request, response, requestBody);
-            return;
-          }
+          this.log.debug(`Removing interceptor "${matchingInterceptor.name}"`);
+          pull(this.interceptors, matchingInterceptor);
+          return;
         }
 
         const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
+        const availableInterceptorNames = this.interceptors.map(({ name }) => name);
+        this.log.error(
+          `Available interceptors: ${JSON.stringify(availableInterceptorNames, null, 2)}`
+        );
+
         this.log.error(
           `${errorMessage}. Messages: ${JSON.stringify(requestBody.messages, null, 2)}`
         );
-        response.writeHead(500, { errorMessage, messages: JSON.stringify(requestBody.messages) });
+        response.writeHead(500, {
+          'Elastic-Interceptor': 'Interceptor not found',
+        });
+        response.write(sseEvent({ errorMessage, availableInterceptorNames }));
         response.end();
       })
       .on('error', (error) => {
@@ -88,7 +109,8 @@ export class LlmProxy {
   }
 
   clear() {
-    this.interceptors.length = 0;
+    this.interceptors = [];
+    this.interceptedRequests = [];
   }
 
   close() {
@@ -97,16 +119,18 @@ export class LlmProxy {
     this.server.close();
   }
 
-  waitForAllInterceptorsSettled() {
+  waitForAllInterceptorsToHaveBeenCalled() {
     return pRetry(
       async () => {
         if (this.interceptors.length === 0) {
           return;
         }
 
-        const unsettledInterceptors = this.interceptors.map((i) => i.name).join(', ');
+        const unsettledInterceptors = this.interceptors.map((i) => i.name);
         this.log.debug(
-          `Waiting for the following interceptors to be called: ${unsettledInterceptors}`
+          `Waiting for the following interceptors to be called: ${JSON.stringify(
+            unsettledInterceptors
+          )}`
         );
         if (this.interceptors.length > 0) {
           throw new Error(`Interceptors were not called: ${unsettledInterceptors}`);
@@ -120,61 +144,104 @@ export class LlmProxy {
   }
 
   interceptConversation(
-    msg: Array<string | ToolMessage> | ToolMessage | string | undefined,
+    msg: LLMMessage,
     {
-      name = 'default_interceptor_conversation_name',
+      name,
     }: {
       name?: string;
     } = {}
   ) {
     return this.intercept(
-      name,
-      (body) => !isFunctionTitleRequest(body),
+      `Conversation interceptor: "${name ?? 'Unnamed'}"`,
+      // @ts-expect-error
+      (body) => body.tool_choice?.function?.name === undefined,
       msg
     ).completeAfterIntercept();
   }
 
-  interceptTitle(title: string) {
-    return this.intercept(
-      `conversation_title_interceptor_${title.split(' ').join('_')}`,
-      (body) => isFunctionTitleRequest(body),
-      {
+  interceptWithFunctionRequest({
+    name: name,
+    arguments: argumentsCallback,
+    when,
+  }: {
+    name: string;
+    arguments: (body: ChatCompletionStreamParams) => string;
+    when: RequestInterceptor['when'];
+  }) {
+    // @ts-expect-error
+    return this.intercept(`Function request interceptor: "${name}"`, when, (body) => {
+      return {
         content: '',
         tool_calls: [
           {
-            index: 0,
-            toolCallId: 'id',
             function: {
-              name: TITLE_CONVERSATION_FUNCTION_NAME,
-              arguments: JSON.stringify({ title }),
+              name,
+              arguments: argumentsCallback(body),
             },
+            index: 0,
+            id: `call_${uuidv4()}`,
           },
         ],
-      }
-    ).completeAfterIntercept();
+      };
+    }).completeAfterIntercept();
   }
 
-  intercept<
-    TResponseChunks extends
-      | Array<string | ToolMessage>
-      | ToolMessage
-      | string
-      | undefined = undefined
-  >(
+  interceptSelectRelevantFieldsToolChoice({
+    from = 0,
+    to = 5,
+  }: { from?: number; to?: number } = {}) {
+    let relevantFields: RelevantField[] = [];
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'select_relevant_fields',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      arguments: (requestBody) => {
+        const messageWithFieldIds = last(requestBody.messages);
+        relevantFields = (messageWithFieldIds?.content as string)
+          .split('\n\n')
+          .slice(1)
+          .join('')
+          .trim()
+          .split('\n')
+          .slice(from, to)
+          .map((line) => JSON.parse(line) as RelevantField);
+
+        return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });
+      },
+    });
+
+    return {
+      simulator,
+      getRelevantFields: async () => {
+        await simulator;
+        return relevantFields;
+      },
+    };
+  }
+
+  interceptTitle(title: string) {
+    return this.interceptWithFunctionRequest({
+      name: TITLE_CONVERSATION_FUNCTION_NAME,
+      arguments: () => JSON.stringify({ title }),
+      // @ts-expect-error
+      when: (body) => body.tool_choice?.function?.name === TITLE_CONVERSATION_FUNCTION_NAME,
+    });
+  }
+
+  intercept(
     name: string,
     when: RequestInterceptor['when'],
-    responseChunks?: TResponseChunks
-  ): TResponseChunks extends undefined
-    ? { waitForIntercept: () => Promise<LlmResponseSimulator> }
-    : { completeAfterIntercept: () => Promise<LlmResponseSimulator> } {
+    responseChunks?: LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage)
+  ): {
+    waitForIntercept: () => Promise<LlmResponseSimulator>;
+    completeAfterIntercept: () => Promise<LlmResponseSimulator>;
+  } {
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
         this.interceptors.push({
           name,
           when,
           handle: (request, response, requestBody) => {
-            this.log.info(`LLM request intercepted by "${name}"`);
-
             function write(chunk: string) {
               return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
             }
@@ -184,24 +251,28 @@ export class LlmProxy {
 
             const simulator: LlmResponseSimulator = {
               requestBody,
-              status: once(async (status: number) => {
+              status: once((status: number) => {
                 response.writeHead(status, {
+                  'Elastic-Interceptor': name,
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
                 });
               }),
               next: (msg) => {
+                simulator.status(200);
                 const chunk = createOpenAiChunk(msg);
-                return write(`data: ${JSON.stringify(chunk)}\n\n`);
+                return write(sseEvent(chunk));
               },
               rawWrite: (chunk: string) => {
+                simulator.status(200);
                 return write(chunk);
               },
               rawEnd: async () => {
                 await end();
               },
               complete: async () => {
+                this.log.debug(`Completed intercept for "${name}"`);
                 await write('data: [DONE]\n\n');
                 await end();
               },
@@ -216,29 +287,41 @@ export class LlmProxy {
         });
       }),
       new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 20000ms`)), 20000);
+        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 30000ms`)), 30000);
       }),
     ]);
 
-    if (responseChunks === undefined) {
-      return { waitForIntercept: () => waitForInterceptPromise } as any;
-    }
-
-    const parsedChunks = Array.isArray(responseChunks)
-      ? responseChunks
-      : isString(responseChunks)
-      ? responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`))
-      : [responseChunks];
-
     return {
+      waitForIntercept: () => waitForInterceptPromise,
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
+
+        function getParsedChunks(): Array<string | ToolMessage> {
+          const llmMessage = isFunction(responseChunks)
+            ? responseChunks(simulator.requestBody)
+            : responseChunks;
+
+          if (!llmMessage) {
+            return [];
+          }
+
+          if (Array.isArray(llmMessage)) {
+            return llmMessage;
+          }
+
+          if (isString(llmMessage)) {
+            return llmMessage.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
+          }
+
+          return [llmMessage];
+        }
+
+        const parsedChunks = getParsedChunks();
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
         }
 
         await simulator.complete();
-
         return simulator;
       },
     } as any;
@@ -251,9 +334,7 @@ export async function createLlmProxy(log: ToolingLog) {
   return new LlmProxy(port, log);
 }
 
-async function getRequestBody(
-  request: http.IncomingMessage
-): Promise<OpenAI.Chat.ChatCompletionCreateParamsNonStreaming> {
+async function getRequestBody(request: http.IncomingMessage): Promise<ChatCompletionStreamParams> {
   return new Promise((resolve, reject) => {
     let data = '';
 
@@ -271,11 +352,6 @@ async function getRequestBody(
   });
 }
 
-export function isFunctionTitleRequest(
-  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-) {
-  return (
-    requestBody.tools?.find((fn) => fn.function.name === TITLE_CONVERSATION_FUNCTION_NAME) !==
-    undefined
-  );
+function sseEvent(chunk: unknown) {
+  return `data: ${JSON.stringify(chunk)}\n\n`;
 }

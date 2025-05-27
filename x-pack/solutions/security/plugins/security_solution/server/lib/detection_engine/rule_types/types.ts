@@ -35,6 +35,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
@@ -46,14 +47,12 @@ import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../r
 import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/api/detection_engine';
-import type { BaseHit, SearchTypes, EqlSequence } from '../../../../common/detection_engine/types';
+import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { GenericBulkCreateResponse } from './factories';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   DetectionAlert,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {
@@ -80,7 +79,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
-export interface RunOpts<TParams extends RuleParams> {
+export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   completeRule: CompleteRule<TParams>;
   tuple: {
     to: Moment;
@@ -92,7 +91,6 @@ export interface RunOpts<TParams extends RuleParams> {
   searchAfterSize: number;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
-  wrapSequences: WrapSequences;
   ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -108,6 +106,7 @@ export interface RunOpts<TParams extends RuleParams> {
   publicBaseUrl: string | undefined;
   experimentalFeatures?: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
+  spaceId: string;
 }
 
 export type SecurityAlertType<
@@ -128,7 +127,7 @@ export type SecurityAlertType<
       WithoutReservedActionGroups<TActionGroupIds, never>
     > & {
       services: PersistenceServices;
-      runOpts: RunOpts<TParams>;
+      sharedParams: SecuritySharedParams<TParams>;
     }
   ) => Promise<
     SearchAfterAndBulkCreateReturnType & {
@@ -141,6 +140,7 @@ export type SecurityAlertType<
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   actions: SetupPlugins['actions'];
+  docLinks: DocLinksServiceSetup;
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;
@@ -164,7 +164,6 @@ export interface CreateRuleOptions {
   logger: Logger;
   ml?: SetupPlugins['ml'];
   eventsTelemetry?: ITelemetryEventsSender | undefined;
-  version: string;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: (params: ScheduleNotificationActions) => void;
 }
@@ -353,13 +352,6 @@ export type WrapSuppressedHits = (
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
 
-export type WrapSequences = (
-  sequences: Array<EqlSequence<SignalSource>>,
-  buildReasonMessage: BuildReasonMessage
-) => Array<
-  WrappedFieldsLatest<EqlShellFieldsLatest> | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
->;
-
 export type RuleServices = RuleExecutorServices<
   AlertInstanceState,
   AlertInstanceContext,
@@ -367,30 +359,20 @@ export type RuleServices = RuleExecutorServices<
 >;
 
 export interface SearchAfterAndBulkCreateParams {
-  tuple: {
-    to: moment.Moment;
-    from: moment.Moment;
-    maxSignals: number;
-  };
+  sharedParams: SecuritySharedParams;
   services: RuleServices;
-  listClient: ListClient;
-  exceptionsList: ExceptionListItemSchema[];
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  inputIndexPattern: string[];
-  pageSize: number;
   filter: estypes.QueryDslQueryContainer;
   buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   isLoggedRequestsEnabled?: boolean;
+  /**
+   * If defined, will override the value of max_signals found in sharedParams.tuple
+   */
+  maxSignalsOverride?: number;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

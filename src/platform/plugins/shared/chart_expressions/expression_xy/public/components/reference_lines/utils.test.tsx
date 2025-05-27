@@ -76,7 +76,6 @@ describe('reference lines helpers', () => {
               hasReducedPadding={false}
             />
           ),
-          markerBody: <MarkerBody label={undefined} isHorizontal={false} />,
         })
       );
     });
@@ -94,7 +93,6 @@ describe('reference lines helpers', () => {
               hasReducedPadding={false}
             />
           ),
-          markerBody: <MarkerBody label={undefined} isHorizontal={false} />,
         })
       );
     });
@@ -112,7 +110,6 @@ describe('reference lines helpers', () => {
               hasReducedPadding={true}
             />
           ),
-          markerBody: <MarkerBody label={undefined} isHorizontal={false} />,
         })
       );
     });

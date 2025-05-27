@@ -109,6 +109,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
+    const getEntityStoreApiKeyManager = () =>
+      getApiKeyManager({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
@@ -145,6 +155,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getDataViewsService: () => dataViewsService,
 
+      getEntityStoreApiKeyManager,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -158,7 +170,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
-          experimentalFeatures: config.experimentalFeatures,
           productFeaturesService,
           license: licensing.license,
         });
@@ -259,14 +270,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
-          apiKeyManager: getApiKeyManager({
-            core: coreStart,
-            logger,
-            security: startPlugins.security,
-            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
-            request,
-            namespace: getSpaceId(),
-          }),
+          apiKeyManager: getEntityStoreApiKeyManager(),
+          security: startPlugins.security,
+          request,
         });
       }),
       getAssetInventoryClient: memoize(() => {

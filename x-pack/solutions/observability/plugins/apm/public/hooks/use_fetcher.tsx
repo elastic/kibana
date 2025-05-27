@@ -87,6 +87,7 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
+    skipTimeRangeRefreshUpdate?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
@@ -98,6 +99,21 @@ export function useFetcher<TReturn>(
   const [counter, setCounter] = useState(0);
   const { timeRangeId } = useTimeRangeId();
   const { addInspectorRequest } = useInspectorContext();
+
+  const deps = useMemo(() => {
+    const _deps = [counter, preservePreviousData, showToastOnError, ...fnDeps];
+    if (options.skipTimeRangeRefreshUpdate !== true) {
+      _deps.push(timeRangeId);
+    }
+    return _deps;
+  }, [
+    counter,
+    fnDeps,
+    options.skipTimeRangeRefreshUpdate,
+    preservePreviousData,
+    showToastOnError,
+    timeRangeId,
+  ]);
 
   useEffect(() => {
     let controller: AbortController = new AbortController();
@@ -176,14 +192,7 @@ export function useFetcher<TReturn>(
       controller.abort();
     };
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    counter,
-    preservePreviousData,
-    timeRangeId,
-    showToastOnError,
-    ...fnDeps,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
+  }, deps);
 
   return useMemo(() => {
     return {

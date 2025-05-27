@@ -227,7 +227,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      beforeEach(async () => {
+      before(async () => {
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
@@ -258,7 +258,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      afterEach(() =>
+      after(() =>
         alertingApi.cleanUpAlerts({
           roleAuthc,
           ruleId,

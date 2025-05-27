@@ -518,7 +518,7 @@ describe('DatatableComponent', () => {
       expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: `Page 1 of ${numberOfPages}` })).toHaveAttribute(
         'aria-current',
-        'true'
+        'page'
       );
       const newIndex = 3;
       await userEvent.click(
@@ -526,7 +526,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
     });
     it('dynamically toggles pagination', async () => {
       const argsWithoutPagination = copyData(args);
@@ -599,7 +599,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
 
       await act(async () => {
         rerender({
@@ -614,7 +614,7 @@ describe('DatatableComponent', () => {
       // keeps existing page if more data is added
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${newNumberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
     });
 
     it('resets page position if rows change so page will be empty', async () => {
@@ -639,7 +639,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
 
       await act(async () => {
         rerender({

@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -54,6 +55,7 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   >([]);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const titleId = useGeneratedHtmlId({ prefix: 'calendarsSelection' });
 
   async function loadCalendars() {
     setIsLoading(true);
@@ -97,10 +99,14 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const Desc = isDst ? DescriptionDst : Description;
 
   return (
-    <Desc>
+    <Desc titleId={isDst ? `Dst${titleId}` : titleId}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
-          <EuiComboBox {...comboBoxProps} data-test-subj="mlJobWizardComboBoxCalendars" />
+          <EuiComboBox
+            {...comboBoxProps}
+            data-test-subj="mlJobWizardComboBoxCalendars"
+            aria-labelledby={isDst ? `Dst${titleId}` : titleId}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip

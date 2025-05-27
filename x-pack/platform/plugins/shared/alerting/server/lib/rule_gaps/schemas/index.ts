@@ -33,10 +33,9 @@ export const gapBaseSchema = schema.object({
   in_progress_duration_ms: schema.number(),
 });
 
-export const findGapsParamsSchema = schema.object(
+const findGapsBaseParamsSchema = schema.object(
   {
     end: schema.string(),
-    page: schema.number({ defaultValue: 1, min: 1 }),
     perPage: schema.number({ defaultValue: 10, min: 0 }),
     ruleId: schema.string(),
     start: schema.string(),
@@ -70,9 +69,20 @@ export const findGapsParamsSchema = schema.object(
   }
 );
 
+export const findGapsParamsSchema = findGapsBaseParamsSchema.extends({
+  page: schema.number({ defaultValue: 1, min: 1 }),
+});
+
 export const findGapsByIdParamsSchema = schema.object({
   gapIds: schema.arrayOf(schema.string()),
   ruleId: schema.string(),
   page: schema.number({ defaultValue: 1, min: 1 }),
   perPage: schema.number({ defaultValue: 10, min: 1 }),
+});
+
+export const findGapsSearchAfterParamsSchema = findGapsBaseParamsSchema.extends({
+  pitId: schema.maybe(schema.string()),
+  searchAfter: schema.maybe(
+    schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))
+  ),
 });

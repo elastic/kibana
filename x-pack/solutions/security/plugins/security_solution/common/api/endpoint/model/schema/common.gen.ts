@@ -37,13 +37,13 @@ export type PageSize = z.infer<typeof PageSize>;
 export const PageSize = z.number().int().min(1).max(100).default(10);
 
 /**
- * Start date
+ * A start date in ISO 8601 format or Date Math format.
  */
 export type StartDate = z.infer<typeof StartDate>;
 export const StartDate = z.string();
 
 /**
- * End date
+ * An end date in ISO format or Date Math format.
  */
 export type EndDate = z.infer<typeof EndDate>;
 export const EndDate = z.string();
@@ -94,6 +94,9 @@ export const SortField = z.enum([
 export type SortFieldEnum = typeof SortField.enum;
 export const SortFieldEnum = SortField.enum;
 
+/**
+ * A list of agent IDs. Max of 50.
+ */
 export type AgentIds = z.infer<typeof AgentIds>;
 export const AgentIds = z.union([z.array(z.string().min(1)).min(1).max(50), z.string().min(1)]);
 
@@ -115,6 +118,9 @@ export const Command = z.enum([
 export type CommandEnum = typeof Command.enum;
 export const CommandEnum = Command.enum;
 
+/**
+ * A list of response action command names.
+ */
 export type Commands = z.infer<typeof Commands>;
 export const Commands = z.array(Command);
 
@@ -133,13 +139,13 @@ export type Statuses = z.infer<typeof Statuses>;
 export const Statuses = z.array(Status);
 
 /**
- * User IDs
+ * A list of user IDs.
  */
 export type UserIds = z.infer<typeof UserIds>;
 export const UserIds = z.union([z.array(z.string().min(1)).min(1), z.string().min(1)]);
 
 /**
- * Shows detailed outputs for an action response
+ * A list of action IDs that should include the complete output of the action.
  */
 export type WithOutputs = z.infer<typeof WithOutputs>;
 export const WithOutputs = z.union([z.array(z.string().min(1)).min(1), z.string().min(1)]);
@@ -183,7 +189,7 @@ export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
 
 /**
- * The host agent type (optional). Defaults to endpoint.
+ * List of agent types to retrieve. Defaults to `endpoint`.
  */
 export type AgentTypes = z.infer<typeof AgentTypes>;
 export const AgentTypes = z.enum([
@@ -208,16 +214,6 @@ export const BaseActionSchema = z.object({
 export type NoParametersRequestSchema = z.infer<typeof NoParametersRequestSchema>;
 export const NoParametersRequestSchema = z.object({
   body: BaseActionSchema,
-});
-
-export type Pid = z.infer<typeof Pid>;
-export const Pid = z.object({
-  pid: z.number().int().min(1).optional(),
-});
-
-export type EntityId = z.infer<typeof EntityId>;
-export const EntityId = z.object({
-  entity_id: z.string().min(1).optional(),
 });
 
 export type ProtectionUpdatesNoteResponse = z.infer<typeof ProtectionUpdatesNoteResponse>;

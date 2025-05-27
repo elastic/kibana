@@ -8,7 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { validatePermissions } from './edit_monitor';
-import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import {
+  InvalidLocationError,
+  InvalidScheduleError,
+} from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -121,7 +124,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
     } catch (getErr) {
       server.logger.error(getErr);
-      if (getErr instanceof InvalidLocationError) {
+      if (getErr instanceof InvalidLocationError || getErr instanceof InvalidScheduleError) {
         return response.badRequest({ body: { message: getErr.message } });
       }
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {

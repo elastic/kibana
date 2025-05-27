@@ -37,8 +37,6 @@ import { INSPECT_ACTION } from '../../../../common/components/visualization_acti
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
-  flex: 1 1 auto;
-  display: flex;
   width: 100%;
 `;
 
@@ -98,11 +96,11 @@ const PreviewHistogramComponent = ({
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
   const previewEmbeddableId = `${previewQueryId}-embeddable`;
-  const { responses: visualizationResponses } = useVisualizationResponse({
+  const { tables } = useVisualizationResponse({
     visualizationId: previewEmbeddableId,
   });
 
-  const totalCount = visualizationResponses?.[0]?.hits?.total ?? 0;
+  const totalCount = (tables && tables.meta.statistics.totalCount) ?? 0;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {

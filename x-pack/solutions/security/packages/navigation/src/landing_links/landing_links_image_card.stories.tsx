@@ -83,35 +83,37 @@ const mockCore = {
   },
 } as unknown as CoreStart;
 
-export const LandingLinksImageCards = (params: LandingLinksImagesProps) => (
-  <div style={{ padding: '25px' }}>
-    <NavigationProvider core={mockCore}>
-      <div
-        css={{
-          display: 'grid',
-          gridTemplateColumns: 'auto auto auto',
-          height: '100%',
-          width: '100%',
-          gap: 8,
-          background: '#fff',
-        }}
-      >
-        {items.map((item) => {
-          const { id } = item;
-          return <LandingLinksImageCardComponent {...params} key={id} item={item} />;
-        })}
-      </div>
-    </NavigationProvider>
-  </div>
-);
+export const LandingLinksImageCards = {
+  render: (params: LandingLinksImagesProps) => (
+    <div style={{ padding: '25px' }}>
+      <NavigationProvider core={mockCore}>
+        <div
+          css={{
+            display: 'grid',
+            gridTemplateColumns: 'auto auto auto',
+            height: '100%',
+            width: '100%',
+            gap: 8,
+            background: '#fff',
+          }}
+        >
+          {items.map((item) => {
+            const { id } = item;
+            return <LandingLinksImageCardComponent {...params} key={id} item={item} />;
+          })}
+        </div>
+      </NavigationProvider>
+    </div>
+  ),
 
-LandingLinksImageCards.argTypes = {
-  items: {
-    control: 'object',
-    defaultValue: items,
+  argTypes: {
+    items: {
+      control: 'object',
+      defaultValue: items,
+    },
   },
-};
 
-LandingLinksImageCards.parameters = {
-  layout: 'fullscreen',
+  parameters: {
+    layout: 'fullscreen',
+  },
 };

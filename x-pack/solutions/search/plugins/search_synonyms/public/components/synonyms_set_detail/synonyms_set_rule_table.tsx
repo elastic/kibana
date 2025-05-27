@@ -27,9 +27,9 @@ import { getExplicitSynonym, isExplicitSynonym } from '../../utils/synonyms_util
 import { DeleteSynonymRuleModal } from './delete_synonym_rule_modal';
 import { SynonymsSetEmptyRuleTable } from './empty_rules_table';
 import { SynonymsSetEmptyRulesCards } from './empty_rules_cards';
-import { SynonymsRuleFlyout } from './synonyms_set_rule_flyout';
 import { useFetchSynonymRule } from '../../hooks/use_fetch_synonym_rule';
 import { useFetchGeneratedRuleId } from '../../hooks/use_fetch_generated_rule_id';
+import { SynonymRuleFlyout } from '../synonyms_rule_flyout/synonym_rule_flyout';
 
 export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: string }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -42,7 +42,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
   });
   const [addNewRulePopoverOpen, setAddNewRulePopoverOpen] = useState(false);
 
-  const [isRuleFlyoutOpen, setIsRuleFlyoutOpen] = useState(false);
+  const [isRuleFlyoutOpen, setIsRuleFlyoutOpen] = useState(true);
   const [synonymsRuleToEdit, setSynonymsRuleToEdit] = useState<string | null>(null);
   const [generatedId, setGeneratedId] = useState<string | null>(null);
   const { data: synonymsRule } = useFetchSynonymRule(synonymsSetId, synonymsRuleToEdit || '');
@@ -74,7 +74,9 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
       }),
       render: (synonyms: string, synonymRule: SynonymsSynonymRule) => {
         const isExplicit = isExplicitSynonym(synonyms);
-        const [explicitFrom = '', explicitTo = ''] = isExplicit ? getExplicitSynonym(synonyms) : [];
+        const { mapFromString: explicitFrom = '', mapToString: explicitTo = '' } = isExplicit
+          ? getExplicitSynonym(synonyms)
+          : {};
 
         return (
           <EuiFlexGroup responsive={false}>
@@ -139,6 +141,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           icon: 'trash',
           color: 'danger',
           type: 'icon',
+          'data-test-subj': 'searchSynonymsSynonymsSetTableDeleteRuleButton',
           onClick: (synonymRule: SynonymsSynonymRule) => {
             if (synonymRule.id) {
               setSynonymRuleToDelete(synonymRule.id);
@@ -157,6 +160,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           ),
           icon: 'pencil',
           type: 'icon',
+          'data-test-subj': 'searchSynonymsSynonymsSetTableEditRuleButton',
           onClick: (synonymRule: SynonymsSynonymRule) => {
             if (synonymRule.id) {
               setSynonymsRuleToEdit(synonymRule.id);
@@ -187,7 +191,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
       )}
 
       {isRuleFlyoutOpen && generatedId ? (
-        <SynonymsRuleFlyout
+        <SynonymRuleFlyout
           synonymsSetId={synonymsSetId}
           onClose={() => {
             setIsRuleFlyoutOpen(false);
@@ -201,7 +205,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
         />
       ) : (
         synonymsRule && (
-          <SynonymsRuleFlyout
+          <SynonymRuleFlyout
             synonymsSetId={synonymsSetId}
             onClose={() => {
               setIsRuleFlyoutOpen(false);

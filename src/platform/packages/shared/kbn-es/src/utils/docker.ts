@@ -384,6 +384,7 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
   'connection refused',
   'i/o timeout',
   'Client.Timeout',
+  'TLS handshake timeout',
 ];
 
 /**
@@ -411,13 +412,15 @@ ${message}`;
       retries: 2,
       onFailedAttempt: (error) => {
         // Only retry if retryable error messages are found in the error message.
-        if (
-          RETRYABLE_DOCKER_PULL_ERROR_MESSAGES.every(
-            (msg) => !error?.message?.includes('connection refused')
-          )
-        ) {
-          throw error;
+        for (const msg of RETRYABLE_DOCKER_PULL_ERROR_MESSAGES) {
+          if (error?.message?.includes(msg)) {
+            log.info(`Retrying due to error: ${error.message}`);
+            return;
+          }
         }
+
+        log.warning('Docker pull failed, error not retriable. Exiting.');
+        throw error;
       },
     }
   );

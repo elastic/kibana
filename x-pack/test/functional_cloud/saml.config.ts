@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
@@ -32,6 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [resolve(__dirname, './tests/onboarding.ts')],
 
     services,
@@ -67,6 +69,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.security.authc.providers.saml.saml1.realm=saml1',
         '--xpack.security.authc.providers.basic.basic1.order=1',
         '--server.restrictInternalApis=false',
+        '--uiSettings.overrides.defaultRoute=/app/observability/landing',
       ],
     },
     uiSettings: {

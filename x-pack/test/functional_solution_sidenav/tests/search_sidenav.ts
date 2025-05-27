@@ -55,7 +55,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'management:index_management',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({

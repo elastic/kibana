@@ -1322,6 +1322,40 @@ ssl.test: 123
     `);
   });
 
+  it('should not override advanced yaml ssl fields for logstash output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['host.fr:3332'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'logstash',
+        config_yaml: 'ssl:\n  verification_mode: "none" ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "host.fr:3332",
+        ],
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+          "verification_mode": "none",
+        },
+        "type": "logstash",
+      }
+    `);
+  });
+
   it('should work with kafka output', () => {
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',

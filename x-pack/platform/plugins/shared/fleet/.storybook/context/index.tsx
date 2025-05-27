@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import { EMPTY } from 'rxjs';
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -52,13 +52,13 @@ import { getCustomBranding } from './custom_branding';
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{
   children: React.ReactNode;
-  storyContext?: Parameters<DecoratorFn>[1];
+  storyContext?: Parameters<Decorator>;
 }> = ({ storyContext, children: storyChildren }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
   const history = new CoreScopedHistory(browserHistory, basepath);
 
-  const isCloudEnabled = storyContext?.args.isCloudEnabled;
+  const isCloudEnabled = Boolean(storyContext?.[1].args.isCloudEnabled);
   // @ts-ignore {} no assignable to parameter
   ExperimentalFeaturesService.init({});
   const startServices: FleetStartServices = useMemo(

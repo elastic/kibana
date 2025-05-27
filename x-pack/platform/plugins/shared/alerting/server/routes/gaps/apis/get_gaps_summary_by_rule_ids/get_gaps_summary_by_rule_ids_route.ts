@@ -25,6 +25,12 @@ export const getGapsSummaryByRuleIdsRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: getGapsSummaryByRuleIdsBodySchemaV1,
       },

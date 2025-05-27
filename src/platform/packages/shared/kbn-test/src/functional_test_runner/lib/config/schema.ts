@@ -11,7 +11,7 @@ import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
 import type { CustomHelpers } from 'joi';
-import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
+import { SCOUT_REPORTER_ENABLED, ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
@@ -92,6 +92,9 @@ export const schema = Joi.object()
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
     serverless: Joi.boolean().default(false),
+    testConfigCategory: Joi.string()
+      .valid(...Object.values(ScoutTestRunConfigCategory))
+      .default(ScoutTestRunConfigCategory.UNKNOWN),
 
     suiteFiles: Joi.object()
       .keys({

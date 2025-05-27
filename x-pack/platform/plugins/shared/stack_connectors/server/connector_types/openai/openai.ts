@@ -59,6 +59,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private provider;
   private key;
   private openAI;
+  private headers;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -66,6 +67,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
+    this.headers = {
+      ...this.config.headers,
+      ...('organizationId' in this.config
+        ? { 'OpenAI-Organization': this.config.organizationId }
+        : {}),
+      ...('projectId' in this.config ? { 'OpenAI-Project': this.config.projectId } : {}),
+    };
 
     this.openAI =
       this.config.apiProvider === OpenAiProviderType.AzureAi
@@ -74,7 +82,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             baseURL: this.config.apiUrl,
             defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
             defaultHeaders: {
-              ...this.config.headers,
+              ...this.headers,
               'api-key': this.secrets.apiKey,
             },
           })
@@ -82,7 +90,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             baseURL: removeEndpointFromUrl(this.config.apiUrl),
             apiKey: this.secrets.apiKey,
             defaultHeaders: {
-              ...this.config.headers,
+              ...this.headers,
             },
           });
 
@@ -144,14 +152,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    // LM Studio returns error.response?.data?.error as string
+    const errorMessage = error.response?.data?.error?.message ?? error.response?.data?.error;
     if (error.response.status === 401) {
-      return `Unauthorized API Error${
-        error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
-      }`;
+      return `Unauthorized API Error${errorMessage ? ` - ${errorMessage}` : ''}`;
     }
-    return `API Error: ${error.response?.statusText}${
-      error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
-    }`;
+    return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
@@ -180,7 +186,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         timeout: timeout ?? DEFAULT_TIMEOUT_MS,
         ...axiosOptions,
         headers: {
-          ...this.config.headers,
+          ...this.headers,
           ...axiosOptions.headers,
         },
       },
@@ -220,7 +226,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         signal,
         ...axiosOptions,
         headers: {
-          ...this.config.headers,
+          ...this.headers,
           ...axiosOptions.headers,
         },
         timeout,
@@ -277,7 +283,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<PassThrough> {
-    const { signal, timeout, ...rest } = body;
+    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
 
     const res = (await this.streamApi(
       {
@@ -309,7 +315,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     tokenCountStream: Stream<ChatCompletionChunk>;
   }> {
     try {
-      const { signal, timeout, ...rest } = body;
+      const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
@@ -347,7 +353,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
-    const { signal, timeout, ...rest } = body;
+    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
     const res = await this.runApi(
       { body: JSON.stringify(rest), signal, timeout },
       connectorUsageCollector

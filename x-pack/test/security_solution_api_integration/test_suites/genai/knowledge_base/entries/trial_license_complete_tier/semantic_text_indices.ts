@@ -14,8 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/208603
-  describe.skip('@ess Security AI Assistant - Indices with `semantic_text` fields', () => {
+  describe('@ess Security AI Assistant - Indices with `semantic_text` fields', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ignore_fields');
       await esArchiver.load(

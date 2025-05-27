@@ -10,7 +10,7 @@
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 export const mockOsCollector = collectorMock.create();
-export const mockProcessCollector = collectorMock.create();
+export const mockProcessCollector = collectorMock.createProcessMetricsCollector();
 export const mockServerCollector = collectorMock.create();
 export const mockEsClientCollector = collectorMock.create();
 

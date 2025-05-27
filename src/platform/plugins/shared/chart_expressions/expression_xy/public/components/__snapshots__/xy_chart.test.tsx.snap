@@ -34,11 +34,6 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
       label="Annotation"
     />
   }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   placement="bottom"
   style={
@@ -135,11 +130,6 @@ exports[`XYChart component annotations should render grouped line annotations pr
       isHorizontal={true}
     />
   }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   placement="bottom"
   style={
@@ -192,11 +182,6 @@ exports[`XYChart component annotations should render grouped line annotations wi
         }
       }
       hasReducedPadding={true}
-      isHorizontal={true}
-    />
-  }
-  markerBody={
-    <MarkerBody
       isHorizontal={true}
     />
   }
@@ -669,24 +654,6 @@ exports[`XYChart component it renders area 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -1140,7 +1107,15 @@ exports[`XYChart component it renders area 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -2232,24 +2207,6 @@ exports[`XYChart component it renders bar 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -2703,7 +2660,15 @@ exports[`XYChart component it renders bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -3795,24 +3760,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -4266,7 +4213,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -5358,24 +5313,6 @@ exports[`XYChart component it renders line 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -5829,7 +5766,15 @@ exports[`XYChart component it renders line 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -6921,24 +6866,6 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -7392,7 +7319,15 @@ exports[`XYChart component it renders stacked area 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -8484,24 +8419,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -8955,7 +8872,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -10047,24 +9972,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -10518,7 +10425,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -11640,24 +11555,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -12111,7 +12008,15 @@ exports[`XYChart component split chart should render split chart if both, splitR
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -13441,24 +13346,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -13912,7 +13799,15 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />
@@ -15235,24 +15130,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -15706,7 +15583,15 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         locale="en"
         noResults={
           <EmptyPlaceholder
-            className="xyChart__empty"
+            css={
+              Object {
+                "map": undefined,
+                "name": "16rwds4",
+                "next": undefined,
+                "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
+                "toString": [Function],
+              }
+            }
             icon={[Function]}
             renderComplete={[Function]}
           />

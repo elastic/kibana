@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { ServiceInventory } from '.';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
@@ -59,6 +59,6 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: StoryFn<{}> = () => {
   return <ServiceInventory />;
 };

@@ -45,6 +45,7 @@ const totalFieldsLimit = 1000;
 describe('RiskScoreDataClient', () => {
   let riskScoreDataClient: RiskScoreDataClient;
   let riskScoreDataClientWithNameSpace: RiskScoreDataClient;
+  let riskScoreDataClientWithLongNameSpace: RiskScoreDataClient;
   let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
@@ -60,6 +61,8 @@ describe('RiskScoreDataClient', () => {
     riskScoreDataClient = new RiskScoreDataClient(options);
     const optionsWithNamespace = { ...options, namespace: 'space-1' };
     riskScoreDataClientWithNameSpace = new RiskScoreDataClient(optionsWithNamespace);
+    const optionsWithLongNamespace = { ...options, namespace: 'a_a-'.repeat(200) };
+    riskScoreDataClientWithLongNameSpace = new RiskScoreDataClient(optionsWithLongNamespace);
   });
 
   afterEach(() => {
@@ -102,6 +105,10 @@ describe('RiskScoreDataClient', () => {
       assertDataStream('space-1');
       assertIndex('space-1');
       assertTransform('space-1');
+
+      // Space with more than 36 characters
+      await riskScoreDataClientWithLongNameSpace.init();
+      assertTransform('a_a-'.repeat(200));
 
       expect(
         (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
@@ -445,7 +452,7 @@ const assertTransform = (namespace: string) => {
           field: '@timestamp',
         },
       },
-      transform_id: `risk_score_latest_transform_${namespace}`,
+      transform_id: transforms.getLatestTransformId(namespace),
       settings: {
         unattended: true,
       },
@@ -453,6 +460,7 @@ const assertTransform = (namespace: string) => {
         version: 3,
         managed: true,
         managed_by: 'security-entity-analytics',
+        space_id: namespace,
       },
     },
   });

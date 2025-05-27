@@ -25,6 +25,8 @@ import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
 export class RuleMigrationsTaskClient {
+  private static migrationsLastError = new Map<string, Error>();
+
   constructor(
     private migrationsRunning: MigrationsRunning,
     private logger: Logger,
@@ -72,16 +74,19 @@ export class RuleMigrationsTaskClient {
       // Just to prevent a race condition in the setup
       throw new Error('Task already running for this migration');
     }
-    this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
     migrationLogger.info('Starting migration');
+
+    this.migrationsRunning.set(migrationId, migrationTaskRunner);
+    RuleMigrationsTaskClient.migrationsLastError.delete(migrationId);
 
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
       .run(invocationConfig)
       .catch((error) => {
-        // no need to throw, the `start` promise is long gone. Just log the error
-        migrationLogger.error('Error executing migration', error);
+        // no use in throwing the error, the `start` promise is long gone. Just store and log the error
+        RuleMigrationsTaskClient.migrationsLastError.set(migrationId, error);
+        migrationLogger.error(`Error executing migration: ${error}`);
       })
       .finally(() => {
         this.migrationsRunning.delete(migrationId);
@@ -109,17 +114,28 @@ export class RuleMigrationsTaskClient {
   /** Returns the stats of a migration */
   public async getStats(migrationId: string): Promise<RuleMigrationTaskStats> {
     const dataStats = await this.data.rules.getStats(migrationId);
-    const status = this.getTaskStatus(migrationId, dataStats.rules);
-    return { status, ...dataStats };
+    const taskStats = this.getTaskStats(migrationId, dataStats.rules);
+    return { ...taskStats, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
   async getAllStats(): Promise<RuleMigrationTaskStats[]> {
     const allDataStats = await this.data.rules.getAllStats();
     return allDataStats.map((dataStats) => {
-      const status = this.getTaskStatus(dataStats.id, dataStats.rules);
-      return { status, ...dataStats };
+      const taskStats = this.getTaskStats(dataStats.id, dataStats.rules);
+      return { ...taskStats, ...dataStats };
     });
+  }
+
+  private getTaskStats(
+    migrationId: string,
+    dataStats: RuleMigrationDataStats['rules']
+  ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
+    const lastError = RuleMigrationsTaskClient.migrationsLastError.get(migrationId);
+    return {
+      status: this.getTaskStatus(migrationId, dataStats),
+      ...(lastError && { last_error: lastError.message }),
+    };
   }
 
   private getTaskStatus(
@@ -149,9 +165,9 @@ export class RuleMigrationsTaskClient {
 
       const { rules } = await this.data.rules.getStats(migrationId);
       if (rules.total > 0) {
-        return { exists: true, stopped: false };
+        return { exists: true, stopped: true };
       }
-      return { exists: false, stopped: false };
+      return { exists: false, stopped: true };
     } catch (err) {
       this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };

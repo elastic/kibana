@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-
 import { getSuppressionMaxSignalsWarning } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -18,8 +16,6 @@ import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
-  alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
   alertSuppression?: AlertSuppressionCamel;
   experimentalFeatures: ExperimentalFeatures;
 }
@@ -36,16 +32,11 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
   params: SearchAfterAndBulkCreateSuppressedAlertsParams
 ): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
-    wrapHits,
-    bulkCreate,
+    sharedParams,
     services,
     buildReasonMessage,
-    ruleExecutionLogger,
-    tuple,
     alertSuppression,
     wrapSuppressedHits,
-    alertWithSuppression,
-    alertTimestampOverride,
     experimentalFeatures,
   } = params;
 
@@ -54,16 +45,11 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
     toReturn,
   }) => {
     return bulkCreateSuppressedAlertsInMemory({
-      wrapHits,
-      bulkCreate,
+      sharedParams,
       services,
       buildReasonMessage,
-      ruleExecutionLogger,
-      tuple,
       alertSuppression,
       wrapSuppressedHits,
-      alertWithSuppression,
-      alertTimestampOverride,
       enrichedEvents,
       toReturn,
       experimentalFeatures,

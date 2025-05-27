@@ -11,12 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-
-import type { SearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
+import { LocatorParams } from '@kbn/reporting-common/types';
+import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -31,35 +30,26 @@ export const reportingCsvShareProvider = ({
       return [];
     }
 
-    // only csv v2 supports esql (isTextBased) reports
-    // TODO: whole csv reporting should move to v2 https://github.com/elastic/kibana/issues/151190
-    const reportType = sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
-
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
       absoluteTime,
     }: {
       addGlobalTimeFilter?: boolean;
       absoluteTime?: boolean;
-    }) => SearchSourceFields;
+    }) => SerializedSearchSourceFields;
 
-    const jobParams = {
-      title: sharingData.title as string,
-      objectType,
-    };
-
-    const getJobParams = (forShareUrl?: boolean) => {
-      if (reportType === CSV_JOB_TYPE_V2) {
+    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams => {
+      if (sharingData.isTextBased) {
         // csv v2 uses locator params
         return {
-          ...jobParams,
-          locatorParams: sharingData.locatorParams as [Record<string, unknown>],
+          isEsqlMode: true,
+          locatorParams: sharingData.locatorParams as LocatorParams[],
         };
       }
 
       // csv v1 uses search source and columns
       return {
-        ...jobParams,
+        isEsqlMode: false,
         columns: sharingData.columns as string[] | undefined,
         searchSource: getSearchSource({
           addGlobalTimeFilter: true,
@@ -78,7 +68,12 @@ export const reportingCsvShareProvider = ({
     const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
-      const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
+      const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+        apiClient,
+        searchModeParams: getSearchModeParams(false),
+        title: sharingData.title as string,
+      });
+
       return apiClient
         .createReportingShareJob(reportType, decoratedJobParams)
         .then(() => firstValueFrom(startServices$))
@@ -135,10 +130,13 @@ export const reportingCsvShareProvider = ({
 
       const reportingUrl = new URL(window.location.origin);
 
-      const relativePath = apiClient.getReportingPublicJobPath(
-        reportType,
-        apiClient.getDecoratedJobParams(getJobParams(true))
-      );
+      const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+        apiClient,
+        searchModeParams: getSearchModeParams(true),
+        title: sharingData.title as string,
+      });
+
+      const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
 
       const absoluteUrl = new URL(relativePath, window.location.href).toString();
 

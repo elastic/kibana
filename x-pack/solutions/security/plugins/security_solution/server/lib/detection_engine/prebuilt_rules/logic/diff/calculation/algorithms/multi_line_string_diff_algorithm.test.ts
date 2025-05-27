@@ -32,7 +32,7 @@ describe('multiLineStringDiffAlgorithm', () => {
       target_version: TEXT_M_A,
     };
 
-    const result = multiLineStringDiffAlgorithm(mockVersions);
+    const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -51,7 +51,7 @@ describe('multiLineStringDiffAlgorithm', () => {
       target_version: TEXT_M_A,
     };
 
-    const result = multiLineStringDiffAlgorithm(mockVersions);
+    const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -70,7 +70,7 @@ describe('multiLineStringDiffAlgorithm', () => {
       target_version: TEXT_M_B,
     };
 
-    const result = multiLineStringDiffAlgorithm(mockVersions);
+    const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -89,7 +89,7 @@ describe('multiLineStringDiffAlgorithm', () => {
       target_version: TEXT_M_B,
     };
 
-    const result = multiLineStringDiffAlgorithm(mockVersions);
+    const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -109,7 +109,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         target_version: TEXT_M_C,
       };
 
-      const result = multiLineStringDiffAlgorithm(mockVersions);
+      const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -130,7 +130,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         target_version: 'My description.\nThis is a MODIFIED second line.',
       };
 
-      const result = multiLineStringDiffAlgorithm(mockVersions);
+      const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -151,7 +151,7 @@ describe('multiLineStringDiffAlgorithm', () => {
         target_version: 'My EXCELLENT description.\nThis is a second line.',
       };
 
-      const result = multiLineStringDiffAlgorithm(mockVersions);
+      const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -171,7 +171,7 @@ describe('multiLineStringDiffAlgorithm', () => {
       };
 
       const startTime = performance.now();
-      const result = multiLineStringDiffAlgorithm(mockVersions);
+      const result = multiLineStringDiffAlgorithm(mockVersions, false);
       const endTime = performance.now();
 
       // If the regex merge in this function takes over 2 sec, this test fails
@@ -192,46 +192,92 @@ describe('multiLineStringDiffAlgorithm', () => {
   });
 
   describe('if base_version is missing', () => {
-    it('returns current_version as merged output if current_version and target_version are the same - scenario -AA', () => {
-      const mockVersions: ThreeVersionsOf<string> = {
-        base_version: MissingVersion,
-        current_version: TEXT_M_A,
-        target_version: TEXT_M_A,
-      };
+    describe('if target_version as merged output if current_version and target_version are the same - scenario -AA', () => {
+      it('returns NONE conflict if rule is not customized', () => {
+        const mockVersions: ThreeVersionsOf<string> = {
+          base_version: MissingVersion,
+          current_version: TEXT_M_A,
+          target_version: TEXT_M_A,
+        };
 
-      const result = multiLineStringDiffAlgorithm(mockVersions);
+        const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
+
+      it('returns NONE conflict if rule is customized', () => {
+        const mockVersions: ThreeVersionsOf<string> = {
+          base_version: MissingVersion,
+          current_version: TEXT_M_A,
+          target_version: TEXT_M_A,
+        };
+
+        const result = multiLineStringDiffAlgorithm(mockVersions, true);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
     });
 
-    it('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
-      const mockVersions: ThreeVersionsOf<string> = {
-        base_version: MissingVersion,
-        current_version: TEXT_M_A,
-        target_version: TEXT_M_B,
-      };
+    describe('returns NONE conflict if current_version and target_version are different and rule is not customized - scenario -AB', () => {
+      it('returns NONE conflict if rule is not customized', () => {
+        const mockVersions: ThreeVersionsOf<string> = {
+          base_version: MissingVersion,
+          current_version: TEXT_M_A,
+          target_version: TEXT_M_B,
+        };
 
-      const result = multiLineStringDiffAlgorithm(mockVersions);
+        const result = multiLineStringDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
+
+      it('returns SOLVABLE conflict if rule is customized', () => {
+        const mockVersions: ThreeVersionsOf<string> = {
+          base_version: MissingVersion,
+          current_version: TEXT_M_A,
+          target_version: TEXT_M_B,
+        };
+
+        const result = multiLineStringDiffAlgorithm(mockVersions, true);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.SOLVABLE,
+          })
+        );
+      });
     });
   });
 });

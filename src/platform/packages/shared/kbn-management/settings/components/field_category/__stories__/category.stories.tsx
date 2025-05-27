@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -51,11 +51,11 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 type FieldCategoryParams = Pick<ComponentProps, 'category'> & Params;
 
-export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
+const CategoryComponent = ({ isFiltered, category, isSavingEnabled }: FieldCategoryParams) => {
   const { onClearQuery, onFieldChange, unsavedChanges } = useCategoryStory({
     isFiltered,
     isSavingEnabled,
@@ -88,4 +88,8 @@ export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategor
       </Component>
     </FieldCategoryProvider>
   );
+};
+
+export const Category: StoryObj<FieldCategoryParams> = {
+  render: (params) => <CategoryComponent {...params} />,
 };

@@ -71,7 +71,7 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     <KibanaContextProvider services={services}>
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
-          <EuiProvider>
+          <EuiProvider highContrastMode={false}>
             <DiscoverDocuments {...props} />
           </EuiProvider>
         </DiscoverMainProvider>

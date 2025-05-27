@@ -155,6 +155,10 @@ export const packagePolicyRouteService = {
   getOrphanedIntegrationPoliciesPath: () => {
     return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
   },
+
+  getBulkGetPath: (): string => {
+    return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
 };
 
 export const agentPolicyRouteService = {

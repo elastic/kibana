@@ -15,8 +15,8 @@ import {
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
-import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/slI_mappings_template';
-import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/slI_settings_template';
+import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/sli_mappings_template';
+import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/sli_settings_template';
 import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
 import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';

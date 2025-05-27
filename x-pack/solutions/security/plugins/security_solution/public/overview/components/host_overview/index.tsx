@@ -58,7 +58,9 @@ interface HostSummaryProps {
   jobNameById: Record<string, string | undefined>;
 }
 
-const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
+const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
+  shouldForwardProp: (propName) => propName !== '$width',
+})`
   padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;

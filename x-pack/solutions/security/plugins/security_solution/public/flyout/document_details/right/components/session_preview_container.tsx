@@ -88,6 +88,7 @@ export const SessionPreviewContainer: FC = () => {
     indexName,
     isFlyoutOpen: true,
     scopeId,
+    isPreviewMode,
   });
 
   const iconType = useMemo(() => {

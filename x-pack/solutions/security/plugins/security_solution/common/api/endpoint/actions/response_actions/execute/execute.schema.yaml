@@ -22,11 +22,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/ExecuteRouteResponse'
 
 components:
   schemas:
     ExecuteRouteRequestBody:
+      example:
+        parameters:
+          command: "ls -al"
+          timeout: 600
+        endpoint_ids:
+          - "b3d6de74-36b0-4fa8-be46-c375bf1771bf"
+        comment: "Get list of all files"
       allOf:
         - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
@@ -42,3 +49,31 @@ components:
                   $ref: '../../../model/schema/common.schema.yaml#/components/schemas/Command'
                 timeout:
                   $ref: '../../../model/schema/common.schema.yaml#/components/schemas/Timeout'
+    ExecuteRouteResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "9f934028-2300-4927-b531-b26376793dc4"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: "gke-endpoint-gke-clu-endpoint-node-po-e1a3ab89-4c4r"
+          agentType: "endpoint"
+          command: "execute"
+          startedAt: "2023-07-28T18:43:27.362Z"
+          isCompleted: false
+          wasSuccessful: false
+          isExpired: false
+          status: "pending"
+          outputs: { }
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          createdBy: "myuser"
+          comment: "Get list of all files"
+          parameters:
+            command: "ls -al"
+            timeout: 600

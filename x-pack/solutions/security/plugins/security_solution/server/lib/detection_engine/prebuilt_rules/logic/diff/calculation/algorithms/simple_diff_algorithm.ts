@@ -25,7 +25,8 @@ import {
  * Meant to be used with primitive types (strings, numbers, booleans), NOT Arrays or Objects
  */
 export const simpleDiffAlgorithm = <TValue>(
-  versions: ThreeVersionsOf<TValue>
+  versions: ThreeVersionsOf<TValue>,
+  isRuleCustomized: boolean
 ): ThreeWayDiff<TValue> => {
   const {
     base_version: baseVersion,
@@ -39,10 +40,10 @@ export const simpleDiffAlgorithm = <TValue>(
   const hasBaseVersion = baseVersion !== MissingVersion;
 
   const { mergeOutcome, conflict, mergedVersion } = mergeVersions({
-    hasBaseVersion,
     currentVersion,
     targetVersion,
     diffOutcome,
+    isRuleCustomized,
   });
 
   return {
@@ -66,22 +67,19 @@ interface MergeResult<TValue> {
 }
 
 interface MergeArgs<TValue> {
-  hasBaseVersion: boolean;
   currentVersion: TValue;
   targetVersion: TValue;
   diffOutcome: ThreeWayDiffOutcome;
+  isRuleCustomized: boolean;
 }
 
 const mergeVersions = <TValue>({
-  hasBaseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
+  isRuleCustomized,
 }: MergeArgs<TValue>): MergeResult<TValue> => {
   switch (diffOutcome) {
-    // Scenario -AA is treated as scenario AAA:
-    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
-    case ThreeWayDiffOutcome.MissingBaseNoUpdate:
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
@@ -106,14 +104,26 @@ const mergeVersions = <TValue>({
       };
     }
 
-    // Scenario -AB is treated as scenario ABC, but marked as
-    // SOLVABLE, and returns the target version as the merged version
-    // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
-    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+    // Missing base versions always return target version
+    // Scenario -AA is treated as AAA
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
+    case ThreeWayDiffOutcome.MissingBaseNoUpdate: {
       return {
+        conflict: ThreeWayDiffConflict.NONE,
         mergedVersion: targetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
-        conflict: ThreeWayDiffConflict.SOLVABLE,
+      };
+    }
+
+    // Missing base versions always return target version
+    // If the rule is customized, we return a SOLVABLE conflict
+    // Otherwise we treat scenario -AB as AAB
+    // https://github.com/elastic/kibana/issues/210358#issuecomment-2654492854
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+      return {
+        conflict: isRuleCustomized ? ThreeWayDiffConflict.SOLVABLE : ThreeWayDiffConflict.NONE,
+        mergedVersion: targetVersion,
+        mergeOutcome: ThreeWayMergeOutcome.Target,
       };
     }
     default:

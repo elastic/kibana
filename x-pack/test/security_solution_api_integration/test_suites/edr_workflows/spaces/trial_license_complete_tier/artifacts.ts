@@ -18,7 +18,10 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { exceptionItemToCreateExceptionItem } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
@@ -37,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
   describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+    const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
 
@@ -45,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     let supertestArtifactManager: TestAgent;
     let supertestGlobalArtifactManager: TestAgent;
     let spaceOnePolicy: PolicyTestResourceInfo;
+    let spaceTwoPolicy: PolicyTestResourceInfo;
 
     before(async () => {
       // For testing, we're using the `t3_analyst` role which already has All privileges
@@ -93,12 +98,21 @@ export default function ({ getService }: FtrProviderContext) {
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
       ]);
 
-      spaceOnePolicy = await policyTestResources.createPolicy();
+      spaceOnePolicy = await policyTestResources.createPolicy({ options: { spaceId: spaceOneId } });
+      spaceTwoPolicy = await policyTestResources.createPolicy({ options: { spaceId: spaceTwoId } });
     });
 
     // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
     // to do it manually
     after(async () => {
+      await spaceOnePolicy.cleanup();
+      // @ts-expect-error
+      spaceOnePolicy = undefined;
+
+      await spaceTwoPolicy.cleanup();
+      // @ts-expect-error
+      spaceTwoPolicy = undefined;
+
       if (artifactManagerRole) {
         await rolesUsersProvider.loader.delete(artifactManagerRole.name);
         // @ts-expect-error
@@ -110,12 +124,10 @@ export default function ({ getService }: FtrProviderContext) {
         // @ts-expect-error
         globalArtifactManagerRole = undefined;
       }
+    });
 
-      if (spaceOnePolicy) {
-        await spaceOnePolicy.cleanup();
-        // @ts-expect-error
-        spaceOnePolicy = undefined;
-      }
+    afterEach(async () => {
+      await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
     });
 
     const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
@@ -127,27 +139,50 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`for ${listInfo.name}`, () => {
         let spaceOnePerPolicyArtifact: ArtifactTestData;
         let spaceOneGlobalArtifact: ArtifactTestData;
+        let spaceTwoPerPolicyArtifact: ArtifactTestData;
+        let spaceTwoGlobalArtifact: ArtifactTestData;
 
         beforeEach(async () => {
+          // SPACE 1 ARTIFACTS
           spaceOnePerPolicyArtifact = await endpointArtifactTestResources.createArtifact(
             listInfo.id,
             { tags: [buildPerPolicyTag(spaceOnePolicy.packagePolicy.id)] },
             { supertest: supertestArtifactManager, spaceId: spaceOneId }
           );
+          afterEachDataCleanup.push(spaceOnePerPolicyArtifact);
 
           spaceOneGlobalArtifact = await endpointArtifactTestResources.createArtifact(
             listInfo.id,
             { tags: [GLOBAL_ARTIFACT_TAG] },
             { supertest: supertestGlobalArtifactManager, spaceId: spaceOneId }
           );
+          afterEachDataCleanup.push(spaceOneGlobalArtifact);
+
+          // SPACE 2 ARTIFACTS
+          spaceTwoPerPolicyArtifact = await endpointArtifactTestResources.createArtifact(
+            listInfo.id,
+            { tags: [buildPerPolicyTag(spaceTwoPolicy.packagePolicy.id)] },
+            { supertest: supertestGlobalArtifactManager, spaceId: spaceTwoId }
+          );
+          afterEachDataCleanup.push(spaceTwoPerPolicyArtifact);
+
+          spaceTwoGlobalArtifact = await endpointArtifactTestResources.createArtifact(
+            listInfo.id,
+            { tags: [GLOBAL_ARTIFACT_TAG] },
+            { supertest: supertestGlobalArtifactManager, spaceId: spaceTwoId }
+          );
+          afterEachDataCleanup.push(spaceTwoGlobalArtifact);
         });
 
         afterEach(async () => {
-          if (spaceOnePerPolicyArtifact) {
-            await spaceOnePerPolicyArtifact.cleanup();
-            // @ts-expect-error assigning `undefined`
-            spaceOnePerPolicyArtifact = undefined;
-          }
+          // @ts-expect-error assigning `undefined`
+          spaceOnePerPolicyArtifact = undefined;
+          // @ts-expect-error assigning `undefined`
+          spaceOneGlobalArtifact = undefined;
+          // @ts-expect-error assigning `undefined`
+          spaceTwoPerPolicyArtifact = undefined;
+          // @ts-expect-error assigning `undefined`
+          spaceTwoGlobalArtifact = undefined;
         });
 
         it('should add owner space id when item is created', async () => {
@@ -173,6 +208,55 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect((body as ExceptionListItemSchema).tags).to.eql(
             spaceOnePerPolicyArtifact.artifact.tags
+          );
+        });
+
+        it('should return only artifacts in active space when sending a find request', async () => {
+          const response = await supertestArtifactManager
+            .get(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL + '/_find'))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .query({
+              page: 1,
+              per_page: 100,
+              list_id: listInfo.id,
+              namespace_type: 'agnostic',
+            })
+            .send()
+            .expect(200);
+
+          const body = response.body as FoundExceptionListItemSchema;
+
+          log.info(`find results:\n${JSON.stringify(body)}, null, 2`);
+
+          expect(body.total).to.eql(3);
+          expect(body.data.map((item) => item.item_id).sort()).to.eql(
+            [
+              spaceOnePerPolicyArtifact.artifact.item_id,
+              spaceOneGlobalArtifact.artifact.item_id,
+              spaceTwoGlobalArtifact.artifact.item_id,
+            ].sort()
+          );
+        });
+
+        it('should get single global artifact regardless of space', async () => {
+          const response = await supertestArtifactManager
+            .get(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .query({
+              item_id: spaceTwoGlobalArtifact.artifact.item_id,
+              namespace_type: 'agnostic',
+            })
+            .send()
+            .expect(200);
+
+          expect((response.body as ExceptionListItemSchema).item_id).to.equal(
+            spaceTwoGlobalArtifact.artifact.item_id
           );
         });
 
@@ -212,8 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(403);
           });
 
-          // TODO:PT Un-skip in next PR. I got a little ahead of myself and added a test for the change that wil come with the next PR.
-          it.skip('should error if attempting to update a global artifact', async () => {
+          it('should error if attempting to update a global artifact', async () => {
             await supertestArtifactManager
               .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
               .set('elastic-api-version', '2023-10-31')
@@ -229,8 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(403);
           });
 
-          // TODO:PT Un-skip in next PR. I got a little ahead of myself and added a test for the change that wil come with the next PR.
-          it.skip('should error when attempting to change a global artifact to per-policy', async () => {
+          it('should error when attempting to change a global artifact to per-policy', async () => {
             await supertestArtifactManager
               .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
               .set('elastic-api-version', '2023-10-31')
@@ -246,6 +328,61 @@ export default function ({ getService }: FtrProviderContext) {
                 })
               )
               .expect(403);
+          });
+
+          it('should error when attempting to update item outside of its owner space id', async () => {
+            const { body } = await supertestArtifactManager
+              .put(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOnePerPolicyArtifact.artifact,
+                  tags: [buildSpaceOwnerIdTag(spaceOneId)], // removed policy assignment
+                })
+              )
+              .expect(403);
+
+            expect(body.message).to.eql(
+              `EndpointArtifactError: Updates to this shared item can only be done from the following space ID: ${spaceOneId} (or by someone having global artifact management privilege)`
+            );
+          });
+
+          it('should error when attempting to delete item outside of its owner space id', async () => {
+            const { body } = await supertestArtifactManager
+              .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .query({
+                item_id: spaceOnePerPolicyArtifact.artifact.item_id,
+                namespace_type: spaceOnePerPolicyArtifact.artifact.namespace_type,
+              })
+              .send()
+              .expect(403);
+
+            expect(body.message).to.eql(
+              `EndpointArtifactError: Updates to this shared item can only be done from the following space ID: ${spaceOneId} (or by someone having global artifact management privilege)`
+            );
+          });
+
+          it('should error when attempting to GET single artifact not associated with active space', async () => {
+            await supertestArtifactManager
+              .get(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([404]))
+              .query({
+                // Artifact from Space 2
+                item_id: spaceTwoPerPolicyArtifact.artifact.item_id,
+                namespace_type: spaceTwoPerPolicyArtifact.artifact.namespace_type,
+              })
+              .send()
+              .expect(404);
           });
         });
 
@@ -268,7 +405,15 @@ export default function ({ getService }: FtrProviderContext) {
               )
               .expect(200);
 
-            expect((body as ExceptionListItemSchema).tags).to.eql([
+            const itemCreated = body as ExceptionListItemSchema;
+
+            afterEachDataCleanup.push({
+              cleanup: () => {
+                return endpointArtifactTestResources.deleteExceptionItem(itemCreated);
+              },
+            });
+
+            expect(itemCreated.tags).to.eql([
               buildSpaceOwnerIdTag('foo'),
               buildSpaceOwnerIdTag(spaceOneId),
             ]);
@@ -332,8 +477,182 @@ export default function ({ getService }: FtrProviderContext) {
               )
               .expect(200);
           });
+
+          it('should allow updating items outside of their owner space ids', async () => {
+            await supertestGlobalArtifactManager
+              .put(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOneGlobalArtifact.artifact,
+                  description: 'updated from outside of its own space id',
+                })
+              )
+              .expect(200);
+          });
+
+          it('should allow deleting items outside of their owner space ids', async () => {
+            await supertestGlobalArtifactManager
+              .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .query({
+                item_id: spaceOnePerPolicyArtifact.artifact.item_id,
+                namespace_type: spaceOnePerPolicyArtifact.artifact.namespace_type,
+              })
+              .send()
+              .expect(200);
+
+            // @ts-expect-error
+            spaceOnePerPolicyArtifact = undefined;
+          });
+
+          it('should allow GET of single artifact not associated with active space', async () => {
+            await supertestGlobalArtifactManager
+              .get(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .query({
+                item_id: spaceTwoPerPolicyArtifact.artifact.item_id,
+                namespace_type: spaceTwoPerPolicyArtifact.artifact.namespace_type,
+              })
+              .send()
+              .expect(200);
+          });
         });
       });
     }
+
+    // Endpoint exceptions are currently ONLY global, but an effort is underway to possibly fold them
+    // into a "regular" artifact, at which point we should just remove this entire `describe()` block
+    // and add endpoint exceptions to the execution of the tests above.
+    describe('and for Endpoint Exceptions', () => {
+      let endpointException: ArtifactTestData;
+
+      beforeEach(async () => {
+        endpointException = await endpointArtifactTestResources.createEndpointException(undefined, {
+          supertest: supertestGlobalArtifactManager,
+          spaceId: spaceOneId,
+        });
+        afterEachDataCleanup.push(endpointException);
+      });
+
+      afterEach(() => {
+        // @ts-expect-error
+        endpointException = undefined;
+      });
+
+      it('should error on create when user does not have global artifact privilege', async () => {
+        await supertestArtifactManager
+          .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .send(
+            Object.assign(
+              exceptionItemToCreateExceptionItem({
+                ...endpointException.artifact,
+              }),
+              { item_id: undefined }
+            )
+          )
+          .expect(403);
+      });
+
+      it('should allow create when user has global artifact privilege', async () => {
+        const response = await supertestGlobalArtifactManager
+          .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .send(
+            Object.assign(
+              exceptionItemToCreateExceptionItem({
+                ...endpointException.artifact,
+              }),
+              { item_id: undefined }
+            )
+          )
+          .expect(200);
+
+        afterEachDataCleanup.push({
+          cleanup: () =>
+            endpointArtifactTestResources.deleteExceptionItem(
+              response.body as ExceptionListItemSchema
+            ),
+        });
+      });
+
+      it('should error on update when user does not have global artifact privilege', async () => {
+        await supertestArtifactManager
+          .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .send(
+            exceptionItemToCreateExceptionItem({
+              ...endpointException.artifact,
+              description: 'item was updated',
+            })
+          )
+          .expect(403);
+      });
+
+      it('should allow update when user has global artifact privilege', async () => {
+        await supertestGlobalArtifactManager
+          .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send(
+            exceptionItemToCreateExceptionItem({
+              ...endpointException.artifact,
+              description: 'item was updated',
+            })
+          )
+          .expect(200);
+      });
+
+      it('should error on delete when user does not have global artifact privilege', async () => {
+        await supertestArtifactManager
+          .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .query({
+            item_id: endpointException.artifact.item_id,
+            namespace_type: endpointException.artifact.namespace_type,
+          })
+          .send()
+          .expect(403);
+      });
+
+      it('should allow delete when user has global artifact privilege', async () => {
+        await supertestGlobalArtifactManager
+          .delete(addSpaceIdToPath('/', spaceTwoId, EXCEPTION_LIST_ITEM_URL))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .query({
+            item_id: endpointException.artifact.item_id,
+            namespace_type: endpointException.artifact.namespace_type,
+          })
+          .send()
+          .expect(200);
+      });
+    });
   });
 }

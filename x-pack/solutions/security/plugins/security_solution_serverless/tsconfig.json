@@ -46,6 +46,6 @@
     "@kbn/logging",
     "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/dev-utils"
+    "@kbn/dev-utils",
   ]
 }

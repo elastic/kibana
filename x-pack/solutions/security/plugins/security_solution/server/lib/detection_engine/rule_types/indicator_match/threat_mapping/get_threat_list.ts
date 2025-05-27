@@ -20,37 +20,41 @@ import type {
 export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
+  sharedParams,
   esClient,
-  index,
-  language,
   perPage,
-  query,
-  ruleExecutionLogger,
   searchAfter,
   threatFilters,
   threatListConfig,
   pitId,
   reassignPitId,
-  runtimeMappings,
-  listClient,
-  exceptionFilter,
   indexFields,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
+  const {
+    exceptionFilter,
+    listClient,
+    runtimeMappings,
+    ruleExecutionLogger,
+    completeRule: {
+      ruleParams: { threatQuery, threatLanguage, threatIndex },
+    },
+  } = sharedParams;
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
   const queryFilter = getQueryFilter({
-    query,
-    language: language ?? 'kuery',
+    query: threatQuery,
+    language: threatLanguage ?? 'kuery',
     filters: threatFilters,
-    index,
+    index: threatIndex,
+    // Exceptions shouldn't apply to threat list??
     exceptionFilter,
     fields: indexFields,
   });
 
   ruleExecutionLogger.debug(
-    `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+    `Querying the indicator items from the index: "${threatIndex}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const response = await esClient.search<
@@ -63,7 +67,7 @@ export const getThreatList = async ({
       search_after: searchAfter,
       runtime_mappings: runtimeMappings,
       sort: getSortForThreatList({
-        index,
+        index: threatIndex,
         listItemIndex: listClient.getListItemName(),
       }),
     },

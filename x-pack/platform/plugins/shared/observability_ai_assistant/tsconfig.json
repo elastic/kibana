@@ -51,8 +51,8 @@
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/security-authorization-core-common",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/core-security-server"
   ],
   "exclude": ["target/**/*"]
 }

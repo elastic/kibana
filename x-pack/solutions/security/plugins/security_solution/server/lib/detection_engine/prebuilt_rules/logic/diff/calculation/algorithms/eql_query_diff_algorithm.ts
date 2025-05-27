@@ -14,5 +14,7 @@ import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 /**
  * Diff algorithm for eql query types
  */
-export const eqlQueryDiffAlgorithm = (versions: ThreeVersionsOf<RuleEqlQuery>) =>
-  simpleDiffAlgorithm<RuleEqlQuery>(versions);
+export const eqlQueryDiffAlgorithm = (
+  versions: ThreeVersionsOf<RuleEqlQuery>,
+  isRuleCustomized: boolean
+) => simpleDiffAlgorithm<RuleEqlQuery>(versions, isRuleCustomized);

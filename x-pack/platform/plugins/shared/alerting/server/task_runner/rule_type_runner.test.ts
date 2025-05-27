@@ -168,7 +168,6 @@ describe('RuleTypeRunner', () => {
       {}
     >({
       context,
-      logger,
       task: mockedTaskInstance,
       timer,
     });
@@ -181,6 +180,7 @@ describe('RuleTypeRunner', () => {
       const { state, error, stackTrace } = await ruleTypeRunner.run({
         context: {
           alertingEventLogger,
+          logger,
           maintenanceWindowsService,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
@@ -211,6 +211,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -290,6 +291,7 @@ describe('RuleTypeRunner', () => {
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          logger,
           queryDelaySec: 0,
           request: fakeRequest,
           maintenanceWindowsService,
@@ -319,6 +321,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -401,6 +404,7 @@ describe('RuleTypeRunner', () => {
         context: {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          logger,
           queryDelaySec: 0,
           maintenanceWindowsService,
           request: fakeRequest,
@@ -464,6 +468,7 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          logger,
           request: fakeRequest,
           maintenanceWindowsService,
           ruleId: RULE_ID,
@@ -492,6 +497,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -568,6 +574,7 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          logger,
           maintenanceWindowsService,
           request: fakeRequest,
           ruleId: RULE_ID,
@@ -596,6 +603,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -673,6 +681,7 @@ describe('RuleTypeRunner', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
           maintenanceWindowsService,
+          logger,
           request: fakeRequest,
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -711,6 +720,7 @@ describe('RuleTypeRunner', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
           request: fakeRequest,
+          logger,
           ruleId: RULE_ID,
           maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -738,6 +748,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -825,6 +836,7 @@ describe('RuleTypeRunner', () => {
           alertingEventLogger,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           queryDelaySec: 0,
+          logger,
           request: fakeRequest,
           ruleId: RULE_ID,
           maintenanceWindowsService,
@@ -853,6 +865,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -940,6 +953,7 @@ describe('RuleTypeRunner', () => {
             alertingEventLogger,
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
             queryDelaySec: 0,
+            logger,
             request: fakeRequest,
             maintenanceWindowsService,
             ruleId: RULE_ID,
@@ -969,6 +983,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -1047,6 +1062,7 @@ describe('RuleTypeRunner', () => {
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
             request: fakeRequest,
             queryDelaySec: 0,
+            logger,
             ruleId: RULE_ID,
             maintenanceWindowsService,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -1075,6 +1091,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -1153,6 +1170,7 @@ describe('RuleTypeRunner', () => {
             flappingSettings: DEFAULT_FLAPPING_SETTINGS,
             queryDelaySec: 0,
             request: fakeRequest,
+            logger,
             maintenanceWindowsService,
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
@@ -1181,6 +1199,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -1247,12 +1266,245 @@ describe('RuleTypeRunner', () => {
         shouldLogAlerts: true,
       });
     });
+
+    test('should call executor with custom ruleExecutionTimeout', async () => {
+      const mockRuleExecutionTimeout = '15m';
+
+      await ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          logger,
+          request: fakeRequest,
+          maintenanceWindowsService,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+          isServerless: false,
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          getDataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          getWrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType: { ...ruleType, ruleTaskTimeout: mockRuleExecutionTimeout },
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+
+      expect(ruleType.executor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleExecutionTimeout: mockRuleExecutionTimeout,
+        })
+      );
+    });
+  });
+
+  describe('cancel', () => {
+    test('should not persist or log alerts if rule run is cancelled due to timeout', async () => {
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      const promise = ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          logger,
+          maintenanceWindowsService,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          request: fakeRequest,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+          isServerless: false,
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          getDataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          getWrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+      await Promise.resolve();
+      await ruleTypeRunner.cancelRun();
+      await promise;
+
+      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
+      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
+      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
+        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
+      );
+      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        alertDelay: 0,
+        ruleRunMetricsStore,
+      });
+      expect(alertsClient.persistAlerts).not.toHaveBeenCalled();
+      expect(alertsClient.logAlerts).toHaveBeenCalledWith({
+        ruleRunMetricsStore,
+        shouldLogAlerts: false,
+      });
+    });
+
+    test('should persist and log alerts if rule run is cancelled due to timeout but cancelAlertsOnRuleTimeout from config is false', async () => {
+      const newContext = {
+        ...context,
+        cancelAlertsOnRuleTimeout: false,
+      };
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      const thisRuleTypeRunner = new RuleTypeRunner<
+        {},
+        {},
+        { foo: string },
+        {},
+        {},
+        'default',
+        'recovered',
+        {}
+      >({
+        context: newContext,
+        task: mockedTaskInstance,
+        timer,
+      });
+
+      const promise = thisRuleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          logger,
+          maintenanceWindowsService,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          request: fakeRequest,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+          isServerless: false,
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          getDataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          getWrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+      await Promise.resolve();
+      await thisRuleTypeRunner.cancelRun();
+      await promise;
+
+      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
+      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
+      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
+        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
+      );
+      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        alertDelay: 0,
+        ruleRunMetricsStore,
+      });
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
+      expect(alertsClient.logAlerts).toHaveBeenCalledWith({
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+    });
+
+    test('should persist and log alerts if rule run is cancelled due to timeout but cancelAlertsOnRuleTimeout for ruleType is false', async () => {
+      ruleType.cancelAlertsOnRuleTimeout = false;
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      const promise = ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          logger,
+          maintenanceWindowsService,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          request: fakeRequest,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+          isServerless: false,
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          getDataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          getWrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+      await Promise.resolve();
+      await ruleTypeRunner.cancelRun();
+      await promise;
+
+      expect(alertsClient.hasReachedAlertLimit).toHaveBeenCalled();
+      expect(alertsClient.checkLimitUsage).toHaveBeenCalled();
+      expect(alertingEventLogger.setExecutionSucceeded).toHaveBeenCalledWith(
+        `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
+      );
+      expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        alertDelay: 0,
+        ruleRunMetricsStore,
+      });
+      expect(alertsClient.persistAlerts).toHaveBeenCalled();
+      expect(alertsClient.logAlerts).toHaveBeenCalledWith({
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+    });
   });
 });
 
 // return enough of TaskRunnerContext that RuleTypeRunner needs
 function getTaskRunnerContext() {
   return {
+    cancelAlertsOnRuleTimeout: true,
     maxAlerts: 100,
     executionContext: executionContextServiceMock.createInternalStartContract(),
     share: {} as SharePluginStart,

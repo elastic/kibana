@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
+import { setProjectAnnotations, composeStories } from '@storybook/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setProjectAnnotations } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { composeStories } from '@storybook/testing-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import * as stories from './graph_investigation.stories';

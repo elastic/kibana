@@ -24,8 +24,6 @@ import { formatValue, shouldApplyColor } from '../utils';
 import { needsLightText } from '../utils/palette';
 import { withAutoScale } from './with_auto_scale';
 
-import './metric.scss';
-
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
   visData: Datatable;

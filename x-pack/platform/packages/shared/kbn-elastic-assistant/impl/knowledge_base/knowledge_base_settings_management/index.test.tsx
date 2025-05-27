@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { KnowledgeBaseSettingsManagement } from '.';
 import { useCreateKnowledgeBaseEntry } from '../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry';
@@ -157,8 +157,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       data: {
         elser_exists: true,
         security_labs_exists: true,
-        index_exists: true,
-        pipeline_exists: true,
       },
       isFetched: true,
     });
@@ -202,8 +200,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       data: {
         elser_exists: false,
         security_labs_exists: false,
-        index_exists: false,
-        pipeline_exists: false,
       },
       isFetched: true,
     });
@@ -444,8 +440,10 @@ describe('KnowledgeBaseSettingsManagement', () => {
       openFlyout: jest.fn(),
       closeFlyout: jest.fn(),
     });
-    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper: Wrapper,
+    await act(async () => {
+      render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+        wrapper: Wrapper,
+      });
     });
 
     await waitFor(() => {
@@ -553,7 +551,11 @@ describe('KnowledgeBaseSettingsManagement', () => {
       expect(mockCreateEntry).toHaveBeenCalledTimes(1);
     });
     expect(mockUpdateEntry).toHaveBeenCalledTimes(0);
-    expect(mockCreateEntry).toHaveBeenCalledWith({ ...mockData[3], users: undefined });
+    expect(mockCreateEntry).toHaveBeenCalledWith({
+      ...mockData[3],
+      global: false,
+      users: undefined,
+    });
   });
 
   it('does not show duplicate entry modal on new document entry creation', async () => {

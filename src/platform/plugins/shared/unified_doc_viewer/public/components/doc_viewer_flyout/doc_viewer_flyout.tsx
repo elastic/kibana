@@ -146,6 +146,12 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
+      const isTabButton = (ev.target as HTMLElement).getAttribute('role') === 'tab';
+      if (isTabButton) {
+        // ignore events triggered when the tab buttons are focused
+        return;
+      }
+
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();

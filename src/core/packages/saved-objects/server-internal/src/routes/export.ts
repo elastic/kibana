@@ -151,6 +151,12 @@ export const registerExportRoute = (
         description:
           'Retrieve sets of saved objects that you want to import into Kibana. You must include `type` or `objects` in the request body.  \nExported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.  \nNOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.',
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),

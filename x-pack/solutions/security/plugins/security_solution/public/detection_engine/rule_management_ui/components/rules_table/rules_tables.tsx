@@ -275,7 +275,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               : i18n.BULK_DELETE_CONFIRMATION_TITLE
           }
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"

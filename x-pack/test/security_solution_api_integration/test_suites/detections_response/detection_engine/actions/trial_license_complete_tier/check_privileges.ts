@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/9.0/alerting-setup.html#alerting-authorization.`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/9.0/alerting-setup.html#alerting-authorization.`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);

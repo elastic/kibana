@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import type { CommandDefinition, ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
 import { getConsoleTestSetup } from '../mocks';
 
-// FLAKY: https://github.com/elastic/kibana/issues/193093
-describe.skip('BadArgument component', () => {
+describe('BadArgument component', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let command: CommandDefinition;
@@ -39,20 +39,23 @@ describe.skip('BadArgument component', () => {
     render();
     await enterCommand('cmd1 --foo');
 
-    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Argument --foo must have a value'
-    );
-    expect(renderResult.getByTestId('test-badArgument-commandUsage'));
-  });
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --foo must have a value'
+      );
+      expect(renderResult.getByTestId('test-badArgument-commandUsage')).toBeInTheDocument();
+    });
+  }, 10000);
 
   it('should only display message (no help) if command is hidden from help', async () => {
     command.helpHidden = true;
     render();
     await enterCommand('cmd1 --foo');
-
-    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Argument --foo must have a value'
-    );
-    expect(renderResult.queryByTestId('test-badArgument-commandUsage')).toBeNull();
-  });
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --foo must have a value'
+      );
+      expect(renderResult.queryByTestId('test-badArgument-commandUsage')).toBeNull();
+    });
+  }, 10000);
 });

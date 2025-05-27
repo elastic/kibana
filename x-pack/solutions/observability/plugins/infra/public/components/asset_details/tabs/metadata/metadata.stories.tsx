@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { Metadata } from './metadata';
@@ -24,30 +24,41 @@ const stories: Meta = {
   component: Metadata,
 };
 
-const Template: Story = () => {
+const Template: StoryFn = () => {
   return <Metadata />;
 };
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
+};
 
-export const NoData = Template.bind({});
-NoData.parameters = {
-  apiResponse: {
-    mock: 'noData',
+export const NoData = {
+  render: Template,
+
+  parameters: {
+    apiResponse: {
+      mock: 'noData',
+    },
   },
 };
 
-export const LoadingState = Template.bind({});
-LoadingState.parameters = {
-  apiResponse: {
-    mock: 'loading',
+export const LoadingState = {
+  render: Template,
+
+  parameters: {
+    apiResponse: {
+      mock: 'loading',
+    },
   },
 };
 
-export const ErrorState = Template.bind({});
-ErrorState.parameters = {
-  apiResponse: {
-    mock: 'error',
+export const ErrorState = {
+  render: Template,
+
+  parameters: {
+    apiResponse: {
+      mock: 'error',
+    },
   },
 };
 

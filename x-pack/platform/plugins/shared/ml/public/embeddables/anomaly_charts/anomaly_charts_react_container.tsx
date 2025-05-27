@@ -266,7 +266,6 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
             >
               <EuiLoadingChart
                 size="xl"
-                mono={true}
                 data-test-subj="mlAnomalyExplorerEmbeddableLoadingIndicator"
               />
             </EuiText>
