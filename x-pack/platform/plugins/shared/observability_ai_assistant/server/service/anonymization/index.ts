@@ -11,6 +11,7 @@ import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 
 import type { Logger } from '@kbn/core/server';
+import { chunk } from 'lodash';
 import { unhashString } from '../../../common/utils/anonymization/redaction';
 import { buildDetectedEntitiesMap } from '../../../common/utils/anonymization/build_detected_entities_map';
 import { detectRegexEntities } from './detect_regex_entities';
@@ -52,14 +53,21 @@ export class AnonymizationService {
     // Maximum number of concurrent requests to the ML model
     const limiter = pLimit(DEFAULT_MAX_CONCURRENT_REQUESTS);
 
-    const tasks = chunks.map((chunk) =>
+    // Batch size - number of documents to send in each request
+    const BATCH_SIZE = 10;
+
+    // Create batches of chunks for the inference request
+    const batches = chunk(chunks, BATCH_SIZE);
+    this.logger.debug(`Processing ${batches.length} batches of up to ${BATCH_SIZE} chunks each`);
+
+    const tasks = batches.map((batchChunks) =>
       limiter(async () =>
-        withInferenceSpan('infer_ner_chunk', async () => {
+        withInferenceSpan('infer_ner_batch', async () => {
           let response;
           try {
             response = await this.esClient.asCurrentUser.ml.inferTrainedModel({
               model_id: NER_MODEL_ID,
-              docs: [{ text_field: chunk.chunkText }],
+              docs: batchChunks.map((batchChunk) => ({ text_field: batchChunk.chunkText })),
             });
           } catch (error) {
             this.logger.error(
@@ -70,14 +78,33 @@ export class AnonymizationService {
             );
           }
 
-          const entities = response?.inference_results?.[0]?.entities ?? [];
-          return entities.map((e) => ({
-            ...e,
-            start_pos: e.start_pos + chunk.charStartOffset,
-            end_pos: e.end_pos + chunk.charStartOffset,
-            type: 'ner' as const,
-            hash: objectHash({ entity: e.entity, class_name: e.class_name }),
-          }));
+          // Process results from all documents in the batch
+          const batchResults: DetectedEntity[] = [];
+          const inferenceResults = response?.inference_results || [];
+
+          if (inferenceResults.length !== batchChunks.length) {
+            this.logger.warn(
+              `NER returned ${inferenceResults.length} results for ${batchChunks.length} docs in batch`
+            );
+          }
+
+          // Match results with their original chunks to maintain offsets
+          inferenceResults.forEach((result, index) => {
+            const batchChunk = batchChunks[index];
+            const entities = result.entities || [];
+
+            batchResults.push(
+              ...entities.map((e) => ({
+                ...e,
+                start_pos: e.start_pos + batchChunk.charStartOffset,
+                end_pos: e.end_pos + batchChunk.charStartOffset,
+                type: 'ner' as const,
+                hash: objectHash({ entity: e.entity, class_name: e.class_name }),
+              }))
+            );
+          });
+
+          return batchResults;
         })
       )
     );
