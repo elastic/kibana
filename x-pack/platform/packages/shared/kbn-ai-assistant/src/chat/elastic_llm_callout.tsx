@@ -10,14 +10,12 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import {
-  ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK,
-  getConnectorsManagementHref,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ElasticLlmCallout = () => {
-  const { http, spaces, application } = useKibana().services;
+  const { http, spaces, application, docLinks } = useKibana().services;
+
   const { euiTheme } = useEuiTheme();
 
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
@@ -66,7 +64,7 @@ export const ElasticLlmCallout = () => {
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
-                href={ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK}
+                href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
                 target="_blank"
                 rel="noopener noreferrer"
                 external

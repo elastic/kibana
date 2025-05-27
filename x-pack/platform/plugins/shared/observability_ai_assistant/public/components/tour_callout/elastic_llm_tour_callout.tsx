@@ -9,11 +9,8 @@ import React, { ReactElement } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK,
-  ELASTIC_MANAGED_LLM_LEARN_MORE_LINK,
-} from '../../../common';
 import { TourCallout } from './tour_callout';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ElasticLlmTourCallout = ({
   children,
@@ -26,6 +23,8 @@ export const ElasticLlmTourCallout = ({
   zIndex?: number;
   dismissTour?: () => void;
 }) => {
+  const { docLinks } = useKibana().services;
+
   return (
     <TourCallout
       title={i18n.translate('xpack.observabilityAiAssistant.tour.elasticLlmTitle', {
@@ -41,7 +40,7 @@ export const ElasticLlmTourCallout = ({
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
-                href={ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK}
+                href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
                 target="_blank"
                 rel="noopener noreferrer"
                 external
@@ -51,7 +50,7 @@ export const ElasticLlmTourCallout = ({
             ),
             learnMoreLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
-                href={ELASTIC_MANAGED_LLM_LEARN_MORE_LINK}
+                href={docLinks?.links?.observability?.elasticManagedLlm}
                 target="_blank"
                 rel="noopener noreferrer"
                 external

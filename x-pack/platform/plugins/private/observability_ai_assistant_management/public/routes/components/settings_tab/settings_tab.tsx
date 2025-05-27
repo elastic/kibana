@@ -19,10 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK,
-  getConnectorsManagementHref,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
@@ -51,6 +48,7 @@ export function SettingsTab() {
     application: { getUrlForApp },
     productDocBase,
     http,
+    docLinks,
   } = useKibana().services;
 
   const { config } = useAppContext();
@@ -119,10 +117,13 @@ export function SettingsTab() {
           <p>
             <FormattedMessage
               id="xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescriptionWithLink"
-              defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI‑driven features in Elastic. This is a space setting and, by default, Elastic uses its Elastic‑managed LLM connector ({link}) when no custom connectors are available. You can always configure and use your own connectors."
+              defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. This is a space setting and, by default, Elastic uses its Elastic-managed LLM connector ({link}) when no custom connectors are available. You can always configure and use your own connectors."
               values={{
                 link: (
-                  <EuiLink href={ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK} target="_blank">
+                  <EuiLink
+                    href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.observabilityAiAssistantManagement.settingsPage.additionalCostsLink',
                       { defaultMessage: 'additional costs incur' }

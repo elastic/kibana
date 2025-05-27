@@ -60,8 +60,3 @@ export {
   E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
 } from './preconfigured_inference_ids';
-
-export {
-  ELASTIC_MANAGED_LLM_ADDITIONAL_COSTS_LINK,
-  ELASTIC_MANAGED_LLM_LEARN_MORE_LINK,
-} from './elastic_managed_llm_links';
