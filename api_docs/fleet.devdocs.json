@@ -31637,6 +31637,17 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.SPACE_AWARENESS_MIGRATION",
+            "type": "string",
+            "tags": [],
+            "label": "SPACE_AWARENESS_MIGRATION",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
