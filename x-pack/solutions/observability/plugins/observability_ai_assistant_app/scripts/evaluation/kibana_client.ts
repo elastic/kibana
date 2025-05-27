@@ -169,6 +169,9 @@ export class KibanaClient {
       async () => {
         const response = await this.callKibana<{}>('POST', {
           pathname: '/internal/observability_ai_assistant/kb/setup',
+          query: {
+            inference_id: '.elser-2-elasticsearch',
+          },
         });
         this.log.info('Knowledge base is ready');
         return response.data;
