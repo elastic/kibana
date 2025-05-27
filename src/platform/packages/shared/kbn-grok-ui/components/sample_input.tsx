@@ -72,7 +72,7 @@ export const SampleInput = ({
       sampleEditorRef,
       sampleEditorDecorationsCollectionRef
     );
-  }, [debouncedProcessExpressions, draftGrokExpressions]);
+  }, [sample, debouncedProcessExpressions, draftGrokExpressions]);
 
   return (
     <>
