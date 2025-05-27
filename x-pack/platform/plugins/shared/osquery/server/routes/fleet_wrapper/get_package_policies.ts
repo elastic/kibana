@@ -7,8 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -30,11 +29,9 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
         validate: {},
       },
       async (context, request, response) => {
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const [core] = await osqueryContext.getStartServices();
-        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
-          core,
-          space?.id ?? DEFAULT_SPACE_ID
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
 
         const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${OSQUERY_INTEGRATION_NAME}`;

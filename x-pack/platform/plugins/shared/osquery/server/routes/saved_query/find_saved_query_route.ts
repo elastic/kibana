@@ -8,8 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
@@ -46,11 +45,9 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         },
       },
       async (context, request, response) => {
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const [core] = await osqueryContext.getStartServices();
-        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
-          core,
-          space?.id ?? DEFAULT_SPACE_ID
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
 
         try {

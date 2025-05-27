@@ -16,8 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type {
   UpdatePacksRequestParamsSchema,
   UpdatePacksRequestBodySchema,
@@ -72,11 +71,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const [core] = await osqueryContext.getStartServices();
-        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
-          core,
-          space?.id ?? DEFAULT_SPACE_ID
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
 
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();

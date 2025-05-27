@@ -13,7 +13,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { processAggregations } from '../../../common/utils/aggregations';
 import { getAgentsRequestQuerySchema } from '../../../common/api';
 import type { GetAgentsRequestQuerySchema } from '../../../common/api';
@@ -54,12 +54,11 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           getStatusSummary?: boolean;
         };
 
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const [core] = await osqueryContext.getStartServices();
-        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
-          core,
-          space?.id ?? DEFAULT_SPACE_ID
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
+        const space = await osqueryContext.service.getActiveSpace(request);
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();

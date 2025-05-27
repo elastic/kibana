@@ -9,7 +9,7 @@ import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
 import type { DeletePacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -19,7 +19,7 @@ import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { deletePacksRequestParamsSchema } from '../../../common/api';
-import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -47,11 +47,9 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       async (context, request, response) => {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
-        const space = await osqueryContext.service.getActiveSpace(request);
-        const [core] = await osqueryContext.getStartServices();
-        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
-          core,
-          space?.id ?? DEFAULT_SPACE_ID
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
