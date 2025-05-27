@@ -9,6 +9,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
 import {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
@@ -27,7 +28,7 @@ export function transformPanelsIn(
   const sections: SavedDashboardSection[] = [];
 
   widgets.forEach((widget) => {
-    if ('panels' in widget) {
+    if (isDashboardSection(widget)) {
       // this is a section
       const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;
       const idx = gridData.i ?? uuidv4();

@@ -22,3 +22,4 @@ export type {
 } from './dashboard_container/types';
 
 export { type InjectExtractDeps } from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
+export { isDashboardSection } from './lib/dashboard_panel_converters';

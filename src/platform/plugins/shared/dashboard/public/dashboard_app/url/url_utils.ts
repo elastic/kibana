@@ -43,6 +43,7 @@ export const isPanelVersionTooOld = (
 ) => {
   for (const panel of panels) {
     if ('panels' in panel) {
+      // can't use isDashboardSection type guard because of SavedDashboardPanel type
       continue; // ignore sections
     }
     if (

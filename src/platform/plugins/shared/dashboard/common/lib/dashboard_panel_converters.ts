@@ -23,7 +23,7 @@ import {
   prefixReferencesFromPanel,
 } from '../dashboard_container/persistable_state/dashboard_container_references';
 
-const widgetIsSection = (
+export const isDashboardSection = (
   widget: DashboardAttributes['panels'][number]
 ): widget is DashboardSection => {
   return 'panels' in widget;
@@ -40,7 +40,7 @@ export const convertPanelsArrayToPanelSectionMaps = (
    * to separate them out into separate maps for the dashboard client side code
    */
   panels?.forEach((widget, idx) => {
-    if (widgetIsSection(widget)) {
+    if (isDashboardSection(widget)) {
       // this is a section
       const sectionId = widget.gridData.i ?? String(idx);
       const { panels: sectionPanels, ...restOfSection } = widget;
