@@ -22,9 +22,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 ### Category: authentication
 
-|     |
-| --- |
 | **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
 | `user_login` | `success` | User has logged in successfully. |
 | | `failure` | Failed login attempt (e.g. due to invalid credentials). |
 | `user_logout` | `unknown` | User is logging out. |
@@ -34,9 +33,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 ### Category: database
 #### Type: creation
 
-|     |
-| --- |
 | **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
 | `saved_object_create` | `unknown` | User is creating a saved object. |
 | | `failure` | User is not authorized to create a saved object. |
 | `saved_object_open_point_in_time` | `unknown` | User is creating a Point In Time to use when querying saved objects. |
@@ -85,9 +83,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 #### Type: change
 
-|     |
-| --- |
 | **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
 | `saved_object_update` | `unknown` | User is updating a saved object. |
 | | `failure` | User is not authorized to update a saved object. |
 | `saved_object_update_objects_spaces` | `unknown` | User is adding and/or removing a saved object to/from other spaces. |
@@ -177,9 +174,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 #### Type: deletion
 
-|     |
-| --- |
 | **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
 | `saved_object_delete` | `unknown` | User is deleting a saved object. |
 | | `failure` | User is not authorized to delete a saved object. |
 | `saved_object_close_point_in_time` | `unknown` | User is deleting a Point In Time that was used to query saved objects. |
@@ -224,9 +220,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 #### Type: access
 
-|     |
-| --- |
 | **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
 | `saved_object_get` | `success` | User has accessed a saved object. |
 | | `failure` | User is not authorized to access a saved object. |
 | `saved_object_resolve` | `success` | User has accessed a saved object. |
@@ -308,9 +303,8 @@ To ensure that a record of every operation is persisted even in case of an unexp
 
 ### Category: web
 
-|     |
-| --- |
 | **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
 | `http_request` | `unknown` | User is making an HTTP request. |
 
 
@@ -320,17 +314,15 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 
 ### Base fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `@timestamp` | Time when the event was generated.<br>Example: `2016-05-23T08:05:34.853Z` |
 | `message` | Human readable description of the event. |
 
 ### Event fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
 | `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication` |
 | `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion` |
@@ -338,9 +330,8 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 
 ### User fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `user.id` | Unique identifier of the user across sessions (See [user profiles](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles.md)). |
 | `user.name` | Login name of the user.<br>Example: `jdoe` |
 | `user.roles[]` | Set of user roles at the time of the event.<br>Example: `[kibana_admin, reporting_user]` |
@@ -348,9 +339,8 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 
 ### Kibana fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `kibana.space_id` | ID of the space associated with the event.<br>Example: `default` |
 | `kibana.session_id` | ID of the user session associated with the event.<br>Each login attempt results in a unique session id. |
 | `kibana.saved_object.type` | Type of saved object associated with the event.<br>Example: `dashboard` |
@@ -364,18 +354,16 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 
 ### Error fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `error.code` | Error code describing the error. |
 | `error.message` | Error message. |
 
 
 ### HTTP and URL fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `client.ip` | Client IP address. |
 | `http.request.method` | HTTP request method.<br>Example: `get`, `post`, `put`, `delete` |
 | `http.request.headers.x-forwarded-for` | `X-Forwarded-For` request header used to identify the originating client IP address when connecting through proxy servers.<br>Example: `161.66.20.177, 236.198.214.101` |
@@ -388,7 +376,6 @@ Audit logs are written in JSON using [Elastic Common Schema (ECS)][Elastic Commo
 
 ### Tracing fields
 
-|     |
-| --- |
 | **Field** | **Description** |
+| --- | --- |
 | `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. |
