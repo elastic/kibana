@@ -10,6 +10,12 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
+// Max java long value stored as string so we don't lose precision.
+// We create the stream index template with the max priority possible
+// to guarantee it will take precedence over existing templates overlapping
+// with the index pattern.
+const MAX_PRIORITY = '9223372036854775807';
+
 export function generateIndexTemplate(name: string) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
     return [...acc, `${ancestorName}@stream.layer`];
@@ -19,7 +25,7 @@ export function generateIndexTemplate(name: string) {
     name: getIndexTemplateName(name),
     index_patterns: [name],
     composed_of: composedOf,
-    priority: 200,
+    priority: MAX_PRIORITY,
     version: ASSET_VERSION,
     _meta: {
       managed: true,
