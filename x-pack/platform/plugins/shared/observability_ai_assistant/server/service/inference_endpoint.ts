@@ -102,7 +102,7 @@ export async function getKbModelStatus({
   modelStats?: MlTrainedModelStats;
   errorMessage?: string;
   kbState: KnowledgeBaseState;
-  currentInferenceId: string | undefined;
+  currentInferenceId?: string | undefined;
   concreteWriteIndex: string | undefined;
   isReIndexing: boolean;
 }> {
@@ -118,7 +118,6 @@ export async function getKbModelStatus({
         enabled,
         errorMessage: 'Inference id not found',
         kbState: KnowledgeBaseState.NOT_INSTALLED,
-        currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
       };
@@ -154,7 +153,7 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    logger.error(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
+    logger.warn(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
 
     return {
       enabled,
