@@ -13,6 +13,8 @@ import type {
   PersistableState,
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
+import type { Type } from '@kbn/config-schema';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -27,9 +29,48 @@ export interface EmbeddableRegistryDefinition<
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 
+export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = Pick<
+  SavedObject<SavedObjectAttributes>,
+  'attributes' | 'references'
+>;
+
+export type ItemAttributesWithReferences<ItemAttributes> = {
+  attributes: ItemAttributes;
+  references: SavedObjectReference[];
+};
+
+export type VersionableEmbeddableObject<SOAttributes, ItemAttributes> = {
+  itemSchema?: Type<ItemAttributes>;
+  savedObjectToItem?: (
+    savedObject: SavedObjectAttributesWithReferences<SOAttributes>
+  ) => ItemAttributesWithReferences<ItemAttributes>;
+  itemToSavedObject?: (
+    item: ItemAttributesWithReferences<ItemAttributes>
+  ) => SavedObjectAttributesWithReferences<SOAttributes>;
+};
+
+export type EmbeddableContentManagementDefinition = {
+  id: string;
+  versions: { 1: VersionableEmbeddableObject<any, any> } & Record<
+    number,
+    VersionableEmbeddableObject<any, any>
+  >;
+  latestVersion: number;
+};
+
+export type EmbeddableContentManagementService = {
+  getEmbeddableMigrationDefinition: (id: string) => EmbeddableContentManagementDefinition;
+};
+
 export interface CommonEmbeddableStartContract {
   getEmbeddableFactory?: (
     embeddableFactoryId: string
   ) => PersistableState & { isContainerType: boolean };
   getEnhancement: (enhancementId: string) => PersistableState;
+}
+
+export interface CanGetEmbeddableContentManagementDefinition {
+  getEmbeddableContentManagementDefinition: (
+    id: string
+  ) => EmbeddableContentManagementDefinition | undefined;
 }
