@@ -6447,6 +6447,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/palettes@link:src/platform/packages/shared/kbn-palettes":
+  version "0.0.0"
+  uid ""
+
 "@kbn/panel-loader@link:src/platform/packages/private/kbn-panel-loader":
   version "0.0.0"
   uid ""
