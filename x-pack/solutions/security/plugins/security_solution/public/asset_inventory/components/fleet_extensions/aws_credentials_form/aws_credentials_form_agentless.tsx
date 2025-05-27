@@ -112,7 +112,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
       intro: (
         <FormattedMessage
           id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.guide.description.cloudConnectors"
-          defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS account. When creating an IAM role, users can define the role’s permissions. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
+          defaultMessage="To enable Cloud Asset Discovery, you launch an AWS CloudFormation stack that automatically creates an IAM role in your account. This role includes the necessary permissions and embeds a unique External ID—generated during onboarding—into its trust policy. The resulting Role ARN and External ID are then used by Cloud Asset Discovery to securely assume the role and access your AWS resources. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
           values={{
             learnMore: (
               <EuiLink
