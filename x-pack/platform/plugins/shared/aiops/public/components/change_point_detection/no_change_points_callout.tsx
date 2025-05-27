@@ -25,10 +25,16 @@ export const NoChangePointsCallout: FC<NoChangePointsCalloutProps> = ({ reason }
       iconType="warning"
     >
       <p data-test-subj="aiopsNoChangePointsWarningCalloutText">
-        {reason ??
-          i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundMessage', {
-            defaultMessage: 'No change points detected - showing sample metric data',
-          })}
+        {reason
+          ? `${reason} ${i18n.translate(
+              'xpack.aiops.changePointDetection.showingSampleMetricData',
+              {
+                defaultMessage: '- showing sample metric data',
+              }
+            )}`
+          : i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundMessage', {
+              defaultMessage: 'No change points detected - showing sample metric data',
+            })}
       </p>
     </EuiCallOut>
   );
