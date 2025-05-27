@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import React, { memo, useMemo } from 'react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { Table } from './table';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useCreateDataView } from '../../../../../settings_flyout/alert_selection/use_create_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../../../../data_view_manager/hooks/use_data_view';
+import { SourcererScopeName } from '../../../../../../../sourcerer/store/model';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
@@ -26,7 +30,8 @@ export const ERROR_TEST_ID = 'attack-discovery-alert-error';
 export const SKELETON_TEST_ID = 'attack-discovery-alert-skeleton';
 export const CONTENT_TEST_ID = 'attack-discovery-alert-content';
 
-const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
+const AI4SOC_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-default`;
+const AI4SOC_DATA_VIEW_SPEC: DataViewSpec = { title: AI4SOC_INDEX_PATTERN };
 
 interface AiForSOCAlertsTabProps {
   /**
@@ -45,9 +50,17 @@ interface AiForSOCAlertsTabProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
-  const { data } = useKibana().services;
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
-  const [dataViewLoading, setDataViewLoading] = useState<boolean>(true);
+  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
+    dataViewSpec: AI4SOC_DATA_VIEW_SPEC,
+  });
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  // TODO: use alert only data view when it is ready
+  // https://github.com/elastic/security-team/issues/12589
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+
+  const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
@@ -62,32 +75,11 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
     [ruleData, ruleIsLoading]
   );
 
-  useEffect(() => {
-    let dv: DataView;
-    const createDataView = async () => {
-      try {
-        dv = await data.dataViews.create(dataViewSpec);
-        setDataView(dv);
-        setDataViewLoading(false);
-      } catch (err) {
-        setDataViewLoading(false);
-      }
-    };
-    createDataView();
-
-    // clearing after leaving the page
-    return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv.id);
-      }
-    };
-  }, [data.dataViews]);
-
   return (
     <EuiSkeletonRectangle
       data-test-subj={SKELETON_TEST_ID}
       height={400}
-      isLoading={integrationIsLoading || dataViewLoading}
+      isLoading={integrationIsLoading || loading}
       width="100%"
     >
       <>

@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { AI4SOC_INDEX_PATTERN } from '../wrapper';
 import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SeverityLevelPanel } from '../../alerts_kpis/severity_level_panel';
@@ -16,21 +16,14 @@ import { AlertsProgressBarByHostNamePanel } from './alerts_progress_bar_by_host_
 
 export const KPIS_SECTION = 'alert-summary-kpis-section';
 
-export interface KPIsSectionProps {
-  /**
-   * DataView created for the alert summary page
-   */
-  dataView: DataView;
-}
-
 /**
  * Section rendering 3 charts in the alert summary page.
  * The component leverages existing chart components from the alerts page but is making a few tweaks:
  * - the SeverityLevelPanel and AlertsByRulePanel are used directly from the alerts page
  * - the UI differences on the AlertsProgressBarPanel were significant enough that a separate component was created
  */
-export const KPIsSection = memo(({ dataView }: KPIsSectionProps) => {
-  const signalIndexName = dataView.getIndexPattern();
+export const KPIsSection = memo(() => {
+  const signalIndexName = AI4SOC_INDEX_PATTERN;
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
