@@ -49,9 +49,16 @@ export const login = (role?: string): void => {
     } else {
       testRole = role;
     }
+
     cy.task('getSessionCookie', testRole).then((cookie) => {
-      cy.setCookie('sid', cookie as string);
+      cy.setCookie('sid', cookie as string, {
+        // "hostOnly: true" sets the cookie without a domain.
+        // This makes cookie available only for the current host (not subdomains).
+        // It's needed to match the Serverless backend behavior where cookies are set without a domain.
+        hostOnly: true,
+      });
     });
+
     cy.visit('/');
   } else {
     const user = role ? getEnvAuth(role) : defaultUser;
