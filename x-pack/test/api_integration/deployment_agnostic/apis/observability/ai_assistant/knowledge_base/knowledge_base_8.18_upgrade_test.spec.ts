@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // We need to make sure that the custom inference endpoint continues to work after the migration
 
   describe('Knowledge base: when upgrading from 8.18 to 8.19', function () {
-    this.tags(['skipServerless']);
+    this.tags(['skipServerless', 'skipCloud']);
 
     before(async () => {
       await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
