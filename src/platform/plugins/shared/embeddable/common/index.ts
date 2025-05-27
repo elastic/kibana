@@ -12,4 +12,7 @@ export type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
+  EmbeddableContentManagementDefinition,
+  VersionableEmbeddableObject,
+  CanGetEmbeddableContentManagementDefinition,
 } from './types';
