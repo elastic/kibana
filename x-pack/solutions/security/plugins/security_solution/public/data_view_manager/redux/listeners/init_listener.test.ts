@@ -18,7 +18,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 
 jest.mock('../../utils/create_default_data_view', () => ({
-  bootstrapSourcererDataViews: jest.fn(),
+  createDefaultDataView: jest.fn(),
 }));
 
 const mockDataViewsService = {
