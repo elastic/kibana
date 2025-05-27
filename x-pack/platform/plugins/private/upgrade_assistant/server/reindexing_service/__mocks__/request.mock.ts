@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { createReindexWorker } from './create_reindex_worker';
+export const createRequestMock = (opts?: {
+  headers?: any;
+  params?: Record<string, any>;
+  query?: Record<string, any>;
+  body?: Record<string, any>;
+}) => {
+  return Object.assign({ headers: {} }, opts || {});
+};

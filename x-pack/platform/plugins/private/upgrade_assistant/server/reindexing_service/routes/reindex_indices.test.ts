@@ -9,13 +9,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-// todo look at relocating
 import {
   createMockRouter,
   MockRouter,
   routeHandlerContextMock,
-} from '../../routes/__mocks__/routes.mock';
-import { createRequestMock } from '../../routes/__mocks__/request.mock';
+} from '../__mocks__/routes.mock';
+import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '../../shared_imports';
 import { errors as esErrors } from '@elastic/elasticsearch';
 

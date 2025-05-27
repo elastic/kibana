@@ -17,7 +17,7 @@ import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/s
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 // todo look at moving these to this dir
 import { ReindexWorker } from '../lib/reindexing';
-import { createReindexWorker } from '../routes/reindex_indices';
+import { createReindexWorker } from './create_reindex_worker';
 import { CredentialStore, credentialStoreFactory } from '../lib/reindexing/credential_store';
 import { hiddenTypes } from '../saved_object_types';
 // import { defaultExclusions } from './lib/data_source_exclusions';
