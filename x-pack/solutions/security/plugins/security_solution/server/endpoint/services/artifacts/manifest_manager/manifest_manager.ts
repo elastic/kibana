@@ -17,7 +17,6 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import type { PromiseResolvedValue } from '../../../../../common/endpoint/types';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
@@ -56,6 +55,7 @@ import { ManifestClient } from '../manifest_client';
 import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
+import type { SavedObjectsClientFactory } from '../../saved_objects';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -84,9 +84,7 @@ const iterateArtifactsBuildResult = (
 };
 
 export interface ManifestManagerContext {
-  endpointService: EndpointAppContextService;
-
-  // TODO: PT Delete most arguments below. We can get them from EndpointService
+  savedObjectsClientFactory: SavedObjectsClientFactory;
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
@@ -118,10 +116,10 @@ export class ManifestManager {
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
   protected esClient: ElasticsearchClient;
   protected productFeaturesService: ProductFeaturesService;
-  protected endpointService: EndpointAppContextService;
+  protected savedObjectsClientFactory: SavedObjectsClientFactory;
 
   constructor(context: ManifestManagerContext) {
-    this.endpointService = context.endpointService;
+    this.savedObjectsClientFactory = context.savedObjectsClientFactory;
 
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
@@ -667,14 +665,14 @@ export class ManifestManager {
     const unChangedPolicies: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
     const execId = Math.random().toString(32).substring(3, 8);
-    const savedObjects = this.endpointService.savedObjects;
+    const savedObjects = this.savedObjectsClientFactory;
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
       key: `tryDispatch.${execId}`,
       batchHandler: async ({ data: currentBatch }) => {
         try {
-          // With spaces, we need to group the updates by Space ID so that a properlty scoped
+          // With spaces, we need to group the updates by Space ID so that a properly scoped
           // SO client is used for the update.
           const updatesBySpace: Record<string, PackagePolicy[]> = {};
 
