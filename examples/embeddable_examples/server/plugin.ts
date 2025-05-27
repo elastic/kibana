@@ -11,9 +11,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import type { EmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
 import type { SetupDeps, StartDeps } from './types';
 import { bookCmDefinitions } from '../common/book/content_management/cm_services';
-import { bookAttributesSchema as bookAttributesSchemaV1 } from './book/content_management/schema/v1';
-import { bookAttributesSchema as bookAttributesSchemaV2 } from './book/content_management/schema/v2';
-import { bookAttributesSchema as bookAttributesSchemaV3 } from './book/content_management/schema/v3';
+import { bookAttributesSchema } from './book/content_management/schema';
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -22,11 +20,9 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     const bookCmDefinitionsWithSchemas: EmbeddableContentManagementDefinition = {
       id: 'book',
       versions: {
-        1: { ...bookCmDefinitions.versions[1], itemSchema: bookAttributesSchemaV1 },
-        2: { ...bookCmDefinitions.versions[2], itemSchema: bookAttributesSchemaV2 },
-        3: { ...bookCmDefinitions.versions[3], itemSchema: bookAttributesSchemaV3 },
+        1: { ...bookCmDefinitions.versions[1], itemSchema: bookAttributesSchema },
       },
-      latestVersion: 3,
+      latestVersion: 1,
     };
 
     embeddable.registerEmbeddableContentManagementDefinition(bookCmDefinitionsWithSchemas);

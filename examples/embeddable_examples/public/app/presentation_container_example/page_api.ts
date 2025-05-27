@@ -28,7 +28,6 @@ import {
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
-import { versionSessionStorage } from './session_storage/version';
 import { PageApi, PageState } from './types';
 
 function deserializePanels(panels: PageState['panels']) {
@@ -44,7 +43,6 @@ function deserializePanels(panels: PageState['panels']) {
 export function getPageApi(embeddable: EmbeddableStart) {
   const initialUnsavedState = unsavedChangesSessionStorage.load();
   const initialState = lastSavedStateSessionStorage.load(embeddable);
-  const embeddableVersion = versionSessionStorage.load();
 
   const lastSavedState$ = new BehaviorSubject<PageState>(initialState);
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
@@ -251,14 +249,6 @@ export function getPageApi(embeddable: EmbeddableStart) {
       },
       timeRange$,
       hasUnsavedChanges$,
-      getVersionForPanelType: (panelType: string) => {
-        const embeddableCmDefinitions =
-          embeddable.getEmbeddableContentManagementDefinition(panelType);
-        if (!embeddableCmDefinitions) return null;
-        return Number(embeddableVersion) in embeddableCmDefinitions.versions
-          ? Number(embeddableVersion)
-          : embeddableCmDefinitions.latestVersion;
-      },
     } as PageApi,
   };
 }

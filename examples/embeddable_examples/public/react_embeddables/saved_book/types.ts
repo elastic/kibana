@@ -15,30 +15,13 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-export interface BookAttributesV1 {
-  bookTitle: string;
-  authorName: string;
-  numberOfPages: number;
-  bookSynopsis?: string;
-}
-
-export interface BookAttributesV2 {
-  bookTitle: string;
-  author: string;
-  numberOfPages: number;
-  synopsis?: string;
-  publicationYear?: number;
-}
-
-export interface BookAttributesV3 {
+export interface BookAttributes {
   bookTitle: string;
   author: string;
   pages: number;
   synopsis?: string;
   published?: number;
 }
-
-export type BookAttributes = BookAttributesV1 | BookAttributesV2 | BookAttributesV3;
 
 export interface BookByValueSerializedState {
   attributes: BookAttributes;

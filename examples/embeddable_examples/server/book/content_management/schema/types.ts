@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { savedBookAttributesSchema } from '../../../saved_object/schema';
+import { TypeOf } from '@kbn/config-schema';
+import { bookAttributesSchema } from './schema';
 
-export const bookAttributesSchema = savedBookAttributesSchema;
+export type BookAttributes = TypeOf<typeof bookAttributesSchema>;

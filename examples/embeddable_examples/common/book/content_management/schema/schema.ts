@@ -8,8 +8,8 @@
  */
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
-import type { SavedBookAttributes } from '../../../../../server/types';
-import type { BookAttributes } from '../../../../../server/book/content_management/schema/v3';
+import type { SavedBookAttributes } from '../../../../server/types';
+import type { BookAttributes } from '../../../../server/book/content_management/schema';
 
 export const bookAttributesDefinition: VersionableEmbeddableObject<
   SavedBookAttributes,

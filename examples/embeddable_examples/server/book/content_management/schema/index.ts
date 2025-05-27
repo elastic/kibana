@@ -7,18 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const VERSION_SESSION_STORAGE_KEY =
-  'kibana.examples.embeddables.presentationContainerExample.version';
-
-export const versionSessionStorage = {
-  clear: () => {
-    sessionStorage.removeItem(VERSION_SESSION_STORAGE_KEY);
-  },
-  save: (version: string) => {
-    sessionStorage.setItem(VERSION_SESSION_STORAGE_KEY, version);
-  },
-  load: () => {
-    const version = sessionStorage.getItem(VERSION_SESSION_STORAGE_KEY);
-    return version ?? 'latest';
-  },
-};
+export type { BookAttributes } from './types';
+export { bookAttributesSchema } from './schema';

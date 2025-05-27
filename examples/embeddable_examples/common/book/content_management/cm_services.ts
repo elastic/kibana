@@ -8,16 +8,12 @@
  */
 
 import { EmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
-import { bookAttributesDefinition as bookAttributesDefinitionV1 } from './schema/v1';
-import { bookAttributesDefinition as bookAttributesDefinitionV2 } from './schema/v2';
-import { bookAttributesDefinition as bookAttributesDefinitionV3 } from './schema/v3';
+import { bookAttributesDefinition } from './schema';
 
 export const bookCmDefinitions: EmbeddableContentManagementDefinition = {
   id: 'book',
   versions: {
-    1: bookAttributesDefinitionV1,
-    2: bookAttributesDefinitionV2,
-    3: bookAttributesDefinitionV3,
+    1: bookAttributesDefinition,
   },
   latestVersion: 1,
 };

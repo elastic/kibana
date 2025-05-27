@@ -9,10 +9,18 @@
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BookAttributes, BookAttributesV3, BookAttributesV2, BookAttributesV1 } from './types';
+import { BookAttributes } from './types';
 
-const useBookAttributesV3 = (bookAttributesManager: StateManager<BookAttributes>) => {
-  const { api: bookAttributesManagerApi } = bookAttributesManager as StateManager<BookAttributesV3>;
+export const useBookAttributePublishingSubjects: (
+  bookAttributesManager: StateManager<BookAttributes>
+) => {
+  author: string;
+  pages: number;
+  title: string;
+  synopsis?: string;
+  published?: number;
+} = (bookAttributesManager) => {
+  const { api: bookAttributesManagerApi } = bookAttributesManager;
   const [author, pages, title, synopsis, published] = useBatchedPublishingSubjects(
     bookAttributesManagerApi.author$,
     bookAttributesManagerApi.pages$,
@@ -27,59 +35,4 @@ const useBookAttributesV3 = (bookAttributesManager: StateManager<BookAttributes>
     synopsis,
     published,
   };
-};
-
-const useBookAttributesV2 = (bookAttributesManager: StateManager<BookAttributes>) => {
-  const { api: bookAttributesManagerApi } = bookAttributesManager as StateManager<BookAttributesV2>;
-  const [author, pages, title, synopsis, published] = useBatchedPublishingSubjects(
-    bookAttributesManagerApi.author$,
-    bookAttributesManagerApi.numberOfPages$,
-    bookAttributesManagerApi.bookTitle$,
-    bookAttributesManagerApi.synopsis$,
-    bookAttributesManagerApi.publicationYear$
-  );
-
-  return {
-    author,
-    pages,
-    title,
-    synopsis,
-    published,
-  };
-};
-
-const useBookAttributesV1 = (bookAttributesManager: StateManager<BookAttributes>) => {
-  const { api: bookAttributesManagerApi } = bookAttributesManager as StateManager<BookAttributesV1>;
-  const [author, pages, title, synopsis] = useBatchedPublishingSubjects(
-    bookAttributesManagerApi.authorName$,
-    bookAttributesManagerApi.numberOfPages$,
-    bookAttributesManagerApi.bookTitle$,
-    bookAttributesManagerApi.bookSynopsis$
-  );
-
-  return {
-    author,
-    pages,
-    title,
-    synopsis,
-  };
-};
-
-export const useBookAttributePublishingSubjects: (
-  apiVersion: number,
-  bookAttributesManager: StateManager<BookAttributes>
-) => {
-  author: string;
-  pages: number;
-  title: string;
-  synopsis?: string;
-  published?: number;
-} = (apiVersion, bookAttributesManager) => {
-  const useAttributes =
-    apiVersion === 3
-      ? useBookAttributesV3
-      : apiVersion === 2
-      ? useBookAttributesV2
-      : useBookAttributesV1;
-  return useAttributes(bookAttributesManager);
 };

@@ -10,23 +10,20 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { EmbeddableStart, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getPageApi } from '../page_api';
 import { AddButton } from './add_button';
 import { TopNav } from './top_nav';
 import { lastSavedStateSessionStorage } from '../session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from '../session_storage/unsaved_changes';
-import { versionSessionStorage } from '../session_storage/version';
 
 export const PresentationContainerExample = ({
   embeddable,
@@ -50,8 +47,6 @@ export const PresentationContainerExample = ({
     componentApi.layout$,
     pageApi.timeRange$
   );
-
-  const selectedVersion = useMemo(() => versionSessionStorage.load(), []);
 
   return (
     <div>
@@ -79,29 +74,6 @@ export const PresentationContainerExample = ({
           >
             Reset
           </EuiButtonEmpty>
-        </p>
-        <p>
-          You can switch between API versions of embeddables using these buttons. A production
-          implementation will always display the most recent version of an embeddable and use
-          versioning logic strictly on the backend.
-        </p>
-        <p>
-          <EuiButtonGroup
-            color="primary"
-            legend="Selected version"
-            options={[
-              { id: '1', label: 'v1' },
-              { id: '2', label: 'v2' },
-              { id: '3', label: 'v3' },
-              { id: 'latest', label: 'latest' },
-            ]}
-            type="single"
-            idSelected={selectedVersion}
-            onChange={(id) => {
-              versionSessionStorage.save(id);
-              window.location.reload();
-            }}
-          />
         </p>
       </EuiCallOut>
 
@@ -138,20 +110,18 @@ export const PresentationContainerExample = ({
 
       {layout.map(({ id, type }) => {
         return (
-          <>
-            <div key={id} css={css({ height: '200px' })}>
-              <EmbeddableRenderer
-                type={type}
-                maybeId={id}
-                getParentApi={() => pageApi}
-                hidePanelChrome={false}
-                onApiAvailable={(api) => {
-                  componentApi.setChild(id, api);
-                }}
-              />
-            </div>
+          <div key={id} style={{ height: '200' }}>
+            <EmbeddableRenderer
+              type={type}
+              maybeId={id}
+              getParentApi={() => pageApi}
+              hidePanelChrome={false}
+              onApiAvailable={(api) => {
+                componentApi.setChild(id, api);
+              }}
+            />
             <EuiSpacer size="s" />
-          </>
+          </div>
         );
       })}
 

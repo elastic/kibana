@@ -9,14 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-const savedBookAttributesBaseSchema = schema.object({
-  // Keys from V1. None of these can be removed, any new keys added in the future must be optional or have default values
+export const savedBookAttributesSchema = schema.object({
   bookTitle: schema.string(),
   authorName: schema.string(),
   numberOfPages: schema.number(),
   bookSynopsis: schema.maybe(schema.string()),
-});
-
-export const savedBookAttributesSchema = savedBookAttributesBaseSchema.extends({
   publicationYear: schema.maybe(schema.number()),
 });

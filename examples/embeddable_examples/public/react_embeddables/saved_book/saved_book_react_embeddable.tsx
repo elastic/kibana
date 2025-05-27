@@ -46,7 +46,6 @@ import {
   BookRuntimeState,
   BookSerializedState,
 } from './types';
-import { PageApi } from '../../app/presentation_container_example/types';
 import { useBookAttributePublishingSubjects } from './use_book_attribute_publishing_subjects';
 
 const bookSerializedStateIsByReference = (
@@ -61,8 +60,7 @@ const bookAttributeComparators: StateComparators<{ attributes: BookAttributes }>
 
 const deserializeState = async (
   serializedState: SerializedPanelState<BookSerializedState>,
-  embeddable: EmbeddableStart,
-  apiVersion: number
+  embeddable: EmbeddableStart
 ): Promise<BookRuntimeState> => {
   // panel state is always stored with the parent.
   const titlesState: SerializedTitles = {
@@ -75,7 +73,7 @@ const deserializeState = async (
     ? serializedState.rawState.savedObjectId
     : undefined;
   const attributes: BookAttributes = bookSerializedStateIsByReference(serializedState.rawState)
-    ? await loadBookAttributes(embeddable, apiVersion, serializedState.rawState.savedObjectId)!
+    ? await loadBookAttributes(embeddable, serializedState.rawState.savedObjectId)!
     : serializedState.rawState.attributes;
 
   // Combine the serialized state from the parent with the state from the
@@ -91,13 +89,12 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
   const savedBookEmbeddableFactory: EmbeddableFactory<BookSerializedState, BookApi> = {
     type: SAVED_BOOK_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const apiVersion = (parentApi as PageApi)?.getVersionForPanelType?.(SAVED_BOOK_ID) ?? 1;
-      const state = await deserializeState(initialState, embeddable, apiVersion);
+      const state = await deserializeState(initialState, embeddable);
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const bookAttributesManager = initializeStateManager<BookAttributes>(
         state,
-        defaultBookAttributes[apiVersion] as WithAllKeys<BookAttributes>
+        defaultBookAttributes as WithAllKeys<BookAttributes>
       );
 
       const isByReference = Boolean(state.savedObjectId);
@@ -134,9 +131,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
           };
         },
         onReset: async (lastSaved) => {
-          const lastRuntimeState = lastSaved
-            ? await deserializeState(lastSaved, embeddable, apiVersion)
-            : {};
+          const lastRuntimeState = lastSaved ? await deserializeState(lastSaved, embeddable) : {};
           titleManager.reinitializeState(lastRuntimeState);
           bookAttributesManager.reinitializeState(lastRuntimeState);
         },
@@ -153,7 +148,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
             core,
             api,
             embeddable,
-            apiVersion,
           }).then((result) => {
             const nextIsByReference = Boolean(result.savedObjectId);
 
@@ -179,7 +173,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
           bookAttributesManager.api.setBookTitle(newTitle);
           const newId = await saveBookAttributes(
             embeddable,
-            apiVersion,
             undefined,
             bookAttributesManager.getLatestState()
           );
@@ -201,10 +194,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
       return {
         api,
         Component: () => {
-          const bookAttributes = useBookAttributePublishingSubjects(
-            apiVersion,
-            bookAttributesManager
-          );
+          const bookAttributes = useBookAttributePublishingSubjects(bookAttributesManager);
           const { author, pages, title, synopsis, published = null } = bookAttributes;
           const { euiTheme } = useEuiTheme();
 
@@ -261,7 +251,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
                           })}
                         </EuiBadge>
                       </EuiFlexItem>
-                      {apiVersion >= 2 && published !== null && (
+                      {published !== null && (
                         <EuiFlexItem grow={false}>
                           <EuiBadge iconType="calendar" color="hollow">
                             {i18n.translate('embeddableExamples.savedBook.publicationYear', {
@@ -276,16 +266,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
                   <EuiFlexItem>
                     <EuiText>{synopsis}</EuiText>
                   </EuiFlexItem>
-                  <EuiFlexGroup justifyContent="flexEnd">
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        {i18n.translate('embeddableExamples.savedBook.apiVersion', {
-                          defaultMessage: 'API version {apiVersion}',
-                          values: { apiVersion },
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
                 </EuiFlexGroup>
               </div>
             </div>

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { bookAttributesDefinition } from './v2';
+export { bookAttributesDefinition } from './schema';

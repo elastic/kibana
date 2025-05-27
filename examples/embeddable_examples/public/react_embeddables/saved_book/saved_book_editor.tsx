@@ -34,7 +34,6 @@ import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { BookApi, BookAttributes } from './types';
 import { saveBookAttributes } from './saved_book_library';
 import { useBookAttributePublishingSubjects } from './use_book_attribute_publishing_subjects';
-import { getVersionedAttributeApi } from './get_versioned_attribute_api';
 
 export const openSavedBookEditor = ({
   attributesManager,
@@ -43,7 +42,6 @@ export const openSavedBookEditor = ({
   parent,
   api,
   embeddable,
-  apiVersion,
 }: {
   attributesManager: StateManager<BookAttributes>;
   isCreate: boolean;
@@ -51,7 +49,6 @@ export const openSavedBookEditor = ({
   parent?: unknown;
   api?: BookApi;
   embeddable: CanGetEmbeddableContentManagementDefinition;
-  apiVersion: number;
 }): Promise<{ savedObjectId?: string }> => {
   return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
@@ -63,7 +60,6 @@ export const openSavedBookEditor = ({
     const overlay = core.overlays.openFlyout(
       toMountPoint(
         <SavedBookEditor
-          apiVersion={apiVersion}
           api={api}
           isCreate={isCreate}
           attributesManager={attributesManager}
@@ -76,7 +72,6 @@ export const openSavedBookEditor = ({
             const savedObjectId = addToLibrary
               ? await saveBookAttributes(
                   embeddable,
-                  apiVersion,
                   api?.getSavedBookId(),
                   attributesManager.getLatestState()
                 )
@@ -109,14 +104,12 @@ export const SavedBookEditor = ({
   onSubmit,
   onCancel,
   api,
-  apiVersion,
 }: {
   attributesManager: StateManager<BookAttributes>;
   isCreate: boolean;
   onSubmit: (addToLibrary: boolean) => Promise<void>;
   onCancel: () => void;
   api?: BookApi;
-  apiVersion: number;
 }) => {
   const {
     author,
@@ -124,12 +117,12 @@ export const SavedBookEditor = ({
     title,
     pages,
     published = null,
-  } = useBookAttributePublishingSubjects(apiVersion, attributesManager);
+  } = useBookAttributePublishingSubjects(attributesManager);
 
   const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedBookId()));
   const [saving, setSaving] = useState(false);
 
-  const attributesManagerApi = getVersionedAttributeApi(apiVersion, attributesManager);
+  const attributesManagerApi = attributesManager.api;
 
   return (
     <>
@@ -191,19 +184,17 @@ export const SavedBookEditor = ({
             onChange={(e) => attributesManagerApi.setSynopsis(e.target.value)}
           />
         </EuiFormRow>
-        {apiVersion >= 2 && (
-          <EuiFormRow
-            label={i18n.translate('embeddableExamples.savedBook.editor.publicationYearLabel', {
-              defaultMessage: 'Year of publication',
-            })}
-          >
-            <EuiFieldNumber
-              disabled={saving}
-              value={published ?? ''}
-              onChange={(e) => attributesManagerApi.setPublished(+e.target.value)}
-            />
-          </EuiFormRow>
-        )}
+        <EuiFormRow
+          label={i18n.translate('embeddableExamples.savedBook.editor.publicationYearLabel', {
+            defaultMessage: 'Year of publication',
+          })}
+        >
+          <EuiFieldNumber
+            disabled={saving}
+            value={published ?? ''}
+            onChange={(e) => attributesManagerApi.setPublished(+e.target.value)}
+          />
+        </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

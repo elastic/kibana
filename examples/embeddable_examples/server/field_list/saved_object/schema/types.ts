@@ -8,6 +8,6 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { savedFieldListAttributesSchema } from './v1';
+import { savedFieldListAttributesSchema } from './schema';
 
 export type SavedFieldListAttributes = TypeOf<typeof savedFieldListAttributesSchema>;

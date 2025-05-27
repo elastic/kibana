@@ -17,14 +17,14 @@ const storage = new Storage(localStorage);
 
 export const loadBookAttributes = async (
   embeddable: CanGetEmbeddableContentManagementDefinition,
-  apiVersion: number,
   id: string
 ): Promise<BookAttributes> => {
   await new Promise((r) => setTimeout(r, 500)); // simulate load from network.
   const attributes = storage.get(id) as BookAttributes;
   const embeddableCmDefinitions =
     embeddable.getEmbeddableContentManagementDefinition(SAVED_BOOK_ID);
-  const { savedObjectToItem } = embeddableCmDefinitions?.versions[apiVersion] ?? {};
+  const { savedObjectToItem } =
+    embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
   if (!savedObjectToItem) return attributes;
   const { attributes: transformedAttributes } = await savedObjectToItem({
     attributes,
@@ -35,7 +35,6 @@ export const loadBookAttributes = async (
 
 export const saveBookAttributes = async (
   embeddable: CanGetEmbeddableContentManagementDefinition,
-  apiVersion: number,
   maybeId?: string,
   attributes?: BookAttributes
 ): Promise<string> => {
@@ -43,7 +42,8 @@ export const saveBookAttributes = async (
   const id = maybeId ?? v4();
   const embeddableCmDefinitions =
     embeddable.getEmbeddableContentManagementDefinition(SAVED_BOOK_ID);
-  const { itemToSavedObject } = embeddableCmDefinitions?.versions[apiVersion] ?? {};
+  const { itemToSavedObject } =
+    embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
   if (!itemToSavedObject) {
     storage.set(id, attributes);
   } else {

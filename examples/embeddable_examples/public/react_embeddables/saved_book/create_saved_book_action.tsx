@@ -19,7 +19,6 @@ import { defaultBookAttributes } from './book_state';
 import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
 import { BookAttributes, BookSerializedState } from './types';
-import { PageApi } from '../../app/presentation_container_example/types';
 
 export const registerCreateSavedBookAction = (
   uiActions: UiActionsPublicStart,
@@ -35,15 +34,13 @@ export const registerCreateSavedBookAction = (
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      const apiVersion = (embeddable as PageApi)?.getVersionForPanelType?.(SAVED_BOOK_ID) ?? 1;
       const newPanelStateManager = initializeStateManager<BookAttributes>(
-        defaultBookAttributes[apiVersion],
-        defaultBookAttributes[apiVersion]
+        defaultBookAttributes,
+        defaultBookAttributes
       );
 
       const { savedObjectId } = await openSavedBookEditor({
         attributesManager: newPanelStateManager,
-        apiVersion,
         parent: embeddable,
         isCreate: true,
         core,

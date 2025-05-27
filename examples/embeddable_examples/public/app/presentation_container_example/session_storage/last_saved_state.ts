@@ -12,7 +12,6 @@ import {
   EmbeddableContentManagementDefinition,
   SavedObjectAttributesWithReferences,
 } from '@kbn/embeddable-plugin/common/types';
-import { versionSessionStorage } from './version';
 import { PageState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
@@ -33,14 +32,11 @@ const isByValue = (
   serializedState !== null &&
   'attributes' in serializedState;
 
-const getVersionOfDefinition = (
-  version: string,
+const getLatestVersionOfDefinition = (
   embeddableCmDefinitions?: EmbeddableContentManagementDefinition
 ) => {
   if (!embeddableCmDefinitions) return {};
-  if (version === 'latest' || !embeddableCmDefinitions.versions[Number(version)])
-    return embeddableCmDefinitions.versions[embeddableCmDefinitions.latestVersion];
-  return embeddableCmDefinitions?.versions[Number(version)];
+  return embeddableCmDefinitions.versions[embeddableCmDefinitions.latestVersion];
 };
 
 export const lastSavedStateSessionStorage = {
@@ -60,10 +56,7 @@ export const lastSavedStateSessionStorage = {
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
         panel.type
       );
-      const { savedObjectToItem } = getVersionOfDefinition(
-        versionSessionStorage.load(),
-        embeddableCmDefinitions
-      );
+      const { savedObjectToItem } = getLatestVersionOfDefinition(embeddableCmDefinitions);
       if (!savedObjectToItem) return panel;
       const newState = savedObjectToItem(rawState);
 
@@ -85,10 +78,7 @@ export const lastSavedStateSessionStorage = {
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
         panel.type
       );
-      const { itemToSavedObject } = getVersionOfDefinition(
-        versionSessionStorage.load(),
-        embeddableCmDefinitions
-      );
+      const { itemToSavedObject } = getLatestVersionOfDefinition(embeddableCmDefinitions);
       if (!itemToSavedObject) return panel;
       const savedState = itemToSavedObject(rawState);
       return {
