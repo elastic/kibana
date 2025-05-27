@@ -17,7 +17,6 @@ import moment from 'moment';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import type { ConfigSchema as AiopsConfigSchema } from '@kbn/aiops-plugin/server';
 import { get, identity } from 'lodash';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
@@ -69,8 +68,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   const { hasAtLeast } = useLicense();
   const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
-  const aiopsCapabilities: AiopsConfigSchema | undefined = application?.capabilities.aiops;
-  const aiopsEnabled = aiopsCapabilities?.ui?.enabled ?? false;
+  const aiopsEnabled = application?.capabilities.aiops.enabled ?? false;
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {

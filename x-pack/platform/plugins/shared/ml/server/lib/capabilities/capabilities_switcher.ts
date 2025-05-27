@@ -10,7 +10,6 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import type { ConfigSchema as AiopsConfigSchema } from '@kbn/aiops-plugin/server';
 import type { MlFeatures } from '../../../common/constants/app';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import {
@@ -56,8 +55,7 @@ function getSwitcher(
       const originalCapabilities = capabilities.ml as MlCapabilities;
       const mlCaps = cloneDeep(originalCapabilities);
 
-      const aiopsCapabilities: AiopsConfigSchema = capabilities.aiops;
-      if (aiopsCapabilities?.ui?.enabled === false) {
+      if (capabilities.aiops.enabled === false) {
         mlCaps.canUseAiops = false;
       }
 

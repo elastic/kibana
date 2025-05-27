@@ -15,9 +15,7 @@ export const setupCapabilities = (
   core.capabilities.registerProvider(() => {
     return {
       aiops: {
-        ui: {
-          enabled,
-        },
+        enabled,
       },
     };
   });
