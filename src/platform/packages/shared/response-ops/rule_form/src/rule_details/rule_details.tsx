@@ -28,7 +28,7 @@ import {
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
-import { InvestigationGuideEditor } from '../rule_definition/rule_investigation_guide_editor';
+import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 
