@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// eslint-disable-next-line import/no-nodejs-modules
 import crypto from 'crypto';
 
 const key = crypto.createHash('sha256').update('ELASTIC').digest();

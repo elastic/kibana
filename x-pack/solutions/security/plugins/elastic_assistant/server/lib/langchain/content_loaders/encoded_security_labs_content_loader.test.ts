@@ -7,8 +7,7 @@
 
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
-import { resolve } from 'path';
-import path from 'path';
+import path, { resolve } from 'path';
 import globby from 'globby';
 import { PLAIN_TEXT_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 
