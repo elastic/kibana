@@ -205,16 +205,20 @@ const compareIntegrations = (
         ccrIntegration.install_status !== 'not_installed' &&
         localIntegrationSO?.attributes.install_status === 'install_failed'
       ) {
-        const latestFailedAttemptTime = localIntegrationSO?.attributes
-          ?.latest_install_failed_attempts?.[0].created_at
-          ? `at ${new Date(
-              localIntegrationSO?.attributes?.latest_install_failed_attempts?.[0].created_at
-            ).toUTCString()}`
-          : '';
-        const latestFailedAttempt = localIntegrationSO?.attributes
-          ?.latest_install_failed_attempts?.[0]?.error?.message
-          ? `error: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
-          : '';
+        let latestFailedAttemptTime = '';
+        let latestFailedAttempt = '';
+
+        if (localIntegrationSO?.attributes?.latest_install_failed_attempts?.[0]) {
+          const latestInstallFailedAttempts =
+            localIntegrationSO.attributes.latest_install_failed_attempts[0];
+          latestFailedAttemptTime = `at ${new Date(
+            latestInstallFailedAttempts.created_at
+          ).toUTCString()}`;
+          latestFailedAttempt = latestInstallFailedAttempts.error?.message
+            ? `error: ${latestInstallFailedAttempts.error?.message}`
+            : '';
+        }
+
         return {
           ...baseIntegrationData,
           install_status: {
@@ -231,16 +235,19 @@ const compareIntegrations = (
         ccrIntegration.install_status === 'not_installed' &&
         localIntegrationSO?.attributes.install_status === 'installed'
       ) {
-        const latestUninstallFailedAttemptTime = localIntegrationSO?.attributes
-          ?.latest_uninstall_failed_attempts?.[0].created_at
-          ? `at ${new Date(
-              localIntegrationSO?.attributes?.latest_uninstall_failed_attempts?.[0].created_at
-            ).toUTCString()}`
-          : '';
-        const latestUninstallFailedAttempt = localIntegrationSO?.attributes
-          ?.latest_uninstall_failed_attempts?.[0]?.error?.message
-          ? `${localIntegrationSO?.attributes?.latest_uninstall_failed_attempts[0].error.message}`
-          : '';
+        let latestUninstallFailedAttemptTime = '';
+        let latestUninstallFailedAttempt = '';
+
+        if (localIntegrationSO?.attributes?.latest_uninstall_failed_attempts?.[0]) {
+          const latestInstallFailedAttempts =
+            localIntegrationSO.attributes.latest_uninstall_failed_attempts[0];
+          latestUninstallFailedAttemptTime = `at ${new Date(
+            latestInstallFailedAttempts.created_at
+          ).toUTCString()}`;
+          latestUninstallFailedAttempt = latestInstallFailedAttempts.error?.message
+            ? `${latestInstallFailedAttempts.error?.message}`
+            : '';
+        }
         return {
           ...baseIntegrationData,
           install_status: {
