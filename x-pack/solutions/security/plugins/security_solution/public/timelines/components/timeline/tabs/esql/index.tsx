@@ -63,13 +63,16 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.detections);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
-  const [oldDataView, setDataView] = useState<DataViewSpec | undefined>();
+  const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const dataViewSpec: DataViewSpec | undefined = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldDataViewSpec]
+  );
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 
@@ -81,7 +84,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
   useEffect(() => {
     if (!dataViewId) return;
-    dataViewService.get(dataViewId).then((dv) => setDataView(dv?.toSpec?.()));
+    dataViewService.get(dataViewId).then((dv) => setDataViewSpec(dv?.toSpec?.()));
   }, [dataViewId, dataViewService]);
 
   const {
@@ -288,7 +291,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const DiscoverContainer = discover.DiscoverContainer;
 
   // TODO: (DV_PICKER) this should not work like that
-  const isLoading = !dataView;
+  const isLoading = !dataViewSpec;
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">
