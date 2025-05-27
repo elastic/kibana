@@ -9,7 +9,8 @@ import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
@@ -128,12 +129,18 @@ export class RuleMigrationTaskRunner {
 
     try {
       // TODO: track the duration of the initialization alone in the telemetry
-      this.logger.debug('Initializing migration');
+      this.logger.info('Initializing migration');
+      await this.saveRuleMigrationStarted();
       await this.withAbort(this.initialize()); // long running operation
     } catch (error) {
+      this.logger.error(`Migration initialization failed: ${error.message}`);
       migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
         this.logger.info('Abort signal received, stopping initialization');
+        await this.saveRuleMigrationCompleted({
+          isAborted: true,
+          error: '',
+        });
         return;
       } else {
         throw new Error(`Migration initialization failed. ${error}`);
@@ -176,6 +183,7 @@ export class RuleMigrationTaskRunner {
               ruleTranslationTelemetry.success(migrationResult);
             } catch (error) {
               if (error instanceof AbortError) {
+                this.logger.info(`Throwing AbortError for rule "${ruleMigration.id}"`);
                 throw error;
               }
               ruleTranslationTelemetry.failure(error);
@@ -199,8 +207,14 @@ export class RuleMigrationTaskRunner {
       migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
         this.logger.info('Abort signal received, stopping migration');
-        return;
+        await this.saveRuleMigrationCompleted({
+          isAborted: true,
+          error: '',
+        });
       } else {
+        await this.saveRuleMigrationCompleted({
+          error: error.message,
+        });
         throw new Error(`Error processing migration: ${error}`);
       }
     } finally {
@@ -348,7 +362,34 @@ export class RuleMigrationTaskRunner {
     return this.data.rules.saveCompleted(ruleMigrationTranslated);
   }
 
-  private async saveRuleFailed(ruleMigration: StoredRuleMigration, error: Error) {
+  private async saveRuleMigrationStarted() {
+    await this.data.migrations.updateLastExecution({
+      id: this.migrationId,
+      lastExecutionParams: {
+        started_at: new Date().toISOString(),
+        error: '',
+      },
+    });
+  }
+
+  private async saveRuleMigrationCompleted({
+    isAborted = false,
+    error,
+  }: {
+    isAborted?: boolean;
+    error?: string;
+  }) {
+    await this.data.migrations.updateLastExecution({
+      id: this.migrationId,
+      lastExecutionParams: {
+        ended_at: new Date().toISOString(),
+        is_aborted: isAborted,
+        error: error ?? '',
+      },
+    });
+  }
+
+  private async saveRuleFailed(ruleMigration: RuleMigrationRule, error: Error) {
     this.logger.error(`Error translating rule "${ruleMigration.id}" with error: ${error.message}`);
     const comments = [generateAssistantComment(`Error migrating rule: ${error.message}`)];
     return this.data.rules.saveError({ ...ruleMigration, comments });

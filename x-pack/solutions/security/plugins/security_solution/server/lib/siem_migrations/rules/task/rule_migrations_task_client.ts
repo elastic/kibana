@@ -10,11 +10,14 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigrationLastExecution,
+  RuleMigrationTaskStats,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
+import type { SiemRuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
 import type {
   RuleMigrationTaskEvaluateParams,
   RuleMigrationTaskStartParams,
@@ -27,8 +30,6 @@ import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
 export class RuleMigrationsTaskClient {
-  private static migrationsLastError = new Map<string, Error>();
-
   constructor(
     private migrationsRunning: MigrationsRunning,
     private logger: Logger,
@@ -80,14 +81,12 @@ export class RuleMigrationsTaskClient {
     migrationLogger.info('Starting migration');
 
     this.migrationsRunning.set(migrationId, migrationTaskRunner);
-    RuleMigrationsTaskClient.migrationsLastError.delete(migrationId);
 
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
       .run(invocationConfig)
       .catch((error) => {
         // no use in throwing the error, the `start` promise is long gone. Just store and log the error
-        RuleMigrationsTaskClient.migrationsLastError.set(migrationId, error);
         migrationLogger.error(`Error executing migration: ${error}`);
       })
       .finally(() => {
@@ -115,34 +114,50 @@ export class RuleMigrationsTaskClient {
 
   /** Returns the stats of a migration */
   public async getStats(migrationId: string): Promise<RuleMigrationTaskStats> {
+    const migration = await this.data.migrations.get({ id: migrationId });
+    if (!migration) {
+      throw new Error(`Migration with ID ${migrationId} not found`);
+    }
     const dataStats = await this.data.rules.getStats(migrationId);
-    const taskStats = this.getTaskStats(migrationId, dataStats.rules);
+    const taskStats = this.getTaskStats(migration, dataStats.rules);
     return { ...taskStats, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
   async getAllStats(): Promise<RuleMigrationTaskStats[]> {
     const allDataStats = await this.data.rules.getAllStats();
-    return allDataStats.map((dataStats) => {
-      const taskStats = this.getTaskStats(dataStats.id, dataStats.rules);
-      return { ...taskStats, ...dataStats };
-    });
+    const allMigrations = await this.data.migrations.getAll();
+    const allMigrationsMap = new Map<string, StoredSiemMigration>(
+      allMigrations.map((migration) => [migration.id, migration])
+    );
+
+    const allStats: RuleMigrationTaskStats[] = [];
+
+    for (const dataStats of allDataStats) {
+      const migration = allMigrationsMap.get(dataStats.id);
+      if (migration) {
+        const taksStats = this.getTaskStats(migration, dataStats.rules);
+        allStats.push({ ...taksStats, ...dataStats });
+      }
+    }
+    return allStats;
   }
 
   private getTaskStats(
-    migrationId: string,
+    migration: StoredSiemMigration,
     dataStats: RuleMigrationDataStats['rules']
   ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
-    const lastError = RuleMigrationsTaskClient.migrationsLastError.get(migrationId);
+    const lastError = migration?.last_execution?.error;
     return {
-      status: this.getTaskStatus(migrationId, dataStats),
-      ...(lastError && { last_error: lastError.message }),
+      status: this.getTaskStatus(migration.id, dataStats, migration?.last_execution),
+      ...(lastError && { last_error: lastError }),
     };
   }
 
   private getTaskStatus(
     migrationId: string,
-    dataStats: RuleMigrationDataStats['rules']
+    dataStats: RuleMigrationDataStats['rules'],
+    lastExecution?: RuleMigrationLastExecution
   ): SiemMigrationTaskStatus {
     if (this.migrationsRunning.has(migrationId)) {
       return SiemMigrationTaskStatus.RUNNING;
@@ -152,6 +167,9 @@ export class RuleMigrationsTaskClient {
     }
     if (dataStats.completed + dataStats.failed === dataStats.total) {
       return SiemMigrationTaskStatus.FINISHED;
+    }
+    if (lastExecution?.is_aborted) {
+      return SiemMigrationTaskStatus.ABORTED;
     }
     return SiemMigrationTaskStatus.STOPPED;
   }

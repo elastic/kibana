@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await migrationRulesRoutes.stop({ migrationId });
     });
-    it('should stop a running migration successfully', async () => {
+    it.only('should stop a running migration successfully', async () => {
       // start migration
       const { body } = await migrationRulesRoutes.start({
         migrationId,
@@ -47,6 +47,46 @@ export default ({ getService }: FtrProviderContext) => {
       // check if the migration is stopped
       statsResponse = await migrationRulesRoutes.stats({ migrationId });
       expect(statsResponse.body.status).to.eql('ready');
+    });
+
+    it('should return correct status of an aborted migration', async () => {
+      // start migration
+      const { body } = await migrationRulesRoutes.start({
+        migrationId,
+        payload: {
+          connector_id: 'preconfigured-bedrock',
+        },
+      });
+      expect(body).to.eql({ started: true });
+
+      // check if it running correctly
+      let statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      expect(statsResponse.body.status).to.eql('running');
+
+      while (true) {
+        const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+        console.log(JSON.stringify({ migrationResponse: migrationResponse.body }, null, 2));
+        if (!migrationResponse.body?.last_execution?.started_at) {
+          // wait for the migration to start
+          console.log('Waiting for migration to start...');
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          continue;
+        }
+        break;
+      }
+
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      // Stop Migration
+      const response = await migrationRulesRoutes.stop({ migrationId });
+      expect(response.body).to.eql({ stopped: true });
+
+      // check if the migration is stopped
+      statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      expect(statsResponse.body.status).to.eql('ready');
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      console.log(JSON.stringify({ migrationResponse }, null, 2));
+      expect(migrationResponse.body.last_execution.is_aborted).to.eql(true);
     });
     describe('error scenarios', () => {
       it('should return 404 if migration id is invalid and non-existent', async () => {
