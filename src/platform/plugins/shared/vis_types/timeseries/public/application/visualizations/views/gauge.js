@@ -58,7 +58,7 @@ const labelStyle = ({ euiTheme }) => css`
   padding: 0 ${euiTheme.size.s} ${euiTheme.size.xs};
 
   .tvbVisGauge--reversed & {
-    color: ${getVisVariables({ euiTheme }).tvbTextColor};
+    color: ${getVisVariables({ euiTheme }).tvbTextColorReversed};
   }
 `;
 
