@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import { ItemAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes, DashboardPanel } from '../../types';
 import { prefixReferencesFromPanel } from '../../../../../common';
@@ -28,7 +28,8 @@ export function transformPanelsIn(
     panelsWithIndex,
     embeddable
   );
-  const panelsJSON = flow(transformPanelsProperties, JSON.stringify)(extractedPanels);
+  const transformedPanels = transformPanelsProperties(extractedPanels, embeddable);
+  const panelsJSON = JSON.stringify(transformedPanels);
   return { panelsJSON, references: panelReferences };
 }
 
@@ -103,12 +104,26 @@ function extractPanelSavedObjectId(panel: DashboardPanel): {
   };
 }
 
-function transformPanelsProperties(panels: DashboardPanel[]) {
+function panelToSavedObject(
+  panelConfig: DashboardPanel['panelConfig'],
+  panelType: DashboardPanel['type'],
+  embeddable: EmbeddableStart
+) {
+  const embeddableCmDefintions = embeddable.getEmbeddableContentManagementDefinition(panelType);
+  if (!embeddableCmDefintions) return panelConfig;
+  const { itemToSavedObject } =
+    embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
+  return (
+    itemToSavedObject?.(panelConfig as unknown as ItemAttributesWithReferences<any>) ?? panelConfig
+  );
+}
+
+function transformPanelsProperties(panels: DashboardPanel[], embeddable: EmbeddableStart) {
   return panels.map(
     ({ panelConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
       gridData,
       id,
-      embeddableConfig: panelConfig,
+      embeddableConfig: panelToSavedObject(panelConfig, type, embeddable),
       panelIndex,
       panelRefName,
       title,

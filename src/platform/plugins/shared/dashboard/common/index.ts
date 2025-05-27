@@ -16,4 +16,10 @@ export type {
 
 export type { DashboardPanelMap, DashboardPanelState } from './dashboard_container/types';
 
+export {
+  getReferencesForPanelId,
+  getReferencesForControls,
+  prefixReferencesFromPanel,
+} from './dashboard_container/persistable_state/dashboard_container_references';
+
 export { type InjectExtractDeps } from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';

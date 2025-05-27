@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { SavedDashboardPanel } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes, DashboardPanel } from '../../types';
@@ -19,16 +18,17 @@ export function transformPanelsOut(
   embeddable: EmbeddableStart,
   references?: SavedObjectReference[]
 ): DashboardAttributes['panels'] {
-  const transformedPanels = flow(JSON.parse, transformPanelsProperties)(panelsJSON);
+  const parsedPanels = JSON.parse(panelsJSON);
+  const transformedPanels = transformPanelsProperties(parsedPanels, embeddable);
   return injectPanelReferences(transformedPanels, embeddable, references);
 }
 
-function transformPanelsProperties(panels: SavedDashboardPanel[]) {
+function transformPanelsProperties(panels: SavedDashboardPanel[], embeddable: EmbeddableStart) {
   return panels.map(
     ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
       gridData,
       id,
-      panelConfig: embeddableConfig,
+      panelConfig: savedPanelToItem(embeddableConfig, type, embeddable),
       panelIndex,
       panelRefName,
       title,
@@ -89,4 +89,16 @@ function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObject
       savedObjectId: matchingReference.id,
     },
   };
+}
+
+function savedPanelToItem(
+  embeddableConfig: SavedDashboardPanel['embeddableConfig'],
+  panelType: SavedDashboardPanel['type'],
+  embeddable: EmbeddableStart
+) {
+  const embeddableCmDefintions = embeddable.getEmbeddableContentManagementDefinition(panelType);
+  if (!embeddableCmDefintions) return embeddableConfig;
+  const { savedObjectToItem } =
+    embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
+  return savedObjectToItem?.(embeddableConfig as unknown as SavedObject) ?? embeddableConfig;
 }
