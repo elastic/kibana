@@ -79,6 +79,7 @@ const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName
 const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
   defaultMessage: 'Open',
 });
+const FAILURE_STORE_DOCS_URL = 'https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams-failure-store.html';
 
 const inactiveDatasetActivityColumnDescription = i18n.translate(
   'xpack.datasetQuality.inactiveDatasetActivityColumnDescription',
@@ -249,37 +250,37 @@ export const getDatasetQualityTableColumns = ({
     },
     ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
-          {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualitySizeColumn">
-                {sizeColumnName}
-              </EuiTableHeader>
-            ),
-            field: 'sizeBytes',
-            sortable: true,
-            render: (_: any, dataStreamStat: DataStreamStat) => {
-              return (
-                <PrivilegesWarningIconWrapper
-                  title={`sizeBytes-${dataStreamStat.title}`}
-                  hasPrivileges={dataStreamStat.userPrivileges?.canMonitor ?? true}
+        {
+          name: (
+            <EuiTableHeader data-test-subj="datasetQualitySizeColumn">
+              {sizeColumnName}
+            </EuiTableHeader>
+          ),
+          field: 'sizeBytes',
+          sortable: true,
+          render: (_: any, dataStreamStat: DataStreamStat) => {
+            return (
+              <PrivilegesWarningIconWrapper
+                title={`sizeBytes-${dataStreamStat.title}`}
+                hasPrivileges={dataStreamStat.userPrivileges?.canMonitor ?? true}
+              >
+                <EuiSkeletonRectangle
+                  width="60px"
+                  height="20px"
+                  borderRadius="m"
+                  isLoading={loadingDataStreamStats || loadingDocStats}
                 >
-                  <EuiSkeletonRectangle
-                    width="60px"
-                    height="20px"
-                    borderRadius="m"
-                    isLoading={loadingDataStreamStats || loadingDocStats}
-                  >
-                    {formatNumber(
-                      DataStreamStat.calculateFilteredSize(dataStreamStat),
-                      BYTE_NUMBER_FORMAT
-                    )}
-                  </EuiSkeletonRectangle>
-                </PrivilegesWarningIconWrapper>
-              );
-            },
-            width: '100px',
+                  {formatNumber(
+                    DataStreamStat.calculateFilteredSize(dataStreamStat),
+                    BYTE_NUMBER_FORMAT
+                  )}
+                </EuiSkeletonRectangle>
+              </PrivilegesWarningIconWrapper>
+            );
           },
-        ]
+          width: '100px',
+        },
+      ]
       : []),
     {
       name: (
@@ -337,25 +338,53 @@ export const getDatasetQualityTableColumns = ({
     },
     ...(canReadFailureStore
       ? [
-          {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
-                <EuiToolTip content={failedDocsColumnTooltip}>
-                  <span>
-                    {`${failedDocsColumnName} `}
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="questionInCircle"
-                      className="eui-alignTop"
-                    />
-                  </span>
-                </EuiToolTip>
-              </EuiTableHeader>
-            ),
-            field: 'failedDocs.percentage',
-            sortable: true,
-            render: (_: any, dataStreamStat: DataStreamStat) => (
+        {
+          name: (
+            <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
+              <EuiToolTip content={failedDocsColumnTooltip}>
+                <span>
+                  {`${failedDocsColumnName} `}
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignTop"
+                  />
+                </span>
+              </EuiToolTip>
+            </EuiTableHeader>
+          ),
+          field: 'failedDocs.percentage',
+          sortable: true,
+          render: (_: any, dataStreamStat: DataStreamStat) => {
+            if (!dataStreamStat.userPrivileges?.canReadFailureStore) {
+              const FailureStoreHoverLink = () => {
+                const [hovered, setHovered] = React.useState(false);
+                return (
+                  <EuiToolTip content={i18n.translate('xpack.datasetQuality.failureStore.notEnabled', {
+                    defaultMessage:
+                      'Failure store is not enabled for this data stream. Learn how to enable it.'
+                  })}>
+                    <EuiLink
+                      href={FAILURE_STORE_DOCS_URL}
+                      target="_blank"
+                      external={false}
+                      data-test-subj="datasetQualitySetFailureStoreLink"
+                      onMouseEnter={() => setHovered(true)}
+                      onMouseLeave={() => setHovered(false)}
+                    >
+                      {hovered
+                        ? i18n.translate('xpack.datasetQuality.failureStore.enable', {
+                          defaultMessage: 'Set failure store'
+                        })
+                        : 'N/A'}
+                    </EuiLink>
+                  </EuiToolTip>
+                );
+              };
+              return <FailureStoreHoverLink />;
+            }
+            return (
               <PrivilegesWarningIconWrapper
                 title={`sizeBytes-${dataStreamStat.title}`}
                 hasPrivileges={dataStreamStat.userPrivileges?.canReadFailureStore ?? true}
@@ -377,45 +406,46 @@ export const getDatasetQualityTableColumns = ({
                   dataTestSubj="datasetQualityFailedDocsPercentageLink"
                 />
               </PrivilegesWarningIconWrapper>
-            ),
-            width: '140px',
+            );
           },
-        ]
+          width: '140px',
+        },
+      ]
       : []),
     ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
-          {
-            name: (
-              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
-                {lastActivityColumnName}
-              </EuiTableHeader>
-            ),
-            field: 'lastActivity',
-            render: (timestamp: number) => (
-              <EuiSkeletonRectangle
-                width="200px"
-                height="20px"
-                borderRadius="m"
-                isLoading={loadingDataStreamStats}
-              >
-                {!isActiveDataset(timestamp) ? (
-                  <EuiFlexGroup gutterSize="xs" alignItems="center">
-                    <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-                    <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="iInCircle" size="s" />
-                    </EuiToolTip>
-                  </EuiFlexGroup>
-                ) : (
-                  fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-                    .convert(timestamp)
-                )}
-              </EuiSkeletonRectangle>
-            ),
-            width: '300px',
-            sortable: true,
-          },
-        ]
+        {
+          name: (
+            <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
+              {lastActivityColumnName}
+            </EuiTableHeader>
+          ),
+          field: 'lastActivity',
+          render: (timestamp: number) => (
+            <EuiSkeletonRectangle
+              width="200px"
+              height="20px"
+              borderRadius="m"
+              isLoading={loadingDataStreamStats}
+            >
+              {!isActiveDataset(timestamp) ? (
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+                  <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                    <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+                  </EuiToolTip>
+                </EuiFlexGroup>
+              ) : (
+                fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+                  .convert(timestamp)
+              )}
+            </EuiSkeletonRectangle>
+          ),
+          width: '300px',
+          sortable: true,
+        },
+      ]
       : []),
     {
       name: actionsColumnName,
