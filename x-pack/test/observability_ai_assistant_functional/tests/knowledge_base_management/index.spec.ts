@@ -178,25 +178,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(savedContent).to.eql(instruction);
       });
 
-      it('edits an existing user instruction', async () => {
-        // First create an instruction
-        await openUserInstructionFlyout();
-        await setUserInstructionContent('Initial instruction');
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
-
-        // Edit the instruction
-        await openUserInstructionFlyout();
-        await toasts.dismissAll();
-        const updatedInstruction = 'Updated instruction';
-        await setUserInstructionContent(updatedInstruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
-
-        // Verify the update in UI
-        await openUserInstructionFlyout();
-        const savedContent = await getUserInstructionContent();
-        expect(savedContent).to.eql(updatedInstruction);
-      });
-
       it('cancels editing without saving changes', async () => {
         // First create an instruction
         await openUserInstructionFlyout();

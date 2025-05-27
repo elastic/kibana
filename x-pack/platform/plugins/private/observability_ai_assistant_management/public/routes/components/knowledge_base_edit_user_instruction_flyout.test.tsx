@@ -164,4 +164,67 @@ describe('KnowledgeBaseEditUserInstructionFlyout', () => {
     // Verify flyout was closed
     expect(mockOnClose).toHaveBeenCalled();
   });
+
+  it('should update existing instruction with new text', async () => {
+    // Set up initial state with an existing instruction
+    const existingId = 'test-id';
+    const originalText = 'Original instruction';
+    const updatedText = 'This is the updated instruction text';
+
+    useGetUserInstructionsMock.mockReturnValue({
+      userInstructions: [
+        {
+          id: existingId,
+          text: originalText,
+          public: false,
+        },
+      ],
+      isLoading: false,
+      isRefetching: false,
+      isSuccess: true,
+      isError: false,
+      refetch: getUserInstructionsMock,
+    });
+
+    const wrapper = mountWithIntl(<KnowledgeBaseEditUserInstructionFlyout onClose={mockOnClose} />);
+
+    // Wait for the component to load and initialize with the existing instruction
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      wrapper.update();
+    });
+
+    // Verify the textarea is initialized with the original text
+    const initialTextarea = wrapper.find('textarea').first();
+    expect(initialTextarea.prop('value')).toBe(originalText);
+
+    // Update the instruction text
+    await act(async () => {
+      const textarea = wrapper.find('textarea').first();
+      textarea.simulate('change', { target: { value: updatedText } });
+    });
+
+    // Submit the form
+    await act(async () => {
+      const saveButton = wrapper.find(
+        'button[data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"]'
+      );
+      saveButton.simulate('click');
+    });
+
+    // Verify the update was called with the correct parameters
+    expect(createOrUpdateMock).toHaveBeenCalledWith({
+      entry: {
+        id: existingId,
+        text: updatedText,
+        public: false,
+      },
+    });
+
+    // Verify that delete was not called
+    expect(deleteMock).not.toHaveBeenCalled();
+
+    // Verify the flyout was closed
+    expect(mockOnClose).toHaveBeenCalled();
+  });
 });
