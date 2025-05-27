@@ -674,7 +674,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('testtest should delete the correct of alerts - security inactive alerts', async () => {
+        it('should delete the correct of alerts - security inactive alerts', async () => {
           // schedule the task
           const scheduleResponse = await supertestWithoutAuth
             .post(
