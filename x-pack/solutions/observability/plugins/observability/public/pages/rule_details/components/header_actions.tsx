@@ -6,13 +6,15 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
@@ -20,6 +22,8 @@ import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useKibana } from '../../../utils/kibana_react';
 import { useEnableRule } from '../../../hooks/use_enable_rule';
 import { useDisableRule } from '../../../hooks/use_disable_rule';
+import { useRunRule } from '../../../hooks/use_run_rule';
+import { useUpdateAPIKey } from '../../../hooks/use_update_api_key';
 interface HeaderActionsProps {
   ruleId: string;
   isLoading: boolean;
@@ -48,8 +52,18 @@ export function HeaderActions({
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
-  const { mutateAsync: enableRule } = useEnableRule();
-  const { mutateAsync: disableRule } = useDisableRule();
+  const { euiTheme } = useEuiTheme();
+
+  const collapsedItemActionsCss = css`
+    .collapsedItemActions__deleteButton {
+      color: ${euiTheme.colors.textDanger};
+    }
+  `;
+
+  const { mutate: enableRule } = useEnableRule();
+  const { mutate: disableRule } = useDisableRule();
+  const { mutate: runRule } = useRunRule();
+  const { mutate: updateAPIKey } = useUpdateAPIKey();
 
   const onDisableModalClose = () => {
     setIsUntrackAlertsModalOpen(false);
@@ -69,6 +83,20 @@ export function HeaderActions({
   const handleRemoveRule = () => {
     setIsRuleEditPopoverOpen(false);
     onDeleteRule();
+  };
+
+  const handleRunRule = () => {
+    setIsRuleEditPopoverOpen(false);
+    runRule({
+      id: ruleId,
+    });
+  };
+
+  const handleUpdateAPIKey = () => {
+    setIsRuleEditPopoverOpen(false);
+    updateAPIKey({
+      id: ruleId,
+    });
   };
 
   const handleEnableRule = () => {
@@ -95,12 +123,73 @@ export function HeaderActions({
     return null;
   }
 
+  const disableRuleOption = {
+    'data-test-subj': 'disableRuleButton',
+    onClick: onDisableModalOpen,
+    name: i18n.translate('xpack.observability.ruleDetails.disableRule', {
+      defaultMessage: 'Disable',
+    }),
+  };
+
+  const enableRuleOption = {
+    'data-test-subj': 'enableRuleButton',
+    onClick: handleEnableRule,
+    name: i18n.translate('xpack.observability.ruleDetails.enableRule', {
+      defaultMessage: 'Enable',
+    }),
+  };
+
+  const panels = [
+    {
+      id: 0,
+      hasFocus: false,
+      items: [
+        ...[rule.enabled ? disableRuleOption : enableRuleOption],
+        {
+          'data-test-subj': 'runRuleButton',
+          onClick: handleRunRule,
+          name: i18n.translate('xpack.observability.ruleDetails.runRule', {
+            defaultMessage: 'Run',
+          }),
+        },
+        {
+          'data-test-subj': 'updateAPIKeyButton',
+          onClick: handleUpdateAPIKey,
+          name: i18n.translate('xpack.observability.ruleDetails.updateAPIkey', {
+            defaultMessage: 'Update API key',
+          }),
+        },
+        {
+          isSeparator: true as const,
+        },
+        {
+          icon: 'pencil',
+          'data-test-subj': 'editRuleButton',
+          onClick: handleEditRule,
+          name: i18n.translate('xpack.observability.ruleDetails.editRule', {
+            defaultMessage: 'Edit',
+          }),
+        },
+        {
+          icon: 'trash',
+          'data-test-subj': 'deleteRuleButton',
+          className: 'collapsedItemActions__deleteButton',
+          onClick: handleRemoveRule,
+          name: i18n.translate('xpack.observability.ruleDetails.deleteRule', {
+            defaultMessage: 'Delete',
+          }),
+        },
+      ],
+    },
+  ];
+
   return (
     <>
-      <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
+      <EuiFlexGroup direction="rowReverse" alignItems="center">
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"
+            panelPaddingSize="none"
             isOpen={isRuleEditPopoverOpen}
             closePopover={togglePopover}
             button={
@@ -118,75 +207,25 @@ export function HeaderActions({
               </EuiButton>
             }
           >
-            <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-              <EuiButtonEmpty
-                data-test-subj="snoozeRuleButton"
-                size="s"
-                iconType={!getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
-                onClick={() => {
-                  setSnoozeModalOpen(true);
-                }}
-              >
-                <EuiText size="s">
-                  {i18n.translate('xpack.observability.ruleDetails.snoozeButton.snoozeSchedule', {
-                    defaultMessage: 'Update snooze schedule',
-                  })}
-                </EuiText>
-              </EuiButtonEmpty>
-              {rule.enabled ? (
-                <EuiButtonEmpty
-                  data-test-subj="disableRuleButton"
-                  size="s"
-                  iconType="pause"
-                  onClick={onDisableModalOpen}
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.ruleDetails.disableRule', {
-                      defaultMessage: 'Disable',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
-              ) : (
-                <EuiButtonEmpty
-                  data-test-subj="enableRuleButton"
-                  size="s"
-                  iconType="play"
-                  onClick={handleEnableRule}
-                >
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.ruleDetails.enableRule', {
-                      defaultMessage: 'Enable',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
-              )}
-              <EuiButtonEmpty
-                data-test-subj="editRuleButton"
-                size="s"
-                iconType="pencil"
-                onClick={handleEditRule}
-              >
-                <EuiText size="s">
-                  {i18n.translate('xpack.observability.ruleDetails.editRule', {
-                    defaultMessage: 'Edit rule',
-                  })}
-                </EuiText>
-              </EuiButtonEmpty>
-              <EuiButtonEmpty
-                size="s"
-                iconType="trash"
-                color="danger"
-                onClick={handleRemoveRule}
-                data-test-subj="deleteRuleButton"
-              >
-                <EuiText size="s">
-                  {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
-                    defaultMessage: 'Delete rule',
-                  })}
-                </EuiText>
-              </EuiButtonEmpty>
-            </EuiFlexGroup>
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={panels}
+              className="actDetailsCollapsedItemActions"
+              data-test-subj="detailsCollapsedActionPanel"
+              data-testid="detailsCollapsedActionPanel"
+              css={collapsedItemActionsCss}
+            />
           </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiButtonIcon
+            className="snoozeButton"
+            data-test-subj="snoozeRuleButton"
+            iconType={getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
+            onClick={() => {
+              setSnoozeModalOpen(true);
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -197,9 +236,7 @@ export function HeaderActions({
             setSnoozeModalOpen(false);
             setIsRuleEditPopoverOpen(false);
           }}
-          onRuleChanged={async () => {
-            refetch();
-          }}
+          onRuleChanged={refetch}
           onLoading={noop}
         />
       )}
