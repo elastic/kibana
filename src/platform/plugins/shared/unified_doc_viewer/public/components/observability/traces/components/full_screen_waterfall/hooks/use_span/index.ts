@@ -52,6 +52,7 @@ export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
   const { data, core } = getUnifiedDocViewerServices();
   const [span, setSpan] = useState<Record<PropertyKey, any> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [docId, setDocId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!spanId) {
@@ -68,6 +69,7 @@ export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
         setLoading(true);
         const result = await getSpanData({ spanId, indexPattern, data, signal });
         setSpan({ ...result.rawResponse.hits.hits[0]?._source });
+        setDocId(result.rawResponse.hits.hits[0]?._id ?? null);
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
@@ -91,5 +93,5 @@ export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
     };
   }, [core.notifications.toasts, data, indexPattern, spanId]);
 
-  return { loading, span };
+  return { loading, span, docId };
 };

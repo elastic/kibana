@@ -45,7 +45,7 @@ describe('useSpan', () => {
 
   describe('when parameters are NOT missing', () => {
     it('should fetch span data successfully', async () => {
-      const mockHit = { _source: { name: 'test-span' } };
+      const mockHit = { _source: { name: 'test-span' }, _id: 'test-id' };
 
       mockSearch.mockReturnValue(
         of({
@@ -62,6 +62,7 @@ describe('useSpan', () => {
 
       expect(result.current.loading).toBe(false);
       expect(result.current.span).toEqual(mockHit._source);
+      expect(result.current.docId).toEqual(mockHit._id);
     });
   });
 
@@ -71,6 +72,7 @@ describe('useSpan', () => {
 
       expect(result.current.loading).toBe(false);
       expect(result.current.span).toBe(null);
+      expect(result.current.docId).toBe(null);
     });
   });
 
@@ -84,6 +86,7 @@ describe('useSpan', () => {
 
       expect(result.current.loading).toBe(false);
       expect(result.current.span).toBe(null);
+      expect(result.current.docId).toBe(null);
       expect(mockAddDanger).toHaveBeenCalledWith(
         expect.objectContaining({
           text: 'something went wrong',
