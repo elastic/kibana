@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import React, { createContext, useContext } from 'react';
+
+const VersionContext = createContext('1');
+
+export const VersionProvider: React.FC<React.PropsWithChildren<{ version: string }>> = ({
+  version,
+  children,
+}) => <VersionContext.Provider value={version}>{children}</VersionContext.Provider>;
+
+export const useVersionContext = () => useContext(VersionContext);

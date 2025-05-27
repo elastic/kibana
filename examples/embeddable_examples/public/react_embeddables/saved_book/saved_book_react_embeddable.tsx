@@ -18,17 +18,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
   initializeTitleManager,
   SerializedTitles,
   SerializedPanelState,
-  useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
   StateComparators,
+  WithAllKeys,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
@@ -46,22 +46,21 @@ import {
   BookRuntimeState,
   BookSerializedState,
 } from './types';
+import { useBookAttributePublishingSubjects } from './use_book_attribute_publishing_subjects';
 
 const bookSerializedStateIsByReference = (
   state?: BookSerializedState
 ): state is BookByReferenceSerializedState => {
-  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId);
+  return Boolean(state && (state as BookByReferenceSerializedState).savedObjectId);
 };
 
-const bookAttributeComparators: StateComparators<BookAttributes> = {
-  bookTitle: 'referenceEquality',
-  authorName: 'referenceEquality',
-  bookSynopsis: 'referenceEquality',
-  numberOfPages: 'referenceEquality',
+const bookAttributeComparators: StateComparators<{ attributes: BookAttributes }> = {
+  attributes: 'deepEquality',
 };
 
 const deserializeState = async (
-  serializedState: SerializedPanelState<BookSerializedState>
+  serializedState: SerializedPanelState<BookSerializedState>,
+  embeddable: EmbeddableStart
 ): Promise<BookRuntimeState> => {
   // panel state is always stored with the parent.
   const titlesState: SerializedTitles = {
@@ -70,12 +69,11 @@ const deserializeState = async (
     description: serializedState.rawState.description,
   };
 
-  const savedBookId = bookSerializedStateIsByReference(serializedState.rawState)
-    ? serializedState.rawState.savedBookId
+  const savedObjectId = bookSerializedStateIsByReference(serializedState.rawState)
+    ? serializedState.rawState.savedObjectId
     : undefined;
-
   const attributes: BookAttributes = bookSerializedStateIsByReference(serializedState.rawState)
-    ? await loadBookAttributes(serializedState.rawState.savedBookId)!
+    ? await loadBookAttributes(embeddable, serializedState.rawState.savedObjectId)!
     : serializedState.rawState.attributes;
 
   // Combine the serialized state from the parent with the state from the
@@ -83,27 +81,29 @@ const deserializeState = async (
   return {
     ...titlesState,
     ...attributes,
-    savedBookId,
+    savedObjectId,
   };
 };
 
-export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
+export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: EmbeddableStart) => {
   const savedBookEmbeddableFactory: EmbeddableFactory<BookSerializedState, BookApi> = {
     type: SAVED_BOOK_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const state = await deserializeState(initialState);
+      const state = await deserializeState(initialState, embeddable);
       const titleManager = initializeTitleManager(initialState.rawState);
+
       const bookAttributesManager = initializeStateManager<BookAttributes>(
         state,
-        defaultBookAttributes
+        defaultBookAttributes as WithAllKeys<BookAttributes>
       );
-      const isByReference = Boolean(state.savedBookId);
+
+      const isByReference = Boolean(state.savedObjectId);
 
       const serializeBook = (byReference: boolean, newId?: string) => {
         if (byReference) {
           // if this book is currently by reference, we serialize the reference only.
           const bookByReferenceState: BookByReferenceSerializedState = {
-            savedBookId: newId ?? state.savedBookId!,
+            savedObjectId: newId ?? state.savedObjectId!,
             ...titleManager.getLatestState(),
           };
           return { rawState: bookByReferenceState };
@@ -127,11 +127,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           return {
             ...titleComparators,
             ...bookAttributeComparators,
-            savedBookId: 'skip', // saved book id will not change over the lifetime of the embeddable.
+            savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
           };
         },
         onReset: async (lastSaved) => {
-          const lastRuntimeState = lastSaved ? await deserializeState(lastSaved) : {};
+          const lastRuntimeState = lastSaved ? await deserializeState(lastSaved, embeddable) : {};
           titleManager.reinitializeState(lastRuntimeState);
           bookAttributesManager.reinitializeState(lastRuntimeState);
         },
@@ -147,13 +147,14 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             isCreate: false,
             core,
             api,
+            embeddable,
           }).then((result) => {
-            const nextIsByReference = Boolean(result.savedBookId);
+            const nextIsByReference = Boolean(result.savedObjectId);
 
             // if the by reference state has changed during this edit, reinitialize the panel.
             if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
               api.parentApi.replacePanel<BookSerializedState>(api.uuid, {
-                serializedState: serializeBook(nextIsByReference, result.savedBookId),
+                serializedState: serializeBook(nextIsByReference, result.savedObjectId),
                 panelType: api.type,
               });
             }
@@ -167,10 +168,14 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         serializeState,
 
         // library transforms
-        getSavedBookId: () => state.savedBookId,
+        getSavedBookId: () => state.savedObjectId,
         saveToLibrary: async (newTitle: string) => {
           bookAttributesManager.api.setBookTitle(newTitle);
-          const newId = await saveBookAttributes(undefined, bookAttributesManager.getLatestState());
+          const newId = await saveBookAttributes(
+            embeddable,
+            undefined,
+            bookAttributesManager.getLatestState()
+          );
           return newId;
         },
         checkForDuplicateTitle: async (title) => {},
@@ -189,12 +194,8 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       return {
         api,
         Component: () => {
-          const [authorName, numberOfPages, bookTitle, synopsis] = useBatchedPublishingSubjects(
-            bookAttributesManager.api.authorName$,
-            bookAttributesManager.api.numberOfPages$,
-            bookAttributesManager.api.bookTitle$,
-            bookAttributesManager.api.bookSynopsis$
-          );
+          const bookAttributes = useBookAttributePublishingSubjects(bookAttributesManager);
+          const { author, pages, title, synopsis, published = null } = bookAttributes;
           const { euiTheme } = useEuiTheme();
 
           return (
@@ -232,24 +233,34 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                 >
                   <EuiFlexItem>
                     <EuiTitle size="m">
-                      <EuiText>{bookTitle}</EuiText>
+                      <EuiText>{title}</EuiText>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup wrap responsive={false} gutterSize="s">
                       <EuiFlexItem grow={false}>
                         <EuiBadge iconType="userAvatar" color="hollow">
-                          {authorName}
+                          {author}
                         </EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiBadge iconType="copy" color="hollow">
                           {i18n.translate('embeddableExamples.savedBook.numberOfPages', {
-                            defaultMessage: '{numberOfPages} pages',
-                            values: { numberOfPages },
+                            defaultMessage: '{pages} pages',
+                            values: { pages },
                           })}
                         </EuiBadge>
                       </EuiFlexItem>
+                      {published !== null && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge iconType="calendar" color="hollow">
+                            {i18n.translate('embeddableExamples.savedBook.publicationYear', {
+                              defaultMessage: 'Published {published}',
+                              values: { published },
+                            })}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem>

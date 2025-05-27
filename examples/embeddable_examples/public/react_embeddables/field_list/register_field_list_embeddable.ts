@@ -8,7 +8,7 @@
  */
 
 import { DashboardStart, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
-import { FIELD_LIST_ID } from './constants';
+import { FIELD_LIST_ID } from '../../../common/field_list/constants';
 
 const getPanelPlacementSetting = () => {
   // Consider using the serialized state to determine the width, height, and strategy

@@ -9,22 +9,50 @@
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { v4 } from 'uuid';
+import { CanGetEmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
 import { BookAttributes } from './types';
+import { SAVED_BOOK_ID } from './constants';
 
 const storage = new Storage(localStorage);
 
-export const loadBookAttributes = async (id: string): Promise<BookAttributes> => {
+export const loadBookAttributes = async (
+  embeddable: CanGetEmbeddableContentManagementDefinition,
+  id: string
+): Promise<BookAttributes> => {
   await new Promise((r) => setTimeout(r, 500)); // simulate load from network.
   const attributes = storage.get(id) as BookAttributes;
-  return attributes;
+  const embeddableCmDefinitions =
+    embeddable.getEmbeddableContentManagementDefinition(SAVED_BOOK_ID);
+  const { savedObjectToItem } =
+    embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
+  if (!savedObjectToItem) return attributes;
+  const { attributes: transformedAttributes } = await savedObjectToItem({
+    attributes,
+    references: [],
+  });
+  return transformedAttributes;
 };
 
 export const saveBookAttributes = async (
+  embeddable: CanGetEmbeddableContentManagementDefinition,
   maybeId?: string,
   attributes?: BookAttributes
 ): Promise<string> => {
   await new Promise((r) => setTimeout(r, 500)); // simulate save to network.
   const id = maybeId ?? v4();
-  storage.set(id, attributes);
+  const embeddableCmDefinitions =
+    embeddable.getEmbeddableContentManagementDefinition(SAVED_BOOK_ID);
+  const { itemToSavedObject } =
+    embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
+  if (!itemToSavedObject) {
+    storage.set(id, attributes);
+  } else {
+    const { attributes: transformedAttributes } = await itemToSavedObject({
+      attributes,
+      references: [],
+    });
+    storage.set(id, transformedAttributes);
+  }
+
   return id;
 };
