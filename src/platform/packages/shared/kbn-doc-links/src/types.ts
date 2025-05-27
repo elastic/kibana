@@ -55,7 +55,6 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
-    readonly serverlessGuide: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -172,6 +171,7 @@ export interface DocLinks {
   };
   readonly heartbeat: {
     readonly base: string;
+    readonly monitorTags: string;
   };
   readonly libbeat: {
     readonly getStarted: string;
@@ -255,7 +255,6 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
-    readonly dashboardImportExport: string;
     readonly upgradeNotes: string;
   };
   readonly upgradeAssistant: {
@@ -281,6 +280,7 @@ export interface DocLinks {
   };
   readonly server: {
     readonly protocol: string;
+    readonly publicBaseUrl: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
@@ -481,6 +481,7 @@ export interface DocLinks {
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
+    fingerprint: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
