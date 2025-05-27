@@ -22,7 +22,7 @@ export const runPanelPlacementStrategy = (
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
         // only consider collisions with panels in the same section
-        if (sectionId && panel.gridData.sectionId === sectionId) {
+        if (panel.gridData.sectionId === sectionId) {
           const { gridData, ...currentPanel } = cloneDeep(panel);
           const newGridData = { ...gridData, y: gridData.y + height };
           otherPanels[id] = { ...currentPanel, gridData: newGridData };
