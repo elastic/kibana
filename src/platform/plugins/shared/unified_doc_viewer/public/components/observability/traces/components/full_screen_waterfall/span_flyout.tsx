@@ -131,7 +131,7 @@ export const SpanFlyout = ({
                 documentAsHit.flattened[PARENT_ID_FIELD] ? (
                   <SpanOverview
                     hit={documentAsHit}
-                    transactionIndexPattern={tracesIndexPattern}
+                    tracesIndexPattern={tracesIndexPattern}
                     showWaterfall={false}
                     showActions={false}
                     dataView={dataView}
