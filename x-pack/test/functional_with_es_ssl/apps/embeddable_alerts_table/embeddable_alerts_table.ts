@@ -52,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         name,
         rule_type_id: `.es-query`,
         enabled: true,
-        schedule: { interval: '1m' },
+        schedule: { interval: '5s' },
         consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
         tags: [name],
         params: {
@@ -107,7 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         tags: ['security-rule'],
         setup: '',
         license: '',
-        interval: '1m',
+        interval: '5s',
         from: 'now-10m',
         to: 'now',
         actions: [],
@@ -151,9 +151,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       await pageObjects.home.addSampleDataSet('logs');
       const dataView = await getSampleWebLogsDataView();
-      const stackRule = await createEsQueryRule(dataView.id, 'stack');
-      const observabilityRule = await createEsQueryRule(dataView.id, 'observability');
-      const securityRule = await createSecurityRule(dataView.id);
+      const [stackRule, observabilityRule, securityRule] = await Promise.all([
+        createEsQueryRule(dataView.id, 'stack'),
+        createEsQueryRule(dataView.id, 'observability'),
+        createSecurityRule(dataView.id),
+      ]);
 
       // Refresh to see the created rules
       await browser.refresh();
@@ -169,10 +171,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const rulesWithoutAlerts = Object.entries(rulesAlerted)
           .filter(([_, alerted]) => !alerted)
           .map(([ruleId]) => ruleId);
-        for (const ruleId of rulesWithoutAlerts) {
-          const summary = await getRuleSummary(ruleId);
-          rulesAlerted[ruleId] = Object.keys(summary.alerts).length > 0;
-        }
+        await Promise.all(
+          rulesWithoutAlerts.map(async (ruleId) => {
+            const summary = await getRuleSummary(ruleId);
+            rulesAlerted[ruleId] = Object.keys(summary.alerts).length > 0;
+          })
+        );
         expect(Object.values(rulesAlerted).every((hasAlerts) => hasAlerts)).to.be(true);
       });
 
