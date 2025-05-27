@@ -36,6 +36,7 @@ import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indices';
+import { generateUserIndexMappings } from './indices';
 import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
 
 import {
@@ -50,6 +51,7 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
+import { PrivilegeMonitoringEngineDescriptorClient, PrivilegeIndexSourceDescriptorClient } from './saved_objects';
 import { PrivilegeMonitoringEngineDescriptorClient, PrivilegeIndexSourceDescriptorClient } from './saved_objects';
 
 interface PrivilegeMonitoringClientOpts {
@@ -70,12 +72,17 @@ export class PrivilegeMonitoringDataClient {
   private internalUserClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
   private indexSourceClient: PrivilegeIndexSourceDescriptorClient;
+  private indexSourceClient: PrivilegeIndexSourceDescriptorClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
     this.internalUserClient = opts.clusterClient.asInternalUser;
     this.apiKeyGenerator = opts.apiKeyManager;
     this.engineClient = new PrivilegeMonitoringEngineDescriptorClient({
+      soClient: opts.soClient,
+      namespace: opts.namespace,
+    });
+    this.indexSourceClient = new PrivilegeIndexSourceDescriptorClient({
       soClient: opts.soClient,
       namespace: opts.namespace,
     });
@@ -99,6 +106,17 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
+
+    // TODO: testing this out, remove log in future.
+    const indexSourceDescriptor = await this.indexSourceClient.createIndexSource({
+      type: 'index',
+      managed: true,
+      indexPattern: this.getIndex(),
+    });
+    this.log(
+      'debug',
+      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+    );
 
     // TODO: testing this out, remove log in future.
     const indexSourceDescriptor = await this.indexSourceClient.createIndexSource({
