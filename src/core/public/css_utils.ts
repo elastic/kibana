@@ -80,12 +80,12 @@ export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEu
   });
 };
 
-type StyleMap = Record<
+export type EmotionStyles = Record<
   string,
   Interpolation<Theme> | ((theme: UseEuiTheme) => Interpolation<Theme>)
 >;
 
-type StaticStyleMap = Record<string, Interpolation<Theme>>;
+type StaticEmotionStyles = Record<string, Interpolation<Theme>>;
 
 /**
  * Custom hook to reduce boilerplate when working with Emotion styles that may depend on
@@ -106,10 +106,10 @@ type StaticStyleMap = Record<string, Interpolation<Theme>>;
  *   }
  *   const styles = useMemoizedStyles(componentStyles);
  */
-export const useMemoizedStyles = (styleMap: StyleMap) => {
+export const useMemoizedStyles = (styleMap: EmotionStyles) => {
   const euiThemeContext = useEuiTheme();
   const outputStyles = useMemo(() => {
-    return Object.entries(styleMap).reduce<StaticStyleMap>((acc, [key, value]) => {
+    return Object.entries(styleMap).reduce<StaticEmotionStyles>((acc, [key, value]) => {
       acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
       return acc;
     }, {});

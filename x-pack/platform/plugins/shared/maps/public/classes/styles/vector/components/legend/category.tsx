@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, UseEuiTheme } from '@elastic/eui';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { VectorIcon } from './vector_icon';
 
@@ -30,7 +31,7 @@ export function Category({
   symbolId,
   svg,
 }: Props) {
-  const styles = useStyles();
+  const styles = useMemoizedStyles(categoryStyles);
 
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
@@ -55,7 +56,7 @@ export function Category({
 
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
-      <EuiFlexItem css={styles} grow={false}>
+      <EuiFlexItem css={styles.itemMargin} grow={false}>
         {renderIcon()}
       </EuiFlexItem>
       <EuiFlexItem>
@@ -65,7 +66,9 @@ export function Category({
   );
 }
 
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return useMemo(() => css({ width: euiTheme.size.l }), [euiTheme]);
+const categoryStyles = {
+  itemMargin: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.size.l,
+    }),
 };

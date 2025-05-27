@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React from 'react';
+import { UseEuiTheme } from '@elastic/eui';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { getIsDarkMode } from '../../../../../kibana_services';
 
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return useMemo(() => css({ margin: `0 ${euiTheme.size.xs}` }), [euiTheme]);
+const prependButtonStyles = {
+  icon: ({ euiTheme }: UseEuiTheme) => ({
+    margin: `0 ${euiTheme.size.xs}`,
+  }),
 };
 
 export const PrependButton = ({ value, svg }: { value: string; svg: string }) => {
-  const styles = useStyles();
+  const styles = useMemoizedStyles(prependButtonStyles);
   return (
     <SymbolIcon
       key={value}
-      css={styles}
+      css={styles.icon}
       symbolId={value}
       svg={svg}
       fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}

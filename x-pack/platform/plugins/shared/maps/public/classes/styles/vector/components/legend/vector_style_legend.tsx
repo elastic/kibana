@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { EuiText, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { StyleError } from './style_error';
 import {
   DynamicStyleProperty,
@@ -27,6 +28,19 @@ interface Props {
   svg?: string;
 }
 
+const vectorStyleLegendStyles = {
+  spacer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:not(:last-child)': {
+        marginBottom: euiTheme.size.s,
+      },
+    }),
+  li: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
+    }),
+};
+
 export function VectorStyleLegend({
   isLinesOnly,
   isPointsOnly,
@@ -37,11 +51,7 @@ export function VectorStyleLegend({
 }: Props) {
   const legendRows = [];
 
-  const { euiTheme } = useEuiTheme();
-  const spacerStyles = useMemo(
-    () => css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
-    [euiTheme]
-  );
+  const cssStyles = useMemoizedStyles(vectorStyleLegendStyles);
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
@@ -62,7 +72,7 @@ export function VectorStyleLegend({
     );
 
     legendRows.push(
-      <div key={i} css={spacerStyles}>
+      <div key={i} css={cssStyles.spacer}>
         {row}
       </div>
     );
@@ -95,7 +105,7 @@ export function VectorStyleLegend({
         </EuiText>
         <ul>
           {masksByFieldOrigin.map((mask) => (
-            <li key={mask.getEsAggField().getMbFieldName()} style={{ marginLeft: euiTheme.size.s }}>
+            <li key={mask.getEsAggField().getMbFieldName()} css={cssStyles.li}>
               <MaskLegend
                 esAggField={mask.getEsAggField()}
                 onlyShowLabelAndValue={true}

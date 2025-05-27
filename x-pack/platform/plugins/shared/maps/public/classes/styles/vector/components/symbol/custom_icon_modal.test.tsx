@@ -17,44 +17,8 @@ jest.mock('../../../../../kibana_services', () => ({
     };
   },
 }));
-jest.mock('@kbn/mapbox-gl', () => {
-  const zoomTo = jest.fn();
-  const setCenter = jest.fn();
-  const fitBounds = jest.fn();
-  return {
-    maplibregl: {
-      mocks: {
-        zoomTo,
-        setCenter,
-        fitBounds,
-      },
-      setRTLTextPlugin: jest.fn(),
-      Map: jest.fn().mockImplementation(() => ({
-        on: jest.fn(),
-        getLayer: () => '',
-        removeLayer: jest.fn(),
-        once: (eventName: string, handler: Function) => handler(),
-        remove: () => jest.fn(),
-        getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
-        getCenter: () => ({ lat: 20, lng: 20 }),
-        getZoom: () => 3,
-        zoomTo,
-        setCenter,
-        fitBounds,
-        addControl: jest.fn(),
-        addLayer: jest.fn(),
-        dragRotate: {
-          disable: jest.fn(),
-        },
-        touchZoomRotate: {
-          disableRotation: jest.fn(),
-        },
-      })),
-      MapboxOptions: jest.fn(),
-      NavigationControl: jest.fn(),
-    },
-  };
-});
+
+jest.mock('./icon_preview', () => ({ IconPreview: () => <div data-test-subj="iconPreview" /> }));
 
 const defaultProps = {
   cutoff: 0.25,
