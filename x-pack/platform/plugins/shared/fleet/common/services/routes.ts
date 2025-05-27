@@ -348,6 +348,7 @@ export const settingsRoutesService = {
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
   getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
   getSpaceInfoPath: () => SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
+  postSpaceAwarenessMigrationPath: () => APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
 };
 
 export const appRoutesService = {
