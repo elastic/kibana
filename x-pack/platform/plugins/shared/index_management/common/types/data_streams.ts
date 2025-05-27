@@ -90,3 +90,10 @@ export interface DataRetention {
   value?: number;
   unit?: string;
 }
+
+export interface DataStreamOptions {
+  failure_store?: {
+    enabled: boolean;
+  };
+  [key: string]: unknown;
+}
