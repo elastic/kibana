@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{}",
+      "showApplySelections": false
+    },
+    "description": "Some dashboard",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeRestore": false,
+    "title": "Some Dashboard",
+    "version": 3
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-05-09T14:33:00.927Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "a1395240-bc20-4cc7-8559-349d049622d2",
+  "managed": false,
+  "references": [
+    {
+      "id": "64b8958c-e914-48ff-a31d-fc51227093b8",
+      "name": "tag-ref-64b8958c-e914-48ff-a31d-fc51227093b8",
+      "type": "tag"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-05-09T14:33:00.927Z",
+  "version": "WzE2LDFd"
+}
