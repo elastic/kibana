@@ -15,9 +15,8 @@ import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../.
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { RouteDependencies } from '../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from './reindex_handler';
+import { reindexHandler } from '../lib/reindex_handler';
 
-// todo move
 export function registerReindexIndicesRoutes(
   {
     credentialStore,

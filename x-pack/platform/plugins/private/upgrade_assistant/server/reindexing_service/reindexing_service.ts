@@ -15,7 +15,6 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-// todo look at moving these to this dir
 import { ReindexWorker } from '../lib/reindexing';
 import { createReindexWorker } from './create_reindex_worker';
 import { CredentialStore, credentialStoreFactory } from '../lib/reindexing/credential_store';

@@ -13,10 +13,10 @@ import { REINDEX_OP_TYPE, ReindexStatus } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
 import { ReindexWorker } from '../../lib/reindexing';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
-import { sortAndOrderReindexOperations } from '../../lib/reindexing/op_utils';
+import { sortAndOrderReindexOperations } from '../lib/op_utils';
 import { RouteDependencies } from '../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from './reindex_handler';
+import { reindexHandler } from '../lib/reindex_handler';
 import { GetBatchQueueResponse, PostBatchResponse } from './types';
 
 export function registerBatchReindexIndicesRoutes(
