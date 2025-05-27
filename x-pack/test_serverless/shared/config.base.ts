@@ -171,6 +171,8 @@ export default async () => {
         // configure security reponse header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        // disable product intercept for all ftr tests by default
+        '--xpack.intercepts.enabled=false',
       ],
     },
 

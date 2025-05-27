@@ -5990,6 +5990,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/intercepts-plugin@link:x-pack/platform/plugins/private/intercepts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
   version "0.0.0"
   uid ""
@@ -6655,6 +6659,10 @@
   uid ""
 
 "@kbn/product-doc-common@link:x-pack/platform/packages/shared/ai-infra/product-doc-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-intercept-plugin@link:x-pack/platform/plugins/private/product_intercept":
   version "0.0.0"
   uid ""
 

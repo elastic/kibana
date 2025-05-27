@@ -569,6 +569,7 @@ src/platform/plugins/shared/inspector @elastic/kibana-presentation
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
+x-pack/platform/plugins/private/intercepts @elastic/appex-sharedux
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
@@ -736,6 +737,7 @@ src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
