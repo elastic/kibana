@@ -27,6 +27,7 @@ export const RuleFormRoute = () => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
     chrome,
     setBreadcrumbs,
     ...startServices
@@ -73,6 +74,7 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
         id={id}
