@@ -186,12 +186,18 @@ export const setXState = (
   operation: CustomOperationObject
 ): void => {
   if (availability) {
-    if (availability.stability === 'experimental') {
-      operation['x-state'] = 'Technical Preview';
+    let state = '';
+    if (availability.stability === 'stable') {
+      state = 'Generally available';
+    } else if (availability.stability === 'experimental') {
+      state = 'Technical Preview';
+    } else if (availability.stability === 'beta') {
+      state = 'Beta';
     }
-    if (availability.stability === 'beta') {
-      operation['x-state'] = 'Beta';
+    if (availability.since) {
+      state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;
     }
+    operation['x-state'] = state;
   }
 };
 

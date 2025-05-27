@@ -10,70 +10,58 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
-import styled from '@emotion/styled';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
-import type { LogEntryColumnWidths } from '@kbn/logs-shared-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
-  LogEntryColumn,
-  LogEntryFieldColumn,
-  LogEntryMessageColumn,
-  LogEntryRowWrapper,
-  LogEntryTimestampColumn,
-  LogEntryContextMenu,
-  iconColumnId,
-  LogColumnHeadersWrapper,
-  LogColumnHeader,
-} from '@kbn/logs-shared-plugin/public';
+  EuiTable,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiTableBody,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  EuiScreenReaderOnly,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
-import type { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import type { LogEntryExample } from '../../../../../../common/log_analysis';
 import { isCategoryAnomaly } from '../../../../../../common/log_analysis';
-import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
-import {
-  isTimestampLogColumnConfiguration,
-  isFieldLogColumnConfiguration,
-  isMessageLogColumnConfiguration,
-} from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
 import type { LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 
-export const exampleMessageScale = 'medium' as const;
-export const exampleTimestampFormat = 'time' as const;
+const VIEW_DETAILS_LABEL = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryExamplesViewDetailsLabel',
+  { defaultMessage: 'View details' }
+);
+
+const VIEW_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryExamplesViewInDiscoverLabel',
+  { defaultMessage: 'View in Discover' }
+);
+
+const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryExamplesViewAnomalyInMlLabel',
+  { defaultMessage: 'View anomaly in machine learning' }
+);
 
 const MENU_LABEL = i18n.translate('xpack.infra.logAnomalies.logEntryExamplesMenuLabel', {
   defaultMessage: 'View actions for log entry',
 });
 
-const VIEW_DETAILS_LABEL = i18n.translate(
-  'xpack.infra.logs.analysis.logEntryExamplesViewDetailsLabel',
-  {
-    defaultMessage: 'View details',
-  }
-);
-
-const VIEW_IN_DISCOVER_LABEL = i18n.translate(
-  'xpack.infra.logs.analysis.logEntryExamplesViewInDiscoverLabel',
-  {
-    defaultMessage: 'View in Discover',
-  }
-);
-
-const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
-  'xpack.infra.logs.analysis.logEntryExamplesViewAnomalyInMlLabel',
-  {
-    defaultMessage: 'View anomaly in machine learning',
-  }
-);
-
-type Props = LogEntryExample & {
+interface Props extends LogEntryExample {
   timeRange: TimeRange;
   anomaly: LogEntryAnomaly;
-};
+  euiTheme: EuiThemeComputed;
+}
 
-export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessageRow: React.FC<Props> = ({
   id,
   dataset,
   message,
@@ -81,22 +69,15 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   tiebreaker,
   timeRange,
   anomaly,
+  euiTheme,
 }) => {
   const {
     services: { ml, http, application },
   } = useKibanaContextForPlugin();
-  const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const openMenu = useCallback(() => setIsMenuOpen(true), []);
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
-  const setItemIsHovered = useCallback(() => setIsHovered(true), []);
-  const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
-
   const { openFlyout: openLogEntryFlyout } = useLogEntryFlyoutContext();
 
-  // handle special cases for the dataset value
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
-
   const time = moment(timestamp).toISOString();
 
   const viewInStreamLinkProps = useLinkProps({
@@ -157,6 +138,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         label: VIEW_DETAILS_LABEL,
         onClick: () => {
           openLogEntryFlyout(id);
+          setIsMenuOpen(false);
         },
       },
       {
@@ -178,164 +160,134 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     handleMlLinkClick,
   ]);
 
+  const toggleMenu = useCallback(() => setIsMenuOpen(!isMenuOpen), [isMenuOpen]);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+
   return (
-    <LogEntryRowWrapper
-      scale={exampleMessageScale}
-      onMouseEnter={setItemIsHovered}
-      onMouseLeave={setItemIsNotHovered}
-    >
-      <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn format={exampleTimestampFormat} time={time} />
-      </LogEntryColumn>
-      <LogEntryColumn {...columnWidths[messageColumnId]}>
-        <LogEntryMessageColumn
-          columnValue={{
-            columnId: messageColumnId,
-            message: [{ field: 'message', value: [message], highlights: [] }],
-          }}
-          highlights={noHighlights}
-          isActiveHighlight={false}
-          wrapMode="none"
-        />
-      </LogEntryColumn>
-      <LogEntryColumn {...columnWidths[datasetColumnId]}>
-        <LogEntryFieldColumn
-          columnValue={{
-            columnId: datasetColumnId,
-            field: 'event.dataset',
-            value: [humanFriendlyDataset],
-            highlights: [],
-          }}
-          highlights={noHighlights}
-          isActiveHighlight={false}
-          wrapMode="none"
-        />
-      </LogEntryColumn>
-      <LogEntryColumn
-        key="logColumn iconLogColumn iconLogColumn:details"
-        {...columnWidths[iconColumnId]}
-      >
-        {(isHovered || isMenuOpen) && menuItems ? (
-          <LogEntryContextMenu
-            aria-label={MENU_LABEL}
-            isOpen={isMenuOpen}
-            onOpen={openMenu}
-            onClose={closeMenu}
-            items={menuItems}
-          />
-        ) : null}
-      </LogEntryColumn>
-    </LogEntryRowWrapper>
-  );
-};
+    <EuiTableRow>
+      <EuiTableRowCell width="150px" css={{ color: euiTheme.colors.textSubdued }}>
+        {moment(timestamp).format('HH:mm:ss.SSS')}
+      </EuiTableRowCell>
+      <EuiTableRowCell>{message}</EuiTableRowCell>
 
-const noHighlights: never[] = [];
-const timestampColumnId = 'log-entry-example-timestamp-column' as const;
-const messageColumnId = 'log-entry-examples-message-column' as const;
-const datasetColumnId = 'log-entry-examples-dataset-column' as const;
+      <EuiTableRowCell width="250px">{humanFriendlyDataset}</EuiTableRowCell>
 
-const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
-const COLUMN_PADDING = 8;
-
-export const columnWidths: LogEntryColumnWidths = {
-  [timestampColumnId]: {
-    growWeight: 0,
-    shrinkWeight: 0,
-    // w_score - w_padding = 130 px  - 8 px
-    baseWidth: '122px',
-  },
-  [messageColumnId]: {
-    growWeight: 1,
-    shrinkWeight: 0,
-    baseWidth: '0%',
-  },
-  [datasetColumnId]: {
-    growWeight: 0,
-    shrinkWeight: 0,
-    baseWidth: '250px',
-  },
-  [iconColumnId]: {
-    growWeight: 0,
-    shrinkWeight: 0,
-    baseWidth: `${DETAIL_FLYOUT_ICON_MIN_WIDTH + 2 * COLUMN_PADDING}px`,
-  },
-};
-
-export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
-  {
-    timestampColumn: {
-      id: timestampColumnId,
-    },
-  },
-  {
-    messageColumn: {
-      id: messageColumnId,
-    },
-  },
-  {
-    fieldColumn: {
-      field: 'event.dataset',
-      id: datasetColumnId,
-    },
-  },
-];
-
-export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
-  dateTime: number;
-}> = ({ dateTime }) => {
-  return (
-    <LogEntryExampleMessageHeadersWrapper>
-      <>
-        {exampleMessageColumnConfigurations.map((columnConfiguration) => {
-          if (isTimestampLogColumnConfiguration(columnConfiguration)) {
-            return (
-              <LogColumnHeader
-                key={columnConfiguration.timestampColumn.id}
-                columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
-                data-test-subj="logColumnHeader timestampLogColumnHeader"
-              >
-                {localizedDate(dateTime)}
-              </LogColumnHeader>
-            );
-          } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
-            return (
-              <LogColumnHeader
-                columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
-                data-test-subj="logColumnHeader messageLogColumnHeader"
-                key={columnConfiguration.messageColumn.id}
-              >
-                {i18n.translate(
-                  'xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel',
-                  { defaultMessage: 'Message' }
-                )}
-              </LogColumnHeader>
-            );
-          } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
-            return (
-              <LogColumnHeader
-                columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
-                data-test-subj="logColumnHeader fieldLogColumnHeader"
-                key={columnConfiguration.fieldColumn.id}
-              >
-                {columnConfiguration.fieldColumn.field}
-              </LogColumnHeader>
-            );
+      <EuiTableRowCell width="48px">
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              data-test-subj="infraLogEntryExampleMessageRowButton"
+              aria-label={MENU_LABEL}
+              iconType="boxesHorizontal"
+              size="s"
+              onClick={toggleMenu}
+            />
           }
-        })}
-        <LogColumnHeader
-          columnWidth={columnWidths[iconColumnId]}
-          data-test-subj="logColumnHeader contextMenuLogColumnHeader"
-          key={'icon-column-header'}
+          isOpen={isMenuOpen}
+          closePopover={closeMenu}
+          panelPaddingSize="none"
+          anchorPosition="leftCenter"
         >
-          {null}
-        </LogColumnHeader>
-      </>
-    </LogEntryExampleMessageHeadersWrapper>
+          <EuiContextMenuPanel
+            items={menuItems?.map((item, index) => (
+              <EuiContextMenuItem
+                key={`menu-item-${index}`}
+                onClick={(e) => {
+                  item.onClick?.(e);
+                  closeMenu();
+                }}
+                href={item.href}
+              >
+                {item.label}
+              </EuiContextMenuItem>
+            ))}
+          />
+        </EuiPopover>
+      </EuiTableRowCell>
+    </EuiTableRow>
   );
 };
 
-const LogEntryExampleMessageHeadersWrapper = styled(LogColumnHeadersWrapper)`
-  border-bottom: none;
-  box-shadow: none;
-  padding-right: 0;
-`;
+export const LogEntryExampleMessageTable: React.FC<{
+  examples: LogEntryExample[];
+  timeRange: TimeRange;
+  anomaly: LogEntryAnomaly;
+}> = ({ examples, timeRange, anomaly }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const dateTime = examples.length > 0 ? examples[0].timestamp : Date.now();
+
+  const columns = [
+    {
+      id: 'timestamp',
+      header: localizedDate(dateTime),
+      width: '122px',
+    },
+    {
+      id: 'message',
+      header: i18n.translate(
+        'xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel',
+        {
+          defaultMessage: 'Message',
+        }
+      ),
+    },
+    {
+      id: 'dataset',
+      header: 'event.dataset',
+      width: '250px',
+    },
+    {
+      id: 'actions',
+      header: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.infra.logEntryExampleMessageHeaders.actionsHeader', {
+              defaultMessage: 'Actions',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      width: '48px',
+    },
+  ];
+
+  return (
+    <EuiTable
+      css={{
+        backgroundColor: euiTheme.colors.borderBaseFloating,
+        '& .euiTableHeaderCell': {
+          paddingBottom: 5,
+        },
+        '& .euiTableRowCell': {
+          borderColor: euiTheme.colors.borderBaseFloating,
+          fontFamily: euiTheme.font.familyCode,
+        },
+        '& .euiTableCellContent': {
+          padding: 0,
+          height: '24px',
+        },
+      }}
+    >
+      <EuiTableHeader>
+        {columns.map((column) => (
+          <EuiTableHeaderCell key={column.id} width={column.width}>
+            {column.header}
+          </EuiTableHeaderCell>
+        ))}
+      </EuiTableHeader>
+
+      <EuiTableBody>
+        {examples.map((example, exampleIndex) => (
+          <LogEntryExampleMessageRow
+            key={exampleIndex}
+            {...example}
+            timeRange={timeRange}
+            anomaly={anomaly}
+            euiTheme={euiTheme}
+          />
+        ))}
+      </EuiTableBody>
+    </EuiTable>
+  );
+};
