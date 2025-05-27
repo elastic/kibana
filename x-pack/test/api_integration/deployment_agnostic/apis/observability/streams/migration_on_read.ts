@@ -123,7 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // This test can't run on MKI because there is no way to create a stream definition document that doesn't match the
     // currently valid format. The test is designed to verify that the migration logic is working correctly.
     this.tags(['failsOnMKI']);
-    beforeAll(async () => {
+    before(async () => {
       await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -164,7 +164,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await esClient.indices.refresh({ index: '.kibana_streams_assets-000001' });
     });
 
-    afterAll(async () => {
+    after(async () => {
       await disableStreams(apiClient);
     });
 
