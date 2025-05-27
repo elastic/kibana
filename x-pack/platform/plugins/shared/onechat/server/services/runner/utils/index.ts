@@ -7,5 +7,5 @@
 
 export { getConnectorList } from './get_connector_list';
 export { getDefaultConnector } from './get_default_connector';
-export { creatEmptyRunContext, forkContextForToolRun } from './run_context';
+export { createEmptyRunContext, forkContextForToolRun } from './run_context';
 export { convertInternalEvent, createEventEmitter, createNoopEventEmitter } from './events';

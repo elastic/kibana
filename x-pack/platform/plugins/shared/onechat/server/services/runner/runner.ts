@@ -20,7 +20,7 @@ import type {
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import { ModelProviderFactoryFn } from './model_provider';
-import { creatEmptyRunContext, forkContextForToolRun } from './utils/run_context';
+import { createEmptyRunContext, forkContextForToolRun } from './utils/run_context';
 import { createEventEmitter, createNoopEventEmitter } from './utils/events';
 
 export interface CreateScopedRunnerDeps {
@@ -44,7 +44,7 @@ export class RunnerManager {
 
   constructor(deps: CreateScopedRunnerDeps, context?: RunContext) {
     this.deps = deps;
-    this.context = context ?? creatEmptyRunContext();
+    this.context = context ?? createEmptyRunContext();
   }
 
   getRunner(): ScopedRunner {
@@ -116,7 +116,7 @@ export const createToolHandlerContext = <TParams = Record<string, unknown>>({
 };
 
 export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner => {
-  const manager = new RunnerManager(deps, creatEmptyRunContext());
+  const manager = new RunnerManager(deps, createEmptyRunContext());
   return manager.getRunner();
 };
 

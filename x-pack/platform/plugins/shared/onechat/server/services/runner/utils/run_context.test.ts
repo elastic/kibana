@@ -7,12 +7,12 @@
 
 import { createBuiltinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
-import { creatEmptyRunContext, forkContextForToolRun } from './run_context';
+import { createEmptyRunContext, forkContextForToolRun } from './run_context';
 
 describe('RunContext utilities', () => {
   describe('creatEmptyRunContext', () => {
     it('should create an empty run context with a generated UUID', () => {
-      const context = creatEmptyRunContext();
+      const context = createEmptyRunContext();
       expect(context).toEqual({
         runId: expect.any(String),
         stack: [],
@@ -21,7 +21,7 @@ describe('RunContext utilities', () => {
 
     it('should create an empty run context with provided runId', () => {
       const runId = 'test-run-id';
-      const context = creatEmptyRunContext({ runId });
+      const context = createEmptyRunContext({ runId });
       expect(context).toEqual({
         runId,
         stack: [],
