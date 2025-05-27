@@ -233,6 +233,7 @@ export class AlertingPlugin {
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
+  private readonly enabledRuleTypes: Set<string> | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -250,6 +251,8 @@ export class AlertingPlugin {
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
+    this.enabledRuleTypes =
+      this.config.enabledRuleTypes != null ? new Set(this.config.enabledRuleTypes) : null;
   }
 
   public setup(
@@ -445,22 +448,42 @@ export class AlertingPlugin {
       ) => {
         if (this.disabledRuleTypes.has(ruleType.id)) {
           this.logger.info(`rule type "${ruleType.id}" disabled by configuration`);
+
+          if (this.enabledRuleTypes && this.enabledRuleTypes.has(ruleType.id)) {
+            this.logger.warn(
+              `rule type "${ruleType.id}" is both disabled and enabled allow-list. rule type will be disabled.`
+            );
+          }
           return;
         }
 
-        if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
-          throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
+        if (
+          this.enabledRuleTypes &&
+          this.enabledRuleTypes.size > 0 &&
+          !this.enabledRuleTypes.has(ruleType.id)
+        ) {
+          this.logger.info(`rule type "${ruleType.id}" is not enabled in configuration`);
         }
-        ruleType.ruleTaskTimeout = getRuleTaskTimeout({
-          config: this.config.rules,
-          ruleTaskTimeout: ruleType.ruleTaskTimeout,
-          ruleTypeId: ruleType.id,
-        });
-        ruleType.cancelAlertsOnRuleTimeout =
-          ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
-        ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
-        ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
-        ruleTypeRegistry.register(ruleType);
+
+        // Register the rule type if enabledRuleTypes is not defined or if it is defined and it contains the rule type id
+        if (
+          this.enabledRuleTypes == null ||
+          (this.enabledRuleTypes.size > 0 && this.enabledRuleTypes.has(ruleType.id))
+        ) {
+          if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
+            throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
+          }
+          ruleType.ruleTaskTimeout = getRuleTaskTimeout({
+            config: this.config.rules,
+            ruleTaskTimeout: ruleType.ruleTaskTimeout,
+            ruleTypeId: ruleType.id,
+          });
+          ruleType.cancelAlertsOnRuleTimeout =
+            ruleType.cancelAlertsOnRuleTimeout ?? this.config.cancelAlertsOnRuleTimeout;
+          ruleType.doesSetRecoveryContext = ruleType.doesSetRecoveryContext ?? false;
+          ruleType.autoRecoverAlerts = ruleType.autoRecoverAlerts ?? true;
+          ruleTypeRegistry.register(ruleType);
+        }
       },
       getSecurityHealth: async () => {
         return await getSecurityHealth(
