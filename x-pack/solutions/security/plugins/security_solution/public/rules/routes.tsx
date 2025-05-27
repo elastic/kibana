@@ -65,7 +65,6 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
   {
     path: '/rules/create',
     main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
-      redirectOnMissing: true,
       omitSpyRoute: true,
     }),
     exact: true,
@@ -73,7 +72,6 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
   {
     path: '/rules/add_rules',
     main: withSecurityRoutePageWrapper(AddRulesPage, SecurityPageName.rulesAdd, {
-      redirectOnMissing: true,
       omitSpyRoute: true,
     }),
     exact: true,
@@ -136,14 +134,12 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_LANDING_PATH,
     component: withSecurityRoutePageWrapper(RulesLandingPage, SecurityPageName.rulesLanding, {
-      redirectOnMissing: true,
       omitSpyRoute: true,
     }),
   },
   {
     path: RULES_PATH,
     component: withSecurityRoutePageWrapper(Rules, SecurityPageName.rules, {
-      redirectOnMissing: true,
       omitSpyRoute: true,
     }),
   },
@@ -151,10 +147,7 @@ export const routes: SecuritySubPluginRoutes = [
     path: COVERAGE_OVERVIEW_PATH,
     component: withSecurityRoutePageWrapper(
       CoverageOverviewRoutes,
-      SecurityPageName.coverageOverview,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.coverageOverview
     ),
   },
 ];
