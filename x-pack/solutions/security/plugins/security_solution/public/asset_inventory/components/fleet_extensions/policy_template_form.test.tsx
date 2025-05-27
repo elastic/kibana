@@ -9,6 +9,7 @@ import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import {
+  getAwsPackageInfoMock,
   getMockPackageInfo,
   getMockPackageInfoAssetGCP,
   getMockPackageInfoAssetInventoryAWS,
@@ -41,6 +42,8 @@ import {
 } from './test_subjects';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
+import { ExperimentalFeaturesService as SecuritySolutionFeatureService } from '../../../common/experimental_features_service';
+import { useKibana } from '../../hooks/use_kibana';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -50,9 +53,15 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
+jest.mock('../../../common/experimental_features_service');
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
 
 const onChange = jest.fn();
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
+const mockedSecuritySolutionFeatureService = jest.mocked(SecuritySolutionFeatureService);
 
 describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   beforeEach(() => {
@@ -64,6 +73,21 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       secretsStorage: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
+    mockedSecuritySolutionFeatureService.get.mockReturnValue({
+      cloudConnectorsEnabled: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cloud: {
+          csp: 'aws',
+          cloudId: 'mock-cloud-id',
+          deploymentId: 'mock-deployment-id',
+          serverless: { projectId: '' },
+          isCloudEnabled: true,
+        },
+      },
+    });
 
     onChange.mockClear();
   });
@@ -254,6 +278,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   // });
 
   describe('AWS Credentials input fields', () => {
+    beforeEach(() => {
+      mockedSecuritySolutionFeatureService.get.mockReturnValue({
+        cloudConnectorsEnabled: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    });
+
     it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Single account is enabled`, () => {
       const { getByLabelText } = render(
         <WrappedComponent
@@ -469,6 +500,12 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   });
 
   describe('GCP Credentials input fields', () => {
+    beforeEach(() => {
+      mockedSecuritySolutionFeatureService.get.mockReturnValue({
+        cloudConnectorsEnabled: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    });
     it(`documentation Hyperlink should have correct URL to redirect users to elastic page`, () => {
       let policy = getMockPolicyGCP();
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
@@ -603,6 +640,12 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     });
   });
   describe('Azure Credentials input fields', () => {
+    beforeEach(() => {
+      mockedSecuritySolutionFeatureService.get.mockReturnValue({
+        cloudConnectorsEnabled: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    });
     it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
       let policy = getMockPolicyAzure();
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
@@ -661,7 +704,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   });
   describe('Agentless', () => {
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
+
       const { queryByTestId } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={false} />
       );
@@ -670,7 +717,16 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).not.toBeInTheDocument();
     });
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
-      const newPackagePolicy = getMockPolicyAWS();
+      mockedSecuritySolutionFeatureService.get.mockReturnValue({
+        cloudConnectorsEnabled: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      const policy = getMockPolicyAWS();
+      const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
+        'aws.credentials.type': { value: 'direct_access_keys' },
+      });
+
       const { getByTestId, getByLabelText } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
@@ -916,6 +972,64 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(onChange).toHaveBeenCalledWith({
         isValid: true,
         updatedPolicy: policy,
+      });
+    });
+
+    it('should render setup technology selector for AWS and allow to select cloud connectors', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      mockedSecuritySolutionFeatureService.get.mockReturnValue({
+        cloudConnectorsEnabled: true,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          cloud: {
+            csp: 'aws',
+            cloudId: 'mock-cloud-id',
+            deploymentId: 'mock-deployment-id',
+            serverless: { projectId: '' },
+            isCloudEnabled: true,
+          },
+        },
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      const { getByTestId, getByLabelText } = render(
+        <WrappedComponent
+          newPolicy={newPackagePolicy}
+          isAgentlessEnabled={true}
+          packageInfo={getAwsPackageInfoMock() as PackageInfo}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+
+      expect(
+        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
+      ).toBeInTheDocument();
+      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+
+      // select agent-based and check for cloudformation option
+      await userEvent.click(setupTechnologySelector);
+      const agentlessOption = getByLabelText(/agentless/i);
+      await userEvent.click(agentlessOption);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(3);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
+        );
       });
     });
   });
