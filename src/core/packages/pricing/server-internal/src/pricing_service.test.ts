@@ -9,22 +9,28 @@
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
-import { httpServiceMock, InternalHttpServiceSetupMock } from '@kbn/core-http-server-mocks';
+import {
+  httpServiceMock,
+  InternalHttpServicePrebootMock,
+  InternalHttpServiceSetupMock,
+} from '@kbn/core-http-server-mocks';
 import { of } from 'rxjs';
 import { PricingService } from './pricing_service';
 import type { PricingConfigType } from './pricing_config';
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
 describe('PricingService', () => {
-  let http: InternalHttpServiceSetupMock;
+  let prebootHttp: InternalHttpServicePrebootMock;
+  let setupHttp: InternalHttpServiceSetupMock;
   let service: PricingService;
   let router: RouterMock;
   let mockConfig: PricingConfigType;
 
   beforeEach(() => {
-    http = httpServiceMock.createInternalSetupContract();
+    prebootHttp = httpServiceMock.createInternalPrebootContract();
+    setupHttp = httpServiceMock.createInternalSetupContract();
     router = mockRouter.create();
-    http.createRouter.mockReturnValue(router);
+    setupHttp.createRouter.mockReturnValue(router);
 
     mockConfig = {
       tiers: {
@@ -45,7 +51,7 @@ describe('PricingService', () => {
 
   describe('#preboot()', () => {
     it('loads the pricing configuration', async () => {
-      await service.preboot();
+      await service.preboot({ http: prebootHttp });
       // Access the private property using bracket notation for testing purposes
       expect((service as any).pricingConfig).toEqual(mockConfig);
     });
@@ -53,10 +59,10 @@ describe('PricingService', () => {
 
   describe('#setup()', () => {
     it('registers the pricing routes', async () => {
-      await service.preboot();
-      service.setup({ http });
+      await service.preboot({ http: prebootHttp });
+      service.setup({ http: setupHttp });
 
-      expect(http.createRouter).toHaveBeenCalledWith('');
+      expect(setupHttp.createRouter).toHaveBeenCalledWith('');
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -75,8 +81,8 @@ describe('PricingService', () => {
     });
 
     it('allows registering product features', async () => {
-      await service.preboot();
-      const setup = service.setup({ http });
+      await service.preboot({ http: prebootHttp });
+      const setup = service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
         {
@@ -100,8 +106,8 @@ describe('PricingService', () => {
 
   describe('#start()', () => {
     it('returns a PricingTiersClient with the configured tiers', async () => {
-      await service.preboot();
-      service.setup({ http });
+      await service.preboot({ http: prebootHttp });
+      service.setup({ http: setupHttp });
       const start = service.start();
 
       expect(start).toHaveProperty('tiers');
@@ -109,8 +115,8 @@ describe('PricingService', () => {
     });
 
     it('returns a PricingTiersClient that can check feature availability', async () => {
-      await service.preboot();
-      const setup = service.setup({ http });
+      await service.preboot({ http: prebootHttp });
+      const setup = service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
         {
