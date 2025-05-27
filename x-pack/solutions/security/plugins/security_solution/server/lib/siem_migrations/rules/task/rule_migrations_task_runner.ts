@@ -118,7 +118,6 @@ export class RuleMigrationTaskRunner {
 
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
   protected async initialize() {
-    await this.saveRuleMigrationStarted();
     await this.retriever.initialize();
   }
 
@@ -365,19 +364,6 @@ export class RuleMigrationTaskRunner {
       comments: migrationResult.comments,
     };
     return this.data.rules.saveCompleted(ruleMigrationTranslated);
-  }
-
-  private async saveRuleMigrationStarted() {
-    await this.data.migrations.updateLastExecution({
-      id: this.migrationId,
-      lastExecutionParams: {
-        started_at: new Date().toISOString(),
-        // overwrite the previous execution details
-        is_aborted: false,
-        error: '',
-        ended_at: '',
-      },
-    });
   }
 
   private async saveRuleMigrationCompleted({

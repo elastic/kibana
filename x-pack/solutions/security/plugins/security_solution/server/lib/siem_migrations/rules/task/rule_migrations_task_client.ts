@@ -82,6 +82,19 @@ export class RuleMigrationsTaskClient {
 
     this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
+    // Mark task as started
+    await this.data.migrations.updateLastExecution({
+      id: migrationId,
+      lastExecutionParams: {
+        started_at: new Date().toISOString(),
+        // overwrite the previous execution details
+        is_aborted: false,
+        error: '',
+        ended_at: '',
+        connector_id: connectorId,
+      },
+    });
+
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
       .run(invocationConfig)
