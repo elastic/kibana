@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, act } from '@testing-library/react';
+import { screen, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChildDragDropProvider, Droppable, Draggable } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
@@ -23,7 +23,6 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LensAppState } from '../../../state_management';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { LayerPanelProps } from './types';
@@ -160,6 +159,7 @@ describe('LayerPanel', () => {
       renderLayerPanel();
       expect(screen.getByRole('button', { name: /clear layer/i })).toBeInTheDocument();
     });
+
     it('should show the delete button when single layer', async () => {
       renderLayerPanel({ isOnlyLayer: false });
       expect(screen.getByRole('button', { name: /delete layer/i })).toBeInTheDocument();
@@ -182,6 +182,7 @@ describe('LayerPanel', () => {
       renderLayerPanel();
       expect(screen.getAllByTestId('lnsGroupTestId')).toHaveLength(1);
     });
+
     it('should render the non-editable state and optional label', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -381,6 +382,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).toBeInTheDocument();
     });
+
     it('should not render visualization dimension editor when clicking on empty dimension', async () => {
       (generateId as jest.Mock).mockReturnValue(`newid`);
       mockVisualization.getConfiguration.mockReturnValue({
@@ -396,6 +398,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lns-empty-dimension'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).not.toBeInTheDocument();
     });
+
     it('should not break if visualization dimensionEditor is not defined', async () => {
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [
@@ -411,6 +414,7 @@ describe('LayerPanel', () => {
       await userEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
       expect(screen.queryByTestId('lnsVisDimensionEditor')).not.toBeInTheDocument();
     });
+
     it('should not update the visualization if the datasource is incomplete', async () => {
       (generateId as jest.Mock).mockReturnValue(`newid`);
       const updateAll = jest.fn();
@@ -654,6 +658,7 @@ describe('LayerPanel', () => {
       expect(mockVisualization.DimensionTriggerComponent).toHaveBeenCalled();
     });
   });
+
   // This test is more like an integration test, since the layer panel owns all
   // the coordination between drag and drop
   describe('drag and drop behavior', () => {
@@ -689,8 +694,7 @@ describe('LayerPanel', () => {
       );
     });
 
-    // TODO: Doesn't work because of emotion babel css prop preset
-    it.skip('should determine if the datasource supports dropping of a field onto a pre-filled dimension', async () => {
+    it('should determine if the datasource supports dropping of a field onto a pre-filled dimension', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -701,20 +705,21 @@ describe('LayerPanel', () => {
       });
 
       mockDatasource.getDropProps.mockImplementation(({ target }) =>
-        target.columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
+        target.columnId !== 'a'
+          ? {
+              dropTypes: ['field_replace'],
+              nextLabel: '',
+            }
+          : undefined
       );
 
-      const { instance } = mountWithReduxStore(
-        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
-          <LayerPanel {...getDefaultProps()} />
-        </ChildDragDropProvider>
-      );
-
-      renderLayerPanel(
-        undefined,
-        undefined,
-        createMockedDragDropContext({ dragging: draggingField })
-      );
+      renderWithReduxStore(<LayerPanel {...getDefaultProps()} />, {
+        wrapper: ({ children }) => (
+          <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
+            {children}
+          </ChildDragDropProvider>
+        ),
+      });
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -722,24 +727,16 @@ describe('LayerPanel', () => {
         })
       );
 
-      expect(
-        instance.find('[data-test-subj="lnsGroupTestId"] Droppable').first().prop('dropType')
-      ).toEqual(undefined);
+      const droppableElements = screen.getAllByTestId('lnsGroupTestId');
+      const prefilledDimensionButton = within(droppableElements[0]).getAllByRole('button')[0];
 
-      const droppableElement = instance
-        .find('[data-test-subj="lnsGroupTestId"] Droppable')
-        .first()
-        .find(DimensionButton)
-        .first();
-
-      droppableElement.simulate('dragOver');
-      droppableElement.simulate('drop');
+      fireEvent.dragOver(prefilledDimensionButton);
+      fireEvent.drop(prefilledDimensionButton);
 
       expect(onDropToDimension).not.toHaveBeenCalled();
     });
 
-    // TODO: Doesn't work because of emotion babel css prop preset
-    it.skip('should allow drag to move between groups', async () => {
+    it('should allow drag to move between groups', async () => {
       (generateId as jest.Mock).mockReturnValue(`newid`);
 
       mockVisualization.getConfiguration.mockReturnValue({
@@ -764,7 +761,7 @@ describe('LayerPanel', () => {
         nextLabel: '',
       });
 
-      const { instance } = mountWithReduxStore(
+      renderWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -778,11 +775,11 @@ describe('LayerPanel', () => {
 
       // Simulate drop on the pre-populated dimension
 
-      const droppableElement = instance
-        .find('[data-test-subj="lnsGroupTestId2"] Droppable .domDroppable')
-        .at(0);
-      droppableElement.simulate('dragOver');
-      droppableElement.simulate('drop');
+      const group = screen.getAllByTestId('lnsGroupTestId2')[0];
+      const droppableElement = within(group).getByTestId('lnsDragDrop-domDroppable');
+
+      fireEvent.dragOver(droppableElement);
+      fireEvent.drop(droppableElement);
 
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -795,12 +792,17 @@ describe('LayerPanel', () => {
 
       // Simulate drop on the empty dimension
 
-      const updatedDroppableElement = instance
-        .find('[data-test-subj="lnsGroupTestId2"] Droppable .domDroppable')
-        .last();
+      const allGroups = screen.getAllByTestId('lnsGroupTestId2');
+      expect(allGroups.length).toBeGreaterThan(0);
+      // Select the last group (typically the empty dimension group)
+      const lastGroup = allGroups[allGroups.length - 1];
+      // Find the droppable area within the last group
+      const droppableElementEmptyDimension = within(lastGroup).getByTestId(
+        'lnsDragDrop-domDroppable'
+      );
 
-      updatedDroppableElement.simulate('dragOver');
-      updatedDroppableElement.simulate('drop');
+      fireEvent.dragOver(droppableElementEmptyDimension);
+      fireEvent.drop(droppableElementEmptyDimension);
 
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -914,6 +916,7 @@ describe('LayerPanel', () => {
         })
       );
     });
+
     it('should call onDrop and update visualization when replacing between compatible groups2', async () => {
       const mockVis = {
         ...mockVisualization,
