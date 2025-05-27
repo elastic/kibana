@@ -8,15 +8,22 @@
  */
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-
+import type {
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginServerDependenciesStart {}
+export interface AIAssistantManagementSelectionPluginServerDependenciesStart {
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+}
 
 export interface AIAssistantManagementSelectionPluginServerDependenciesSetup {
   features?: FeaturesPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginServerStart {}
+export interface AIAssistantManagementSelectionPluginServerStart {
+    observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginServerSetup {}
+export interface AIAssistantManagementSelectionPluginServerSetup {
+}

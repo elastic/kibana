@@ -38,9 +38,7 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
   const { element, history, setBreadcrumbs } = mountParams;
   const { theme$ } = core.theme; 
 
-  const isObservabilityDeployment = startDeps.observabilityAIAssistant.service.getScopes().includes('observability');
-  console.log(isObservabilityDeployment);
-  
+  const isObservabilityDeployment = startDeps.observabilityAIAssistant.service.getScopes().includes('observability');  
 
   coreStart.chrome.docTitle.change(
     isServerless && isObservabilityDeployment ? i18n.translate('xpack.observabilityAiAssistantManagement.app.titleBarServerless', {

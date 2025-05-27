@@ -46,13 +46,17 @@ export class AIAssistantManagementSelectionPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<AIAssistantManagementSelectionPluginServerDependenciesStart>,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    
+    let isObservabilityDeployment = true;
+    core.getStartServices().then(([_, startDeps]) => {
+       isObservabilityDeployment = startDeps.observabilityAIAssistant.service.getScopes().includes('observability');  
+    })
+
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: this.isServerless ? i18n.translate(
+        name: this.isServerless && isObservabilityDeployment ? i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingNameServerless',
           {
             defaultMessage: 'AI Assistant for Observability visibility',
@@ -66,7 +70,7 @@ export class AIAssistantManagementSelectionPlugin
         ),
         category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
-        description: this.isServerless ? i18n.translate(
+        description: this.isServerless && isObservabilityDeployment ? i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescriptionServerless',
           {
             defaultMessage:
@@ -97,7 +101,7 @@ export class AIAssistantManagementSelectionPlugin
         options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
         type: 'select',
         optionLabels: {
-          [AIAssistantType.Default]: this.isServerless ? i18n.translate(
+          [AIAssistantType.Default]: this.isServerless && isObservabilityDeployment ? i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefaultServerless',
             { defaultMessage: 'Observability only (default)' }
           ) : i18n.translate(
@@ -182,8 +186,13 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
-    return {};
+  public start(
+    core: CoreStart,
+    plugins: AIAssistantManagementSelectionPluginServerDependenciesStart
+  ) {
+    return {
+      observabilityAIAssistant: plugins.observabilityAIAssistant,
+    };
   }
 
   public stop() {}
