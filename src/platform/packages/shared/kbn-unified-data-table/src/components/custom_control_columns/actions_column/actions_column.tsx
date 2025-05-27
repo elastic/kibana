@@ -20,6 +20,9 @@ import { getAdditionalRowControlColumns } from '../additional_row_control';
 import { ActionsHeader } from './actions_header';
 
 const COLUMN_ID = 'actions';
+const EXTERNAL_CONTROL_COLUMNS_SPACING = 4;
+
+const HorizontalSpacer = () => <div css={{ paddingLeft: EXTERNAL_CONTROL_COLUMNS_SPACING }} />;
 
 export const getActionsColumn = ({
   baseColumns,
@@ -40,7 +43,12 @@ export const getActionsColumn = ({
 
   let columnWidth = baseColumns.length * DEFAULT_CONTROL_COLUMN_WIDTH;
   const actions = [...baseColumns];
-  if (externalControlColumns) {
+  if (externalControlColumns?.length) {
+    if (actions.length > 0) {
+      actions.push(HorizontalSpacer);
+      columnWidth += EXTERNAL_CONTROL_COLUMNS_SPACING;
+    }
+
     actions.push(...externalControlColumns.map((column) => column.rowCellRender));
     columnWidth += externalControlColumns.reduce((acc, column) => acc + column.width, 0);
   }

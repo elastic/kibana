@@ -150,7 +150,7 @@ describe('getActionsColumn', () => {
           headerCellRender: () => <div>External control column 2</div>,
         },
       ],
-      expectedWidth: 218,
+      expectedWidth: 222,
       expectedTexts: [
         'Base column 1',
         'Base column 2',
@@ -220,7 +220,7 @@ describe('getActionsColumn', () => {
           headerCellRender: () => <div>External control column 2</div>,
         },
       ],
-      expectedWidth: 266,
+      expectedWidth: 270,
       expectedTexts: [
         'Base column 1',
         'Base column 2',
