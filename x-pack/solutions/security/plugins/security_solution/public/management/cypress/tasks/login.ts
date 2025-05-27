@@ -58,7 +58,12 @@ export const login: CyLoginTask = (
         username = result.username;
         password = result.password;
         // Set cookie asynchronously
-        return cy.setCookie('sid', result.cookie as string);
+        return cy.setCookie('sid', result.cookie as string, {
+          // "hostOnly: true" sets the cookie without a domain.
+          // This makes cookie available only for the current host (not subdomains).
+          // It's needed to match the Serverless backend behavior where cookies are set without a domain.
+          hostOnly: true,
+        });
       })
       .then(() => {
         // Visit URL after setting cookie
