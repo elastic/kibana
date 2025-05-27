@@ -12,7 +12,7 @@ applies_to:
 The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
 
 ::::{note}
-Please refer to the [Google Gemini Models documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable) to know if specific models have been retired.
+Refer to the [Google Gemini Models documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable) to check when specific models are retired.
 Switch to a supported model in case you are using a model which is going to be retired in order to avoid outages.
 ::::
 
