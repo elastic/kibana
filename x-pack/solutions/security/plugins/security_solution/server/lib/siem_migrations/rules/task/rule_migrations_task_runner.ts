@@ -186,7 +186,6 @@ export class RuleMigrationTaskRunner {
             } catch (error) {
               if (error instanceof AbortError) {
                 this.logger.info(`Throwing AbortError for rule "${ruleMigration.id}"`);
-                throw error;
               }
               ruleTranslationTelemetry.failure(error);
               await this.saveRuleFailed(ruleMigration, error);

@@ -134,7 +134,6 @@ components:
       required:
         - created_by
         - created_at
-        - status
       properties:
         created_by:
           description: The user profile ID of the user who created the migration.

@@ -10,10 +10,7 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type {
-  RuleMigrationLastExecution,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
@@ -162,16 +159,16 @@ export class RuleMigrationsTaskClient {
   ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
     const lastError = migration?.last_execution?.error;
     return {
-      status: this.getTaskStatus(migration.id, dataStats, migration?.last_execution),
+      status: this.getTaskStatus(migration, dataStats),
       ...(lastError && { last_error: lastError }),
     };
   }
 
   private getTaskStatus(
-    migrationId: string,
-    dataStats: RuleMigrationDataStats['rules'],
-    lastExecution?: RuleMigrationLastExecution
+    migration: StoredSiemMigration,
+    dataStats: RuleMigrationDataStats['rules']
   ): SiemMigrationTaskStatus {
+    const { id: migrationId, last_execution: lastExecution } = migration;
     if (this.migrationsRunning.has(migrationId)) {
       return SiemMigrationTaskStatus.RUNNING;
     }

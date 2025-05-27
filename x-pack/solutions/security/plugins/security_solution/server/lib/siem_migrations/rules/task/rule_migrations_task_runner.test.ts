@@ -133,6 +133,14 @@ describe('RuleMigrationTaskRunner', () => {
       expect(mockInvoke).toHaveBeenCalledTimes(1);
       expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalled();
       expect(mockRuleMigrationsDataClient.rules.get).toHaveBeenCalledTimes(2); // One with data, one without
+      expect(mockRuleMigrationsDataClient.migrations.updateLastExecution).toHaveBeenCalledWith({
+        id: 'test-migration-id',
+        lastExecutionParams: expect.objectContaining({
+          ended_at: expect.any(String),
+          is_aborted: false,
+          error: '',
+        }),
+      });
       expect(mockLogger.info).toHaveBeenCalledWith('Migration completed successfully');
     });
 
@@ -146,6 +154,15 @@ describe('RuleMigrationTaskRunner', () => {
 
           await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
 
+          expect(mockRuleMigrationsDataClient.migrations.updateLastExecution).toHaveBeenCalledWith({
+            id: 'test-migration-id',
+            lastExecutionParams: expect.objectContaining({
+              ended_at: expect.any(String),
+              is_aborted: true,
+              error: '',
+            }),
+          });
+
           expect(mockLogger.info).toHaveBeenCalledWith(
             'Abort signal received, stopping initialization'
           );
@@ -158,6 +175,14 @@ describe('RuleMigrationTaskRunner', () => {
           await expect(runPromise).rejects.toEqual(
             Error('Migration initialization failed. Error: Test error message')
           );
+          expect(mockRuleMigrationsDataClient.migrations.updateLastExecution).toHaveBeenCalledWith({
+            id: 'test-migration-id',
+            lastExecutionParams: expect.objectContaining({
+              ended_at: expect.any(String),
+              is_aborted: false,
+              error: errorMessage,
+            }),
+          });
         });
       });
 
@@ -183,6 +208,14 @@ describe('RuleMigrationTaskRunner', () => {
           await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
           expect(mockLogger.info).toHaveBeenCalledWith('Abort signal received, stopping migration');
           expect(mockRuleMigrationsDataClient.rules.releaseProcessing).toHaveBeenCalled();
+          expect(mockRuleMigrationsDataClient.migrations.updateLastExecution).toHaveBeenCalledWith({
+            id: 'test-migration-id',
+            lastExecutionParams: expect.objectContaining({
+              ended_at: expect.any(String),
+              is_aborted: true,
+              error: '',
+            }),
+          });
         });
 
         it('should handle other errors correctly', async () => {

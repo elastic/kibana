@@ -184,7 +184,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates one rule migration with the provided data and sets the status to `failed` */
-  async saveError({ id, ...ruleMigration }: RuleMigrationRule): Promise<void> {
+  async saveError({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
     const doc = {

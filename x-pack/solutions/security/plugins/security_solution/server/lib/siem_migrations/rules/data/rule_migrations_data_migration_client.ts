@@ -98,6 +98,9 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     return [migrationDeleteOperation];
   }
 
+  /**
+   * Updates the last execution parameters for a migration document.
+   */
   async updateLastExecution({
     id,
     lastExecutionParams,
@@ -105,13 +108,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     id: string;
     lastExecutionParams: RuleMigrationLastExecution;
   }): Promise<void> {
-    this.logger.info(
-      `Updating last execution params for migration ${id} : ${JSON.stringify(
-        lastExecutionParams,
-        null,
-        2
-      )}`
-    );
+    this.logger.info(`Updating last execution params for migration ${id}`);
     const index = await this.getIndexName();
 
     const painlessUpdateScripts: string[] = [];
@@ -119,7 +116,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     for (const [key, value] of Object.entries(lastExecutionParams)) {
       if (typeof value === 'string') {
         painlessUpdateScripts.push(`ctx._source.last_execution.${key} = '${value}';`);
-      } else if (typeof value === 'boolean') {
+      } else if (['boolean', 'number'].includes(typeof value)) {
         painlessUpdateScripts.push(`ctx._source.last_execution.${key} = ${value};`);
       }
     }
@@ -130,7 +127,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
           ctx._source.last_execution = [:];
         }
       ${painlessUpdateScripts.join('\n')}
-  `,
+      `,
     };
 
     await this.esClient

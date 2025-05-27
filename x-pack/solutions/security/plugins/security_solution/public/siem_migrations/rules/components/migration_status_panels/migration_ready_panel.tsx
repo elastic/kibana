@@ -95,10 +95,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
                 {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
               </EuiButton>
             ) : (
-              <StartTranslationButton
-                migrationId={migrationStats.id}
-                status={migrationStats.status}
-              />
+              <StartTranslationButton migrationId={migrationStats.id} isAborted={isAborted} />
             )}
           </EuiFlexItem>
         )}
@@ -114,8 +111,8 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 });
 MigrationReadyPanel.displayName = 'MigrationReadyPanel';
 
-const StartTranslationButton = React.memo<{ migrationId: string; status: SiemMigrationTaskStatus }>(
-  ({ migrationId, status }) => {
+const StartTranslationButton = React.memo<{ migrationId: string; isAborted: boolean }>(
+  ({ migrationId, isAborted }) => {
     const { startMigration, isLoading } = useStartMigration();
     const onStartMigration = useCallback(() => {
       startMigration(migrationId);
@@ -129,7 +126,7 @@ const StartTranslationButton = React.memo<{ migrationId: string; status: SiemMig
         isLoading={isLoading}
         size="s"
       >
-        {status === SiemMigrationTaskStatus.ABORTED
+        {isAborted
           ? i18n.RULE_MIGRATION_RESTART_TRANSLATION_BUTTON
           : i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON}
       </EuiButton>

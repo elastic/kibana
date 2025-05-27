@@ -99,11 +99,4 @@ export const migrationsFieldMaps: FieldMap<
 > = {
   created_at: { type: 'date', required: true },
   created_by: { type: 'keyword', required: true },
-  status: { type: 'keyword', required: true },
-  // last_execution: {
-  //   error: { type: 'string', required: false },
-  //   conntector_id: { type: 'keyword', required: false },
-  //   started_at: { type: 'date', required: false },
-  //   finished_at: { type: 'date', required: false },
-  // },
 };
