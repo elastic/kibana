@@ -9,9 +9,10 @@
 
 // This file replaces scss core/public/_mixins.scss
 
-import { Interpolation, Theme, css, keyframes } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { COLOR_MODES_STANDARD, UseEuiTheme, euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
+import { CSSInterpolation } from '@emotion/serialize';
 import bg_top_branded from './styles/core_app/images/bg_top_branded.svg';
 import bg_top_branded_dark from './styles/core_app/images/bg_top_branded_dark.svg';
 import bg_bottom_branded from './styles/core_app/images/bg_bottom_branded.svg';
@@ -82,10 +83,10 @@ export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEu
 
 export type EmotionStyles = Record<
   string,
-  Interpolation<Theme> | ((theme: UseEuiTheme) => Interpolation<Theme>)
+  CSSInterpolation | ((theme: UseEuiTheme) => CSSInterpolation)
 >;
 
-type StaticEmotionStyles = Record<string, Interpolation<Theme>>;
+type StaticEmotionStyles = Record<string, CSSInterpolation>;
 
 /**
  * Custom hook to reduce boilerplate when working with Emotion styles that may depend on
