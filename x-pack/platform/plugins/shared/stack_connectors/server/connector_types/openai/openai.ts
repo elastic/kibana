@@ -18,7 +18,7 @@ import type {
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import https from 'https';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -96,13 +96,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           caData: this.secrets.caData,
           verificationMode: this.config.verificationMode,
         });
-        const httpsAgent = new https.Agent(this.sslOverrides);
+        const agents = getCustomAgents(
+          this.configurationUtilities,
+          this.logger,
+          this.url,
+          this.sslOverrides
+        );
         try {
           this.openAI = new OpenAI({
             apiKey: this.key,
             baseURL: removeEndpointFromUrl(this.url),
             defaultHeaders: this.headers,
-            httpAgent: httpsAgent,
+            httpAgent: agents.httpsAgent,
           });
         } catch (error) {
           this.logger.error(`Error initializing OpenAI client: ${error.message}`);
