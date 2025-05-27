@@ -185,6 +185,8 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
       ...getBaseMigratorParams({ migrationAlgorithm: 'v2' }),
       logFilePath,
       types: [switchType, modelVersionType],
+      // add any removed type so it doesn't skip CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+      removedTypes: ['removedType'],
     });
     await runMigrations();
 

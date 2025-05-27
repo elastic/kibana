@@ -12,11 +12,11 @@ import { computeGradientFinalColor } from './compute_gradient_final_color';
 describe('computeGradientFinalColor Function', () => {
   it('Should compute the gradient final color correctly for rgb color', () => {
     const color = computeGradientFinalColor('rgba(211,96,134,1)');
-    expect(color).toEqual('rgb(145, 40, 75)');
+    expect(color).toEqual('rgb(145,40,75)');
   });
 
   it('Should compute the gradient final color correctly for hex color', () => {
     const color = computeGradientFinalColor('#6092C0');
-    expect(color).toEqual('rgb(43, 77, 108)');
+    expect(color).toEqual('rgb(43,77,108)');
   });
 });
