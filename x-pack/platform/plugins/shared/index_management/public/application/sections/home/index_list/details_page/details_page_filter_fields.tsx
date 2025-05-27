@@ -183,7 +183,6 @@ export const MappingsFilter: React.FC<Props> = ({
               color="danger"
               iconSide="left"
               size="s"
-              iconType="cross"
               data-test-subj="clearFilters"
               disabled={isClearAllFilterDisabled}
               onClick={clearOptions}
