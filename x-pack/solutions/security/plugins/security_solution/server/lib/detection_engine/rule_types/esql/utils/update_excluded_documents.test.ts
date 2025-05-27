@@ -38,7 +38,11 @@ describe('updateExcludedDocuments', () => {
       isRuleAggregating: true,
     });
 
-    expect(result).toEqual(excludedDocuments);
+    expect(excludedDocuments).toEqual([
+      { id: 'prev-id-0', timestamp: '2025-04-28T09:00:00Z' },
+      { id: 'prev-id-1', timestamp: '2025-04-28T09:30:00Z' },
+      { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },
+    ]);
   });
 
   it('should add all source document ids except last one to excluded when hasMvExpand is false', () => {
@@ -48,14 +52,14 @@ describe('updateExcludedDocuments', () => {
       { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },
     ];
 
-    const result = updateExcludedDocuments({
+    updateExcludedDocuments({
       excludedDocuments,
       sourceDocuments,
       results,
       isRuleAggregating: false,
     });
 
-    expect(result).toEqual([
+    expect(excludedDocuments).toEqual([
       { id: 'prev-id-0', timestamp: '2025-04-28T09:00:00Z' },
       { id: 'prev-id-1', timestamp: '2025-04-28T09:30:00Z' },
       { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },
@@ -71,14 +75,14 @@ describe('updateExcludedDocuments', () => {
       { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },
     ];
 
-    const result = updateExcludedDocuments({
+    updateExcludedDocuments({
       excludedDocuments,
       sourceDocuments: { id1: fetchedDocumentMock },
       results,
       isRuleAggregating: false,
     });
 
-    expect(result).toEqual([
+    expect(excludedDocuments).toEqual([
       { id: 'prev-id-0', timestamp: '2025-04-28T09:00:00Z' },
       { id: 'prev-id-1', timestamp: '2025-04-28T09:30:00Z' },
       { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },

@@ -23,10 +23,10 @@ export const updateExcludedDocuments = ({
   sourceDocuments: Record<string, FetchedDocument>;
   results: Array<Record<string, string>>;
   isRuleAggregating: boolean;
-}): ExcludedDocument[] => {
+}): void => {
   // aggregating queries do not have event _id, so we will not exclude any documents
   if (isRuleAggregating) {
-    return excludedDocuments;
+    return;
   }
   const documentIds = Object.keys(sourceDocuments);
   const lastId = results.at(-1)?._id;
@@ -36,15 +36,13 @@ export const updateExcludedDocuments = ({
     sourceDocuments,
     documentIds.length === 1 ? documentIds : documentIds.filter((id) => id !== lastId)
   );
-
-  return excludedDocuments;
 };
 
 const addToExcludedDocuments = (
   excludedDocuments: ExcludedDocument[],
   sourceDocuments: Record<string, FetchedDocument>,
   documentIds: string[]
-): ExcludedDocument[] => {
+): void => {
   for (const documentId of documentIds) {
     const document = sourceDocuments[documentId];
     excludedDocuments.push({
@@ -52,5 +50,4 @@ const addToExcludedDocuments = (
       timestamp: document._source?.['@timestamp'],
     });
   }
-  return excludedDocuments;
 };
