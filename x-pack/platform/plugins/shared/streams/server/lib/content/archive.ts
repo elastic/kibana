@@ -178,13 +178,13 @@ async function resolveDashboard(
 function getRootDir(entries: AdmZip.IZipEntry[]) {
   const rootDirs = new Set<string>();
   for (const entry of entries) {
-    const rootDir = path.dirname(entry.entryName).split(path.sep)[0];
+    const rootDir = entry.entryName.split(path.sep)[0];
     rootDirs.add(rootDir);
   }
 
   if (rootDirs.size !== 1) {
     throw new InvalidContentPackError(
-      `Expected one root directory but got [${Array.from(rootDirs)}]`
+      `Expected a single root directory but got [${Array.from(rootDirs)}]`
     );
   }
 
