@@ -16,7 +16,7 @@ import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_manag
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { monitorAttributes } from '../../common/types/saved_objects';
+import { legacyMonitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -204,7 +204,7 @@ export const getSavedObjectKqlFilter = ({
   if (searchAtRoot) {
     fieldKey = `${field}`;
   } else {
-    fieldKey = `${monitorAttributes}.${field}`;
+    fieldKey = `${legacyMonitorAttributes}.${field}`;
   }
 
   if (Array.isArray(values)) {

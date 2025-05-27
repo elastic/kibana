@@ -22,7 +22,7 @@ import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import {
   CertResult,
   ConfigKey,

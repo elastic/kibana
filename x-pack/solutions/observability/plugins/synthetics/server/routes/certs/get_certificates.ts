@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { CertResult, GetCertsParams } from '../../../common/runtime_types';

@@ -14,11 +14,16 @@ import {
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import {
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
 } from '../common/saved_objects/private_locations';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsParamType,
+} from '../common/types/saved_objects';
+
 import { PLUGIN } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
@@ -92,7 +97,8 @@ export const syntheticsFeature = {
       savedObject: {
         all: [
           syntheticsSettingsObjectType,
-          syntheticsMonitorType,
+          legacySyntheticsMonitorTypeSingle,
+          syntheticsMonitorSavedObjectType,
           syntheticsApiKeyObjectType,
           syntheticsParamType,
 
@@ -123,7 +129,8 @@ export const syntheticsFeature = {
         read: [
           syntheticsParamType,
           syntheticsSettingsObjectType,
-          syntheticsMonitorType,
+          syntheticsMonitorSavedObjectType,
+          legacySyntheticsMonitorTypeSingle,
           syntheticsApiKeyObjectType,
           privateLocationSavedObjectName,
           legacyPrivateLocationsSavedObjectName,

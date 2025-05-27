@@ -30,8 +30,8 @@ jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
   allLocations,
 });
 
-jest.mock('../../saved_objects/synthetics_monitor/get_all_monitors', () => ({
-  ...jest.requireActual('../../saved_objects/synthetics_monitor/get_all_monitors'),
+jest.mock('../../saved_objects/synthetics_monitor/process_monitors', () => ({
+  ...jest.requireActual('../../saved_objects/synthetics_monitor/process_monitors'),
   getAllMonitors: jest.fn(),
 }));
 

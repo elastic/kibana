@@ -13,8 +13,12 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsMonitorSOTypes,
+} from '../../common/types/saved_objects';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
-import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
@@ -30,24 +34,45 @@ export class MonitorConfigRepository {
   ) {}
 
   async get(id: string) {
-    return await this.soClient.get<EncryptedSyntheticsMonitorAttributes>(syntheticsMonitorType, id);
+    const results = await Promise.allSettled([
+      this.soClient.get<EncryptedSyntheticsMonitorAttributes>(syntheticsMonitorSavedObjectType, id),
+      this.soClient.get<EncryptedSyntheticsMonitorAttributes>(
+        legacySyntheticsMonitorTypeSingle,
+        id
+      ),
+    ]);
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      }
+    }
+    const firstError = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+
+    throw new Error(firstError?.reason || 'Unknown error');
   }
 
-  async getDecrypted(id: string, spaceId: string): Promise<SavedObject<SyntheticsMonitor>> {
+  async getDecrypted(
+    id: string,
+    spaceId: string
+  ): Promise<{
+    normalizedMonitor: SavedObject<SyntheticsMonitor>;
+    decryptedMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
+  }> {
     const decryptedMonitor =
       await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         id,
         {
           namespace: spaceId,
         }
       );
-    return normalizeSecrets(decryptedMonitor);
+    return { normalizedMonitor: normalizeSecrets(decryptedMonitor), decryptedMonitor };
   }
 
   async create({ id, normalizedMonitor }: { id: string; normalizedMonitor: SyntheticsMonitor }) {
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorType,
+      syntheticsMonitorSavedObjectType,
       formatSecrets({
         ...normalizedMonitor,
         [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
@@ -66,7 +91,7 @@ export class MonitorConfigRepository {
   async createBulk({ monitors }: { monitors: Array<{ id: string; monitor: MonitorFields }> }) {
     const newMonitors = monitors.map(({ id, monitor }) => ({
       id,
-      type: syntheticsMonitorType,
+      type: syntheticsMonitorSavedObjectType,
       attributes: formatSecrets({
         ...monitor,
         [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
@@ -90,19 +115,30 @@ export class MonitorConfigRepository {
   }) {
     return await this.soClient.bulkUpdate<MonitorFields>(
       monitors.map(({ attributes, id }) => ({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         id,
         attributes,
       }))
     );
   }
 
-  find<T>(options: Omit<SavedObjectsFindOptions, 'type'>) {
-    return this.soClient.find<T>({
-      type: syntheticsMonitorType,
+  async find<T>(options: Omit<SavedObjectsFindOptions, 'type'>) {
+    const findResult = this.soClient.find<T>({
+      type: syntheticsMonitorSavedObjectType,
       ...options,
       perPage: options.perPage ?? 5000,
     });
+    const legacyFindResult = this.soClient.find<T>({
+      type: legacySyntheticsMonitorTypeSingle,
+      ...options,
+      perPage: options.perPage ?? 5000,
+    });
+    const [result, legacyResult] = await Promise.all([findResult, legacyFindResult]);
+    return {
+      ...result,
+      total: result.total + legacyResult.total,
+      saved_objects: [...result.saved_objects, ...legacyResult.saved_objects],
+    };
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
@@ -110,7 +146,7 @@ export class MonitorConfigRepository {
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         {
           filter,
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSOTypes,
           perPage: 500,
           namespaces: [spaceId],
         }
@@ -128,12 +164,12 @@ export class MonitorConfigRepository {
   }
 
   async delete(monitorId: string) {
-    return this.soClient.delete(syntheticsMonitorType, monitorId);
+    return this.soClient.delete(syntheticsMonitorSavedObjectType, monitorId);
   }
 
   async bulkDelete(monitorIds: string[]) {
     return this.soClient.bulkDelete(
-      monitorIds.map((monitor) => ({ type: syntheticsMonitorType, id: monitor }))
+      monitorIds.map((monitor) => ({ type: syntheticsMonitorSavedObjectType, id: monitor }))
     );
   }
 
@@ -152,8 +188,8 @@ export class MonitorConfigRepository {
     filter?: string;
     showFromAllSpaces?: boolean;
   } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) {
-    return withApmSpan('get_all_monitors', async () => {
-      const finder = this.soClient.createPointInTimeFinder<T>({
+    const getConfigs = async (syntheticsMonitorType: string) => {
+      const findOptions = {
         type: syntheticsMonitorType,
         perPage: 5000,
         search,
@@ -163,7 +199,9 @@ export class MonitorConfigRepository {
         filter,
         searchFields,
         ...(showFromAllSpaces && { namespaces: ['*'] }),
-      });
+      };
+      const finder =
+        this.soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>(findOptions);
 
       const hits: Array<SavedObjectsFindResult<T>> = [];
       for await (const result of finder.find()) {
@@ -173,6 +211,14 @@ export class MonitorConfigRepository {
       finder.close().catch(() => {});
 
       return hits;
+    };
+
+    return withApmSpan('get_all_monitors', async () => {
+      const [configs, legacyConfigs] = await Promise.all([
+        getConfigs(syntheticsMonitorSavedObjectType),
+        getConfigs(legacySyntheticsMonitorTypeSingle),
+      ]);
+      return [...configs, ...legacyConfigs];
     });
   }
 }

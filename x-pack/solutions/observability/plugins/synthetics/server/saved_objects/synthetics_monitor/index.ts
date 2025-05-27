@@ -8,4 +8,6 @@
 export {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
-} from './synthetics_monitor/legacy_synthetics_monitor';
+} from './legacy_synthetics_monitor';
+
+export * from './synthetics_monitor_config';

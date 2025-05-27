@@ -39,7 +39,7 @@ import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';

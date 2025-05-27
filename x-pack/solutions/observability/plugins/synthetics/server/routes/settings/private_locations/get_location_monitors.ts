@@ -9,7 +9,10 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import {
+  legacyMonitorAttributes,
+  legacySyntheticsMonitorTypeSingle,
+} from '../../../../common/types/saved_objects';
 import { SyntheticsServerSetup } from '../../../types';
 
 type Payload = Array<{
@@ -29,7 +32,7 @@ interface ExpectedResponse {
 const aggs = {
   locations: {
     terms: {
-      field: `${monitorAttributes}.locations.id`,
+      field: `${legacyMonitorAttributes}.locations.id`,
       size: 10000,
     },
   },
@@ -50,7 +53,7 @@ export const getMonitorsByLocation = async (server: SyntheticsServerSetup, locat
   const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
 
   const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
-    type: syntheticsMonitorType,
+    type: legacySyntheticsMonitorTypeSingle,
     perPage: 0,
     aggs,
     filter: locationFilter,
