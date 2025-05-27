@@ -18,7 +18,7 @@ import {
 } from '../../../common/constants';
 import { hasAccessToSecuritySolution } from '../../helpers_access';
 
-export const bootstrapSourcererDataViews = async ({
+export const createDefaultDataView = async ({
   uiSettings,
   dataViewService,
   spaces,
