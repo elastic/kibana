@@ -51,7 +51,7 @@ export const ColorPalette: FC<Props> = ({
     <div className="canvasColorPalette">
       <ItemGrid items={colors} itemsPerRow={colorsPerRow}>
         {(color) => {
-          const match = chroma(color).name() === chroma(value).name();
+          const match = chroma(color).hex() === chroma(value).hex();
           const icon = match ? (
             <EuiIcon type="check" className="selected-color" color={readableColor(value)} />
           ) : null;

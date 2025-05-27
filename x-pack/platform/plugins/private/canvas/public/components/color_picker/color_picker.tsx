@@ -38,7 +38,7 @@ export const ColorPicker: FC<Props> = ({
   let canAdd = false;
 
   if (isValidColor) {
-    const match = colors.filter((color) => chroma(value).name() === chroma(color).name());
+    const match = colors.filter((color) => chroma(value).hex() === chroma(color).hex());
     canRemove = match.length > 0;
     canAdd = match.length === 0;
   }
