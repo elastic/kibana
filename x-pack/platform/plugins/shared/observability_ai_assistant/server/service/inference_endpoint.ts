@@ -244,9 +244,7 @@ export async function waitForKbModel({
   config: ObservabilityAIAssistantConfig;
   inferenceId: string;
 }) {
-  logger.debug(
-    `!! Waiting for knowledge base model to be ready for inference ID "${inferenceId}" !!`
-  );
+  logger.debug(`Waiting for knowledge base model to be ready for inference ID "${inferenceId}" !!`);
 
   // Run a dummy inference to trigger the model to deploy
   // This is a workaround for the fact that the model may not be deployed yet
@@ -264,7 +262,7 @@ export async function waitForKbModel({
       });
 
       if (kbState !== KnowledgeBaseState.READY) {
-        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, inferenceId = ${inferenceId}`;
+        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, `;
         logger.debug(message);
         throw new Error(message);
       }
