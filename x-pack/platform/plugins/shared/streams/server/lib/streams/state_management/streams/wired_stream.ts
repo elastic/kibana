@@ -562,7 +562,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    const definitionChanged = _.isEqual(startingStateStream.definition, this._definition);
+    const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
 
     if (definitionChanged) {
       actions.push({
