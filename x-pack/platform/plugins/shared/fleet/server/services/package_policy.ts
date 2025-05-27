@@ -120,6 +120,7 @@ import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
 import {
+  canDeployAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
@@ -368,6 +369,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
+      canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
       if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndWriteSecrets({
@@ -587,6 +589,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
           validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+          canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
@@ -1023,6 +1026,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicyUpdate,
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+      canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
       if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndUpdateSecrets({
@@ -1292,6 +1296,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (pkgInfoAndAsset) {
             const { pkgInfo, assetsMap } = pkgInfoAndAsset;
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
+            canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
             if (secretStorageEnabled) {
               const secretsRes = await extractAndUpdateSecrets({

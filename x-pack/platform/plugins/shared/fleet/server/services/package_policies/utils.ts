@@ -50,7 +50,7 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
 export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy | NewPackagePolicy,
-  packageInfo?: PackageInfo
+  packageInfo?: Pick<PackageInfo, 'type'>
 ) {
   // Package policies cannot be created for content type packages
   if (packageInfo?.type === 'content') {
@@ -72,18 +72,6 @@ export async function preflightCheckPackagePolicy(
     if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
       throw new PackagePolicyOutputError(outputForIntegrationErrorMessage);
     }
-  }
-
-  const installSource =
-    packageInfo &&
-    'savedObject' in packageInfo &&
-    packageInfo.savedObject?.attributes.install_source;
-  const isCustom = installSource === 'custom' || installSource === 'upload';
-  const isCustomAgentlessAllowed =
-    appContextService.getConfig()?.agentless?.customIntegrations?.enabled;
-
-  if (packagePolicy.supports_agentless && isCustom && !isCustomAgentlessAllowed) {
-    throw new CustomPackagePolicyNotAllowedForAgentlessError();
   }
 }
 
@@ -134,4 +122,23 @@ export async function canUseOutputForIntegration(
     canUseOutputForIntegrationResult: true,
     errorMessage: null,
   };
+}
+
+export function canDeployAsAgentlessOrThrow(
+  packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo
+) {
+  const installSource =
+    packageInfo &&
+    'savedObject' in packageInfo &&
+    packageInfo.savedObject?.attributes.install_source;
+  const isCustom = installSource === 'custom' || installSource === 'upload';
+  const isCustomAgentlessAllowed =
+    appContextService.getConfig()?.agentless?.customIntegrations?.enabled;
+
+  if (packagePolicy.supports_agentless && isCustom && !isCustomAgentlessAllowed) {
+    throw new CustomPackagePolicyNotAllowedForAgentlessError();
+  }
+
+  return true;
 }
