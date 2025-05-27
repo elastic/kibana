@@ -86,10 +86,12 @@ export function getLensAttributeService(
         if (Object.values(textBasedState.layers).length > 0) {
           Object.keys(textBasedState.layers).forEach((layerId) => {
             if ('index' in textBasedState.layers[layerId]) {
-              textBasedState.layers[layerId].indexPatternId = (textBasedState.layers[layerId] as unknown as { index: string }).index;
+              textBasedState.layers[layerId].indexPatternId = (
+                textBasedState.layers[layerId] as unknown as { index: string }
+              ).index;
               delete (textBasedState.layers[layerId] as unknown as { index?: string }).index;
             }
-          }); 
+          });
         }
       }
       return {
