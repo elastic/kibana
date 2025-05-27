@@ -9,40 +9,98 @@
 
 import {
   useEuiTheme,
-  useGeneratedHtmlId,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
   EuiSkeletonText,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
-import { PARENT_ID_FIELD } from '@kbn/discover-utils';
+import { DataTableRecord, PARENT_ID_FIELD } from '@kbn/discover-utils';
 import { flattenObject } from '@kbn/object-utils';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import SpanOverview from '../../doc_viewer_span_overview';
 import TransactionOverview from '../../doc_viewer_transaction_overview';
 import { useSpan } from './hooks/use_span';
+import DocViewerTable from '../../../../doc_viewer_table';
+import DocViewerSource from '../../../../doc_viewer_source';
+
+const flyoutId = 'spanDetailFlyout';
+const tabIds = {
+  OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
+  TABLE: 'unifiedDocViewerTracesSpanFlyoutTable',
+  JSON: 'unifiedDocViewerTracesSpanFlyoutJson',
+};
+
+const tabs = [
+  {
+    id: tabIds.OVERVIEW,
+    name: i18n.translate(
+      'unifiedDocViewer.observability.traces.fullScreenWaterfall.tabs.overview',
+      {
+        defaultMessage: 'Overview',
+      }
+    ),
+  },
+  {
+    id: tabIds.TABLE,
+    name: i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.tabs.table', {
+      defaultMessage: 'Table',
+    }),
+  },
+  {
+    id: tabIds.JSON,
+    name: i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.tabs.json', {
+      defaultMessage: 'JSON',
+    }),
+  },
+];
 
 export interface SpanFlyoutProps {
-  indexPattern: string;
+  tracesIndexPattern: string;
   spanId: string;
+  dataView: DocViewRenderProps['dataView'];
   onCloseFlyout: () => void;
 }
 
-export const SpanFlyout = ({ indexPattern, spanId, onCloseFlyout }: SpanFlyoutProps) => {
-  const { span, loading } = useSpan({ indexPattern, spanId });
+export const SpanFlyout = ({
+  tracesIndexPattern,
+  spanId,
+  dataView,
+  onCloseFlyout,
+}: SpanFlyoutProps) => {
+  const { span, docId, loading } = useSpan({ indexPattern: tracesIndexPattern, spanId });
+  const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const { euiTheme } = useEuiTheme();
+  const documentAsHit: DataTableRecord | null = useMemo(() => {
+    if (!span || !docId) return null;
 
-  const flyoutId = useGeneratedHtmlId({
-    prefix: 'spanDetailFlyout',
-  });
+    return {
+      id: docId,
+      raw: {
+        _index: span._index,
+        _id: docId,
+        _source: span,
+      },
+      flattened: flattenObject(span),
+    };
+  }, [docId, span]);
 
-  // TODO I think I won’t use the hit and will go with the flattened for the overviews, but not sure yet.
-  const detailDocument = {
-    id: 'test',
-    raw: {},
-    flattened: flattenObject(span || {}),
+  const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
+
+  const renderTabs = () => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        key={index}
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
   };
 
   return (
@@ -63,24 +121,46 @@ export const SpanFlyout = ({ indexPattern, spanId, onCloseFlyout }: SpanFlyoutPr
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSkeletonText isLoading={loading}>
-          {detailDocument &&
-            (detailDocument.flattened[PARENT_ID_FIELD] ? (
-              <SpanOverview
-                hit={detailDocument}
-                transactionIndexPattern={'remote_cluster:traces-*'} // TODO this needs to be set correctly!
-                showWaterfall={false}
-                showActions={false}
-              />
-            ) : (
-              <TransactionOverview
-                hit={detailDocument}
-                tracesIndexPattern={'remote_cluster:traces-*'} // TODO this needs to be set correctly!
-                showWaterfall={false}
-                showActions={false}
-              />
-            ))}
-        </EuiSkeletonText>
+        {loading || !documentAsHit ? (
+          <EuiSkeletonText lines={5} />
+        ) : (
+          <>
+            <EuiTabs size="s">{renderTabs()}</EuiTabs>
+            <EuiSkeletonText isLoading={loading}>
+              {selectedTabId === tabIds.OVERVIEW ? (
+                documentAsHit.flattened[PARENT_ID_FIELD] ? (
+                  <SpanOverview
+                    hit={documentAsHit}
+                    transactionIndexPattern={tracesIndexPattern}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                ) : (
+                  <TransactionOverview
+                    hit={documentAsHit}
+                    tracesIndexPattern={tracesIndexPattern}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                )
+              ) : selectedTabId === tabIds.TABLE ? (
+                <DocViewerTable hit={documentAsHit} dataView={dataView} />
+              ) : (
+                <DocViewerSource
+                  id={documentAsHit.id}
+                  index={documentAsHit.raw._index}
+                  dataView={dataView}
+                  esqlHit={documentAsHit}
+                  onRefresh={function (): void {
+                    throw new Error('onRefresh: Function not implemented.');
+                  }}
+                />
+              )}
+            </EuiSkeletonText>
+          </>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
