@@ -1217,10 +1217,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(
-      [...packagePolicyUpdates, ...oldPackagePolicies],
+      packagePolicyUpdates,
       soClient,
       true
     );
+
+    const oldPackageInfos = await getPackageInfoForPackagePolicies(
+      oldPackagePolicies,
+      soClient,
+      true
+    );
+
+    const allPackageInfos = [...packageInfos.entries(), ...oldPackageInfos.entries()].reduce(
+      (acc, [pkgKey, pkgInfo]) => {
+        acc.set(pkgKey, pkgInfo);
+
+        return acc;
+      },
+      new Map<string, PackageInfo>()
+    );
+
     const allSecretsToDelete: PolicySecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
@@ -1329,10 +1345,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               oldPackagePolicy.package &&
               oldPackagePolicy.package.version !== pkgInfo.version
             ) {
-              const oldPkgInfoAndAsset = packageInfosandAssetsMap.get(
+              const oldPackageInfo = allPackageInfos.get(
                 `${oldPackagePolicy.package.name}-${oldPackagePolicy.package.version}`
               );
-              if (oldPkgInfoAndAsset?.pkgInfo.type === 'integration') {
+              if (oldPackageInfo?.type === 'integration') {
                 assetsToInstallFn.push(async () => {
                   const updatedPackagePolicy = await this.get(soClient, id);
 
