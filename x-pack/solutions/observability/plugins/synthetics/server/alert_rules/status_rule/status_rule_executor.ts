@@ -298,10 +298,8 @@ export class StatusRuleExecutor {
 
   schedulePendingAlertPerConfigIdPerLocation({
     pendingConfigs,
-    pendingThreshold,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
-    pendingThreshold: number;
   }) {
     Object.entries(pendingConfigs).forEach(([idWithLocation, statusConfig]) => {
       const alertId = idWithLocation;
@@ -321,17 +319,14 @@ export class StatusRuleExecutor {
         statusConfig,
         locationNames: [monitorSummary.locationName],
         locationIds: [statusConfig.locationId],
-        pendingThreshold,
       });
     });
   }
 
   schedulePendingAlertPerConfigId({
     pendingConfigs,
-    pendingThreshold,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
-    pendingThreshold: number;
   }) {
     const pendingConfigsById = getConfigsByIds(pendingConfigs);
 
@@ -351,7 +346,6 @@ export class StatusRuleExecutor {
         statusConfig: configs[0],
         locationNames: configs.map(({ locationId, ping }) => ping?.observer.geo.name || locationId),
         locationIds: configs.map(({ locationId }) => locationId),
-        pendingThreshold,
       });
     }
   }
@@ -365,12 +359,10 @@ export class StatusRuleExecutor {
       if (this.params.condition?.groupBy && this.params.condition.groupBy !== 'locationId') {
         this.schedulePendingAlertPerConfigId({
           pendingConfigs,
-          pendingThreshold: this.params.condition.alertOnNoData.noOfMissingPings,
         });
       } else {
         this.schedulePendingAlertPerConfigIdPerLocation({
           pendingConfigs,
-          pendingThreshold: this.params.condition.alertOnNoData.noOfMissingPings,
         });
       }
     }
@@ -519,31 +511,28 @@ export class StatusRuleExecutor {
     return baseSummary;
   }
 
-  scheduleAlert({
-    idWithLocation,
-    alertId,
-    monitorSummary,
-    statusConfig,
-    downThreshold,
-    useLatestChecks = false,
-    locationNames,
-    locationIds,
-    pendingThreshold,
-  }: {
-    idWithLocation: string;
-    alertId: string;
-    monitorSummary: MonitorSummaryStatusRule;
-    useLatestChecks?: boolean;
-    locationNames: string[];
-    locationIds: string[];
-  } & (
-    | { statusConfig: AlertStatusMetaData; downThreshold: number; pendingThreshold?: undefined }
-    | {
-        statusConfig: AlertPendingStatusMetaData;
-        downThreshold?: undefined;
-        pendingThreshold: number;
-      }
-  )) {
+  scheduleAlert(
+    params: {
+      idWithLocation: string;
+      alertId: string;
+      monitorSummary: MonitorSummaryStatusRule;
+      useLatestChecks?: boolean;
+      locationNames: string[];
+      locationIds: string[];
+    } & (
+      | { statusConfig: AlertPendingStatusMetaData }
+      | { statusConfig: AlertStatusMetaData; downThreshold: number }
+    )
+  ) {
+    const {
+      idWithLocation,
+      alertId,
+      monitorSummary,
+      statusConfig,
+      useLatestChecks = false,
+      locationNames,
+      locationIds,
+    } = params;
     const { configId, locationId } = statusConfig;
     const { spaceId, startedAt } = this.options;
     const { alertsClient } = this.options.services;
@@ -577,8 +566,8 @@ export class StatusRuleExecutor {
     };
 
     // downThreshold and checks are only available for down alerts
-    if (downThreshold) {
-      context.downThreshold = downThreshold;
+    if ('downThreshold' in params) {
+      context.downThreshold = params.downThreshold;
     }
 
     if ('checks' in statusConfig) {
@@ -590,7 +579,7 @@ export class StatusRuleExecutor {
       locationNames,
       locationIds,
       useLatestChecks,
-      pendingThreshold === undefined ? downThreshold : pendingThreshold
+      'downThreshold' in params ? params.downThreshold : 1
     );
 
     alertsClient.setAlertData({

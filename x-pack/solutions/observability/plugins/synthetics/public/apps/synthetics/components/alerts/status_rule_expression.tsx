@@ -69,9 +69,7 @@ export const StatusRuleExpression: React.FC<Props> = ({
       if (isChecked) {
         newCondition = {
           ...newCondition,
-          alertOnNoData: {
-            noOfMissingPings: 1,
-          },
+          alertOnNoData: true,
         };
       } else if ('alertOnNoData' in newCondition) {
         const { alertOnNoData, ...rest } = newCondition;

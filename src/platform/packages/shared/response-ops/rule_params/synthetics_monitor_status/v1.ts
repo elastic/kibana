@@ -30,11 +30,6 @@ const NumberOfChecksSchema = schema.object({
   }),
 });
 
-const AlertOnNoDataSchema = schema.object({
-  // This parameters is not used in the current implementation but is kept for future use if the user wants to wait for a certain number of missing pings before alerting
-  noOfMissingPings: schema.number({ min: 1 }),
-});
-
 const StatusRuleConditionSchema = schema.object({
   groupBy: schema.maybe(
     schema.string({
@@ -58,7 +53,7 @@ const StatusRuleConditionSchema = schema.object({
     NumberOfChecksSchema,
   ]),
   includeRetests: schema.maybe(schema.boolean()),
-  alertOnNoData: schema.maybe(AlertOnNoDataSchema),
+  alertOnNoData: schema.maybe(schema.boolean()),
 });
 
 export const syntheticsMonitorStatusRuleParamsSchema = schema.object(
