@@ -29,5 +29,11 @@
       "spaces",
       "security"
     ]
+  },
+  "build": {
+    "extraExcludes": [
+      "**/*.md", 
+      "!**/*.encoded.md"
+    ]
   }
 }
