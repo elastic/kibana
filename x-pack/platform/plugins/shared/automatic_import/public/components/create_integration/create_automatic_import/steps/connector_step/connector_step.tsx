@@ -25,6 +25,7 @@ import {
   ELASTIC_LLM_THIRD_PARTY,
   ELASTIC_LLM_TOUR_PERFORMANCE,
 } from '@kbn/elastic-assistant/impl/tour/elastic_llm/translations';
+import { isElasticManagedLlmConnector } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import {
   AuthorizationWrapper,
   MissingPrivilegesTooltip,
@@ -173,7 +174,11 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
-              <ElasticLLMNewIntegrationMessage />
+              {isElasticManagedLlmConnector(connector) ? (
+                <ElasticLLMNewIntegrationMessage />
+              ) : (
+                i18n.SUPPORTED_MODELS_INFO
+              )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -20,6 +20,7 @@ import { type AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
@@ -113,12 +114,18 @@ const HeaderComponent: React.FC<Props> = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <ConnectorSelectorInline
-                    onConnectorSelected={noop}
-                    onConnectorIdSelected={onConnectorIdSelected}
+                  <ElasticLLMCostAwarenessTour
+                    isDisabled={!connectorsAreConfigured}
                     selectedConnectorId={connectorId}
-                    stats={stats}
-                  />
+                    zIndex={1}
+                  >
+                    <ConnectorSelectorInline
+                      onConnectorSelected={noop}
+                      onConnectorIdSelected={onConnectorIdSelected}
+                      selectedConnectorId={connectorId}
+                      stats={stats}
+                    />
+                  </ElasticLLMCostAwarenessTour>
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}

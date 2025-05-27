@@ -13,7 +13,7 @@ import {
   EuiTourStepProps,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
@@ -21,13 +21,21 @@ import { elasticLLMTourStep1 } from './step_config';
 import { ELASTIC_LLM_TOUR_FINISH_TOUR } from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { isElasticManagedLlmConnector } from '../../connectorland/helpers';
 
 interface Props {
   children?: EuiTourStepProps['children'];
   isDisabled: boolean;
+  selectedConnectorId: string | undefined;
+  zIndex?: number;
 }
 
-const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({ children, isDisabled }) => {
+const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
+  children,
+  isDisabled,
+  selectedConnectorId,
+  zIndex,
+}) => {
   const { http, inferenceEnabled } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(
@@ -57,13 +65,33 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({ children, isDis
     inferenceEnabled,
   });
 
+  const isElasticLLMConnectorSelected = useMemo(
+    () =>
+      aiConnectors?.some((c) => isElasticManagedLlmConnector(c) && c.id === selectedConnectorId),
+    [aiConnectors, selectedConnectorId]
+  );
+
   useEffect(() => {
-    if (!inferenceEnabled || isDisabled || tourCompleted || aiConnectors?.length === 0) {
+    if (
+      !inferenceEnabled ||
+      isDisabled ||
+      tourCompleted ||
+      aiConnectors?.length === 0 ||
+      !isElasticLLMConnectorSelected
+    ) {
       setShowTour(false);
     } else {
       setShowTour(true);
     }
-  }, [tourCompleted, isDisabled, children, showTour, inferenceEnabled, aiConnectors?.length]);
+  }, [
+    tourCompleted,
+    isDisabled,
+    children,
+    showTour,
+    inferenceEnabled,
+    aiConnectors?.length,
+    isElasticLLMConnectorSelected,
+  ]);
 
   if (!children) {
     return null;
@@ -109,9 +137,10 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({ children, isDis
       panelStyle={{
         fontSize: euiTheme.size.m,
       }}
+      zIndex={zIndex}
     >
       <div
-        id="elasticLLMTourStepContent"
+        id={`elasticLLMTourStepContent`}
         css={css`
           padding-left: ${euiTheme.size.m};
         `}

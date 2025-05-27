@@ -17,6 +17,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { ActionConnector } from '@kbn/cases-plugin/public/containers/configure/types';
 import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
+import { isElasticManagedLlmConnector } from '../helpers';
 
 /**
  * Cache expiration in ms -- 1 minute, useful if connector is deleted/access removed
@@ -52,8 +53,7 @@ export const useLoadConnectors = ({
           actionTypes.includes(connector.actionTypeId) &&
           // only include preconfigured .inference connectors
           (connector.actionTypeId !== '.inference' ||
-            (connector.actionTypeId === '.inference' &&
-              connector.isPreconfigured &&
+            (isElasticManagedLlmConnector(connector) &&
               (await isInferenceEndpointExists(
                 http,
                 (connector as ActionConnector)?.config?.inferenceId

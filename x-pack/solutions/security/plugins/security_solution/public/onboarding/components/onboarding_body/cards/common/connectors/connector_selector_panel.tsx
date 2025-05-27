@@ -6,7 +6,16 @@
  */
 
 import React, { useMemo, useEffect, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import {
@@ -26,7 +35,7 @@ interface ConnectorSelectorPanelProps {
 export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
   ({ connectors, selectedConnectorId, onConnectorSelected }) => {
     const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
-
+    const { euiTheme } = useEuiTheme();
     const selectedConnector = useMemo(
       () => connectors.find((connector) => connector.id === selectedConnectorId),
       [connectors, selectedConnectorId]
@@ -72,51 +81,86 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
       [connectors, onConnectorSelected]
     );
 
-    return (
-      <EuiPanel hasShadow={false} hasBorder>
-        <EuiFlexGroup
-          css={css`
-            height: 100%;
-          `}
-          alignItems="center"
-          justifyContent="center"
-          direction="column"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false} justifyContent="center">
-            <EuiText>{i18n.SELECTED_PROVIDER}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem justifyContent="center">
-            <EuiFlexGroup
-              alignItems="center"
+    const betaBadgeProps = selectedConnector?.isPreconfigured
+      ? {
+          label: (
+            <EuiTitle
               css={css`
-                height: 32px;
+                font-size: ${euiTheme.size.s};
+                font-weight: ${euiTheme.font.weight.bold};
+                line-height: ${euiTheme.base * 1.25}px;
               `}
-              direction="column"
-              justifyContent="center"
-              responsive={false}
-              gutterSize="xs"
             >
-              {selectedConnector && (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    size="xxl"
-                    color="text"
-                    type={actionTypeRegistry.get(selectedConnector.actionTypeId).iconClass}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <ConnectorSelector
-                  connectors={connectorOptions}
-                  selectedId={selectedConnectorId}
-                  onChange={onConnectorSelectionChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+              <h5>{i18n.PRECONFIGURED_CONNECTOR_LABEL}</h5>
+            </EuiTitle>
+          ),
+          title: i18n.PRECONFIGURED_CONNECTOR_LABEL,
+          color: 'subdued' as const,
+          css: css`
+            height: ${euiTheme.base * 1.25}px;
+          `,
+        }
+      : undefined;
+
+    return (
+      <EuiCard
+        css={css`
+          height: 100%;
+        `}
+        hasBorder
+        betaBadgeProps={betaBadgeProps}
+        titleElement="p"
+        footer={
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            direction="column"
+            gutterSize="none"
+          >
+            <EuiFlexItem grow={false}>
+              <ConnectorSelector
+                connectors={connectorOptions}
+                selectedId={selectedConnectorId}
+                onChange={onConnectorSelectionChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        title={
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            direction="column"
+            gutterSize="m"
+          >
+            <EuiFlexItem grow={false} justifyContent="center">
+              <EuiText>{i18n.SELECTED_PROVIDER}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem justifyContent="center">
+              <EuiFlexGroup
+                alignItems="center"
+                css={css`
+                  height: ${euiTheme.size.xl};
+                `}
+                direction="column"
+                justifyContent="center"
+                responsive={false}
+                gutterSize="xs"
+              >
+                {selectedConnector && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      size="xxl"
+                      color="text"
+                      type={actionTypeRegistry.get(selectedConnector.actionTypeId).iconClass}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
     );
   }
 );

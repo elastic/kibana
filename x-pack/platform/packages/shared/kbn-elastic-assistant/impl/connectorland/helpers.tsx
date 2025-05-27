@@ -12,7 +12,9 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { PRECONFIGURED_CONNECTOR } from './translations';
+import { AIConnector } from './connector_selector';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 export enum OpenAiProviderType {
@@ -71,3 +73,9 @@ export const getConnectorTypeTitle = (
 
   return actionType;
 };
+
+export const isElasticManagedLlmConnector = (
+  connector:
+    | { actionTypeId: AIConnector['actionTypeId']; isPreconfigured: AIConnector['isPreconfigured'] }
+    | undefined
+) => connector?.actionTypeId === '.inference' && connector?.isPreconfigured;
