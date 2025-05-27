@@ -122,13 +122,13 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # - wait
+  - wait
 
-  # - command: .buildkite/scripts/steps/artifacts/publish.sh
-  #   label: 'Publish Kibana Artifacts'
-  #   agents:
-  #     image: family/kibana-ubuntu-2004
-  #     imageProject: elastic-images-prod
-  #     provider: gcp
-  #     machineType: n2-standard-2
-  #   timeout_in_minutes: 30
+  - command: .buildkite/scripts/steps/artifacts/publish.sh
+    label: 'Publish Kibana Artifacts'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    timeout_in_minutes: 30
