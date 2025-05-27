@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { type FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatus } from '../../../../common/typings';
-import { ALL_ALERTS } from '../constants';
 import { AlertSearchBarContainerState } from '../types';
 
 interface AlertSearchBarStateTransitions {
@@ -33,14 +33,20 @@ interface AlertSearchBarStateTransitions {
   setSavedQueryId: (
     state: AlertSearchBarContainerState
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
+  setControlConfigs: (
+    state: AlertSearchBarContainerState
+  ) => (controlConfigs: FilterControlConfig[]) => AlertSearchBarContainerState;
+  setGroupings: (
+    state: AlertSearchBarContainerState
+  ) => (groupings: string[]) => AlertSearchBarContainerState;
 }
 
 const DEFAULT_STATE: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
-  status: ALL_ALERTS.status,
   filters: [],
+  groupings: [],
 };
 
 const transitions: AlertSearchBarStateTransitions = {
@@ -50,6 +56,8 @@ const transitions: AlertSearchBarStateTransitions = {
   setStatus: (state) => (status) => ({ ...state, status }),
   setFilters: (state) => (filters) => ({ ...state, filters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
+  setControlConfigs: (state) => (controlConfigs) => ({ ...state, controlConfigs }),
+  setGroupings: (state) => (groupings) => ({ ...state, groupings }),
 };
 
 const alertSearchBarStateContainer = createStateContainer(DEFAULT_STATE, transitions);

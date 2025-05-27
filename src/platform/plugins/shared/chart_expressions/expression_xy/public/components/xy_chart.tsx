@@ -57,6 +57,7 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
   BrushEvent,
@@ -139,6 +140,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -202,6 +204,7 @@ export function XYChart({
   minInterval,
   onClickValue,
   onClickMultiValue,
+  onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -230,6 +233,7 @@ export function XYChart({
     singleTable,
     annotations,
   } = args;
+
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
@@ -654,12 +658,16 @@ export function XYChart({
         ? getAccessorByDimension(dataLayers[0].xAccessor, table.columns)
         : undefined;
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
-
     const context: BrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      ...(isEsqlMode ? { timeFieldName: table.columns[xAxisColumnIndex].name } : {}),
+      ...(isEsqlMode
+        ? {
+            timeFieldName:
+              table.columns[xAxisColumnIndex].meta.sourceParams?.sourceField?.toString(),
+          }
+        : {}),
     };
     onSelectRange(context);
   };
@@ -750,6 +758,9 @@ export function XYChart({
   const applicationQuery = data.query.queryString.getQuery();
   const canCreateFilters =
     !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
+  // ES|QL charts are allowed to create alert rules only in dashboards
+  const canCreateAlerts =
+    isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
   return (
     <>
@@ -791,11 +802,14 @@ export function XYChart({
               actions={getTooltipActions(
                 dataLayers,
                 onClickMultiValue,
+                onCreateAlertRule,
                 fieldFormats,
                 formattedDatatables,
                 xAxisFormatter,
                 formatFactory,
-                interactive && !args.detailedTooltip && !isEsqlMode
+                isEsqlMode,
+                canCreateAlerts,
+                interactive && !args.detailedTooltip
               )}
               customTooltip={
                 args.detailedTooltip
