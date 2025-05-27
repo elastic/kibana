@@ -7,10 +7,11 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { getInternalSavedObjectsClient } from '../utils';
 import { GetAgentPolicyRequestParams } from '../../../common/api';
 
 export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -34,12 +35,15 @@ export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppC
         },
       },
       async (context, request, response) => {
-        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-          osqueryContext.getStartServices
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const [core] = await osqueryContext.getStartServices();
+        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
+          core,
+          space?.id ?? DEFAULT_SPACE_ID
         );
         const packageInfo = await osqueryContext.service
           .getAgentPolicyService()
-          ?.get(internalSavedObjectsClient, request.params.id);
+          ?.get(spaceScopedClient, request.params.id);
 
         return response.ok({ body: { item: packageInfo } });
       }

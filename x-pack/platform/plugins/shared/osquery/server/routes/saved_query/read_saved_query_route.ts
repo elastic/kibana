@@ -6,6 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
@@ -42,10 +44,14 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const [core] = await osqueryContext.getStartServices();
+        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
+          core,
+          space?.id ?? DEFAULT_SPACE_ID
+        );
 
-        const savedQuery = await savedObjectsClient.get<SavedQuerySavedObject>(
+        const savedQuery = await spaceScopedClient.get<SavedQuerySavedObject>(
           savedQuerySavedObjectType,
           request.params.id
         );

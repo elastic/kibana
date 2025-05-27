@@ -7,6 +7,8 @@
 
 import { isEmpty, pickBy, some, isBoolean, isNumber } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
@@ -43,7 +45,12 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       },
       async (context, request, response) => {
         const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const [core] = await osqueryContext.getStartServices();
+        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
+          core,
+          space?.id ?? DEFAULT_SPACE_ID
+        );
 
         const {
           id,
@@ -61,7 +68,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
         const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
-        const conflictingEntries = await savedObjectsClient.find<SavedQuerySavedObject>({
+        const conflictingEntries = await spaceScopedClient.find<SavedQuerySavedObject>({
           type: savedQuerySavedObjectType,
           filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
         });
@@ -73,7 +80,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Saved query with id "${id}" already exists.` });
         }
 
-        const savedQuerySO = await savedObjectsClient.create(
+        const savedQuerySO = await spaceScopedClient.create(
           savedQuerySavedObjectType,
           pickBy(
             {

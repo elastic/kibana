@@ -8,6 +8,8 @@
 import { filter, map } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -19,8 +21,9 @@ import { convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const readPackRoute = (router: IRouter) => {
+export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
     .get({
       access: 'public',
@@ -44,11 +47,15 @@ export const readPackRoute = (router: IRouter) => {
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const [core] = await osqueryContext.getStartServices();
+        const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
+          core,
+          space?.id ?? DEFAULT_SPACE_ID
+        );
 
         const { attributes, references, id, ...rest } =
-          await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
+          await spaceScopedClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
 
         const policyIds = map(
           filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),

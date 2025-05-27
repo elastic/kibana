@@ -119,6 +119,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       config: this.config!,
       logger: this.logger,
       registerIngestCallback,
+      spacesService: plugins.spaces?.spacesService,
     });
 
     this.telemetryReceiver.start(core, this.osqueryAppContextService);

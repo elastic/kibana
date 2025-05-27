@@ -7,6 +7,7 @@
 
 import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type {
   GetAgentStatusForAgentPolicyRequestParamsSchema,
   GetAgentStatusForAgentPolicyRequestQuerySchema,
@@ -51,9 +52,10 @@ export const getAgentStatusForAgentPolicyRoute = (
         },
       },
       async (context, request, response) => {
+        const space = await osqueryContext.service.getActiveSpace(request);
         const results = await osqueryContext.service
           .getAgentService()
-          ?.asScoped(request)
+          ?.asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
           .getAgentStatusForAgentPolicy(request.query.policyId, request.query.kuery);
 
         if (!results) {
