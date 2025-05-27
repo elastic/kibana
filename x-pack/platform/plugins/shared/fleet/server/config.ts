@@ -297,6 +297,7 @@ export const config: PluginConfigDescriptor = {
       ),
       autoUpgrades: schema.maybe(
         schema.object({
+          taskInterval: schema.maybe(schema.string()),
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),

@@ -218,7 +218,7 @@ export const createNavigationTree = ({
               {
                 id: 'category-aiops_labs',
                 title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
+                  defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [

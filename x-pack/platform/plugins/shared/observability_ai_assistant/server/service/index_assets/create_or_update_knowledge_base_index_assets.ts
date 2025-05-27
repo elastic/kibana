@@ -10,11 +10,12 @@ import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-pl
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { getComponentTemplate } from './templates/kb_component_template';
 import { resourceNames } from '..';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 export async function createOrUpdateKnowledgeBaseIndexAssets({
   logger,
   core,
-  inferenceId,
+  inferenceId: componentTemplateInferenceId,
 }: {
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -23,14 +24,19 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
   try {
     logger.debug('Setting up knowledge base index assets');
     const [coreStart] = await core.getStartServices();
-    const { asInternalUser } = coreStart.elasticsearch.client;
+    const esClient = coreStart.elasticsearch.client;
+    const { asInternalUser } = esClient;
 
     // Knowledge base: component template
     await asInternalUser.cluster.putComponentTemplate({
       create: false,
       name: resourceNames.componentTemplate.kb,
-      template: getComponentTemplate(inferenceId),
+      template: getComponentTemplate(componentTemplateInferenceId),
     });
+
+    logger.debug(
+      `Knowledge base component template updated with inference_id: ${componentTemplateInferenceId}`
+    );
 
     // Knowledge base: index template
     await asInternalUser.indices.putIndexTemplate({
@@ -47,21 +53,30 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       },
     });
 
+    const writeIndexInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(
+      () => undefined
+    );
+    logger.debug(`Current write index inference id: ${writeIndexInferenceId}`);
+
     // Knowledge base: write index
-    const kbAliasName = resourceNames.writeIndexAlias.kb;
-    await createConcreteWriteIndex({
-      esClient: asInternalUser,
-      logger,
-      totalFieldsLimit: 10000,
-      indexPatterns: {
-        alias: kbAliasName,
-        pattern: `${kbAliasName}*`,
-        basePattern: `${kbAliasName}*`,
-        name: resourceNames.concreteWriteIndexName.kb,
-        template: resourceNames.indexTemplate.kb,
-      },
-      dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
-    });
+    // `createConcreteWriteIndex` will create the write index, or update the index mappings if the index already exists
+    // only invoke `createConcreteWriteIndex` if the write index does not exist or the inferenceId in the component template is the same as the one in the write index
+    if (!writeIndexInferenceId || writeIndexInferenceId === componentTemplateInferenceId) {
+      const kbAliasName = resourceNames.writeIndexAlias.kb;
+      await createConcreteWriteIndex({
+        esClient: asInternalUser,
+        logger,
+        totalFieldsLimit: 10000,
+        indexPatterns: {
+          alias: kbAliasName,
+          pattern: `${kbAliasName}*`,
+          basePattern: `${kbAliasName}*`,
+          name: resourceNames.concreteWriteIndexName.kb,
+          template: resourceNames.indexTemplate.kb,
+        },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+      });
+    }
 
     logger.info('Successfully set up knowledge base index assets');
   } catch (error) {

@@ -33,6 +33,7 @@ const TEST_IDS = {
   AGENT_POLICY_NAME_LINK: 'agentPolicyNameLink',
   AGENTLESS_STATUS_BADGE: 'agentlessStatusBadge',
   CREATE_AGENT_POLICY_NAME_FIELD: 'createAgentPolicyNameField',
+  CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
 } as const;
 
 export function AddCisIntegrationFormPageProvider({
@@ -277,8 +278,10 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickFirstElementOnIntegrationTableAddAgent = async () => {
-    const integrationList = await testSubjects.findAll(TEST_IDS.ADD_AGENT_BUTTON);
-    await integrationList[0].click();
+    const integrationList = await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
+    if (integrationList) {
+      await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
+    }
   };
 
   const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
@@ -328,11 +331,19 @@ export function AddCisIntegrationFormPageProvider({
     return await testSubjects.exists(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
   };
 
-  const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
-    await selectValue(
-      AWS_CREDENTIAL_SELECTOR,
-      credentialType === 'direct' ? 'direct_access_keys' : 'temporary_keys'
-    );
+  const selectAwsCredentials = async (
+    credentialType: 'direct' | 'temporary' | 'cloud_connectors'
+  ) => {
+    let credentialTypeValue = 'direct_access_keys';
+
+    if (credentialType === 'temporary') {
+      credentialTypeValue = 'temporary_keys';
+    }
+    if (credentialType === 'cloud_connectors') {
+      credentialTypeValue = 'cloud_connector';
+    }
+    await testSubjects.click(AWS_CREDENTIAL_SELECTOR);
+    await selectValue(AWS_CREDENTIAL_SELECTOR, credentialTypeValue);
   };
 
   const clickOptionButton = async (text: string) => {
@@ -355,7 +366,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getPostInstallModal = async () => {
-    return await testSubjects.find(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
+    return await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
   };
 
   const checkIntegrationPliAuthBlockExists = async () => {
@@ -408,6 +419,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const getReplaceSecretButton = async (secretField: string) => {
     return await testSubjects.find(`button-replace-${secretField}`);
+  };
+
+  const showCredentialJsonSecretPanel = async () => {
+    return await testSubjects.exists(TEST_IDS.CREDENTIALS_JSON_SECRET_PANEL);
   };
 
   const inputUniqueIntegrationName = async () => {
@@ -638,5 +653,6 @@ export function AddCisIntegrationFormPageProvider({
     navigateToEditAgentlessIntegrationPage,
     closeAllOpenTabs,
     waitUntilLaunchCloudFormationButtonAppears,
+    showCredentialJsonSecretPanel,
   };
 }

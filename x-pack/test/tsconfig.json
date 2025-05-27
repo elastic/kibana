@@ -174,10 +174,12 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/embeddable-alerts-table-plugin",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
   ]
 }
