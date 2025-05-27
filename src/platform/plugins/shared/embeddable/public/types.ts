@@ -18,7 +18,11 @@ import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EmbeddableStateWithType } from '../common';
+import type {
+  EmbeddableContentManagementDefinition,
+  EmbeddableStateWithType,
+  CanGetEmbeddableContentManagementDefinition,
+} from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
 
 export interface EmbeddableSetupDependencies {
@@ -68,12 +72,17 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
+  registerEmbeddableContentManagementDefinition: (
+    definition: EmbeddableContentManagementDefinition
+  ) => void;
+
   /**
    * @deprecated
    */
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
 }
 
-export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
-  getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-}
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
+  CanGetEmbeddableContentManagementDefinition & {
+    getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
+  };
