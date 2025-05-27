@@ -62,7 +62,7 @@ describe('timeShift(resp, panel, series)', () => {
     const results = await stdMetric(resp, panel, series, {})(next)([]);
 
     expect(results).toHaveLength(1);
-    expect(results[0]).toHaveProperty('color', 'rgb(255, 0, 0)');
+    expect(results[0]).toHaveProperty('color', '#ff0000');
     expect(results[0]).toHaveProperty('id', 'test');
     expect(results[0]).toHaveProperty('label', 'Average of cpu');
     expect(results[0]).toHaveProperty('lines');
