@@ -33,7 +33,6 @@ import { asErr, asOk } from './lib/result_type';
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
@@ -75,7 +74,6 @@ const adHocTaskCounter = new AdHocTaskCounter();
 const randomId = () => `id-${_.random(1, 20)}`;
 
 const coreStart = coreMock.createStart();
-const spacesStart = spacesMock.createStart();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -146,7 +144,6 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
-        spaces: spacesStart,
         canEncryptSavedObjects: true,
       });
 
@@ -319,12 +316,7 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [task],
-        request,
-        coreStart.security,
-        spacesStart
-      );
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security);
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -363,7 +355,6 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
-        spaces: spacesStart,
         canEncryptSavedObjects: false,
       });
 
@@ -1688,7 +1679,6 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
-        spaces: spacesStart,
         canEncryptSavedObjects: true,
       });
 
@@ -1809,7 +1799,6 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
-        spaces: spacesStart,
         canEncryptSavedObjects: true,
       });
 
@@ -2123,7 +2112,6 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
-        spaces: spacesStart,
         canEncryptSavedObjects: true,
       });
 
@@ -2330,8 +2318,7 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task1, task2],
         request,
-        coreStart.security,
-        spacesStart
+        coreStart.security
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -2392,7 +2379,6 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
-        spaces: spacesStart,
         canEncryptSavedObjects: false,
       });
 
