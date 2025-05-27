@@ -13,7 +13,7 @@ import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import { default as React, useCallback, useEffect, useMemo, useRef } from 'react';
+import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { GridData } from '../../../common/content_management/v2/types';
 import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
@@ -41,12 +41,20 @@ export const DashboardGrid = ({
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
 
+  const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
   const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
     dashboardInternalApi.layout$,
     dashboardApi.settings.useMargins$,
     dashboardApi.viewMode$
   );
+
+  useEffect(() => {
+    setTopOffset(
+      dashboardContainerRef?.current?.getBoundingClientRect().top ??
+        DEFAULT_DASHBOARD_DRAG_TOP_OFFSET
+    );
+  }, [dashboardContainerRef]);
 
   const appFixedViewport = useAppFixedViewport();
 
@@ -201,9 +209,7 @@ export const DashboardGrid = ({
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-          keyboardDragTopLimit:
-            dashboardContainerRef?.current?.getBoundingClientRect().top ||
-            DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
+          keyboardDragTopLimit: topOffset,
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
@@ -220,7 +226,7 @@ export const DashboardGrid = ({
     onLayoutChange,
     expandedPanelId,
     viewMode,
-    dashboardContainerRef,
+    topOffset,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {

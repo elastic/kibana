@@ -407,7 +407,7 @@ export function initializeLayoutManager(
       },
       isSectionCollapsed: (sectionId?: string): boolean => {
         const { sections } = layout$.getValue();
-        return Boolean(!sectionId || sections[sectionId].collapsed);
+        return Boolean(sectionId && sections[sectionId].collapsed);
       },
     },
     api: {
