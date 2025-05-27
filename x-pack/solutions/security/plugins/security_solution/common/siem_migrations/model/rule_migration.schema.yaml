@@ -395,7 +395,7 @@ components:
         - total_rules
       properties:
         id:
-          description: The migration id, usually the integration name
+          description: The integration id
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         total_rules:
           type: integer
