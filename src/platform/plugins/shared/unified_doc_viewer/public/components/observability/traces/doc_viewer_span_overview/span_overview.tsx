@@ -32,7 +32,7 @@ import { SpanSummaryTitle } from './sub_components/span_summary_title';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
 
 export type SpanOverviewProps = DocViewRenderProps & {
-  transactionIndexPattern: string;
+  tracesIndexPattern: string;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -43,7 +43,7 @@ export function SpanOverview({
   filter,
   onAddColumn,
   onRemoveColumn,
-  transactionIndexPattern,
+  tracesIndexPattern,
   showWaterfall = true,
   showActions = true,
   dataView,
@@ -67,9 +67,9 @@ export function SpanOverview({
   return (
     <RootTransactionProvider
       traceId={flattenedDoc[TRACE_ID_FIELD]}
-      indexPattern={transactionIndexPattern}
+      indexPattern={tracesIndexPattern}
     >
-      <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
+      <TransactionProvider transactionId={transactionId} indexPattern={tracesIndexPattern}>
         <FieldActionsProvider
           columns={columns}
           filter={filter}
@@ -111,6 +111,7 @@ export function SpanOverview({
               docId={flattenedDoc[SPAN_ID_FIELD]}
               displayType="span"
               dataView={dataView}
+              tracesIndexPattern={tracesIndexPattern}
               showWaterfall={showWaterfall}
             />
           </EuiPanel>
