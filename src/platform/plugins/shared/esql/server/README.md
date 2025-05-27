@@ -23,6 +23,8 @@ Currently, we support the following type of extension:
 * **Recommended Queries**: These queries are suggested to users in the ES|QL editor, particularly after the **`FROM <index_pattern>`** command. They guide users by offering relevant starting points or common analytical patterns for their selected data source.
 
     **Note:** The registry intelligently handles both **exact index pattern matches** (e.g., "logs-2023-10-01") and **wildcard patterns** (e.g., "logs*"). This ensures users receive comprehensive and contextually appropriate suggestions, whether they specify a precise index or a broad pattern. For instance, a recommended query registered for `logs*` will be suggested if the user's query uses `FROM logs-2024-01-15`.
+    
+    **Important:** Extensions registered through this mechanism are **solution-specific**. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'chat') and are only visible when working within the context of that specific solution. Extensions are not displayed in general or non-solution-based Kibana instances.
 
 ---
 
@@ -46,16 +48,19 @@ Here's an example of how to register `recommendedQueries`:
     // Inside your plugin's `Plugin` class
     public setup(core: CoreSetup, { esql }: SetupDeps) {
         // Register your array of recommended queries
-        esql.registerESQLQueries([
-          {
-            name: 'Logs count by log level',
-            query: 'from logs* | STATS count(*) by log_level',
-          },
-          {
-            name: 'Apache logs counts',
-            query: 'from logs-apache_error | STATS count(*)',
-          },
-        ]);
+        esql.registerESQLQueries(
+          [
+            {
+              name: 'Logs count by log level',
+              query: 'from logs* | STATS count(*) by log_level',
+            },
+            {
+              name: 'Apache logs counts',
+              query: 'from logs-apache_error | STATS count(*)',
+            },
+          ],
+            'oblt'
+        );
         return {};
     }
 

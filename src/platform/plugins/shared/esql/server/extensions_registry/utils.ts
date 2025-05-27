@@ -105,13 +105,14 @@ export function findMatchingIndicesFromPattern(
   const matchingIndices: string[] = [];
   const indexPatternRegex = createPatternRegex(indexPattern);
 
-  for (const [indexName, _] of registry.entries()) {
-    if (indexPatternRegex.test(indexName)) {
-      matchingIndices.push(indexName);
+  for (const [registryId, _] of registry.entries()) {
+    const index = registryId.split('>')[1] || registryId; // Extract the index from the registryId
+    if (indexPatternRegex.test(index)) {
+      matchingIndices.push(index);
     } else {
-      const regex = createPatternRegex(indexName);
+      const regex = createPatternRegex(index);
       if (regex.test(indexPattern)) {
-        matchingIndices.push(indexName);
+        matchingIndices.push(index);
       }
     }
   }

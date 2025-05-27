@@ -8,13 +8,14 @@
  */
 import { uniqBy } from 'lodash';
 import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 
 /**
  * `ESQLExtensionsRegistry` serves as a central hub for managing and retrieving extrensions of the ES|QL editor.
  *
- * It allows for the registration of queries, associating them with specific index patterns.
+ * It allows for the registration of queries, associating them with specific index patterns and solutions.
  * This registry is designed to intelligently provide relevant recommended queries
  * based on the index patterns present in an active ES|QL query or available data sources.
  *
@@ -25,8 +26,10 @@ import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 export class ESQLExtensionsRegistry {
   private recommendedQueries: Map<string, RecommendedQuery[]> = new Map();
 
-  // ToDo: allow to register recommended queries from the solution
-  setRecommendedQueries(recommendedQueries: RecommendedQuery[]) {
+  setRecommendedQueries(
+    recommendedQueries: RecommendedQuery[],
+    activeSolutionId: SolutionId
+  ): void {
     if (!Array.isArray(recommendedQueries)) {
       throw new Error('Recommended queries must be an array');
     }
@@ -40,26 +43,30 @@ export class ESQLExtensionsRegistry {
         continue;
       }
 
-      if (this.recommendedQueries.has(indexPattern)) {
-        const existingQueries = this.recommendedQueries.get(indexPattern);
+      // Adding the > as separator to distinguish between solutions and index patterns
+      // The > is not a valid character in index names, so it won't conflict with actual index names
+      const registryId = `${activeSolutionId}>${indexPattern}`;
+
+      if (this.recommendedQueries.has(registryId)) {
+        const existingQueries = this.recommendedQueries.get(registryId);
         // check if the recommended query already exists
         if (existingQueries && existingQueries.some((q) => q.query === recommendedQuery.query)) {
           // If the query already exists, skip adding it again
           continue;
         }
         // If the index pattern already exists, push the new recommended query
-        this.recommendedQueries.get(indexPattern)!.push(recommendedQuery);
+        this.recommendedQueries.get(registryId)!.push(recommendedQuery);
       } else {
         // If the index pattern doesn't exist, create a new array
-        this.recommendedQueries.set(indexPattern, [recommendedQuery]);
+        this.recommendedQueries.set(registryId, [recommendedQuery]);
       }
     }
   }
 
-  // ToDo: allow to get recommended queries per solution
   getRecommendedQueries(
     queryString: string,
-    availableDatasources: ResolveIndexResponse
+    availableDatasources: ResolveIndexResponse,
+    activeSolutionId: SolutionId
   ): RecommendedQuery[] {
     // Validates that the index pattern extracted from the ES|QL `FROM` command
     // exists within the available `sources` (indices, aliases, or data streams).
@@ -79,7 +86,12 @@ export class ESQLExtensionsRegistry {
     const matchingIndices = findMatchingIndicesFromPattern(this.recommendedQueries, indexPattern);
     if (matchingIndices.length > 0) {
       recommendedQueries.push(
-        ...matchingIndices.map((index) => this.recommendedQueries.get(index)!).flat()
+        ...matchingIndices
+          .map((index) => {
+            const registryId = `${activeSolutionId}>${index}`;
+            return this.recommendedQueries.get(registryId) || [];
+          })
+          .flat()
       );
     }
     return uniqBy(recommendedQueries, 'query');

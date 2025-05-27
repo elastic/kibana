@@ -10,13 +10,14 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { RecommendedQuery } from '@kbn/esql-types';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
 
 export interface EsqlServerPluginSetup {
-  registerESQLQueries: (queries: RecommendedQuery[]) => void;
+  registerESQLQueries: (queries: RecommendedQuery[], activeSolutionId: SolutionId) => void;
 }
 
 export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
@@ -42,26 +43,28 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
 
     registerRoutes(core, this.extensionsRegistry, initContext);
     // temporary
-    this.extensionsRegistry.setRecommendedQueries([
-      {
-        name: 'Logs count by log level',
-        query: 'from logs* | STATS count(*) by log_level',
-      },
-      {
-        name: 'Meow and woof counts',
-        query: 'from logs* | STATS count(*)',
-      },
-      {
-        name: 'Zzzzz',
-        query: 'from logs-apache_error | STATS count(*)',
-      },
-      {
-        name: 'ouch',
-        query: 'from kibana_sample_data_ecommerce | STATS count(*)',
-      },
-    ]);
+    this.extensionsRegistry.setRecommendedQueries(
+      [
+        {
+          name: 'Logs count by log level',
+          query: 'from logs* | STATS count(*) by log_level',
+        },
+        {
+          name: 'Meow and woof counts',
+          query: 'from logs* | STATS count(*)',
+        },
+        {
+          name: 'Zzzzz',
+          query: 'from logs-apache_error | STATS count(*)',
+        },
+        {
+          name: 'ouch',
+          query: 'from kibana_sample_data_ecommerce | STATS count(*)',
+        },
+      ],
+      'oblt'
+    );
 
-    // should allow to register the solution too
     return {
       registerESQLQueries: this.extensionsRegistry.setRecommendedQueries,
     };

@@ -7,10 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { ResolveIndexResponse } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
+/**
+ * Type guard to check if a string is a valid SolutionId.
+ * @param str The string to check.
+ * @returns True if the string is a valid SolutionId, false otherwise.
+ */
+const VALID_SOLUTION_IDS = ['es', 'oblt', 'security', 'chat'];
+
+function isSolutionId(str: string): str is SolutionId {
+  return VALID_SOLUTION_IDS.includes(str as SolutionId);
+}
+
+/**
+ * Registers the ESQL extensions route.
+ * This route handles requests for ESQL extensions based on the provided solutionId and query.
+ *
+ * @param router The IRouter instance to register the route with.
+ * @param extensionsRegistry The ESQLExtensionsRegistry instance to use for fetching recommended queries.
+ * @param logger The logger instance from the PluginInitializerContext.
+ */
 export const registerESQLExtensionsRoute = (
   router: IRouter,
   extensionsRegistry: ESQLExtensionsRegistry,
@@ -18,7 +38,7 @@ export const registerESQLExtensionsRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/esql_registry/extensions/{query}',
+      path: '/internal/esql_registry/extensions/{solutionId}/{query}',
       security: {
         authz: {
           enabled: false,
@@ -27,6 +47,17 @@ export const registerESQLExtensionsRoute = (
       },
       validate: {
         params: schema.object({
+          solutionId: schema.oneOf(
+            [
+              schema.literal('es'),
+              schema.literal('oblt'),
+              schema.literal('security'),
+              schema.literal('chat'),
+            ],
+            {
+              defaultValue: 'oblt', // Default to 'oblt' if no solutionId is provided
+            }
+          ),
           query: schema.string(),
         }),
       },
@@ -34,14 +65,20 @@ export const registerESQLExtensionsRoute = (
     async (requestHandlerContext, request, response) => {
       const core = await requestHandlerContext.core;
       const client = core.elasticsearch.client.asCurrentUser;
-      const { query } = request.params;
+      const { query, solutionId } = request.params;
       try {
         const sources = (await client.indices.resolveIndex({
           name: '*',
           expand_wildcards: 'open',
         })) as ResolveIndexResponse;
+        // Validate solutionId
+        const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
         // return the recommended queries for now, we will add more extensions later
-        const recommendedQueries = extensionsRegistry.getRecommendedQueries(query, sources);
+        const recommendedQueries = extensionsRegistry.getRecommendedQueries(
+          query,
+          sources,
+          validSolutionId
+        );
         return response.ok({
           body: recommendedQueries,
         });

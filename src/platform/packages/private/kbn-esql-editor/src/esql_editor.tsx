@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import useObservable from 'react-use/lib/useObservable';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -125,6 +126,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     uiActions,
     data,
   } = kibana.services;
+
+  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -597,15 +600,18 @@ export const ESQLEditor = memo(function ESQLEditor({
   // Temporary, for testing purposes only
   useEffect(() => {
     const getEditorExtensions = async () => {
-      const extensions = await kibana.services?.esql?.getEditorExtensionsAutocomplete(
-        'from logs-apache_error'
-      );
-      if (extensions) {
-        console.dir(extensions);
+      if (activeSolutionId) {
+        const extensions = await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+          'from logs-apache_error',
+          activeSolutionId
+        );
+        if (extensions) {
+          console.dir(extensions);
+        }
       }
     };
     getEditorExtensions();
-  }, [kibana.services?.esql]);
+  }, [activeSolutionId, kibana.services?.esql]);
 
   useEffect(() => {
     async function fetchLicense() {

@@ -18,6 +18,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SolutionId } from '@kbn/core-chrome-browser';
 import {
   esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,
@@ -125,8 +126,14 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
     );
 
-    const getEditorExtensionsAutocomplete = async (queryString: string) => {
-      const result = await core.http.get(`/internal/esql_registry/extensions/${queryString}`);
+    // needs caching, make solutionId from argument
+    const getEditorExtensionsAutocomplete = async (
+      queryString: string,
+      activeSolutionId: SolutionId
+    ) => {
+      const result = await core.http.get(
+        `/internal/esql_registry/extensions/${activeSolutionId}/${queryString}`
+      );
       if (!result) {
         throw new Error('Failed to fetch ESQL editor extensions');
       }
@@ -141,6 +148,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };
+    // core.chrome.getActiveSolutionNavId$().subscribe((solutionNavId) => {
 
     setKibanaServices(
       start,

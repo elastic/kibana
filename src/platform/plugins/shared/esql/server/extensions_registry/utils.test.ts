@@ -135,31 +135,31 @@ describe('Extensions registry utils', () => {
     beforeEach(() => {
       // Initialize a fresh registry for each test
       registry = new Map<string, RecommendedQuery[]>();
-      registry.set('logs-2023-10-01', [
+      registry.set('oblt>logs-2023-10-01', [
         { name: 'attr1', query: 'from attr1' },
         { name: 'attr2', query: 'from attr2' },
       ]);
-      registry.set('logs-2024-01-15', [
+      registry.set('oblt>logs-2024-01-15', [
         { name: 'attrA', query: 'from attrA' },
         { name: 'attrB', query: 'from attrB' },
       ]);
-      registry.set('metrics-cpu', [
+      registry.set('oblt>metrics-cpu', [
         { name: 'load', query: 'from load' },
         { name: 'usage', query: 'from usage' },
       ]);
-      registry.set('logs-nginx-access', [
+      registry.set('oblt>logs-nginx-access', [
         { name: 'status', query: 'from status' },
         { name: 'bytes', query: 'from bytes' },
       ]);
-      registry.set('my_logs', [{ name: 'logstash', query: 'from logstash' }]);
-      registry.set('data', [{ name: 'data1', query: 'from data1' }]);
-      registry.set('another-logs-index', [{ name: 'info', query: 'from info' }]);
-      registry.set('logs', [{ name: 'plain_logs', query: 'from plain_logs' }]);
-      registry.set('orders-2023-q1', []);
-      registry.set('orders-2023-q2', []);
-      registry.set('errors_123', []);
-      registry.set('errors_abc', []);
-      registry.set('pattern*', [{ name: 'pattern', query: 'from pattern*' }]);
+      registry.set('oblt>my_logs', [{ name: 'logstash', query: 'from logstash' }]);
+      registry.set('oblt>data', [{ name: 'data1', query: 'from data1' }]);
+      registry.set('oblt>another-logs-index', [{ name: 'info', query: 'from info' }]);
+      registry.set('oblt>logs', [{ name: 'plain_logs', query: 'from plain_logs' }]);
+      registry.set('oblt>orders-2023-q1', []);
+      registry.set('oblt>orders-2023-q2', []);
+      registry.set('oblt>errors_123', []);
+      registry.set('oblt>errors_abc', []);
+      registry.set('oblt>pattern*', [{ name: 'pattern', query: 'from pattern*' }]);
     });
 
     // Matching with a wildcard at the end (e.g., "logs*")
