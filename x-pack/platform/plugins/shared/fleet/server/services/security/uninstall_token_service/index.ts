@@ -331,6 +331,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const agentPolicies = await agentPolicyService.getByIds(this.soClient, policyIds, {
       ignoreMissing: true,
+      // search across all spaces
+      spaceId: '*',
     });
 
     const warnings: string[] = [];

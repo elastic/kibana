@@ -580,7 +580,13 @@ class AgentPolicyService {
           spaceId?: string;
         }
     >,
-    options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
+    options: {
+      fields?: string[];
+      withPackagePolicies?: boolean;
+      ignoreMissing?: boolean;
+      /** Space ID to be applied to the retrieval of the policies (only used if not already defined as part of `ids` argument) */
+      spaceId?: string;
+    } = {}
   ): Promise<AgentPolicy[]> {
     const logger = this.getLogger('getByIds');
 
@@ -598,12 +604,21 @@ class AgentPolicyService {
 
     const objects = ids.map((id) => {
       if (typeof id === 'string') {
-        return { ...options, id, type: savedObjectType };
+        return {
+          ...options,
+          id,
+          type: savedObjectType,
+          namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
+        };
       }
+
+      const spaceForThisAgentPolicy = id.spaceId ?? options.spaceId;
+
       return {
         ...options,
         id: id.id,
-        namespaces: isSpacesEnabled && id.spaceId ? [id.spaceId] : undefined,
+        namespaces:
+          isSpacesEnabled && spaceForThisAgentPolicy ? [spaceForThisAgentPolicy] : undefined,
         type: savedObjectType,
       };
     });
