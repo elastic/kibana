@@ -57404,17 +57404,13 @@
                 "additionalProperties": false,
                 "properties": {
                   "content": {},
-                  "filename": {
-                    "type": "string"
-                  },
                   "include": {
                     "type": "string"
                   }
                 },
                 "required": [
                   "include",
-                  "content",
-                  "filename"
+                  "content"
                 ],
                 "type": "object"
               }
