@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import { schema } from '@kbn/config-schema';
+
+export const bookAttributesSchema = schema.object({
+  bookTitle: schema.string(),
+  author: schema.string(),
+  pages: schema.number(),
+  synopsis: schema.maybe(schema.string()),
+  published: schema.nullable(schema.number()),
+});

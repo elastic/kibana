@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+export type { BookAttributes } from './types';
+export { bookAttributesSchema } from './schema';

@@ -9,12 +9,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  type DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
+import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -34,7 +30,7 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import { merge, skip, Subscription, switchMap } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
+import { FIELD_LIST_ID } from '../../../common/field_list/constants';
 import { FieldListApi, Services, FieldListSerializedState, FieldListRuntimeState } from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
@@ -61,14 +57,6 @@ const deserializeState = async (
   serializedState?: SerializedPanelState<FieldListSerializedState>
 ): Promise<FieldListRuntimeState> => {
   const state = serializedState?.rawState ? cloneDeep(serializedState?.rawState) : {};
-  // inject the reference
-  const dataViewIdRef = (serializedState?.references ?? []).find(
-    (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
-  );
-  // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-  if (dataViewIdRef && state && !state.dataViewId) {
-    state.dataViewId = dataViewIdRef?.id;
-  }
 
   const [allDataViews, defaultDataViewId] = await Promise.all([
     dataViews.getIdsWithTitle(),
@@ -122,22 +110,13 @@ export const getFieldListFactory = (
 
       function serializeState() {
         const { dataViewId, selectedFieldNames } = fieldListStateManager.getLatestState();
-        const references: Reference[] = dataViewId
-          ? [
-              {
-                type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                name: FIELD_LIST_DATA_VIEW_REF_NAME,
-                id: dataViewId,
-              },
-            ]
-          : [];
         return {
           rawState: {
             ...titleManager.getLatestState(),
-            // here we skip serializing the dataViewId, because the reference contains that information.
+            dataViewId,
             selectedFieldNames,
           },
-          references,
+          references: [],
         };
       }
 
@@ -148,6 +127,7 @@ export const getFieldListFactory = (
         anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
         getComparators: () => ({
           ...titleComparators,
+          dataViewId: 'referenceEquality',
           selectedFieldNames: (a, b) => {
             return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
           },

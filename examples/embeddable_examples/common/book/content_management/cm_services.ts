@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import { EmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
+import { bookAttributesDefinition } from './schema';
+
+export const bookCmDefinitions: EmbeddableContentManagementDefinition = {
+  id: 'book',
+  versions: {
+    1: bookAttributesDefinition,
+  },
+  latestVersion: 1,
+};

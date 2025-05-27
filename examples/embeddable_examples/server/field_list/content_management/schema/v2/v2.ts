@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import { schema } from '@kbn/config-schema';
+
+// in v2 even though the schema is the same as v1, we fully decouple from the saved object schema
+export const fieldListAttributesSchema = schema.object({
+  dataViewId: schema.maybe(schema.string()),
+  selectedFieldNames: schema.maybe(schema.arrayOf(schema.string())),
+});

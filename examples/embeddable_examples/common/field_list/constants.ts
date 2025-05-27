@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+export const FIELD_LIST_DATA_VIEW_REF_NAME = 'field_list_data_view_id';
+export const FIELD_LIST_ID = 'field_list';

@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import { TypeOf } from '@kbn/config-schema';
+import { savedBookAttributesSchema } from './schema';
+
+export type SavedBookAttributes = TypeOf<typeof savedBookAttributesSchema>;

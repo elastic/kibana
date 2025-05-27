@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+
+export type { SavedBookAttributes } from './book/saved_object/schema';
+
+export type { SavedFieldListAttributes } from './field_list/saved_object/schema';
+
+export interface SetupDeps {
+  embeddable: EmbeddableSetup;
+}
+
+export interface StartDeps {
+  embeddable: EmbeddableStart;
+}

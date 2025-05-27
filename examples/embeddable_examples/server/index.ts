@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_FIELD_LIST_ACTION_ID = 'create_field_list';
+import { PluginInitializerContext } from '@kbn/core/server';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { EmbeddableExamplesPlugin } = await import('./plugin');
+  return new EmbeddableExamplesPlugin(initializerContext);
+}
