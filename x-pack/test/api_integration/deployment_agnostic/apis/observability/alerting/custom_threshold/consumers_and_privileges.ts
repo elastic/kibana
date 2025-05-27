@@ -31,6 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // skip until custom roles are supported in serverless
     this.tags(['skipMKI']);
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
+    const CUSTOM_THRESHOLD_RULE_ALERT_INDEX_PATTERN = '.alerts-observability.threshold.alerts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
@@ -41,6 +42,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX_PATTERN,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
@@ -83,11 +89,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(internalReqHeader);
       if (ruleId) {
         await esClient.deleteByQuery({
-          index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
-          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-          conflicts: 'proceed',
-        });
-        await esClient.deleteByQuery({
           index: '.kibana-event-log-*',
           query: { term: { 'rule.id': ruleId } },
           conflicts: 'proceed',
@@ -101,6 +102,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX_PATTERN,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
     });
 
     describe('Custom threshold - Rule visibility - consumer observability', () => {

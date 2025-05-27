@@ -13,6 +13,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 const RULE_TYPE_ID = 'slo.rules.burnRate';
 const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
 const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
+const RULE_ALERT_INDEX_PATTERN = '.alerts-observability.slo.alerts-*';
 const ALERT_ACTION_INDEX = 'alert-action-slo';
 const DATA_VIEW_ID = 'data-view-id';
 
@@ -44,6 +45,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX_PATTERN,
+        query: {
+          match_all: {},
+        },
+        conflicts: 'proceed',
+      });
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       currentRoleAuthc = isServerless ? editorRoleAuthc : adminRoleAuthc;
@@ -124,6 +132,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(currentRoleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX_PATTERN,
+        query: {
+          match_all: {},
+        },
+        conflicts: 'proceed',
+      });
     });
 
     describe('Rule creation', function () {

@@ -33,6 +33,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = samlAuth.getInternalRequestHeader();
     });
@@ -44,7 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(internalReqHeader);
       await esClient.deleteByQuery({
         index: RULE_ALERT_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        query: { match_all: {} },
         conflicts: 'proceed',
       });
       await esClient.deleteByQuery({

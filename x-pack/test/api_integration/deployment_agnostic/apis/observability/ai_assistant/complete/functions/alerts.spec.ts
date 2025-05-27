@@ -65,13 +65,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esClient.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: {
-          match_all: {},
-        },
-        conflicts: 'proceed',
-      });
       internalReqHeader = samlAuth.getInternalRequestHeader();
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
@@ -147,13 +140,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
-      await esClient.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: {
-          match_all: {},
-        },
-        conflicts: 'proceed',
-      });
     });
 
     it('should execute the function without any errors', async () => {
