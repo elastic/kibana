@@ -581,7 +581,7 @@ export const normalizedTimes = [
         childrenIds: [],
         selfTime: 0.192502,
         timePercentage: '43.03',
-        absoluteColor: '#f9d7d7',
+        absoluteColor: '#f9dada',
       },
       {
         type: 'TermQuery',
@@ -678,7 +678,7 @@ export const normalizedTimes = [
         childrenIds: [],
         selfTime: 0.162608,
         timePercentage: '36.35',
-        absoluteColor: '#f9dcdc',
+        absoluteColor: '#f9dede',
       },
       {
         type: 'MatchNoDocsQuery',
@@ -775,7 +775,7 @@ export const normalizedTimes = [
         childrenIds: [],
         selfTime: 0.03517,
         timePercentage: '7.86',
-        absoluteColor: '#f6efef',
+        absoluteColor: '#f6f0f0',
       },
     ],
     id: 'f1e689b1-dafe-4c2b-9a4d-9bd8f1a53803',

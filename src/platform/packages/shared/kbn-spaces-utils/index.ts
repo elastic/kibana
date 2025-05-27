@@ -7,12 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getValidColor } from '@kbn/coloring';
-import chroma from 'chroma-js';
-
-export const computeGradientFinalColor = (color: string): string => {
-  const inputColor = getValidColor(color, { shouldBeCompatibleWithColorJs: true });
-  const [h, s, l] = inputColor.hsl();
-  const lightness = l - inputColor.luminance();
-  return chroma.hsl(h, s, lightness).css();
-};
+export { DEFAULT_SPACE_ID } from './src/common/constants';
+export { addSpaceIdToPath, getSpaceIdFromPath } from './src/common/spaces_url_parser';

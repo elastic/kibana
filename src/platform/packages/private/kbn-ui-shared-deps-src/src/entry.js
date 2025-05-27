@@ -88,6 +88,7 @@ export const Reselect = require('reselect');
 
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
+export const ChromaJs = require('chroma-js');
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
