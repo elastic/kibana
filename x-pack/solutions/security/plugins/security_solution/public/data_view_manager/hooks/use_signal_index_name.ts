@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export const useSignalIndexName = () => {
-  return '';
-};
+import { useSelector } from 'react-redux';
+import { signalIndexNameSelector } from '../redux/selectors';
+
+export const useSignalIndexName = () => useSelector(signalIndexNameSelector);

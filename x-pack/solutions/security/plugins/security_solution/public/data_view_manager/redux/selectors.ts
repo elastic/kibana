@@ -23,3 +23,8 @@ export const sharedStateSelector = createSelector(
   [(state: RootState) => state.dataViewManager],
   (dataViewManager) => dataViewManager.shared
 );
+
+export const signalIndexNameSelector = createSelector(
+  [(state: RootState) => state.dataViewManager],
+  (dataViewManager) => dataViewManager.shared.signalIndexName
+);
