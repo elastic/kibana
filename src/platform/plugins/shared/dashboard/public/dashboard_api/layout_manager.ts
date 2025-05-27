@@ -232,12 +232,9 @@ export function initializeLayoutManager(
 
   async function getPanelTitles(): Promise<string[]> {
     const titles: string[] = [];
-    await asyncForEach(Object.keys(layout$.value), async (id) => {
+    await asyncForEach(Object.keys(layout$.value.panels), async (id) => {
       const childApi = await getChildApi(id);
       const title = apiPublishesTitle(childApi) ? getTitle(childApi) : '';
-      // const title = apiPublishesTitle(childApi)
-      // ? getTitle(childApi)
-      // : (panels$.value[id]?.explicitInput as { title?: string }).title;
       if (title) titles.push(title);
     });
     return titles;
