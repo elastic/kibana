@@ -139,6 +139,7 @@ export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
   AGENT_POLICIES_SPACES: `${INTERNAL_ROOT}/agent_policies_spaces`,
+  SPACE_AWARENESS_MIGRATION: `${INTERNAL_ROOT}/enable_space_awareness`,
 };
 
 // Agent API routes
