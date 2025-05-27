@@ -22,7 +22,6 @@ const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_an
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   core,
   plugins,
-  isHidden,
 }): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
@@ -36,7 +35,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: isHidden,
+  requiresAppContext: true,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
