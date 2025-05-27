@@ -265,11 +265,11 @@ export class AssetClient {
     if (types?.length) {
       filters.push(...termsQuery(ASSET_TYPE, types));
     }
-    if (ids?.length) {
+    if (types?.length === 1 && ids?.length) {
       filters.push(
         ...termsQuery(
           '_id',
-          ids.map((id) => getUuid(name, { [ASSET_TYPE]: types![0], [ASSET_ID]: id }))
+          ids.map((id) => getUuid(name, { [ASSET_TYPE]: types[0], [ASSET_ID]: id }))
         )
       );
     }
