@@ -879,12 +879,14 @@ x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
+x-pack/platform/plugins/private/intercepts @elastic/appex-sharedux
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
+x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/reporting @elastic/response-ops
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
