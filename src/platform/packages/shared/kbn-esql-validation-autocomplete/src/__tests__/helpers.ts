@@ -8,7 +8,8 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLFieldWithMetadata, JoinIndexAutocompleteItem } from '../validation/types';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 
@@ -53,7 +54,7 @@ export const policies = [
   },
 ];
 
-export const joinIndices: JoinIndexAutocompleteItem[] = [
+export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
     mode: 'lookup',
@@ -67,6 +68,24 @@ export const joinIndices: JoinIndexAutocompleteItem[] = [
   {
     name: 'lookup_index',
     mode: 'lookup',
+    aliases: [],
+  },
+];
+
+export const timeseriesIndices: IndexAutocompleteItem[] = [
+  {
+    name: 'timeseries_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+  {
+    name: 'timeseries_index_with_alias',
+    mode: 'time_series',
+    aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
+  },
+  {
+    name: 'time_series_index',
+    mode: 'time_series',
     aliases: [],
   },
 ];
@@ -99,5 +118,6 @@ export function getCallbackMocks(): ESQLCallbacks {
     ),
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
   };
 }

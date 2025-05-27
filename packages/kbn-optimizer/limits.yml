@@ -82,6 +82,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 18000
   interactiveSetup: 80000
+  intercepts: 26158
   inventory: 27430
   kibanaOverview: 56279
   kibanaReact: 74422
@@ -90,7 +91,7 @@ pageLoadAssetSize:
   lens: 76079
   licenseManagement: 41817
   licensing: 29004
-  links: 8200
+  links: 9000
   lists: 22900
   logsDataAccess: 16759
   logsShared: 281060
@@ -117,6 +118,7 @@ pageLoadAssetSize:
   presentationPanel: 11550
   presentationUtil: 9000
   productDocBase: 22500
+  productIntercept: 23846
   profiling: 36694
   remoteClusters: 51327
   reporting: 58600

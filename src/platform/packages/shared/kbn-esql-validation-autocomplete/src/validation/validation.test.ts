@@ -676,15 +676,10 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
       ]);
       testErrorsAndWarnings('from a_index | rename key* as keywords', [
-        'Using wildcards (*) in RENAME is not allowed [key*]',
         'Unknown column [keywords]',
       ]);
-      testErrorsAndWarnings('from a_index | rename s* as strings', [
-        'Using wildcards (*) in RENAME is not allowed [s*]',
-        'Unknown column [s*]',
-        'Unknown column [strings]',
-      ]);
       testErrorsAndWarnings('row a = 10 | rename a as `this``is fine`', []);
+      testErrorsAndWarnings('ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow', []);
       testErrorsAndWarnings('row a = 10 | rename a as this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
       ]);

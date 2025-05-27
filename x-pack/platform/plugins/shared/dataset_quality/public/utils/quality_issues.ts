@@ -20,11 +20,13 @@ export function mapDegradedFieldsIssues(degradedFields: DegradedField[] = []): Q
 }
 
 export function mapFailedDocsIssues(failedDocsDetails: FailedDocsDetails): QualityIssue[] {
-  return [
-    {
-      ...failedDocsDetails,
-      name: 'failedDocs',
-      type: 'failed',
-    },
-  ];
+  return failedDocsDetails.count > 0
+    ? [
+        {
+          ...failedDocsDetails,
+          name: 'failedDocs',
+          type: 'failed',
+        },
+      ]
+    : [];
 }

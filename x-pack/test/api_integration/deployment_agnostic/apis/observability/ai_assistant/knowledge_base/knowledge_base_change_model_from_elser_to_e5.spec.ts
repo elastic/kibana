@@ -31,18 +31,20 @@ import {
   deleteInferenceEndpoint,
   deleteModel,
   importModel,
+  startModelDeployment,
 } from '../utils/model_and_inference';
 import { animalSampleDocs } from '../utils/sample_docs';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
+  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   type KnowledgeBaseEsEntry = Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>[0];
 
-  describe('when changing from ELSER to E5-like model', function () {
+  describe('Knowledge base: when changing from ELSER to E5-like model', function () {
+    this.tags(['skipCloud']);
     let elserEntriesFromApi: KnowledgeBaseEntry[];
     let elserEntriesFromEs: KnowledgeBaseEsEntry[];
     let elserInferenceId: string;
@@ -54,40 +56,51 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let e5WriteIndex: string;
 
     before(async () => {
-      await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
-      await createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient, TINY_ELSER_INFERENCE_ID);
-      await waitForKnowledgeBaseReady(getService);
+      await retry.try(async () => {
+        await restoreIndexAssets(getService);
+        await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
+        await createTinyElserInferenceEndpoint(getService, {
+          inferenceId: TINY_ELSER_INFERENCE_ID,
+        });
+        await setupKnowledgeBase(getService, TINY_ELSER_INFERENCE_ID);
+        await waitForKnowledgeBaseReady(getService);
 
-      // ingest documents
-      await addSampleDocsToInternalKb(getService, animalSampleDocs);
+        // ingest documents
+        await addSampleDocsToInternalKb(getService, animalSampleDocs);
 
-      elserEntriesFromApi = (
-        await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient })
-      ).body.entries;
+        elserEntriesFromApi = (
+          await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient })
+        ).body.entries;
 
-      elserEntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
-      elserInferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
-      elserWriteIndex = await getConcreteWriteIndexFromAlias(es);
+        elserEntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
+        elserInferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
+        elserWriteIndex = await getConcreteWriteIndexFromAlias(es);
 
-      // setup KB with E5-like model
-      await importModel(ml, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
-      await ml.api.startTrainedModelDeploymentES(TINY_TEXT_EMBEDDING_MODEL_ID);
-      await createTinyTextEmbeddingInferenceEndpoint(getService, {
-        inferenceId: TINY_TEXT_EMBEDDING_INFERENCE_ID,
+        // setup KB with E5-like model
+        await importModel(getService, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
+        await startModelDeployment(getService, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
+
+        await createTinyTextEmbeddingInferenceEndpoint(getService, {
+          inferenceId: TINY_TEXT_EMBEDDING_INFERENCE_ID,
+        });
+        await setupKnowledgeBase(getService, TINY_TEXT_EMBEDDING_INFERENCE_ID);
+
+        await waitForKnowledgeBaseIndex(getService, '.kibana-observability-ai-assistant-kb-000002');
+        await waitForKnowledgeBaseReady(getService);
+
+        e5EntriesFromApi = (
+          await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient })
+        ).body.entries;
+
+        e5EntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
+        e5InferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
+        e5WriteIndex = await getConcreteWriteIndexFromAlias(es);
+
+        // retry until the following assertions pass
+        expect(elserWriteIndex).to.be(`${resourceNames.writeIndexAlias.kb}-000001`);
+        expect(e5WriteIndex).to.be(`${resourceNames.writeIndexAlias.kb}-000002`);
+        expect(e5InferenceId).to.be(TINY_TEXT_EMBEDDING_INFERENCE_ID);
       });
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient, TINY_TEXT_EMBEDDING_INFERENCE_ID);
-
-      await waitForKnowledgeBaseIndex(getService, '.kibana-observability-ai-assistant-kb-000002');
-      await waitForKnowledgeBaseReady(getService);
-
-      e5EntriesFromApi = (
-        await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient })
-      ).body.entries;
-
-      e5EntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
-      e5InferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
-      e5WriteIndex = await getConcreteWriteIndexFromAlias(es);
     });
 
     after(async () => {
@@ -99,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteModel(getService, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
       await deleteInferenceEndpoint(getService, { inferenceId: TINY_TEXT_EMBEDDING_INFERENCE_ID });
 
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
     });
 
     describe('when model is ELSER', () => {
@@ -135,15 +148,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when model is changed to E5', () => {
-      it('has increments the index name', async () => {
+      it('increments the index name', async () => {
         expect(e5WriteIndex).to.be(`${resourceNames.writeIndexAlias.kb}-000002`);
       });
 
-      it('returns the same entries from the API', async () => {
+      it('still returns the same entries from the API', async () => {
         expect(e5EntriesFromApi).to.eql(elserEntriesFromApi);
       });
 
-      it('has updates the inference id', async () => {
+      it('updates the inference id', async () => {
         expect(e5InferenceId).to.be(TINY_TEXT_EMBEDDING_INFERENCE_ID);
       });
 

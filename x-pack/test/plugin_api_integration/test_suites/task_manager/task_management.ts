@@ -10,7 +10,11 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  BulkUpdateTaskResult,
+  Frequency,
+} from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
@@ -247,6 +251,71 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ event: taskId, data })
         .expect(200);
     }
+    it('should schedule a task with rrule', async () => {
+      const dailyTask = await scheduleTask({
+        id: 'sample-recurring-task-id',
+        taskType: 'sampleRecurringTask',
+        schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 } },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const history = await historyDocs();
+        expect(history.length).to.eql(1);
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(dailyTask.id);
+        expect(task.status).to.be('idle');
+        const runAt = new Date(task.runAt).getTime();
+        const scheduledAt = new Date(task.scheduledAt).getTime();
+        // scheduled to run 24 hours from now
+        expect(runAt).to.greaterThan(scheduledAt + 1000 * 59 * 60 * 24);
+        expect(runAt).to.lessThan(scheduledAt + 1000 * 61 * 60 * 24);
+      });
+    });
+
+    it('should schedule a task with rrule with fixed time', async () => {
+      const dailyTask = await scheduleTask({
+        id: 'sample-recurring-task-id',
+        taskType: 'sampleRecurringTask',
+        schedule: {
+          rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1, byhour: [15], byminute: [27] },
+        },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(dailyTask.id);
+        expect(task.status).to.be('idle');
+        const runAt = new Date(task.runAt);
+        expect(runAt.getUTCHours()).to.be(15);
+        expect(runAt.getUTCMinutes()).to.be(27);
+      });
+
+      // should not run immediately as the task is scheduled to run at 15:27 UTC
+      expect((await historyDocs()).length).to.eql(0);
+    });
+
+    it('should not schedule a task with invalid rrule config', async () => {
+      await supertest
+        .post('/api/sample_tasks/schedule')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          id: 'sample-recurring-task-id',
+          taskType: 'sampleRecurringTask',
+          schedule: {
+            rrule: {
+              freq: Frequency.DAILY,
+              interval: 1,
+              byhour: [30], // invalid
+              byminute: [27],
+            },
+          },
+          params: {},
+        })
+        .expect(400);
+    });
 
     it('should support middleware', async () => {
       const historyItem = random(1, 100);

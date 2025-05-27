@@ -22,6 +22,7 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./complete/functions/retrieve_elastic_doc.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/summarize.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/title_conversation.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/visualize_query.spec.ts'));
 
     // knowledge base
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_8.10_upgrade_test.spec.ts'));
@@ -31,7 +32,7 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));
-    loadTestFile(require.resolve('./knowledge_base/knowledge_base.spec.ts'));
+    loadTestFile(require.resolve('./knowledge_base/knowledge_base_basic_operations.spec.ts'));
     loadTestFile(
       require.resolve('./knowledge_base/knowledge_base_change_model_from_elser_to_e5.spec.ts')
     );
