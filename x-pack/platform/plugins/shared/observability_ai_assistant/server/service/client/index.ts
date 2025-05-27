@@ -680,7 +680,7 @@ export class ObservabilityAIAssistantClient {
       const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
       if (waitUntilComplete) {
         logger.debug('Waiting for warmup to complete...');
-        await p;
+        await warmupModelPromise;
         logger.debug('Warmup completed.');
       }
       return { reindex: false, currentInferenceId, nextInferenceId };
