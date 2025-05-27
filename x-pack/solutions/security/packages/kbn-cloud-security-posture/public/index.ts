@@ -9,7 +9,7 @@ export * from './src/types';
 export * from './src/constants/navigation';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
-export { encodeQuery, decodeQuery } from './src/utils/query_utils';
+export { updateUrlQuery, encodeQuery, decodeQuery } from './src/utils/query_utils';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
 export {
   getSeverityStatusColor,
