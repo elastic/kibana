@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { SPAN_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { SpanFlyout } from './span_flyout';
 
@@ -28,6 +29,7 @@ export interface FullScreenWaterfallProps {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
+  dataView: DocViewRenderProps['dataView'];
   onCloseFullScreen: () => void;
 }
 
@@ -35,6 +37,7 @@ export const FullScreenWaterfall = ({
   traceId,
   rangeFrom,
   rangeTo,
+  dataView,
   onCloseFullScreen,
 }: FullScreenWaterfallProps) => {
   const { transaction } = useRootTransactionContext();
@@ -65,6 +68,7 @@ export const FullScreenWaterfall = ({
       <SpanFlyout
         indexPattern={'remote_cluster:traces-*'}
         spanId={spanId}
+        dataView={dataView}
         onCloseFlyout={() => {
           setIsFlyoutVisible(false);
         }}
