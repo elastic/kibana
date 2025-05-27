@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -137,6 +138,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
             path="actions"
             component={RuleActionsField}
             componentProps={{
+              ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
               messageVariables,
             }}
           />
