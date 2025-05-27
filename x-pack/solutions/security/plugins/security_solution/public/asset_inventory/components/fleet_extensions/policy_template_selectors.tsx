@@ -57,7 +57,6 @@ export const PolicyTemplateVarsForm = ({
             packageInfo={packageInfo}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             input={input}
-            disabled={disabled}
             showCloudConnectors={showCloudConnectors}
           />
         );

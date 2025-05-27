@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
-import type { PackageInfo } from '@kbn/config';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -260,16 +260,15 @@ export const AwsCredentialsFormAgentless = ({
     ? cloud?.deploymentId
     : cloud?.serverless.projectId;
 
-  const cloudConnectorRemoteRoleTemplate =
-    elasticResourceId && !!packageInfo
-      ? getTemplateUrlFromPackageInfo(
-          packageInfo,
-          input.policy_template,
-          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-        )
-          ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-          ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
-      : undefined;
+  const cloudConnectorRemoteRoleTemplate = elasticResourceId
+    ? getTemplateUrlFromPackageInfo(
+        packageInfo,
+        input.policy_template,
+        SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+      )
+        ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+        ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
+    : undefined;
   const awsCredentialsType = getAgentlessCredentialsType(input, !!showCloudConnectors);
   const documentationLink = assetIntegrationDocsNavigation.awsGetStartedPath;
 

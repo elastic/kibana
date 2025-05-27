@@ -66,6 +66,7 @@ export interface GetAwsCredentialTypeConfigParams {
     | 'cloudbeat/asset_inventory_gcp'
     | 'cloudbeat/asset_inventory_azure';
 }
+
 const getAssetType = (policyTemplateInput: AssetInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
