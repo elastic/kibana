@@ -54,6 +54,113 @@ describe('composeQueryFilters', () => {
     ];
     expect(composeQueryFilters(testFilterParams, 'test-data-view')).toEqual(testResult);
   });
+
+  it('Should return correct filters given multiple values in one of the filters params', () => {
+    const testFilterParams = {
+      test_field: ['test_value_1', 'test_value_2', 'test_value_3'],
+    };
+    const testResult = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { test_field: 'test_value_1' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { test_field: 'test_value_2' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { test_field: 'test_value_3' } },
+      },
+    ];
+    expect(composeQueryFilters(testFilterParams, 'test-data-view')).toEqual(testResult);
+  });
+
+  it('Should return correct filters given multiple values in multiple fields', () => {
+    const testFilterParams = {
+      test_field: ['test_value_1', 'test_value_2', 'test_value_3'],
+      another_test_field: ['another_test_field_value_1', 'another_test_field_value_2'],
+    };
+    const testResult = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { test_field: 'test_value_1' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { test_field: 'test_value_2' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { test_field: 'test_value_3' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'another_test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { another_test_field: 'another_test_field_value_1' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'another_test_field',
+          index: 'test-data-view',
+        },
+        query: { match_phrase: { another_test_field: 'another_test_field_value_2' } },
+      },
+    ];
+    expect(composeQueryFilters(testFilterParams, 'test-data-view')).toEqual(testResult);
+  });
 });
 
 describe('encodeQueryUrl', () => {
@@ -102,6 +209,37 @@ describe('encodeQueryUrl', () => {
     const groupByFilter = ['filterA'];
     const result =
       'cspq=(filters:!((meta:(alias:!n,disabled:!f,index:security-solution-default,key:test_field,negate:!f,type:phrase),query:(match_phrase:(test_field:test_value)))),groupBy:!(filterA))';
+    expect(encodeQueryUrl(getServicesMock().data, filter, groupByFilter)).toEqual(result);
+  });
+
+  it('should return correct URL given filters with multiple values for a specific filter and group by', () => {
+    const filter = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: DEFAULT_DATA_VIEW_ID,
+        },
+        query: { match_phrase: { test_field: 'test_value_1' } },
+      },
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'test_field',
+          index: DEFAULT_DATA_VIEW_ID,
+        },
+        query: { match_phrase: { test_field: 'test_value_2' } },
+      },
+    ];
+    const groupByFilter = ['filterA'];
+    const result =
+      'cspq=(filters:!((meta:(alias:!n,disabled:!f,index:security-solution-default,key:test_field,negate:!f,type:phrase),query:(match_phrase:(test_field:test_value_1))),(meta:(alias:!n,disabled:!f,index:security-solution-default,key:test_field,negate:!f,type:phrase),query:(match_phrase:(test_field:test_value_2)))),groupBy:!(filterA))';
     expect(encodeQueryUrl(getServicesMock().data, filter, groupByFilter)).toEqual(result);
   });
 });

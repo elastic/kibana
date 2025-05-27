@@ -6,17 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ALL_ALERTS = 40;
 const ACTIVE_ALERTS = 10;
 const RECOVERED_ALERTS = 30;
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const { alertControls, header } = getPageObjects(['alertControls', 'header']);
 
-  describe('Alert status filter >', function () {
+  describe('Alert controls >', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -33,34 +33,31 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    it('is filtered to only show "all" alerts by default', async () => {
-      await retry.try(async () => {
-        const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(ALL_ALERTS);
-      });
-    });
-
-    it('can be filtered to only show "active" alerts using the filter button', async () => {
-      await observability.alerts.common.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
+    it('is filtered to only show "active" alerts by default', async () => {
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
         expect(tableRows.length).to.be(ACTIVE_ALERTS);
       });
     });
 
-    it('can be filtered to only show "recovered" alerts using the filter button', async () => {
-      await observability.alerts.common.setAlertStatusFilter(ALERT_STATUS_RECOVERED);
-      await retry.try(async () => {
-        const tableRows = await observability.alerts.common.getTableCellsInRows();
-        expect(tableRows.length).to.be(RECOVERED_ALERTS);
-      });
-    });
-
-    it('can be filtered to only show "all" alerts using the filter button', async () => {
-      await observability.alerts.common.setAlertStatusFilter();
+    it('can be filtered to only show "all" when filter is cleared', async () => {
+      // Clear status filter
+      await alertControls.clearControlSelections('0');
+      await observability.alerts.common.waitForAlertTableToLoad();
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
         expect(tableRows.length).to.be(ALL_ALERTS);
+      });
+    });
+
+    it('can be filtered to only show "recovered" alerts using the filter button', async () => {
+      await header.waitUntilLoadingHasFinished();
+      await alertControls.optionsListOpenPopover('0');
+      await alertControls.optionsListPopoverSelectOption('recovered');
+      await alertControls.optionsListEnsurePopoverIsClosed('0');
+      await retry.try(async () => {
+        const tableRows = await observability.alerts.common.getTableCellsInRows();
+        expect(tableRows.length).to.be(RECOVERED_ALERTS);
       });
     });
   });

@@ -9,20 +9,20 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createMigrationRules,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocument,
-  migrationRulesRouteHelpersFactory,
-} from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+  ruleMigrationRouteHelpersFactory,
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Update API', () => {
+  describe('@ess @serverless @serverlessQA Update Rules API', () => {
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     describe('Happy path', () => {
@@ -32,7 +32,10 @@ export default ({ getService }: FtrProviderContext) => {
         const [createdDocumentId] = await createMigrationRules(es, [migrationRuleDocument]);
 
         const now = new Date().toISOString();
-        await migrationRulesRoutes.update({
+
+        const {
+          body: { updated },
+        } = await ruleMigrationRoutes.updateRules({
           migrationId,
           payload: [
             {
@@ -43,8 +46,10 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
 
+        expect(updated).toBe(true);
+
         // fetch migration rule
-        const response = await migrationRulesRoutes.get({ migrationId });
+        const response = await ruleMigrationRoutes.getRules({ migrationId });
         expect(response.body.total).toEqual(1);
 
         const {
@@ -71,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         const [createdDocumentId] = await createMigrationRules(es, [migrationRuleDocument]);
 
         const now = new Date().toISOString();
-        await migrationRulesRoutes.update({
+        await ruleMigrationRoutes.updateRules({
           migrationId,
           payload: [
             {
@@ -101,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // fetch migration rule
-        const response = await migrationRulesRoutes.get({ migrationId });
+        const response = await ruleMigrationRoutes.getRules({ migrationId });
         expect(response.body.total).toEqual(1);
 
         const migrationRule = response.body.data[0];
@@ -112,7 +117,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Error handling', () => {
       it('should return empty content response when no rules passed', async () => {
         const migrationId = uuidv4();
-        await migrationRulesRoutes.update({
+        const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
+        await createMigrationRules(es, [migrationRuleDocument]);
+        await ruleMigrationRoutes.updateRules({
           migrationId,
           payload: [],
           expectStatusCode: 204,
@@ -123,8 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
         await createMigrationRules(es, [migrationRuleDocument]);
-
-        const response = await migrationRulesRoutes.update({
+        const response = await ruleMigrationRoutes.updateRules({
           migrationId,
           payload: [{ elastic_rule: { title: 'Updated title' } }],
           expectStatusCode: 400,
@@ -140,8 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
         await createMigrationRules(es, [migrationRuleDocument]);
-
-        const response = await migrationRulesRoutes.update({
+        const response = await ruleMigrationRoutes.updateRules({
           migrationId,
           expectStatusCode: 400,
         });
