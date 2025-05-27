@@ -90,8 +90,10 @@ describe('UseRunQueryRuleset', () => {
     expect(buttonProps.request).toContain('test-index');
     // Verify the request contains retriever structure
     expect(buttonProps.request).toContain('retriever');
+    // Verify the request contains the expected query
+    expect(buttonProps.request).toContain('"query": "pugs"');
     // Verify ruleset_ids are included
-    expect(buttonProps.request).toContain('"ruleset_ids": [');
+    expect(buttonProps.request).toContain('test-ruleset');
   });
 
   it('renders with custom type and content', () => {
@@ -172,7 +174,7 @@ describe('UseRunQueryRuleset', () => {
 
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('"user_query": "search term"');
-    expect(buttonProps.request).toContain('"user_location": [');
+    expect(buttonProps.request).toMatch(/"user_location":\s*\[\s*"US",\s*"UK"\s*\]/);
   });
 
   it('handles complex nested criteria values', () => {
@@ -200,6 +202,6 @@ describe('UseRunQueryRuleset', () => {
 
     const buttonProps = (TryInConsoleButton as jest.Mock).mock.calls[0][0];
     expect(buttonProps.request).toContain('"nested_field": "nested value"');
-    expect(buttonProps.request).toContain('"another_field": [');
+    expect(buttonProps.request).toMatch(/"another_field":\s*\[\s*"array",\s*"of",\s*"values"\s*\]/);
   });
 });
