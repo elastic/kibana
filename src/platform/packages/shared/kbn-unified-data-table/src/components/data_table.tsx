@@ -729,6 +729,7 @@ export const UnifiedDataTable = ({
   /**
    * Cell rendering
    */
+  const query = useMemo(() => data.query.queryString.getQuery(), [data.query.queryString]);
   const renderCellValue = useMemo(
     () =>
       getRenderCellValueFn({
@@ -742,6 +743,7 @@ export const UnifiedDataTable = ({
         isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
         columnsMeta,
+        query,
       }),
     [
       dataView,
@@ -753,6 +755,7 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       dataGridDensity,
       columnsMeta,
+      query,
     ]
   );
 

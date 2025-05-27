@@ -6,7 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+import {
+  parse,
+  Walker,
+  walk,
+  BasicPrettyPrinter,
+  isFunctionExpression,
+  isColumn,
+} from '@kbn/esql-ast';
 
 import type {
   ESQLSource,
@@ -275,4 +282,61 @@ export const fixESQLQueryWithVariables = (
   }
 
   return queryString;
+};
+
+export const getCategorizeColumns = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const options: ESQLCommandOption[] = [];
+  const columns: string[] = [];
+
+  walk(statsCommand, {
+    visitCommandOption: (node) => options.push(node),
+  });
+
+  const statsByOptions = options.find(({ name }) => name === 'by');
+
+  // categorize is part of the stats by command
+  if (!statsByOptions) {
+    return [];
+  }
+
+  const categorizeOptions = statsByOptions.args.filter((arg) => {
+    return (arg as ESQLFunction).text.toLowerCase().indexOf('categorize') !== -1;
+  }) as ESQLFunction[];
+
+  if (categorizeOptions.length) {
+    categorizeOptions.forEach((arg) => {
+      // ... STATS ... BY CATEGORIZE(field)
+      if (isFunctionExpression(arg) && arg.name === 'categorize') {
+        columns.push(arg.text);
+      } else {
+        // ... STATS ... BY pattern = CATEGORIZE(field)
+        const columnArgs = arg.args.filter((a) => isColumn(a));
+        columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+      }
+    });
+  }
+
+  // If there is a rename command, we need to check if the column is renamed
+  const renameCommand = root.commands.find(({ name }) => name === 'rename');
+  if (!renameCommand) {
+    return columns;
+  }
+  const renameOptions: ESQLCommandOption[] = [];
+  walk(renameCommand, {
+    visitCommandOption: (node) => renameOptions.push(node),
+  });
+
+  renameOptions.forEach(({ args }) => {
+    const oldColumn = (args[0] as ESQLColumn).name;
+    const newColumn = (args[1] as ESQLColumn).name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+  return columns;
 };
