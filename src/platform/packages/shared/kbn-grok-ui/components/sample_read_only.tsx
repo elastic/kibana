@@ -29,7 +29,9 @@ export const Sample = ({
 }) => {
   const eui = useEuiTheme();
 
-  const [processedSample, setProcessedSample] = useState<ReactNode>(sample);
+  const [processedSample, setProcessedSample] = useState<ReactNode>(() =>
+    renderProcessedSample(draftGrokExpressions, sample)
+  );
 
   const colourPaletteStyles = useMemo(() => {
     return grokCollection.getColourPaletteStyles();
