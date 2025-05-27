@@ -20,7 +20,4 @@ export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
 };
