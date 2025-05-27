@@ -170,7 +170,7 @@ export const RuleDetails = () => {
         }
       >
         <InvestigationGuideEditor
-          setRuleParams={onSetArtifacts}
+          setRuleParams={() => {}}
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
         />
       </EuiFormRow>
