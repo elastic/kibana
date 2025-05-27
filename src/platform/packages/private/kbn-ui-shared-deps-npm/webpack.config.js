@@ -144,6 +144,8 @@ module.exports = (_, argv) => {
         // that points to special EUI releases bundled with Amsterdam set as the default theme
         // and meant to be used with Kibana 8.x. Kibana 9.0 and later use the Borealis theme
         // and should import from the regular @elastic/eui package.
+        // TODO: Remove when Kibana 8.19 is EOL and Amsterdam backports aren't needed anymore
+        // https://github.com/elastic/kibana/issues/221593
         '@elastic/eui$': useEuiAmsterdamRelease
           ? '@elastic/eui-amsterdam/optimize/es'
           : '@elastic/eui/optimize/es',
