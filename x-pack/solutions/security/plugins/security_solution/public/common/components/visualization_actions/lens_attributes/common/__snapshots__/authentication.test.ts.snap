@@ -228,7 +228,7 @@ Object {
           "xAccessor": "column-timestamp-success-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#16C5C0",
+              "color": "#54B399",
               "forAccessor": "column-event-outcome-success-id-generated-uuid",
             },
           ],
@@ -243,7 +243,7 @@ Object {
           "xAccessor": "column-timestamp-failure-id-generated-uuid",
           "yConfig": Array [
             Object {
-              "color": "#FFC9C2",
+              "color": "#DA8B45",
               "forAccessor": "column-event-outcome-failure-id-generated-uuid",
             },
           ],
