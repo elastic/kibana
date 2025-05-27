@@ -28,7 +28,7 @@ const render = (toRender: React.ReactElement) =>
 
 const mockOnChange = jest.fn();
 
-describe.skip('RuleDetails', () => {
+describe('RuleDetails', () => {
   beforeEach(() => {
     useRuleFormState.mockReturnValue({
       plugins: {
