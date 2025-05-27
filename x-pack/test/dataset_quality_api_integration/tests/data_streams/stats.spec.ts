@@ -77,6 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           canRead: true,
           canMonitor: true,
           canViewIntegrations: true,
+          canReadFailureStore: true,
         });
       });
 
@@ -85,6 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(resp.body.datasetUserPrivileges.canRead).to.be(true);
         expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.canReadFailureStore).to.be(false);
         expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
         expect(resp.body.dataStreamsStats).to.eql([]);
       });
