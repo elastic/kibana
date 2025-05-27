@@ -22,6 +22,7 @@ import type {
   PackagePolicySOAttributes,
   PackageInfo,
 } from '../../types';
+import { appContextService } from '..';
 import {
   PackagePolicyMultipleAgentPoliciesError,
   PackagePolicyOutputError,
@@ -78,8 +79,10 @@ export async function preflightCheckPackagePolicy(
     'savedObject' in packageInfo &&
     packageInfo.savedObject?.attributes.install_source;
   const isCustom = installSource === 'custom' || installSource === 'upload';
+  const isCustomAgentlessAllowed =
+    appContextService.getConfig()?.agentless?.customIntegrations?.enabled;
 
-  if (isCustom && packagePolicy.supports_agentless) {
+  if (packagePolicy.supports_agentless && isCustom && !isCustomAgentlessAllowed) {
     throw new CustomPackagePolicyNotAllowedForAgentlessError();
   }
 }
