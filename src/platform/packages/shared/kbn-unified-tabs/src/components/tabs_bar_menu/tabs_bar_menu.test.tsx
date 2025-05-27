@@ -80,7 +80,7 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const secondTabOption = await screen.findByTitle(mockTabs[1].label);
+    const secondTabOption = (await screen.findAllByRole('option'))[1];
     await user.click(secondTabOption);
 
     expect(mockOnSelectOpenedTab).toHaveBeenCalledWith(mockTabs[1]);
@@ -107,7 +107,7 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const closedTabOption = await screen.findByTitle(mockRecentlyClosedTabs[0].label);
+    const closedTabOption = (await screen.findAllByTitle(mockRecentlyClosedTabs[0].label))[0];
     await user.click(closedTabOption);
 
     expect(mockOnSelectClosedTab).toHaveBeenCalledWith(mockRecentlyClosedTabs[0]);
@@ -139,7 +139,7 @@ describe('TabsBarMenu', () => {
     const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     await user.click(menuButton);
 
-    const selectedTabOption = await screen.findByTitle(mockTabs[0].label);
+    const selectedTabOption = (await screen.findAllByTitle(mockTabs[0].label))[0];
     expect(selectedTabOption.closest('[aria-selected="true"]')).toBeInTheDocument();
   });
 });
