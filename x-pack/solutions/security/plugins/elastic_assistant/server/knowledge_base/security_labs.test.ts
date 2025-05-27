@@ -9,15 +9,22 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import globby from 'globby';
-import { decryptSecurityLabsContent, ENCODED_FILE_MICROMATCH_PATTERN, PLAIN_TEXT_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
+import {
+  decryptSecurityLabsContent,
+  ENCODED_FILE_MICROMATCH_PATTERN,
+  PLAIN_TEXT_FILE_MICROMATCH_PATTERN,
+} from '@kbn/ai-security-labs-content';
 
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
 describe('Security labs content', () => {
-
   const directoryPath = path.join(__dirname, 'security_labs');
-  let plainTextFiles: string[] = globby.sync(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, { cwd: directoryPath });
-  let encodedFiles: string[] = globby.sync(ENCODED_FILE_MICROMATCH_PATTERN, { cwd: directoryPath });
+  const plainTextFiles: string[] = globby.sync(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
+    cwd: directoryPath,
+  });
+  const encodedFiles: string[] = globby.sync(ENCODED_FILE_MICROMATCH_PATTERN, {
+    cwd: directoryPath,
+  });
 
   describe('plaintext security labs content format', () => {
     plainTextFiles.forEach((file) => {
@@ -43,9 +50,9 @@ describe('Security labs content', () => {
           title: string;
           date: string;
           description: string;
-          author: { slug: string }[]
+          author: Array<{ slug: string }>;
           image: string;
-          category: { slug: string }[];
+          category: Array<{ slug: string }>;
         };
 
         const slug = parsed.slug;
@@ -72,7 +79,6 @@ describe('Security labs content', () => {
         expect(image.trim().length).toBeGreaterThan(0);
         expect(category).toBeDefined();
 
-
         expect(article).toBeDefined();
         expect(typeof article).toBe('string');
       });
@@ -94,7 +100,6 @@ describe('Security labs content', () => {
   });
 
   describe('encoded security labs content', () => {
-
     plainTextFiles.forEach((file) => {
       it(`corresponding encoded file exists for ${file}`, () => {
         /**
@@ -111,7 +116,6 @@ describe('Security labs content', () => {
 
     encodedFiles.forEach((file) => {
       it(`corresponding plaintext file exists for ${file}`, () => {
-
         const plaintextFileName = `${path.basename(file, path.extname(file))}.md`;
         const plaintextFilePath = path.join(directoryPath, plaintextFileName);
 
@@ -136,5 +140,5 @@ describe('Security labs content', () => {
         expect(decodedContent).toBe(plainTextContent);
       });
     });
-  })
+  });
 });

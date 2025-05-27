@@ -12,13 +12,11 @@ import { resolve } from 'path';
 import { Document } from 'langchain/document';
 import { Metadata } from '@kbn/elastic-assistant-common';
 import pMap from 'p-map';
+import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
-import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
-
-
 
 /**
  * Loads the Elastic Security Labs mdx files into the Knowledge Base.

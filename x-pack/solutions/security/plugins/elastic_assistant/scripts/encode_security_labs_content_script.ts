@@ -58,7 +58,7 @@ const encodedFile = async (fileName: string) => {
   await fs.writeFile(outputFilePath, encodedContent, 'utf-8');
   console.log(`Encoded file: ${fileName} -> ${outputFilePath}`);
   return outputFilePath;
-}
+};
 
 /**
  * Main function to encode all markdown files in the security labs directory
@@ -75,8 +75,8 @@ export const encodeSecurityLabsContent = async () => {
 
   const files = await globby(MARKDOWN_FILE_PATTERN, {
     cwd: SECURITY_LABS_DIR,
-  })
+  });
   files.forEach((file) => {
     encodedFile(file);
-  })
+  });
 };
