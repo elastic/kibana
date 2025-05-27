@@ -23,7 +23,7 @@ export function CustomKqlPanels({ slo, alert, rule }: Props) {
   const {
     services: { application },
   } = useKibana();
-  const aiopsEnabled = application?.capabilities.aiops.enabled ?? false;
+  const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
   const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
   return hasLicenseForLogRateAnalysis && aiopsEnabled ? (
     <LogRateAnalysisPanel slo={slo} alert={alert} rule={rule} />

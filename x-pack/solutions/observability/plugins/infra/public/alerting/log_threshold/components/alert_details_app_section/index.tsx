@@ -68,7 +68,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
 
   const { hasAtLeast } = useLicense();
   const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
-  const aiopsEnabled = application?.capabilities.aiops.enabled ?? false;
+  const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {
