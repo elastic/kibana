@@ -9,6 +9,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   type ControlGroupChainingSystem,
@@ -517,12 +518,13 @@ export const dashboardCreateResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const serviceDefinition: ServicesDefinition = {
+export const getServiceDefinition = (embeddable: EmbeddableStart): ServicesDefinition => ({
   get: {
     out: {
       result: {
         schema: dashboardGetResultSchema,
-        down: getResultV3ToV2,
+        // TODO Ignoring references for now...
+        down: (data) => getResultV3ToV2(data, embeddable),
       },
     },
   },
@@ -558,4 +560,4 @@ export const serviceDefinition: ServicesDefinition = {
       },
     },
   },
-};
+});

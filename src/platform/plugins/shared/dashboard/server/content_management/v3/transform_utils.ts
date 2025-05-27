@@ -10,13 +10,14 @@
 import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type {
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
-  ItemAttrsToSavedObjectParams,
-  ItemAttrsToSavedObjectReturn,
-  ItemAttrsToSavedObjectWithTagsParams,
+  ItemToSavedObjectParams,
+  ItemToSavedObjectReturn,
+  ItemToSavedObjectWithTagsParams,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -37,6 +38,7 @@ import {
 
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   references?: SavedObjectReference[],
   getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
@@ -68,7 +70,7 @@ export function dashboardAttributesOut(
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
-    ...(panelsJSON && { panels: transformPanelsOut(panelsJSON) }),
+    ...(panelsJSON && { panels: transformPanelsOut(panelsJSON, embeddable, references) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
@@ -81,9 +83,12 @@ export function dashboardAttributesOut(
   };
 }
 
-export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
+export const getResultV3ToV2 = (
+  result: DashboardGetOut,
+  embeddable: EmbeddableStart
+): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
-  const { attributes, ...rest } = item;
+  const { attributes, references, ...rest } = item;
   const {
     controlGroupInput,
     description,
@@ -98,6 +103,8 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
     version,
   } = attributes;
 
+  const { panelsJSON, references: panelReferences } = transformPanelsIn(panels, embeddable);
+
   const v2Attributes = {
     ...(controlGroupInput && {
       controlGroupInput: transformControlGroupIn(controlGroupInput) as ControlGroupAttributesV2,
@@ -107,7 +114,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
       kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
     }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
-    panelsJSON: panels ? transformPanelsIn(panels) : '[]',
+    panelsJSON,
     refreshInterval,
     ...(timeFrom && { timeFrom }),
     timeRestore,
@@ -120,16 +127,21 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
     item: {
       ...rest,
       attributes: v2Attributes,
+      references: [...references, ...panelReferences],
     },
   };
 };
 
-export const itemAttrsToSavedObject = ({
+export const itemToSavedObject = ({
   attributes,
-  incomingReferences = [],
-}: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
+  embeddable,
+  references = [],
+}: ItemToSavedObjectParams): ItemToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
+    const { panelsJSON, references: panelReferences } = panels
+      ? transformPanelsIn(panels, embeddable)
+      : { panelsJSON: '[]', references: [] };
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -138,33 +150,37 @@ export const itemAttrsToSavedObject = ({
       ...(options && {
         optionsJSON: JSON.stringify(options),
       }),
-      ...(panels && {
-        panelsJSON: transformPanelsIn(panels),
-      }),
+      panelsJSON,
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
     };
-    return { attributes: soAttributes, references: incomingReferences, error: null };
+    return {
+      attributes: soAttributes,
+      references: [...references, ...panelReferences],
+      error: null,
+    };
   } catch (e) {
     return { attributes: null, references: null, error: e };
   }
 };
 
-export const itemAttrsToSavedObjectWithTags = async ({
+export const itemToSavedObjectWithTags = async ({
   attributes,
+  embeddable,
   replaceTagReferencesByName,
-  incomingReferences = [],
-}: ItemAttrsToSavedObjectWithTagsParams): Promise<ItemAttrsToSavedObjectReturn> => {
+  references = [],
+}: ItemToSavedObjectWithTagsParams): Promise<ItemToSavedObjectReturn> => {
   const { tags, ...restAttributes } = attributes;
-  // Tags can be specified as an attribute or in the incomingReferences.
+  // Tags can be specified as an attribute or in the references.
   const soReferences =
     replaceTagReferencesByName && tags && tags.length
-      ? await replaceTagReferencesByName({ references: incomingReferences, newTagNames: tags })
-      : incomingReferences;
-  return itemAttrsToSavedObject({
+      ? await replaceTagReferencesByName({ references, newTagNames: tags })
+      : references;
+  return itemToSavedObject({
     attributes: restAttributes,
-    incomingReferences: soReferences,
+    embeddable,
+    references: soReferences,
   });
 };
 
@@ -186,12 +202,14 @@ interface SavedObjectToItemOptions {
 
 export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: false,
   opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<DashboardItem>;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: true,
   opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<PartialDashboardItem>;
@@ -200,6 +218,7 @@ export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: boolean /* partial arg is used to enforce the correct savedObject type */,
   { allowedAttributes, allowedReferences, getTagNamesFromReferences }: SavedObjectToItemOptions = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
@@ -221,10 +240,10 @@ export function savedObjectToItem(
   try {
     const attributesOut = allowedAttributes
       ? pick(
-          dashboardAttributesOut(attributes, references, getTagNamesFromReferences),
+          dashboardAttributesOut(attributes, embeddable, references, getTagNamesFromReferences),
           allowedAttributes
         )
-      : dashboardAttributesOut(attributes, references, getTagNamesFromReferences);
+      : dashboardAttributesOut(attributes, embeddable, references, getTagNamesFromReferences);
 
     // if includeReferences is provided, only include references of those types
     const referencesOut = allowedReferences

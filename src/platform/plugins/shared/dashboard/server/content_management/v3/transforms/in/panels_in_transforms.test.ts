@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { DashboardPanel } from '../../types';
 import { transformPanelsIn } from './panels_in_transforms';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
+
+const embeddableStartMock = createEmbeddableStartMock();
 
 describe('transformPanelsIn', () => {
   it('should transform panels', () => {
@@ -28,23 +31,60 @@ describe('transformPanelsIn', () => {
         gridData: { x: 0, y: 0, w: 12, h: 12 },
         panelConfig: { bizz: 'buzz' },
       },
+      {
+        type: 'baz',
+        gridData: { x: 0, y: 0, w: 12, h: 12 },
+        panelIndex: '3',
+        panelConfig: { savedObjectId: '123' },
+      },
     ];
-    const result = transformPanelsIn(panels as DashboardPanel[]);
-    expect(result).toEqual(
+    const { panelsJSON, references } = transformPanelsIn(
+      panels as DashboardPanel[],
+      embeddableStartMock
+    );
+    const extractSpy = jest.spyOn(embeddableStartMock, 'extract');
+    expect(extractSpy).toHaveBeenCalledTimes(3);
+    expect(extractSpy).toHaveBeenNthCalledWith(1, {
+      type: 'foo',
+      foo: 'bar',
+    });
+    expect(extractSpy).toHaveBeenNthCalledWith(2, {
+      type: 'bar',
+      bizz: 'buzz',
+    });
+    expect(extractSpy).toHaveBeenNthCalledWith(3, {
+      type: 'baz',
+      savedObjectId: '123',
+    });
+    expect(panelsJSON).toEqual(
       JSON.stringify([
         {
-          type: 'foo',
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
           embeddableConfig: { foo: 'bar' },
           panelIndex: '1',
-          gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
+          type: 'foo',
         },
         {
-          type: 'bar',
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid' },
           embeddableConfig: { bizz: 'buzz' },
           panelIndex: 'mock-uuid',
-          gridData: { x: 0, y: 0, w: 12, h: 12, i: 'mock-uuid' },
+          type: 'bar',
+        },
+        {
+          gridData: { x: 0, y: 0, w: 12, h: 12, i: '3' },
+          embeddableConfig: {},
+          panelIndex: '3',
+          panelRefName: 'panel_3',
+          type: 'baz',
         },
       ])
     );
+    expect(references).toEqual([
+      {
+        name: '3:panel_3',
+        type: 'baz',
+        id: '123',
+      },
+    ]);
   });
 });

@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   CreateIn,
   GetIn,
   SearchIn,
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { WithRequiredProperty } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { WithRequiredProperty } from '@kbn/utility-types';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import {
   dashboardItemSchema,
   controlGroupInputSchema,
@@ -32,7 +34,6 @@ import {
   optionsSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
-import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
@@ -81,12 +82,13 @@ export type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
-export interface ItemAttrsToSavedObjectParams {
+export interface ItemToSavedObjectParams {
   attributes: DashboardAttributes;
-  incomingReferences?: SavedObjectReference[];
+  embeddable: EmbeddableStart;
+  references?: SavedObjectReference[];
 }
 
-export type ItemAttrsToSavedObjectReturn =
+export type ItemToSavedObjectReturn =
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
@@ -98,7 +100,7 @@ export type ItemAttrsToSavedObjectReturn =
       error: Error;
     };
 
-export interface ItemAttrsToSavedObjectWithTagsParams extends ItemAttrsToSavedObjectParams {
+export interface ItemToSavedObjectWithTagsParams extends ItemToSavedObjectParams {
   replaceTagReferencesByName?: (
     params: ReplaceTagReferencesByNameParams
   ) => Promise<SavedObjectReference[]>;

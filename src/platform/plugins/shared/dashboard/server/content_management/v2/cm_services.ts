@@ -12,6 +12,7 @@ import {
   objectTypeToGetResultSchema,
   savedObjectSchema,
 } from '@kbn/content-management-utils';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import type { DashboardCrudTypes } from '../../../common/content_management/v2';
 import { serviceDefinition as serviceDefinitionV1 } from '../v1';
@@ -24,7 +25,7 @@ export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesS
  * Content management service definition v2.
  * Dashboard attributes in content management version v2 are tightly coupled with the v2 model version saved object schema.
  */
-export const serviceDefinition: ServicesDefinition = {
+export const getServiceDefinition = (embeddable: EmbeddableStart): ServicesDefinition => ({
   get: {
     out: {
       result: {
@@ -37,7 +38,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1?.create?.in,
       data: {
         schema: dashboardAttributesSchema,
-        up: (data: DashboardCrudTypes['CreateIn']['data']) => attributesTov3(data),
+        up: (data: DashboardCrudTypes['CreateIn']['data']) => attributesTov3(data, embeddable),
       },
     },
     out: {
@@ -51,11 +52,11 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1.update?.in,
       data: {
         schema: dashboardAttributesSchema,
-        up: (data: DashboardCrudTypes['UpdateIn']['data']) => attributesTov3(data, [], () => []),
+        up: (data: DashboardCrudTypes['UpdateIn']['data']) => attributesTov3(data, embeddable),
       },
     },
   },
   search: {
     in: serviceDefinitionV1.search?.in,
   },
-};
+});
