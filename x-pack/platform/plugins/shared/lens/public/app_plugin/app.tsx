@@ -137,9 +137,12 @@ export function App({
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [initialDocFromContext, setInitialDocFromContext] = useState<LensDocument | undefined>(
-    undefined
-  );
+  // keeping the initial doc state created by the context
+  const initialDocFromContextRef = useRef<LensDocument | undefined>(undefined);
+  if (!initialDocFromContextRef.current && currentDoc) {
+    initialDocFromContextRef.current = currentDoc;
+  }
+
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
   const savedObjectId = initialInput?.savedObjectId;
 
@@ -346,13 +349,6 @@ export function App({
     ]
   );
 
-  // keeping the initial doc state created by the context
-  useEffect(() => {
-    if (currentDoc && !initialDocFromContext) {
-      setInitialDocFromContext(currentDoc);
-    }
-  }, [currentDoc, initialDocFromContext]);
-
   const {
     shouldShowGoBackToVizEditorModal,
     goBackToOriginatingApp,
@@ -363,7 +359,7 @@ export function App({
     onAppLeave,
     legacyEditorAppName,
     legacyEditorAppUrl,
-    initialDocFromContext,
+    initialDocFromContext: initialDocFromContextRef.current,
     persistedDoc,
     isLensEqual: isLensEqualWrapper,
   });
