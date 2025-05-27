@@ -32,7 +32,7 @@ export const getRecommendedQueriesSuggestions = async (
       text: query.queryString,
       kind: 'Issue',
       detail: query.description,
-      sortText: 'D',
+      sortText: query?.sortText ?? 'E',
     };
   });
 
