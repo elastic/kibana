@@ -27,7 +27,7 @@ export const isIndexPlaceholder = (index: string) => index.startsWith(INDEX_PLAC
 
 interface TraverseOptions {
   esqlQuery(query: string): string;
-  indexPattern<T extends { name?: string; title?: string }>(pattern: T): T;
+  indexPattern<T extends { title?: string }>(pattern: T): T;
   field<T extends GenericIndexPatternColumn | TextBasedLayerColumn>(field: T): T;
 }
 
@@ -82,10 +82,17 @@ export function replaceIndexPatterns(
         .map((index) => patternReplacements[index] ?? index)
         .join(',');
 
+      // data view references may be named after the index patterns they represent,
+      // so we attempt to replace index patterns to avoid wrongly named data views
+      const updatedName = pattern.name
+        ?.split(',')
+        .map((index) => patternReplacements[index] ?? index)
+        .join(',');
+
       return {
         ...pattern,
-        name: updatedPattern,
         title: updatedPattern,
+        name: updatedName,
       };
     },
     field(field: any) {
