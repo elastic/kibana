@@ -21,7 +21,6 @@ export async function importContent({
   include: ContentPackIncludedObjects;
 }) {
   const body = new FormData();
-  body.append('filename', file.name);
   body.append('content', file);
   body.append('include', JSON.stringify(include));
 
@@ -46,7 +45,6 @@ export async function previewContent({
   definition: Streams.ingest.all.GetResponse;
 }) {
   const body = new FormData();
-  body.append('filename', file.name);
   body.append('content', file);
 
   const contentPack = await http.post<ContentPack>(

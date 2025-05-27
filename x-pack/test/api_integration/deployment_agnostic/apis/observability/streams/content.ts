@@ -104,7 +104,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           replaced_patterns: [],
         });
 
-        contentPack = await parseArchive('logs-content_pack-1.0.0.zip', Readable.from([response]));
+        contentPack = await parseArchive(Readable.from([response]));
         expect(contentPack.name).to.be('logs-content_pack');
         expect(contentPack.version).to.be('1.0.0');
         expect(contentPack.description).to.be('my content pack');

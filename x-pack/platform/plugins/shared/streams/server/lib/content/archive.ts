@@ -27,7 +27,7 @@ import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
 
-export async function parseArchive(filename: string, archive: Readable): Promise<ContentPack> {
+export async function parseArchive(archive: Readable): Promise<ContentPack> {
   const zip: AdmZip = await new Promise((resolve, reject) => {
     const bufs: Buffer[] = [];
     archive.on('data', (chunk: Buffer) => bufs.push(chunk));
@@ -41,7 +41,7 @@ export async function parseArchive(filename: string, archive: Readable): Promise
     archive.on('error', (error) => reject(error));
   });
 
-  const rootDir = path.parse(filename).name;
+  const rootDir = getRootDir(zip.getEntries());
   const manifest = await extractManifest(rootDir, zip);
   const entries = await extractEntries(rootDir, zip);
 
@@ -173,6 +173,22 @@ async function resolveDashboard(
   );
 
   return [dashboard, ...resolvedReferences];
+}
+
+function getRootDir(entries: AdmZip.IZipEntry[]) {
+  const rootDirs = new Set<string>();
+  for (const entry of entries) {
+    const rootDir = path.dirname(entry.entryName).split(path.sep)[0];
+    rootDirs.add(rootDir);
+  }
+
+  if (rootDirs.size !== 1) {
+    throw new InvalidContentPackError(
+      `Expected one root directory but got [${Array.from(rootDirs)}]`
+    );
+  }
+
+  return rootDirs.keys().next().value;
 }
 
 function assertUncompressedSize(entry: AdmZip.IZipEntry) {
