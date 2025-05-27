@@ -7,24 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type UseEuiTheme, hexToRgb, transparentize } from '@elastic/eui';
+import chroma from 'chroma-js';
+import { type UseEuiTheme } from '@elastic/eui';
 
-// These need to be functions to get theme values
-export const getVisVariables = ({ euiTheme }: UseEuiTheme) => {
-  const fullShadeRgb = hexToRgb(euiTheme.colors.fullShade);
-  const emptyShadeRgb = hexToRgb(euiTheme.colors.emptyShade);
+export const getVisVariables = ({ euiTheme }: { euiTheme: UseEuiTheme['euiTheme'] }) => {
+  const fullShade = chroma(euiTheme.colors.fullShade);
+  const emptyShade = chroma(euiTheme.colors.emptyShade);
 
   return {
-    // Text colors
-    tvbTextColor: `rgba(${fullShadeRgb}, 0.6)`,
-    tvbTextColorReversed: `rgba(${emptyShadeRgb}, 0.6)`,
+    tvbTextColor: fullShade.alpha(0.6).css(),
+    tvbTextColorReversed: emptyShade.alpha(0.6).css(),
 
-    // Value colors
-    tvbValueColor: `rgba(${fullShadeRgb}, 0.7)`,
-    tvbValueColorReversed: `rgba(${emptyShadeRgb}, 0.8)`,
+    tvbValueColor: fullShade.alpha(0.7).css(),
+    tvbValueColorReversed: emptyShade.alpha(0.8).css(),
 
-    // Background colors
-    tvbHoverBackgroundColor: `rgba(${fullShadeRgb}, 0.1)`,
-    tvbHoverBackgroundColorReversed: `rgba(${emptyShadeRgb}, 0.1)`,
+    tvbHoverBackgroundColor: fullShade.alpha(0.1).css(),
+    tvbHoverBackgroundColorReversed: emptyShade.alpha(0.1).css(),
   };
 };
