@@ -159,9 +159,9 @@ export const RangeSliderControl: FC<Props> = ({
           isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
         ],
         className: 'rangeSliderAnchor__fieldNumber',
-        'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
+        'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
       };
     },
