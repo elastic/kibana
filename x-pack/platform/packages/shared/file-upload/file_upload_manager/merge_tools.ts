@@ -24,9 +24,6 @@ export enum CLASH_ERROR_TYPE {
   WARNING,
 }
 
-// export const NEW_FIELD_THRESHOLD = 10;
-// export const UNUSED_FIELD_THRESHOLD = 10;
-
 export interface MappingClash {
   fieldName: string;
   existingType: string;
