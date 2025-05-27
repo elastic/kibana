@@ -946,15 +946,15 @@ x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-invest
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/test
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
-x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-genai-utils @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana
-x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana
-x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana
-x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
-x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
+x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-genai-utils @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-common @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/packages/wci-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/workchat-eng
@@ -1003,6 +1003,7 @@ x-pack/solutions/observability/test
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-search-queries @elastic/search-kibana
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
@@ -2640,6 +2641,7 @@ x-pack/solutions/security/plugins/security_solution/public/cloud_security_postur
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/universal_right @elastic/kibana-cloud-security-posture
+/x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/kibana-cloud-security-posture
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
