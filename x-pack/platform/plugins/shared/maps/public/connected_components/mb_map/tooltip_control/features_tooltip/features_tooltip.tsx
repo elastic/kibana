@@ -6,7 +6,9 @@
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
-import { EuiContextMenuItem, EuiLink } from '@elastic/eui';
+import { EuiContextMenuItem, EuiLink, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 // @ts-ignore file exists, but ts def doesn't
 import { euiContextMenuPanelStyles } from '@elastic/eui/lib/components/context_menu/context_menu_panel.styles';
 import { i18n } from '@kbn/i18n';
@@ -105,19 +107,20 @@ export class FeaturesTooltip extends Component<Props, State> {
 
     return this.state.currentFeature.actions.map((action) => {
       return (
-        <EuiLink
-          className="mapFeatureTooltip_actionLinks"
-          onClick={() => {
-            if (action.onClick) {
-              action.onClick();
-            } else if (action.form) {
-              this.setState({ view: action.id });
-            }
-          }}
-          key={action.id}
-        >
-          {action.label}
-        </EuiLink>
+        <ActionLinksBox>
+          <EuiLink
+            onClick={() => {
+              if (action.onClick) {
+                action.onClick();
+              } else if (action.form) {
+                this.setState({ view: action.id });
+              }
+            }}
+            key={action.id}
+          >
+            {action.label}
+          </EuiLink>
+        </ActionLinksBox>
       );
     });
   }
@@ -199,3 +202,16 @@ export class FeaturesTooltip extends Component<Props, State> {
     );
   }
 }
+
+const componentStyles = {
+  actionLinksStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xs,
+    }),
+};
+
+const ActionLinksBox = ({ children }: { children: ReactNode }) => {
+  const styles = useMemoizedStyles(componentStyles);
+
+  return <div css={styles.actionLinksStyles}>{children}</div>;
+};
