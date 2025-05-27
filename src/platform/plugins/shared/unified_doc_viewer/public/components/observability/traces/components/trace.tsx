@@ -26,6 +26,7 @@ export interface TraceProps {
   displayType: 'span' | 'transaction';
   docId: string;
   dataView: DocViewRenderProps['dataView'];
+  tracesIndexPattern: string;
   showWaterfall?: boolean;
 }
 
@@ -35,6 +36,7 @@ export const Trace = ({
   displayType,
   docId,
   dataView,
+  tracesIndexPattern,
   showWaterfall = true,
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
@@ -77,6 +79,7 @@ export const Trace = ({
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           dataView={dataView}
+          tracesIndexPattern={tracesIndexPattern}
           onCloseFullScreen={() => {
             setShowFullScreenWaterfall(false);
           }}

@@ -111,6 +111,7 @@ export function TransactionOverview({
                 docId={transactionId}
                 displayType="transaction"
                 dataView={dataView}
+                tracesIndexPattern={tracesIndexPattern}
                 showWaterfall={showWaterfall}
               />
             </>

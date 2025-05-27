@@ -30,6 +30,7 @@ export interface FullScreenWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
+  tracesIndexPattern: string;
   onCloseFullScreen: () => void;
 }
 
@@ -38,6 +39,7 @@ export const FullScreenWaterfall = ({
   rangeFrom,
   rangeTo,
   dataView,
+  tracesIndexPattern,
   onCloseFullScreen,
 }: FullScreenWaterfallProps) => {
   const { transaction } = useRootTransactionContext();
@@ -66,7 +68,7 @@ export const FullScreenWaterfall = ({
   if (isFlyoutVisible && spanId) {
     flyout = (
       <SpanFlyout
-        indexPattern={'remote_cluster:traces-*'}
+        tracesIndexPattern={tracesIndexPattern}
         spanId={spanId}
         dataView={dataView}
         onCloseFlyout={() => {
