@@ -6,7 +6,7 @@
  */
 import { useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { encodeQuery, decodeQuery } from '@kbn/cloud-security-posture';
+import { updateUrlQuery, encodeQuery, decodeQuery } from '@kbn/cloud-security-posture';
 
 /**
  * @description uses 'rison' to encode/decode a url query
@@ -14,7 +14,7 @@ import { encodeQuery, decodeQuery } from '@kbn/cloud-security-posture';
  * @note shallow-merges default, current and next query
  */
 export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
-  const { push, replace } = useHistory();
+  const { replace } = useHistory();
   const { search, key } = useLocation();
 
   const urlQuery = useMemo(
@@ -23,11 +23,14 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
   );
 
   const setUrlQuery = useCallback(
-    (query: Partial<T>) =>
-      push({
-        search: encodeQuery({ ...getDefaultQuery(), ...urlQuery, ...query }),
-      }),
-    [getDefaultQuery, urlQuery, push]
+    (query: Partial<T>) => {
+      const newQuery = { ...getDefaultQuery(), ...urlQuery, ...query };
+
+      replace({
+        search: updateUrlQuery(newQuery, search),
+      });
+    },
+    [getDefaultQuery, search, urlQuery, replace]
   );
 
   // Set initial query
