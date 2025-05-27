@@ -64,8 +64,15 @@ export const internalStateSlice = createSlice({
       state.savedDataViews = action.payload;
     },
 
-    setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {
-      state.expandedDoc = action.payload;
+    setExpandedDoc: (
+      state,
+      action: PayloadAction<{
+        expandedDoc: DataTableRecord | undefined;
+        initialDocViewerTabId?: string;
+      }>
+    ) => {
+      state.expandedDoc = action.payload.expandedDoc;
+      state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
     },
 
     setCustomFilters: (state, action: PayloadAction<Filter[]>) => {
