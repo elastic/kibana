@@ -56,6 +56,9 @@ const streams: StreamPutItem[] = [
             span_id: {
               type: 'keyword',
             },
+            event_name: {
+              type: 'keyword',
+            },
             severity_text: {
               type: 'keyword',
             },

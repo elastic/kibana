@@ -139,6 +139,15 @@ describe('generateLayer', () => {
                 },
                 "type": "object",
               },
+              "scope": Object {
+                "properties": Object {
+                  "attributes": Object {
+                    "subobjects": false,
+                    "type": "object",
+                  },
+                },
+                "type": "object",
+              },
               "span.id": Object {
                 "path": "span_id",
                 "type": "alias",
