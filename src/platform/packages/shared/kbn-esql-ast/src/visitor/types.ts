@@ -144,7 +144,8 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitMvExpandCommand'>
   | VisitorOutput<Methods, 'visitJoinCommand'>
   | VisitorOutput<Methods, 'visitRerankCommand'>
-  | VisitorOutput<Methods, 'visitChangePointCommand'>;
+  | VisitorOutput<Methods, 'visitChangePointCommand'>
+  | VisitorOutput<Methods, 'visitCompletionCommand'>;
 
 export interface VisitorMethods<
   Visitors extends VisitorMethods = any,
@@ -189,6 +190,11 @@ export interface VisitorMethods<
   >;
   visitForkCommand?: Visitor<contexts.ForkCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
+  visitCompletionCommand?: Visitor<
+    contexts.CompletionCommandVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
     contexts.SourceExpressionVisitorContext<Visitors, Data>,
