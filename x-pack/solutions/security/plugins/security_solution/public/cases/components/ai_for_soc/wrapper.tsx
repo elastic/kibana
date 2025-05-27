@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-// import React, { memo, useEffect, useMemo } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { type EuiDataGridColumn, EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import { Table } from './table';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
@@ -31,9 +30,6 @@ const DATAVIEW_ERROR = i18n.translate(
 export const ERROR_TEST_ID = 'cases-alert-error';
 export const SKELETON_TEST_ID = 'cases-alert-skeleton';
 export const CONTENT_TEST_ID = 'cases-alert-content';
-
-const AI4SOC_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-default`;
-const AI4SOC_DATA_VIEW_SPEC: DataViewSpec = { title: AI4SOC_INDEX_PATTERN };
 
 interface AiForSOCAlertsTableProps {
   /**
@@ -56,8 +52,9 @@ interface AiForSOCAlertsTableProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlertsTableProps) => {
+  const spaceId = useSpaceId();
   const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec: AI4SOC_DATA_VIEW_SPEC,
+    dataViewSpec: { title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` },
   });
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');

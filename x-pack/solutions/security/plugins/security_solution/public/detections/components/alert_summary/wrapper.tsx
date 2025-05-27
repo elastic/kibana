@@ -14,7 +14,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
@@ -25,6 +24,7 @@ import { TableSection } from './table/table_section';
 import { useCreateDataView } from '../../../attack_discovery/pages/settings_flyout/alert_selection/use_create_data_view';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
@@ -35,9 +35,6 @@ export const DATA_VIEW_LOADING_PROMPT_TEST_ID = 'alert-summary-data-view-loading
 export const DATA_VIEW_ERROR_TEST_ID = 'alert-summary-data-view-error';
 export const SKELETON_TEST_ID = 'alert-summary-skeleton';
 export const CONTENT_TEST_ID = 'alert-summary-content';
-
-export const AI4SOC_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-default`;
-const AI4SOC_DATA_VIEW_SPEC: DataViewSpec = { title: AI4SOC_INDEX_PATTERN };
 
 export interface WrapperProps {
   /**
@@ -66,8 +63,9 @@ export interface WrapperProps {
  * If the creation fails, we show an error message.
  */
 export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
+  const spaceId = useSpaceId();
   const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec: AI4SOC_DATA_VIEW_SPEC,
+    dataViewSpec: { title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` },
   });
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');

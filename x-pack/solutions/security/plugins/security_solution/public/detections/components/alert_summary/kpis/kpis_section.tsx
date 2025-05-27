@@ -7,7 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AI4SOC_INDEX_PATTERN } from '../wrapper';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SeverityLevelPanel } from '../../alerts_kpis/severity_level_panel';
@@ -23,7 +24,8 @@ export const KPIS_SECTION = 'alert-summary-kpis-section';
  * - the UI differences on the AlertsProgressBarPanel were significant enough that a separate component was created
  */
 export const KPIsSection = memo(() => {
-  const signalIndexName = AI4SOC_INDEX_PATTERN;
+  const spaceId = useSpaceId();
+  const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);

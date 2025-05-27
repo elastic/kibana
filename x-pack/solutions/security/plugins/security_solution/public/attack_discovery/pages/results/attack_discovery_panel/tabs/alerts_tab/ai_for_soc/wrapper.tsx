@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { Table } from './table';
+import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useCreateDataView } from '../../../../../settings_flyout/alert_selection/use_create_data_view';
@@ -30,9 +30,6 @@ export const ERROR_TEST_ID = 'attack-discovery-alert-error';
 export const SKELETON_TEST_ID = 'attack-discovery-alert-skeleton';
 export const CONTENT_TEST_ID = 'attack-discovery-alert-content';
 
-const AI4SOC_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-default`;
-const AI4SOC_DATA_VIEW_SPEC: DataViewSpec = { title: AI4SOC_INDEX_PATTERN };
-
 interface AiForSOCAlertsTabProps {
   /**
    * Id to pass down to the ResponseOps alerts table
@@ -50,8 +47,9 @@ interface AiForSOCAlertsTabProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
+  const spaceId = useSpaceId();
   const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec: AI4SOC_DATA_VIEW_SPEC,
+    dataViewSpec: { title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` },
   });
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -59,7 +57,7 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
   // https://github.com/elastic/security-team/issues/12589
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
 
-  const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
+  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   // Fetch all integrations
@@ -79,7 +77,7 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
     <EuiSkeletonRectangle
       data-test-subj={SKELETON_TEST_ID}
       height={400}
-      isLoading={integrationIsLoading || loading}
+      isLoading={integrationIsLoading || dataViewLoading}
       width="100%"
     >
       <>
