@@ -110,7 +110,7 @@ export const ControlGroupRenderer = ({
 
     let cancelled = false;
 
-    getCreationOptions(defaultRuntimeState, controlGroupStateBuilder)
+    getCreationOptions({ ...defaultRuntimeState }, controlGroupStateBuilder)
       .then(({ initialState, editorConfig }) => {
         if (cancelled) return;
         const initialRuntimeState = {
