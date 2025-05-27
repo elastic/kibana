@@ -46,7 +46,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const alertingApi = getService('alertingApi');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const kibanaServer = getService('kibanaServer');
-  const esClient = getService('es');
 
   describe('alerts', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
