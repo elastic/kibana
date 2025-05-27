@@ -101,6 +101,7 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
+export { useKibana } from './hooks/use_kibana';
 
 export {
   aiAssistantLogsIndexPattern,
