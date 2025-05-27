@@ -21,7 +21,7 @@ describe('encoded_security_labs_content_loader', () => {
     const docsLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/security_labs'),
       {
-        '.md': (path) => new EncodedSecurityLabsContentLoader(path),
+        '.md': (p) => new EncodedSecurityLabsContentLoader(p),
       },
       true
     );

@@ -11,6 +11,9 @@ import crypto from 'crypto';
 const key = crypto.createHash('sha256').update('ELASTIC').digest();
 const keyUint8 = key as unknown as Uint8Array;
 
+/**
+ * Unsafe encryption function for security labs content.
+ */
 export function encryptSecurityLabsContent(text: string): string {
   const cipher = crypto.createCipheriv('aes-256-ecb', keyUint8, null);
   return cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
