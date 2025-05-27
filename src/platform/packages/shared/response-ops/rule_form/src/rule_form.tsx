@@ -85,6 +85,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     ruleTypeRegistry,
     actionTypeRegistry,
     fieldsMetadata,
+    contentManagement,
   } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
@@ -104,6 +105,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
       ruleTypeRegistry,
       actionTypeRegistry,
       fieldsMetadata,
+      contentManagement,
     };
 
     // Passing the MetaData type all the way down the component hierarchy is unnecessary, this type is
@@ -176,6 +178,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
     isServerless,
     id,
     ruleTypeId,
