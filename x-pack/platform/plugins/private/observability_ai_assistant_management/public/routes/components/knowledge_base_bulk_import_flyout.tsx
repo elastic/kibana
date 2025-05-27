@@ -136,7 +136,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
         <EuiSpacer size="m" />
 
         <EuiCodeBlock isCopyable paddingSize="s">
-          {`{"id": "a_unique_human_readable_id","title": "Title of item","text": "Contents of item"}`}
+          {JSON.stringify({"id": "a_unique_human_readable_id","title": "Title of item","text": "Contents of item"})}
         </EuiCodeBlock>
 
         <EuiHorizontalRule />
