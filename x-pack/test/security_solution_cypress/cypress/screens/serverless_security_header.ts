@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
+
 // main panels links
 export const DASHBOARDS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
 export const DASHBOARDS_PANEL_BTN =
@@ -86,6 +88,12 @@ export const EXCEPTIONS = '[data-test-subj~="panelNavItem-id-exceptions"]';
 export const getBreadcrumb = (deepLinkId: string) => {
   return `breadcrumb-deepLinkId-${deepLinkId}`;
 };
+
+// Siem Migrations
+export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
+  'panelNavItem panelNavItem-id-siem_migrations-rules'
+);
+
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (pageName: string) => {
   let panel;

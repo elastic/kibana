@@ -21,7 +21,7 @@ import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_stat
 import {
   buildMisconfigurationsFindingsQuery,
   getMisconfigurationAggregationCount,
-} from '../utils/hooks_utils';
+} from '../utils/findings_query_builders';
 
 export enum MISCONFIGURATION {
   RESULT_EVALUATION = 'result.evaluation',

@@ -182,6 +182,7 @@ export const useQualityIssuesDocsChart = () => {
     breakdownField: breakdownDataViewField?.name,
     sendTelemetry,
     selector: docsTrendChart === 'failed' ? FAILURE_STORE_SELECTOR : undefined,
+    forceDiscover: true,
   });
 
   const extraActions: Action[] = [getOpenInLensAction];

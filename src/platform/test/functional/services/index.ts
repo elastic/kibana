@@ -56,6 +56,7 @@ import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 import { ESQLService } from './esql';
 import { DataViewsService } from './data_views';
+import { LogSynthtraceEsClientProvider } from './synthtrace/logs_synthtrace_es_client';
 
 export const services = {
   ...commonFunctionalServices,
@@ -100,4 +101,5 @@ export const services = {
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
   esql: ESQLService,
+  logSynthtraceEsClient: LogSynthtraceEsClientProvider,
 };
