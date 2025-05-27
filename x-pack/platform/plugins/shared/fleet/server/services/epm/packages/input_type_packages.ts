@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 import type { IndicesDataStream } from 'elasticsearch-8.x/lib/api/types';
 
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../types';
-import { DATASET_VAR_NAME } from '../../../../common/constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
 import { dataStreamService } from '../..';
@@ -37,9 +37,10 @@ export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): str
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
   pkgInfo: PackageInfo,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  dataStreamType?: string
 ) => {
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,
@@ -69,10 +70,16 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   const datasetName = getDatasetName(packagePolicy.inputs);
 
+  const dataStreamType =
+    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+    packagePolicy.inputs[0].streams[0].data_stream?.type ||
+    'logs';
+
   const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
     datasetName,
     pkgInfo,
-    esClient
+    esClient,
+    dataStreamType
   );
 
   if (existingDataStreams.length) {
