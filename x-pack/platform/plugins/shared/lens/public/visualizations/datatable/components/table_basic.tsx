@@ -33,6 +33,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { css } from '@emotion/react';
+import { CoreTheme } from '@kbn/core/public';
+import { getKbnPalettes } from '@kbn/palettes';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
@@ -80,7 +82,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
+  const theme = useObservable<CoreTheme>(props.theme.theme$, props.theme.getTheme());
+  const palettes = getKbnPalettes(theme);
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -412,9 +415,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           };
       const colorFn = getCellColorFn(
         props.paletteService,
+        palettes,
         data,
         colorByTerms,
-        isDarkMode,
+        theme.darkMode,
         syncColors,
         palette,
         colorMapping
@@ -428,16 +432,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       formatters,
       columnConfig,
       DataContext,
-      isDarkMode,
+      theme.darkMode,
       getCellColor,
       props.args.fitRowToContent
     );
   }, [
     formatters,
     columnConfig,
-    isDarkMode,
+    theme.darkMode,
     props.args.fitRowToContent,
     props.paletteService,
+    palettes,
     firstLocalTable,
     bucketedColumns,
     minMaxByColumnId,

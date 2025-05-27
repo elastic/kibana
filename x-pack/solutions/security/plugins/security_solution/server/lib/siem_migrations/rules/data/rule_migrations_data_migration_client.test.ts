@@ -95,6 +95,25 @@ describe('RuleMigrationsDataMigrationClient', () => {
         id: response._id,
       });
     });
+
+    test('should return undefined if the migration is not found', async () => {
+      const id = 'testId';
+      const response = {
+        _index: '.kibana-siem-rule-migrations',
+        found: false,
+      };
+
+      (
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+      ).mockRejectedValueOnce({
+        message: JSON.stringify(response),
+      });
+
+      const result = await ruleMigrationsDataMigrationClient.get({ id });
+
+      expect(result).toBeUndefined();
+    });
+
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
       (
@@ -105,6 +124,28 @@ describe('RuleMigrationsDataMigrationClient', () => {
 
       expect(esClient.asInternalUser.get).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(`Error getting migration ${id}: Error: Test error`);
+    });
+  });
+
+  describe('prepareDelete', () => {
+    beforeEach(() => jest.clearAllMocks());
+
+    it('should delete the migration and associated rules and resources', async () => {
+      const migrationId = 'testId';
+      const index = '.kibana-siem-rule-migrations';
+
+      const operations = await ruleMigrationsDataMigrationClient.prepareDelete({
+        id: migrationId,
+      });
+
+      expect(operations).toMatchObject([
+        {
+          delete: {
+            _index: index,
+            _id: migrationId,
+          },
+        },
+      ]);
     });
   });
 });

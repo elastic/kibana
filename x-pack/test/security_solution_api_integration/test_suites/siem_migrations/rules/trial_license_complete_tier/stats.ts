@@ -9,9 +9,9 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createMigrationRules,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocuments,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
   statsOverrideCallbackFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,11 +19,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Stats API', () => {
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     it('should return stats for the specific migration', async () => {
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should return stats for the existing migrations', async () => {
+    it('should return stats for all existing migrations', async () => {
       const migrationId1 = uuidv4();
       const migrationId2 = uuidv4();
 
@@ -140,6 +140,21 @@ export default ({ getService }: FtrProviderContext) => {
           },
         })
       );
+    });
+
+    describe('Error handling', () => {
+      it('should return 404 if migration ID does not exist', async () => {
+        const { body } = await migrationRulesRoutes.stats({
+          migrationId: 'non-existing-migration-id',
+          expectStatusCode: 404,
+        });
+
+        expect(body).toMatchObject({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'No Migration found with id: non-existing-migration-id',
+        });
+      });
     });
   });
 };
