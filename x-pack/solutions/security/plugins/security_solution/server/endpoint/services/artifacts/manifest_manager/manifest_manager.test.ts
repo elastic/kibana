@@ -1398,8 +1398,7 @@ describe('ManifestManager', () => {
               },
             },
           }),
-        ],
-        { spaceIds: ['*'] }
+        ]
       );
     });
 
@@ -1470,8 +1469,7 @@ describe('ManifestManager', () => {
               },
             },
           }),
-        ],
-        { spaceIds: ['*'] }
+        ]
       );
     });
 
