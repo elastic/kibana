@@ -23,9 +23,15 @@ interface Props {
   fields: Field[];
   changeHandler(i: string[]): void;
   selectedInfluencers: string[];
+  titleId: string;
 }
 
-export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
+export const InfluencersSelect: FC<Props> = ({
+  fields,
+  changeHandler,
+  selectedInfluencers,
+  titleId,
+}) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 
@@ -49,6 +55,7 @@ export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedIn
       isClearable={false}
       data-test-subj="mlInfluencerSelect"
       renderOption={renderOption}
+      aria-labelledby={titleId}
     />
   );
 };
