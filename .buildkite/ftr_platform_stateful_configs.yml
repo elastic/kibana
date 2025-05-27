@@ -171,6 +171,7 @@ enabled:
   - x-pack/test/fleet_api_integration/config.package_policy.ts
   - x-pack/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
+  - x-pack/test/fleet_tasks/config.ts
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
@@ -189,6 +190,7 @@ enabled:
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
@@ -303,6 +305,7 @@ enabled:
   - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/chips.config.ts
   - x-pack/test/security_api_integration/features.config.ts
+  - x-pack/test/security_api_integration/session_cookie.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_shard_missing.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts

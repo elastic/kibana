@@ -35,6 +35,7 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
+import { initializeAlertRules } from './initializers/initialize_alert_rules';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -125,6 +126,8 @@ export const createLensEmbeddableFactory = (
         services
       );
 
+      const alertRulesConfig = initializeAlertRules(uuid, parentApi, services);
+
       /**
        * This is useful to have always the latest version of the state
        * at hand when calling callbacks or performing actions
@@ -189,6 +192,7 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
+          ...alertRulesConfig.api,
         }
       );
 

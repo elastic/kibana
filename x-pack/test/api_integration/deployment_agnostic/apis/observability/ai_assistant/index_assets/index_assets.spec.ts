@@ -16,7 +16,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('index assets: creating mappings, templates, aliases and write indices', () => {
     before(async () => {
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
     });
 
     for (const componentTemplateName of Object.values(resourceNames.componentTemplate)) {
