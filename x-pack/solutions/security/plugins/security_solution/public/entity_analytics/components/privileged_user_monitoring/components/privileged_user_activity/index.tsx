@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { useNavigation } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
+import { LinkAnchor } from '../../../../../common/components/links';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
@@ -53,6 +53,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
   const defaultStackByOption = stackByOptions[0];
   const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
   const toggleOptions = useToggleOptions();
+  const { getAppUrl } = useNavigation();
 
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
@@ -66,12 +67,17 @@ export const UserActivityPrivilegedUsersPanel: React.FC = () => {
         outerDirection="column"
         hideSubtitle
       >
-        <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.entityAnalytics}>
+        <LinkAnchor
+          href={getAppUrl({
+            appId: 'discover',
+            path: `#/?&_a=(query:(esql:'${generateTableQuery('@timestamp', 'DESC', 100)}'))`,
+          })}
+        >
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.tableTitle"
-            defaultMessage="[TODO] View all events by privileged users"
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.linkDescription"
+            defaultMessage="View all events"
           />
-        </SecuritySolutionLinkAnchor>
+        </LinkAnchor>
       </HeaderSection>
       {toggleStatus && (
         <>
