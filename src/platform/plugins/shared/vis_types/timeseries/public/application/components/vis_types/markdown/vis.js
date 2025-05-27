@@ -19,8 +19,6 @@ import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
-import './_markdown.scss';
-
 const markdownStyles = css`
   display: flex;
   flex-direction: column;
