@@ -289,7 +289,6 @@ export async function queryMonitorStatusAlert({
               status: 'up',
             };
 
-            // If the latest ping is up but downcount is greater than 0 should we put the meta of the latest ping in the down configs?
             if (isValidPing && downCount > 0) {
               downConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
