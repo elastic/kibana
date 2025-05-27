@@ -17,21 +17,29 @@ export const bookAttributesDefinition: VersionableEmbeddableObject<
 > = {
   itemToSavedObject: ({ attributes, references }) => ({
     attributes: {
-      bookTitle: attributes.bookTitle,
-      authorName: attributes.author,
-      numberOfPages: attributes.pages,
-      bookSynopsis: attributes.synopsis,
-      publicationYear: attributes.published ?? undefined,
+      bookTitleAsArray: [...attributes.bookTitle],
+      metadata: {
+        numbers: {
+          numberOfPages: attributes.pages,
+          publicationYear: attributes.published ?? undefined,
+        },
+        text: {
+          authorName: attributes.author,
+          bookSynopsis: attributes.synopsis,
+        },
+      },
+      // Generate a string of random letters and numbers to demonstrate simplifying a savedObject
+      uselessGarbage: Array.from(Array(10), () => Math.random().toString(36).substring(2)).join(''),
     },
     references,
   }),
   savedObjectToItem: ({ attributes, references }) => ({
     attributes: {
-      bookTitle: attributes.bookTitle,
-      author: attributes.authorName,
-      pages: attributes.numberOfPages,
-      synopsis: attributes.bookSynopsis,
-      published: attributes.publicationYear ?? null,
+      bookTitle: attributes.bookTitleAsArray.join(''),
+      author: attributes.metadata.text.authorName,
+      pages: attributes.metadata.numbers.numberOfPages,
+      synopsis: attributes.metadata.text.bookSynopsis,
+      published: attributes.metadata.numbers.publicationYear ?? null,
     },
     references,
   }),
