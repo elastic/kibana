@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -110,10 +110,12 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
-  if (isAgentlessDefault) {
-    // Always skip the splash screen and go directly to the add integration page
-    application.navigateToUrl(cancelUrl);
-  }
+  useEffect(() => {
+    if (isAgentlessDefault) {
+      // Always skip the splash screen and go directly to the add integration page
+      application.navigateToUrl(cancelUrl);
+    }
+  }, [application, cancelUrl, isAgentlessDefault]);
 
   if (onSplash || !packageInfo) {
     return (
