@@ -6,7 +6,8 @@
  */
 
 import React, { ReactElement, useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export interface TourCalloutProps
   extends Pick<
@@ -40,7 +41,7 @@ export const TourCallout = ({
   isOpen = true,
   hasArrow = true,
   subtitle,
-  maxWidth = 330,
+  maxWidth = 350,
   footerButtonLabel,
   zIndex,
   dismissTour,
@@ -77,7 +78,16 @@ export const TourCallout = ({
     <EuiTourStep
       title={title}
       subtitle={subtitle}
-      content={content}
+      content={
+        <EuiText
+          size="m"
+          css={css`
+            line-height: 1.5;
+          `}
+        >
+          {content}
+        </EuiText>
+      }
       step={step}
       stepsTotal={stepsTotal}
       anchorPosition={anchorPosition}
