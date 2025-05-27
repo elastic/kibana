@@ -370,7 +370,6 @@ export function initializeLayoutManager(
       ): Observable<{ panels?: DashboardPanelMap; sections?: DashboardSectionMap }> => {
         return layout$.pipe(
           debounceTime(100),
-<<<<<<< HEAD:src/platform/plugins/shared/dashboard/public/dashboard_api/layout_manager.ts
           combineLatestWith(
             lastSavedState$.pipe(
               map((lastSaved) => ({ panels: lastSaved.panels, sections: lastSaved.sections }))
@@ -384,21 +383,14 @@ export function initializeLayoutManager(
                 { panels, sections }
               )
             ) {
-              return { panels, sections };
-=======
-          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => lastSaved.panels))),
-          map(([, lastSavedPanels]) => {
-            const panels = serializePanels().panels;
-            if (!arePanelLayoutsEqual(lastSavedPanels, panels)) {
               if (shouldLogStateDiff()) {
                 logStateDiff(
                   'dashboard layout',
-                  deserializePanels(lastSavedPanels).layout,
-                  deserializePanels(panels).layout
+                  deserializeLayout(lastSavedPanels, lastSavedSections).layout,
+                  deserializeLayout(panels, sections).layout
                 );
               }
-              return { panels };
->>>>>>> 6d5acfca0db486530e684d1036a67dc13f8a8b05:src/platform/plugins/shared/dashboard/public/dashboard_api/panels_manager.ts
+              return { panels, sections };
             }
             return {};
           })
