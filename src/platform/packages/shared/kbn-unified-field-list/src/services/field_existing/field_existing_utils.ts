@@ -58,16 +58,17 @@ export async function fetchFieldExistence({
   // Identify two categories of fields requiring a refresh:
   // 1. New fields - fields that don't exist in the current data view
   // 2. Fields with mapping changes - existing fields with updated mapping information
-  const newFields = existingFieldList.filter((field) => !dataView.getFieldByName(field.name));
+  const newFields: typeof existingFieldList = [];
+  const fieldsWithMappingChanges: typeof existingFieldList = [];
 
-  // Check for existing fields with mapping changes (unmapped→mapped or type changes)
-  const fieldsWithMappingChanges = existingFieldList.filter((field) => {
+  for (const field of existingFieldList) {
     const previousField = dataView.getFieldByName(field.name);
-    // Skip fields that don't exist (already handled in newFields)
-    if (!previousField) return false;
-    // Detect field type changes
-    return previousField.type !== field.type;
-  });
+    if (!previousField) {
+      newFields.push(field);
+    } else if (previousField.type !== field.type) {
+      fieldsWithMappingChanges.push(field);
+    }
+  }
 
   // Refresh if either new fields or mapping changes are detected
   const needsRefresh = newFields.length > 0 || fieldsWithMappingChanges.length > 0;
@@ -79,7 +80,7 @@ export async function fetchFieldExistence({
   const allFields = buildFieldList(dataView, metaFields);
   return {
     indexPatternTitle: dataView.getIndexPattern(),
-    existingFieldNames: existingFields(existingFieldList, allFields),
+    existingFieldNames: getExistingFields(existingFieldList, allFields),
     newFields,
   };
 }
@@ -139,7 +140,7 @@ function toQuery(
 /**
  * Exported only for unit tests.
  */
-export function existingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
+export function getExistingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
   const filteredFieldsSet = new Set(filteredFields.map((f) => f.name));
 
   return allFields
