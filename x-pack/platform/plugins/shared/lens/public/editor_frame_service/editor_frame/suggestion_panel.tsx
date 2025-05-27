@@ -37,7 +37,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { CoreStart } from '@kbn/core/public';
-import chromajs from 'chroma-js';
+import chroma from 'chroma-js';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -607,7 +607,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
-  const dangerAlpha10 = chromajs(euiTheme.colors.danger).alpha(0.1).css();
+  const dangerAlpha10 = chroma(euiTheme.colors.danger).alpha(0.1).css();
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"

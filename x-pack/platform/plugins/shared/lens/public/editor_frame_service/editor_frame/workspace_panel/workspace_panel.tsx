@@ -36,7 +36,7 @@ import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
-import chromajs from 'chroma-js';
+import chroma from 'chroma-js';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -499,7 +499,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const isDarkMode = useKibanaIsDarkMode();
 
-  const shadowAlpha20 = chromajs(euiTheme.colors.shadow).alpha(0.2).css();
+  const shadowAlpha20 = chroma(euiTheme.colors.shadow).alpha(0.2).css();
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
