@@ -69,7 +69,12 @@ export function RoutingStreamEntry({
         }
       `}
     >
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+      >
         <EuiFlexItem grow={false}>
           <EuiPanel
             className="streamsDragHandle"

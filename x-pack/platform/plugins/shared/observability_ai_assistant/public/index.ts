@@ -73,6 +73,7 @@ export {
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
 } from '../common';
 
 export type {
@@ -98,6 +99,7 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
+export { useKibana } from './hooks/use_kibana';
 
 export {
   aiAssistantLogsIndexPattern,

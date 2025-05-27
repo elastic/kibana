@@ -117,7 +117,7 @@ components:
           $ref: '../../../common/api/detection_engine/model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
 
     RuleMigration:
-      description: The rule migration document object.
+      description: The rule migration object with its settings.
       allOf:
         - type: object
           required:
@@ -129,6 +129,33 @@ components:
         - $ref: '#/components/schemas/RuleMigrationData'
 
     RuleMigrationData:
+      type: object
+      description: The rule migration object ( without Id ) with its settings.
+      required:
+        - created_by
+        - created_at
+      properties:
+        created_by:
+          description: The user profile ID of the user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_at:
+          description:  The moment migration was created
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+
+    RuleMigrationRule:
+      description: The rule migration document object.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/RuleMigrationRuleData'
+
+    RuleMigrationRuleData:
       type: object
       description: The rule migration document object.
       required:
@@ -331,7 +358,7 @@ components:
         description: The comments for the migration
         $ref: '#/components/schemas/RuleMigrationComment'
 
-    UpdateRuleMigrationData:
+    UpdateRuleMigrationRule:
       type: object
       description: The rule migration data object for rule update operation
       required:
