@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { sortAndOrderReindexOperations } from './op_utils';
+export { reindexHandler } from './reindex_handler';
