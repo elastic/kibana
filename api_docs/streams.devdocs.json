@@ -1092,7 +1092,7 @@
         "label": "StreamsConfig",
         "description": [],
         "signature": [
-          "{}"
+          "{ readonly experimental?: Readonly<{ significantEventsEnabled?: boolean | undefined; } & {}> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/config.ts",
         "deprecated": false,
