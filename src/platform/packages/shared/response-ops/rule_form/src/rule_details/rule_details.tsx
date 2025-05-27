@@ -85,18 +85,18 @@ export const RuleDetails = () => {
     }
   }, [dispatch, tags]);
 
-  const onSetArtifacts = useCallback(
-    (value: object) => {
-      dispatch({
-        type: 'setRuleProperty',
-        payload: {
-          property: 'artifacts',
-          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
-        },
-      });
-    },
-    [dispatch, formData.artifacts]
-  );
+  // const onSetArtifacts = useCallback(
+  //   (value: object) => {
+  //     dispatch({
+  //       type: 'setRuleProperty',
+  //       payload: {
+  //         property: 'artifacts',
+  //         value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
+  //       },
+  //     });
+  //   },
+  //   [dispatch, formData.artifacts]
+  // );
 
   return (
     <>
