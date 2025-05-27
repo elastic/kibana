@@ -127,11 +127,11 @@ console.log(updateMappingResponse);`,
 
 const searchCommand: SearchCodeSnippetFunction = (
   args: SearchCodeSnippetParameters
-) => `import { Client } from "@elastic/elasticsearch";
+) => `import { Client } from '@elastic/elasticsearch';
 
 ${createClientSnippet(args)}
 
-const index = "${args.indexName}";
+const index = '${args.indexName}';
 const query = ${JSON.stringify(args.queryObject, null, 2)};
 
 const result = await client.search({
@@ -151,9 +151,7 @@ export const JSSemanticIngestDataExample: IngestDataCodeDefinition = {
 
 ${createClientSnippet(args)}
 
-// Set the ingestion timeout to 5 minutes, to allow for semantic ingestion
-// to complete. The initial ingest with semantic_text fields may take longer
-// while the model loads, or ML nodes are allocated.
+// Timeout to allow ML node allocation and semantic ingestion to complete
 const timeout = '5m';
 
 const index = '${args.indexName}';

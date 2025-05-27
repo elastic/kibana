@@ -151,9 +151,7 @@ index_name = "${indexName}"
 
 docs = ${JSON.stringify(sampleDocuments, null, 4)}
 
-# Set the ingestion timeout to 5 minutes, to allow time for semantic ingestion
-# to complete. The initial ingest with semantic_text fields may take longer
-# while the model loads, or ML nodes are allocated.
+# Timeout to allow ML node allocation and semantic ingestion to complete
 ingestion_timeout=300
 
 bulk_response = helpers.bulk(
