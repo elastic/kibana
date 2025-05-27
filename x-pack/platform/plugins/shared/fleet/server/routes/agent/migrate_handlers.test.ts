@@ -18,7 +18,7 @@ import type {
 
 import * as AgentService from '../../services/agents';
 
-import { AgentNotFoundError } from '../../errors';
+import { AgentNotFoundError, FleetUnauthorizedError } from '../../errors';
 
 import { migrateSingleAgentHandler } from './migrate_handlers';
 
@@ -108,6 +108,8 @@ describe('Migrate handlers', () => {
       expect(AgentService.migrateSingleAgent).toHaveBeenCalledWith(
         mockElasticsearchClient,
         agentId,
+        mockAgentPolicy,
+        mockAgent,
         {
           ...mockSettings,
           policyId: mockAgentPolicy.id,
@@ -126,7 +128,10 @@ describe('Migrate handlers', () => {
         ...mockAgentPolicy,
         is_protected: true,
       });
-
+      // Change the migrateSingleAgent mock to be an error
+      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+        new FleetUnauthorizedError('Agent is protected and cannot be migrated')
+      );
       await expect(
         migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
       ).rejects.toThrow('Agent is protected and cannot be migrated');
@@ -138,7 +143,10 @@ describe('Migrate handlers', () => {
         ...mockAgent,
         components: [{ type: 'fleet-server' }],
       });
-
+      // Change the migrateSingleAgent mock to be an error
+      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+        new FleetUnauthorizedError('Agent is protected and cannot be migrated')
+      );
       await expect(
         migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
       ).rejects.toThrow('Agent is protected and cannot be migrated');
