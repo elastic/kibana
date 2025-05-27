@@ -28,7 +28,10 @@ import {
   translateToEndpointExceptions,
 } from '../../../lib/artifacts';
 
-import { mockFindExceptionListItemResponses } from './manifest_manager.mock';
+import {
+  buildManifestManagerContextMock,
+  mockFindExceptionListItemResponses,
+} from './manifest_manager.mock';
 
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
@@ -43,8 +46,6 @@ import {
 } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
-
-import { buildManifestManagerContextMock } from '../mocks';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
