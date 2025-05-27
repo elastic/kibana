@@ -240,6 +240,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(options.length).to.equal(1);
           expect(await options[0].getVisibleText()).to.equal(ruleName);
           await options[0].click();
+          // Dashboard warnings may appear above the save button
+          await toasts.dismissIfExists();
           await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
           await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
           await pageObjects.dashboard.verifyNoRenderErrors();
