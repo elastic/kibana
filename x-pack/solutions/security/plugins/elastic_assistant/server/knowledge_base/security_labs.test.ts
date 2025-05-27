@@ -115,7 +115,7 @@ describe('Security labs content', () => {
         const plaintextFileName = `${path.basename(file, path.extname(file))}.md`;
         const plaintextFilePath = path.join(directoryPath, plaintextFileName);
 
-        // check if encoded file exists
+        // check if plaintext file exists
         expect(encodedFiles).toContain(plaintextFileName);
         expect(fs.existsSync(plaintextFilePath)).toBe(true);
       });
