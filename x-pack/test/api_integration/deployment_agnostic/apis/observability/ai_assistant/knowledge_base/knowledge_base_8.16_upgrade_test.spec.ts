@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('Knowledge base: when upgrading from 8.16 to 8.17', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
-    this.tags(['skipServerless']);
+    this.tags(['skipServerless', 'skipCloud']);
 
     describe('using a snapshot', () => {
       before(async () => {

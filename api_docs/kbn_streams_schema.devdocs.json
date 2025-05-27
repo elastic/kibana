@@ -1227,10 +1227,6 @@
           "GroupStream",
           ".Definition>(value: TValue) => value is Extract<TValue, ",
           "WiredStream",
-          ".Definition | ",
-          "UnwiredStream",
-          ".Definition | ",
-          "GroupStream",
           ".Definition>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_root.ts",
