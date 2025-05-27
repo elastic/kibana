@@ -47,7 +47,7 @@ const getMissingPingMonitorInfo = ({
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
   configId: string;
   locationId: string;
-}): MissingPingMonitorInfo | undefined => {
+}): (MissingPingMonitorInfo & { createdAt?: string }) | undefined => {
   const monitor = monitors.find((m) => m.id === configId);
   if (!monitor) {
     // This should never happen
@@ -74,6 +74,7 @@ const getMissingPingMonitorInfo = ({
     labels: monitor.attributes.labels,
     tags: monitor.attributes.tags,
     url: { full: fullUrl },
+    createdAt: monitor.created_at,
   };
 };
 
@@ -107,19 +108,26 @@ const getPendingConfigs = async ({
         monitorsData[monitorQueryId].locations.includes(locationId);
 
       if (isConfigMissing) {
-        const monitorInfo = getMissingPingMonitorInfo({
+        const res = getMissingPingMonitorInfo({
           configId: monitorQueryId,
           locationId,
           monitors,
         });
-        if (monitorInfo) {
-          pendingConfigs[configWithLocationId] = {
-            status: 'pending',
-            configId: monitorQueryId,
-            monitorQueryId,
-            locationId,
-            monitorInfo,
-          };
+        if (res) {
+          const { createdAt, ...monitorInfo } = res;
+          if (
+            !createdAt ||
+            // Wait at least 5 minutes since monitor creation before setting the monitor as pending
+            (createdAt && moment(createdAt).isBefore(moment().subtract(5, 'minutes')))
+          ) {
+            pendingConfigs[configWithLocationId] = {
+              status: 'pending',
+              configId: monitorQueryId,
+              monitorQueryId,
+              locationId,
+              monitorInfo,
+            };
+          }
         } else {
           logger.error(
             `Config ${configWithLocationId} not added to pending configs because the monitor info is missing`
