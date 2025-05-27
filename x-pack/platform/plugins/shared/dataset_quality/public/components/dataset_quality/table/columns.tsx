@@ -79,7 +79,7 @@ const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName
 const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
   defaultMessage: 'Open',
 });
-const FAILURE_STORE_DOCS_URL = 'https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams-failure-store.html';
+const FAILURE_STORE_DOCS_URL = 'https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store';
 
 const inactiveDatasetActivityColumnDescription = i18n.translate(
   'xpack.datasetQuality.inactiveDatasetActivityColumnDescription',
