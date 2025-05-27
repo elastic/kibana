@@ -10,9 +10,17 @@
 import { schema } from '@kbn/config-schema';
 
 export const savedBookAttributesSchema = schema.object({
-  bookTitle: schema.string(),
-  authorName: schema.string(),
-  numberOfPages: schema.number(),
-  bookSynopsis: schema.maybe(schema.string()),
-  publicationYear: schema.maybe(schema.number()),
+  bookTitleAsArray: schema.arrayOf(schema.string()),
+  metadata: schema.object({
+    text: schema.object({
+      authorName: schema.string(),
+      bookSynopsis: schema.maybe(schema.string()),
+    }),
+    numbers: schema.object({
+      numberOfPages: schema.number(),
+      publicationYear: schema.maybe(schema.number()),
+    }),
+  }),
+  // Used for demonstrating simplifying the SavedObject through itemToSavedObject transforms
+  uselessGarbage: schema.string(),
 });
