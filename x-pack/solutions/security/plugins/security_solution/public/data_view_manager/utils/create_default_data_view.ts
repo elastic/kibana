@@ -18,6 +18,15 @@ import {
 } from '../../../common/constants';
 import { hasAccessToSecuritySolution } from '../../helpers_access';
 
+export interface CreateDefaultDataViewDependencies {
+  http: CoreStart['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
+  dataViewService: DataViewsServicePublic;
+  spaces: SpacesPluginStart;
+  skip?: boolean;
+}
+
 export const createDefaultDataView = async ({
   uiSettings,
   dataViewService,
@@ -25,14 +34,7 @@ export const createDefaultDataView = async ({
   skip,
   http,
   application,
-}: {
-  http: CoreStart['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
-  dataViewService: DataViewsServicePublic;
-  spaces: SpacesPluginStart;
-  skip?: boolean;
-}) => {
+}: CreateDefaultDataViewDependencies) => {
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
   let defaultDataView: SourcererModel['defaultDataView'];
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
