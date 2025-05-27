@@ -18,7 +18,7 @@ import {
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 
 export function transformPanelsIn(
-  widgets: DashboardAttributes['panels'],
+  widgets: DashboardAttributes['panels'] | undefined,
   dropSections: boolean = false
 ): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
@@ -27,7 +27,7 @@ export function transformPanelsIn(
   const panels: SavedDashboardPanel[] = [];
   const sections: SavedDashboardSection[] = [];
 
-  widgets.forEach((widget) => {
+  widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
       // this is a section
       const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;

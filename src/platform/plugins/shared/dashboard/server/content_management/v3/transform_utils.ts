@@ -131,9 +131,7 @@ export const itemAttrsToSavedObject = ({
 }: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
-    const { panelsJSON, sections } = panels
-      ? transformPanelsIn(panels)
-      : { panelsJSON: '', sections: undefined };
+    const { panelsJSON, sections } = transformPanelsIn(panels);
 
     const soAttributes = {
       ...rest,
