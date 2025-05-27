@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -497,6 +498,55 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await getStream(apiClient, 'logs.nginx', 404);
         await getStream(apiClient, 'logs.nginx.error', 404);
+      });
+    });
+
+    describe('misc', () => {
+      before(async () => {
+        await enableStreams(apiClient);
+      });
+
+      after(async () => {
+        await disableStreams(apiClient);
+      });
+
+      // this test verifies that the highest possible value did not change
+      //it('fails to create a template with a higher max value', async () => {
+      //  await esClient.indices.putIndexTemplate({
+      //    name: 'highest_priority_template',
+      //    index_patterns: ['just_a_test'],
+      //    priority: `${BigInt(MAX_PRIORITY) + BigInt(1)}` as unknown as number,
+      //  });
+      //});
+
+      it('fails to create a stream if an existing template takes precedence', async () => {
+        const index = 'logs.noprecedence';
+        await esClient.indices.putIndexTemplate({
+          name: 'highest_priority_template',
+          index_patterns: [index],
+          priority: MAX_PRIORITY,
+        });
+
+        await putStream(
+          apiClient,
+          index,
+          {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: [],
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+              },
+            },
+          },
+          500
+        );
       });
     });
   });

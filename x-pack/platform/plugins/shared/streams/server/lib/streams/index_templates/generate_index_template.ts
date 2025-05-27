@@ -14,7 +14,7 @@ import { getIndexTemplateName } from './name';
 // We create the stream index template with the max priority possible
 // to guarantee it will take precedence over existing templates overlapping
 // with the index pattern.
-const MAX_PRIORITY = '9223372036854775807';
+export const MAX_PRIORITY = '9223372036854775807' as unknown as number;
 
 export function generateIndexTemplate(name: string) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
