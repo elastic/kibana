@@ -2392,6 +2392,27 @@
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DatatableVisualizationState.density",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "density",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/datatable/visualization.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
