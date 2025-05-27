@@ -27,24 +27,28 @@ $ mkdir hello_world
 $ cd hello_world
 ```
 
-2. Create the <DocLink id="kibDevAnatomyOfAPlugin" section="kibanajson" text="kibana.json manifest file"/>.
+2. Create the <DocLink id="kibDevAnatomyOfAPlugin" section="kibanajson" text="kibana.jsonc manifest file"/>.
 
 ```
-$ touch kibana.json
+$ touch kibana.jsonc
 ```
 
 and add the following:
 
 ```
 {
-  "id": "helloWorld",
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
-    "owner": {
-    "name": "Kibana Core",
-    "githubTeam": "kibana-core"
-  },
-  "ui": true
+  "type": "plugin",
+  "id": "@kbn/hello-world-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "A plugin which registers a very simple hello world application.",
+  "plugin": {
+    "id": "helloWorld",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
 }
 ```
 
