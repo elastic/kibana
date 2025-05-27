@@ -31,7 +31,7 @@ describe('updateExcludedDocuments', () => {
       { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },
     ];
 
-    const result = updateExcludedDocuments({
+    updateExcludedDocuments({
       excludedDocuments,
       sourceDocuments,
       results,
