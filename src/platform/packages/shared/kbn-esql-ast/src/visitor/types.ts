@@ -188,6 +188,7 @@ export interface VisitorMethods<
     any
   >;
   visitForkCommand?: Visitor<contexts.ForkCommandVisitorContext<Visitors, Data>, any, any>;
+  visitSampleCommand?: Visitor<contexts.SampleCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
