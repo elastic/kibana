@@ -42,7 +42,21 @@ import { CustomThresholdAlert } from './types';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
-  mappings: { fieldMap: legacyExperimentalFieldMap },
+  mappings: {
+    fieldMap: legacyExperimentalFieldMap,
+    dynamicTemplates: [
+      {
+        strings_as_keywords: {
+          path_match: 'kibana.alert.grouping.*',
+          match_mapping_type: 'string',
+          mapping: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+        },
+      },
+    ],
+  },
   useEcs: true,
   useLegacyAlerts: false,
   shouldWrite: true,
