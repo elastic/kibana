@@ -122,7 +122,7 @@ paths:
                       $ref: './attack_discovery_alert.schema.yaml#/components/schemas/AttackDiscoveryAlert'
                   page:
                     type: integer
-                  perPage:
+                  per_page:
                     type: integer
                   total:
                     type: integer

@@ -8,7 +8,6 @@
 import { BehaviorSubject, of } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
-import type { NavigationLink } from './common/links/types';
 import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
 import { OnboardingService } from './onboarding/service';
@@ -29,14 +28,13 @@ const setupMock = (): PluginSetup => ({
 });
 
 const startMock = (): PluginStart => ({
-  getNavLinks$: jest.fn(() => new BehaviorSubject<NavigationLink[]>([])),
   setComponents: jest.fn(),
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
   getUpselling: () => upselling,
   setOnboardingSettings: onboardingService.setSettings.bind(onboardingService),
-  setIsSolutionNavigationEnabled: jest.fn(),
+  setSolutionNavigationTree: jest.fn(),
 });
 
 export const securitySolutionMock = {

@@ -37,11 +37,6 @@ export const assetGroupsUnit = (
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
       });
-    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
-      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.source', {
-        values: { groupCount },
-        defaultMessage: `{groupCount} {groupCount, plural, =1 {source} other {sources}}`,
-      });
     default:
       return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.default', {
         values: { groupCount },
@@ -76,9 +71,6 @@ export const NULL_GROUPING_MESSAGES = {
       defaultMessage: 'No cloud account',
     }
   ),
-  SOURCE: i18n.translate('xpack.securitySolution.assetInventory.grouping.source.nullGroupTitle', {
-    defaultMessage: 'No source',
-  }),
   DEFAULT: i18n.translate('xpack.securitySolution.assetInventory.grouping.default.nullGroupTitle', {
     defaultMessage: 'No grouping',
   }),
@@ -96,9 +88,6 @@ export const GROUPING_LABELS = {
   }),
   CLOUD_ACCOUNT: i18n.translate('xpack.securitySolution.assetInventory.groupBy.cloudAccount', {
     defaultMessage: 'Cloud account',
-  }),
-  SOURCE: i18n.translate('xpack.securitySolution.assetInventory.groupBy.source', {
-    defaultMessage: 'Source',
   }),
 };
 

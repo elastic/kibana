@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, PhaseName, isIlmLifecycle } from '@kbn/streams-schema';
+import { PhaseName, Streams, isIlmLifecycle } from '@kbn/streams-schema';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,7 +34,7 @@ export function IngestionRate({
   stats,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
 }) {
@@ -107,7 +107,7 @@ function ChartAreaSeries({
   timeState,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
@@ -172,7 +172,7 @@ function ChartBarSeries({
   timeState,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;

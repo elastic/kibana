@@ -15,7 +15,7 @@ import { PluginTemplateWrapper } from '../../../common/components/plugin_templat
 
 const AlertSummaryRoute = () => (
   <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.alertSummary} redirectIfUnauthorized>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.alertSummary}>
       <AlertSummaryPage />
     </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>

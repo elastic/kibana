@@ -31,7 +31,7 @@ import {
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
-  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -141,15 +141,15 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
     vulnerabilityId: string | string[],
     resourceId: string,
-    vulnerabilityPackageName: string,
-    vulnerabilityPackageVersion: string
+    packageName: string,
+    packageVersion: string
   ) => {
     return getNavUrlParams(
       {
         'vulnerability.id': vulnerabilityId,
         'resource.id': resourceId,
-        'vulnerability.package.name': vulnerabilityPackageName,
-        'vulnerability.package.version': vulnerabilityPackageVersion,
+        'package.name': encodeURIComponent(packageName),
+        'package.version': encodeURIComponent(packageVersion),
       },
       'vulnerabilities'
     );
@@ -326,7 +326,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
           onClick={() => {
             uiMetricService.trackUiMetric(
               METRIC_TYPE.CLICK,
-              NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+              NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT
             );
           }}
         >
