@@ -16,9 +16,16 @@ import {
   ProductFeaturesRegistry,
   PricingTiersClient,
 } from '@kbn/core-pricing-common';
-import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
 import type { PricingConfigType } from './pricing_config';
 import { registerRoutes } from './routes';
+
+interface PrebootDeps {
+  http: InternalHttpServicePreboot;
+}
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -38,14 +45,20 @@ export class PricingService {
     this.pricingConfig = { tiers: { enabled: false, products: [] } };
   }
 
-  public async preboot() {
+  public async preboot({ http }: PrebootDeps) {
     this.logger.debug('Prebooting pricing service');
 
-    const pricingConfig = await firstValueFrom(
+    this.pricingConfig = await firstValueFrom(
       this.configService.atPath<PricingConfigType>('pricing')
     );
 
-    this.pricingConfig = pricingConfig;
+    // The preboot server has no need for real pricing.
+    http.registerRoutes('', (router) => {
+      registerRoutes(router, {
+        pricingConfig: this.pricingConfig,
+        productFeaturesRegistry: this.productFeaturesRegistry,
+      });
+    });
   }
 
   public setup({ http }: SetupDeps) {

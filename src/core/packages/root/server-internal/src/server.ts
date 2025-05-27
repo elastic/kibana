@@ -192,7 +192,6 @@ export class Server {
     // services we need to preboot even when preboot is disabled
     const uiSettingsPreboot = await this.uiSettings.preboot();
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
-    await this.pricing.preboot();
 
     let corePreboot: InternalCorePreboot | undefined;
 
@@ -209,6 +208,8 @@ export class Server {
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
       this.capabilities.preboot({ http: httpPreboot });
+
+      this.pricing.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
 
