@@ -421,7 +421,7 @@ export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
 export type RuleMigrationAllIntegrationStats = z.infer<typeof RuleMigrationAllIntegrationStats>;
 export const RuleMigrationAllIntegrationStats = z.object({
   /**
-   * The migration id, usually the integration name
+   * The integration id
    */
   id: NonEmptyString,
   /**
