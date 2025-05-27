@@ -11,6 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
 import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
 import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
@@ -24,6 +25,7 @@ export interface TraceProps {
   traceId: string;
   displayType: 'span' | 'transaction';
   docId: string;
+  dataView: DocViewRenderProps['dataView'];
   showWaterfall?: boolean;
 }
 
@@ -32,6 +34,7 @@ export const Trace = ({
   fields,
   displayType,
   docId,
+  dataView,
   showWaterfall = true,
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
@@ -73,6 +76,7 @@ export const Trace = ({
           traceId={traceId}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
+          dataView={dataView}
           onCloseFullScreen={() => {
             setShowFullScreenWaterfall(false);
           }}

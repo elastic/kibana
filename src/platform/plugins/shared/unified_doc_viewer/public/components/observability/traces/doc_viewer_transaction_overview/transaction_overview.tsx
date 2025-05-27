@@ -110,6 +110,7 @@ export function TransactionOverview({
                 traceId={traceId}
                 docId={transactionId}
                 displayType="transaction"
+                dataView={dataView}
                 showWaterfall={showWaterfall}
               />
             </>

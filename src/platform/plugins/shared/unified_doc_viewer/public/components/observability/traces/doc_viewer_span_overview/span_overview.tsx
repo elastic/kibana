@@ -110,6 +110,7 @@ export function SpanOverview({
               traceId={flattenedDoc[TRACE_ID_FIELD]}
               docId={flattenedDoc[SPAN_ID_FIELD]}
               displayType="span"
+              dataView={dataView}
               showWaterfall={showWaterfall}
             />
           </EuiPanel>
