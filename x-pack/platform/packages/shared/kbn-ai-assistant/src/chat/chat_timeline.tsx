@@ -7,7 +7,7 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiCommentList } from '@elastic/eui';
+import { EuiCode, EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
@@ -70,12 +70,6 @@ export interface ChatTimelineProps {
   }) => void;
 }
 
-const highlightAnonymizedClassName = css`
-  background-color: #ffeb3b;
-  padding: 2px 4px;
-  border-radius: 3px;
-`;
-
 // helper using detected entity positions to transform user messages into react node to add text highlighting
 function highlightContent(
   content: string,
@@ -92,9 +86,9 @@ function highlightContent(
     }
     // Wrap the sensitive text in a span with highlight styles
     parts.push(
-      <span key={`user-highlight-${index}`} className={highlightAnonymizedClassName}>
+      <EuiCode key={`user-highlight-${index}`}>
         {content.substring(entity.start_pos, entity.end_pos)}
-      </span>
+      </EuiCode>
     );
     lastIndex = entity.end_pos;
   });
