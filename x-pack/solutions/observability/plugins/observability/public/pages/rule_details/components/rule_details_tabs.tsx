@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,10 +13,11 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
+import { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Query, BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
@@ -44,6 +45,8 @@ interface Props {
   ruleType: any;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   onSetTabId: (tabId: TabId) => void;
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
+  controlApi?: FilterGroupHandler;
 }
 
 const tableColumns = getColumns();
@@ -57,13 +60,27 @@ export function RuleDetailsTabs({
   ruleType,
   onSetTabId,
   onEsQueryChange,
+  onControlApiAvailable,
+  controlApi,
 }: Props) {
   const {
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
+  const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => controlApi && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
 
-  const ruleQuery = useRef<Query[]>([
-    { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
+  const ruleFilters = useRef<Filter[]>([
+    {
+      query: {
+        match_phrase: {
+          'kibana.alert.rule.uuid': ruleId,
+        },
+      },
+      meta: {},
+    },
   ]);
 
   const tabs: EuiTabbedContentTab[] = [
@@ -81,13 +98,17 @@ export function RuleDetailsTabs({
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             onEsQueryChange={onEsQueryChange}
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
-            defaultSearchQueries={ruleQuery.current}
+            defaultFilters={ruleFilters.current}
+            disableLocalStorageSync={true}
+            filterControls={filterControls}
+            onFilterControlsChange={setFilterControls}
+            onControlApiAvailable={onControlApiAvailable}
           />
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
+          <EuiFlexGroup css={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && ruleTypeIds && (
+              {esQuery && ruleTypeIds && hasInitialControlLoadingFinished && (
                 <ObservabilityAlertsTable
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
@@ -108,7 +129,7 @@ export function RuleDetailsTabs({
       }),
       'data-test-subj': 'eventLogListTab',
       content: (
-        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
+        <EuiFlexGroup css={{ minHeight: 600 }} direction={'column'}>
           <EuiFlexItem>
             {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
           </EuiFlexItem>

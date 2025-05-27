@@ -55,27 +55,41 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       critical: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.CRITICAL,
+              case_insensitive: true,
+            },
           },
         },
       },
       high: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.HIGH,
+              case_insensitive: true,
+            },
           },
         },
       },
       medium: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.MEDIUM,
+              case_insensitive: true,
+            },
           },
         },
       },
       low: {
         filter: {
-          term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.LOW,
+              case_insensitive: true,
+            },
+          },
         },
       },
     },
