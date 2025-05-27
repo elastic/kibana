@@ -801,6 +801,54 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.updateUrlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "updateUrlQuery",
+        "description": [],
+        "signature": [
+          "<T extends object>(newQuery: Partial<T>, search: string) => string"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.updateUrlQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "newQuery",
+            "description": [],
+            "signature": [
+              "Partial<T>"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.updateUrlQuery.$2",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
