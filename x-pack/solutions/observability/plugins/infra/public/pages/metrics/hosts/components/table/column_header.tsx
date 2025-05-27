@@ -33,7 +33,7 @@ export const ColumnHeader = React.memo(
       </div>
 
       {toolTip && (
-        <Popover>
+        <Popover buttonAriaLabelText={label}>
           <TooltipContent
             formula={formula}
             description={toolTip}
