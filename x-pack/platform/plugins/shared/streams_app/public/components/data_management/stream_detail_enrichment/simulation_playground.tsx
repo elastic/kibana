@@ -8,6 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
   EuiProgress,
@@ -23,6 +26,7 @@ import {
   useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
+import { DataSourcesFlyout } from './data_sources_flyout';
 
 export const SimulationPlayground = () => {
   const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
@@ -49,34 +53,46 @@ export const SimulationPlayground = () => {
   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
   const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
 
+  const isManagingDataSources = true;
+
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiTabs bottomBorder={false}>
-          <EuiTab isSelected={isViewingDataPreview} onClick={viewSimulationPreviewData}>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
-              { defaultMessage: 'Data preview' }
-            )}
-          </EuiTab>
-          {canViewDetectedFields && (
-            <EuiTab
-              isSelected={isViewingDetectedFields}
-              onClick={viewSimulationDetectedFields}
-              append={
-                detectedFields.length > 0 ? (
-                  <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
-                ) : undefined
-              }
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                { defaultMessage: 'Detected fields' }
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTabs bottomBorder={false}>
+              <EuiTab isSelected={isViewingDataPreview} onClick={viewSimulationPreviewData}>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
+                  { defaultMessage: 'Data preview' }
+                )}
+              </EuiTab>
+              {canViewDetectedFields && (
+                <EuiTab
+                  isSelected={isViewingDetectedFields}
+                  onClick={viewSimulationDetectedFields}
+                  append={
+                    detectedFields.length > 0 ? (
+                      <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+                    ) : undefined
+                  }
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+                    { defaultMessage: 'Detected fields' }
+                  )}
+                </EuiTab>
               )}
-            </EuiTab>
-          )}
-        </EuiTabs>
-        {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+            </EuiTabs>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="advancedSettingsApp" iconSide="right">
+              Manage simulation data sources
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+          {isManagingDataSources && <DataSourcesFlyout onApply={() => {}} onClose={() => {}} />}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}

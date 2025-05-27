@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiProgress,
   EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -119,48 +120,52 @@ const PreviewDocumentsGroupBy = () => {
   });
 
   return (
-    <EuiFilterGroup
-      aria-label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
-        { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
-      )}
-    >
-      <EuiFilterButton {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}>
-        {previewDocsFilterOptions.outcome_filter_all.label}
-      </EuiFilterButton>
-      <EuiFilterButton
-        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
-        badgeColor="success"
-        numFilters={simulationParsedRate}
-        numActiveFilters={simulationParsedRate}
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+      <EuiFilterGroup
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
+          { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
+        )}
       >
-        {previewDocsFilterOptions.outcome_filter_parsed.label}
-      </EuiFilterButton>
-      <EuiFilterButton
-        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
-        badgeColor="accent"
-        numFilters={simulationPartiallyParsedRate}
-        numActiveFilters={simulationPartiallyParsedRate}
-      >
-        {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
-      </EuiFilterButton>
-      <EuiFilterButton
-        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
-        badgeColor="accent"
-        numFilters={simulationSkippedRate}
-        numActiveFilters={simulationSkippedRate}
-      >
-        {previewDocsFilterOptions.outcome_filter_skipped.label}
-      </EuiFilterButton>
-      <EuiFilterButton
-        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
-        badgeColor="accent"
-        numFilters={simulationFailedRate}
-        numActiveFilters={simulationFailedRate}
-      >
-        {previewDocsFilterOptions.outcome_filter_failed.label}
-      </EuiFilterButton>
-    </EuiFilterGroup>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+        >
+          {previewDocsFilterOptions.outcome_filter_all.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
+          badgeColor="success"
+          numFilters={simulationParsedRate}
+          numActiveFilters={simulationParsedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_parsed.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
+          badgeColor="accent"
+          numFilters={simulationPartiallyParsedRate}
+          numActiveFilters={simulationPartiallyParsedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+          badgeColor="accent"
+          numFilters={simulationSkippedRate}
+          numActiveFilters={simulationSkippedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_skipped.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+          badgeColor="accent"
+          numFilters={simulationFailedRate}
+          numActiveFilters={simulationFailedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_failed.label}
+        </EuiFilterButton>
+      </EuiFilterGroup>
+    </EuiFlexGroup>
   );
 };
 
