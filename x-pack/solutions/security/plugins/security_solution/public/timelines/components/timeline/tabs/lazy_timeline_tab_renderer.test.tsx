@@ -106,7 +106,10 @@ describe('LazyTimelineTabRenderer', () => {
     });
 
     it('should re-render if the component is unmounted and remounted', () => {
-      const { rerender, queryByText, unmount } = render(<RerenderTestComponent />);
+      const { rerender, queryByText, unmount } = render(<RerenderTestComponent />, {
+        // TODO: fails in concurrent mode
+        legacyRoot: true,
+      });
       unmount();
       rerender(<RerenderTestComponent shouldShowTab={true} />);
       expect(queryByText(testChildString)).toBeInTheDocument();

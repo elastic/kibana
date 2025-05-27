@@ -50,6 +50,7 @@ import {
   DATASET_VAR_NAME,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  DATA_STREAM_TYPE_VAR_NAME,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -891,7 +892,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     return {
       items: packagePolicies?.saved_objects.map((so) =>
-        mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
+        mapPackagePolicySavedObjectToPackagePolicy(so)
       ),
       total: packagePolicies?.total,
       page,
@@ -1889,7 +1890,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyPostUpdate') {
                   thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
                     updatedNewData as PackagePolicy,
@@ -1898,7 +1901,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                     updatedNewData as NewPackagePolicy,
@@ -1910,7 +1915,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 }
 
                 if (externalCallbackType === 'packagePolicyCreate') {
-                  updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = NewPackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
@@ -2032,7 +2039,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
         })
-    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces));
+    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so));
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
@@ -2151,10 +2158,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectType,
           });
 
-          return mapPackagePolicySavedObjectToPackagePolicy(
-            packagePolicySO,
-            packagePolicySO.namespaces
-          );
+          return mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
         });
       },
     });
@@ -2951,6 +2955,29 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
                   'Package policy dataset cannot be modified for input only packages, please create a new package policy.',
+              })
+            );
+          }
+
+          if (
+            oldStream &&
+            oldStream?.vars?.[DATA_STREAM_TYPE_VAR_NAME] &&
+            oldStream?.vars[DATA_STREAM_TYPE_VAR_NAME]?.value !==
+              stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
+          ) {
+            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
+            appContextService
+              .getLogger()
+              .debug(
+                () =>
+                  `Rejecting package policy update due to data stream type change, old val '${
+                    oldStream.vars![DATA_STREAM_TYPE_VAR_NAME].value
+                  }, new val '${JSON.stringify(stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value)}'`
+              );
+            throw new PackagePolicyValidationError(
+              i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
+                defaultMessage:
+                  'Package policy data stream type cannot be modified for input only packages, please create a new package policy.',
               })
             );
           }
