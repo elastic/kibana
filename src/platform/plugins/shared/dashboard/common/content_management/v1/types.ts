@@ -17,7 +17,6 @@ import { RefreshInterval } from '@kbn/data-plugin/common';
 import { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
 
 import { DashboardContentType } from '../types';
-import { DashboardSectionState } from '../../dashboard_container/types';
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<
   DashboardContentType,
@@ -41,7 +40,6 @@ export interface GridData {
   x: number;
   y: number;
   i: string;
-  sectionId?: string;
 }
 
 /**
@@ -81,7 +79,6 @@ export type DashboardAttributes = {
   useMargins?: boolean;
   description: string;
   panelsJSON: string;
-  sections?: DashboardSectionState[];
   timeFrom?: string;
   version?: number;
   timeTo?: string;

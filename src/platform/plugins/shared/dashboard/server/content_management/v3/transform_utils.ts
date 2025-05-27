@@ -81,7 +81,6 @@ export function dashboardAttributesOut(
   };
 }
 
-// !!!!!!! DO THIS
 export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;

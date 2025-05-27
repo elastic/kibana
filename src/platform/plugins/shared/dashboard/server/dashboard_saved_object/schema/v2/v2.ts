@@ -13,7 +13,7 @@ import {
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
 } from '../v1';
 
-//
+// sections only include y + i for grid data
 export const sectionGridDataSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
   i: schema.string({
@@ -21,7 +21,7 @@ export const sectionGridDataSchema = schema.object({
   }),
 });
 
-// this is used for panels
+// panels include all grid data keys, including those that sections use
 export const gridDataSchema = sectionGridDataSchema.extends({
   x: schema.number(),
   w: schema.number(),

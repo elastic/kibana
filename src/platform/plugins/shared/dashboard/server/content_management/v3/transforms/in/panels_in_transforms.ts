@@ -29,7 +29,6 @@ export function transformPanelsIn(
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      // this is a section
       const { panels: sectionPanels, gridData, ...restOfSection } = widget as DashboardSection;
       const idx = gridData.i ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
@@ -41,7 +40,7 @@ export function transformPanelsIn(
         });
       });
     } else {
-      // this is a panel
+      // widget is a panel
       panels.push(transformPanel(widget));
     }
   });

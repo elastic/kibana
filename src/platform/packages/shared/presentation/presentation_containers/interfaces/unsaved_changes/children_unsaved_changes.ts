@@ -26,8 +26,6 @@ export function childrenUnsavedChanges$<Api extends unknown = unknown>(
 ) {
   return children$.pipe(
     map((children) => Object.keys(children)),
-    // https://github.com/elastic/kibana/pull/215052/files#r2025639180
-
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);

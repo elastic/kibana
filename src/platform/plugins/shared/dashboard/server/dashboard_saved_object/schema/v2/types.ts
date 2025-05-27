@@ -35,6 +35,6 @@ export interface SavedDashboardPanel {
 }
 
 /**
- * A saved dashboard section parsed directly from the Dashboard Attributes sections array
+ * A saved dashboard section parsed directly from the Dashboard Attributes
  */
 export type SavedDashboardSection = TypeOf<typeof sectionSchema>;

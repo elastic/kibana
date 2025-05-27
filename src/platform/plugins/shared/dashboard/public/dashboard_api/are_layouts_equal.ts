@@ -9,16 +9,13 @@
 
 import deepEqual from 'fast-deep-equal';
 import { xor } from 'lodash';
-import { DashboardPanelMap, DashboardSectionMap } from '../../common';
+import { DashboardLayout } from './types';
 
 /**
  * Checks whether the layouts have the same keys, and if they do, checks whether every layout item in the
  * original layout is deep equal to the layout item at the same ID in the new layout
  */
-export const areLayoutsEqual = (
-  originalLayout?: { panels: DashboardPanelMap; sections: DashboardSectionMap },
-  newLayout?: { panels: DashboardPanelMap; sections: DashboardSectionMap }
-) => {
+export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: DashboardLayout) => {
   /**
    * It is safe to assume that there are **usually** more panels than sections, so do cheaper section ID comparison first
    */

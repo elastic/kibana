@@ -15,6 +15,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
+import { GridData } from '../../../common/content_management/v2/types';
+import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
 import { DashboardLayout } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -111,31 +113,22 @@ export const DashboardGrid = ({
             updatedLayout.panels[panel.id] = {
               ...currLayout.panels[panel.id],
               gridData: {
-                i: panel.id,
-                y: panel.row,
-                x: panel.column,
-                w: panel.width,
-                h: panel.height,
+                ...convertGridPanelToDashboardGridData(panel),
                 sectionId: widget.id,
               },
             };
           });
         } else {
+          // widget is a panel
           updatedLayout.panels[widget.id] = {
             ...currLayout.panels[widget.id],
-            gridData: {
-              i: widget.id,
-              y: widget.row,
-              x: widget.column,
-              w: widget.width,
-              h: widget.height,
-            },
+            gridData: convertGridPanelToDashboardGridData(widget),
           };
         }
       });
-      // if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
-      dashboardInternalApi.layout$.next(updatedLayout);
-      // }a
+      if (!areLayoutsEqual(currLayout, updatedLayout)) {
+        dashboardInternalApi.layout$.next(updatedLayout);
+      }
     },
     [dashboardInternalApi.layout$, viewMode]
   );
@@ -258,4 +251,14 @@ export const DashboardGrid = ({
       {memoizedgridLayout}
     </div>
   );
+};
+
+const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => {
+  return {
+    i: panel.id,
+    y: panel.row,
+    x: panel.column,
+    w: panel.width,
+    h: panel.height,
+  };
 };

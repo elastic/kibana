@@ -182,4 +182,5 @@ export interface DashboardInternalApi {
     panels: DashboardPanelMap;
     sections: DashboardSectionMap;
   };
+  isSectionCollapsed: (sectionId?: string) => boolean;
 }

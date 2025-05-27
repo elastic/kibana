@@ -39,10 +39,9 @@ export const convertPanelsArrayToPanelSectionMaps = (
    * panels and sections are mixed in the DashboardAttributes 'panels' key, so we need
    * to separate them out into separate maps for the dashboard client side code
    */
-  panels?.forEach((widget, idx) => {
+  panels?.forEach((widget, i) => {
     if (isDashboardSection(widget)) {
-      // this is a section
-      const sectionId = widget.gridData.i ?? String(idx);
+      const sectionId = widget.gridData.i ?? String(i);
       const { panels: sectionPanels, ...restOfSection } = widget;
       sectionsMap[sectionId] = {
         ...restOfSection,
@@ -52,8 +51,8 @@ export const convertPanelsArrayToPanelSectionMaps = (
         },
         id: sectionId,
       };
-      (sectionPanels as DashboardPanel[]).forEach((panel, idx2) => {
-        const panelId = panel.panelIndex ?? String(idx2);
+      (sectionPanels as DashboardPanel[]).forEach((panel, j) => {
+        const panelId = panel.panelIndex ?? String(j);
         const transformed = transformPanel(panel);
         panelsMap[panelId] = {
           ...transformed,
@@ -61,8 +60,8 @@ export const convertPanelsArrayToPanelSectionMaps = (
         };
       });
     } else {
-      // this is a panel
-      panelsMap[widget.panelIndex ?? String(idx)] = transformPanel(widget);
+      // if not a section, then this widget is a panel
+      panelsMap[widget.panelIndex ?? String(i)] = transformPanel(widget);
     }
   });
 
@@ -82,6 +81,7 @@ const transformPanel = (panel: DashboardPanel): DashboardPanelMap[string] => {
     version: panel.version,
   };
 };
+
 export const convertPanelSectionMapsToPanelsArray = (
   panels: DashboardPanelMap,
   sections: DashboardSectionMap,

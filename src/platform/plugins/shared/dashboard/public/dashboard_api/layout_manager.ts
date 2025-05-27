@@ -82,7 +82,6 @@ export function initializeLayoutManager(
         references: getReferences(panelId),
       };
     });
-    Object.keys(sectionMap).forEach((uuid) => {});
     return { layout, childState };
   }
 
@@ -397,6 +396,10 @@ export function initializeLayoutManager(
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
         currentChildState[uuid] = state;
       },
+      isSectionCollapsed: (sectionId?: string): boolean => {
+        const { sections } = layout$.getValue();
+        return Boolean(!sectionId || sections[sectionId].collapsed);
+      },
     },
     api: {
       /** Panels */
@@ -410,7 +413,7 @@ export function initializeLayoutManager(
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
-      /** Sectionss */
+      /** Sections */
       addNewSection: () => {
         const newLayout = cloneDeep(layout$.getValue());
         const newId = v4();
