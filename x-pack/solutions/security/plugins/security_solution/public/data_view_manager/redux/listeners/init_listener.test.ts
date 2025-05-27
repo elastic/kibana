@@ -15,7 +15,7 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from
 import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { bootstrapSourcererDataViews } from '../../utils/create_default_data_view';
+import { createDefaultDataView } from '../../utils/create_default_data_view';
 
 jest.mock('../../utils/create_default_data_view', () => ({
   bootstrapSourcererDataViews: jest.fn(),
@@ -57,16 +57,16 @@ describe('createInitListener', () => {
       spaces,
     });
 
-    jest.mocked(bootstrapSourcererDataViews).mockResolvedValue({
+    jest.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
       kibanaDataViews: [],
-    } as unknown as Awaited<ReturnType<typeof bootstrapSourcererDataViews>>);
+    } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
   });
 
   it('should load the data views and dispatch further actions', async () => {
     await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
 
-    expect(jest.mocked(bootstrapSourcererDataViews)).toHaveBeenCalled();
+    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
 
     expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
 

@@ -44,7 +44,7 @@ import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
-import { bootstrapSourcererDataViews } from '../../data_view_manager/utils/create_default_data_view';
+import { createDefaultDataView } from '../../data_view_manager/utils/create_default_data_view';
 
 let store: Store<State, Action> | null = null;
 
@@ -55,7 +55,7 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  const { kibanaDataViews, defaultDataView, signal } = await bootstrapSourcererDataViews({
+  const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
     application: coreStart.application,
     http: coreStart.http,
     dataViewService: startPlugins.data.dataViews,

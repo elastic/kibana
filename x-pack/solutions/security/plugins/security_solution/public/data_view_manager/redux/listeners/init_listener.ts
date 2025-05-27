@@ -13,7 +13,7 @@ import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
-import { bootstrapSourcererDataViews } from '../../utils/create_default_data_view';
+import { createDefaultDataView } from '../../utils/create_default_data_view';
 
 export const createInitListener = (dependencies: {
   http: CoreStart['http'];
@@ -34,7 +34,7 @@ export const createInitListener = (dependencies: {
 
         // TODO: store this in shared reducer and replace all the uses of constant data view id (DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
         // Issue: https://github.com/elastic/security-team/issues/12667
-        const { defaultDataView } = await bootstrapSourcererDataViews({
+        const { defaultDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
           spaces: dependencies.spaces,
