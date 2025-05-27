@@ -390,6 +390,7 @@ describe('policy preconfiguration', () => {
     it('should install packages and configure agent policies successfully', async () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      jest.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
       const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
         soClient,

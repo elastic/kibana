@@ -89,7 +89,6 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
