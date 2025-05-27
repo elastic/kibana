@@ -515,7 +515,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       //  await esClient.indices.putIndexTemplate({
       //    name: 'highest_priority_template',
       //    index_patterns: ['just_a_test'],
-      //    priority: `${BigInt(MAX_PRIORITY) + BigInt(1)}` as unknown as number,
+      //    priority: `${MAX_PRIORITY + 1n}` as unknown as number,
       //  });
       //});
 
@@ -524,7 +524,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await esClient.indices.putIndexTemplate({
           name: 'highest_priority_template',
           index_patterns: [index],
-          priority: MAX_PRIORITY,
+          priority: `${MAX_PRIORITY}` as unknown as number,
         });
 
         await putStream(
