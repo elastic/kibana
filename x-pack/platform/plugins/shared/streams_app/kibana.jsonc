@@ -27,6 +27,6 @@
       "streams",
       "unifiedSearch"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }

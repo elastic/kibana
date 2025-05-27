@@ -11,33 +11,19 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiButton,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 
 interface DataSourcesFlyoutProps {
-  onApply: () => void;
   onClose: () => void;
-  shouldConfirm?: boolean;
 }
 
-export const DataSourcesFlyout = ({
-  onApply,
-  onClose,
-  shouldConfirm = false,
-}: DataSourcesFlyoutProps) => {
-  const handleClose = useDiscardConfirm(onClose);
-
-  const closeHandler = shouldConfirm ? handleClose : onClose;
-
+export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
   return (
-    <EuiFlyoutResizable onClose={closeHandler}>
+    <EuiFlyoutResizable onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -58,23 +44,26 @@ export const DataSourcesFlyout = ({
           )}
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>Content</EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty iconType="cross" onClick={closeHandler}>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.cancel',
-              { defaultMessage: 'Cancel' }
+      <EuiFlyoutBody
+        banner={
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.bannerTitle',
+              { defaultMessage: 'Data Sources usage' }
             )}
-          </EuiButtonEmpty>
-          <EuiButton iconType="cross" onClick={onApply}>
+          >
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.apply',
-              { defaultMessage: 'Apply changes' }
+              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.bannerDescription',
+              {
+                defaultMessage:
+                  'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
+              }
             )}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+          </EuiCallOut>
+        }
+      >
+        Content
+      </EuiFlyoutBody>
     </EuiFlyoutResizable>
   );
 };

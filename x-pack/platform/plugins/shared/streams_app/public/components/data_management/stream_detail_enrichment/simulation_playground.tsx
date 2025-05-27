@@ -35,6 +35,8 @@ export const SimulationPlayground = () => {
     viewSimulationDetectedFields,
   } = useStreamEnrichmentEvents();
 
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
@@ -57,7 +59,6 @@ export const SimulationPlayground = () => {
       state.matches('runningSimulation')
   );
 
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
   const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
 
   return (
@@ -96,16 +97,14 @@ export const SimulationPlayground = () => {
               iconSide="right"
               onClick={manageDataSources}
             >
-              Manage simulation data sources
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.manageDataSources.label',
+                { defaultMessage: 'Manage data sources' }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {isManagingDataSources && <DataSourcesFlyout onClose={closeDataSourcesManagement} />}
           {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-          {isManagingDataSources && (
-            <DataSourcesFlyout
-              onApply={closeDataSourcesManagement}
-              onClose={closeDataSourcesManagement}
-            />
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />

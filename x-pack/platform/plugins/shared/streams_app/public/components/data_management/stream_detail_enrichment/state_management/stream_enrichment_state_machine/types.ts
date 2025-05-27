@@ -11,6 +11,8 @@ import { Streams } from '@kbn/streams-schema';
 import { TimeState } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
@@ -22,6 +24,7 @@ export interface StreamEnrichmentServiceDependencies {
   core: CoreStart;
   data: DataPublicPluginStart;
   timeState$: BehaviorSubject<TimeState>;
+  urlStateStorageContainer: IKbnUrlStateStorage;
 }
 
 export interface StreamEnrichmentInput {
@@ -33,6 +36,7 @@ export interface StreamEnrichmentContextType {
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
   simulatorRef?: SimulationActorRef;
+  urlState: EnrichmentUrlState;
 }
 
 export type StreamEnrichmentEvent =
@@ -48,4 +52,5 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
-  | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] };
+  | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] }
+  | { type: 'url.initialized'; urlState: EnrichmentUrlState };

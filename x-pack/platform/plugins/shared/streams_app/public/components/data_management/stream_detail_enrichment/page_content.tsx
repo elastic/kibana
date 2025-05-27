@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
@@ -54,6 +55,8 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
   const timefilterHook = useTimefilter();
 
   const timeState$ = useMemo(() => {
@@ -81,6 +84,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
       timeState$={timeState$}
+      urlStateStorageContainer={urlStateStorageContainer}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -92,6 +96,7 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
+  const isReady = useStreamsEnrichmentSelector((state) => state.matches('ready'));
   const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const canManage = useStreamsEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -107,6 +112,10 @@ export function StreamDetailEnrichmentContentImpl() {
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>

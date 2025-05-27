@@ -12,6 +12,21 @@ import {
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
+import { EnrichmentUrlState } from '../../../../../../common/url_schema';
+
+export const defaultEnrichmentUrlState: EnrichmentUrlState = {
+  v: 1,
+  dataSources: [
+    {
+      type: 'random-samples',
+      enabled: true,
+      time: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    }
+  ],
+};
 
 export function getStagedProcessors(context: StreamEnrichmentContextType) {
   return context.processorsRefs
