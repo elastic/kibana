@@ -257,7 +257,7 @@ export const LegendControls = ({
             showLabel={false}
             name="reverseColors"
             label={i18n.translate('xpack.infra.legendControls.euiSwitch.reversecolorsLabel', {
-              defaultMessage: 'reverseColors',
+              defaultMessage: 'Reverse colors direction',
             })}
             checked={draftLegend.reverseColors}
             onChange={handleReverseColors}
@@ -275,7 +275,7 @@ export const LegendControls = ({
             showLabel={false}
             name="bounds"
             label={i18n.translate('xpack.infra.legendControls.euiSwitch.boundsLabel', {
-              defaultMessage: 'bounds',
+              defaultMessage: 'Auto calculate range',
             })}
             checked={draftAuto}
             onChange={handleAutoChange}
