@@ -26,7 +26,7 @@ import {
   PackagePolicyMultipleAgentPoliciesError,
   PackagePolicyOutputError,
   PackagePolicyContentPackageError,
-  PackagePolicyNotAllowedError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
 } from '../../errors';
 import { licenseService } from '../license';
 import { outputService } from '../output';
@@ -80,9 +80,7 @@ export async function preflightCheckPackagePolicy(
   const isCustom = installSource === 'custom' || installSource === 'upload';
 
   if (isCustom && packagePolicy.supports_agentless) {
-    throw new PackagePolicyNotAllowedError(
-      'Custom integration agentless deployments are not allowed'
-    );
+    throw new CustomPackagePolicyNotAllowedForAgentlessError();
   }
 }
 
