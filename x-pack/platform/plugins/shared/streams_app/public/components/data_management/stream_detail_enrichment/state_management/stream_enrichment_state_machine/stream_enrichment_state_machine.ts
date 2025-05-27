@@ -240,52 +240,52 @@ export const streamEnrichmentMachine = setup({
           },
         },
         enrichment: {
-          type: 'parallel',
+          initial: 'displayingSimulation',
           states: {
-            displayingProcessors: {
-              on: {
-                'processors.add': {
-                  guard: '!hasPendingDraft',
-                  actions: [{ type: 'addProcessor', params: ({ event }) => event }],
-                },
-                'processors.reorder': {
-                  guard: 'hasMultipleProcessors',
-                  actions: [{ type: 'reorderProcessors', params: ({ event }) => event }],
-                },
-                'processor.delete': {
-                  actions: [
-                    { type: 'stopProcessor', params: ({ event }) => event },
-                    { type: 'deleteProcessor', params: ({ event }) => event },
-                  ],
-                },
-                'processor.stage': {
-                  actions: [{ type: 'reassignProcessors' }],
-                },
-                'processor.update': {
-                  actions: [{ type: 'reassignProcessors' }],
-                },
-              },
-            },
             displayingSimulation: {
               entry: [{ type: 'spawnSimulationMachine' }],
               initial: 'viewDataPreview',
               on: {
+                'processors.add': {
+                  guard: '!hasPendingDraft',
+                  actions: [
+                    { type: 'addProcessor', params: ({ event }) => event },
+                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
+                },
+                'processors.reorder': {
+                  guard: 'hasMultipleProcessors',
+                  actions: [
+                    { type: 'reorderProcessors', params: ({ event }) => event },
+                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
+                },
                 'processor.change': {
                   guard: { type: 'isStagedProcessor', params: ({ event }) => event },
                   actions: [
                     { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
-                'processor.*': {
+                'processor.delete': {
                   actions: [
+                    { type: 'stopProcessor', params: ({ event }) => event },
+                    { type: 'deleteProcessor', params: ({ event }) => event },
                     { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
-                'processors.*': {
+                'processor.stage': {
                   actions: [
+                    { type: 'reassignProcessors' },
                     { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
+                'processor.update': {
+                  actions: [
+                    { type: 'reassignProcessors' },
+                    { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
+                },
+                'simulation.manageDataSources': 'managingDataSources',
               },
               states: {
                 viewDataPreview: {
@@ -304,6 +304,11 @@ export const streamEnrichmentMachine = setup({
                     },
                   },
                 },
+              },
+            },
+            managingDataSources: {
+              on: {
+                'dataSources.closeManagement': 'displayingSimulation',
               },
             },
           },

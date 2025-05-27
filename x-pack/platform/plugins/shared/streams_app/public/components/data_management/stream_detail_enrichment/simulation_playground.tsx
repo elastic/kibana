@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +28,12 @@ import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesFlyout } from './data_sources_flyout';
 
 export const SimulationPlayground = () => {
-  const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
+  const {
+    closeDataSourcesManagement,
+    manageDataSources,
+    viewSimulationPreviewData,
+    viewSimulationDetectedFields,
+  } = useStreamEnrichmentEvents();
 
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
     state.matches({
@@ -40,6 +44,9 @@ export const SimulationPlayground = () => {
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
     })
+  );
+  const isManagingDataSources = useStreamsEnrichmentSelector((state) =>
+    state.matches({ ready: { enrichment: 'managingDataSources' } })
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
@@ -52,8 +59,6 @@ export const SimulationPlayground = () => {
 
   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
   const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
-
-  const isManagingDataSources = true;
 
   return (
     <>
@@ -86,12 +91,21 @@ export const SimulationPlayground = () => {
             </EuiTabs>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="advancedSettingsApp" iconSide="right">
+            <EuiButtonEmpty
+              iconType="advancedSettingsApp"
+              iconSide="right"
+              onClick={manageDataSources}
+            >
               Manage simulation data sources
             </EuiButtonEmpty>
           </EuiFlexItem>
           {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-          {isManagingDataSources && <DataSourcesFlyout onApply={() => {}} onClose={() => {}} />}
+          {isManagingDataSources && (
+            <DataSourcesFlyout
+              onApply={closeDataSourcesManagement}
+              onClose={closeDataSourcesManagement}
+            />
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />

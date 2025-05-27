@@ -42,6 +42,8 @@ export type StreamEnrichmentEvent =
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
+  | { type: 'simulation.manageDataSources' }
+  | { type: 'dataSources.closeManagement' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
