@@ -9,7 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { type ToolIdentifier, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
 
-export const createEmptyRunContext = ({ runId = uuidv4() }: { runId?: string } = {}): RunContext => {
+export const createEmptyRunContext = ({
+  runId = uuidv4(),
+}: { runId?: string } = {}): RunContext => {
   return {
     runId,
     stack: [],
