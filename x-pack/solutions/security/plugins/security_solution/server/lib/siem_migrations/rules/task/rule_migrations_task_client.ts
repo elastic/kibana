@@ -198,4 +198,9 @@ export class RuleMigrationsTaskClient {
       invocationConfig,
     });
   }
+
+  /** Returns if a migration is running or not */
+  isMigrationRunning(migrationId: string): boolean {
+    return this.migrationsRunning.has(migrationId);
+  }
 }
