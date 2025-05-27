@@ -181,7 +181,6 @@ export const MappingsFilter: React.FC<Props> = ({
           <EuiFlexItem>
             <EuiButtonEmpty
               color="danger"
-              iconSide="left"
               size="s"
               data-test-subj="clearFilters"
               disabled={isClearAllFilterDisabled}
