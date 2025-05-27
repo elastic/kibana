@@ -13,10 +13,11 @@ describe('RRF', () => {
   describe('correctly formatted', () => {
     it('can parse RRF command without modifiers', () => {
       const text = `FROM search-movies METADATA _score, _id, _index
-| FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
-          ( WHERE title:"Shakespeare" | SORT _score)
-| RRF
-| KEEP title, _score`;
+                    | FORK
+                      ( WHERE semantic_title:"Shakespeare" | SORT _score)
+                      ( WHERE title:"Shakespeare" | SORT _score)
+                    | RRF
+                    | KEEP title, _score`;
 
       const { root, errors } = parse(text);
 
@@ -32,9 +33,10 @@ describe('RRF', () => {
   describe('when incorrectly formatted, return errors', () => {
     it('when no pipe after', () => {
       const text = `FROM search-movies METADATA _score, _id, _index
-| FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
-          ( WHERE title:"Shakespeare" | SORT _score)
-| RRF KEEP title, _score`;
+                      | FORK
+                        ( WHERE semantic_title:"Shakespeare" | SORT _score)
+                        ( WHERE title:"Shakespeare" | SORT _score)
+                      | RRF KEEP title, _score`;
 
       const { errors } = parse(text);
 
@@ -43,8 +45,9 @@ describe('RRF', () => {
 
     it('when no pipe between FORK and RRF', () => {
       const text = `FROM search-movies METADATA _score, _id, _index
-| FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
-          ( WHERE title:"Shakespeare" | SORT _score) RRF`;
+                    | FORK
+                      ( WHERE semantic_title:"Shakespeare" | SORT _score)
+                      ( WHERE title:"Shakespeare" | SORT _score) RRF`;
 
       const { errors } = parse(text);
 
@@ -53,9 +56,9 @@ describe('RRF', () => {
 
     it('when RRF is invoked with arguments', () => {
       const text = `FROM search-movies METADATA _score, _id, _index
-| FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
-          ( WHERE title:"Shakespeare" | SORT _score)
-| RRF text`;
+                    | FORK ( WHERE semantic_title:"Shakespeare" | SORT _score)
+                              ( WHERE title:"Shakespeare" | SORT _score)
+                    | RRF text`;
 
       const { errors } = parse(text);
 

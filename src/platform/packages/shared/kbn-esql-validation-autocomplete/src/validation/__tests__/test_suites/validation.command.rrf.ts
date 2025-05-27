@@ -18,10 +18,10 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
 
           await expectErrors(
             `FROM index METADATA _id, _score, _index
-| FORK
-  (WHERE keywordField != "" | LIMIT 100)
-  (SORT doubleField ASC NULLS LAST)
-| RRF`,
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | RRF`,
             []
           );
         });
@@ -39,11 +39,11 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
 
           await expectErrors(
             `FROM index METADATA _id, _score, _index
-| FORK
-  (WHERE keywordField != "" | LIMIT 100)
-  (SORT doubleField ASC NULLS LAST)
-| SORT _id
-| RRF`,
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | SORT _id
+                    | RRF`,
             ['[RRF] Must be immediately preceded by a FORK command.']
           );
         });
@@ -53,10 +53,10 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
 
           await expectErrors(
             `FROM index
-| FORK
-  (WHERE keywordField != "" | LIMIT 100)
-  (SORT doubleField ASC NULLS LAST)
-| RRF`,
+                    | FORK
+                      (WHERE keywordField != "" | LIMIT 100)
+                      (SORT doubleField ASC NULLS LAST)
+                    | RRF`,
             [
               '[RRF] The FROM command is missing the _id METADATA field.',
               '[RRF] The FROM command is missing the _index METADATA field.',
