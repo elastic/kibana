@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
@@ -19,7 +20,6 @@ import {
   ControlGroupChainingSystem,
   ControlWidth,
 } from '@kbn/controls-plugin/common';
-
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
@@ -29,10 +29,12 @@ import type { DashboardAttributes, DashboardItem } from './types';
 import {
   dashboardAttributesOut,
   getResultV3ToV2,
-  itemAttrsToSavedObject,
+  itemToSavedObject,
   savedObjectToItem,
 } from './transform_utils';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
+
+const embeddableStartMock = createEmbeddableStartMock();
 
 describe('dashboardAttributesOut', () => {
   const controlGroupInputControlsSo = {
@@ -41,16 +43,28 @@ describe('dashboardAttributesOut', () => {
     order: 0,
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const panelsSo: SavedDashboardPanel[] = [
     {
       embeddableConfig: { enhancements: {} },
-      gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+      gridData: { x: 0, y: 0, w: 10, h: 10, i: 'bizz' },
       id: '1',
-      panelIndex: '1',
+      panelIndex: 'bizz',
       panelRefName: 'ref1',
       title: 'title1',
       type: 'type1',
       version: '2',
+    },
+  ];
+
+  const referencesSo: SavedObjectReference[] = [
+    {
+      name: 'bizz:ref1',
+      id: 'foobar',
+      type: 'type1',
     },
   ];
 
@@ -67,7 +81,9 @@ describe('dashboardAttributesOut', () => {
       title: 'my title',
       description: 'my description',
     };
-    expect(dashboardAttributesOut(input)).toEqual<DashboardAttributes>({
+    expect(
+      dashboardAttributesOut(input, embeddableStartMock, referencesSo)
+    ).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: DEFAULT_CONTROL_CHAINING,
         labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
@@ -92,11 +108,10 @@ describe('dashboardAttributesOut', () => {
       },
       panels: [
         {
-          panelConfig: { enhancements: {} },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          panelConfig: { enhancements: {}, savedObjectId: 'foobar' },
+          gridData: { x: 0, y: 0, w: 10, h: 10, i: 'bizz' },
           id: '1',
-          panelIndex: '1',
-          panelRefName: 'ref1',
+          panelIndex: 'bizz',
           title: 'title1',
           type: 'type1',
           version: '2',
@@ -140,7 +155,9 @@ describe('dashboardAttributesOut', () => {
       timeTo: 'now',
       title: 'title',
     };
-    expect(dashboardAttributesOut(input)).toEqual<DashboardAttributes>({
+    expect(
+      dashboardAttributesOut(input, embeddableStartMock, referencesSo)
+    ).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',
@@ -179,17 +196,17 @@ describe('dashboardAttributesOut', () => {
         {
           panelConfig: {
             enhancements: {},
+            savedObjectId: 'foobar',
           },
           gridData: {
             x: 0,
             y: 0,
             w: 10,
             h: 10,
-            i: '1',
+            i: 'bizz',
           },
           id: '1',
-          panelIndex: '1',
-          panelRefName: 'ref1',
+          panelIndex: 'bizz',
           title: 'title1',
           type: 'type1',
           version: '2',
@@ -205,10 +222,70 @@ describe('dashboardAttributesOut', () => {
       title: 'title',
     });
   });
+
+  it('should call embeddable.inject for panels', () => {
+    const input: DashboardSavedObjectAttributes = {
+      controlGroupInput: {
+        panelsJSON: JSON.stringify(controlGroupInputControlsSo),
+        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
+        controlStyle: 'twoLine',
+        chainingSystem: 'NONE',
+        showApplySelections: true,
+      },
+      description: 'description',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
+      },
+      optionsJSON: JSON.stringify({
+        hidePanelTitles: true,
+        useMargins: false,
+        syncColors: false,
+        syncTooltips: false,
+        syncCursor: false,
+      }),
+      panelsJSON: JSON.stringify([
+        {
+          embeddableConfig: { enhancements: {}, some: 'key' },
+          gridData: { x: 0, y: 0, w: 10, h: 10, i: 'buzz' },
+          id: '2',
+          panelIndex: 'buzz',
+          title: 'title2',
+          type: 'type2',
+          version: '2',
+        },
+      ]),
+      refreshInterval: { pause: true, value: 1000 },
+      timeFrom: 'now-15m',
+      timeRestore: true,
+      timeTo: 'now',
+      title: 'title',
+    };
+    const referencePanel = {
+      name: 'buzz:ref2',
+      id: 'foobar',
+      type: 'type2',
+    };
+    const injectSpy = jest.spyOn(embeddableStartMock, 'inject');
+    dashboardAttributesOut(input, embeddableStartMock, [...referencesSo, referencePanel]);
+    expect(injectSpy).toHaveBeenCalledTimes(1);
+    expect(injectSpy).toHaveBeenCalledWith(
+      {
+        type: 'type2',
+        enhancements: {},
+        some: 'key',
+      },
+      [
+        {
+          ...referencePanel,
+          name: 'ref2',
+        },
+      ]
+    );
+  });
 });
 
-describe('itemAttrsToSavedObject', () => {
-  it('should transform item attributes to saved object correctly', () => {
+describe('itemToSavedObject', () => {
+  it('should transform item attributes to saved object attributes correctly', () => {
     const input: DashboardAttributes = {
       controlGroupInput: {
         chainingSystem: 'NONE',
@@ -242,10 +319,10 @@ describe('itemAttrsToSavedObject', () => {
       },
       panels: [
         {
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          gridData: { x: 0, y: 0, w: 10, h: 10, i: 'bizz' },
           id: '1',
           panelConfig: { enhancements: {} },
-          panelIndex: '1',
+          panelIndex: 'bizz',
           panelRefName: 'ref1',
           title: 'title1',
           type: 'type1',
@@ -260,7 +337,19 @@ describe('itemAttrsToSavedObject', () => {
       timeTo: 'now',
     };
 
-    const output = itemAttrsToSavedObject({ attributes: input });
+    const references = [
+      {
+        name: 'bizz:ref1',
+        id: 'foobar',
+        type: 'type1',
+      },
+    ];
+
+    const output = itemToSavedObject({
+      attributes: input,
+      embeddable: embeddableStartMock,
+      references,
+    });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -276,7 +365,7 @@ describe('itemAttrsToSavedObject', () => {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
           "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
-          "panelsJSON": "[{\\"id\\":\\"1\\",\\"panelRefName\\":\\"ref1\\",\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{}},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "panelsJSON": "[{\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"bizz\\"},\\"id\\":\\"1\\",\\"embeddableConfig\\":{\\"enhancements\\":{}},\\"panelIndex\\":\\"bizz\\",\\"panelRefName\\":\\"ref1\\",\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\"}]",
           "refreshInterval": Object {
             "pause": true,
             "value": 1000,
@@ -287,7 +376,13 @@ describe('itemAttrsToSavedObject', () => {
           "title": "title",
         },
         "error": null,
-        "references": Array [],
+        "references": Array [
+          Object {
+            "id": "foobar",
+            "name": "bizz:ref1",
+            "type": "type1",
+          },
+        ],
       }
     `);
   });
@@ -302,7 +397,7 @@ describe('itemAttrsToSavedObject', () => {
       kibanaSavedObjectMeta: {},
     };
 
-    const output = itemAttrsToSavedObject({ attributes: input });
+    const output = itemToSavedObject({ attributes: input, embeddable: embeddableStartMock });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -330,65 +425,71 @@ describe('savedObjectToItem', () => {
     attributes: {},
   };
 
-  const getSavedObjectForAttributes = (
-    attributes: DashboardSavedObjectAttributes
-  ): SavedObject<DashboardSavedObjectAttributes> => {
-    return {
-      ...commonSavedObject,
-      attributes,
-    };
-  };
-
   const getTagNamesFromReferences = jest.fn();
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should convert saved object to item with all attributes', () => {
-    const input = getSavedObjectForAttributes({
-      title: 'title',
-      description: 'description',
-      timeRestore: true,
-      panelsJSON: JSON.stringify([
+    const input = {
+      ...commonSavedObject,
+      references: [
         {
-          embeddableConfig: { enhancements: {} },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
-          panelIndex: '1',
-          panelRefName: 'ref1',
-          title: 'title1',
+          name: 'bizz:ref1',
+          id: 'foobar',
           type: 'type1',
-          version: '2',
         },
-      ]),
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
-      }),
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
+      ],
+      attributes: {
+        title: 'title',
+        description: 'description',
+        timeRestore: true,
+        panelsJSON: JSON.stringify([
+          {
+            embeddableConfig: { enhancements: {} },
+            gridData: { x: 0, y: 0, w: 10, h: 10, i: 'bizz' },
+            id: '1',
+            panelIndex: 'bizz',
+            panelRefName: 'ref1',
+            title: 'title1',
+            type: 'type1',
+            version: '2',
+          },
+        ]),
+        optionsJSON: JSON.stringify({
+          hidePanelTitles: true,
+          useMargins: false,
+          syncColors: false,
+          syncTooltips: false,
+          syncCursor: false,
+        }),
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{"query":{"query":"test","language":"KQL"}}',
+        },
       },
-    });
-
-    const { item, error } = savedObjectToItem(input, false);
+    };
+    const { item, error } = savedObjectToItem(input, embeddableStartMock, false);
     expect(error).toBeNull();
     expect(item).toEqual<DashboardItem>({
       ...commonSavedObject,
+      references: [
+        {
+          name: 'bizz:ref1',
+          id: 'foobar',
+          type: 'type1',
+        },
+      ],
       attributes: {
         title: 'title',
         description: 'description',
         timeRestore: true,
         panels: [
           {
-            panelConfig: { enhancements: {} },
-            gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+            panelConfig: { enhancements: {}, savedObjectId: 'foobar' },
+            gridData: { x: 0, y: 0, w: 10, h: 10, i: 'bizz' },
             id: '1',
-            panelIndex: '1',
-            panelRefName: 'ref1',
+            panelIndex: 'bizz',
             title: 'title1',
             type: 'type1',
             version: '2',
@@ -411,13 +512,14 @@ describe('savedObjectToItem', () => {
   it('should pass references to getTagNamesFromReferences', () => {
     getTagNamesFromReferences.mockReturnValue(['tag1', 'tag2']);
     const input = {
-      ...getSavedObjectForAttributes({
+      ...commonSavedObject,
+      attributes: {
         title: 'dashboard with tags',
         description: 'I have some tags!',
         timeRestore: true,
         kibanaSavedObjectMeta: {},
         panelsJSON: JSON.stringify([]),
-      }),
+      },
       references: [
         {
           type: 'tag',
@@ -436,7 +538,9 @@ describe('savedObjectToItem', () => {
         },
       ],
     };
-    const { item, error } = savedObjectToItem(input, false, { getTagNamesFromReferences });
+    const { item, error } = savedObjectToItem(input, embeddableStartMock, false, {
+      getTagNamesFromReferences,
+    });
     expect(getTagNamesFromReferences).toHaveBeenCalledWith(input.references);
     expect(error).toBeNull();
     expect(item).toEqual({
@@ -454,16 +558,19 @@ describe('savedObjectToItem', () => {
   });
 
   it('should handle missing optional attributes', () => {
-    const input = getSavedObjectForAttributes({
-      title: 'title',
-      description: 'description',
-      timeRestore: false,
-      panelsJSON: '[]',
-      optionsJSON: '{}',
-      kibanaSavedObjectMeta: {},
-    });
+    const input = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'title',
+        description: 'description',
+        timeRestore: false,
+        panelsJSON: '[]',
+        optionsJSON: '{}',
+        kibanaSavedObjectMeta: {},
+      },
+    };
 
-    const { item, error } = savedObjectToItem(input, false);
+    const { item, error } = savedObjectToItem(input, embeddableStartMock, false);
     expect(error).toBeNull();
     expect(item).toEqual<DashboardItem>({
       ...commonSavedObject,
@@ -489,7 +596,7 @@ describe('savedObjectToItem', () => {
       },
     };
 
-    const { item, error } = savedObjectToItem(input, true, {
+    const { item, error } = savedObjectToItem(input, embeddableStartMock, true, {
       allowedAttributes: ['title', 'description'],
     });
     expect(error).toBeNull();
@@ -512,7 +619,7 @@ describe('savedObjectToItem', () => {
         panelsJSON: 'not stringified json',
       },
     };
-    const { item, error } = savedObjectToItem(input, true);
+    const { item, error } = savedObjectToItem(input, embeddableStartMock, true);
     expect(item).toBeNull();
     expect(error).not.toBe(null);
   });
@@ -540,14 +647,14 @@ describe('savedObjectToItem', () => {
     };
 
     {
-      const { item } = savedObjectToItem(input, true, {
+      const { item } = savedObjectToItem(input, embeddableStartMock, true, {
         allowedAttributes: ['title', 'description'],
       });
       expect(item?.references).toEqual(input.references);
     }
 
     {
-      const { item } = savedObjectToItem(input, true, {
+      const { item } = savedObjectToItem(input, embeddableStartMock, true, {
         allowedAttributes: ['title', 'description'],
         allowedReferences: ['tag'],
       });
@@ -555,7 +662,7 @@ describe('savedObjectToItem', () => {
     }
 
     {
-      const { item } = savedObjectToItem(input, true, {
+      const { item } = savedObjectToItem(input, embeddableStartMock, true, {
         allowedAttributes: ['title', 'description'],
         allowedReferences: [],
       });
@@ -563,10 +670,15 @@ describe('savedObjectToItem', () => {
     }
 
     {
-      const { item } = savedObjectToItem({ ...input, references: undefined }, true, {
-        allowedAttributes: ['title', 'description'],
-        allowedReferences: [],
-      });
+      const { item } = savedObjectToItem(
+        { ...input, references: undefined },
+        embeddableStartMock,
+        true,
+        {
+          allowedAttributes: ['title', 'description'],
+          allowedReferences: [],
+        }
+      );
       expect(item?.references).toBeUndefined();
     }
   });
@@ -581,6 +693,11 @@ describe('getResultV3ToV2', () => {
     timeTo: 'now',
     title: 'title',
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should transform a v3 result to a v2 result with all attributes', () => {
     const v3Result = {
       meta: { outcome: 'exactMatch' as const },
@@ -628,12 +745,24 @@ describe('getResultV3ToV2', () => {
             },
           ],
         },
-        references: [],
+        references: [
+          {
+            name: 'foo:ref1',
+            id: 'foobar',
+            type: 'visualization',
+          },
+        ],
       },
     };
 
-    const output = getResultV3ToV2(v3Result);
+    const extractSpy = jest.spyOn(embeddableStartMock, 'extract');
+    const output = getResultV3ToV2(v3Result, embeddableStartMock);
 
+    expect(extractSpy).toHaveBeenCalledTimes(1);
+    expect(extractSpy).toHaveBeenCalledWith({
+      type: 'visualization',
+      title: 'my panel',
+    });
     // Common attributes should match between v2 and v3
     expect(output.item.attributes).toMatchObject(commonAttributes);
     expect(output.item.attributes.controlGroupInput).toMatchObject({
@@ -658,7 +787,7 @@ describe('getResultV3ToV2', () => {
       `"{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}"`
     );
     expect(output.item.attributes.panelsJSON).toMatchInlineSnapshot(
-      `"[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{\\"title\\":\\"my panel\\"},\\"panelIndex\\":\\"foo\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":15,\\"h\\":15,\\"i\\":\\"foo\\"}}]"`
+      `"[{\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":15,\\"h\\":15,\\"i\\":\\"foo\\"},\\"id\\":\\"1\\",\\"embeddableConfig\\":{\\"title\\":\\"my panel\\"},\\"panelIndex\\":\\"foo\\",\\"type\\":\\"visualization\\"}]"`
     );
   });
 });
