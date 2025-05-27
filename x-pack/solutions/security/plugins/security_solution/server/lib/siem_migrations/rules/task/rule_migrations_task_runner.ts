@@ -118,6 +118,7 @@ export class RuleMigrationTaskRunner {
 
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
   protected async initialize() {
+    await this.saveRuleMigrationStarted();
     await this.retriever.initialize();
   }
 
@@ -130,7 +131,6 @@ export class RuleMigrationTaskRunner {
     try {
       // TODO: track the duration of the initialization alone in the telemetry
       this.logger.info('Initializing migration');
-      await this.saveRuleMigrationStarted();
       await this.withAbort(this.initialize()); // long running operation
     } catch (error) {
       this.logger.error(`Migration initialization failed: ${error.message}`);
@@ -143,6 +143,9 @@ export class RuleMigrationTaskRunner {
         });
         return;
       } else {
+        await this.saveRuleMigrationCompleted({
+          error: error.message,
+        });
         throw new Error(`Migration initialization failed. ${error}`);
       }
     }
@@ -200,6 +203,7 @@ export class RuleMigrationTaskRunner {
       } while (true);
 
       migrationTaskTelemetry.success();
+      await this.saveRuleMigrationCompleted({});
       this.logger.info('Migration completed successfully');
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
@@ -211,6 +215,7 @@ export class RuleMigrationTaskRunner {
           isAborted: true,
           error: '',
         });
+        return;
       } else {
         await this.saveRuleMigrationCompleted({
           error: error.message,
@@ -367,7 +372,10 @@ export class RuleMigrationTaskRunner {
       id: this.migrationId,
       lastExecutionParams: {
         started_at: new Date().toISOString(),
+        // overwrite the previous execution details
+        is_aborted: false,
         error: '',
+        ended_at: '',
       },
     });
   }

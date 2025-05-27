@@ -162,14 +162,14 @@ export class RuleMigrationsTaskClient {
     if (this.migrationsRunning.has(migrationId)) {
       return SiemMigrationTaskStatus.RUNNING;
     }
-    if (dataStats.pending === dataStats.total) {
-      return SiemMigrationTaskStatus.READY;
-    }
     if (dataStats.completed + dataStats.failed === dataStats.total) {
       return SiemMigrationTaskStatus.FINISHED;
     }
     if (lastExecution?.is_aborted) {
       return SiemMigrationTaskStatus.ABORTED;
+    }
+    if (dataStats.pending === dataStats.total) {
+      return SiemMigrationTaskStatus.READY;
     }
     return SiemMigrationTaskStatus.STOPPED;
   }

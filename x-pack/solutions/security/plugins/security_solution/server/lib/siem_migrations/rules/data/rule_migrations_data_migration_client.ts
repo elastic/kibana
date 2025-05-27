@@ -8,7 +8,6 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { Script, BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleMigrationLastExecution } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { isNotFoundError } from './utils';
@@ -28,7 +27,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         document: {
           created_by: profileUid,
           created_at: createdAt,
-          status: SiemMigrationTaskStatus.READY,
         },
       })
       .catch((error) => {
@@ -65,6 +63,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
    * Gets all migrations from the index.
    */
   async getAll(): Promise<StoredSiemMigration[]> {
+    this.logger.info('Getting all migrations');
     const index = await this.getIndexName();
     return this.esClient
       .search<StoredSiemMigration>({
@@ -75,9 +74,9 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         },
         _source: true,
       })
-      .then(this.processResponseHits)
+      .then((result) => this.processResponseHits(result))
       .catch((error) => {
-        this.logger.error(`Error getting all migrations: ${error}`);
+        this.logger.error(`Error getting all migrations:- ${error}`);
         throw error;
       });
   }
@@ -106,32 +105,23 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     id: string;
     lastExecutionParams: RuleMigrationLastExecution;
   }): Promise<void> {
-    this.logger.info(`Updating last execution params for migration ${id}`);
+    this.logger.info(
+      `Updating last execution params for migration ${id} : ${JSON.stringify(
+        lastExecutionParams,
+        null,
+        2
+      )}`
+    );
     const index = await this.getIndexName();
 
-    const painlessUpdateScriptLines = [];
-    if (lastExecutionParams.error) {
-      painlessUpdateScriptLines.push(
-        `ctx._source.last_execution.error = "${lastExecutionParams.error}";`
-      );
-    }
+    const painlessUpdateScripts: string[] = [];
 
-    if (lastExecutionParams.started_at) {
-      painlessUpdateScriptLines.push(
-        `ctx._source.last_execution.started_at = "${lastExecutionParams.started_at}";`
-      );
-    }
-
-    if (lastExecutionParams.ended_at) {
-      painlessUpdateScriptLines.push(
-        `ctx._source.last_execution.ended_at = "${lastExecutionParams.ended_at}";`
-      );
-    }
-
-    if (lastExecutionParams.is_aborted) {
-      painlessUpdateScriptLines.push(
-        `ctx._source.last_execution.is_aborted = ${lastExecutionParams.is_aborted};`
-      );
+    for (const [key, value] of Object.entries(lastExecutionParams)) {
+      if (typeof value === 'string') {
+        painlessUpdateScripts.push(`ctx._source.last_execution.${key} = '${value}';`);
+      } else if (typeof value === 'boolean') {
+        painlessUpdateScripts.push(`ctx._source.last_execution.${key} = ${value};`);
+      }
     }
 
     const script: Script = {
@@ -139,15 +129,20 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         if (ctx._source.last_execution == null) {
           ctx._source.last_execution = [:];
         }
-      ${painlessUpdateScriptLines.join('\n')}
+      ${painlessUpdateScripts.join('\n')}
   `,
     };
 
-    await this.esClient.update({
-      index,
-      id,
-      refresh: 'wait_for',
-      script,
-    });
+    await this.esClient
+      .update({
+        index,
+        id,
+        refresh: 'wait_for',
+        script,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
+        throw error;
+      });
   }
 }

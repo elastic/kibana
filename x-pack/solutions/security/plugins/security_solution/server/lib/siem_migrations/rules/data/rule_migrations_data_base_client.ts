@@ -71,6 +71,7 @@ export class RuleMigrationsDataBaseClient {
     response: SearchResponse<T>,
     override?: Partial<T>
   ): Array<Stored<T>> {
+    // this.logger.info(JSON.stringify({ response }, null, 2));
     return this.processHits(response.hits.hits, override);
   }
 

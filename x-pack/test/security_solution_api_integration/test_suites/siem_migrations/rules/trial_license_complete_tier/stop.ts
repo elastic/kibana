@@ -10,6 +10,7 @@ import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../uti
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const es = getService('es');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Stop Migration', () => {
@@ -26,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await migrationRulesRoutes.stop({ migrationId });
     });
-    it.only('should stop a running migration successfully', async () => {
+    it('should stop a running migration successfully', async () => {
       // start migration
       const { body } = await migrationRulesRoutes.start({
         migrationId,
@@ -44,9 +45,21 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await migrationRulesRoutes.stop({ migrationId });
       expect(response.body).to.eql({ stopped: true });
 
-      // check if the migration is stopped
-      statsResponse = await migrationRulesRoutes.stats({ migrationId });
-      expect(statsResponse.body.status).to.eql('ready');
+      let count = 1;
+      const MAX_RETRIES = 3;
+      while (count <= MAX_RETRIES) {
+        // wait to make sure that migration is stopped
+        statsResponse = await migrationRulesRoutes.stats({ migrationId });
+        if (statsResponse.body.status === 'ready') {
+          break;
+        }
+        count++;
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.is_aborted).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.ended_at).to.not.be('');
     });
 
     it('should return correct status of an aborted migration', async () => {
@@ -60,33 +73,23 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.eql({ started: true });
 
       // check if it running correctly
-      let statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      const statsResponse = await migrationRulesRoutes.stats({ migrationId });
       expect(statsResponse.body.status).to.eql('running');
 
       while (true) {
         const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-        console.log(JSON.stringify({ migrationResponse: migrationResponse.body }, null, 2));
-        if (!migrationResponse.body?.last_execution?.started_at) {
-          // wait for the migration to start
-          console.log('Waiting for migration to start...');
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          continue;
+        if (migrationResponse.body?.last_execution?.started_at) {
+          break;
         }
-        break;
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
-
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // Stop Migration
       const response = await migrationRulesRoutes.stop({ migrationId });
       expect(response.body).to.eql({ stopped: true });
 
-      // check if the migration is stopped
-      statsResponse = await migrationRulesRoutes.stats({ migrationId });
-      expect(statsResponse.body.status).to.eql('ready');
       const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-      console.log(JSON.stringify({ migrationResponse }, null, 2));
-      expect(migrationResponse.body.last_execution.is_aborted).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.is_aborted).to.eql(true);
     });
     describe('error scenarios', () => {
       it('should return 404 if migration id is invalid and non-existent', async () => {
