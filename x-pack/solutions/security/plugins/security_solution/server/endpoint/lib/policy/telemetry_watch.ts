@@ -127,9 +127,6 @@ export class TelemetryConfigWatcher {
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
-          // FIXME:PT testing dev code
-        }
-        if (true) {
           this.logger.debug(
             `Endpoint policy [${policy.id}] needs update to global telemetry enabled setting (currently set to [${policyConfig.global_telemetry_enabled}])`
           );
