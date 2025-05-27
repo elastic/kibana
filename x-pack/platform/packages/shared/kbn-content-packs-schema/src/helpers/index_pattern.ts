@@ -76,8 +76,15 @@ export function replaceIndexPatterns(
     esqlQuery(query: string) {
       return replaceESQLQueryIndexPattern(query, patternReplacements);
     },
-    indexPattern<T extends { title?: string }>(pattern: T) {
+    indexPattern<T extends { name?: string; title?: string }>(pattern: T) {
       const updatedPattern = pattern.title
+        ?.split(',')
+        .map((index) => patternReplacements[index] ?? index)
+        .join(',');
+
+      // data view references may be named after the index patterns they represent,
+      // so we attempt to replace index patterns to avoid wrongly named data views
+      const updatedName = pattern.name
         ?.split(',')
         .map((index) => patternReplacements[index] ?? index)
         .join(',');
@@ -85,6 +92,7 @@ export function replaceIndexPatterns(
       return {
         ...pattern,
         title: updatedPattern,
+        name: updatedName,
       };
     },
     field(field: any) {
