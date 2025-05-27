@@ -12,20 +12,18 @@ import { Filter, isRangeFilter, RangeFilter } from '../build_filters';
 import { TimeRange } from './types';
 import { convertRangeFilterToTimeRangeString } from './convert_range_filter';
 
-export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
-  const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
-    let key;
-
-    if (isRangeFilter(obj)) {
-      key = keys(obj.query.range)[0];
-    }
-
-    return Boolean(key && key === timeFieldName);
-  });
+export function extractTimeFilter(
+  timeFieldName: string,
+  filters: Filter[]
+): { restOfFilters: Filter[]; timeRangeFilter?: RangeFilter } {
+  const [timeRangeFilter, restOfFilters] = partition<Filter, RangeFilter>(
+    filters,
+    (f: Filter): f is RangeFilter => isRangeFilter(f) && timeFieldName === keys(f.query.range)[0]
+  );
 
   return {
     restOfFilters,
-    timeRangeFilter: timeRangeFilter[0] as RangeFilter | undefined,
+    timeRangeFilter: timeRangeFilter[0],
   };
 }
 
@@ -33,7 +31,9 @@ export function extractTimeRange(
   filters: Filter[],
   timeFieldName?: string
 ): { restOfFilters: Filter[]; timeRange?: TimeRange } {
-  if (!timeFieldName) return { restOfFilters: filters, timeRange: undefined };
+  if (!timeFieldName) {
+    return { restOfFilters: filters };
+  }
   const { timeRangeFilter, restOfFilters } = extractTimeFilter(timeFieldName, filters);
   return {
     restOfFilters,
