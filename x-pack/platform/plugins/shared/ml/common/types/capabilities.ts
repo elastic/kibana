@@ -111,7 +111,7 @@ export function getDefaultCapabilities(): MlCapabilities {
   };
 }
 
-const alertingFeatures = Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
+export const alertingFeatures = Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
   ruleTypeId,
   consumers: [PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
 }));
