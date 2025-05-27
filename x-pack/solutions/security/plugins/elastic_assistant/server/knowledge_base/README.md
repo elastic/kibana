@@ -39,6 +39,8 @@ cd x-pack/solutions/security/plugins/elastic_assistant
 yarn encode-security-labs-content
 ```
 
+Files are encoded due to this issue: https://github.com/elastic/kibana/issues/202114
+
 ### Future
 
 Once asset format and chunking strategies are finalized, we may want to either move the assets to a shared package so they can be consumed by other plugins, or potentially ship the pre-packaged ELSER embeddings as part of a Fleet Integration. For now though, the assets will be included in their source format within the plugin, and can then be processed and embedded at runtime.
