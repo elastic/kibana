@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { DetectedEntity, Message } from '../../types';
+import { DetectedEntityType, Message } from '../../types';
 
 /**
  * Build a map from each entity‐hash to its original value & metadata.
  */
 export function buildDetectedEntitiesMap(
   messages: Message[]
-): Map<string, { value: string; class_name: string; type: DetectedEntity['type'] }> {
-  const map = new Map<
-    string,
-    { value: string; class_name: string; type: DetectedEntity['type'] }
-  >();
+): Map<string, { value: string; class_name: string; type: DetectedEntityType }> {
+  const map = new Map<string, { value: string; class_name: string; type: DetectedEntityType }>();
   for (const { message } of messages) {
     if (message.role !== 'user') continue;
     message.detected_entities?.forEach((ent) => {

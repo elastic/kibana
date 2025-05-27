@@ -37,6 +37,8 @@ export interface DetectedEntity {
   hash: string;
   type: 'ner' | 'regex';
 }
+
+export type DetectedEntityType = DetectedEntity['type'];
 export interface Message {
   '@timestamp': string;
   message: {

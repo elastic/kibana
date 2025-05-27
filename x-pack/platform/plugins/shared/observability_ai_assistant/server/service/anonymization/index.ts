@@ -16,7 +16,12 @@ import { buildDetectedEntitiesMap } from '../../../common/utils/anonymization/bu
 import { detectRegexEntities } from './detect_regex_entities';
 import { deanonymizeText } from './deanonymize_text';
 import { chunkText } from './chunk_text';
-import { type DetectedEntity, type InferenceChunk, type Message } from '../../../common/types';
+import {
+  type DetectedEntity,
+  DetectedEntityType,
+  type InferenceChunk,
+  type Message,
+} from '../../../common/types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 
 const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
@@ -232,7 +237,7 @@ export class AnonymizationService {
    */
   private processAssistantMessage(
     message: Message,
-    hashMap: Map<string, { value: string; class_name: string; type: DetectedEntity['type'] }>
+    hashMap: Map<string, { value: string; class_name: string; type: DetectedEntityType }>
   ): Message {
     const { content } = message.message;
 

@@ -6,7 +6,7 @@
  */
 
 import { HASH_REGEX } from '../../../common/utils/anonymization/redaction';
-import { DetectedEntity } from '../../../common/types';
+import { DetectedEntity, DetectedEntityType } from '../../../common/types';
 
 /**
  * Replaces hash placeholders in text with their original values
@@ -21,7 +21,7 @@ import { DetectedEntity } from '../../../common/types';
  */
 export function deanonymizeText(
   contentWithHashes: string,
-  hashMap: Map<string, { value: string; class_name: string; type: DetectedEntity['type'] }>
+  hashMap: Map<string, { value: string; class_name: string; type: DetectedEntityType }>
 ) {
   const detectedEntities: DetectedEntity[] = [];
   let unhashedText = '';
