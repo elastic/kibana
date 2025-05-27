@@ -10,7 +10,7 @@ import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
-export function generateIndexTemplate(name: string, isServerless: boolean) {
+export function generateIndexTemplate(name: string) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
     return [...acc, `${ancestorName}@stream.layer`];
   }, [] as string[]);
@@ -27,7 +27,7 @@ export function generateIndexTemplate(name: string, isServerless: boolean) {
     },
     data_stream: {
       hidden: false,
-      failure_store: isServerless ? undefined : true, // TODO: Enable failure store for serverless once it is rolled out
+      failure_store: false,
     },
     template: {
       settings: {
