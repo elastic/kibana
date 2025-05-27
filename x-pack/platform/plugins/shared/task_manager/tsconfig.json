@@ -37,6 +37,7 @@
     "@kbn/rrule",
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
+    "@kbn/spaces-plugin",
   ],
   "exclude": ["target/**/*"]
 }
