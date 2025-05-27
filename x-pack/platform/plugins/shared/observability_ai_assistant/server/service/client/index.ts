@@ -677,7 +677,7 @@ export class ObservabilityAIAssistantClient {
     const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
     if (currentInferenceId === nextInferenceId) {
       logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      const p = warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
+      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
       if (waitUntilComplete) {
         logger.debug('Waiting for warmup to complete...');
         await p;
