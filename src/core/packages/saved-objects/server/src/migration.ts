@@ -60,7 +60,7 @@ export interface SavedObjectMigrationParams<
    * A flag that can defer the migration until either an object is accessed (read) or if there is another non-deferred migration with a higher version.
    * @default false
    */
-  deferred?: false;
+  deferred?: boolean;
 
   /** {@inheritDoc SavedObjectMigrationFn} */
   transform: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
