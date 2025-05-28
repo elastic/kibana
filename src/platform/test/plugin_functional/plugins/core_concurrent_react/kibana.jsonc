@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-concurrent-react",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "coreConcurrentReact",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "coreConcurrentReact"
+    ]
+  }
+}

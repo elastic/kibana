@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom-swap';
 import { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class RenderingPlugin implements Plugin {

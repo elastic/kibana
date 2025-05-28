@@ -16,6 +16,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-dom-swap"
   ]
 }

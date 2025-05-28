@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+// TODO: ignore rule until kibana wide migration to concurrent mode has started
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, pairwise, startWith } from 'rxjs';
 
@@ -95,7 +97,9 @@ export class RenderingService implements IRenderingService {
         body.classList.add(...newClasses);
       });
 
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+
+    root.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <>
           {/* Global Styles that apply across the entire app */}
@@ -116,8 +120,7 @@ export class RenderingService implements IRenderingService {
             {appComponent}
           </AppWrapper>
         </>
-      </KibanaRootContextProvider>,
-      targetDomElement
+      </KibanaRootContextProvider>
     );
   }
 

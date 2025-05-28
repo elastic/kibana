@@ -340,6 +340,7 @@ src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-oper
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 src/platform/packages/private/kbn-projects-solutions-groups @elastic/kibana-core
+src/platform/packages/private/kbn-react-dom-swap @elastic/appex-sharedux
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
 src/platform/packages/private/kbn-repo-path @elastic/kibana-operations
@@ -724,6 +725,7 @@ src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/ki
 src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_app_status @elastic/kibana-core
+src/platform/test/plugin_functional/plugins/core_concurrent_react @elastic/appex-sharedux
 src/platform/test/plugin_functional/plugins/core_dynamic_resolving_a @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_dynamic_resolving_b @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_history_block @elastic/kibana-core

@@ -9,7 +9,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom-swap';
 import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';

@@ -119,6 +119,7 @@ enabled:
   - src/platform/test/node_roles_functional/background_tasks.config.ts
   - src/platform/test/node_roles_functional/ui.config.ts
   - src/platform/test/plugin_functional/config.ts
+  - src/platform/test/plugin_functional/concurrent_react.config.ts
   - src/platform/test/server_integration/http/platform/config.status.ts
   - src/platform/test/server_integration/http/platform/config.ts
   - src/platform/test/server_integration/http/ssl_redirect/config.ts

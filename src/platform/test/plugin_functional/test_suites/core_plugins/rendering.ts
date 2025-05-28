@@ -385,6 +385,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.ruleFormV2.enabled (boolean?)',
         'xpack.slo.experimental.ruleFormV2.enabled (boolean?)',
         /**/
+
+        /**
+         * from test plugins
+         */
+        'coreConcurrentReact.enabled (boolean?)',
+        /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

@@ -81,7 +81,10 @@ describe('RenderingService', () => {
 
     it('renders application service into provided DOM element', () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      act(() => {
+        service.renderCore({ chrome, application, overlays }, targetDomElement);
+      });
+
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
         <div
           class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
@@ -101,7 +104,9 @@ describe('RenderingService', () => {
       const isVisible$ = new BehaviorSubject(true);
       chrome.getIsVisible$.mockReturnValue(isVisible$);
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      act(() => {
+        service.renderCore({ chrome, application, overlays }, targetDomElement);
+      });
 
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
@@ -120,7 +125,10 @@ describe('RenderingService', () => {
 
     it('renders the banner UI', () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      act(() => {
+        service.renderCore({ chrome, application, overlays }, targetDomElement);
+      });
+
       expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
                 <div
                   id="globalBannerList"

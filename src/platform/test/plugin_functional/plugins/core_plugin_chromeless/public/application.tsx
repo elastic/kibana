@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from '@kbn/react-dom-swap';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route } from '@kbn/shared-ux-router';

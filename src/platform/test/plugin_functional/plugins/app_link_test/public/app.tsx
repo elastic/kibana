@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from '@kbn/react-dom-swap';
 import { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
