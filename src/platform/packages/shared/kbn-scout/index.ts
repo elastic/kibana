@@ -49,3 +49,6 @@ export type { Locator, CDPSession } from 'playwright/test';
 export { mergeTests, test as playwrightTest } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+export { apiTest } from './src/playwright/fixtures/api';
+export type { RoleApiCredentials } from './src/playwright/fixtures/worker/api_key';

@@ -6,3 +6,4 @@
 /.kibana-plugin-helpers.dev.*
 .cache
 **/ui_tests/output
+**/api_tests/output
