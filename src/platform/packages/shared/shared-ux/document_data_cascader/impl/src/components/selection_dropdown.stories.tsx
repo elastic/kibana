@@ -10,14 +10,14 @@
 import React, { type ComponentProps } from 'react';
 import { StoryObj, Meta } from '@storybook/react';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import { DataPoolerProvider } from '../lib/store';
+import { DataCascadeProvider } from '../lib/store';
 import { SelectionDropdown } from './selection_dropdown';
 
 /**
  * @description story for dropdown component which allows selecting options based of provided ES|QL query',
  */
 export default {
-  title: 'Data Pooler/Selection Dropdown',
+  title: 'Data Cascade/Selection Dropdown',
 } satisfies Meta;
 
 type SelectionDropdownProps = ComponentProps<typeof SelectionDropdown>;
@@ -57,9 +57,9 @@ const argTypes = selectionDropdownStorybookMock.getArgumentTypes();
 export const ValidQueryScenario: StoryObj<Arguments> = {
   render: (args) => {
     return (
-      <DataPoolerProvider query={args.query}>
+      <DataCascadeProvider query={args.query}>
         <SelectionDropdown />
-      </DataPoolerProvider>
+      </DataCascadeProvider>
     );
   },
   argTypes,

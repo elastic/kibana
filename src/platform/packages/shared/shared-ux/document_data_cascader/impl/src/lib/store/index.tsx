@@ -25,7 +25,7 @@ interface IStoreContext {
   dispatch: Dispatch<IDispatchAction>;
 }
 
-interface IDataPoolerProviderProps {
+interface IDataCascadeProviderProps {
   query: string;
 }
 
@@ -33,10 +33,10 @@ export const createStore = once(() => {
   return createContext<IStoreContext | null>(null);
 });
 
-export function DataPoolerProvider({
+export function DataCascadeProvider({
   query,
   children,
-}: PropsWithChildren<IDataPoolerProviderProps>) {
+}: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStore();
   const initialState = useRef({
     currentQueryString: '',
@@ -64,7 +64,7 @@ export function DataPoolerProvider({
   return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>;
 }
 
-const useDataPoolerStore = () => {
+const useDataCascadeStore = () => {
   const ctx = useContext(createStore());
   if (!ctx) {
     throw new Error('useDataPoolerStore must be used within a DataPoolerProvider');
@@ -72,12 +72,12 @@ const useDataPoolerStore = () => {
   return ctx as IStoreContext;
 };
 
-export const useDataPoolerDispatch = () => {
-  const ctx = useDataPoolerStore();
+export const useDataCascadeDispatch = () => {
+  const ctx = useDataCascadeStore();
   return ctx.dispatch;
 };
 
-export const useDataPoolerState = () => {
-  const ctx = useDataPoolerStore();
+export const useDataCascadeState = () => {
+  const ctx = useDataCascadeStore();
   return ctx.state;
 };

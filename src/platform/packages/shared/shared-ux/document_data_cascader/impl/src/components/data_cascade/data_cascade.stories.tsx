@@ -9,22 +9,22 @@
 
 import React from 'react';
 import { StoryObj, Meta } from '@storybook/react';
-import { DataPoolerProvider } from '../../lib';
-import { ESQLDataPooler } from '..';
+import { DataCascadeProvider } from '../../lib';
+import { DataCascade } from '..';
 
 /**
  * @description story for dropdown component which allows selecting options based of provided ES|QL query',
  */
 export default {
-  title: 'Data Pooler/Data Pooler',
+  title: 'Data Cascade/Data Cascade',
 } satisfies Meta;
 
 export const GridImplementation: StoryObj<{ query: string }> = {
   render: (args) => {
     return (
-      <DataPoolerProvider query={args.query}>
-        <ESQLDataPooler />
-      </DataPoolerProvider>
+      <DataCascadeProvider query={args.query}>
+        <DataCascade />
+      </DataCascadeProvider>
     );
   },
   argTypes: {
