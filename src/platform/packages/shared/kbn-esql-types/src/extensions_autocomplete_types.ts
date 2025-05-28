@@ -10,8 +10,10 @@
 export interface RecommendedQuery {
   // The name of the recommended query, appears in the editor as a suggestion
   name: string;
-  // The actual ESQL query string
+  // The actual ESQL query string, this is what appears in the editor when the user selects the recommendation
   query: string;
+  // Optional description of the query, can be used to provide more context, appears at the right side of the suggestion popover
+  description?: string;
 }
 
 interface ResolveIndexResponseItem {

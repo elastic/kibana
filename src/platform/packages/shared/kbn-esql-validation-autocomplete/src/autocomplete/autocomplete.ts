@@ -82,7 +82,11 @@ import {
   getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
-import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+import {
+  getRecommendedQueriesSuggestions,
+  mapRecommendedQueriesFromExtensionsRegistry,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -136,6 +140,12 @@ export async function suggest(
           resourceRetriever,
           innerText
         );
+        const editorExtensions =
+          (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
+        // make it a helper function
+        const recommendedQueriesSuggestionsFromExtensions =
+          mapRecommendedQueriesFromExtensionsRegistry(editorExtensions);
+        recommendedQueriesSuggestions.push(...recommendedQueriesSuggestionsFromExtensions);
         recommendedQueriesSuggestions.push(
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
         );
@@ -329,6 +339,16 @@ async function getSuggestionsWithinCommandExpression(
     });
   }
 
+  const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
+    const recommendedQueriesExtensions =
+      (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
+
+    return [
+      ...getRecommendedQueriesTemplatesFromExtensions(recommendedQueriesExtensions),
+      ...(await getRecommendedQueriesSuggestions(getColumnsByType, prefix)),
+    ];
+  };
+
   return commandDef.suggest({
     innerText,
     command: astContext.command,
@@ -353,8 +373,8 @@ async function getSuggestionsWithinCommandExpression(
     getPreferences,
     definition: commandDef,
     getSources,
-    getRecommendedQueriesSuggestions: (prefix) =>
-      getRecommendedQueriesSuggestions(getColumnsByType, prefix),
+    getRecommendedQueriesSuggestions: (queryString, prefix) =>
+      getRecommendedQueries(queryString, prefix),
     getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
     previousCommands: commands,
     callbacks,

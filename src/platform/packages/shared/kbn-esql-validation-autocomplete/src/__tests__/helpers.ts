@@ -119,5 +119,11 @@ export function getCallbackMocks(): ESQLCallbacks {
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => [
+      {
+        name: 'Logs Count by Host',
+        query: 'from logs* | STATS count(*) by host',
+      },
+    ]),
   };
 }

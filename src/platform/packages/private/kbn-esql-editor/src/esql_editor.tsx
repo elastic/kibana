@@ -515,15 +515,25 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+      getEditorExtensions: async (queryString: string) => {
+        if (activeSolutionId) {
+          return (
+            (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+              queryString,
+              activeSolutionId
+            )) ?? []
+          );
+        }
+        return [];
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
-    license,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
-    kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+    kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
+    license,
     memoizedSources,
     dataViews,
     core,
@@ -532,10 +542,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     memoizedFieldsFromESQL,
     expressions,
     abortController,
-    indexManagementApiService,
-    histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    indexManagementApiService,
+    histogramBarTarget,
+    activeSolutionId,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -596,22 +607,6 @@ export const ESQLEditor = memo(function ESQLEditor({
       setQueryToTheCache();
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
-
-  // Temporary, for testing purposes only
-  useEffect(() => {
-    const getEditorExtensions = async () => {
-      if (activeSolutionId) {
-        const extensions = await kibana.services?.esql?.getEditorExtensionsAutocomplete(
-          'from logs-apache_error',
-          activeSolutionId
-        );
-        if (extensions) {
-          console.dir(extensions);
-        }
-      }
-    };
-    getEditorExtensions();
-  }, [activeSolutionId, kibana.services?.esql]);
 
   useEffect(() => {
     async function fetchLicense() {

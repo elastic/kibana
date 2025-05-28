@@ -304,6 +304,12 @@ export function createCustomCallbackMocks(
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => [
+      {
+        name: 'Logs Count by Host',
+        query: 'from logs* | STATS count(*) by host',
+      },
+    ]),
   };
 }
 
