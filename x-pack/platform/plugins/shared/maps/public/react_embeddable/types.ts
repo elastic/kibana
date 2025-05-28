@@ -37,6 +37,7 @@ export type MapSerializedState = SerializedTimeRange &
     // by-value
     attributes?: MapAttributes;
     // by-reference
+    savedObjectRefName?: string;
     savedObjectId?: string;
 
     isLayerTOCOpen?: boolean;
