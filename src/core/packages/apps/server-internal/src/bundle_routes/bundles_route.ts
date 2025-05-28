@@ -35,6 +35,7 @@ export function registerRouteForBundle(
         httpResource: true,
         authRequired: false,
         access: 'public',
+        excludeFromRateLimiter: true,
       },
       validate: {
         params: schema.object({
