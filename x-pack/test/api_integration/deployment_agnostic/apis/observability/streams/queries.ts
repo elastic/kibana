@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
-import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -93,7 +93,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'alert.attributes.name:OutOfMemoryError'
       );
       expect(rules.body.data).to.have.length(1);
-      expect(rules.body.data[0].rule_type_id).to.eql(ESQL_RULE_TYPE_ID);
+      expect(rules.body.data[0].rule_type_id).to.eql(STREAMS_ESQL_RULE_TYPE_ID);
       expect(rules.body.data[0].params.query).to.eql(
         `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("""message:'OutOfMemoryError'""")`
       );
