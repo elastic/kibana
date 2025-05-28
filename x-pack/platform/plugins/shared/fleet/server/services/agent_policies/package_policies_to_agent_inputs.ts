@@ -123,10 +123,15 @@ export const getFullInputStreams = (
             .filter((stream) => stream.enabled || allStreamEnabled)
             .map((stream) => {
               const streamId = stream.id;
+              const { data_stream: compiledDataStream, ...compiledStream } =
+                stream.compiled_stream ?? {};
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
-                data_stream: stream.data_stream,
-                ...stream.compiled_stream,
+                data_stream: {
+                  ...stream.data_stream,
+                  ...compiledDataStream,
+                },
+                ...compiledStream,
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                   acc[key] = value;
                   return acc;
