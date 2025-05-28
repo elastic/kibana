@@ -199,7 +199,6 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
                 },
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
-          savedObjectRefName: 'skip',
         };
       },
       onReset: async (lastSaved) => {
