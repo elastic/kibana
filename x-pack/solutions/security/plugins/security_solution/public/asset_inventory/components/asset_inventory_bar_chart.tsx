@@ -102,7 +102,7 @@ export const AssetInventoryBarChart = ({
               },
               axes: {
                 axisTitle: {
-                  fontSize: euiTheme.font.scale.xs * 16, // convert rem -> px
+                  fontSize: euiTheme.font.scale.xs * euiTheme.base, // convert rem -> px
                 },
               },
             }}
