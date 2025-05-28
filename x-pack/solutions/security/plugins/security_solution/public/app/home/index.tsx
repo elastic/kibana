@@ -27,6 +27,7 @@ import { TopValuesPopover } from '../components/top_values_popover/top_values_po
 import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
+import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -34,11 +35,13 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
-  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
+  const sourcererScope = getScopeFromPath(pathname);
+  const { browserFields } = useInitSourcerer(sourcererScope);
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
   useInitDataViewManager();
+  useRestoreDataViewManagerStateFromURL(sourcererScope);
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between

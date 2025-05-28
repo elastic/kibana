@@ -10,6 +10,8 @@ import { createAction } from '@reduxjs/toolkit';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 
+// NOTE: You should not need to dispatch any actions by yourself. Instead, use one of the hooks that we built to faciliate data view selection and retrieval based on current scope.
+
 export const selectDataViewAsync = createAction<{
   id?: string | null;
   /**
