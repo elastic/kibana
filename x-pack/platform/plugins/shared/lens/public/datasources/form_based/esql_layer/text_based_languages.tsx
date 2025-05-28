@@ -39,6 +39,7 @@ import type {
   TextBasedPersistedState,
   TextBasedLayerColumn,
   TextBasedField,
+  TextBasedLayer,
 } from './types';
 import type { Datasource, DatasourceSuggestion } from '../../../types';
 import { getUniqueLabelGenerator, nonNullable } from '../../../utils';
@@ -270,7 +271,7 @@ export function getTextBasedDatasource({
           ...state.layers,
           [newLayerId]: {
             type: 'esql' as const,
-            index,
+            indexPatternId: index,
             query,
             columns: newColumns ?? [],
             timeField: context.dataViewSpec.timeFieldName,
@@ -736,10 +737,10 @@ export function getTextBasedDatasource({
   return TextBasedDatasource;
 }
 
-function blankLayer(index: string, query?: AggregateQuery) {
+function blankLayer(index: string, query?: AggregateQuery): TextBasedLayer {
   return {
     type: 'esql' as const,
-    index,
+    indexPatternId: index,
     query,
     columns: [],
   };

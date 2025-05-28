@@ -15,6 +15,7 @@ import {
   LensApi,
   LensEmbeddableStartServices,
   LensRuntimeState,
+  LensSavedObjectAttributes,
   LensSerializedState,
 } from './types';
 
@@ -36,6 +37,7 @@ import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { initializeAlertRules } from './initializers/initialize_alert_rules';
+import { TextBasedPersistedState } from '../datasources/form_based/types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -65,6 +67,21 @@ export const createLensEmbeddableFactory = (
         initialState.rawState,
         initialState.references
       );
+
+      const state = initialRuntimeState.attributes.state as LensSavedObjectAttributes['state'];
+      if (state.datasourceStates.textBased) {
+        const textBasedState = state.datasourceStates.textBased as TextBasedPersistedState;
+        if (Object.values(textBasedState.layers).length > 0) {
+          Object.keys(textBasedState.layers).forEach((layerId) => {
+            if ('index' in textBasedState.layers[layerId]) {
+              textBasedState.layers[layerId].indexPatternId = (
+                textBasedState.layers[layerId] as unknown as { index: string }
+              ).index;
+              delete (textBasedState.layers[layerId] as unknown as { index?: string }).index;
+            }
+          });
+        }
+      }
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
