@@ -560,7 +560,6 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'non-empty-string',
           exclusiveOr: true,
           SelectorComponent: CustomScriptSelector(agentType),
-          // SelectorComponent: ArgumentFileSelector,
         },
         CommandLine: {
           required: false,
