@@ -83,6 +83,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { canEnableSyncIntegrations } from './setup/fleet_synced_integrations';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -364,6 +365,18 @@ async function updateAgentPoliciesDataOutputId(
         );
       }
     }
+  }
+}
+
+function validateRemoteSyncIntegrationsCanBeEnabled(output: NewOutput) {
+  if (
+    output.type === outputType.RemoteElasticsearch &&
+    (output.sync_integrations === true || output.sync_uninstalled_integrations === true) &&
+    !canEnableSyncIntegrations()
+  ) {
+    throw new OutputUnauthorizedError(
+      'Remote sync integrations are only available with an Enterprise license.'
+    );
   }
 }
 
@@ -678,6 +691,8 @@ class OutputService {
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
     }
+
+    validateRemoteSyncIntegrationsCanBeEnabled(output);
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
