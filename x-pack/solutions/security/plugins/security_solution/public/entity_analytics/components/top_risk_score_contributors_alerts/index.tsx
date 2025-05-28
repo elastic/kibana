@@ -10,6 +10,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
   defaultGroupStatsAggregations,
@@ -101,6 +102,10 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
 
   const defaultFilters = useMemo(() => [...inputFilters, ...filters], [filters, inputFilters]);
 
+  const groupTakeActionItems = useGroupTakeActionsItems({
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+  });
+
   const accordionExtraActionGroupStats = useMemo(
     () => ({
       aggregations: defaultGroupStatsAggregations,
@@ -138,8 +143,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
               from={from}
               globalFilters={filters}
               globalQuery={query}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              hasIndexWrite={hasIndexWrite ?? false}
+              groupTakeActionItems={groupTakeActionItems}
               loading={userInfoLoading || loading}
               renderChildComponent={renderGroupedAlertTable}
               runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}

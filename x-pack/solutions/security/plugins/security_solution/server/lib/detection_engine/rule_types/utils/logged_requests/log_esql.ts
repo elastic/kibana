@@ -24,5 +24,9 @@ export const logEsqlRequest = (
     }, [])
     .join('&');
 
-  return `POST _query${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(requestBody, null, 2)}`;
+  return `POST _query/async${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(
+    requestBody,
+    null,
+    2
+  )}`;
 };

@@ -139,7 +139,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
         loadPage(APP_ALERTS_PATH);
         closeAllToasts();
 
-        cy.getByTestSubj('alertsTable').within(() => {
+        cy.getByTestSubj('alertsTableIsLoaded').within(() => {
           cy.getByTestSubj('expand-event')
             .first()
             .within(() => {

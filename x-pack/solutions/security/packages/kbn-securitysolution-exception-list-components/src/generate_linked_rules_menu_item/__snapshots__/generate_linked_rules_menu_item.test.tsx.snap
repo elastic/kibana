@@ -6,14 +6,14 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiContextMenuItem css-0"
+        class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
         data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
       >
         <span
           class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row-itemContentCss"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -24,7 +24,7 @@ Object {
               />
             </div>
             <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
+              class="euiFlexItem emotion-euiFlexItem-grow-1-itemContentCss"
             >
               <div
                 data-test-subj="securityLinkAnchorComponent"
@@ -43,14 +43,14 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiContextMenuItem css-0"
+      class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
       data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
     >
       <span
         class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row-itemContentCss"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -61,7 +61,7 @@ Object {
             />
           </div>
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-1-itemContentCss"
           >
             <div
               data-test-subj="securityLinkAnchorComponent"
@@ -137,17 +137,17 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiContextMenuItem emotion-EuiContextMenuItem"
+        class="euiContextMenuItem emotion-euiContextMenuItem-m-center-containerCss"
         data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
       >
         <span
           class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row-itemContentCss"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-grow-1"
+              class="euiFlexItem emotion-euiFlexItem-grow-1-itemContentCss"
             >
               <div
                 data-test-subj="securityLinkAnchorComponent"
@@ -166,17 +166,17 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiContextMenuItem emotion-EuiContextMenuItem"
+      class="euiContextMenuItem emotion-euiContextMenuItem-m-center-containerCss"
       data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
     >
       <span
         class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row-itemContentCss"
         >
           <div
-            class="euiFlexItem emotion-euiFlexItem-grow-1"
+            class="euiFlexItem emotion-euiFlexItem-grow-1-itemContentCss"
           >
             <div
               data-test-subj="securityLinkAnchorComponent"

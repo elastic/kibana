@@ -32,7 +32,7 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
@@ -984,6 +984,31 @@ describe('TaskManagerRunner', () => {
         expect.any(Function)
       );
     });
+    test('provides fakeRequest when task has apiKey', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const instance = mockInstance();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          ...instance,
+          apiKey: 'aw4badfg333',
+          userScope: {
+            apiKeyId: 'abcdefg',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: createTaskRunnerFn,
+          },
+        },
+      });
+      await runner.run();
+      const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
+      expect(createTaskRunnerParams.fakeRequest).toBeDefined();
+      expect(createTaskRunnerParams.taskInstance).toEqual(instance);
+    });
     test('queues a reattempt if the task fails', async () => {
       const initialAttempts = _.random(0, 2);
       const id = Date.now().toString();
@@ -1143,7 +1168,7 @@ describe('TaskManagerRunner', () => {
       const schedule = {
         interval: '1m',
       };
-      const { instance, runner, store } = await readyToRunStageSetup({
+      const { instance, runner, store, logger } = await readyToRunStageSetup({
         instance: {
           status: TaskStatus.Running,
           startedAt: new Date(),
@@ -1170,7 +1195,8 @@ describe('TaskManagerRunner', () => {
 
       expect(getNextRunAtSpy).toHaveBeenCalledWith(
         expect.objectContaining({ schedule }),
-        expect.any(Number)
+        expect.any(Number),
+        logger
       );
     });
 
@@ -2565,6 +2591,7 @@ describe('TaskManagerRunner', () => {
     }
 
     const runner = new TaskManagerRunner({
+      basePathService: httpServiceMock.createBasePath(),
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
       beforeMarkRunning: (context) => Promise.resolve(context),

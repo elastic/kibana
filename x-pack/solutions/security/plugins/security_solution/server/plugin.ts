@@ -336,6 +336,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
     const previewIlmPolicy = previewPolicy.policy;
 
+    const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
+
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
@@ -345,6 +347,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const securityRuleTypeOptions = {
       lists: plugins.lists,
+      docLinks: core.docLinks,
       actions: plugins.actions,
       logger: this.logger,
       config: this.config,
@@ -356,6 +359,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
       analytics: core.analytics,
+      isServerless,
       eventsTelemetry: this.telemetryEventsSender,
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
@@ -406,7 +410,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions,
       previewRuleDataClient,
       this.telemetryReceiver,
-      this.pluginContext.env.packageInfo.buildFlavor === 'serverless',
+      isServerless,
       core.docLinks,
       this.endpointContext
     );
@@ -591,6 +595,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      advancedEsqlGeneration: config.experimentalFeatures.advancedEsqlGeneration,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

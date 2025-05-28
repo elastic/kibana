@@ -17,7 +17,10 @@ import {
 } from '../..';
 
 import { Error as FleetError } from '../../../../../../../components';
-import { useKibanaVersion } from '../../../../../../../../../hooks';
+import {
+  useKibanaVersion,
+  useShowCompleteAgentInstructions,
+} from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
   ConfigureStandaloneAgentStep,
@@ -38,6 +41,9 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } =
     useFetchFullPolicy(agentPolicy);
 
+  const { onChangeShowCompleteAgentInstructions, showCompleteAgentInstructions } =
+    useShowCompleteAgentInstructions();
+
   if (!agentPolicy) {
     return (
       <FleetError
@@ -52,7 +58,10 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
     );
   }
 
-  const installManagedCommands = StandaloneInstructions({ agentVersion: kibanaVersion });
+  const installManagedCommands = StandaloneInstructions({
+    agentVersion: kibanaVersion,
+    showCompleteAgentInstructions,
+  });
 
   const steps = [
     ConfigureStandaloneAgentStep({
@@ -71,6 +80,8 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
+      onChangeShowCompleteAgentInstructions,
+      showCompleteAgentInstructions,
     }),
   ];
 

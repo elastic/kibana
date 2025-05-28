@@ -42,12 +42,12 @@ const getAllFtrConfigsManifests = () => {
 
 export const getAllFtrConfigsAndManifests = () => {
   const manifestPaths = getAllFtrConfigsManifests();
-  const allFtrConfigs: string[] = [];
+  const ftrConfigEntries = new Map<string, string[]>();
 
   for (const manifestRelPath of manifestPaths.all) {
-    const manifest: FtrConfigsManifest = JsYaml.safeLoad(
+    const manifest = JsYaml.load(
       Fs.readFileSync(Path.resolve(REPO_ROOT, manifestRelPath), 'utf8')
-    );
+    ) as FtrConfigsManifest;
 
     const ftrConfigsInManifest = [
       Object.values(manifest.enabled ?? []),
@@ -59,8 +59,13 @@ export const getAllFtrConfigsAndManifests = () => {
         return Path.resolve(REPO_ROOT, rel);
       });
 
-    allFtrConfigs.push(...ftrConfigsInManifest);
+    for (const config of ftrConfigsInManifest) {
+      if (!ftrConfigEntries.has(config)) {
+        ftrConfigEntries.set(config, []);
+      }
+      ftrConfigEntries.get(config)!.push(manifestRelPath);
+    }
   }
 
-  return { allFtrConfigs, manifestPaths };
+  return { ftrConfigEntries, manifestPaths };
 };

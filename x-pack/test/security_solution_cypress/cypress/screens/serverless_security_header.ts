@@ -5,28 +5,27 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
+
 // main panels links
 export const DASHBOARDS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
 export const DASHBOARDS_PANEL_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:dashboards"]';
+  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:dashboards"]';
 
 export const INVESTIGATIONS =
   '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:investigations"]';
 export const INVESTIGATIONS_PANEL_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:investigations"]';
+  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:investigations"]';
 
 export const EXPLORE = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:explore"]';
 export const EXPLORE_PANEL_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:explore"]';
+  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:explore"]';
 
-export const RULES_LANDING =
-  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:rules-landing"]';
 export const RULES_PANEL_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:rules-landing"]';
+  '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:rules-landing"]';
 
 export const ASSETS = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:assets"]';
-export const ASSETS_PANEL_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-securitySolutionUI:assets"]';
+export const ASSETS_PANEL_BTN = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:assets"]';
 
 export const MACHINE_LEARNING =
   '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:machine_learning-landing"]';
@@ -89,6 +88,12 @@ export const EXCEPTIONS = '[data-test-subj~="panelNavItem-id-exceptions"]';
 export const getBreadcrumb = (deepLinkId: string) => {
   return `breadcrumb-deepLinkId-${deepLinkId}`;
 };
+
+// Siem Migrations
+export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
+  'panelNavItem panelNavItem-id-siem_migrations-rules'
+);
+
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (pageName: string) => {
   let panel;

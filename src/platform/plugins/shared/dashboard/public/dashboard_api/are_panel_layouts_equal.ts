@@ -7,53 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEmpty, xor } from 'lodash';
-import fastIsEqual from 'fast-deep-equal';
-import { DashboardPanelMap } from '../../common';
+import { xor } from 'lodash';
+import deepEqual from 'fast-deep-equal';
+import { DashboardLayout } from './types';
 
 /**
- * Checks whether the panel maps have the same keys, and if they do, whether all of the other keys inside each panel
- * are equal. Skips explicit input as that needs to be handled asynchronously.
+ * Checks whether the panel maps have the same keys, and if they do, whether the grid data and types of each panel
+ * are equal.
  */
 export const arePanelLayoutsEqual = (
-  originalPanels: DashboardPanelMap,
-  newPanels: DashboardPanelMap
+  originalPanels?: DashboardLayout,
+  newPanels?: DashboardLayout
 ) => {
-  const originalEmbeddableIds = Object.keys(originalPanels);
-  const newEmbeddableIds = Object.keys(newPanels);
+  const originalUuids = Object.keys(originalPanels ?? {});
+  const newUuids = Object.keys(newPanels ?? {});
 
-  const embeddableIdDiff = xor(originalEmbeddableIds, newEmbeddableIds);
-  if (embeddableIdDiff.length > 0) {
-    return false;
-  }
-  const commonPanelDiff = <T>(originalObj: Partial<T>, newObj: Partial<T>) => {
-    const differences: Partial<T> = {};
-    const keys = [
-      ...new Set([
-        ...(Object.keys(originalObj) as Array<keyof T>),
-        ...(Object.keys(newObj) as Array<keyof T>),
-      ]),
-    ];
-    for (const key of keys) {
-      if (key === undefined) continue;
-      if (!fastIsEqual(originalObj[key], newObj[key])) differences[key] = newObj[key];
+  const idDiff = xor(originalUuids, newUuids);
+  if (idDiff.length > 0) return false;
+
+  for (const embeddableId of newUuids) {
+    if (originalPanels?.[embeddableId]?.type !== newPanels?.[embeddableId]?.type) {
+      return false;
     }
-    return differences;
-  };
-
-  for (const embeddableId of newEmbeddableIds) {
-    const {
-      explicitInput: originalExplicitInput,
-      panelRefName: panelRefA,
-      ...commonPanelDiffOriginal
-    } = originalPanels[embeddableId];
-    const {
-      explicitInput: newExplicitInput,
-      panelRefName: panelRefB,
-      ...commonPanelDiffNew
-    } = newPanels[embeddableId];
-
-    if (!isEmpty(commonPanelDiff(commonPanelDiffOriginal, commonPanelDiffNew))) return false;
+    if (!deepEqual(originalPanels?.[embeddableId]?.gridData, newPanels?.[embeddableId]?.gridData)) {
+      return false;
+    }
   }
   return true;
 };

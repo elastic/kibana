@@ -97,6 +97,12 @@ export {
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** The history view's end of the date range of attack discoveries */
+  HISTORY_END_LOCAL_STORAGE_KEY,
+  /** The history view's Search bar query that apply to the alerts sent as context to the LLM */
+  HISTORY_QUERY_LOCAL_STORAGE_KEY,
+  /** The history view's start date range of attack discoveries */
+  HISTORY_START_LOCAL_STORAGE_KEY,
   /** Search bar query that apply to the alerts sent as context to the LLM */
   QUERY_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies whether the settings tour should be shown */
@@ -105,6 +111,7 @@ export {
   START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
+export type { AIConnector } from './impl/connectorland/connector_selector';
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {

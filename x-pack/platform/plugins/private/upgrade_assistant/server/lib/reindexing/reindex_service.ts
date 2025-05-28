@@ -120,6 +120,7 @@ export interface ReindexService {
     aliases: Record<string, IndicesAlias>;
     settings?: IndicesIndexSettings;
     isInDataStream: boolean;
+    isFollowerIndex: boolean;
   }>;
 }
 
@@ -169,7 +170,12 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, rollupJob } = reindexOp.attributes;
+
+    if (rollupJob) {
+      await esClient.rollup.stopJob({ id: rollupJob, wait_for_completion: true });
+    }
+
     const putReadonly = await esClient.indices.putSettings({
       index: indexName,
       body: { blocks: { write: true } },
@@ -359,7 +365,19 @@ export const reindexServiceFactory = (
     const aliases = response[indexName]?.aliases ?? {};
     const settings = response[indexName]?.settings?.index ?? {};
     const isInDataStream = Boolean(response[indexName]?.data_stream);
-    return { aliases, settings, isInDataStream };
+
+    // Check if the index is a follower index
+    let isFollowerIndex = false;
+    try {
+      const ccrResponse = await esClient.ccr.followInfo({ index: indexName });
+      isFollowerIndex = ccrResponse.follower_indices?.length > 0;
+    } catch (err) {
+      // If the API returns a 404, it means the index is not a follower index
+      // Any other error should be ignored and we'll default to false
+      isFollowerIndex = false;
+    }
+
+    return { aliases, settings, isInDataStream, isFollowerIndex };
   };
 
   const isIndexHidden = async (indexName: string) => {
@@ -456,6 +474,11 @@ export const reindexServiceFactory = (
 
     if (reindexOptions?.openAndClose === true) {
       await esClient.indices.close({ index: indexName });
+    }
+
+    if (reindexOp.attributes.rollupJob) {
+      // start the rollup job. rollupJob is undefined if the rollup job is stopped
+      await esClient.rollup.startJob({ id: reindexOp.attributes.rollupJob });
     }
 
     return actions.updateReindexOp(reindexOp, {

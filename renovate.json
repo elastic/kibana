@@ -107,7 +107,7 @@
       "matchBaseBranches": [
         "main",
         "/^[9].*/",
-        "8.x",
+        "8.19",
         "8.18"
       ],
       "labels": [
@@ -964,11 +964,28 @@
     },
     {
       "groupName": "OpenTelemetry modules",
-      "matchDepPrefixes": [
-        "@opentelemetry/"
+      "matchDepNames": [
+        "@grpc/grpc-js",
+        "@opentelemetry/api",
+        "@opentelemetry/api-metrics",
+        "@opentelemetry/core",
+        "@opentelemetry/exporter-metrics-otlp-grpc",
+        "@opentelemetry/exporter-prometheus",
+        "@opentelemetry/resources",
+        "@opentelemetry/sdk-metrics-base",
+        "@opentelemetry/semantic-conventions",
+        "@arizeai/openinference-semantic-conventions",
+        "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-trace-otlp-grpc",
+        "@opentelemetry/exporter-trace-otlp-http",
+        "@opentelemetry/exporter-trace-otlp-proto",
+        "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/sdk-node",
+        "@opentelemetry/sdk-trace-node"
       ],
       "reviewers": [
-        "team:stack-monitoring"
+        "team:stack-monitoring",
+        "team:kibana-core"
       ],
       "matchBaseBranches": [
         "main"
@@ -1190,9 +1207,9 @@
       "enabled": true
     },
     {
-      "groupName": "node-libs-browser",
+      "groupName": "node-stdlib-browser",
       "matchDepNames": [
-        "node-libs-browser"
+        "node-stdlib-browser"
       ],
       "reviewers": [
         "team:kibana-operations"

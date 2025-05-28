@@ -99,7 +99,7 @@ export const validateWithScoutCiConfig = (
 ) => {
   const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
   const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
-  const ciConfig = yaml.safeLoad(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
+  const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
     ui_tests: {
       enabled?: string[];
       disabled?: string[];

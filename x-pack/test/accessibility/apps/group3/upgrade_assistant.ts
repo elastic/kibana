@@ -76,9 +76,17 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
 
       it('with logs collection disabled', async () => {
         await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
+
+        // Add additional retry and wait for flyout to be fully visible
+        await retry.waitFor('Deprecation logging flyout to be visible', async () => {
+          return testSubjects.exists('esDeprecationLogsFlyout');
+        });
+
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (loggingEnabled) {
-          await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+          await retry.try(async () => {
+            await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+          });
         }
 
         await retry.waitFor('Deprecation logging to be disabled', async () => {
@@ -89,9 +97,17 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
 
       it('with logs collection enabled', async () => {
         await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
+
+        // Add additional retry and wait for flyout to be fully visible
+        await retry.waitFor('Deprecation logging flyout to be visible', async () => {
+          return testSubjects.exists('esDeprecationLogsFlyout');
+        });
+
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (!loggingEnabled) {
-          await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+          await retry.try(async () => {
+            await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
+          });
         }
 
         await retry.waitFor('UA external links title to be present', async () => {

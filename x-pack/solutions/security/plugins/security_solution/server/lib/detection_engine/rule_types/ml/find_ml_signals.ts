@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import dateMath from '@kbn/datemath';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -54,9 +55,9 @@ export const findMlSignals = async ({
 
   if (isLoggedRequestsEnabled) {
     const searchQuery = buildAnomalyQuery(params);
-    searchQuery.index = '.ml-anomalies-*';
+    set(searchQuery, 'body.index', '.ml-anomalies-*');
     loggedRequests.push({
-      request: logSearchRequest(searchQuery),
+      request: logSearchRequest(searchQuery.body),
       description: i18n.ML_SEARCH_ANOMALIES_DESCRIPTION,
       duration: anomalyResults.took,
       request_type: 'findAnomalies',

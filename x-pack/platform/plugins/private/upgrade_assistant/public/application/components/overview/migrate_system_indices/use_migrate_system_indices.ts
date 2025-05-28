@@ -77,6 +77,8 @@ export const useMigrateSystemIndices = () => {
         },
         flyoutProps: {
           onClose: closeFlyout,
+          'data-test-subj': 'migrateSystemIndicesFlyout',
+          'aria-labelledby': 'migrateSystemIndicesFlyoutTitle',
         },
       });
     }

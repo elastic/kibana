@@ -31,7 +31,8 @@ describe('SolutionFilter ', () => {
     expect(screen.getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
   });
 
-  describe('when the owner is a single solution', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/218144
+  describe.skip('when the owner is a single solution', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });

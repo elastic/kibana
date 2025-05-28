@@ -25,6 +25,7 @@ describe('updateIndex', () => {
   const mockGetReindexWarnings = getReindexWarnings as jest.Mock;
   const mockLogger = loggingSystemMock.create().get();
   const mockClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  mockClient.rollup.getRollupIndexCaps.mockResponse({});
 
   beforeEach(() => {
     jest.clearAllMocks();

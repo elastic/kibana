@@ -8,13 +8,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
+  FlattenRecord,
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   ProcessorType,
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { isEmpty, mapValues } from 'lodash';
+import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -35,9 +36,47 @@ import {
  */
 export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 
-const defaultDateProcessorFormState: DateFormState = {
+const PRIORITIZED_CONTENT_FIELDS = [
+  'message',
+  'body.text',
+  'error.message',
+  'event.original',
+  'attributes.exception.message',
+];
+
+const PRIORITIZED_DATE_FIELDS = [
+  'timestamp',
+  'logtime',
+  'initial_date',
+  'date',
+  'event.time.received',
+  'event.ingested',
+];
+
+const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+  // Count occurrences of well-known text fields in the sample documents
+  const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
+    Object.keys(doc).filter((key) => prioritizedFields.includes(key))
+  );
+  const acceptableFieldsOccurrences = countBy(acceptableDefaultFields);
+
+  // Sort by count descending first, then by order of field in prioritizedFields
+  const sortedFields = orderBy(
+    Object.entries(acceptableFieldsOccurrences),
+    [
+      ([_field, occurrencies]) => occurrencies, // Sort entries by occurrencies descending
+      ([field]) => prioritizedFields.indexOf(field), // Sort entries by priority order in well-known fields
+    ],
+    ['desc', 'asc']
+  );
+
+  const mostCommonField = sortedFields[0];
+  return mostCommonField ? mostCommonField[0] : '';
+};
+
+const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   type: 'date',
-  field: '',
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
   formats: [],
   locale: '',
   target_field: '',
@@ -45,48 +84,52 @@ const defaultDateProcessorFormState: DateFormState = {
   output_format: '',
   ignore_failure: true,
   if: ALWAYS_CONDITION,
-};
+});
 
-const defaultDissectProcessorFormState: DissectFormState = {
+const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectFormState => ({
   type: 'dissect',
-  field: 'message',
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
   if: ALWAYS_CONDITION,
-};
+});
 
-const defaultGrokProcessorFormState: GrokFormState = {
+const defaultGrokProcessorFormState = (sampleDocs: FlattenRecord[]): GrokFormState => ({
   type: 'grok',
-  field: 'message',
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   patterns: [{ value: '' }],
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
   if: ALWAYS_CONDITION,
-};
+});
 
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
-  (config) => config.defaultFormState
+  (config) => () => config.defaultFormState
 ) as {
-  [TKey in ConfigDrivenProcessorType]: ConfigDrivenProcessors[TKey]['defaultFormState'];
+  [TKey in ConfigDrivenProcessorType]: () => ConfigDrivenProcessors[TKey]['defaultFormState'];
 };
 
-const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
+const defaultProcessorFormStateByType: Record<
+  ProcessorType,
+  (sampleDocs: FlattenRecord[]) => ProcessorFormState
+> = {
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
-export const getDefaultFormStateByType = (type: ProcessorType) =>
-  defaultProcessorFormStateByType[type];
+export const getDefaultFormStateByType = (type: ProcessorType, sampleDocuments: FlattenRecord[]) =>
+  defaultProcessorFormStateByType[type](sampleDocuments);
 
 export const getFormStateFrom = (
+  sampleDocuments: FlattenRecord[],
   processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
-  if (!processor) return defaultGrokProcessorFormState;
+  if (!processor) return defaultGrokProcessorFormState(sampleDocuments);
 
   if (isGrokProcessor(processor)) {
     const { grok } = processor;

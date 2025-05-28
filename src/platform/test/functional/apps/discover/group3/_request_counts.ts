@@ -105,14 +105,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearch,
       query1,
       query2,
-      savedSearchesRequests,
       setQuery,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
       query1: string;
       query2: string;
-      savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
     }) => {
       it(`should send 2 search requests (documents + chart) on page load`, async () => {
@@ -176,9 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      const actualSavedSearchRequests = savedSearchesRequests ?? 2;
-
-      it(`should send no more than ${actualSavedSearchRequests} requests for saved search changes`, async () => {
+      it(`should send no more than 2 requests for saved search changes`, async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await timePicker.setAbsoluteRange(
@@ -187,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await waitForLoadingToFinish();
         log.debug('Creating saved search');
-        await expectSearches(type, actualSavedSearchRequests, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.saveSearch(savedSearch);
         });
         log.debug('Resetting saved search');
@@ -198,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.revertUnsavedChanges();
         });
         log.debug('Clearing saved search');
-        await expectSearches(type, actualSavedSearchRequests, async () => {
+        await expectSearches(type, 2, async () => {
           await testSubjects.click('discoverNewButton');
           if (type === 'esql') {
             await queryBar.clickQuerySubmitButton();
@@ -206,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await waitForLoadingToFinish();
         });
         log.debug('Loading saved search');
-        await expectSearches(type, actualSavedSearchRequests, async () => {
+        await expectSearches(type, 2, async () => {
           await discover.loadSavedSearch(savedSearch);
         });
       });
@@ -290,7 +286,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearch: 'esql test',
         query1: 'from logstash-* | where bytes > 1000 ',
         query2: 'from logstash-* | where bytes < 2000 ',
-        savedSearchesRequests: 3,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
       });
     });

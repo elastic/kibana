@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
-import { FollowerIndex } from '../../../../common/types';
+import { FollowerIndex, FollowerIndexToEs } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { removeEmptyFields } from '../../../../common/services/utils';
 import { RouteDependencies } from '../../../types';
@@ -52,7 +52,9 @@ export const registerCreateRoute = ({
     license.guardApiRoute(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name, ...rest } = request.body;
-      const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
+      const body = removeEmptyFields(
+        serializeFollowerIndex(rest as FollowerIndex)
+      ) as FollowerIndexToEs;
 
       try {
         const responseBody = await client.asCurrentUser.ccr.follow({

@@ -8,20 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { Condition, SampleDocument } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { DateRangeContext } from '../../../../../state_management/date_range_state_machine';
+import type { errors as esErrors } from '@elastic/elasticsearch';
 import { SimulationMachineDeps } from './types';
 
 export interface SamplesFetchInput {
   condition?: Condition;
   streamName: string;
-  absoluteTimeRange: DateRangeContext['absoluteTimeRange'];
 }
 
 export function createSamplesFetchActor({
   streamsRepositoryClient,
-}: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
+  timeState$,
+}: Pick<SimulationMachineDeps, 'streamsRepositoryClient' | 'timeState$'>) {
   return fromPromise<SampleDocument[], SamplesFetchInput>(async ({ input, signal }) => {
+    const { asAbsoluteTimeRange } = timeState$.getValue();
     const samplesBody = await streamsRepositoryClient.fetch(
       'POST /internal/streams/{name}/_sample',
       {
@@ -30,8 +30,8 @@ export function createSamplesFetchActor({
           path: { name: input.streamName },
           body: {
             if: input.condition,
-            start: input.absoluteTimeRange.start,
-            end: input.absoluteTimeRange.end,
+            start: new Date(asAbsoluteTimeRange.from).getTime(),
+            end: new Date(asAbsoluteTimeRange.to).getTime(),
             size: 100,
           },
         },

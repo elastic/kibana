@@ -22,7 +22,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('retrieve_elastic_doc', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/218819
+  describe.skip('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     const supertest = getService('supertest');
@@ -37,7 +38,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         await chatComplete({
           userPrompt: USER_PROMPT,
@@ -53,6 +54,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
         });
+      });
+
+      afterEach(async () => {
+        llmProxy.clear();
       });
 
       it('makes 1 requests to the LLM', () => {
@@ -100,7 +105,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           when: () => true,
         });
 
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_PROMPT,

@@ -69,7 +69,9 @@ describe('createInitialState', () => {
   let createInitialStateParams: CreateInitialStateParams;
 
   beforeEach(() => {
-    typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry = new SavedObjectTypeRegistry({
+      legacyTypes: ['deprecated_type_1', 'deprecatedType2', 'deprecated-type-3'],
+    });
     typeRegistry.registerType({
       name: 'foo',
       hidden: false,
@@ -136,112 +138,17 @@ describe('createInitialState', () => {
             "must_not": Array [
               Object {
                 "term": Object {
-                  "type": "apm-services-telemetry",
+                  "type": "deprecated_type_1",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "application_usage_transactional",
+                  "type": "deprecatedType2",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "background-session",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "cases-sub-case",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "csp_rule",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "endpoint:user-artifact",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "file-upload-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-actions",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-events",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agents",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-enrollment-api-keys",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "guided-setup-state",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "maps-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "ml-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "osquery-usage-metric",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "server",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "siem-detection-engine-rule-execution-info",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "siem-detection-engine-rule-status",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "timelion-sheet",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "tsvb-validation-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "ui-counter",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "upgrade-assistant-telemetry",
+                  "type": "deprecated-type-3",
                 },
               },
             ],

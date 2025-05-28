@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -17,6 +16,13 @@ import type {
   AnomalyChartsEmbeddableRuntimeState,
   AnomalyChartsEmbeddableState,
 } from '../types';
+
+export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
+  jobIds: 'deepEquality',
+  maxSeriesToPlot: 'referenceEquality',
+  severityThreshold: 'referenceEquality',
+  selectedEntities: 'deepEquality',
+};
 
 export const initializeAnomalyChartsControls = (
   rawState: AnomalyChartsEmbeddableState,
@@ -47,7 +53,7 @@ export const initializeAnomalyChartsControls = (
   const updateSelectedEntities = (v: MlEntityField[]) => selectedEntities$.next(v);
   const setInterval = (v: number) => interval$.next(v);
 
-  const serializeAnomalyChartsState = (): AnomalyChartsEmbeddableState => {
+  const getLatestState = (): AnomalyChartsEmbeddableState => {
     return {
       jobIds: jobIds$.value,
       maxSeriesToPlot: maxSeriesToPlot$.value,
@@ -56,22 +62,12 @@ export const initializeAnomalyChartsControls = (
     };
   };
 
-  const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
-    jobIds: [jobIds$, (arg: JobId[]) => jobIds$.next(arg), fastIsEqual],
-    maxSeriesToPlot: [maxSeriesToPlot$, (arg: number) => maxSeriesToPlot$.next(arg)],
-    severityThreshold: [severityThreshold$, (arg?: number) => severityThreshold$.next(arg)],
-    selectedEntities: [
-      selectedEntities$,
-      (arg?: MlEntityField[]) => selectedEntities$.next(arg),
-      fastIsEqual,
-    ],
-  };
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
   const onError = (error?: Error) => blockingError$.next(error);
 
   return {
-    anomalyChartsControlsApi: {
+    api: {
       jobIds$,
       maxSeriesToPlot$,
       severityThreshold$,
@@ -87,9 +83,17 @@ export const initializeAnomalyChartsControls = (
       onLoading,
       onError,
     } as AnomalyChartsDataLoadingApi,
-    serializeAnomalyChartsState,
-    anomalyChartsComparators,
-    onAnomalyChartsDestroy: () => {
+    anyStateChange$: merge(jobIds$, maxSeriesToPlot$, severityThreshold$, selectedEntities$).pipe(
+      map(() => undefined)
+    ),
+    getLatestState,
+    reinitializeState: (lastSavedState: AnomalyChartsEmbeddableState) => {
+      jobIds$.next(lastSavedState.jobIds);
+      maxSeriesToPlot$.next(lastSavedState.maxSeriesToPlot);
+      severityThreshold$.next(lastSavedState.severityThreshold);
+      selectedEntities$.next(lastSavedState.selectedEntities);
+    },
+    cleanup: () => {
       jobIds$.complete();
       maxSeriesToPlot$.complete();
       severityThreshold$.complete();

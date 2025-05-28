@@ -26,6 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dataViews = getService('dataViews');
+  const elasticChart = getService('elasticChart');
+  const filterBar = getService('filterBar');
+
   const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
     getPageObjects([
       'common',
@@ -235,6 +238,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.dragFieldToTable('a');
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
+      });
+
+      it('should allow brushing time series', async () => {
+        await timePicker.setDefaultAbsoluteRange();
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from logstash-* | limit 100`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const initialTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(initialTimeConfig.start).to.equal(timePicker.defaultStartTime);
+        expect(initialTimeConfig.end).to.equal(timePicker.defaultEndTime);
+
+        const renderingCount = await elasticChart.getVisualizationRenderingCount();
+        await discover.brushHistogram();
+        await discover.waitUntilSearchingHasFinished();
+        // no filter pill created for time brush
+        expect(await filterBar.getFilterCount()).to.be(0);
+        // chart and time picker updated
+        await elasticChart.waitForRenderingCount(renderingCount + 1);
+        const updatedTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:41:22.854');
+        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 04:14:56.951');
       });
     });
 
@@ -480,6 +513,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('sorting', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+      });
+
       it('should sort correctly', async () => {
         const savedSearchName = 'testSorting';
 
@@ -644,6 +682,100 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
           'Sort fields\n2'
+        );
+      });
+
+      it('should sort on custom vars too', async () => {
+        const savedSearchName = 'testSortingForCustomVars';
+
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery =
+          'from logstash-* | sort @timestamp | limit 100 | keep bytes | eval var0 = abs(bytes) + 1';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains an initial value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '1,624';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields'
+        );
+
+        await dataGrid.clickDocSortDesc('var0', 'Sort High-Low');
+
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the highest value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '17,967';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
+        );
+
+        await discover.saveSearch(savedSearchName);
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '17,967';
+        });
+
+        await browser.refresh();
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value after reload', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '17,967';
+        });
+
+        await discover.clickNewSearchButton();
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await discover.loadSavedSearch(savedSearchName);
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor(
+          'first cell contains the same highest value after reopening',
+          async () => {
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+            const text = await cell.getVisibleText();
+            return text === '17,967';
+          }
+        );
+
+        await dataGrid.clickDocSortDesc('var0', 'Sort Low-High');
+
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the lowest value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '1';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
         );
       });
     });

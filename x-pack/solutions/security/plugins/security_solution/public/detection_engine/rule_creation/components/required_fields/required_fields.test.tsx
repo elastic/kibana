@@ -585,8 +585,10 @@ export function addRequiredFieldRow(): Promise<void> {
   });
 }
 
-function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
+async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(comboBoxToggleButton);
+  });
 
   return waitFor(() => {
     const listWithOptionsElement = document.querySelector('[role="listbox"]');
@@ -608,14 +610,14 @@ type SelectEuiComboBoxOptionParameters =
       optionIndex?: undefined;
     };
 
-function selectEuiComboBoxOption({
+async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
   optionText,
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
+  return act(async () => {
     const options = Array.from(
       document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
     );
@@ -646,17 +648,19 @@ function selectFirstEuiComboBoxOption({
   return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }
 
-function typeInCustomComboBoxOption({
+async function typeInCustomComboBoxOption({
   comboBoxToggleButton,
   optionText,
 }: {
   comboBoxToggleButton: HTMLElement;
   optionText: string;
 }) {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
-
+  await showEuiComboBoxOptions(comboBoxToggleButton);
+  await act(async () => {
     fireEvent.change(document.activeElement as HTMLInputElement, { target: { value: optionText } });
+  });
+
+  return act(async () => {
     fireEvent.keyDown(document.activeElement as HTMLInputElement, { key: 'Enter' });
   });
 }

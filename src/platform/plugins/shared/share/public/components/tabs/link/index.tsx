@@ -108,7 +108,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
 export const linkTab: ILinkTab = {
   id: 'link',
   name: i18n.translate('share.contextMenu.permalinksTab', {
-    defaultMessage: 'Links',
+    defaultMessage: 'Link',
   }),
   description: i18n.translate('share.dashboard.link.description', {
     defaultMessage: 'Share a direct link to this search.',

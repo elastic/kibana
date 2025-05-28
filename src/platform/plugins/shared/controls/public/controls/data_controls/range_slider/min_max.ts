@@ -11,8 +11,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { Observable, combineLatest, lastValueFrom, of, startWith, switchMap, tap } from 'rxjs';
+import { Observable, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { ControlGroupApi } from '../../../control_group/types';
@@ -31,14 +30,7 @@ export function minMax$({
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([
-    controlFetch$,
-    dataViews$,
-    fieldName$,
-    apiPublishesReload(controlGroupApi)
-      ? controlGroupApi.reload$.pipe(startWith(undefined))
-      : of(undefined),
-  ]).pipe(
+  return combineLatest([controlFetch$, dataViews$, fieldName$]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();

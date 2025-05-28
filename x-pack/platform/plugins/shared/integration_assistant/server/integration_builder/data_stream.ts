@@ -7,7 +7,7 @@
 
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import type { DataStream } from '../../common';
 import { DEFAULT_CEL_PROGRAM } from './constants';
 import { copySync, createSync, ensureDirSync, listDirSync, readSync } from '../util';
@@ -98,6 +98,6 @@ function loadFieldsFromFiles(sourcePath: string, files: string[]): Field[] {
   return files.flatMap((file) => {
     const filePath = joinPath(sourcePath, file);
     const content = readSync(filePath);
-    return safeLoad(content) as Field[];
+    return load(content) as Field[];
   });
 }

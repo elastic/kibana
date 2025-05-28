@@ -10,8 +10,9 @@
 import type { PaletteRegistry, PaletteDefinition } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { CoreTheme } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '../..';
-import type { LegacyColorsService } from '../legacy_colors';
+import { LegacyColorsService } from '../legacy_colors';
 
 export interface PaletteSetupPlugins {
   expressions: ExpressionsSetup;
@@ -22,12 +23,12 @@ export class PaletteService {
   private palettes: Record<string, PaletteDefinition<unknown>> | undefined = undefined;
   constructor() {}
 
-  public setup(colorsService: LegacyColorsService) {
+  public setup(theme: CoreTheme, colorsService: LegacyColorsService) {
     return {
       getPalettes: async (): Promise<PaletteRegistry> => {
         if (!this.palettes) {
           const { buildPalettes } = await import('./palettes');
-          this.palettes = buildPalettes(colorsService);
+          this.palettes = buildPalettes(theme, colorsService);
         }
         return {
           get: (name: string) => {

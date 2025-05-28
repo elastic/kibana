@@ -10,7 +10,7 @@ import type { OriginalColumn, MapToColumnsExpressionFunction } from './types';
 
 function getColumnName(originalColumn: OriginalColumn, newColumn: DatatableColumn) {
   if (originalColumn?.operationType === 'date_histogram') {
-    const fieldName = originalColumn.sourceField;
+    const fieldName = originalColumn.sourceField as string;
 
     // HACK: This is a hack, and introduces some fragility into
     // column naming. Eventually, this should be calculated and

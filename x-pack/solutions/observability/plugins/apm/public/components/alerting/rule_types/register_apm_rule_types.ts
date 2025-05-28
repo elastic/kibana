@@ -13,8 +13,11 @@ import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../commo
 import {
   anomalyMessage,
   errorCountMessage,
+  errorCountRecoveryMessage,
   transactionDurationMessage,
+  transactionDurationRecoveryMessage,
   transactionErrorRateMessage,
+  transactionErrorRateRecoveryMessage,
 } from '../../../../common/rules/default_action_message';
 import type { AlertParams } from './anomaly_rule_type';
 
@@ -49,6 +52,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     }),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
+    defaultRecoveryMessage: errorCountRecoveryMessage,
     priority: 80,
   });
 
@@ -80,6 +84,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     alertDetailsAppSection: lazy(() => import('../ui_components/alert_details_app_section')),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
+    defaultRecoveryMessage: transactionDurationRecoveryMessage,
     priority: 60,
   });
 
@@ -108,6 +113,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     }),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
+    defaultRecoveryMessage: transactionErrorRateRecoveryMessage,
     priority: 70,
   });
 

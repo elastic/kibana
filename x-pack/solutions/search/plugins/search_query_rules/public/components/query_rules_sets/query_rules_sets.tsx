@@ -8,28 +8,45 @@
 import React, { useState } from 'react';
 
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
+import { useKibana } from '../../hooks/use_kibana';
+import { useQueryRulesSetsTableData } from '../../hooks/use_query_rules_sets_table_data';
+import { QueryRulesSetsSearch } from './query_rules_sets_search';
+import { DeleteRulesetModal } from './delete_ruleset_modal';
+import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
 
 export const QueryRulesSets = () => {
+  const {
+    services: { application, http },
+  } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
+  const [searchKey, setSearchKey] = useState('');
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: queryRulesData } = useFetchQueryRulesSets({ from, size: pageSize });
+  const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
+
+  const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
+    queryRulesData?.data,
+    searchKey,
+    pageIndex,
+    pageSize
+  );
 
   if (!queryRulesData) {
     return null;
   }
 
-  const pagination = {
-    initialPageSize: 25,
-    pageSizeOptions: [10, 25, 50],
-    ...queryRulesData._meta,
-    pageSize,
-    pageIndex,
-  };
   const columns: Array<EuiBasicTableColumn<QueryRulesListRulesetsQueryRulesetListItem>> = [
     {
       field: 'ruleset_id',
@@ -40,7 +57,9 @@ export const QueryRulesSets = () => {
         <EuiLink
           data-test-subj="queryRuleSetName"
           onClick={() => {
-            // Navigate to the ruleset details page
+            application.navigateToUrl(
+              http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${name}`)
+            );
           }}
         >
           {name}
@@ -56,18 +75,83 @@ export const QueryRulesSets = () => {
         <div data-test-subj="queryRuleSetItemRuleCount">{ruleCount}</div>
       ),
     },
+    {
+      actions: [
+        {
+          render: (item: QueryRulesListRulesetsQueryRulesetListItem) => {
+            return (
+              <UseRunQueryRuleset
+                rulesetId={item.ruleset_id}
+                type="contextMenuItem"
+                content={i18n.translate('xpack.queryRules.queryRulesSetTable.actions.run', {
+                  defaultMessage: 'Test in Console',
+                })}
+              />
+            );
+          },
+        },
+        {
+          name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.edit', {
+            defaultMessage: 'Edit',
+          }),
+          description: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+            i18n.translate('xpack.queryRules.queryRulesSetTable.actions.editDescription', {
+              defaultMessage: 'Edit query ruleset {name}',
+              values: { name: ruleset.ruleset_id },
+            }),
+          icon: 'pencil',
+          color: 'text',
+          type: 'icon',
+          onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+            application.navigateToUrl(
+              http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${ruleset.ruleset_id}`)
+            ),
+        },
+        {
+          name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.delete', {
+            defaultMessage: 'Delete',
+          }),
+          description: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+            i18n.translate('xpack.queryRules.queryRulesSetTable.actions.deleteDescription', {
+              defaultMessage: 'Delete query ruleset {name}',
+              values: { name: ruleset.ruleset_id },
+            }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
+            setRulesetToDelete(ruleset.ruleset_id);
+          },
+        },
+      ],
+    },
   ];
 
   return (
-    <EuiBasicTable
-      data-test-subj="queryRulesSetTable"
-      items={queryRulesData.data}
-      columns={columns}
-      pagination={pagination}
-      onChange={({ page: changedPage }) => {
-        setPageIndex(changedPage.index);
-        setPageSize(changedPage.size);
-      }}
-    />
+    <>
+      {rulesetToDelete && (
+        <DeleteRulesetModal
+          rulesetId={rulesetToDelete}
+          closeDeleteModal={() => setRulesetToDelete(null)}
+        />
+      )}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiBasicTable
+            data-test-subj="queryRulesSetTable"
+            items={queryRulesSetsFilteredData} // Use filtered data from hook
+            columns={columns}
+            pagination={pagination}
+            onChange={({ page: changedPage }) => {
+              setPageIndex(changedPage.index);
+              setPageSize(changedPage.size);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

@@ -10,7 +10,12 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.18.2>>
+* <<release-notes-8.18.1>>
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.7>>
+* <<release-notes-8.17.6>>
+* <<release-notes-8.17.5>>
 * <<release-notes-8.17.4>>
 * <<release-notes-8.17.3>>
 * <<release-notes-8.17.2>>
@@ -92,6 +97,69 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.18.2]]
+== {kib} 8.18.2
+
+The 8.18.2 release includes the following fixes.
+
+[float]
+[[fixes-v8.18.2]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes success message and auto-scroll behavior after adding a panel to a dashboard from the library ({kibana-pull}220122[#220122]).
+* Allows ES|QL queries to suggest a chart even when there is no data returned from a query. ({kibana-pull}218085[#218085]).
+Elastic Observability Solution::
+* Updates SLO created in a previous version to handle `createdBy` and `updatedBy` fields in an ingest pipeline ({kibana-pull}221158[#221158]).
+* Fixes errors in `error_marker.tsx` to support **Mobile Services** ({kibana-pull}220424[#220424]).
+Elastic Security solution::
+For the Elastic Security 8.18.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[[release-notes-8.18.1]]
+== {kib} 8.18.1
+
+[IMPORTANT]
+====
+The 8.18.1 release contains fixes for potential security vulnerabilities. See our https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+====
+
+The 8.18.1 release includes the following enhancements and fixes.
+
+[float]
+[[known-issues-8.18.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+[float]
+[[enhancement-v8.18.1]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.18.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.18.1]]
+=== Fixes
+Dashboards and Visualizations::
+* Syncs the dashboard ES|QL query and filters with the corresponding visualization query in *Lens* ({kibana-pull}218997[#218997]).
+* Correctly formats keywords in metric visualizations ({kibana-pull}218233[#218233]).
+* When exploring a dashboard, the request inspector now shows the correct request and response in any successful scenario ({kibana-pull}216519[#216519]).
+Discover::
+* Fixes incorrect behavior for requests on fields where the *Allow hidden and system indices* (`allow_hidden`) option of the data view could be ignored ({kibana-pull}217628[#217628]).
+* Fixes the result of the *Generate CSV report* action for ES|QL panels ({kibana-pull}216325[#216325]).
+Elastic Observability Solution::
+* Prevents unnecessary suggestion requests when interacting with inputs on the APM *Custom Links* page ({kibana-pull}218927[#218927]).
+* Filters out null values from `sourceDataStreams` ({kibana-pull}218772[#218772]).
+* Fixes a bug with navigating to the *Search Connectors* tab in the AI Assistant Settings ({kibana-pull}217749[#217749]).
+* Improves `aria-label` attributes for correlations ({kibana-pull}217512[#217512]).
+Elastic Security solution::
+For the Elastic Security 8.18.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes broken icons in integrations coming from the Home plugin ({kibana-pull}219206[#219206]).
+Kibana security::
+* Removes check for unused connector role ({kibana-pull}219358[#219358]).
+Machine Learning::
+* Fixes error when switching Service providers in the *Inference Endpoint* flyout ({kibana-pull}219020[#219020]).
+* Corrects quotes in ES|QL queries for function arguments ({kibana-pull}217680[#217680]).
 
 [[release-notes-8.18.0]]
 == {kib} 8.18.0
@@ -101,6 +169,62 @@ Review the following information about the {kib} 8.18.0 release.
 [float]
 [[known-issues-8.18.0]]
 === Known issues
+
+// tag::known-issue-220339[]
+.Observability AI assistant Knowledge Base entries with empty text can lead to Kibana OOM or restarts.
+[%collapsible]
+====
+*Details* +
+The semantic text migration can cause excessive traffic to a cluster and might eventually cause the Kibana instance to crash due to OOM, together with increase of requests to Elasticsearch & ML nodes.
+
+The problem can occur when there is one or more empty text Knowledge Base documents.
+
+The migration script does not handle this scenario and will indefinitely update the same document.
+
+Because the document update involves semantic_text an ML node is kept warm further increasing the costs.
+
+The issue involves semantic_text field type (and thus the semantic_text migration which is causing this issue), introduced in the knowledge base feature in 8.17.
+
+*Workaround* +
+
+1. Pause the Kibana instance if possible. If not possible, skip this step.
+2. Run a dry run query to identify if you have empty Knowledge Base documents. If you have at least 1 hit, you can be affected by the problem.
++
+```sh
+GET .kibana-observability-ai-assistant-kb/_search
+{
+  "query": {
+    "bool": {
+      "must": [{ "exists": { "field": "text" }}],
+      "must_not": [ { "wildcard": { "text": "*" } }
+      ]
+    }
+  }
+}
+```
++
+3. Execute the deletion. For extra safety, you might want to trigger a snapshot before executing it.
++
+```sh
+POST .kibana-observability-ai-assistant-kb/_delete_by_query
+{
+  "query": {
+    "bool": {
+      "must": [{ "exists": { "field": "text" }}],
+      "must_not": [ { "wildcard": { "text": "*" } }
+      ]
+    }
+  }
+}
+```
+
+For more information, check:
+
+* https://github.com/elastic/kibana/issues/220339[#220339]
+* https://github.com/elastic/kibana/issues/220342[#220342]
+
+====
+// end::known-issue-220339[]
 
 // tag::known-issue-211850[]
 .Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed.
@@ -366,10 +490,147 @@ Machine Learning::
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
 
+[[release-notes-8.17.7]]
+== {kib} 8.17.7
+
+The 8.17.7 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.17.7]]
+=== Enhancements
+Alerting::
+* Ensures alerts created within **Maintenance Windows** trigger actions after the window expires ({kibana-pull}219797[#219797]).
+
+[float]
+[[fixes-v8.17.7]]
+=== Fixes
+Dashboards and Visualizations::
+* Correctly applies default timezone in **TSVB** when the timezone parameter is set to default in **Advanced Settings** ({kibana-pull}220658[#220658]).
+* Removes extra icon from map visualization tooltips ({kibana-pull}220134[#220134]).
+Discover::
+* Fixes drill-down state not saving in by-value **Discover** sessions ({kibana-pull}219857[#219857]).
+Elastic Observability Solution::
+* Considers locations only if the array is not empty in a monitor status rule ({kibana-pull}220983[#220983]).
+* Uses update-by-query for `semantic_text` migration ({kibana-pull}220255[#220255]).
+* Prevents undefined errors in **Transaction flyout** ({kibana-pull}220224[#220224]).
+* Fixes broken **Span Links** flyout in **Trace Explorer** ({kibana-pull}219763[#219763]).
+Elastic Security solution::
+For the Elastic Security 8.17.7 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Reworks cookie and session storage to prevent unexpected logouts for certain users ({kibana-pull}220430[#220430]).
+
+[[release-notes-8.17.6]]
+== {kib} 8.17.6
+
+[IMPORTANT]
+====
+The 8.17.6 release contains fixes for potential security vulnerabilities. See our https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+====
+
+The 8.17.6 release includes the following enhancements and fixes.
+
+[float]
+[[known-issues-8.17.6]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+[float]
+[[enhancement-v8.17.6]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.17.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.17.6]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the options list control making two requests instead of one when the page is refreshed ({kibana-pull}219625[#219625]).
+* Updates the HTTP API response from 201 to 200 ({kibana-pull}217054[#217054]).
+Elastic Observability Solution::
+* Prevents an error with reading properties in `custom_link_flyout.tsx` ({kibana-pull}219668[#219668]).
+* Handles missing `trace` in API response ({kibana-pull}219512[#219512]).
+* Displays an error message when creating an anomaly detection job fails ({kibana-pull}219364[#219364]).
+* Ensures that a distinct alert is sent per monitor configuration when *Receive distinct alerts per location* is turned off ({kibana-pull}219291[#219291]).
+* Prevents setting up filters when embeddable dashboard is destroyed ({kibana-pull}219097[#219097]).
+* Fixed error message when using Synthetics monitor status rule controls ({kibana-pull}218994[#218994]).
+* Fixes monitor history histogram and group by location issue ({kibana-pull}218550[#218550]).
+* Fixes pagination for test run logs ({kibana-pull}218458[#218458]).
+* Fixes span url link when `transactionId` is missing in span links ({kibana-pull}218232[#218232]).
+* Sorts the *Environment* dropdown alphabetically ({kibana-pull}217710[#217710]).
+* Prevents other conditions from changing when you change the condition type of a monitor status rule ({kibana-pull}216426[#216426]).
+* Filters out upstream orphans in the waterfall ({kibana-pull}214704[#214704]).
+Elastic Security solution::
+For the Elastic Security 8.17.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Ensures simultaneous successful logins when refreshing multiple tabs ({kibana-pull}212148[#212148]).
+Machine Learning::
+* Fixes vCPU usage message in the *Start deployment* dialog ({kibana-pull}218557[#218557]).
+* Improves anomaly charts object safety ({kibana-pull}217552[#217552]).
+Management::
+* Fixes error message when previewing index templates used by data streams ({kibana-pull}217604[#217604]).
+
+[[release-notes-8.17.5]]
+== {kib} 8.17.5
+
+The 8.17.5 release includes the following enhancements and fixes.
+
+[float]
+[[known-issues-8.17.5]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+[float]
+[[enhancement-v8.17.5]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.17.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.17.5]]
+=== Fixes
+Dashboards and Visualizations::
+* Wraps text in search bars ({kibana-pull}217556[#217556]).
+* Updates the HTTP API response from 201 to 200 ({kibana-pull}217054[#217054]).
+* Fixes an issue with the state being dropped when editing visualize embeddables ({kibana-pull}216910[#216910]).
+* Fixes a race condition in `useBatchedPublishingSubjects` ({kibana-pull}216399[#216399]).
+* Fixes dragged elements becoming invisible when dragging-and-dropping in *Lens* ({kibana-pull}213928[#213928]).
+Data ingestion and Fleet::
+* Enables unenroll inactive agent tasks to unenroll some agents if the first set returned is equal to `UNENROLLMENT_BATCH_SIZE` ({kibana-pull}216283[#216283]).
+Elastic Observability Solution::
+* Fixes the Alerts tab count in Monitor details ({kibana-pull}216761[#216761]).
+* Fixes the *Save visualization* action on the Monitors Overview tab ({kibana-pull}216695[#216695]).
+* Makes service inventory icons visible if the `agentName` is returned ({kibana-pull}216220[#216220]).
+* Fixes an issue with old time units persisting when updating monitor frequency ({kibana-pull}215823[#215823]).
+* Fixes the query for transaction marks ({kibana-pull}215819[#215819]).
+* Fixes the location filter in the status rule executor ({kibana-pull}215514[#215514]).
+* Adds missing `user_agent` version field and shows it on the trace summary ({kibana-pull}215403[#215403]).
+* Fixes the missing URL in the transaction summary ({kibana-pull}215397[#215397]).
+* Fixes the span link invalid filter ({kibana-pull}215322[#215322]).
+* Prevents `getChildrenGroupedByParentId` from including the parent in the children list ({kibana-pull}214957[#214957]).
+* Fixes entry waterfall transaction being treated as an orphan ({kibana-pull}214700[#214700]).
+* Fixes an issue with loading SLOs by status, SLI type, or instance ID ({kibana-pull}209910[#209910]).
+Elastic Security solution::
+For the Elastic Security 8.17.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes the Share modal export icon focusable ({kibana-pull}217313[#217313]).
+Machine Learning::
+* Fixes the `Change Point Detection` embeddable ({kibana-pull}217178[#217178]).
+Management::
+* Fixes error message when previewing index templates used by data streams ({kibana-pull}217604[#217604]).
+* Fixes the search profiler resetting the index field when query is edited ({kibana-pull}215420[#215420]).
+
 [[release-notes-8.17.4]]
 == {kib} 8.17.4
 
 The 8.17.4 release includes the following fixes.
+
+[float]
+[[known-issues-8.17.4]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
 
 [float]
 [[fixes-v8.17.4]]
@@ -391,6 +652,12 @@ Management::
 The 8.17.3 release includes the following bug fixes.
 
 [float]
+[[known-issues-8.17.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
+
+[float]
 [[fixes-v8.17.3]]
 === Bug fixes
 Elastic Observability solution::
@@ -408,8 +675,14 @@ Sharing::
 * Reinstates switch to support generating public URLs for Embed when supported ({kibana-pull}207383[#207383]).
 
 [[release-notes-8.17.2]]
-
+== {kib} 8.17.2
 The 8.17.2 release includes the following bug fixes.
+
+[float]
+[[known-issues-8.17.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
 
 [float]
 [[fixes-v8.17.2]]
@@ -430,6 +703,8 @@ The 8.17.1 release includes the following known issues, enhancements, and bug fi
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-206400]
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
 
 [float]
 [[enhancement-v8.17.1]]
@@ -465,6 +740,8 @@ The 8.17.0 release includes the following known issues.
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
+include::CHANGELOG.asciidoc[tag=known-issue-220339]
 
 // tag::known-issue-206400[]
 .Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.

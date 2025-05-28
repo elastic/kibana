@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -3732,6 +3743,13 @@
       },
       "taskType": {
         "type": "keyword"
+      },
+      "userScope": {
+        "properties": {
+          "apiKeyId": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },

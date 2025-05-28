@@ -6,18 +6,15 @@
  */
 
 import { isError } from 'lodash';
-import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { Alert } from '@kbn/alerts-as-data-utils';
-import type { Group } from '../../../../common/typings';
+import { flattenObject, unflattenObject } from '@kbn/object-utils';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
 
@@ -44,26 +41,6 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
     validate: (value) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
-
-export const validateKQLStringFilter = (value: string) => {
-  if (value === '') {
-    // Allow clearing the filter.
-    return;
-  }
-
-  try {
-    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
-      allowLeadingWildcards: true,
-      queryStringOptions: {},
-      ignoreFilterIfFieldNotInIndex: false,
-    });
-  } catch (e) {
-    return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
-      values: { errorMessage: e?.message },
-    });
-  }
-};
 
 export const createScopedLogger = (
   logger: Logger,
@@ -194,7 +171,7 @@ export const getContextForRecoveredAlerts = <
 >(
   alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {
-  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
+  const alert = alertHitSource ? unflattenObject<AdditionalContext>(alertHitSource) : undefined;
 
   return {
     cloud: alert?.[ALERT_CONTEXT_CLOUD],
@@ -204,53 +181,6 @@ export const getContextForRecoveredAlerts = <
     labels: alert?.[ALERT_CONTEXT_LABELS],
     tags: alert?.[ALERT_CONTEXT_TAGS],
   };
-};
-
-export const unflattenObject = <T extends object = AdditionalContext>(object: object): T =>
-  Object.entries(object).reduce((acc, [key, value]) => {
-    set(acc, key, value);
-    return acc;
-  }, {} as T);
-
-export const flattenObject = (obj: AdditionalContext, prefix: string = ''): AdditionalContext =>
-  Object.keys(obj).reduce<AdditionalContext>((acc, key) => {
-    const nextValue = obj[key];
-
-    if (nextValue) {
-      if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
-        const dotSuffix = '.';
-        if (Object.keys(nextValue).length > 0) {
-          return {
-            ...acc,
-            ...flattenObject(nextValue, `${prefix}${key}${dotSuffix}`),
-          };
-        }
-      }
-
-      const fullPath = `${prefix}${key}`;
-      acc[fullPath] = nextValue;
-    }
-
-    return acc;
-  }, {});
-
-export const getFormattedGroupBy = (
-  groupBy: string | string[] | undefined,
-  groupSet: Set<string>
-): Record<string, Group[]> => {
-  const groupByKeysObjectMapping: Record<string, Group[]> = {};
-  if (groupBy) {
-    groupSet.forEach((group) => {
-      const groupSetKeys = group.split(',');
-      groupByKeysObjectMapping[group] = Array.isArray(groupBy)
-        ? groupBy.reduce((result: Group[], groupByItem, index) => {
-            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
-            return result;
-          }, [])
-        : [{ field: groupBy, value: group }];
-    });
-  }
-  return groupByKeysObjectMapping;
 };
 
 // TO BE MOVED

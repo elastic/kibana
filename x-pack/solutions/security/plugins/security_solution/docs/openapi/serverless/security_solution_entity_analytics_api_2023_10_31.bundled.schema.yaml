@@ -4,7 +4,7 @@ info:
   title: Security Entity Analytics API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -199,7 +199,7 @@ paths:
         - Security Entity Analytics API
   /api/asset_criticality/list:
     get:
-      description: 'List asset criticality records, paging, sorting and filtering as needed.'
+      description: List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.
@@ -391,7 +391,7 @@ paths:
       summary: List the Entity Engines
       tags:
         - Security Entity Analytics API
-  '/api/entity_store/engines/{entityType}':
+  /api/entity_store/engines/{entityType}:
     delete:
       operationId: DeleteEntityEngine
       parameters:
@@ -439,7 +439,7 @@ paths:
       summary: Get an Entity Engine
       tags:
         - Security Entity Analytics API
-  '/api/entity_store/engines/{entityType}/init':
+  /api/entity_store/engines/{entityType}/init:
     post:
       operationId: InitEntityEngine
       parameters:
@@ -508,7 +508,7 @@ paths:
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
-  '/api/entity_store/engines/{entityType}/start':
+  /api/entity_store/engines/{entityType}/start:
     post:
       operationId: StartEntityEngine
       parameters:
@@ -531,7 +531,7 @@ paths:
       summary: Start an Entity Engine
       tags:
         - Security Entity Analytics API
-  '/api/entity_store/engines/{entityType}/stop':
+  /api/entity_store/engines/{entityType}/stop:
     post:
       operationId: StopEntityEngine
       parameters:
@@ -604,7 +604,7 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
-      description: 'List entities records, paging, sorting and filtering as needed.'
+      description: List entities records, paging, sorting and filtering as needed.
       operationId: ListEntities
       parameters:
         - in: query
@@ -1316,7 +1316,7 @@ components:
         runs every hour. Must be less than or equal to half the duration of the
         lookback period,
       example: 1h
-      pattern: '^[1-9]\d*[smh]$'
+      pattern: ^[1-9]\d*[smh]$
       type: string
     RiskEngineScheduleNowErrorResponse:
       type: object

@@ -80,7 +80,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
   const shouldShowIncrementalSync =
     productFeatures.hasIncrementalSyncEnabled && hasIncrementalSyncFeature;
 
-  const isEnterpriseSearchNotAvailable = Boolean(config.host && errorConnectingMessage);
+  const isEnterpriseSearchNotAvailable = !config.host || !!errorConnectingMessage;
   const isSyncsDisabled =
     (connector?.is_native && isEnterpriseSearchNotAvailable) ||
     ingestionStatus === IngestionStatus.INCOMPLETE ||

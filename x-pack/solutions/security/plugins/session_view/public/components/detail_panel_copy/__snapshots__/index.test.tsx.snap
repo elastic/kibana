@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiText emotion-EuiText"
+        class="euiText emotion-euiText-s-DetailPanelListItem"
         data-test-subj="sessionView:detail-panel-list-item"
       >
         <span
@@ -21,7 +21,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiText emotion-EuiText"
+      class="euiText emotion-euiText-s-DetailPanelListItem"
       data-test-subj="sessionView:detail-panel-list-item"
     >
       <span

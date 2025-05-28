@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
-import { safeLoad, safeDump } from 'js-yaml';
+import Handlebars from '@kbn/handlebars';
+import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
@@ -21,17 +21,17 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
-    const template = handlebars.compile(templateStr, { noEscape: true });
+    const template = handlebars.compileAST(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-  const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
+  const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
-  // `safeLoad` replaces empty strings with null
+  // `load` replaces empty strings with null
   const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
     (acc, [key, value]) => {
       if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
@@ -98,7 +98,7 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {
@@ -177,7 +177,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
-      val ? safeDump(val) : ''
+      val ? dump(val) : ''
     );
   });
 

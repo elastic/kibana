@@ -27,7 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   let internalHeaders: InternalRequestHeader;
 
-  describe('Find SLOs', function () {
+  describe('Find SLOs using kql query', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalHeaders = samlAuth.getInternalRequestHeader();
@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
-    it('searches SLOs', async () => {
+    it('searches SLOs using kqlQuery', async () => {
       const createResponse1 = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
       const createResponse2 = await sloApi.create(
         Object.assign({}, DEFAULT_SLO, { name: 'something irrelevant foo' }),

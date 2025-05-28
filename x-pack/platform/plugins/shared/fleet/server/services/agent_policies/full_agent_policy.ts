@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -373,7 +373,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? safeLoad(config_yaml) : {};
+  const configJs = config_yaml ? load(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -480,10 +480,15 @@ export function transformOutputToFullPolicyOutput(
     ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
-    ...(ssl ? { ssl } : {}),
     ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
+  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+    newOutput.ssl = {
+      ...newOutput.ssl,
+      ...ssl,
+    };
+  }
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;
@@ -524,7 +529,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', safeLoad);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
   }
 
   return newOutput;

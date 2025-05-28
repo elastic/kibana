@@ -8,7 +8,7 @@ exports[`Sparkline component does not show tooltip initially 1`] = `
 </div>
 `;
 
-exports[`Sparkline component shows tooltip on hover 1`] = `
+exports[`Sparkline component with EuiProvider shows tooltip on hover 1`] = `
 <div>
   <div
     className="monSparkline"

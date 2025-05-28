@@ -10,7 +10,6 @@ import {
   HasSupportedTriggers,
   PublishesDisabledActionIds,
   PublishesViewMode,
-  ViewMode,
   apiHasAppContext,
   apiPublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';
@@ -20,6 +19,7 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { Filter } from '@kbn/es-query';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -28,14 +28,10 @@ import {
   LensInternalApi,
   LensRuntimeState,
 } from '../types';
-import {
-  buildObservableVariable,
-  emptySerializer,
-  extractInheritedViewModeObservable,
-} from '../helper';
+import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountInlineEditPanel } from '../inline_editing/mount';
+import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
@@ -72,17 +68,12 @@ export function initializeEditApi(
     PublishesDisabledActionIds &
     HasEditCapabilities &
     PublishesViewMode & { uuid: string };
-  comparators: {};
-  serialize: () => {};
-  cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
-  const [viewMode$] = buildObservableVariable<ViewMode>(
-    extractInheritedViewModeObservable(parentApi)
-  );
+  const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
@@ -129,26 +120,39 @@ export function initializeEditApi(
     stateApi.updateSavedObjectId(newState.savedObjectId);
   };
 
-  // Wrap the getState() when inline editing and make sure that the filters in the attributes
-  // are properly injected with the correct references to avoid issues when saving/navigating to the full editor
-  const getStateWithInjectedFilters = () => {
+  /**
+   * Use the search context api here for filters for 2 reasons:
+   *  - the filters here have the correct references already injected
+   *  - the edit filters flow may change in the future and this is the right place to get the filters
+   */
+  const getFilters = ({ attributes }: LensRuntimeState): Filter[] =>
+    searchContextApi.filters$.getValue() ?? attributes.state.filters;
+
+  const convertVisualizationState = ({ attributes }: LensRuntimeState) => {
+    const visState = attributes.state.visualization;
+    const convertToRuntimeState =
+      startDependencies.visualizationMap[attributes.visualizationType ?? '']?.convertToRuntimeState;
+    if (!convertToRuntimeState) return visState;
+    return convertToRuntimeState(visState, attributes.state.datasourceStates);
+  };
+
+  /**
+   * Wrap getState() when inline editing to ensure:
+   *  - Filters in the attributes are properly injected with the correct references to avoid
+   *    issues when saving/navigating to the full editor
+   *  - Apply runtime conversions to visualization state
+   */
+  const getModifiedState = (): LensRuntimeState => {
     const currentState = getState();
-    // use the search context api here for filters for 2 reasons:
-    // * the filters here have the correct references already injected
-    // * the edit filters flow may change in the future and this is the right place to get the filters
-    const currentFilters = searchContextApi.filters$.getValue() ?? [];
-    // if there are no filters, avoid to copy the attributes
-    if (!currentFilters.length) {
-      return currentState;
-    }
-    // otherwise make sure to inject the references into filters
+
     return {
       ...currentState,
       attributes: {
         ...currentState.attributes,
         state: {
           ...currentState.attributes.state,
-          filters: currentFilters,
+          filters: getFilters(currentState),
+          visualization: convertVisualizationState(currentState),
         },
       },
     };
@@ -156,7 +160,7 @@ export function initializeEditApi(
 
   const openInlineEditor = prepareInlineEditPanel(
     initialState,
-    getStateWithInjectedFilters,
+    getModifiedState,
     updateState,
     internalApi,
     panelManagementApi,
@@ -194,9 +198,6 @@ export function initializeEditApi(
     : true;
 
   return {
-    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
-    serialize: emptySerializer,
-    cleanup: noop,
     api: {
       uuid,
       viewMode$,
@@ -210,7 +211,7 @@ export function initializeEditApi(
 
       /**
        * This is the key method to enable the new Editing capabilities API
-       * Lens will leverage the netural nature of this function to build the inline editing experience
+       * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
       onEdit: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
@@ -243,7 +244,7 @@ export function initializeEditApi(
           onCancel: () => updateState({ ...firstState }),
         });
         if (ConfigPanel) {
-          mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
+          mountInlinePanel(ConfigPanel, startDependencies.coreStart, overlayTracker, { uuid });
         }
       },
       /**

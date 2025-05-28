@@ -156,7 +156,7 @@ export class ESTestIndexTool {
     return result;
   }
 
-  async getAll(size: number = 10) {
+  async getAll(size: number = 10, sort?: string) {
     const params = {
       index: this.index,
       size,
@@ -164,6 +164,7 @@ export class ESTestIndexTool {
         query: {
           match_all: {},
         },
+        ...(sort ? { sort: [{ [sort]: 'asc' as const }] } : {}),
       },
     };
     return await this.es.search(params, { meta: true });

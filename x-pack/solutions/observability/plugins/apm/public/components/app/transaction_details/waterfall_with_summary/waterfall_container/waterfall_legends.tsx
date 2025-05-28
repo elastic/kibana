@@ -15,6 +15,7 @@ import type { IWaterfallLegend } from './waterfall/waterfall_helpers/waterfall_h
 import { WaterfallLegendType } from './waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
+  serviceName?: string;
   legends: IWaterfallLegend[];
   type: WaterfallLegendType;
 }
@@ -30,7 +31,15 @@ const LEGEND_LABELS = {
     }
   ),
 };
-export function WaterfallLegends({ legends, type }: Props) {
+export function WaterfallLegends({ serviceName, legends, type }: Props) {
+  const displayedLegends = legends.filter((legend) => legend.type === type);
+
+  // default to serviceName if value is empty, e.g. for transactions (which don't
+  // have span.type or span.subtype)
+  const legendsWithFallbackLabel = displayedLegends.map((legend) => {
+    return { ...legend, value: !legend.value ? serviceName : legend.value };
+  });
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
       <EuiFlexItem grow={false}>
@@ -40,7 +49,7 @@ export function WaterfallLegends({ legends, type }: Props) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="s">
-          {legends.map((legend) => (
+          {legendsWithFallbackLabel.map((legend) => (
             <EuiFlexItem grow={false} key={legend.value}>
               <Legend color={legend.color} text={legend.value} />
             </EuiFlexItem>

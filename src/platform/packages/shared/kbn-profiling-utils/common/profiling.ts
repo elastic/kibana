@@ -22,6 +22,8 @@ export type FileID = string;
 
 /**
  * Frame type
+ * These frame types need to match with the constants defined in
+ * https://github.com/open-telemetry/opentelemetry-ebpf-profiler/blob/main/libpf/frametype.go
  */
 export enum FrameType {
   Unsymbolized = 0,
@@ -35,8 +37,14 @@ export enum FrameType {
   JavaScript,
   PHPJIT,
   DotNET,
+  Go,
   ErrorFlag = 0x80,
   Error = 0xff,
+
+  // Artificial frame types for grouping, set by the ES profiling plugin
+  Root = 0x100,
+  ProcessName = 0x101,
+  ThreadName = 0x102,
 }
 
 const frameTypeDescriptions = {
@@ -51,8 +59,12 @@ const frameTypeDescriptions = {
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
   [FrameType.DotNET]: '.NET',
+  [FrameType.Go]: 'Go',
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
+  [FrameType.Root]: 'Root',
+  [FrameType.ProcessName]: 'Process', // Due to OTEL semconv issues, "process name" is currently more correct than "executable name"
+  [FrameType.ThreadName]: 'Thread',
 };
 
 export function isErrorFrame(ft: FrameType): boolean {

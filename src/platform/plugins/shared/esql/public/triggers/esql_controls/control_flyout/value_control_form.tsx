@@ -22,16 +22,19 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  type ESQLControlState,
+  type ControlWidthOptions,
+} from '@kbn/esql-types';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
   appendStatsByToQuery,
 } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import type { ESQLControlState, ControlWidthOptions } from '../types';
 import { ControlWidth, ControlLabel } from './shared_form_components';
-import { EsqlControlType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {

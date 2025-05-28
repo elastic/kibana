@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import 'jest-styled-components';
 import { mount } from 'enzyme';
 import type { CellProps } from './table_cell';
 import { TableCell } from './table_cell';

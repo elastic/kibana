@@ -61,14 +61,14 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
-} from './plugin_constants';
+} from '../common/constants';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,

@@ -77,14 +77,12 @@ export function getValueLable(value: string, perc?: string) {
 export function SummaryItem({
   id,
   baseValue,
-  baseIcon,
   baseColor,
   comparisonValue,
   title,
   isLoading,
   comparisonPerc,
   comparisonColor,
-  comparisonIcon,
   titleHint,
   hasBorder = false,
   compressed = false,
@@ -93,7 +91,7 @@ export function SummaryItem({
   return (
     <EuiPanel hasShadow={false} hasBorder={hasBorder}>
       <EuiStat
-        title={<BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} />}
+        title={<BaseValue id={id} value={baseValue} color={baseColor} />}
         titleSize={textSize}
         description={
           <>
@@ -119,12 +117,6 @@ export function SummaryItem({
       >
         {!isLoading && comparisonValue ? (
           <EuiText color={comparisonColor} size={textSize}>
-            {comparisonIcon ? (
-              <EuiIcon
-                data-test-subj={`${id}_comparison_${comparisonIcon}_${comparisonColor}`}
-                type={comparisonIcon}
-              />
-            ) : null}
             <span data-test-subj={`${id}_comparison_value`}>
               {getValueLable(comparisonValue, comparisonPerc)}
             </span>

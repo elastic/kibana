@@ -40,7 +40,13 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
     clickDeprecationRowAt: async (
-      deprecationType: 'mlSnapshot' | 'indexSetting' | 'reindex' | 'default' | 'clusterSetting',
+      deprecationType:
+        | 'mlSnapshot'
+        | 'indexSetting'
+        | 'reindex'
+        | 'default'
+        | 'clusterSetting'
+        | 'dataStream',
       index: number
     ) => {
       await act(async () => {
@@ -176,6 +182,65 @@ const createActions = (testBed: TestBed) => {
       });
       component.update();
     },
+    clickReadOnlyButton: async () => {
+      await act(async () => {
+        find('startIndexReadonlyButton').simulate('click');
+      });
+
+      component.update();
+    },
+    checkMigrationWarningCheckbox: async () => {
+      await act(async () => {
+        find('warninStepCheckbox')
+          .find('input.euiCheckbox__input')
+          .simulate('change', {
+            target: {
+              checked: true,
+            },
+          });
+      });
+      component.update();
+    },
+  };
+  const dataStreamDeprecationFlyout = {
+    clickReindexButton: async () => {
+      await act(async () => {
+        find('startDataStreamReindexingButton').simulate('click');
+      });
+
+      component.update();
+    },
+    clickReadOnlyButton: async () => {
+      await act(async () => {
+        find('startDataStreamReadonlyButton').simulate('click');
+      });
+
+      component.update();
+    },
+    closeFlyout: async () => {
+      await act(async () => {
+        find('closeDataStreamReindexingButton').simulate('click');
+      });
+      component.update();
+    },
+    checkMigrationWarningCheckbox: async () => {
+      await act(async () => {
+        find('migrationWarningCheckbox')
+          .find('input.euiCheckbox__input')
+          .simulate('change', {
+            target: {
+              checked: true,
+            },
+          });
+      });
+      component.update();
+    },
+    clickStartActionButton: async () => {
+      await act(async () => {
+        find('startActionButton').simulate('click');
+      });
+      component.update();
+    },
   };
 
   return {
@@ -186,6 +251,7 @@ const createActions = (testBed: TestBed) => {
     reindexDeprecationFlyout,
     indexSettingsDeprecationFlyout,
     clusterSettingsDeprecationFlyout,
+    dataStreamDeprecationFlyout,
   };
 };
 

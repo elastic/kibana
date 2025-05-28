@@ -140,6 +140,7 @@ describe('ES deprecations table', () => {
 
       expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
 
+      await actions.searchBar.clickStatusFilterDropdown();
       await actions.searchBar.clickFilterByTitle('Critical'); // Reset filter
 
       expect(find('deprecationTableRow').length).toEqual(

@@ -18,14 +18,14 @@ describe('TimeRangeBar', () => {
 
   test('Renders gantt bar when isRunning is false', () => {
     const wrapper = mount(<TimeRangeBar timerange={timeRange} />);
-    const ganttBar = wrapper.find('[data-test-subj="mlJobSelectorGanttBar"]');
+    const ganttBar = wrapper.find('div[data-test-subj="mlJobSelectorGanttBar"]');
 
     expect(ganttBar).toHaveLength(1);
   });
 
   test('Renders running animation bar when isRunning is true', () => {
     const wrapper = mount(<TimeRangeBar timerange={timeRange} isRunning={true} />);
-    const runningBar = wrapper.find('[data-test-subj="mlJobSelectorGanttBarRunning"]');
+    const runningBar = wrapper.find('div[data-test-subj="mlJobSelectorGanttBarRunning"]');
 
     expect(runningBar).toHaveLength(1);
   });

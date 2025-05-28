@@ -9,7 +9,7 @@ info:
   title: Security Detections API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -339,11 +339,11 @@ paths:
                         tactic:
                           id: TA0001
                           name: Initial Access
-                          reference: 'https://attack.mitre.org/tactics/TA0001'
+                          reference: https://attack.mitre.org/tactics/TA0001
                         technique:
                           - id: T1193
                             name: Spearphishing Attachment
-                            reference: 'https://attack.mitre.org/techniques/T1193'
+                            reference: https://attack.mitre.org/techniques/T1193
                     to: now-300s
                     type: query
                     updated_at: '2020-02-03T11:19:04.462Z'
@@ -410,11 +410,11 @@ paths:
                       tactic:
                         id: TA0001
                         name: Initial Access
-                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        reference: https://attack.mitre.org/tactics/TA0001
                       technique:
                         - id: T1193
                           name: Spearphishing Attachment
-                          reference: 'https://attack.mitre.org/techniques/T1193'
+                          reference: https://attack.mitre.org/techniques/T1193
               example3:
                 summary: Patch threshold rule
                 value:
@@ -836,7 +836,7 @@ paths:
                   index:
                     - packetbeat-*
                   name: Bad IP threat match
-                  query: 'destination.ip:* or host.ip:*'
+                  query: destination.ip:* or host.ip:*
                   required_fields:
                     - name: destination.ip
                       type: ip
@@ -1217,7 +1217,7 @@ paths:
                     language: kuery
                     max_signals: 100
                     name: Bad IP threat match
-                    query: 'destination.ip:* or host.ip:*'
+                    query: destination.ip:* or host.ip:*
                     references: []
                     related_integrations:
                       - package: o365
@@ -1473,7 +1473,7 @@ paths:
                   description: New description
                   id: 462f1986-10fe-40a3-a22c-2b1c9c4c48fd
                   name: New name for Indicator Match rule
-                  query: 'source.ip:* or destination.ip:*\n'
+                  query: source.ip:* or destination.ip:*\n
                   risk_score: 99
                   severity: critical
                   threat_index:
@@ -2089,7 +2089,7 @@ paths:
                             machine_learning_job_id:
                               - packetbeat_dns_tunneling
                             max_signals: 100
-                            name: 'DNS Tunneling [Duplicate]'
+                            name: DNS Tunneling [Duplicate]
                             references:
                               - >-
                                 https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
@@ -2135,7 +2135,7 @@ paths:
                               rule doesn't have index patterns property
                             rules:
                               - id: 8bc7dad0-9320-11ec-9265-8b772383a08d
-                                name: 'DNS Tunneling [Duplicate]'
+                                name: DNS Tunneling [Duplicate]
                             status_code: 500
                         results:
                           created: []
@@ -2185,7 +2185,7 @@ paths:
                               language: kuery
                               license: Elastic License v2
                               max_signals: 10000
-                              name: 'External Alerts [Duplicate]'
+                              name: External Alerts [Duplicate]
                               query: >
                                 event.kind:alert and not event.module:(endgame
                                 or endpoint)
@@ -2265,7 +2265,7 @@ paths:
                           message: Machine learning rule doesn't have index patterns
                           rules:
                             - id: dc015d10-0831-11ed-ac8b-05a222bd8d4a
-                              name: 'Suspicious Powershell Script [Duplicate]'
+                              name: Suspicious Powershell Script [Duplicate]
                           status_code: 500
                       results:
                         created: []
@@ -2320,7 +2320,7 @@ paths:
                             license: ''
                             max_signals: 100
                             meta:
-                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
                             name: Rule 1
                             output_index: ''
                             query: '*'
@@ -2388,7 +2388,7 @@ paths:
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
                             name: Rule 2
                             output_index: ''
                             query: '*'
@@ -2509,7 +2509,7 @@ paths:
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
                             name: Test rule
                             output_index: ''
                             query: '*'
@@ -2601,7 +2601,7 @@ paths:
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
                             name: Test rule
                             output_index: ''
                             query: '*'
@@ -2697,7 +2697,7 @@ paths:
                             license: ''
                             max_signals: 100
                             meta:
-                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
                             name: Jacek test rule
                             output_index: ''
                             query: '*'
@@ -2804,7 +2804,7 @@ paths:
               items:
                 $ref: '#/components/schemas/RuleCreateProps'
               type: array
-        description: 'A JSON array of rules, where each rule contains the required fields.'
+        description: A JSON array of rules, where each rule contains the required fields.
         required: true
       responses:
         '200':
@@ -2972,19 +2972,19 @@ paths:
                       - framework: MITRE ATT&CK
                         id: TA0001
                         name: Initial Access
-                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        reference: https://attack.mitre.org/tactics/TA0001
                         tactic: null
                         technique:
                           - id: T1193
                             name: Spearphishing Attachment
-                            reference: 'https://attack.mitre.org/techniques/T1193'
+                            reference: https://attack.mitre.org/techniques/T1193
                   - id: 56b22b65-173e-4a5b-b27a-82599cb1433e
                     name: New name
             schema:
               items:
                 $ref: '#/components/schemas/RulePatchProps'
               type: array
-        description: 'A JSON array of rules, where each rule contains the required fields.'
+        description: A JSON array of rules, where each rule contains the required fields.
         required: true
       responses:
         '200':
@@ -3344,11 +3344,11 @@ paths:
                             tactic:
                               id: TA0002
                               name: Execution
-                              reference: 'https://attack.mitre.org/tactics/TA0002/'
+                              reference: https://attack.mitre.org/tactics/TA0002/
                             technique:
                               - id: T1193
                                 name: Spearphishing Attachment
-                                reference: 'https://attack.mitre.org/techniques/T1193/'
+                                reference: https://attack.mitre.org/techniques/T1193/
                         to: now
                         type: query
                         updated_at: '2020-02-02T10:05:19.830Z'
@@ -4600,7 +4600,7 @@ components:
                 Interval in which the rule runs. For example, `"1h"` means the
                 rule runs every hour.
               example: 1h
-              pattern: '^[1-9]\d*[smh]$'
+              pattern: ^[1-9]\d*[smh]$
               type: string
             lookback:
               description: >
@@ -4611,7 +4611,7 @@ components:
                 "10m" means the rule analyzes the last 10 minutes of data in
                 addition to the frequency interval.
               example: 1h
-              pattern: '^[1-9]\d*[smh]$'
+              pattern: ^[1-9]\d*[smh]$
               type: string
           required:
             - interval
@@ -4949,6 +4949,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run
@@ -8396,9 +8397,9 @@ components:
             - no_actions
             - rule
           type: string
-        - description: 'Time interval in seconds, minutes, hours, or days.'
+        - description: Time interval in seconds, minutes, hours, or days.
           example: 1h
-          pattern: '^[1-9]\d*[smhd]$'
+          pattern: ^[1-9]\d*[smhd]$
           type: string
     RuleAuthorArray:
       description: The rule’s author.
@@ -8467,6 +8468,13 @@ components:
       properties:
         execution_gap_duration_s:
           description: Duration in seconds of execution gap
+          minimum: 0
+          type: integer
+        frozen_indices_queried_count:
+          description: >-
+            Count of frozen indices queried during the rule execution. These
+            indices could not be entirely excluded after applying the time range
+            filter.
           minimum: 0
           type: integer
         gap_range:

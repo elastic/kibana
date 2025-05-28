@@ -9,10 +9,10 @@ Object {
         data-test-subj="EntryContentlistlist_id0EntryContent"
       >
         <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          class="css-9scbbc-expressionContainerCss"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row-nestedGroupSpaceCss"
             data-test-subj="EntryContentNestedEntry"
           >
             <span
@@ -24,7 +24,7 @@ Object {
               />
             </span>
             <div
-              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+              class="css-8rdxtd-valueContainerCss"
             >
               <span
                 class="euiExpression emotion-euiExpression-subdued"
@@ -62,10 +62,10 @@ Object {
       data-test-subj="EntryContentlistlist_id0EntryContent"
     >
       <div
-        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        class="css-9scbbc-expressionContainerCss"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row-nestedGroupSpaceCss"
           data-test-subj="EntryContentNestedEntry"
         >
           <span
@@ -77,7 +77,7 @@ Object {
             />
           </span>
           <div
-            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            class="css-8rdxtd-valueContainerCss"
           >
             <span
               class="euiExpression emotion-euiExpression-subdued"

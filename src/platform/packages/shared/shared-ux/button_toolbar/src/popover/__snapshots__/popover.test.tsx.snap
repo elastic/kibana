@@ -6,7 +6,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
   intl="[object Object]"
 >
   <button
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
+    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text-ToolbarStandardButton"
     type="button"
   >
     <span

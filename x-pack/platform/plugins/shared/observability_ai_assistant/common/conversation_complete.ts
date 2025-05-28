@@ -167,7 +167,7 @@ export function createInternalServerError(
 export function createFunctionNotFoundError(name: string) {
   return new ChatCompletionError(
     ChatCompletionErrorCode.FunctionNotFoundError,
-    `Function ${name} called but was not available`
+    `Function "${name}" called but was not available`
   );
 }
 

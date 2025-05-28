@@ -7,8 +7,10 @@
 
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-export function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
+export async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  await act(() => {
+    fireEvent.click(comboBoxToggleButton);
+  });
 
   return waitFor(() => {
     const listWithOptionsElement = document.querySelector('[role="listbox"]');
@@ -30,14 +32,14 @@ type SelectEuiComboBoxOptionParameters =
       optionIndex?: undefined;
     };
 
-export function selectEuiComboBoxOption({
+export async function selectEuiComboBoxOption({
   comboBoxToggleButton,
   optionIndex,
   optionText,
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
+  await showEuiComboBoxOptions(comboBoxToggleButton);
 
+  return act(async () => {
     const options = Array.from(
       document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
     );

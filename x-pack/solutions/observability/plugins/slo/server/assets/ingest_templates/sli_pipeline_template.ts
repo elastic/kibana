@@ -13,7 +13,7 @@ import {
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 
-export const getSLIPipelineTemplate = (slo: SLODefinition) => {
+export const getSLIPipelineTemplate = (slo: SLODefinition, spaceId: string) => {
   // remove empty string
   const groupByFields = [slo.groupBy].flat().filter((field) => !!field);
 
@@ -43,6 +43,12 @@ export const getSLIPipelineTemplate = (slo: SLODefinition) => {
         set: {
           field: 'slo.revision',
           value: slo.revision,
+        },
+      },
+      {
+        set: {
+          field: 'spaceId',
+          value: spaceId,
         },
       },
       {

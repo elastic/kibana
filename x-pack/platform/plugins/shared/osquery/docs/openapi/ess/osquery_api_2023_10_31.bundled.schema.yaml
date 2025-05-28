@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  description: 'Run live queries, manage packs and saved queries.'
+  description: Run live queries, manage packs and saved queries.
   title: Security Osquery API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -70,7 +70,7 @@ paths:
       summary: Create a live query
       tags:
         - Security Osquery API
-  '/api/osquery/live_queries/{id}':
+  /api/osquery/live_queries/{id}:
     get:
       description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
@@ -92,7 +92,7 @@ paths:
       summary: Get live query details
       tags:
         - Security Osquery API
-  '/api/osquery/live_queries/{id}/results/{actionId}':
+  /api/osquery/live_queries/{id}/results/{actionId}:
     get:
       description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
@@ -200,7 +200,7 @@ paths:
       summary: Create a pack
       tags:
         - Security Osquery API
-  '/api/osquery/packs/{id}':
+  /api/osquery/packs/{id}:
     delete:
       description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
@@ -323,7 +323,7 @@ paths:
       summary: Create a saved query
       tags:
         - Security Osquery API
-  '/api/osquery/saved_queries/{id}':
+  /api/osquery/saved_queries/{id}:
     delete:
       description: Delete a saved query using the query ID.
       operationId: OsqueryDeleteSavedQuery
@@ -424,7 +424,7 @@ components:
       type: object
       properties:
         agent_all:
-          description: 'When `true`, the query runs on all agents.'
+          description: When `true`, the query runs on all agents.
           type: boolean
         agent_ids:
           description: A list of agent IDs to run the query on.
@@ -574,7 +574,7 @@ components:
             field: total_seconds
         id: saved_query_id
         interval: '60'
-        platform: 'linux,darwin'
+        platform: linux,darwin
         query: select * from uptime;
         timeout: 120
         version: 2.8.0
@@ -757,7 +757,7 @@ components:
                 field: total_seconds
             id: saved_query_id
             interval: '60'
-            platform: 'linux,darwin'
+            platform: linux,darwin
             prebuilt: false
             query: select * from uptime;
             updated_at: '2022-07-26T09:28:08.597Z'
@@ -785,7 +785,7 @@ components:
                   field: total_seconds
               id: saved_query_id
               interval: '60'
-              platform: 'linux,darwin'
+              platform: linux,darwin
               prebuilt: false
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
@@ -811,7 +811,7 @@ components:
       type: object
       properties: {}
     Interval:
-      description: 'An interval, in seconds, on which to run the query.'
+      description: An interval, in seconds, on which to run the query.
       example: '60'
       type: string
     IntervalOrUndefined:
@@ -854,7 +854,7 @@ components:
       $ref: '#/components/schemas/PackDescription'
       nullable: true
     PackId:
-      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
+      description: The ID of the pack you want to run, retrieve, update, or delete.
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     PackIdOrUndefined:
@@ -878,7 +878,7 @@ components:
         Restricts the query to a specified platform. The default is all
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
-      example: 'linux,darwin'
+      example: linux,darwin
       type: string
     PlatformOrUndefined:
       $ref: '#/components/schemas/Platform'
@@ -1045,6 +1045,6 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: 'Run live queries, manage packs and saved queries.'
+  - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery

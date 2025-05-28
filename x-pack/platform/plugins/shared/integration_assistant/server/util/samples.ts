@@ -150,7 +150,7 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return yaml.safeDump(fieldsStructure, { sortKeys: false });
+  return yaml.dump(fieldsStructure, { sortKeys: false });
 }
 
 export function isObject(value: any): boolean {

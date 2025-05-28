@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReactNode } from 'react';
-import React, { useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTheme } from '../../../../../../hooks/use_theme';
+import { default as React, useEffect, useRef, useState, type ReactNode } from 'react';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { SyncBadge } from './badge/sync_badge';
-import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
-import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { SpanLinksBadge } from './badge/span_links_badge';
+import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
-import { useApmRouter } from '../../../../../../hooks/use_apm_router';
-import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
+import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
+import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -32,6 +32,7 @@ interface IContainerStyleProps {
   timelineMargins: Margins;
   isSelected: boolean;
   hasToggle: boolean;
+  hasOnClick: boolean;
 }
 
 interface IBarStyleProps {
@@ -45,6 +46,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
   user-select: none;
   padding-top: ${({ theme }) => theme.eui.euiSizeS};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
+  min-height: 44px;
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
@@ -52,7 +54,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
       : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
-  cursor: pointer;
+  cursor: ${(props) => (props.hasOnClick ? 'pointer' : 'default')}};
 
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
@@ -122,7 +124,8 @@ interface IWaterfallItemProps {
     width: number;
     color: string;
   }>;
-  onClick: (flyoutDetailTab: string) => unknown;
+  onClick?: (flyoutDetailTab: string) => unknown;
+  isEmbeddable?: boolean;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -201,7 +204,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
       return (
-        <EuiText style={{ overflow: 'hidden' }} size="s">
+        <EuiText css={{ overflow: 'hidden' }} size="s">
           <TruncateWithTooltip content={name} text={name} />
         </EuiText>
       );
@@ -225,6 +228,7 @@ export function WaterfallItem({
   marginLeftLevel,
   onClick,
   segments,
+  isEmbeddable = false,
 }: IWaterfallItemProps) {
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
@@ -257,9 +261,12 @@ export function WaterfallItem({
       isSelected={isSelected}
       hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        onClick(waterfallItemFlyoutTab);
+        if (onClick) {
+          e.stopPropagation();
+          onClick(waterfallItemFlyoutTab);
+        }
       }}
+      hasOnClick={onClick !== undefined}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={itemBarStyle}
@@ -286,11 +293,17 @@ export function WaterfallItem({
           <PrefixIcon item={item} />
         </SpanActionToolTip>
         {item.isOrphan ? <OrphanItemTooltipIcon docType={item.docType} /> : null}
+        {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
 
         <Duration item={item} />
-        <RelatedErrors item={item} errorCount={errorCount} />
+        {isEmbeddable ? (
+          <EmbeddableErrorIcon errorCount={errorCount} />
+        ) : (
+          <RelatedErrors item={item} errorCount={errorCount} />
+        )}
+
         {item.docType === 'span' && (
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
@@ -304,6 +317,14 @@ export function WaterfallItem({
       </ItemText>
     </Container>
   );
+}
+
+function EmbeddableErrorIcon({ errorCount }: { errorCount: number }) {
+  const theme = useEuiTheme();
+  if (errorCount <= 0) {
+    return null;
+  }
+  return <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />;
 }
 
 function RelatedErrors({

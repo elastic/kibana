@@ -131,8 +131,6 @@ const testProps: AlertsTableComponentProps = {
     query: 'query',
     language: 'language',
   },
-  hasIndexMaintenance: true,
-  hasIndexWrite: true,
   loading: false,
   renderChildComponent,
   runtimeMappings: {},
@@ -320,7 +318,7 @@ describe('GroupedAlertsTable', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
@@ -333,7 +331,7 @@ describe('GroupedAlertsTable', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -381,7 +379,7 @@ describe('GroupedAlertsTable', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -430,7 +428,7 @@ describe('GroupedAlertsTable', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     // level 2 pagination is reset
@@ -438,7 +436,7 @@ describe('GroupedAlertsTable', () => {
       within(getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-0')
         .getAttribute('aria-current')
-    ).toEqual('true');
+    ).toEqual('page');
     expect(
       within(getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-1')
@@ -484,11 +482,11 @@ describe('GroupedAlertsTable', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });
@@ -533,11 +531,11 @@ describe('GroupedAlertsTable', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });

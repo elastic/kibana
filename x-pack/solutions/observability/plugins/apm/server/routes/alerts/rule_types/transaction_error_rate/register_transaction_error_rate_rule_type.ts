@@ -29,12 +29,14 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
+import { unflattenObject } from '@kbn/object-utils';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
@@ -49,6 +51,7 @@ import { EventOutcome } from '../../../../../common/event_outcome';
 import type {
   THRESHOLD_MET_GROUP,
   ApmRuleParamsType,
+  AdditionalContext,
 } from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
@@ -83,6 +86,7 @@ export const transactionErrorRateActionVariables = [
   apmActionVariables.transactionType,
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
+  apmActionVariables.grouping,
 ];
 
 type TransactionErrorRateRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionErrorRate];
@@ -113,6 +117,7 @@ export function registerTransactionErrorRateRuleType({
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: transactionErrorRateParamsSchema },
+    doesSetRecoveryContext: true,
     schemas: {
       params: {
         type: 'config-schema',
@@ -290,6 +295,7 @@ export function registerTransactionErrorRateRuleType({
         );
         const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
 
         const payload = {
           [TRANSACTION_NAME]: ruleParams.transactionName,
@@ -312,6 +318,7 @@ export function registerTransactionErrorRateRuleType({
           transactionName: ruleParams.transactionName,
           triggerValue: asDecimalOrInteger(errorRate),
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 
@@ -321,6 +328,66 @@ export function registerTransactionErrorRateRuleType({
           context,
         });
       });
+
+      // Handle recovered alerts context
+      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+      for (const recoveredAlert of recoveredAlerts) {
+        const alertHits = recoveredAlert.hit as AdditionalContext;
+        const recoveredAlertId = recoveredAlert.alert.getId();
+        const alertUuid = recoveredAlert.alert.getUuid();
+        const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
+
+        const ruleParamsOfRecoveredAlert = alertHits?.[
+          ALERT_RULE_PARAMETERS
+        ] as TransactionErrorRateRuleTypeParams;
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
+          ApmRuleType.TransactionErrorRate,
+          groupByFieldsOfRecoveredAlert
+        );
+        const groupByFields: Record<string, string> = allGroupByFieldsOfRecoveredAlert.reduce(
+          (acc, sourceField: string) => {
+            if (alertHits?.[sourceField] !== undefined) {
+              acc[sourceField] = alertHits[sourceField];
+            }
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          getAlertUrlTransaction(
+            groupByFields[SERVICE_NAME],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[SERVICE_ENVIRONMENT],
+            groupByFields[TRANSACTION_TYPE]
+          )
+        );
+
+        const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
+        const recoveredContext = {
+          alertDetailsUrl,
+          interval: formatDurationFromTimeUnitChar(
+            ruleParams.windowSize,
+            ruleParams.windowUnit as TimeUnitChar
+          ),
+          reason: alertHits?.[ALERT_REASON],
+          // When group by doesn't include transaction.name, the context.transaction.name action variable will contain value of the Transaction Name filter
+          transactionName: ruleParams.transactionName,
+          threshold: ruleParams.threshold,
+          triggerValue: asDecimalOrInteger(alertHits?.[ALERT_EVALUATION_VALUE]),
+          viewInAppUrl,
+          grouping: groupingObject,
+          ...groupByActionVariables,
+        };
+
+        alertsClient.setAlertData({
+          id: recoveredAlertId,
+          context: recoveredContext,
+        });
+      }
 
       return { state: {} };
     },

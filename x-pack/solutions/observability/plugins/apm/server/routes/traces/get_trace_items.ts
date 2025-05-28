@@ -37,6 +37,7 @@ import {
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS,
@@ -63,9 +64,11 @@ import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import { mapOtelToSpanLink } from '../span_links/utils';
 
+export type TraceDoc = WaterfallTransaction | WaterfallSpan;
+
 export interface TraceItems {
   exceedsMax: boolean;
-  traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
+  traceDocs: TraceDoc[];
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
   traceDocsTotal: number;
@@ -105,6 +108,7 @@ export async function getTraceItems({
     PARENT_ID,
     TRANSACTION_ID,
     SPAN_ID,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
     ERROR_CULPRIT,
     ERROR_LOG_MESSAGE,
     ERROR_EXC_MESSAGE,
@@ -303,6 +307,7 @@ async function getTraceDocsPerPage({
     SPAN_COMPOSITE_COMPRESSION_STRATEGY,
     SPAN_COMPOSITE_SUM,
     SPAN_SYNC,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
     CHILD_ID,
     OTEL_SPAN_LINKS_SPAN_ID,
     OTEL_SPAN_LINKS_TRACE_ID,

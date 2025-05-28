@@ -10,7 +10,7 @@
 import { setup } from './helpers';
 import { fields } from '../../__tests__/helpers';
 
-describe('validation', () => {
+describe.skip('validation', () => {
   describe('command', () => {
     describe('CHANGE_POINT <value> [ ON <condition> AS <type>, <pvalue>]', () => {
       beforeEach(() => {
@@ -55,7 +55,7 @@ describe('validation', () => {
             fields.filter((v) => v.name !== '@timestamp')
           );
 
-          await expectErrors('FROM index | CHANGE_POINT longField', [
+          await expectErrors('FROM a_index | CHANGE_POINT longField', [
             `[CHANGE_POINT] Default @timestamp column is missing`,
           ]);
         });

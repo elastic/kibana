@@ -157,3 +157,15 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 # These features are disabled in Serverless until fully tested
 xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
+
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 10m
+  - id: siem.eqlRule
+    timeout: 5m
+  - id: attack-discovery
+    timeout: 10m

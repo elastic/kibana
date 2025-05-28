@@ -103,6 +103,15 @@ export enum KnowledgeBaseType {
   Contextual = 'contextual',
 }
 
+export enum KnowledgeBaseState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
+}
+
 export interface ObservabilityAIAssistantScreenContextRequest {
   starterPrompts?: StarterPrompt[];
   screenDescription?: string;

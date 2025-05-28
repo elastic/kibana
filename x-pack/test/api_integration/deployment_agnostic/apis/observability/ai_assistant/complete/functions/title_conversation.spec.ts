@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         await clearConversations(es);
         const simulatorPromise = llmProxy.interceptTitle(TITLE);
-        void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
+        void llmProxy.interceptWithResponse('The sky is blue because of Rayleigh scattering.');
 
         const res = await chatComplete({
           userPrompt: 'Why the sky is blue?',

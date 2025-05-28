@@ -62,7 +62,7 @@ export interface Consumer {
   name: string;
 }
 
-export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts'>;
+export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts' | 'streams'>;
 
 export type CellComponent = NonNullable<AlertsTableProps['renderCellValue']>;
 
@@ -372,6 +372,8 @@ export interface PublicAlertsDataGridProps
     | 'columns'
   > {
   ruleTypeIds: string[];
+  minScore?: number;
+  trackScores?: boolean;
   consumers?: string[];
   /**
    * If true, shows a button in the table toolbar to inspect the search alerts request

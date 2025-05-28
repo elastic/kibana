@@ -57,6 +57,7 @@ export interface ReindexStatusResponse {
     isReadonly: boolean;
     isFrozen: boolean;
     isInDataStream: boolean;
+    isFollowerIndex: boolean;
   };
   warnings?: IndexWarning[];
   reindexOp?: ReindexOperation;
@@ -115,6 +116,7 @@ export interface ReindexOperation {
   errorMessage: string | null;
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+  rollupJob?: string;
 
   /**
    * The original index settings to set after reindex is completed.

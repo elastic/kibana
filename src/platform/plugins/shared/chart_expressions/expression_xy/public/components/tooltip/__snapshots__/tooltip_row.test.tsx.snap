@@ -3,27 +3,17 @@
 exports[`TooltipRow should render label and value if both are specified 1`] = `
 <tr>
   <td
-    css={[Function]}
+    css="unknown styles"
   >
     <div
-      css={[Function]}
+      css="unknown styles"
     >
       tooltip
     </div>
   </td>
   <td>
     <div
-      css={
-        Object {
-          "map": undefined,
-          "name": "us16fb",
-          "next": undefined,
-          "styles": "
-            overflow-wrap: break-word;
-          ",
-          "toString": [Function],
-        }
-      }
+      css="unknown styles"
     >
       0
     </div>

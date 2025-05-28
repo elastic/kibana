@@ -16,10 +16,12 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { Axes } from './axes';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 export interface LineChartPoint {
   time: number | string;
@@ -33,7 +35,8 @@ interface Props {
 }
 
 export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width }) => {
-  const { euiColorLightShade } = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
   const theme: PartialTheme = {
     scales: { histogramPadding: 0.2 },
     background: {
@@ -42,10 +45,10 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
     axes: {
       gridLine: {
         horizontal: {
-          stroke: euiColorLightShade,
+          stroke: euiTheme.colors.lightShade,
         },
         vertical: {
-          stroke: euiColorLightShade,
+          stroke: euiTheme.colors.lightShade,
         },
       },
     },
@@ -61,7 +64,7 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
       <Chart>
         <Axes />
         <Tooltip type={TooltipType.None} />
-        <Settings theme={theme} locale={i18n.getLocale()} />
+        <Settings theme={theme} locale={i18n.getLocale()} baseTheme={chartBaseTheme} />
 
         <HistogramBarSeries
           id="event_rate"

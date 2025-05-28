@@ -100,6 +100,15 @@ const InContextMenuActions = (props: LayerActionsProps) => {
       setPopover(false);
     }
   }, [isPopoverOpen]);
+  // `neutral` and `risk` variants belong to `severity` so they're not
+  // available in `euiTheme.colors` directly
+  const getColorFromTheme = useCallback(
+    (color: LayerAction['color']) =>
+      color === 'risk' || color === 'neutral'
+        ? euiTheme.colors.severity[color]
+        : euiTheme.colors[color!],
+    [euiTheme]
+  );
 
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
@@ -144,9 +153,9 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               {...(i.color
                 ? {
                     css: css`
-                      color: ${euiTheme.colors[i.color]};
+                      color: ${getColorFromTheme(i.color)};
                       &:hover {
-                        text-decoration-color: ${euiTheme.colors[i.color]} !important;
+                        text-decoration-color: ${getColorFromTheme(i.color)} !important;
                       }
                     `,
                     size: 's', // need to be explicit here as css prop will disable the default small size

@@ -21,6 +21,9 @@
     "actions.actionTypeId",
     "actions.group",
     "alertTypeId",
+    "artifacts",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
     "consumer",
     "createdAt",
     "createdBy",
@@ -1128,7 +1131,9 @@
     "scheduledAt",
     "scope",
     "status",
-    "taskType"
+    "taskType",
+    "userScope",
+    "userScope.apiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],

@@ -54,7 +54,11 @@ jest.mock('../../hooks/use_get_available_rules_with_descriptions', () => ({
   useGetAvailableRulesWithDescriptions: jest.fn(),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+  useBreadcrumbs: jest.fn(),
+  TagsList: jest.fn(),
+}));
 
 jest.mock('@kbn/response-ops-rule-form/src/rule_type_modal', () => ({
   RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (

@@ -138,7 +138,9 @@
     "@kbn/event-stacktrace",
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/object-utils",
+    "@kbn/presentation-containers",
   ],
   "exclude": ["target/**/*"]
 }

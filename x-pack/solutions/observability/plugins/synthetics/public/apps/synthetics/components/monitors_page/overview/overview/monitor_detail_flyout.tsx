@@ -41,6 +41,7 @@ import { ActionsPopover } from './actions_popover';
 import {
   getMonitorAction,
   selectMonitorUpsertStatus,
+  selectOverviewState,
   selectServiceLocationsState,
   selectSyntheticsMonitor,
   selectSyntheticsMonitorError,
@@ -52,6 +53,7 @@ import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '.
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 
 interface Props {
   configId: string;
@@ -209,7 +211,7 @@ function DetailedFlyoutHeader({
 
 export function LoadingState() {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
@@ -369,6 +371,34 @@ export function MonitorDetailFlyout(props: Props) {
     </EuiFlyout>
   );
 }
+
+export const MaybeMonitorDetailsFlyout = ({
+  setFlyoutConfigCallback,
+}: {
+  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+}) => {
+  const dispatch = useDispatch();
+
+  const { flyoutConfig, pageState } = useSelector(selectOverviewState);
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewStatusAction.get({ pageState })),
+    [dispatch, pageState]
+  );
+
+  return flyoutConfig?.configId && flyoutConfig?.location ? (
+    <MonitorDetailFlyout
+      configId={flyoutConfig.configId}
+      id={flyoutConfig.id}
+      location={flyoutConfig.location}
+      locationId={flyoutConfig.locationId}
+      spaceId={flyoutConfig.spaceId}
+      onClose={hideFlyout}
+      onEnabledChange={forceRefreshCallback}
+      onLocationChange={setFlyoutConfigCallback}
+    />
+  ) : null;
+};
 
 const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
   defaultMessage: 'Duration',

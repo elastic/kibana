@@ -6,6 +6,7 @@
  */
 
 import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -72,6 +73,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -133,6 +135,7 @@ export interface ObservabilityPublicPluginsStart {
   cases: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -167,6 +170,7 @@ export interface ObservabilityPublicPluginsStart {
   investigate?: InvestigatePublicStart;
   streams?: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  inspector: InspectorPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-xpack-observability",
+  "owner": [],
+  "group": "observability",
+  "visibility": "private",
+  "devOnly": true
+}

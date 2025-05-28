@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiTitle, RIGHT_ALIGNMENT, EuiSpacer } from '@elastic/eui';
 import type { ValuesType } from 'utility-types';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -37,6 +38,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
     query,
     path: { groupId },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
+  const { link } = useApmRouter();
 
   const { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled } = query;
 
@@ -86,11 +88,18 @@ export function TopErroneousTransactions({ serviceName }: Props) {
             text={transactionName}
             content={
               <TransactionDetailLink
-                serviceName={serviceName}
                 transactionName={transactionName}
-                transactionType={transactionType ?? ''}
-                comparisonEnabled={comparisonEnabled}
-                offset={offset}
+                href={link('/services/{serviceName}/transactions/view', {
+                  path: { serviceName },
+                  query: {
+                    ...query,
+                    transactionName,
+                    transactionType: transactionType ?? '',
+                    comparisonEnabled,
+                    showCriticalPath: false,
+                    offset,
+                  },
+                })}
               >
                 {transactionName}
               </TransactionDetailLink>

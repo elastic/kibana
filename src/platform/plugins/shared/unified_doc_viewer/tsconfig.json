@@ -40,7 +40,8 @@
     "@kbn/management-settings-ids",
     "@kbn/apm-types",
     "@kbn/event-stacktrace",
-    "@kbn/react-hooks"
+    "@kbn/data-view-utils",
+    "@kbn/react-hooks",
   ],
   "exclude": [
     "target/**/*",

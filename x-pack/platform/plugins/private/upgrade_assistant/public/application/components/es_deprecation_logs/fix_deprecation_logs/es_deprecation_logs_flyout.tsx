@@ -193,7 +193,7 @@ export const EsDeprecationLogsFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>
+          <h2 id="esDeprecationLogsFlyoutTitle">
             <FormattedMessage
               id="xpack.upgradeAssistant.esDeprecationLogs.pageTitle"
               defaultMessage="Elasticsearch deprecation logs"

@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
+import { FrameSymbolStatus, FrameType, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
@@ -159,7 +159,9 @@ export function FrameInformationWindow({
           </EuiFlexGroup>
         </EuiFlexItem>
         <FrameInformationAIAssistant frame={frame} />
-        {showSymbolsStatus && symbolStatus !== FrameSymbolStatus.SYMBOLIZED ? (
+        {showSymbolsStatus &&
+        symbolStatus !== FrameSymbolStatus.SYMBOLIZED &&
+        frame.frameType < FrameType.Root ? (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />
           </EuiFlexItem>

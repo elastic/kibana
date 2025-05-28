@@ -54,7 +54,7 @@ tags:
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
       description: Alerting documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/alerting-getting-started.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
     x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
@@ -74,14 +74,14 @@ tags:
     name: cases
     externalDocs:
       description: Cases documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/cases.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
     externalDocs:
       description: Connector documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/action-types.html
+      url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Dashboards
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
@@ -115,7 +115,7 @@ tags:
       * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
       * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
 
-      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
     name: saved objects
     x-displayName: Saved objects
   - description: Manage and interact with Security Assistant resources.
@@ -229,6 +229,11 @@ tags:
     externalDocs:
       url: https://www.elastic.co/guide/en/kibana/8.x/xpack-spaces.html
       description: Space overview
+  - name: synthetics
+    x-displayName: Synthetics
+    externalDocs:
+      description: Synthetic monitoring
+      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
   - name: system
     x-displayName: System
     description: |
@@ -736,6 +741,7 @@ paths:
                     - $ref: '#/components/schemas/gemini_secrets'
                     - $ref: '#/components/schemas/resilient_secrets'
                     - $ref: '#/components/schemas/jira_secrets'
+                    - $ref: '#/components/schemas/defender_secrets'
                     - $ref: '#/components/schemas/teams_secrets'
                     - $ref: '#/components/schemas/genai_secrets'
                     - $ref: '#/components/schemas/opsgenie_secrets'
@@ -853,6 +859,7 @@ paths:
                     - $ref: '#/components/schemas/resilient_config'
                     - $ref: '#/components/schemas/index_config'
                     - $ref: '#/components/schemas/jira_config'
+                    - $ref: '#/components/schemas/defender_config'
                     - $ref: '#/components/schemas/genai_azure_config'
                     - $ref: '#/components/schemas/genai_openai_config'
                     - $ref: '#/components/schemas/opsgenie_config'
@@ -980,6 +987,8 @@ paths:
                     - $ref: '#/components/schemas/run_closeincident'
                     - $ref: '#/components/schemas/run_createalert'
                     - $ref: '#/components/schemas/run_fieldsbyissuetype'
+                    - $ref: '#/components/schemas/run_getagentdetails'
+                    - $ref: '#/components/schemas/run_getagents'
                     - $ref: '#/components/schemas/run_getchoices'
                     - $ref: '#/components/schemas/run_getfields'
                     - $ref: '#/components/schemas/run_getincident'
@@ -1626,6 +1635,29 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2285,6 +2317,30 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      maxItems: 10
+                      type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2544,6 +2600,29 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3213,6 +3292,30 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      maxItems: 10
+                      type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3437,6 +3540,29 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4632,6 +4758,29 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -20319,25 +20468,52 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                create:
+                  - allowed: true
+                    anonymized: false
+                    field: host.name
+                  - allowed: false
+                    anonymized: true
+                    field: user.name
+                delete:
+                  ids:
+                    - field5
+                    - field6
+                  query: 'field: host.name'
+                update:
+                  - allowed: true
+                    anonymized: false
+                    id: field8
+                  - allowed: false
+                    anonymized: true
+                    id: field9
               type: object
               properties:
                 create:
+                  description: Array of anonymization fields to create.
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldCreateProps'
                   type: array
                 delete:
+                  description: Object containing the query to filter anonymization fields and/or an array of anonymization field IDs to delete.
                   type: object
                   properties:
                     ids:
-                      description: Array of anonymization fields IDs
+                      description: Array of IDs to apply the action to.
+                      example:
+                        - '1234'
+                        - '5678'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: Query to filter anonymization fields
+                      description: Query to filter the bulk action.
+                      example: 'status: ''inactive'''
                       type: string
                 update:
+                  description: Array of anonymization fields to update.
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldUpdateProps'
                   type: array
@@ -20345,20 +20521,67 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                anonymization_fields_count: 5
+                attributes:
+                  results:
+                    created:
+                      - allowed: false
+                        anonymized: true
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy: user1
+                        field: host.name
+                        id: field2
+                        namespace: default
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        updatedBy: user1
+                    deleted:
+                      - field3
+                    skipped:
+                      - id: field4
+                        name: user.name
+                        skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
+                    updated:
+                      - allowed: true
+                        anonymized: false
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy: user1
+                        field: url.domain
+                        id: field8
+                        namespace: default
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        updatedBy: user1
+                  summary:
+                    failed: 1
+                    skipped: 1
+                    succeeded: 2
+                    total: 5
+                message: Bulk action completed successfully
+                status_code: 200
+                success: true
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldsBulkCrudActionResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request body
+                statusCode: 400
               schema:
                 type: object
                 properties:
                   error:
+                    description: Error type or name.
                     type: string
                   message:
+                    description: Detailed error message.
                     type: string
                   statusCode:
+                    description: Status code of the response.
                     type: number
           description: Generic Error
       summary: Apply a bulk action to anonymization fields
@@ -20369,7 +20592,13 @@ paths:
       description: Get a list of all anonymization fields.
       operationId: FindAnonymizationFields
       parameters:
-        - in: query
+        - description: Fields to return
+          example:
+            - id
+            - field
+            - anonymized
+            - allowed
+          in: query
           name: fields
           required: false
           schema:
@@ -20377,24 +20606,28 @@ paths:
               type: string
             type: array
         - description: Search query
+          example: 'field: "user.name"'
           in: query
           name: filter
           required: false
           schema:
             type: string
         - description: Field to sort by
+          example: created_at
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_FindAnonymizationFieldsSortField'
         - description: Sort order
+          example: asc
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
         - description: Page number
+          example: 1
           in: query
           name: page
           required: false
@@ -20403,6 +20636,7 @@ paths:
             minimum: 1
             type: integer
         - description: AnonymizationFields per page
+          example: 20
           in: query
           name: per_page
           required: false
@@ -20414,6 +20648,21 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                data:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
+                page: 1
+                perPage: 20
+                total: 100
               schema:
                 type: object
                 properties:
@@ -20436,6 +20685,10 @@ paths:
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                statusCode: 400
               schema:
                 type: object
                 properties:
@@ -20455,6 +20708,7 @@ paths:
       operationId: ChatComplete
       parameters:
         - description: If true, the response will not include content references.
+          example: false
           in: query
           name: content_references_disabled
           required: false
@@ -20464,6 +20718,24 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              connectorId: conn-001
+              conversationId: abc123
+              isStream: true
+              langSmithApiKey: sk-abc123
+              langSmithProject: security_ai_project
+              messages:
+                - content: What are some common phishing techniques?
+                  data:
+                    user_id: user_789
+                  fields_to_anonymize:
+                    - user.name
+                    - source.ip
+                  role: user
+              model: gpt-4
+              persist: true
+              promptId: prompt_456
+              responseLanguage: en
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_ChatCompleteProps'
         required: true
@@ -20474,7 +20746,7 @@ paths:
               schema:
                 format: binary
                 type: string
-          description: Indicates a successful call.
+          description: Indicates a successful model response call.
         '400':
           content:
             application/json:
@@ -20482,10 +20754,16 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: Error type.
+                    example: Bad Request
                     type: string
                   message:
+                    description: Human-readable error message.
+                    example: Invalid request payload.
                     type: string
                   statusCode:
+                    description: HTTP status code.
+                    example: 400
                     type: number
           description: Generic Error
       summary: Create a model response
@@ -20493,11 +20771,23 @@ paths:
         - Security AI Assistant API
   /api/security_ai_assistant/current_user/conversations:
     post:
-      description: Create a new Security AI Assistant conversation.
+      description: Create a new Security AI Assistant conversation. This endpoint allows the user to initiate a conversation with the Security AI Assistant by providing the required parameters.
       operationId: CreateConversation
       requestBody:
         content:
           application/json:
+            example:
+              apiConfig:
+                actionTypeId: '67890'
+                connectorId: '12345'
+              category: assistant
+              excludeFromLastConversationStorage: false
+              messages:
+                - content: Hello, how can I assist you today?
+                  role: system
+                  timestamp: '2023-10-31T12:00:00Z'
+              replacements: {}
+              title: Security Discussion
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCreateProps'
         required: true
@@ -20505,9 +20795,27 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '67890'
+                  connectorId: '12345'
+                category: assistant
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: false
+                id: abc123
+                messages:
+                  - content: Hello, how can I assist you today?
+                    role: system
+                    timestamp: '2023-10-31T12:00:00Z'
+                replacements: {}
+                title: Security Discussion
+                updatedAt: '2023-10-31T12:01:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation was created successfully.
         '400':
           content:
             application/json:
@@ -20515,59 +20823,72 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: 'Missing required parameter: title'
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request, such as missing required parameters or incorrect data.
       summary: Create a conversation
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
-      description: Get a list of all conversations for the current user.
+      description: Get a list of all conversations for the current user. This endpoint allows users to search, filter, sort, and paginate through their conversations.
       operationId: FindConversations
       parameters:
-        - in: query
+        - description: A list of fields to include in the response. If omitted, all fields are returned.
+          in: query
           name: fields
           required: false
           schema:
+            example:
+              - id
+              - title
+              - createdAt
             items:
               type: string
             type: array
-        - description: Search query
+        - description: A search query to filter the conversations. Can match against titles, messages, or other conversation attributes.
           in: query
           name: filter
           required: false
           schema:
+            example: Security Issue
             type: string
-        - description: Field to sort by
+        - description: The field by which to sort the results. Valid fields are `created_at`, `title`, and `updated_at`.
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_FindConversationsSortField'
-        - description: Sort order
+            example: created_at
+        - description: The order in which to sort the results. Can be either `asc` for ascending or `desc` for descending.
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
-        - description: Page number
+            example: desc
+        - description: The page number of the results to retrieve. Default is 1.
           in: query
           name: page
           required: false
           schema:
             default: 1
+            example: 1
             minimum: 1
             type: integer
-        - description: Conversations per page
+        - description: The number of conversations to return per page. Default is 20.
           in: query
           name: per_page
           required: false
           schema:
             default: 20
+            example: 20
             minimum: 0
             type: integer
       responses:
@@ -20578,21 +20899,28 @@ paths:
                 type: object
                 properties:
                   data:
+                    description: A list of conversations.
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationResponse'
                     type: array
                   page:
+                    description: The current page of the results.
+                    example: 1
                     type: integer
                   perPage:
+                    description: The number of results returned per page.
+                    example: 20
                     type: integer
                   total:
+                    description: The total number of conversations matching the filter criteria.
+                    example: 100
                     type: integer
                 required:
                   - page
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: Successful response, returns a paginated list of conversations matching the specified criteria.
         '400':
           content:
             application/json:
@@ -20600,21 +20928,25 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: Invalid filter query parameter
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. The request could not be processed due to an invalid query parameter or other issue.
       summary: Get conversations
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/current_user/conversations/{id}:
     delete:
-      description: Delete an existing conversation using the conversation ID.
+      description: Delete an existing conversation using the conversation ID. This endpoint allows users to permanently delete a conversation.
       operationId: DeleteConversation
       parameters:
         - description: The conversation's `id` value.
+          example: abc123
           in: path
           name: id
           required: true
@@ -20624,9 +20956,27 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '67890'
+                  connectorId: '12345'
+                category: assistant
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: false
+                id: abc123
+                messages:
+                  - content: The conversation has been deleted.
+                    role: system
+                    timestamp: '2023-10-31T12:35:00Z'
+                replacements: {}
+                title: Deleted Security Discussion
+                updatedAt: '2023-10-31T12:01:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation was deleted successfully.
         '400':
           content:
             application/json:
@@ -20634,20 +20984,24 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: Invalid conversation ID
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request.
       summary: Delete a conversation
       tags:
         - Security AI Assistant API
     get:
-      description: Get the details of an existing conversation using the conversation ID.
+      description: Get the details of an existing conversation using the conversation ID. This allows users to fetch the specific conversation data by its unique ID.
       operationId: ReadConversation
       parameters:
-        - description: The conversation's `id` value.
+        - description: The conversation's `id` value, a unique identifier for the conversation.
+          example: abc123
           in: path
           name: id
           required: true
@@ -20657,9 +21011,27 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '67890'
+                  connectorId: '12345'
+                category: assistant
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: false
+                id: abc123
+                messages:
+                  - content: Hello, how can I assist you today?
+                    role: system
+                    timestamp: '2023-10-31T12:00:00Z'
+                replacements: {}
+                title: Security Discussion
+                updatedAt: '2023-10-31T12:01:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation details are returned.
         '400':
           content:
             application/json:
@@ -20667,20 +21039,24 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: Invalid conversation ID
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. The request could not be processed due to an error.
       summary: Get a conversation
       tags:
         - Security AI Assistant API
     put:
-      description: Update an existing conversation using the conversation ID.
+      description: Update an existing conversation using the conversation ID. This endpoint allows users to modify the details of an existing conversation.
       operationId: UpdateConversation
       parameters:
         - description: The conversation's `id` value.
+          example: abc123
           in: path
           name: id
           required: true
@@ -20689,6 +21065,18 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              apiConfig:
+                actionTypeId: '09876'
+                connectorId: '54321'
+              category: insights
+              excludeFromLastConversationStorage: true
+              messages:
+                - content: The issue was resolved.
+                  role: assistant
+                  timestamp: '2023-10-31T12:30:00Z'
+              replacements: {}
+              title: Updated Security Discussion
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationUpdateProps'
         required: true
@@ -20696,9 +21084,27 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '09876'
+                  connectorId: '54321'
+                category: insights
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: true
+                id: abc123
+                messages:
+                  - content: The issue was resolved.
+                    role: assistant
+                    timestamp: '2023-10-31T12:30:00Z'
+                replacements: {}
+                title: Updated Security Discussion
+                updatedAt: '2023-10-31T12:31:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation was updated successfully.
         '400':
           content:
             application/json:
@@ -20706,12 +21112,15 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: 'Missing required field: title'
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request, such as missing required parameters or incorrect data.
       summary: Update a conversation
       tags:
         - Security AI Assistant API
@@ -20721,6 +21130,7 @@ paths:
       operationId: ReadKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
+          example: kb12345
           in: path
           name: resource
           schema:
@@ -20733,16 +21143,28 @@ paths:
                 type: object
                 properties:
                   elser_exists:
+                    description: Indicates if the ELSER model exists for the KnowledgeBase.
+                    example: true
                     type: boolean
                   is_setup_available:
+                    description: Indicates if the setup process is available for the KnowledgeBase.
+                    example: true
                     type: boolean
                   is_setup_in_progress:
+                    description: Indicates if the setup process is currently in progress.
+                    example: false
                     type: boolean
                   product_documentation_status:
+                    description: The status of the product documentation in the KnowledgeBase.
+                    example: complete
                     type: string
                   security_labs_exists:
+                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+                    example: true
                     type: boolean
                   user_data_exists:
+                    description: Indicates if user data exists in the KnowledgeBase.
+                    example: false
                     type: boolean
           description: Indicates a successful call.
         '400':
@@ -20752,10 +21174,16 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short description of the error.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed error message.
+                    example: Invalid resource ID provided.
                     type: string
                   statusCode:
+                    description: The HTTP status code of the error.
+                    example: 400
                     type: number
           description: Generic Error
       summary: Read a KnowledgeBase
@@ -20766,17 +21194,20 @@ paths:
       operationId: CreateKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
+          example: kb12345
           in: path
           name: resource
           schema:
             type: string
-        - description: Optional ELSER modelId to use when setting up the Knowledge Base
+        - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          example: elser-model-001
           in: query
           name: modelId
           required: false
           schema:
             type: string
-        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+          example: true
           in: query
           name: ignoreSecurityLabs
           required: false
@@ -20797,10 +21228,16 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short description of the error.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed error message.
+                    example: Invalid resource ID provided.
                     type: string
                   statusCode:
+                    description: The HTTP status code of the error.
+                    example: 400
                     type: number
           description: Generic Error
       summary: Create a KnowledgeBase
@@ -20813,6 +21250,13 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              content: To reset your password, go to the settings page and click 'Reset Password'.
+              tags:
+                - password
+                - reset
+                - help
+              title: How to reset a password
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
         required: true
@@ -20820,21 +21264,32 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                content: To reset your password, go to the settings page and click 'Reset Password'.
+                id: '12345'
+                tags:
+                  - password
+                  - reset
+                  - help
+                title: How to reset a password
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           description: Successful request returning Knowledge Base Entries
         '400':
           content:
             application/json:
+              example:
+                error: Invalid input
+                message: The 'title' field is required.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as invalid input or missing required fields.
       summary: Create a Knowledge Base Entry
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
-      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs
+      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs.
       operationId: PerformKnowledgeBaseEntryBulkAction
       requestBody:
         content:
@@ -20843,6 +21298,10 @@ paths:
               type: object
               properties:
                 create:
+                  description: List of Knowledge Base Entries to create.
+                  example:
+                    - content: This is the content of the new entry.
+                      title: New Entry
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
                   type: array
@@ -20850,15 +21309,25 @@ paths:
                   type: object
                   properties:
                     ids:
-                      description: Array of Knowledge base Entry IDs
+                      description: Array of Knowledge Base Entry IDs.
+                      example:
+                        - '123'
+                        - '456'
+                        - '789'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: Query to filter Knowledge Base Entries
+                      description: Query to filter Knowledge Base Entries.
+                      example: status:active AND category:technology
                       type: string
                 update:
+                  description: List of Knowledge Base Entries to update.
+                  example:
+                    - content: Updated content.
+                      id: '123'
+                      title: Updated Entry
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
                   type: array
@@ -20883,45 +21352,54 @@ paths:
       description: Finds Knowledge Base Entries that match the given query.
       operationId: FindKnowledgeBaseEntries
       parameters:
-        - in: query
+        - description: A list of fields to include in the response. If not provided, all fields will be included.
+          in: query
           name: fields
           required: false
           schema:
+            example:
+              - title
+              - created_at
             items:
               type: string
             type: array
-        - description: Search query
+        - description: Search query to filter Knowledge Base Entries by specific criteria.
           in: query
           name: filter
           required: false
           schema:
+            example: error handling
             type: string
-        - description: Field to sort by
+        - description: Field to sort the Knowledge Base Entries by.
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField'
-        - description: Sort order
+            example: created_at
+        - description: Sort order for the results, either asc or desc.
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
-        - description: Page number
+            example: asc
+        - description: Page number for paginated results. Defaults to 1.
           in: query
           name: page
           required: false
           schema:
             default: 1
+            example: 2
             minimum: 1
             type: integer
-        - description: Knowledge Base Entries per page
+        - description: Number of Knowledge Base Entries to return per page. Defaults to 20.
           in: query
           name: per_page
           required: false
           schema:
             default: 20
+            example: 10
             minimum: 0
             type: integer
       responses:
@@ -20932,21 +21410,28 @@ paths:
                 type: object
                 properties:
                   data:
+                    description: The list of Knowledge Base Entries for the current page.
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
                     type: array
                   page:
+                    description: The current page number.
+                    example: 1
                     type: integer
                   perPage:
+                    description: The number of Knowledge Base Entries returned per page.
+                    example: 20
                     type: integer
                   total:
+                    description: The total number of Knowledge Base Entries available.
+                    example: 100
                     type: integer
                 required:
                   - page
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: Successful response containing the paginated Knowledge Base Entries.
         '400':
           content:
             application/json:
@@ -20954,21 +21439,28 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short description of the error.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed message explaining the error.
+                    example: 'Invalid query parameter: sort_order'
                     type: string
                   statusCode:
+                    description: The HTTP status code of the error.
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error indicating an issue with the request.
       summary: Finds Knowledge Base Entries that match the given query.
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/knowledge_base/entries/{id}:
     delete:
-      description: Deletes a single Knowledge Base Entry using the `id` field
+      description: Delete a Knowledge Base Entry by its unique `id`.
       operationId: DeleteKnowledgeBaseEntry
       parameters:
-        - description: The Knowledge Base Entry's `id` value
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to delete.
+          example: '12345'
           in: path
           name: id
           required: true
@@ -20978,23 +21470,30 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                id: '12345'
+                message: Knowledge Base Entry successfully deleted.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_DeleteResponseFields'
-          description: Successful request returning the deleted Knowledge Base Entry's ID
+          description: Successful request returning the `id` of the deleted Knowledge Base Entry.
         '400':
           content:
             application/json:
+              example:
+                error: Not Found
+                message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as an invalid `id` or the entry not being found.
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:
         - Security AI Assistant API
     get:
-      description: Read a Knowledge Base Entry
+      description: Retrieve a Knowledge Base Entry by its unique `id`.
       operationId: ReadKnowledgeBaseEntry
       parameters:
-        - description: The Knowledge Base Entry's `id` value.
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
+          example: '12345'
           in: path
           name: id
           required: true
@@ -21004,23 +21503,35 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                content: To reset your password, go to the settings page and click 'Reset Password'.
+                id: '12345'
+                tags:
+                  - password
+                  - reset
+                  - help
+                title: How to reset a password
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
-          description: Successful request returning a Knowledge Base Entry
+          description: Successful request returning the requested Knowledge Base Entry.
         '400':
           content:
             application/json:
+              example:
+                error: Not Found
+                message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as an invalid `id` or the entry not being found.
       summary: Read a Knowledge Base Entry
       tags:
         - Security AI Assistant API
     put:
-      description: Update a Knowledge Base Entry
+      description: Update an existing Knowledge Base Entry by its unique `id`.
       operationId: UpdateKnowledgeBaseEntry
       parameters:
-        - description: The Knowledge Base Entry's `id` value
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to update.
+          example: '12345'
           in: path
           name: id
           required: true
@@ -21029,6 +21540,14 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              content: To reset your password, go to the settings page, click 'Reset Password', and follow the instructions.
+              tags:
+                - password
+                - reset
+                - help
+                - update
+              title: How to reset a password (updated)
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps'
         required: true
@@ -21036,45 +21555,76 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                content: To reset your password, go to the settings page, click 'Reset Password', and follow the instructions.
+                id: '12345'
+                tags:
+                  - password
+                  - reset
+                  - help
+                  - update
+                title: How to reset a password (updated)
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
-          description: Successful request returning the updated Knowledge Base Entry
+          description: Successful request returning the updated Knowledge Base Entry.
         '400':
           content:
             application/json:
+              example:
+                error: Invalid input
+                message: The 'content' field cannot be empty.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as invalid input or the entry not being found.
       summary: Update a Knowledge Base Entry
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
-      description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
+      description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs. This action allows for bulk create, update, or delete operations.
       operationId: PerformPromptsBulkAction
       requestBody:
         content:
           application/json:
+            example:
+              create:
+                - content: Please verify the security settings.
+                  name: New Security Prompt
+                  promptType: system
+              delete:
+                ids:
+                  - prompt1
+                  - prompt2
+              update:
+                - content: Updated content for security prompt.
+                  id: prompt123
             schema:
               type: object
               properties:
                 create:
+                  description: List of prompts to be created.
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_PromptCreateProps'
                   type: array
                 delete:
+                  description: Criteria for deleting prompts in bulk.
                   type: object
                   properties:
                     ids:
-                      description: Array of prompts IDs
+                      description: Array of IDs to apply the action to.
+                      example:
+                        - '1234'
+                        - '5678'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: Query to filter promps
+                      description: Query to filter the bulk action.
+                      example: 'status: ''inactive'''
                       type: string
                 update:
+                  description: List of prompts to be updated.
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_PromptUpdateProps'
                   type: array
@@ -21082,9 +21632,41 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    attributes:
+                      errors: []
+                      results:
+                        created:
+                          - content: Please verify the security settings.
+                            id: prompt6
+                            name: New Security Prompt
+                            promptType: system
+                        deleted:
+                          - prompt2
+                          - prompt3
+                        skipped:
+                          - id: prompt4
+                            name: Security Prompt
+                            skip_reason: PROMPT_FIELD_NOT_MODIFIED
+                        updated:
+                          - content: Updated security settings prompt
+                            id: prompt1
+                            name: Security Prompt
+                            promptType: system
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 4
+                        total: 5
+                    message: Bulk action completed successfully.
+                    prompts_count: 5
+                    status_code: 200
+                    success: true
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_PromptsBulkCrudActionResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call with the results of the bulk action.
         '400':
           content:
             application/json:
@@ -21092,59 +21674,73 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short error message.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed error message.
+                    example: Invalid prompt ID or missing required fields.
                     type: string
                   statusCode:
+                    description: The HTTP status code for the error.
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Indicates a generic error due to a bad request.
       summary: Apply a bulk action to prompts
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/prompts/_find:
     get:
-      description: Get a list of all prompts.
+      description: Get a list of all prompts based on optional filters, sorting, and pagination.
       operationId: FindPrompts
       parameters:
-        - in: query
+        - description: List of specific fields to include in each returned prompt.
+          in: query
           name: fields
           required: false
           schema:
+            example:
+              - id
+              - name
+              - content
             items:
               type: string
             type: array
-        - description: Search query
+        - description: Search query string to filter prompts by matching fields.
           in: query
           name: filter
           required: false
           schema:
+            example: error handling
             type: string
-        - description: Field to sort by
+        - description: Field to sort prompts by.
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_FindPromptsSortField'
-        - description: Sort order
+        - description: Sort order, either asc or desc.
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
-        - description: Page number
+        - description: Page number for pagination.
           in: query
           name: page
           required: false
           schema:
             default: 1
+            example: 1
             minimum: 1
             type: integer
-        - description: Prompts per page
+        - description: Number of prompts per page.
           in: query
           name: per_page
           required: false
           schema:
             default: 20
+            example: 20
             minimum: 0
             type: integer
       responses:
@@ -21152,24 +21748,56 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  data:
+                    - categories:
+                        - troubleshooting
+                        - logging
+                      color: '#FF5733'
+                      consumer: security
+                      content: If you encounter an error, check the logs and retry.
+                      createdAt: '2025-04-20T21:00:00Z'
+                      createdBy: jdoe
+                      id: prompt-123
+                      isDefault: true
+                      isNewConversationDefault: false
+                      name: Error Troubleshooting Prompt
+                      namespace: default
+                      promptType: standard
+                      timestamp: '2025-04-30T22:30:00Z'
+                      updatedAt: '2025-04-30T22:45:00Z'
+                      updatedBy: jdoe
+                      users:
+                        - full_name: John Doe
+                          username: jdoe
+                  page: 1
+                  perPage: 20
+                  total: 142
                 type: object
                 properties:
                   data:
+                    description: The list of prompts returned based on the search query, sorting, and pagination.
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_PromptResponse'
                     type: array
                   page:
+                    description: Current page number.
+                    example: 1
                     type: integer
                   perPage:
+                    description: Number of prompts per page.
+                    example: 20
                     type: integer
                   total:
+                    description: Total number of prompts matching the query.
+                    example: 142
                     type: integer
                 required:
                   - page
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: Successful response containing a list of prompts.
         '400':
           content:
             application/json:
@@ -21177,12 +21805,18 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: Short error message.
+                    example: Bad Request
                     type: string
                   message:
+                    description: Detailed description of the error.
+                    example: Invalid sort order value provided.
                     type: string
                   statusCode:
+                    description: HTTP status code for the error.
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Bad request due to invalid parameters or malformed query.
       summary: Get prompts
       tags:
         - Security AI Assistant API
@@ -22504,6 +23138,982 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
+  /api/synthetics/monitors:
+    get:
+      description: |
+        Get a list of monitors.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-synthetic-monitors
+      parameters:
+        - description: Additional filtering criteria.
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: The locations to filter by.
+          in: query
+          name: locations
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: The monitor types to filter.
+          in: query
+          name: monitorTypes
+          schema:
+            oneOf:
+              - enum:
+                  - browser
+                  - http
+                  - icmp
+                  - tcp
+                type: string
+              - type: array
+        - description: The page number for paginated results.
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: The number of items to return per page.
+          in: query
+          name: per_page
+          schema:
+            type: integer
+        - description: The projects to filter by.
+          in: query
+          name: projects
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: A free-text query string.
+          in: query
+          name: query
+          schema:
+            type: string
+        - description: The schedules to filter by.
+          in: query
+          name: schedules
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - description: The field to sort the results by.
+          in: query
+          name: sortField
+          schema:
+            enum:
+              - name
+              - createdAt
+              - updatedAt
+              - status
+            type: string
+        - description: The sort order.
+          in: query
+          name: sortOrder
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: The status to filter by.
+          in: query
+          name: status
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - description: Tags to filter monitors.
+          in: query
+          name: tags
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: |
+            Specifies whether to apply logical AND filtering for specific fields. Accepts either a string with values "tags" or "locations" or an array containing both.
+          in: query
+          name: useLogicalAndFor
+          schema:
+            oneOf:
+              - enum:
+                  - tags
+                  - locations
+                type: string
+              - items:
+                  enum:
+                    - tags
+                    - locations
+                  type: string
+                type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSyntheticMonitorsResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`.
+                  value: |-
+                    {
+                        "page": 1,
+                        "total": 24,
+                        "monitors": [
+                            {
+                                "type": "icmp",
+                                "enabled": false,
+                                "alert": {
+                                    "status": {
+                                        "enabled": true
+                                    },
+                                    "tls": {
+                                        "enabled": true
+                                    }
+                                },
+                                "schedule": {
+                                    "number": "3",
+                                    "unit": "m"
+                                },
+                                "config_id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "timeout": "16",
+                                "name": "8.8.8.8:80",
+                                "locations": [
+                                    {
+                                        "id": "us_central",
+                                        "label": "North America - US Central",
+                                        "geo": {
+                                            "lat": 41.25,
+                                            "lon": -95.86
+                                        },
+                                        "isServiceManaged": true
+                                    }
+                                ],
+                                "namespace": "default",
+                                "origin": "ui",
+                                "id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "max_attempts": 2,
+                                "wait": "7",
+                                "revision": 3,
+                                "mode": "all",
+                                "ipv4": true,
+                                "ipv6": true,
+                                "created_at": "2023-11-07T09:57:04.152Z",
+                                "updated_at": "2023-12-04T19:19:34.039Z",
+                                "host": "8.8.8.8:80"
+                            }
+                        ],
+                        "absoluteTotal": 24,
+                        "perPage": 10,
+                    }
+              schema:
+                type: object
+          description: A successful response.
+      summary: Get monitors
+      tags:
+        - synthetics
+    post:
+      description: |
+        Create a new monitor with the specified attributes. A monitor can be one of the following types: HTTP, TCP, ICMP, or Browser. The required and default fields may vary based on the monitor type.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: post-synthetic-monitors
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postSyntheticMonitorsRequestExample1:
+                description: Create an HTTP monitor to check a website's availability.
+                summary: HTTP monitor
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample2:
+                description: Create a TCP monitor to monitor a server's availability.
+                summary: TCP monitor
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              postSyntheticMonitorsRequestExample3:
+                description: Create an ICMP monitor to perform ping checks.
+                summary: ICMP monitor
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample4:
+                description: Create a browser monitor to check a website.
+                summary: Browser monitor
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+            schema:
+              description: |
+                The request body should contain the attributes of the monitor you want to create. The required and default fields differ depending on the monitor type.
+              discriminator:
+                propertyName: type
+              oneOf:
+                - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+        required: true
+      responses:
+        '200':
+          description: A successful response.
+      summary: Create a monitor
+      tags:
+        - synthetics
+  /api/synthetics/monitors/_bulk_delete:
+    post:
+      description: |
+        Delete multiple monitors by sending a list of config IDs.
+      operationId: delete-synthetic-monitors
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkDeleteRequestExample1:
+                description: Run `POST /api/synthetics/monitors/_bulk_delete` to delete a list of monitors.
+                value: |-
+                  {
+                    "ids": [
+                      "monitor1-id",
+                      "monitor2-id"
+                    ]
+                  }
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: An array of monitor IDs to delete.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteMonitorsResponseExample1:
+                  description: A response from successfully deleting multiple monitors.
+                  value: |-
+                    [
+                      {
+                        "id": "monitor1-id",
+                        "deleted": true
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "deleted": true
+                      }
+                    ]
+              schema:
+                items:
+                  description: The API response includes information about the deleted monitors.
+                  type: object
+                  properties:
+                    deleted:
+                      description: |
+                        If it is `true`, the monitor was successfully deleted If it is `false`, the monitor was not deleted.
+                      type: boolean
+                    ids:
+                      description: The unique identifier of the deleted monitor.
+                      type: string
+                type: array
+      summary: Delete monitors
+      tags:
+        - synthetics
+  /api/synthetics/monitors/{id}:
+    delete:
+      description: |
+        Delete a monitor from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-synthetic-monitor
+      parameters:
+        - description: The identifier for the monitor that you want to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      summary: Delete a monitor
+      tags:
+        - synthetics
+    get:
+      operationId: get-synthetic-monitor
+      parameters:
+        - description: The ID of the monitor.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSyntheticMonitorResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors/<id>`.
+                  value: |-
+                    {
+                        "type": "http",
+                        "enabled": true,
+                        "alert": {
+                            "status": {
+                                "enabled": true
+                            },
+                            "tls": {
+                                "enabled": true
+                            }
+                        },
+                        "schedule": {
+                            "number": "3",
+                            "unit": "m"
+                        },
+                        "config_id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "timeout": "16",
+                        "name": "am i something",
+                        "locations": [
+                            {
+                                "id": "us_central",
+                                "label": "North America - US Central",
+                                "geo": {
+                                    "lat": 41.25,
+                                    "lon": -95.86
+                                },
+                                "isServiceManaged": true
+                            }
+                        ],
+                        "namespace": "default",
+                        "origin": "ui",
+                        "id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "max_attempts": 2,
+                        "__ui": {
+                            "is_tls_enabled": false
+                        },
+                        "max_redirects": "0",
+                        "response.include_body": "on_error",
+                        "response.include_headers": true,
+                        "check.request.method": "GET",
+                        "mode": "any",
+                        "response.include_body_max_bytes": "1024",
+                        "ipv4": true,
+                        "ipv6": true,
+                        "ssl.verification_mode": "full",
+                        "ssl.supported_protocols": [
+                            "TLSv1.1",
+                            "TLSv1.2",
+                            "TLSv1.3"
+                        ],
+                        "revision": 13,
+                        "created_at": "2023-11-08T08:45:29.334Z",
+                        "updated_at": "2023-12-18T20:31:44.770Z",
+                        "url": "https://fast.com"
+                    }
+              schema:
+                type: object
+        '404':
+          description: If the monitor is not found, the API returns a 404 error.
+      summary: Get a monitor
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update a monitor with the specified attributes. The required and default fields may vary based on the monitor type.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        You can also partially update a monitor. This will only update the fields that are specified in the request body. All other fields are left unchanged. The specified fields should conform to the monitor type. For example, you can't update the `inline_scipt` field of a HTTP monitor.
+      operationId: put-synthetic-monitor
+      parameters:
+        - description: The identifier for the monitor that you want to update.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putSyntheticMonitorsRequestExample1:
+                description: Update an HTTP monitor that checks a website's availability.
+                summary: HTTP monitor
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample2:
+                description: Update a TCP monitor that monitors a server's availability.
+                summary: TCP monitor
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              putSyntheticMonitorsRequestExample3:
+                description: Update an ICMP monitor that performs ping checks.
+                summary: ICMP monitor
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample4:
+                description: Update a browser monitor that checks a website.
+                summary: Browser monitor
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+            schema:
+              description: |
+                The request body should contain the attributes of the monitor you want to update. The required and default fields differ depending on the monitor type.
+              discriminator:
+                propertyName: type
+              oneOf:
+                - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+              type: object
+        required: true
+      summary: Update a monitor
+      tags:
+        - synthetics
+  /api/synthetics/params:
+    get:
+      description: |
+        Get a list of all parameters. You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-parameters
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getParametersResponseExample1:
+                  description: A successful response for a user with read-only permissions to get a list of parameters.
+                  summary: Read access
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"]
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"]
+                      }
+                    ]
+                getParametersResponseExample2:
+                  description: A successful response for a user with write permissions to get a list of parameters.
+                  summary: Write access
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"],
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"],
+                        "value": "value2"
+                      }
+                    ]
+              schema:
+                items:
+                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                type: array
+          description: A successful response.
+      summary: Get parameters
+      tags:
+        - synthetics
+    post:
+      description: |
+        Add one or more parameters to the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: post-parameters
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postParametersRequestExample1:
+                description: Add a single parameter.
+                summary: Single parameter
+                value: |-
+                  {
+                    "key": "your-key-name",
+                    "value": "your-parameter-value",
+                    "description": "Param to use in browser monitor",
+                    "tags": ["authentication", "security"],
+                    "share_across_spaces": true
+                  }
+              postParametersRequestExample2:
+                description: Add multiple parameters.
+                summary: Multiple parameters
+                value: |-
+                  [
+                    {
+                      "key": "param1",
+                      "value": "value1"
+                    },
+                    {
+                      "key": "param2",
+                      "value": "value2"
+                    }
+                  ]
+            schema:
+              oneOf:
+                - items:
+                    $ref: '#/components/schemas/Synthetics_parameterRequest'
+                  type: array
+                - $ref: '#/components/schemas/Synthetics_parameterRequest'
+        description: The request body can contain either a single parameter object or an array of parameter objects.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postParametersResponseExample1:
+                  description: A successful response for a single added parameter.
+                  summary: Single parameter
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-key-name",
+                      "value": "your-param-value",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "share_across_spaces": true
+                    }
+                postParametersResponseExample2:
+                  description: A successful response for multiple added parameters.
+                  summary: Multiple parameters
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "value": "value2"
+                      }
+                    ]
+              schema:
+                oneOf:
+                  - items:
+                      $ref: '#/components/schemas/Synthetics_postParameterResponse'
+                    type: array
+                  - $ref: '#/components/schemas/Synthetics_postParameterResponse'
+          description: A successful response.
+      summary: Add parameters
+      tags:
+        - synthetics
+  /api/synthetics/params/_bulk_delete:
+    delete:
+      description: |
+        Delete parameters from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-parameters
+      requestBody:
+        content:
+          application/json:
+            examples:
+              deleteParametersRequestExample1:
+                description: Run `POST /api/synthetics/params/_bulk_delete` to delete multiple parameters.
+                value: |-
+                  {
+                    "ids": ["param1-id", "param2-id"]
+                  }
+            schema:
+              property:
+                ids:
+                  description: An array of parameter IDs to delete.
+                  items:
+                    type: string
+                  type: array
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteParametersResponseExample1:
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "deleted": true
+                      }
+                    ]
+              schema:
+                items:
+                  type: object
+                  properties:
+                    deleted:
+                      description: |
+                        Indicates whether the parameter was successfully deleted. It is `true` if it was deleted. It is `false` if it was not deleted.
+                      type: boolean
+                    id:
+                      description: The unique identifier for the deleted parameter.
+                      type: string
+                type: array
+          description: A successful response.
+      summary: Delete parameters
+      tags:
+        - synthetics
+  /api/synthetics/params/{id}:
+    delete:
+      description: |
+        Delete a parameter from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-parameter
+      parameters:
+        - description: The ID for the parameter to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      summary: Delete a parameter
+      tags:
+        - synthetics
+    get:
+      description: |
+        Get a parameter from the Synthetics app.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-parameter
+      parameters:
+        - description: The unique identifier for the parameter.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getParameterResponseExample1:
+                  description: A successful response for a user with read-only permissions to get a single parameter.
+                  summary: Read access
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-api-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"]
+                    }
+                getParameterResponseExample2:
+                  description: A successful response for a user with write permissions to get a single parameter.
+                  summary: Write access
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-param-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"],
+                      "value": "your-param-value"
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getParameterResponse'
+          description: A successful response.
+      summary: Get a parameter
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update a parameter in the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: put-parameter
+      parameters:
+        - description: The unique identifier for the parameter.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putParameterRequestExample1:
+                value: |-
+                  {
+                    "key": "updated_param_key",
+                    "value": "updated-param-value",
+                    "description": "Updated Param to be used in browser monitor",
+                    "tags": ["authentication", "security", "updated"]
+                  }
+            schema:
+              type: object
+              properties:
+                description:
+                  description: The updated description of the parameter.
+                  type: string
+                key:
+                  description: The key of the parameter.
+                  type: string
+                tags:
+                  description: An array of updated tags to categorize the parameter.
+                  items:
+                    type: string
+                  type: array
+                value:
+                  description: The updated value associated with the parameter.
+                  type: string
+        description: The request body cannot be empty; at least one attribute is required.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putParameterResponseExample1:
+                  value: |-
+                    {
+                      "id": "param_id1",
+                      "key": "updated_param_key",
+                      "value": "updated-param-value",
+                      "description": "Updated Param to be used in browser monitor",
+                      "tags": ["authentication", "security", "updated"]
+                    }
+              schema:
+                type: object
+          description: A successful response.
+      summary: Update a parameter
+      tags:
+        - synthetics
+  /api/synthetics/private_locations:
+    get:
+      description: |
+        Get a list of private locations.
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-private-locations
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPrivateLocationsResponseExample1:
+                  value: |-
+                    [
+                        {
+                            "label": "Test private location",
+                            "id": "fleet-server-policy",
+                            "agentPolicyId": "fleet-server-policy",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "default"
+                        },
+                        {
+                            "label": "Test private location 2",
+                            "id": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "agentPolicyId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "test"
+                        }
+                    ]
+              schema:
+                items:
+                  $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+                type: array
+          description: A successful response.
+      summary: Get private locations
+      tags:
+        - synthetics
+    post:
+      description: You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: post-private-location
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postPrivateLocationRequestExample1:
+                description: Run `POST /api/private_locations` to create a private location.
+                value: |-
+                  {
+                    "label": "Private Location 1",
+                    "agentPolicyId": "abcd1234",
+                    "tags": ["private", "testing"],
+                    "geo": {
+                      "lat": 40.7128,
+                      "lon": -74.0060
+                    }
+                    "spaces": ["default"]
+                  }
+            schema:
+              type: object
+              properties:
+                agentPolicyId:
+                  description: The ID of the agent policy associated with the private location.
+                  type: string
+                geo:
+                  description: Geographic coordinates (WGS84) for the location.
+                  type: object
+                  properties:
+                    lat:
+                      description: The latitude of the location.
+                      type: number
+                    lon:
+                      description: The longitude of the location.
+                      type: number
+                  required:
+                    - lat
+                    - lon
+                label:
+                  description: A label for the private location.
+                  type: string
+                spaces:
+                  description: |
+                    An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.
+                  items:
+                    type: string
+                  type: array
+                tags:
+                  description: An array of tags to categorize the private location.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - agentPolicyId
+                - label
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "id": "abcd1234",
+                      "label": "Private Location 1",
+                      "agentPolicyId": "abcd1234",
+                      "tags": ["private", "testing"],
+                      "geo": {
+                        "lat": 40.7128,
+                        "lon": -74.0060
+                      }
+                    }
+              schema:
+                type: object
+          description: A successful response.
+        '400':
+          description: If the `agentPolicyId` is already used by an existing private location or if the `label` already exists, the API will return a 400 Bad Request response with a corresponding error message.
+      summary: Create a private location
+      tags:
+        - synthetics
+  /api/synthetics/private_locations/{id}:
+    delete:
+      description: |
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+        The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.
+        A location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.
+      operationId: delete-private-location
+      parameters:
+        - description: The unique identifier of the private location to be deleted.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+      summary: Delete a private location
+      tags:
+        - synthetics
+    get:
+      description: |
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-private-location
+      parameters:
+        - description: A private location identifier or label.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                        "label": "Test private location",
+                        "id": "test-private-location-id",
+                        "agentPolicyId": "test-private-location-id",
+                        "isServiceManaged": false,
+                        "isInvalid": false,
+                        "geo": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "namespace": "default"
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+          description: A successful response.
+      summary: Get a private location
+      tags:
+        - synthetics
   /api/task_manager/_health:
     get:
       description: |
@@ -23716,6 +25326,20 @@ paths:
           name: kqlQuery
           schema:
             type: string
+        - description: The page size to use for cursor-based pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: size
+          schema:
+            default: 1
+            type: integer
+        - description: The cursor to use for fetching the results from, when using a cursor-base pagination.
+          in: query
+          name: searchAfter
+          schema:
+            items:
+              type: string
+            type: array
         - description: The page to use for pagination, must be greater or equal than 1
           example: 1
           in: query
@@ -23837,6 +25461,133 @@ paths:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
       summary: Create an SLO
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete:
+    post:
+      description: |
+        Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.
+      operationId: bulkDeleteOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_delete_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Bulk delete SLO definitions and their associated summary and rollup data.
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}:
+    get:
+      description: |
+        Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
+      operationId: bulkDeleteStatusOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: The task id of the bulk delete operation
+          in: path
+          name: taskId
+          required: true
+          schema:
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Retrieve the status of the bulk deletion
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
+    post:
+      description: |
+        The deletion occurs for the specified list of `sloId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: deleteRollupDataOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_purge_rollup_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_purge_rollup_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Batch delete rollup and summary data
       tags:
         - slo
   /s/{spaceId}/api/observability/slos/_delete_instances:
@@ -24131,6 +25882,73 @@ paths:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
       summary: Enable an SLO
+      tags:
+        - slo
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getDefinitionsOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: Indicates if the API returns only outdated SLO or all SLO definitions
+          example: true
+          in: query
+          name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Filters the SLOs by tag
+          in: query
+          name: tags
+          schema:
+            type: string
+        - description: Filters the SLOs by name
+          example: my service availability
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: The page to use for pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of SLOs returned by page
+          example: 100
+          in: query
+          name: perPage
+          schema:
+            default: 100
+            maximum: 1000
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Get the SLO definitions
       tags:
         - slo
 components:
@@ -33193,10 +35011,16 @@ components:
       type: object
       properties:
         allowed:
+          description: Whether this field is allowed to be sent to the model.
+          example: true
           type: boolean
         anonymized:
+          description: Whether this field should be anonymized.
+          example: false
           type: boolean
         field:
+          description: Name of the anonymization field to create.
+          example: host.name
           type: string
       required:
         - field
@@ -33204,8 +35028,12 @@ components:
       type: object
       properties:
         id:
+          description: The ID of the anonymization field.
+          example: field12
           type: string
         name:
+          description: Name of the anonymization field.
+          example: host.name
           type: string
       required:
         - id
@@ -33213,30 +35041,48 @@ components:
       type: object
       properties:
         allowed:
+          description: Whether this field is allowed to be sent to the model.
+          example: true
           type: boolean
         anonymized:
+          description: Whether this field should be anonymized.
+          example: false
           type: boolean
         createdAt:
+          description: Timestamp of when the anonymization field was created.
+          example: '2023-10-31T12:00:00Z'
           type: string
         createdBy:
+          description: Username of the person who created the anonymization field.
+          example: user1
           type: string
         field:
+          description: Name of the anonymization field.
+          example: url.domain
           type: string
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          description: The ID of the anonymization field.
         namespace:
-          description: Kibana space
+          description: Kibana space in which this anonymization field exists.
+          example: default
           type: string
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
+          description: Timestamp when the anonymization field was initially created.
         updatedAt:
+          description: Timestamp of the last update.
+          example: '2023-10-31T12:00:00Z'
           type: string
         updatedBy:
+          description: Username of the person who last updated the field.
+          example: user1
           type: string
       required:
         - id
         - field
     Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason:
+      description: Reason why the anonymization field was not modified.
       enum:
         - ANONYMIZATION_FIELD_NOT_MODIFIED
       type: string
@@ -33244,11 +35090,16 @@ components:
       type: object
       properties:
         id:
+          description: The ID of the anonymization field that was not modified.
+          example: field4
           type: string
         name:
+          description: Name of the anonymization field that was not modified.
+          example: user.name
           type: string
         skip_reason:
           $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason'
+          description: Reason why the anonymization field was not modified.
       required:
         - id
         - skip_reason
@@ -33256,11 +35107,14 @@ components:
       type: object
       properties:
         anonymization_fields_count:
+          description: Total number of anonymization fields processed.
+          example: 5
           type: integer
         attributes:
           type: object
           properties:
             errors:
+              description: List of errors that occurred during the bulk operation.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_NormalizedAnonymizationFieldError'
               type: array
@@ -33272,10 +35126,16 @@ components:
             - results
             - summary
         message:
+          description: Message providing information about the bulk action result.
+          example: Bulk action completed successfully
           type: string
         status_code:
+          description: HTTP status code returned.
+          example: 200
           type: integer
         success:
+          description: Indicates if the bulk action was successful.
+          example: true
           type: boolean
       required:
         - attributes
@@ -33283,18 +35143,23 @@ components:
       type: object
       properties:
         created:
+          description: List of anonymization fields successfully created.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
           type: array
         deleted:
           items:
+            description: Array of IDs of anonymization fields that were deleted.
+            example: field3
             type: string
           type: array
         skipped:
+          description: List of anonymization fields that were skipped during the operation.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult'
           type: array
         updated:
+          description: List of anonymization fields successfully updated.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
           type: array
@@ -33307,10 +35172,16 @@ components:
       type: object
       properties:
         allowed:
+          description: Whether this field is allowed to be sent to the model.
+          example: true
           type: boolean
         anonymized:
+          description: Whether this field should be anonymized.
+          example: false
           type: boolean
         id:
+          description: The ID of the anonymization field to update.
+          example: field8
           type: string
       required:
         - id
@@ -33318,20 +35189,25 @@ components:
       type: object
       properties:
         actionTypeId:
-          description: action type id
+          description: Action type ID
+          example: actionType456
           type: string
         connectorId:
-          description: connector id
+          description: Connector ID
+          example: connector123
           type: string
         defaultSystemPromptId:
-          description: defaultSystemPromptId
+          description: Default system prompt ID
+          example: systemPrompt001
           type: string
         model:
-          description: model
+          description: Model
+          example: gpt-4
           type: string
         provider:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Provider'
           description: Provider
+          example: OpenAI
       required:
         - connectorId
         - actionTypeId
@@ -33341,9 +35217,11 @@ components:
       properties:
         id:
           description: Id of the content reference
+          example: content123
           type: string
         type:
           description: Type of the content reference
+          example: SecurityAlert
           type: string
       required:
         - id
@@ -33352,12 +35230,20 @@ components:
       type: object
       properties:
         failed:
+          description: The number of failed actions.
+          example: 0
           type: integer
         skipped:
+          description: The number of skipped actions.
+          example: 1
           type: integer
         succeeded:
+          description: The number of successfully performed actions.
+          example: 10
           type: integer
         total:
+          description: The total number of actions attempted.
+          example: 12
           type: integer
       required:
         - failed
@@ -33365,59 +35251,102 @@ components:
         - succeeded
         - total
     Security_AI_Assistant_API_ChatCompleteProps:
+      description: The request payload for creating a chat completion.
+      example:
+        connectorId: conn-001
+        conversationId: abc123
+        isStream: true
+        langSmithApiKey: sk-abc123
+        langSmithProject: security_ai_project
+        messages:
+          - content: How do I detect ransomware on my endpoints?
+            data:
+              device_id: device-567
+            fields_to_anonymize:
+              - device.name
+              - file.path
+            role: user
+        model: gpt-4
+        persist: true
+        promptId: prompt_456
+        responseLanguage: en
       type: object
       properties:
         connectorId:
+          description: Required connector identifier to route the request.
+          example: conn-001
           type: string
         conversationId:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          description: Existing conversation ID to continue.
         isStream:
+          description: If true, the response will be streamed in chunks.
+          example: true
           type: boolean
         langSmithApiKey:
+          description: API key for LangSmith integration.
+          example: sk-abc123
           type: string
         langSmithProject:
+          description: LangSmith project name for tracing.
+          example: security_ai_project
           type: string
         messages:
+          description: List of chat messages exchanged so far.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_ChatMessage'
           type: array
         model:
+          description: Model ID or name to use for the response.
+          example: gpt-4
           type: string
         persist:
+          description: Whether to persist the chat and response to storage.
+          example: true
           type: boolean
         promptId:
+          description: Prompt template identifier.
+          example: prompt_001
           type: string
         responseLanguage:
+          description: ISO language code for the assistant's response.
+          example: en
           type: string
       required:
         - messages
         - persist
         - connectorId
     Security_AI_Assistant_API_ChatMessage:
-      description: AI assistant message.
+      description: A message exchanged within the AI chat conversation.
       type: object
       properties:
         content:
-          description: Message content.
+          description: The textual content of the message.
+          example: What security incidents have been reported today?
           type: string
         data:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageData'
-          description: ECS object to attach to the context of the message.
+          description: Metadata to attach to the context of the message.
         fields_to_anonymize:
+          description: List of field names within the data object that should be anonymized.
+          example:
+            - user.name
+            - source.ip
           items:
             type: string
           type: array
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ChatMessageRole'
-          description: Message role.
+          description: The sender role of the message.
       required:
         - role
     Security_AI_Assistant_API_ChatMessageRole:
-      description: Message role.
+      description: The role associated with the message in the chat.
       enum:
         - system
         - user
         - assistant
+      example: user
       type: string
     Security_AI_Assistant_API_ContentReferences:
       additionalProperties:
@@ -33427,6 +35356,7 @@ components:
           - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_HrefContentReference'
             additionalProperties: false
       description: A union of all content reference types
       type: object
@@ -33435,6 +35365,7 @@ components:
       enum:
         - assistant
         - insights
+      example: assistant
       type: string
     Security_AI_Assistant_API_ConversationConfidence:
       description: The conversation confidence.
@@ -33442,6 +35373,7 @@ components:
         - low
         - medium
         - high
+      example: high
       type: string
     Security_AI_Assistant_API_ConversationCreateProps:
       type: object
@@ -33452,11 +35384,13 @@ components:
         category:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
+          example: assistant
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         id:
           description: The conversation id.
+          example: conversation123
           type: string
         messages:
           description: The conversation messages.
@@ -33467,6 +35401,7 @@ components:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
         title:
           description: The conversation title.
+          example: Security AI Assistant Setup
           type: string
       required:
         - title
@@ -33479,11 +35414,13 @@ components:
         category:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
+          example: assistant
         createdAt:
           description: The time conversation was created.
+          example: '2025-04-30T14:00:00Z'
           type: string
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
@@ -33494,18 +35431,21 @@ components:
           type: array
         namespace:
           description: Kibana space
+          example: default
           type: string
         replacements:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Replacements'
         summary:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         title:
           description: The conversation title.
+          example: Security AI Assistant Setup
           type: string
         updatedAt:
           description: The last time conversation was updated.
+          example: '2025-04-30T16:30:00Z'
           type: string
         users:
           items:
@@ -33524,15 +35464,19 @@ components:
         confidence:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationConfidence'
           description: How confident you are about this being a correct and useful learning.
+          example: high
         content:
           description: Summary text of the conversation over time.
+          example: This conversation covered how to configure the Security AI Assistant.
           type: string
         public:
           description: Define if summary is marked as publicly available.
+          example: true
           type: boolean
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
           description: The timestamp summary was updated.
+          example: '2025-04-30T16:00:00Z'
     Security_AI_Assistant_API_ConversationUpdateProps:
       type: object
       properties:
@@ -33542,8 +35486,9 @@ components:
         category:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationCategory'
           description: The conversation category.
+          example: assistant
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
@@ -33558,6 +35503,7 @@ components:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         title:
           description: The conversation title.
+          example: Updated Security AI Assistant Setup
           type: string
       required:
         - id
@@ -33573,13 +35519,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -33598,13 +35547,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -33619,7 +35571,8 @@ components:
       type: object
       properties:
         required:
-          description: Whether this resource should always be included, defaults to false
+          description: Whether this resource should always be included, defaults to false.
+          example: false
           type: boolean
         vector:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Vector'
@@ -33629,15 +35582,18 @@ components:
         kbResource:
           $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResource'
         source:
-          description: Source document name or filepath
+          description: Source document name or filepath.
+          example: /documents/example.txt
           type: string
         text:
-          description: Knowledge Base Entry content
+          description: Knowledge Base Entry content.
+          example: This is the content of the document.
           type: string
         type:
-          description: Entry type
+          description: Entry type.
           enum:
             - document
+          example: document
           type: string
       required:
         - type
@@ -33653,15 +35609,18 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -33678,17 +35637,21 @@ components:
           properties:
             label:
               description: Label of the query
+              example: High Severity Alerts
               type: string
             query:
               description: An ESQL query
+              example: SELECT * FROM alerts WHERE severity = "high"
               type: string
             timerange:
               description: Time range to select in the time picker.
               type: object
               properties:
                 from:
+                  example: '2025-04-01T00:00:00Z'
                   type: string
                 to:
+                  example: '2025-04-30T23:59:59Z'
                   type: string
               required:
                 - from
@@ -33696,6 +35659,7 @@ components:
             type:
               enum:
                 - EsqlQuery
+              example: EsqlQuery
               type: string
           required:
             - type
@@ -33711,37 +35675,65 @@ components:
         - updated_at
       type: string
     Security_AI_Assistant_API_FindConversationsSortField:
+      description: The field by which to sort the conversations. Possible values are `created_at`, `title`, and `updated_at`.
       enum:
         - created_at
         - title
         - updated_at
+      example: created_at
       type: string
     Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField:
+      description: Fields available for sorting Knowledge Base Entries.
       enum:
         - created_at
         - is_default
         - title
         - updated_at
+      example: title
       type: string
     Security_AI_Assistant_API_FindPromptsSortField:
+      description: Field by which to sort the prompts.
       enum:
         - created_at
         - is_default
         - name
         - updated_at
+      example: created_at
       type: string
+    Security_AI_Assistant_API_HrefContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            href:
+              description: URL to the external resource
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            type:
+              enum:
+                - Href
+              type: string
+          required:
+            - type
+            - href
+      description: References an external URL
     Security_AI_Assistant_API_IndexEntry:
       allOf:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -33760,13 +35752,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -33783,7 +35778,10 @@ components:
         inputSchema:
           $ref: '#/components/schemas/Security_AI_Assistant_API_InputSchema'
         outputFields:
-          description: Fields to extract from the query result, defaults to all fields if not provided or empty
+          description: Fields to extract from the query result, defaults to all fields if not provided or empty.
+          example:
+            - title
+            - author
           items:
             type: string
           type: array
@@ -33791,21 +35789,26 @@ components:
       type: object
       properties:
         description:
-          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
+          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
+          example: Query this index for general knowledge base content.
           type: string
         field:
-          description: Field to query for Knowledge Base content
+          description: Field to query for Knowledge Base content.
+          example: content
           type: string
         index:
-          description: Index or Data Stream to query for Knowledge Base content
+          description: Index or Data Stream to query for Knowledge Base content.
+          example: knowledge_base_index
           type: string
         queryDescription:
-          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
+          example: Search for documents containing the specified keywords.
           type: string
         type:
-          description: Entry type
+          description: Entry type.
           enum:
             - index
+          example: index
           type: string
       required:
         - type
@@ -33822,15 +35825,18 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -33841,18 +35847,21 @@ components:
             - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
     Security_AI_Assistant_API_InputSchema:
-      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval.
       items:
         type: object
         properties:
           description:
-            description: Description of the field
+            description: Description of the field.
+            example: The title of the document.
             type: string
           fieldName:
-            description: Name of the field
+            description: Name of the field.
+            example: title
             type: string
           fieldType:
-            description: Type of the field
+            description: Type of the field.
+            example: string
             type: string
         required:
           - fieldName
@@ -33860,6 +35869,7 @@ components:
           - description
       type: array
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
+      description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
         - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
       type: string
@@ -33867,8 +35877,12 @@ components:
       type: object
       properties:
         id:
+          description: ID of the skipped Knowledge Base Entry.
+          example: '123'
           type: string
         name:
+          description: Name of the skipped Knowledge Base Entry.
+          example: Skipped Entry
           type: string
         skip_reason:
           $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason'
@@ -33882,6 +35896,14 @@ components:
           type: object
           properties:
             errors:
+              description: List of errors encountered during the bulk action.
+              example:
+                - err_code: UPDATE_FAILED
+                  knowledgeBaseEntries:
+                    - id: '456'
+                      name: Error Entry
+                  message: Failed to update entry.
+                  statusCode: 400
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError'
               type: array
@@ -33893,12 +35915,20 @@ components:
             - results
             - summary
         knowledgeBaseEntriesCount:
+          description: Total number of Knowledge Base Entries processed.
+          example: 8
           type: integer
         message:
+          description: Message describing the result of the bulk action.
+          example: Bulk action completed successfully.
           type: string
         statusCode:
+          description: HTTP status code of the response.
+          example: 200
           type: integer
         success:
+          description: Indicates whether the bulk action was successful.
+          example: true
           type: boolean
       required:
         - attributes
@@ -33906,18 +35936,36 @@ components:
       type: object
       properties:
         created:
+          description: List of Knowledge Base Entries that were successfully created.
+          example:
+            - content: This is the content of the new entry.
+              id: '456'
+              title: New Entry
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           type: array
         deleted:
+          description: List of IDs of Knowledge Base Entries that were successfully deleted.
+          example:
+            - '789'
           items:
             type: string
           type: array
         skipped:
+          description: List of Knowledge Base Entries that were skipped during the bulk action.
+          example:
+            - id: '123'
+              name: Skipped Entry
+              skip_reason: KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult'
           type: array
         updated:
+          description: List of Knowledge Base Entries that were successfully updated.
+          example:
+            - content: Updated content.
+              id: '123'
+              title: Updated Entry
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           type: array
@@ -33930,12 +35978,20 @@ components:
       type: object
       properties:
         failed:
+          description: Number of Knowledge Base Entries that failed during the bulk action.
+          example: 2
           type: integer
         skipped:
+          description: Number of Knowledge Base Entries that were skipped during the bulk action.
+          example: 1
           type: integer
         succeeded:
+          description: Number of Knowledge Base Entries that were successfully processed during the bulk action.
+          example: 5
           type: integer
         total:
+          description: Total number of Knowledge Base Entries involved in the bulk action.
+          example: 8
           type: integer
       required:
         - failed
@@ -33949,13 +36005,16 @@ components:
           properties:
             knowledgeBaseEntryId:
               description: Id of the Knowledge Base Entry
+              example: kbentry456
               type: string
             knowledgeBaseEntryName:
               description: Name of the knowledge base entry
+              example: Network Security Best Practices
               type: string
             type:
               enum:
                 - KnowledgeBaseEntry
+              example: KnowledgeBaseEntry
               type: string
           required:
             - type
@@ -33972,8 +36031,12 @@ components:
       type: object
       properties:
         id:
+          description: ID of the Knowledge Base Entry that encountered an error.
+          example: '456'
           type: string
         name:
+          description: Name of the Knowledge Base Entry that encountered an error.
+          example: Error Entry
           type: string
       required:
         - id
@@ -33982,10 +36045,16 @@ components:
       type: object
       properties:
         error:
+          description: Error type or category.
+          example: Not Found
           type: string
         message:
+          description: Detailed error message.
+          example: The requested Knowledge Base Entry was not found.
           type: string
         statusCode:
+          description: HTTP status code of the error.
+          example: 404
           type: number
       required:
         - statusCode
@@ -34010,10 +36079,11 @@ components:
       discriminator:
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseResource:
-      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
         - user
+      example: security_labs
       type: string
     Security_AI_Assistant_API_KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
@@ -34021,6 +36091,7 @@ components:
       properties:
         success:
           description: Identify the success of the method execution.
+          example: true
           type: boolean
     Security_AI_Assistant_API_Message:
       description: AI assistant conversation message.
@@ -34028,31 +36099,39 @@ components:
       properties:
         content:
           description: Message content.
+          example: Hello, how can I assist you today?
           type: string
         isError:
           description: Is error message.
+          example: false
           type: boolean
         metadata:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageMetadata'
-          description: metadata
+          description: Metadata
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.
+          example: assistant
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
           description: The timestamp message was sent or received.
+          example: '2025-04-30T15:30:00Z'
         traceData:
           $ref: '#/components/schemas/Security_AI_Assistant_API_TraceData'
-          description: trace Data
+          description: Trace data
       required:
         - timestamp
         - content
         - role
     Security_AI_Assistant_API_MessageData:
       additionalProperties: true
+      description: ECS-style metadata attached to the message.
+      example:
+        alert_id: alert-456
+        user_id: abc123
       type: object
     Security_AI_Assistant_API_MessageMetadata:
       description: Message metadata
@@ -34060,16 +36139,24 @@ components:
       properties:
         contentReferences:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
-          description: Data refered to by the message content.
+          description: Data referred to by the message content.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
         - system
         - user
         - assistant
+      example: assistant
       type: string
     Security_AI_Assistant_API_NonEmptyString:
-      description: A string that does not contain only whitespace characters
+      description: A string that does not contain only whitespace characters.
+      example: I am a string
+      format: nonempty
+      minLength: 1
+      type: string
+    Security_AI_Assistant_API_NonEmptyTimestamp:
+      description: A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
+      example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
       type: string
@@ -34077,14 +36164,21 @@ components:
       type: object
       properties:
         anonymization_fields:
+          description: Array of anonymization fields that caused the error.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldDetailsInError'
           type: array
         err_code:
+          description: Error code indicating the type of failure.
+          example: UPDATE_FAILED
           type: string
         message:
+          description: Error message.
+          example: Failed to update anonymization field.
           type: string
         status_code:
+          description: Status code of the response.
+          example: 400
           type: integer
       required:
         - message
@@ -34094,14 +36188,21 @@ components:
       type: object
       properties:
         err_code:
+          description: Specific error code for the issue.
+          example: UPDATE_FAILED
           type: string
         knowledgeBaseEntries:
+          description: List of Knowledge Base Entries that encountered the error.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError'
           type: array
         message:
+          description: Error message describing the issue.
+          example: Failed to update entry.
           type: string
         statusCode:
+          description: HTTP status code associated with the error.
+          example: 400
           type: integer
       required:
         - message
@@ -34111,14 +36212,18 @@ components:
       type: object
       properties:
         err_code:
+          description: A code representing the error type.
           type: string
         message:
+          description: A message describing the error encountered.
           type: string
         prompts:
+          description: List of prompts that encountered errors.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_PromptDetailsInError'
           type: array
         status_code:
+          description: The HTTP status code associated with the error.
           type: integer
       required:
         - message
@@ -34131,13 +36236,16 @@ components:
           properties:
             title:
               description: Title of the documentation
+              example: Getting Started with Security AI Assistant
               type: string
             type:
               enum:
                 - ProductDocumentation
+              example: ProductDocumentation
               type: string
             url:
               description: URL to the documentation
+              example: https://docs.example.com/security-ai-assistant
               type: string
           required:
             - type
@@ -34148,23 +36256,41 @@ components:
       type: object
       properties:
         categories:
+          description: List of categories for the prompt.
+          example:
+            - security
+            - verification
           items:
             type: string
           type: array
         color:
+          description: The color associated with the prompt.
+          example: blue
           type: string
         consumer:
+          description: The consumer associated with the prompt.
+          example: admin
           type: string
         content:
+          description: The content of the prompt.
+          example: Please verify the security settings.
           type: string
         isDefault:
+          description: Whether this prompt should be the default.
+          example: false
           type: boolean
         isNewConversationDefault:
+          description: Whether this prompt should be the default for new conversations.
+          example: true
           type: boolean
         name:
+          description: The name of the prompt.
+          example: New Security Prompt
           type: string
         promptType:
           $ref: '#/components/schemas/Security_AI_Assistant_API_PromptType'
+          description: The type of the prompt.
+          example: system
       required:
         - name
         - content
@@ -34173,8 +36299,10 @@ components:
       type: object
       properties:
         id:
+          description: The ID of the prompt that encountered an error.
           type: string
         name:
+          description: The name of the prompt that encountered an error.
           type: string
       required:
         - id
@@ -34182,39 +36310,52 @@ components:
       type: object
       properties:
         categories:
+          description: Categories associated with the prompt.
           items:
             type: string
           type: array
         color:
+          description: The color associated with the prompt.
           type: string
         consumer:
+          description: The consumer that the prompt is associated with.
           type: string
         content:
+          description: The content of the prompt.
           type: string
         createdAt:
+          description: The timestamp of when the prompt was created.
           type: string
         createdBy:
+          description: The user who created the prompt.
           type: string
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         isDefault:
+          description: Whether this prompt is the default.
           type: boolean
         isNewConversationDefault:
+          description: Whether this prompt is the default for new conversations.
           type: boolean
         name:
+          description: The name of the prompt.
           type: string
         namespace:
-          description: Kibana space
+          description: Kibana space where the prompt is located.
           type: string
         promptType:
           $ref: '#/components/schemas/Security_AI_Assistant_API_PromptType'
+          description: The type of the prompt.
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         updatedAt:
+          description: The timestamp of when the prompt was last updated.
           type: string
         updatedBy:
+          description: The user who last updated the prompt.
           type: string
         users:
+          description: List of users associated with the prompt.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_User'
           type: array
@@ -34224,6 +36365,7 @@ components:
         - promptType
         - content
     Security_AI_Assistant_API_PromptsBulkActionSkipReason:
+      description: Reason why a prompt was skipped during the bulk action.
       enum:
         - PROMPT_FIELD_NOT_MODIFIED
       type: string
@@ -34231,11 +36373,14 @@ components:
       type: object
       properties:
         id:
+          description: The ID of the prompt that was skipped.
           type: string
         name:
+          description: The name of the prompt that was skipped.
           type: string
         skip_reason:
           $ref: '#/components/schemas/Security_AI_Assistant_API_PromptsBulkActionSkipReason'
+          description: The reason for skipping the prompt.
       required:
         - id
         - skip_reason
@@ -34257,12 +36402,20 @@ components:
             - results
             - summary
         message:
+          description: A message describing the result of the bulk action.
+          example: Bulk action completed successfully.
           type: string
         prompts_count:
+          description: The number of prompts processed in the bulk action.
+          example: 6
           type: integer
         status_code:
+          description: The HTTP status code of the response.
+          example: 200
           type: integer
         success:
+          description: Indicates if the bulk action was successful.
+          example: true
           type: boolean
       required:
         - attributes
@@ -34270,18 +36423,22 @@ components:
       type: object
       properties:
         created:
+          description: List of prompts that were created.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_PromptResponse'
           type: array
         deleted:
+          description: List of IDs of prompts that were deleted.
           items:
             type: string
           type: array
         skipped:
+          description: List of prompts that were skipped.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_PromptsBulkActionSkipResult'
           type: array
         updated:
+          description: List of prompts that were updated.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_PromptResponse'
           type: array
@@ -34291,7 +36448,7 @@ components:
         - deleted
         - skipped
     Security_AI_Assistant_API_PromptType:
-      description: Prompt type
+      description: Type of the prompt (either system or quick).
       enum:
         - system
         - quick
@@ -34300,20 +36457,36 @@ components:
       type: object
       properties:
         categories:
+          description: The updated categories for the prompt.
+          example:
+            - security
+            - alert
           items:
             type: string
           type: array
         color:
+          description: The updated color associated with the prompt.
+          example: green
           type: string
         consumer:
+          description: The updated consumer for the prompt.
+          example: user123
           type: string
         content:
+          description: The updated content for the prompt.
+          example: Updated content for security prompt.
           type: string
         id:
+          description: The ID of the prompt to update.
+          example: prompt123
           type: string
         isDefault:
+          description: Whether this prompt should be the default.
+          example: true
           type: boolean
         isNewConversationDefault:
+          description: Whether the prompt should be the default for new conversations.
+          example: false
           type: boolean
       required:
         - id
@@ -34323,6 +36496,7 @@ components:
         - OpenAI
         - Azure OpenAI
         - Other
+      example: OpenAI
       type: string
     Security_AI_Assistant_API_Reader:
       additionalProperties: true
@@ -34330,24 +36504,28 @@ components:
     Security_AI_Assistant_API_Replacements:
       additionalProperties:
         type: string
-      description: Replacements object used to anonymize/deanomymize messsages
+      description: Replacements object used to anonymize/deanonymize messages
       type: object
     Security_AI_Assistant_API_ResponseFields:
       type: object
       properties:
         createdAt:
-          description: Time the Knowledge Base Entry was created
+          description: Time the Knowledge Base Entry was created.
+          example: '2023-01-01T12:00:00Z'
           type: string
         createdBy:
-          description: User who created the Knowledge Base Entry
+          description: User who created the Knowledge Base Entry.
+          example: admin
           type: string
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         updatedAt:
-          description: Time the Knowledge Base Entry was last updated
+          description: Time the Knowledge Base Entry was last updated.
+          example: '2023-01-02T12:00:00Z'
           type: string
         updatedBy:
-          description: User who last updated the Knowledge Base Entry
+          description: User who last updated the Knowledge Base Entry.
+          example: editor
           type: string
       required:
         - id
@@ -34362,10 +36540,12 @@ components:
           properties:
             alertId:
               description: ID of the Alert
+              example: alert789
               type: string
             type:
               enum:
                 - SecurityAlert
+              example: SecurityAlert
               type: string
           required:
             - type
@@ -34379,46 +36559,57 @@ components:
             type:
               enum:
                 - SecurityAlertsPage
+              example: SecurityAlertsPage
               type: string
           required:
             - type
       description: References the security alerts page
     Security_AI_Assistant_API_SortOrder:
+      description: The order in which results are sorted.
       enum:
         - asc
         - desc
+      example: asc
       type: string
     Security_AI_Assistant_API_TraceData:
-      description: trace Data
+      description: Trace Data
       type: object
       properties:
         traceId:
           description: Could be any string, not necessarily a UUID
+          example: d9876543-f0a1-2345-6789-abcdef123456
           type: string
         transactionId:
           description: Could be any string, not necessarily a UUID
+          example: a1234567-bc89-0def-1234-56789abcdef0
           type: string
     Security_AI_Assistant_API_User:
-      description: Could be any string, not necessarily a UUID
+      description: Could be any string, not necessarily a UUID.
       type: object
       properties:
         id:
-          description: User id
+          description: User id.
+          example: user123
           type: string
         name:
-          description: User name
+          description: User name.
+          example: John Doe
           type: string
     Security_AI_Assistant_API_Vector:
-      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
+      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings.
       type: object
       properties:
         modelId:
-          description: ID of the model used to create the embeddings
+          description: ID of the model used to create the embeddings.
+          example: bert-base-uncased
           type: string
         tokens:
           additionalProperties:
             type: number
-          description: Tokens with their corresponding values
+          description: Tokens with their corresponding values.
+          example:
+            token1: 0.123
+            token2: 0.456
           type: object
       required:
         - modelId
@@ -34999,6 +37190,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run
@@ -38231,6 +40423,10 @@ components:
       properties:
         execution_gap_duration_s:
           description: Duration in seconds of execution gap
+          minimum: 0
+          type: integer
+        frozen_indices_queried_count:
+          description: Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
           minimum: 0
           type: integer
         gap_range:
@@ -44939,6 +47135,114 @@ components:
       example: occurrences
       title: Budgeting method
       type: string
+    SLOs_bulk_delete_request:
+      description: |
+        The bulk delete SLO request takes a list of SLOs Definition id to delete.
+      properties:
+        list:
+          description: An array of SLO Definition id
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+      required:
+        - list
+      title: Bulk delete SLO request
+      type: object
+    SLOs_bulk_delete_response:
+      description: |
+        The bulk delete SLO response returns a taskId that can be used to poll for its status
+      properties:
+        taskId:
+          description: The taskId of the bulk delete operation
+          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+          type: string
+      title: Bulk delete SLO response
+      type: object
+    SLOs_bulk_delete_status_response:
+      description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
+      properties:
+        error:
+          description: The error message if the bulk deletion operation failed
+          example: Task not found
+          type: string
+        isDone:
+          description: Indicates if the bulk deletion operation is completed
+          example: true
+          type: boolean
+        results:
+          description: The results of the bulk deletion operation, including the success status and any errors for each SLO
+          items:
+            type: object
+            properties:
+              error:
+                description: The error message if the deletion operation failed for this SLO
+                example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
+                type: string
+              id:
+                description: The ID of the SLO that was deleted
+                example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+                type: string
+              success:
+                description: The result of the deletion operation for this SLO
+                example: true
+                type: boolean
+          type: array
+      title: The status of the bulk deletion
+      type: object
+    SLOs_bulk_purge_rollup_request:
+      description: |
+        The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.
+      properties:
+        list:
+          description: An array of slo ids
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+        purgePolicy:
+          description: Policy that dictates which SLI documents to purge based on age
+          oneOf:
+            - type: object
+              properties:
+                age:
+                  description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+                  example: 7d
+                  type: string
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-age
+                  type: string
+            - type: object
+              properties:
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-time
+                  type: string
+                timestamp:
+                  description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                  example: '2024-12-31T00:00:00.000Z'
+                  type: string
+          type: object
+      required:
+        - list
+        - purgePolicy
+      title: Bulk Purge Rollup data request
+      type: object
+    SLOs_bulk_purge_rollup_response:
+      description: |
+        The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      properties:
+        taskId:
+          description: The task id of the purge operation
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          type: string
+      title: Bulk Purge Rollup data response
+      type: object
     SLOs_create_slo_request:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
@@ -45083,6 +47387,55 @@ components:
           type: string
       title: FilterMeta
       type: object
+    SLOs_find_slo_definitions_response:
+      description: |
+        A paginated response of SLO definitions matching the query.
+      oneOf:
+        - type: object
+          properties:
+            page:
+              example: 1
+              type: number
+            perPage:
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            total:
+              example: 34
+              type: number
+        - type: object
+          properties:
+            page:
+              default: 1
+              description: for backward compability
+              type: number
+            perPage:
+              description: for backward compability
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            searchAfter:
+              description: the cursor to provide to get the next paged results
+              example:
+                - some-slo-id
+                - other-cursor-id
+              items:
+                type: string
+              type: array
+            size:
+              example: 25
+              type: number
+            total:
+              example: 34
+              type: number
+      title: Find SLO definitions response
+      type: object
     SLOs_find_slo_response:
       description: |
         A paginated response of SLOs matching the query.
@@ -45097,6 +47450,12 @@ components:
           items:
             $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           type: array
+        searchAfter:
+          type: string
+        size:
+          description: Size provided for cursor based pagination
+          example: 25
+          type: number
         total:
           example: 34
           type: number
@@ -45986,6 +48345,376 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_browserMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline script.
+              type: string
+            playwright_options:
+              description: Playwright options.
+              type: object
+            screenshots:
+              default: 'on'
+              description: The screenshot option.
+              enum:
+                - 'on'
+                - 'off'
+                - only-on-failure
+              type: string
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - browser
+              type: string
+          required:
+            - inline_script
+            - type
+      title: Browser monitor fields
+    Synthetics_commonMonitorFields:
+      title: Common monitor fields
+      type: object
+      properties:
+        alert:
+          description: |
+            The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.
+          type: object
+        enabled:
+          default: true
+          description: Specify whether the monitor is enabled.
+          type: boolean
+        locations:
+          description: |
+            The location to deploy the monitor.
+            Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
+            To list available locations you can:
+
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Management* and click *Create monitor*. Locations will be listed in *Locations*.
+          externalDocs:
+            url: https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts
+          items:
+            type: string
+          type: array
+        name:
+          description: The monitor name.
+          type: string
+        namespace:
+          default: default
+          description: |
+            The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`.
+          type: string
+        params:
+          description: The monitor parameters.
+          type: string
+        private_locations:
+          description: |
+            The private locations to which the monitors will be deployed.
+            These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
+            You can specify a private location using the location's name.
+            To list available private locations you can:
+
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
+
+            > info
+            > You can provide `locations` or `private_locations` or both. At least one is required.
+          items:
+            type: string
+          type: array
+        retest_on_failure:
+          default: true
+          description: |
+            Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created and if configured, an alert sent. The monitor will then resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
+          type: boolean
+        schedule:
+          description: |
+            The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors. The default value is `10` minutes for Browser monitors.
+          type: number
+        service.name:
+          description: The APM service name.
+          type: string
+        tags:
+          description: An array of tags.
+          items:
+            type: string
+          type: array
+        timeout:
+          default: 16
+          description: |
+            The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+          type: number
+      required:
+        - name
+    Synthetics_getParameterResponse:
+      title: Get parameter response
+      type: object
+      properties:
+        description:
+          description: |
+            The description of the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          type: string
+        id:
+          description: The unique identifier of the parameter.
+          type: string
+        key:
+          description: The key of the parameter.
+          type: string
+        namespaces:
+          description: |
+            The namespaces associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          items:
+            type: string
+          type: array
+        tags:
+          description: |
+            An array of tags associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          items:
+            type: string
+          type: array
+        value:
+          description: |
+            The value associated with the parameter. It will be included in the response if the user has write permissions.  
+          type: string
+      required: null
+    Synthetics_getPrivateLocation:
+      additionalProperties: true
+      properties:
+        agentPolicyId:
+          description: The ID of the agent policy associated with the private location.
+          type: string
+        geo:
+          description: Geographic coordinates (WGS84) for the location.
+          type: object
+          properties:
+            lat:
+              description: The latitude of the location.
+              type: number
+            lon:
+              description: The longitude of the location.
+              type: number
+          required:
+            - lat
+            - lon
+        id:
+          description: The unique identifier of the private location.
+          type: string
+        isInvalid:
+          description: |
+            Indicates whether the location is invalid. If `true`, the location is invalid, which means the agent policy associated with the location is deleted.
+          type: boolean
+        label:
+          description: A label for the private location.
+          type: string
+        namespace:
+          description: The namespace of the location, which is the same as the namespace of the agent policy associated with the location.
+          type: string
+      title: Post a private location
+      type: object
+    Synthetics_httpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalproperties: true
+          type: object
+          properties:
+            check:
+              description: The check request settings.
+              type: objects
+              properties:
+                request:
+                  description: An optional request to send to the remote host.
+                  type: object
+                  properties:
+                    body:
+                      description: Optional request body content.
+                      type: string
+                    headers:
+                      description: |
+                        A dictionary of additional HTTP headers to send. By default, Synthetics will set the User-Agent header to identify itself.
+                      type: object
+                    method:
+                      description: The HTTP method to use.
+                      enum:
+                        - HEAD
+                        - GET
+                        - POST
+                        - OPTIONS
+                      type: string
+                response:
+                  additionalProperties: true
+                  description: The expected response.
+                  type: object
+                  properties:
+                    body:
+                      type: object
+                    headers:
+                      description: A dictionary of expected HTTP headers. If the header is not found, the check fails.
+                      type: object
+            ipv4:
+              default: true
+              description: If `true`, ping using the ipv4 protocol.
+              type: boolean
+            ipv6:
+              default: true
+              description: If `true`, ping using the ipv6 protocol.
+              type: boolean
+            max_redirects:
+              default: 0
+              description: The maximum number of redirects to follow.
+              type: number
+            mode:
+              default: any
+              description: |
+                The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, you should use `all`.
+              enum:
+                - all
+                - any
+              type: string
+            password:
+              description: |
+                The password for authenticating with the server. The credentials are passed with the request.
+              type: string
+            proxy_headers:
+              description: Additional headers to send to proxies during CONNECT requests.
+              type: object
+            proxy_url:
+              description: The URL of the proxy to use for this monitor.
+              type: string
+            response:
+              description: Controls the indexing of the HTTP response body contents to the `http.response.body.contents field`.
+              type: object
+            ssl:
+              description: |
+                The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
+              type: object
+            type:
+              description: The monitor type.
+              enum:
+                - http
+              type: string
+            url:
+              description: The URL to monitor.
+              type: string
+            username:
+              description: |
+                The username for authenticating with the server. The credentials are passed with the request.
+              type: string
+          required:
+            - type
+            - url
+      title: HTTP monitor fields
+    Synthetics_icmpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            host:
+              description: The host to ping.
+              type: string
+            type:
+              description: The monitor type.
+              enum:
+                - icmp
+              type: string
+            wait:
+              default: 1
+              description: The wait time in seconds.
+              type: number
+          required:
+            - host
+            - type
+      title: ICMP monitor fields
+    Synthetics_parameterRequest:
+      title: Parameter request
+      type: object
+      properties:
+        description:
+          description: A description of the parameter.
+          type: string
+        key:
+          description: The key of the parameter.
+          type: string
+        share_across_spaces:
+          description: Specify whether the parameter should be shared across spaces.
+          type: boolean
+        tags:
+          description: An array of tags to categorize the parameter.
+          items:
+            type: string
+          type: array
+        value:
+          description: The value associated with the parameter.
+          type: string
+      required:
+        - key
+        - value
+    Synthetics_postParameterResponse:
+      title: Post parameter response
+      type: object
+      properties:
+        description:
+          description: A description of the parameter.
+          type: string
+        id:
+          description: The unique identifier for the parameter.
+          type: string
+        key:
+          description: The parameter key.
+          type: string
+        share_across_spaces:
+          description: Indicates whether the parameter is shared across spaces.
+          type: boolean
+        tags:
+          description: An array of tags associated with the parameter.
+          items:
+            type: string
+          type: array
+        value:
+          description: The value associated with the parameter.
+          type: string
+    Synthetics_tcpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            host:
+              description: |
+                The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon, for example "example.com:9200".
+              type: string
+            proxy_url:
+              description: |
+                The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the `proxy_use_local_resolver` option.
+              type: string
+            proxy_use_local_resolver:
+              default: false
+              description: |
+                Specify that hostnames are resolved locally instead of being resolved on the proxy server. If `false`, name resolution occurs on the proxy server.
+              type: boolean
+            ssl:
+              description: |
+                The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
+              type: object
+            type:
+              description: The monitor type.
+              enum:
+                - tcp
+              type: string
+          required:
+            - host
+            - type
+      title: TCP monitor fields
     Task_manager_health_APIs_configuration:
       description: |
         This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
@@ -46076,7 +48805,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-3-5-sonnet-20240620-v1:0
+          default: us.anthropic.claude-3-7-sonnet-20250219-v1:0
     crowdstrike_config:
       title: Connector request config properties for a Crowdstrike connector
       required:
@@ -46220,6 +48949,30 @@ components:
           type: string
         projectKey:
           description: The Jira project key.
+          type: string
+    defender_config:
+      title: Connector request properties for a Microsoft Defender for Endpoint connector
+      required:
+        - apiUrl
+        - projectKey
+      description: Defines properties for connectors when type is `.microsoft_defender_endpoint`.
+      type: object
+      properties:
+        apiUrl:
+          type: string
+          description: |
+            The URL of the Microsoft Defender for Endpoint API. If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+        clientId:
+          type: string
+          description: The application (client) identifier for your app in the Azure portal.
+        oAuthScope:
+          type: string
+          description: The OAuth scopes or permission sets for the Microsoft Defender for Endpoint API.
+        oAuthServerUrl:
+          type: string
+          description: The OAuth server URL where authentication is sent and received for the Microsoft Defender for Endpoint API.
+        tenantId:
+          description: The tenant identifier for your app in the Azure portal.
           type: string
     genai_azure_config:
       title: Connector request properties for an OpenAI connector that uses Azure OpenAI
@@ -47053,6 +49806,16 @@ components:
           description: |
             A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
           type: string
+    defender_secrets:
+      title: Connector secrets properties for a Microsoft Defender for Endpoint connector
+      required:
+        - clientSecret
+      description: Defines secrets for connectors when type is `..microsoft_defender_endpoint`.
+      type: object
+      properties:
+        clientSecret:
+          description: The client secret for your app in the Azure portal.
+          type: string
     run_acknowledge_resolve_pagerduty:
       title: PagerDuty connector parameters
       description: Test an action that acknowledges or resolves a PagerDuty alert.
@@ -47489,6 +50252,42 @@ components:
               type: string
               description: The Jira issue type identifier.
               example: 10024
+    run_getagentdetails:
+      title: The getAgentDetails subaction
+      type: object
+      required:
+        - subAction
+        - subActionParams
+      description: The `getAgentDetails` subaction for CrowdStrike connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgentDetails
+        subActionParams:
+          type: object
+          description: The set of configuration properties for the action.
+          required:
+            - ids
+          properties:
+            ids:
+              type: array
+              description: An array of CrowdStrike agent identifiers.
+              items:
+                type: string
+    run_getagents:
+      title: The getAgents subaction
+      type: object
+      required:
+        - subAction
+      description: The `getAgents` subaction for SentinelOne connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgents
     run_getchoices:
       title: The getChoices subaction
       type: object
