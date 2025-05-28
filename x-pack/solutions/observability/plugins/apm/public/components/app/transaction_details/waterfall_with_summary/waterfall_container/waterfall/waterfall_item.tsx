@@ -393,11 +393,6 @@ function RelatedErrors({
         color={euiTheme.colors.danger}
         iconType="arrowRight"
         onClick={onClick}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            onClick(e);
-          }
-        }}
         tabIndex={0}
         role="button"
         aria-label={viewRelatedErrorsLabel}
