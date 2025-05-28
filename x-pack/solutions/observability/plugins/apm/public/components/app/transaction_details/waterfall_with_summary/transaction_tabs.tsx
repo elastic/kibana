@@ -209,7 +209,7 @@ function LogsTabContent({
       height={'60vh'}
       displayOptions={{
         solutionNavIdOverride: 'oblt',
-        enableDocumentViewer: false,
+        enableDocumentViewer: true,
         enableFilters: false,
       }}
     />
