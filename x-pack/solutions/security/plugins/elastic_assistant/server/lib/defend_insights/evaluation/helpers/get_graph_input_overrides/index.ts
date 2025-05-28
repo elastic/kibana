@@ -22,9 +22,9 @@ export const getDefendInsightsGraphInputOverrides = (
 
   // return all overrides at the root level:
   return {
-    // pick extracts just the anonymizedEvents and replacements from the root level of the input,
-    // and only adds the anonymizedEvents key if it exists in the input
-    ...pick('anonymizedEvents', validatedInput),
+    // pick extracts just the anonymizedDocuments and replacements from the root level of the input,
+    // and only adds the anonymizedDocuments key if it exists in the input
+    ...pick('anonymizedDocuments', validatedInput),
     ...pick('replacements', validatedInput),
     ...overrides, // bring all other overrides to the root level
   };
