@@ -20,13 +20,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDataPoolerState, useDataPoolerDispatch } from '../lib/store';
+import { useDataCascadeState, useDataCascadeDispatch } from '../lib/store';
 
 export function SelectionDropdown({}) {
   const [isPopoverOpen, setPopover] = useState(false);
   const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
-  const { groupByColumns, currentGroupByColumn } = useDataPoolerState();
-  const dispatch = useDataPoolerDispatch();
+  const { groupByColumns, currentGroupByColumn } = useDataCascadeState();
+  const dispatch = useDataCascadeDispatch();
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -41,9 +41,13 @@ export function SelectionDropdown({}) {
     closePopover();
   };
 
+  const clearSelectedGroupByColumn = () => {
+    dispatch({ type: 'EMPTY_GROUP_BY_COLUMN_SELECTION', payload: '' });
+  };
+
   const button = (
     <EuiButtonEmpty iconType={'inspect'} onClick={onButtonClick}>
-      {i18n.translate('sharedUXPackages.data_pooler.selection_dropdown.selection_message', {
+      {i18n.translate('sharedUXPackages.data_cascade.selection_dropdown.selection_message', {
         defaultMessage: 'Group By: {groupByColumns} selected',
         values: { groupByColumns: currentGroupByColumn },
       })}
@@ -56,7 +60,7 @@ export function SelectionDropdown({}) {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
-      data-test-subj="DataPoolerColumnSelectionPopover"
+      data-test-subj="DataCascadeColumnSelectionPopover"
     >
       <EuiContextMenu
         size="m"
@@ -75,13 +79,13 @@ export function SelectionDropdown({}) {
                         label: <EuiText>{groupColumn}</EuiText>,
                         icon: <EuiToken iconType="tokenString" />,
                         onClick: () => {},
-                        'data-test-subj': `DataPoolerColumnSelectedAnchor-${groupColumn}`,
+                        'data-test-subj': `DataCascadeColumnSelectedAnchor-${groupColumn}`,
                       }))}
                     />
                   ) : (
                     <EuiText>
                       {i18n.translate(
-                        'sharedUXPackages.data_pooler.selection_dropdown.no_selection_message',
+                        'sharedUXPackages.data_cascade.selection_dropdown.no_selection_message',
                         { defaultMessage: 'No selection' }
                       )}
                     </EuiText>
@@ -116,7 +120,7 @@ export function SelectionDropdown({}) {
                                 disabled={!availableColumnsForSelection?.length}
                               >
                                 {i18n.translate(
-                                  'sharedUXPackages.data_pooler.selection_dropdown.available_selection_btn_text',
+                                  'sharedUXPackages.data_cascade.selection_dropdown.available_selection_btn_text',
                                   { defaultMessage: 'Pick items to groupBy' }
                                 )}
                               </EuiButtonEmpty>
@@ -129,16 +133,20 @@ export function SelectionDropdown({}) {
                                 label: <EuiText size="s">{groupColumn}</EuiText>,
                                 icon: <EuiToken iconType="tokenString" />,
                                 onClick: onGroupByColumnSelection.bind(null, groupColumn),
-                                'data-test-subj': `DataPoolerColumnSelectionPopover-${groupColumn}`,
+                                'data-test-subj': `DataCascadeColumnSelectionPopover-${groupColumn}`,
                               }))}
                             />
                           </EuiPopover>
                         </EuiFlexItem>
                         {currentGroupByColumn && (
                           <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty size="xs" flush="right">
+                            <EuiButtonEmpty
+                              onClick={clearSelectedGroupByColumn}
+                              size="xs"
+                              flush="right"
+                            >
                               {i18n.translate(
-                                'sharedUXPackages.data_pooler.selection_dropdown.clear_selection_btn_text',
+                                'sharedUXPackages.data_cascade.selection_dropdown.clear_selection_btn_text',
                                 { defaultMessage: 'Clear selection' }
                               )}
                             </EuiButtonEmpty>
