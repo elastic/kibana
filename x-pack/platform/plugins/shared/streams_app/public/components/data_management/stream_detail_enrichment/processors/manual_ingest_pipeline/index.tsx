@@ -12,7 +12,7 @@ import { OptionalFieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
 
-export const AdvancedJsonProcessorForm = () => {
+export const ManualIngestPipelineProcessorForm = () => {
   return (
     <>
       <JsonEditor />

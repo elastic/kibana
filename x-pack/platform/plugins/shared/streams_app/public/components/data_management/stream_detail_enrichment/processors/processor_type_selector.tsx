@@ -134,13 +134,13 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   ...configDrivenProcessors,
-  advanced_json: {
-    type: 'advanced_json',
-    inputDisplay: 'Advanced Elasticsearch ingest pipeline',
+  manual_ingest_pipeline: {
+    type: 'manual_ingest_pipeline',
+    inputDisplay: 'Manual pipeline configuration',
     getDocUrl: () => (
       <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.advancedJsonHelpText"
-        defaultMessage="Allows specifying an array of ingest pipeline processors as JSON."
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
+        defaultMessage="Specify an array of ingest pipeline processors using JSON"
       />
     ),
   },

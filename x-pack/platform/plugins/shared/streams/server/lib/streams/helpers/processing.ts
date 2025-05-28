@@ -6,7 +6,7 @@
  */
 
 import {
-  AdvancedJsonProcessorConfig,
+  ManualIngestPipelineProcessorConfig,
   ElasticsearchProcessorType,
   ProcessorDefinition,
   elasticsearchProcessorTypes,
@@ -18,24 +18,24 @@ import { conditionToPainless } from './condition_to_painless';
 
 export function formatToIngestProcessors(
   processing: ProcessorDefinition[],
-  ignoreMalformedAdvancedJson: boolean = false
+  ignoreMalformedManualIngestPipeline: boolean = false
 ): IngestProcessorContainer[] {
   return processing.flatMap((processor) => {
     const config = getProcessorConfig(processor);
     const type = getProcessorType(processor);
-    if (type === 'advanced_json') {
-      const advancedJsonProcessorConfig = config as AdvancedJsonProcessorConfig;
+    if (type === 'manual_ingest_pipeline') {
+      const manualIngestPipelineProcessorConfig = config as ManualIngestPipelineProcessorConfig;
 
-      // advanced_json processor is a special case, since it has nested Elasticsearch-level processors and doesn't support if
+      // manual_ingest_pipeline processor is a special case, since it has nested Elasticsearch-level processors and doesn't support if
       // directly - we need to add it to each nested processor
-      return advancedJsonProcessorConfig.processors.flatMap((nestedProcessor) => {
+      return manualIngestPipelineProcessorConfig.processors.flatMap((nestedProcessor) => {
         const nestedType = Object.keys(nestedProcessor)[0];
         if (!elasticsearchProcessorTypes.includes(nestedType as ElasticsearchProcessorType)) {
-          if (ignoreMalformedAdvancedJson) {
+          if (ignoreMalformedManualIngestPipeline) {
             return [];
           }
           throw new Error(
-            `Invalid processor type "${nestedType}" in advanced_json processor. Supported types: ${elasticsearchProcessorTypes.join(
+            `Invalid processor type "${nestedType}" in manual_ingest_pipeline processor. Supported types: ${elasticsearchProcessorTypes.join(
               ', '
             )}`
           );
@@ -45,25 +45,25 @@ export function formatToIngestProcessors(
           unknown
         >;
         if (typeof nestedConfig !== 'object' || nestedConfig === null) {
-          if (ignoreMalformedAdvancedJson) {
+          if (ignoreMalformedManualIngestPipeline) {
             return [];
           }
           throw new Error(
-            `Invalid processor config for "${nestedType}" in advanced_json processor. Expected an object.`
+            `Invalid processor config for "${nestedType}" in manual_ingest_pipeline processor. Expected an object.`
           );
         }
         return {
           [nestedType]: {
             ...nestedConfig,
-            tag: advancedJsonProcessorConfig.tag ?? nestedConfig.tag,
+            tag: manualIngestPipelineProcessorConfig.tag ?? nestedConfig.tag,
             ignore_failure:
-              nestedConfig.ignore_failure ?? advancedJsonProcessorConfig.ignore_failure,
+              nestedConfig.ignore_failure ?? manualIngestPipelineProcessorConfig.ignore_failure,
             on_failure: nestedConfig.on_failure
               ? [
                   ...(nestedConfig.on_failure as []),
-                  ...(advancedJsonProcessorConfig.on_failure || []),
+                  ...(manualIngestPipelineProcessorConfig.on_failure || []),
                 ]
-              : advancedJsonProcessorConfig.on_failure,
+              : manualIngestPipelineProcessorConfig.on_failure,
             ...(!nestedConfig.if && 'if' in config && config.if
               ? { if: conditionToPainless(config.if) }
               : {}),

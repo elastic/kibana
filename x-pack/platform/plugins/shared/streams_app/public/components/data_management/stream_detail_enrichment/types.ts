@@ -13,7 +13,7 @@ import {
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
 
-import { AdvancedJsonProcessorConfig } from '@kbn/streams-schema/src/models/ingest/processors';
+import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema/src/models/ingest/processors';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
@@ -32,13 +32,15 @@ export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
 export type DateFormState = DateProcessorConfig & { type: 'date' };
 
-export type AdvancedJsonFormState = AdvancedJsonProcessorConfig & { type: 'advanced_json' };
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessorConfig & {
+  type: 'manual_ingest_pipeline';
+};
 
 export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
-  | AdvancedJsonFormState;
+  | ManualIngestPipelineFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 

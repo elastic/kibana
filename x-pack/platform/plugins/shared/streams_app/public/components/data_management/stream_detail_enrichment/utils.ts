@@ -23,7 +23,7 @@ import {
   ProcessorFormState,
   WithUIAttributes,
   DateFormState,
-  AdvancedJsonFormState,
+  ManualIngestPipelineFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -106,8 +106,8 @@ const defaultGrokProcessorFormState = (sampleDocs: FlattenRecord[]): GrokFormSta
   if: ALWAYS_CONDITION,
 });
 
-const defaultAdvancedJsonProcessorFormState = (): AdvancedJsonFormState => ({
-  type: 'advanced_json',
+const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFormState => ({
+  type: 'manual_ingest_pipeline',
   processors: [],
   ignore_failure: true,
   if: ALWAYS_CONDITION,
@@ -127,7 +127,7 @@ const defaultProcessorFormStateByType: Record<
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
-  advanced_json: defaultAdvancedJsonProcessorFormState,
+  manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -159,12 +159,12 @@ export const getFormStateFrom = (
     });
   }
 
-  if (isAdvancedJsonProcessor(processor)) {
-    const { advanced_json } = processor;
+  if (isManualIngestPipelineJsonProcessor(processor)) {
+    const { manual_ingest_pipeline } = processor;
 
     return structuredClone({
-      ...advanced_json,
-      type: 'advanced_json',
+      ...manual_ingest_pipeline,
+      type: 'manual_ingest_pipeline',
     });
   }
 
@@ -217,11 +217,11 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
     };
   }
 
-  if (formState.type === 'advanced_json') {
+  if (formState.type === 'manual_ingest_pipeline') {
     const { processors, ignore_failure } = formState;
 
     return {
-      advanced_json: {
+      manual_ingest_pipeline: {
         if: formState.if,
         processors,
         ignore_failure,
@@ -265,7 +265,8 @@ const createProcessorGuardByType =
 
 export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
-export const isAdvancedJsonProcessor = createProcessorGuardByType('advanced_json');
+export const isManualIngestPipelineJsonProcessor =
+  createProcessorGuardByType('manual_ingest_pipeline');
 export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();

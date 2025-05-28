@@ -53,7 +53,7 @@ import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
-import { AdvancedJsonProcessorForm } from './advanced_json';
+import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -190,7 +190,7 @@ export function AddProcessorPanel() {
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
-            {type === 'advanced_json' && <AdvancedJsonProcessorForm />}
+            {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -395,7 +395,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
-            {type === 'advanced_json' && <AdvancedJsonProcessorForm />}
+            {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
