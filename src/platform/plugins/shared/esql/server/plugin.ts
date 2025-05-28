@@ -10,14 +10,12 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { SolutionId } from '@kbn/core-chrome-browser';
-import type { RecommendedQuery } from '@kbn/esql-types';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
 
 export interface EsqlServerPluginSetup {
-  registerESQLQueries: (queries: RecommendedQuery[], activeSolutionId: SolutionId) => void;
+  getExtensionsRegistry: () => ESQLExtensionsRegistry;
 }
 
 export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
@@ -66,7 +64,7 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
     );
 
     return {
-      registerESQLQueries: this.extensionsRegistry.setRecommendedQueries,
+      getExtensionsRegistry: () => this.extensionsRegistry,
     };
   }
 

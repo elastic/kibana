@@ -48,7 +48,8 @@ Here's an example of how to register `recommendedQueries`:
     // Inside your plugin's `Plugin` class
     public setup(core: CoreSetup, { esql }: SetupDeps) {
         // Register your array of recommended queries
-        esql.registerESQLQueries(
+        const esqlExtensionsRegistry = esql.getExtensionsRegistry();
+        esqlExtensionsRegistry.setRecommendedQueries(
           [
             {
               name: 'Logs count by log level',
