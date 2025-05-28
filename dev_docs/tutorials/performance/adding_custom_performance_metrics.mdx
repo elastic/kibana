@@ -310,7 +310,7 @@ onPageReady({
 
 #### Tracking Refreshes or Subsequent Loads
 
-The `meta` field supports an `isInitialLoad` boolean flag, which indicates whether the performance event was triggered during the application's initial load or as a result of a subsequent user interaction. This helps distinguish between first page loads and subsequent refreshes as subsequent refreshes may be quite rapid and may not reflect the true initial load performance.
+The `meta` field supports an `isInitialLoad` boolean flag, which indicates whether the performance event was triggered during the application's initial load or as a result of a subsequent user interaction. This helps distinguish between first page loads and subsequent refreshes as subsequent refreshes may be quite different in terms of performance compared to the initial load.
 
 By default, when you call `onPageReady()` without first calling `onPageRefreshStart()`, the event will be recorded with `isInitialLoad: true`, indicating it was the initial page load.
 
