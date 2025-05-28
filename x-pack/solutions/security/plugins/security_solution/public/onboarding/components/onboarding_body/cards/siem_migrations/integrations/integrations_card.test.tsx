@@ -8,9 +8,15 @@
 import React from 'react';
 import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
+import { TestProviders } from '../../../../../../common/mock';
+import {
+  mockAvailablePackages,
+  getDefaultAvailablePackages,
+} from '../../../../../../common/lib/integrations/components/__mocks__/with_available_packages';
 
-jest.mock('../../../onboarding_context');
-jest.mock('../../../../../common/lib/integrations/components/security_integrations');
+jest.mock('../../../../onboarding_context');
+jest.mock('../../../../../../common/lib/integrations/components/security_integrations_grid_tabs');
+jest.mock('../../../../../../common/lib/integrations/components/with_available_packages');
 
 const props = {
   setComplete: jest.fn(),
@@ -20,14 +26,30 @@ const props = {
   isCardComplete: jest.fn(),
 };
 
+const mockUseGetIntegrationsStats = jest.fn((_: Function) => ({
+  getIntegrationsStats: jest.fn(),
+  isLoading: false,
+}));
+jest.mock(
+  '../../../../../../siem_migrations/rules/service/hooks/use_get_integrations_stats',
+  () => ({ useGetIntegrationsStats: (params: Function) => mockUseGetIntegrationsStats(params) })
+);
+
 describe('IntegrationsCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseGetIntegrationsStats.mockImplementation((_: Function) => ({
+      getIntegrationsStats: jest.fn(),
+      isLoading: false,
+    }));
+    mockAvailablePackages.mockReturnValue(getDefaultAvailablePackages());
   });
 
   it('renders a loading spinner when checkCompleteMetadata is undefined', () => {
     const { getByTestId } = render(
-      <IntegrationsCard {...props} checkCompleteMetadata={undefined} />
+      <IntegrationsCard {...props} checkCompleteMetadata={undefined} />,
+      { wrapper: TestProviders }
     );
     expect(getByTestId('loadingInstalledIntegrations')).toBeInTheDocument();
   });
@@ -47,9 +69,10 @@ describe('IntegrationsCard', () => {
           ],
           isAgentRequired: false,
         }}
-      />
+      />,
+      { wrapper: TestProviders }
     );
     expect(queryByTestId('loadingInstalledIntegrations')).not.toBeInTheDocument();
-    expect(queryByTestId('securityIntegrations')).toBeInTheDocument();
+    expect(queryByTestId('securityIntegrationsGridTabs')).toBeInTheDocument();
   });
 });
