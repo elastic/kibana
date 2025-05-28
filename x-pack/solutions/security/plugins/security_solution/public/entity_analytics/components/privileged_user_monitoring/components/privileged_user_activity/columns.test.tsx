@@ -147,25 +147,25 @@ describe('columns', () => {
     });
 
     it('renders result column with badge', () => {
-      const col = columns[6] as EuiTableFieldDataColumnType<TableItemType>;
+      const col = columns[5] as EuiTableFieldDataColumnType<TableItemType>;
       render(<>{col.render?.('success', baseRecord)}</>, { wrapper: TestProviders });
       expect(screen.getByText('Success')).toBeInTheDocument();
     });
 
     it('renders result column with empty value', () => {
-      const col = columns[6] as EuiTableFieldDataColumnType<TableItemType>;
+      const col = columns[5] as EuiTableFieldDataColumnType<TableItemType>;
       render(<>{col.render?.('', baseRecord)}</>, { wrapper: TestProviders });
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     it('renders ip column', () => {
-      const col = columns[7] as EuiTableFieldDataColumnType<TableItemType>;
+      const col = columns[6] as EuiTableFieldDataColumnType<TableItemType>;
       render(<>{col.render?.('1.2.3.4', baseRecord)}</>, { wrapper: TestProviders });
       expect(screen.getByText('1.2.3.4')).toBeInTheDocument();
     });
 
     it('renders destination column', () => {
-      const col = columns[8] as EuiTableFieldDataColumnType<TableItemType>;
+      const col = columns[7] as EuiTableFieldDataColumnType<TableItemType>;
       render(<>{col.render ? col.render('server1', baseRecord) : 'server1'}</>, {
         wrapper: TestProviders,
       });
