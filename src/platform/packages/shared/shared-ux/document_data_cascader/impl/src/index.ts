@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataPoolerProvider } from './lib/store';
-export { ESQLDataPooler } from './components';
+export { DataCascadeProvider } from './lib/store';
+export { DataCascade } from './components';

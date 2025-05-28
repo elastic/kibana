@@ -8,4 +8,4 @@
  */
 
 export { getStatsGroupByColumnsFromQuery } from './parse_esql';
-export { DataPoolerProvider, useDataPoolerDispatch, useDataPoolerState } from './store';
+export { DataCascadeProvider, useDataCascadeDispatch, useDataCascadeState } from './store';
