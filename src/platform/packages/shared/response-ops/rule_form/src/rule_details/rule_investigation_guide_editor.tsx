@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiMarkdownEditor } from '@elastic/eui';
+import { EuiMarkdownAstNode, EuiMarkdownEditor, EuiMarkdownParseError } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 
 interface Props {
   setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
@@ -18,6 +19,24 @@ interface Props {
 }
 
 export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
+  const [errorMessages, setErrorMessages] = React.useState<string[]>([]);
+  const onParse = useCallback(
+    (_: EuiMarkdownParseError | null, { ast }: { ast: EuiMarkdownAstNode }) => {
+      const length = ast.position?.end.offset ?? 0;
+      if (length > MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH) {
+        setErrorMessages([
+          i18n.translate('responseOpsRuleForm.investigationGuide.editor.errorMessage', {
+            defaultMessage:
+              'The Investigation Guide is too long. Please shorten it.\nCurrent length: {length}.\nMax length: {maxLength}.',
+            values: { length, maxLength: MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH },
+          }),
+        ]);
+      } else if (errorMessages.length) {
+        setErrorMessages([]);
+      }
+    },
+    [errorMessages]
+  );
   return (
     <EuiMarkdownEditor
       aria-label={i18n.translate('responseOpsRuleForm.investigationGuide.editor.ariaLabel', {
@@ -33,6 +52,8 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
       `}
       value={value}
       onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
+      onParse={onParse}
+      errors={errorMessages}
       height={200}
       data-test-subj="investigationGuideEditor"
       initialViewMode="editing"
