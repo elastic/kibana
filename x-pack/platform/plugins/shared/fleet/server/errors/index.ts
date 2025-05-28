@@ -36,7 +36,8 @@ export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta>
     } else if (isObjectLike(meta)) {
       const metaStatusCode = (meta as { statusCode?: unknown }).statusCode;
 
-      if (typeof metaStatusCode === 'number') {
+      // If the original error had a status code, and it is not a `401`, then set that status code here
+      if (typeof metaStatusCode === 'number' && metaStatusCode !== 401) {
         this.statusCode = metaStatusCode;
       }
     }
