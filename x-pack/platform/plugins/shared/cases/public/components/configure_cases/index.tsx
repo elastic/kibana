@@ -119,7 +119,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
-  const canShowObservableTypes = features.observables.enabled;
+  const canShowObservableTypes = features.observables?.enabled;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
