@@ -17,12 +17,11 @@ export function transformPanelsOut(panelsJSON: string): DashboardAttributes['pan
 
 function transformPanelsProperties(panels: SavedDashboardPanel[]) {
   return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+    ({ embeddableConfig, gridData, id, panelIndex, title, type, version }) => ({
       gridData,
       panelConfig: {
         ...embeddableConfig,
         ...(id ? { savedObjectId:  id } : {}),
-        ...(panelRefName ? { savedObjectRefName: panelRefName } : {}),
         ...(title ? { title } : {}),
       },
       panelIndex,

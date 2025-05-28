@@ -95,7 +95,6 @@ describe('dashboardAttributesOut', () => {
           panelConfig: {
             enhancements: {},
             savedObjectId: '1',
-            savedObjectRefName: 'ref1',
             title: 'title1',
           },
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
@@ -182,7 +181,6 @@ describe('dashboardAttributesOut', () => {
           panelConfig: {
             enhancements: {},
             savedObjectId: '1',
-            savedObjectRefName: 'ref1',
             title: 'title1',
           },
           gridData: {
@@ -248,7 +246,6 @@ describe('itemAttrsToSavedObject', () => {
           panelConfig: {
             enhancements: {},
             savedObjectId: '1',
-            savedObjectRefName: 'ref1',
             title: 'title1',
           },
           panelIndex: '1',
@@ -280,7 +277,7 @@ describe('itemAttrsToSavedObject', () => {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
           "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
-          "panelsJSON": "[{\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\",\\"savedObjectRefName\\":\\"ref1\\",\\"title\\":\\"title1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "panelsJSON": "[{\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\",\\"title\\":\\"title1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
           "refreshInterval": Object {
             "pause": true,
             "value": 1000,
@@ -391,7 +388,6 @@ describe('savedObjectToItem', () => {
             panelConfig: {
               enhancements: {},
               savedObjectId: '1',
-              savedObjectRefName: 'ref1',
               title: 'title1',
             },
             gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },

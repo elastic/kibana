@@ -12,9 +12,11 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { EmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
+  SAVED_OBJECT_REF_NAME,
   SerializedPanelState,
   apiIsOfType,
   areTriggersDisabled,
+  findSavedObjectRef,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -58,12 +60,10 @@ function injectReferences(serializedState?: SerializedPanelState<MapSerializedSt
   const rawState = { ...serializedState.rawState };
   const references = serializedState.references ?? [];
 
-  if (rawState.savedObjectRefName) {
-    const ref = references.find(({ name }) => name === rawState.savedObjectRefName);
-    if (ref) {
-      rawState.savedObjectId = ref.id;
-      delete rawState.savedObjectRefName;
-    }
+  const savedObjectRef = findSavedObjectRef(MAP_SAVED_OBJECT_TYPE, references);
+
+  if (savedObjectRef) {
+    rawState.savedObjectId = savedObjectRef.id;
   }
 
   return inject(rawState as EmbeddableStateWithType, references) as unknown as MapSerializedState;
@@ -133,19 +133,15 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         };
       }
 
-      const byRefState = getByReferenceState(rawState, libraryId);
+      const { savedObjectId, ...byRefState } = getByReferenceState(rawState, libraryId);
       delete (byRefState as MapSerializedState).savedObjectId;
-      const savedObjectRef = {
-        name: 'savedObjectRef',
-        type: MAP_SAVED_OBJECT_TYPE,
-        id: libraryId,
-      };
       return {
-        rawState: {
-          ...byRefState,
-          savedObjectRefName: savedObjectRef.name,
-        },
-        references: [savedObjectRef],
+        rawState: byRefState,
+        references: [{
+          name: SAVED_OBJECT_REF_NAME,
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: libraryId,
+        }],
       };
     }
 
