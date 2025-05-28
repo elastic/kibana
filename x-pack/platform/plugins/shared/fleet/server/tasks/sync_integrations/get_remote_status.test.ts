@@ -82,15 +82,15 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     });
   });
 
-  it('should throw error if the passed outputId is not found', async () => {
+  it('should return response with error if the passed outputId is not found', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
 
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
-    ).rejects.toThrowError('No output found with id remote-es-not-existent');
+    expect(
+      await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
+    ).toEqual({ error: 'No output found with id remote-es-not-existent', integrations: [] });
   });
 
   it('should throw error if the passed outputId is not of type remote_elasticsearch', async () => {
