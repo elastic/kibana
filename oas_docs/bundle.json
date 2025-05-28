@@ -44165,7 +44165,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44197,6 +44198,21 @@
                           "id": {
                             "type": "string"
                           },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
                           "package_name": {
                             "type": "string"
                           },
@@ -44207,20 +44223,28 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
                           "updated_at": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
                           }
                         },
                         "required": [
-                          "sync_status"
+                          "sync_status",
+                          "install_status"
                         ],
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -44312,7 +44336,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44344,6 +44369,21 @@
                           "id": {
                             "type": "string"
                           },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
                           "package_name": {
                             "type": "string"
                           },
@@ -44354,20 +44394,28 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
                           "updated_at": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
                           }
                         },
                         "required": [
-                          "sync_status"
+                          "sync_status",
+                          "install_status"
                         ],
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
                     }
                   },
                   "required": [
