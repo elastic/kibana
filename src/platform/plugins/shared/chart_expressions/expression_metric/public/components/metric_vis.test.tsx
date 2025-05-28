@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { shallow } from 'enzyme';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
@@ -28,6 +28,7 @@ import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import faker from 'faker';
+import { PaletteOutput } from '@kbn/coloring';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
@@ -1160,12 +1161,16 @@ describe('MetricVisComponent', function () {
                 // should be overridden
                 color: 'static-color',
                 palette: {
-                  colors: [],
-                  gradient: true,
-                  stops: [],
-                  range: 'number',
-                  rangeMin: 2,
-                  rangeMax: 10,
+                  type: 'palette',
+                  name: 'default',
+                  params: {
+                    colors: [],
+                    gradient: true,
+                    stops: [],
+                    range: 'number',
+                    rangeMin: 2,
+                    rangeMax: 10,
+                  },
                 },
               },
             }}
@@ -1200,7 +1205,7 @@ describe('MetricVisComponent', function () {
 
       describe('percent-based', () => {
         const renderWithPalette = (
-          palette: CustomPaletteState,
+          palette: PaletteOutput<CustomPaletteState>,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
           shallow(
@@ -1238,13 +1243,17 @@ describe('MetricVisComponent', function () {
 
             renderWithPalette(
               {
-                range: 'percent',
-                // the rest of these params don't matter
-                colors: [],
-                gradient: false,
-                stops: [],
-                rangeMin: 2,
-                rangeMax: 10,
+                type: 'palette',
+                name: 'default',
+                params: {
+                  range: 'percent',
+                  // the rest of these params don't matter
+                  colors: [],
+                  gradient: false,
+                  stops: [],
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
               },
               dimensions as DimensionsVisParam
             );
@@ -1363,7 +1372,10 @@ describe('MetricVisComponent', function () {
         extra,
       } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
+      return {
+        primary: valueFormatter(primaryMetric),
+        secondary: (extra as ReactElement).props.children[1],
+      };
     };
 
     it.each`

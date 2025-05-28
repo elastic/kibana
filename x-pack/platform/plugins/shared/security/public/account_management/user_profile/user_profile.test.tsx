@@ -180,6 +180,8 @@ describe('useUserProfileForm', () => {
 
     await act(async () => {
       await result.current.setFieldValue('user.full_name', 'Another Name');
+    });
+    await act(async () => {
       await result.current.submitForm();
     });
 
@@ -304,6 +306,9 @@ describe('useUserProfileForm', () => {
 
       await act(async () => {
         await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+
+      await act(async () => {
         await result.current.submitForm();
       });
 

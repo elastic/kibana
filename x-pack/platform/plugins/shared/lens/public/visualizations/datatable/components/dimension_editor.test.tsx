@@ -12,6 +12,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
+import { getKbnPalettes } from '@kbn/palettes';
 import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor, DataType } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
@@ -88,6 +89,7 @@ describe('data table dimension editor', () => {
       setState: jest.fn(),
       isDarkMode: false,
       paletteService: chartPluginMock.createPaletteRegistry(),
+      palettes: getKbnPalettes({ darkMode: false }),
       panelRef: React.createRef(),
       addLayer: jest.fn(),
       removeLayer: jest.fn(),

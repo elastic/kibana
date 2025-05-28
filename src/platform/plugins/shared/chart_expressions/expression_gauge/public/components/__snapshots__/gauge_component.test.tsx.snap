@@ -97,24 +97,6 @@ exports[`GaugeComponent renders the chart 1`] = `
               "strokeWidth": 1,
               "visible": true,
             },
-            "lumaSteps": Array [
-              224,
-              184,
-              128,
-              96,
-              64,
-              32,
-              16,
-              8,
-              4,
-              2,
-              1,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
             "vertical": Object {
               "dash": Array [
                 0,
@@ -257,6 +239,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           },
         },
         "flamegraph": Object {
+          "minimapFocusBorder": "magenta",
           "navigation": Object {
             "buttonBackgroundColor": "#CCE4F5",
             "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -334,7 +317,7 @@ exports[`GaugeComponent renders the chart 1`] = `
             "align": "center",
             "border": Object {
               "stroke": "gray",
-              "strokeWidth": 1,
+              "strokeWidth": 0,
             },
             "label": Object {
               "fontFamily": "Sans-Serif",
@@ -358,7 +341,7 @@ exports[`GaugeComponent renders the chart 1`] = `
             },
           },
           "xAxisLabel": Object {
-            "fontFamily": "Sans-Serif",
+            "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
             "fontSize": 12,
             "fontStyle": "normal",
             "fontVariant": "normal",
@@ -374,7 +357,7 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": true,
           },
           "yAxisLabel": Object {
-            "fontFamily": "Sans-Serif",
+            "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
             "fontSize": 12,
             "fontStyle": "normal",
             "fontVariant": "normal",
@@ -469,7 +452,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "emptySizeRatio": 0,
           "fillLabel": Object {
             "clipText": false,
-            "fontFamily": "Sans-Serif",
+            "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
             "fontStyle": "normal",
             "fontVariant": "normal",
             "fontWeight": 400,
@@ -486,7 +469,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "horizontalTextEnforcer": 1,
           "idealFontSizeJump": 1.05,
           "linkLabel": Object {
-            "fontFamily": "Sans-Serif",
+            "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
             "fontSize": 11,
             "fontStyle": "normal",
             "fontVariant": "normal",

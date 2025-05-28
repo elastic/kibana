@@ -367,6 +367,32 @@ describe('Task Runner', () => {
     ).toHaveBeenCalled();
   });
 
+  test('throws error when schedule.interval is not provided', async () => {
+    mockGetAlertFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, schedule: {} } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, schedule: {} },
+    });
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+        // @ts-ignore
+        schedule: {},
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Interval is required to calculate next run"'
+    );
+  });
   test.each(ephemeralTestParams)(
     'actionsPlugin.execute is called per alert alert that is scheduled %s',
     async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction, isBulk) => {
@@ -376,7 +402,6 @@ describe('Task Runner', () => {
       customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
         true
       );
-      actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,

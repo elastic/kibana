@@ -19,7 +19,7 @@ import {
   LineAnnotation,
   AnnotationDomainType,
   Tooltip,
-  LIGHT_THEME,
+  AMSTERDAM_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -123,7 +123,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         }
       />
       <Settings
-        theme={{ chartMargins: LIGHT_THEME.chartMargins }}
+        theme={{ chartMargins: AMSTERDAM_LIGHT_THEME.chartMargins }}
         baseTheme={chartBaseTheme}
         rotation={90}
         locale={i18n.getLocale()}

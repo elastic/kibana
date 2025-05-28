@@ -84,6 +84,8 @@ export interface ESQLEditorProps {
   controlsContext?: ControlsContext;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
+  /** Resize the editor to fit the initially passed query on mount */
+  expandToFitQueryOnMount?: boolean;
 }
 
 export interface JoinIndicesAutocompleteResult {

@@ -182,11 +182,9 @@ describe('HistoricalResults', () => {
           await userEvent.click(dateQuickSelect);
         });
 
-        await act(async () => {
-          const monthToDateButton = screen.getByTestId('superDatePickerCommonlyUsed_Month_to date');
+        const monthToDateButton = screen.getByTestId('superDatePickerCommonlyUsed_Month_to date');
 
-          await userEvent.click(monthToDateButton);
-        });
+        await userEvent.click(monthToDateButton);
 
         const fetchQueryOpts = {
           abortController: expect.any(AbortController),
@@ -391,11 +389,9 @@ describe('HistoricalResults', () => {
 
         const wrapper = screen.getByTestId('historicalResultsPagination');
 
-        await act(() =>
-          userEvent.click(within(wrapper).getByTestId('tablePaginationPopoverButton'))
-        );
+        await userEvent.click(within(wrapper).getByTestId('tablePaginationPopoverButton'));
 
-        await act(() => userEvent.click(screen.getByTestId('tablePagination-25-rows')));
+        await userEvent.click(screen.getByTestId('tablePagination-25-rows'));
 
         const fetchQueryOpts = {
           abortController: expect.any(AbortController),

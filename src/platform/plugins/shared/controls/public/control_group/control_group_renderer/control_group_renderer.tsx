@@ -10,6 +10,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { cloneDeep } from 'lodash';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -110,7 +111,7 @@ export const ControlGroupRenderer = ({
 
     let cancelled = false;
 
-    getCreationOptions(defaultRuntimeState, controlGroupStateBuilder)
+    getCreationOptions(cloneDeep(defaultRuntimeState), controlGroupStateBuilder)
       .then(({ initialState, editorConfig }) => {
         if (cancelled) return;
         const initialRuntimeState = {
@@ -145,7 +146,8 @@ export const ControlGroupRenderer = ({
         getLastSavedStateForChild: () => lastState$Ref.current.value,
         compressed: compressed ?? true,
       })}
-      onApiAvailable={(controlGroupApi) => {
+      onApiAvailable={async (controlGroupApi) => {
+        await controlGroupApi.untilInitialized();
         const controlGroupRendererApi: ControlGroupRendererApi = {
           ...controlGroupApi,
           reload: () => reload$.next(),

@@ -15,6 +15,8 @@ jest.mock('@kbn/search-connectors', () => {
     fetchConnectors: () => mockedFetchConnectors(),
   };
 });
+
+import { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 
 import { Connector } from '@kbn/search-connectors';
@@ -25,13 +27,25 @@ import {
   getCrawlerDeprecations,
   getEnterpriseSearchNodeDeprecation,
   getNativeConnectorDeprecations,
+  getEnterpriseSearchAccountCleanups,
 } from '.';
 
+let mockedGetUser = jest.fn();
+let mockedGetServiceCredentials = jest.fn();
+let mockedGetApiKey = jest.fn();
 const ctx = {
   esClient: {
     asInternalUser: {},
+    asCurrentUser: {
+      security: {
+        getUser: () => mockedGetUser(),
+        getServiceCredentials: (request: any) => mockedGetServiceCredentials(request),
+        getApiKey: () => mockedGetApiKey(),
+      },
+    },
   },
 } as GetDeprecationsContext;
+
 const cloud = { baseUrl: 'cloud.elastic.co', deploymentId: '123', cloudId: 'abc' } as CloudSetup;
 const notCloud = {} as CloudSetup;
 const docsUrl = 'example.com';
@@ -128,5 +142,154 @@ describe('Native connector deprecations', () => {
     );
     expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo'] });
     expect(deprecations[0].title).toMatch('Elastic-managed connectors are no longer supported');
+  });
+});
+
+describe('Enterprise Search service account cleanups', () => {
+  it('Should not return any deprecations if Enterprise Search is still active', async () => {
+    mockedGetUser = jest.fn().mockResolvedValue(undefined);
+    mockedGetServiceCredentials = jest.fn().mockResolvedValue(undefined);
+    mockedGetApiKey = jest.fn().mockResolvedValue([]);
+
+    const config = { host: 'example.com' } as ConfigType;
+    const deprecations = await getEnterpriseSearchAccountCleanups(ctx, config);
+    expect(deprecations).toHaveLength(0);
+  });
+
+  it('Should not return any deprecations if no service accounts, tokens, or api keys are present', async () => {
+    const config = {} as ConfigType;
+
+    mockedGetUser = jest.fn().mockResolvedValue(undefined);
+    mockedGetServiceCredentials = jest.fn().mockResolvedValue(undefined);
+    mockedGetApiKey = jest.fn().mockResolvedValue([]);
+
+    const deprecations = await getEnterpriseSearchAccountCleanups(ctx, config);
+    expect(deprecations).toHaveLength(0);
+  });
+
+  it('Should return a deprecation if service accounts user is present', async () => {
+    const config = {} as ConfigType;
+
+    mockedGetUser = jest.fn().mockResolvedValue({
+      username: 'enterprise_search',
+    });
+    mockedGetServiceCredentials = jest.fn().mockResolvedValue(undefined);
+    mockedGetApiKey = jest.fn().mockResolvedValue([]);
+
+    const deprecations = await getEnterpriseSearchAccountCleanups(ctx, config);
+    expect(deprecations).toHaveLength(1);
+
+    const steps = deprecations[0].correctiveActions.manualSteps;
+    expect(steps).toHaveLength(1);
+    const stepsStr = steps.join(', ');
+    expect(stepsStr).toMatch("Remove the 'enterprise_search' user account");
+
+    expect(deprecations[0].title).toMatch(
+      'Enterprise Search user accounts and credentials should be removed'
+    );
+
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch("Remove the 'enterprise_search' user account");
+  });
+
+  it('Should return a deprecation if service account credentials are present', async () => {
+    const config = {} as ConfigType;
+
+    mockedGetUser = jest.fn().mockResolvedValue(undefined);
+    mockedGetServiceCredentials = jest.fn().mockResolvedValue({
+      service_account: 'enterprise_search',
+      count: 1,
+      tokens: ['tokenid'],
+      nodes_credentials: [],
+    });
+    mockedGetApiKey = jest.fn().mockResolvedValue([]);
+
+    const deprecations = await getEnterpriseSearchAccountCleanups(ctx, config);
+    expect(deprecations).toHaveLength(1);
+
+    const steps = deprecations[0].correctiveActions.manualSteps;
+    expect(steps).toHaveLength(1);
+    const stepsStr = steps.join(', ');
+    expect(stepsStr).toMatch("Invalidate the 'elastic/enterprise-search-server' token");
+
+    expect(deprecations[0].title).toMatch(
+      'Enterprise Search user accounts and credentials should be removed'
+    );
+
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch(
+      "Invalidate any 'elastic/enterprise-search-server' service account credentials"
+    );
+  });
+
+  it('Should return a deprecation if service account api keys are present', async () => {
+    const config = {} as ConfigType;
+
+    mockedGetUser = jest.fn().mockResolvedValue(undefined);
+    mockedGetServiceCredentials = jest.fn().mockResolvedValue(undefined);
+    mockedGetApiKey = jest.fn().mockResolvedValue({ api_keys: [{ id: 'test_api_key' }] });
+
+    const deprecations = await getEnterpriseSearchAccountCleanups(ctx, config);
+    expect(deprecations).toHaveLength(1);
+
+    const steps = deprecations[0].correctiveActions.manualSteps;
+    expect(steps).toHaveLength(1);
+    const stepsStr = steps.join(', ');
+    expect(stepsStr).toMatch(
+      "Invalidate the 'cloud-internal-enterprise_search-server' API key 'test_api_key'"
+    );
+
+    expect(deprecations[0].title).toMatch(
+      'Enterprise Search user accounts and credentials should be removed'
+    );
+
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch(
+      "Invalidate any 'cloud-internal-enterprise_search-server' API keys"
+    );
+  });
+
+  it('Should return a deprecation for service account user, credentials, and keys', async () => {
+    const config = {} as ConfigType;
+
+    mockedGetUser = jest.fn().mockResolvedValue({
+      username: 'enterprise_search',
+    });
+    mockedGetServiceCredentials = jest.fn().mockResolvedValue({
+      service_account: 'enterprise_search',
+      count: 1,
+      tokens: ['tokenid'],
+      nodes_credentials: [],
+    });
+    mockedGetApiKey = jest.fn().mockResolvedValue({ api_keys: [{ id: 'test_api_key' }] });
+
+    const deprecations = await getEnterpriseSearchAccountCleanups(ctx, config);
+    expect(deprecations).toHaveLength(1);
+
+    const steps = deprecations[0].correctiveActions.manualSteps;
+    expect(steps).toHaveLength(3);
+    const stepsStr = steps.join(', ');
+    expect(stepsStr).toMatch("Remove the 'enterprise_search' user account");
+    expect(stepsStr).toMatch("Invalidate the 'elastic/enterprise-search-server' token");
+    expect(stepsStr).toMatch(
+      "Invalidate the 'cloud-internal-enterprise_search-server' API key 'test_api_key'"
+    );
+
+    expect(deprecations[0].title).toMatch(
+      'Enterprise Search user accounts and credentials should be removed'
+    );
+
+    const message = deprecations[0].message as DeprecationDetailsMessage;
+    expect(message.content).toMatch('There are leftover accounts or credentials');
+    expect(message.content).toMatch("Remove the 'enterprise_search' user account");
+    expect(message.content).toMatch(
+      "Invalidate any 'elastic/enterprise-search-server' service account credentials"
+    );
+    expect(message.content).toMatch(
+      "Invalidate any 'cloud-internal-enterprise_search-server' API keys"
+    );
   });
 });

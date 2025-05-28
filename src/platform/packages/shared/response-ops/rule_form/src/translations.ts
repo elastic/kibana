@@ -103,6 +103,20 @@ export const ALERT_FLAPPING_DETECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Related dashboards',
+  }
+);
+
+export const ALERT_LINK_DASHBOARDS_PLACEHOLDER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Link related dashboards for investigation',
+  }
+);
+
 export const SCHEDULE_TITLE_PREFIX = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleSchedule.scheduleTitlePrefix',
   {
@@ -252,17 +266,6 @@ export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
   {
     defaultMessage:
       'Select a connector and configure the actions to be performed when an alert is triggered',
-  }
-);
-
-export const RULE_DETAILS_TITLE = i18n.translate('responseOpsRuleForm.ruleForm.ruleDetails.title', {
-  defaultMessage: 'Rule name and tags',
-});
-
-export const RULE_DETAILS_DESCRIPTION = i18n.translate(
-  'responseOpsRuleForm.ruleForm.ruleDetails.description',
-  {
-    defaultMessage: 'Define a name and tags for your rule.',
   }
 );
 

@@ -298,24 +298,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -458,6 +440,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 },
               },
               "flamegraph": Object {
+                "minimapFocusBorder": "magenta",
                 "navigation": Object {
                   "buttonBackgroundColor": "#CCE4F5",
                   "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -535,7 +518,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "align": "center",
                   "border": Object {
                     "stroke": "gray",
-                    "strokeWidth": 1,
+                    "strokeWidth": 0,
                   },
                   "label": Object {
                     "fontFamily": "Sans-Serif",
@@ -559,7 +542,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "xAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -575,7 +558,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "visible": true,
                 },
                 "yAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -670,7 +653,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
@@ -687,7 +670,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "horizontalTextEnforcer": 1,
                 "idealFontSizeJump": 1.05,
                 "linkLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 11,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -1199,24 +1182,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -1359,6 +1324,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 },
               },
               "flamegraph": Object {
+                "minimapFocusBorder": "magenta",
                 "navigation": Object {
                   "buttonBackgroundColor": "#CCE4F5",
                   "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -1436,7 +1402,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "align": "center",
                   "border": Object {
                     "stroke": "gray",
-                    "strokeWidth": 1,
+                    "strokeWidth": 0,
                   },
                   "label": Object {
                     "fontFamily": "Sans-Serif",
@@ -1460,7 +1426,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "xAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -1476,7 +1442,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "visible": true,
                 },
                 "yAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -1571,7 +1537,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
@@ -1588,7 +1554,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "horizontalTextEnforcer": 1,
                 "idealFontSizeJump": 1.05,
                 "linkLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 11,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -2160,24 +2126,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -2320,6 +2268,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 },
               },
               "flamegraph": Object {
+                "minimapFocusBorder": "magenta",
                 "navigation": Object {
                   "buttonBackgroundColor": "#CCE4F5",
                   "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -2397,7 +2346,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "align": "center",
                   "border": Object {
                     "stroke": "gray",
-                    "strokeWidth": 1,
+                    "strokeWidth": 0,
                   },
                   "label": Object {
                     "fontFamily": "Sans-Serif",
@@ -2421,7 +2370,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "xAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -2437,7 +2386,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "visible": true,
                 },
                 "yAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -2532,7 +2481,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
@@ -2549,7 +2498,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "horizontalTextEnforcer": 1,
                 "idealFontSizeJump": 1.05,
                 "linkLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 11,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -3123,24 +3072,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -3283,6 +3214,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 },
               },
               "flamegraph": Object {
+                "minimapFocusBorder": "magenta",
                 "navigation": Object {
                   "buttonBackgroundColor": "#CCE4F5",
                   "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -3360,7 +3292,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "align": "center",
                   "border": Object {
                     "stroke": "gray",
-                    "strokeWidth": 1,
+                    "strokeWidth": 0,
                   },
                   "label": Object {
                     "fontFamily": "Sans-Serif",
@@ -3384,7 +3316,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "xAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -3400,7 +3332,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "visible": true,
                 },
                 "yAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -3495,7 +3427,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
@@ -3512,7 +3444,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "horizontalTextEnforcer": 1,
                 "idealFontSizeJump": 1.05,
                 "linkLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 11,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -4024,24 +3956,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -4184,6 +4098,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 },
               },
               "flamegraph": Object {
+                "minimapFocusBorder": "magenta",
                 "navigation": Object {
                   "buttonBackgroundColor": "#CCE4F5",
                   "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -4261,7 +4176,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "align": "center",
                   "border": Object {
                     "stroke": "gray",
-                    "strokeWidth": 1,
+                    "strokeWidth": 0,
                   },
                   "label": Object {
                     "fontFamily": "Sans-Serif",
@@ -4285,7 +4200,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "xAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -4301,7 +4216,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "visible": true,
                 },
                 "yAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -4396,7 +4311,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
@@ -4413,7 +4328,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "horizontalTextEnforcer": 1,
                 "idealFontSizeJump": 1.05,
                 "linkLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 11,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -4880,24 +4795,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -5040,6 +4937,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 },
               },
               "flamegraph": Object {
+                "minimapFocusBorder": "magenta",
                 "navigation": Object {
                   "buttonBackgroundColor": "#CCE4F5",
                   "buttonDisabledBackgroundColor": "#D3DAE626",
@@ -5117,7 +5015,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "align": "center",
                   "border": Object {
                     "stroke": "gray",
-                    "strokeWidth": 1,
+                    "strokeWidth": 0,
                   },
                   "label": Object {
                     "fontFamily": "Sans-Serif",
@@ -5141,7 +5039,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "xAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -5157,7 +5055,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "visible": true,
                 },
                 "yAxisLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 12,
                   "fontStyle": "normal",
                   "fontVariant": "normal",
@@ -5252,7 +5150,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "emptySizeRatio": 0,
                 "fillLabel": Object {
                   "clipText": false,
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontStyle": "normal",
                   "fontVariant": "normal",
                   "fontWeight": 400,
@@ -5269,7 +5167,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "horizontalTextEnforcer": 1,
                 "idealFontSizeJump": 1.05,
                 "linkLabel": Object {
-                  "fontFamily": "Sans-Serif",
+                  "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 11,
                   "fontStyle": "normal",
                   "fontVariant": "normal",

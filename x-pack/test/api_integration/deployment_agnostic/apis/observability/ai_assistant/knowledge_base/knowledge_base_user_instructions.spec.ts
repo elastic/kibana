@@ -250,7 +250,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when a user instruction exist and a conversation is created', () => {
       // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
-      this.tags(['failsOnMKI']);
+      this.tags(['skipCloud']);
 
       let proxy: LlmProxy;
       let connectorId: string;
@@ -395,7 +395,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('Forwarding User Instructions via System Message to the LLM', () => {
       // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
-      this.tags(['failsOnMKI']);
+      this.tags(['skipCloud']);
 
       let proxy: LlmProxy;
       let connectorId: string;
