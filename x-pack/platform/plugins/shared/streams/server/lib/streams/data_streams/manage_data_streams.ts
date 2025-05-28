@@ -149,6 +149,7 @@ export async function updateDataStreamsLifecycle({
     const isIlm = isIlmLifecycle(lifecycle);
     await retryTransientEsErrors(
       () =>
+        // TODO: use client method once available
         esClient.transport.request({
           method: 'PUT',
           path: `/_data_stream/${names.join(',')}/_settings`,

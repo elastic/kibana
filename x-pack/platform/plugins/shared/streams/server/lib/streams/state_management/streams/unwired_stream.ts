@@ -28,7 +28,7 @@ import { StreamActiveRecord, PrintableStream } from '../stream_active_record/str
 
 export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Definition> {
   private _processingChanged: boolean = false;
-  private _lifeCycleChanged: boolean = false;
+  private _lifecycleChanged: boolean = false;
 
   constructor(definition: Streams.UnwiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
@@ -42,7 +42,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     return {
       ...super.toPrintable(),
       processingChanged: this._processingChanged,
-      lifeCycleChanged: this._lifeCycleChanged,
+      lifecycleChanged: this._lifecycleChanged,
     };
   }
 
@@ -77,7 +77,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
         startingStateStreamDefinition.ingest.processing
       );
 
-    this._lifeCycleChanged =
+    this._lifecycleChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
@@ -101,7 +101,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     startingState: State
   ): Promise<ValidationResult> {
     // Check for conflicts
-    if (this._lifeCycleChanged || this._processingChanged) {
+    if (this._lifecycleChanged || this._processingChanged) {
       try {
         const dataStreamResult =
           await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
@@ -153,12 +153,12 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     if (this._definition.ingest.processing.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
-    if (!isInheritLifecycle(this.getLifeCycle())) {
+    if (!isInheritLifecycle(this.getLifecycle())) {
       actions.push({
         type: 'update_lifecycle',
         request: {
           name: this._definition.name,
-          lifecycle: this.getLifeCycle(),
+          lifecycle: this.getLifecycle(),
         },
       });
     }
@@ -169,11 +169,11 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     return actions;
   }
 
-  public hasChangedLifeCycle(): boolean {
-    return this._lifeCycleChanged;
+  public hasChangedLifecycle(): boolean {
+    return this._lifecycleChanged;
   }
 
-  public getLifeCycle(): IngestStreamLifecycle {
+  public getLifecycle(): IngestStreamLifecycle {
     return this._definition.ingest.lifecycle;
   }
 
@@ -210,12 +210,12 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       });
     }
 
-    if (this._lifeCycleChanged) {
+    if (this._lifecycleChanged) {
       actions.push({
         type: 'update_lifecycle',
         request: {
           name: this._definition.name,
-          lifecycle: this.getLifeCycle(),
+          lifecycle: this.getLifecycle(),
         },
       });
     }
