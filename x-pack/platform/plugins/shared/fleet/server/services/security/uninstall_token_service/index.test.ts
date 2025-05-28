@@ -290,7 +290,7 @@ describe('UninstallTokenService', () => {
           expect(getAgentPoliciesByIDsMock).toHaveBeenCalledWith(
             soClientMock,
             [so.attributes.policy_id],
-            { ignoreMissing: true }
+            { ignoreMissing: true, spaceId: '*' }
           );
         });
 
@@ -326,7 +326,7 @@ describe('UninstallTokenService', () => {
           expect(getAgentPoliciesByIDsMock).toHaveBeenCalledWith(
             soClientMock,
             [so.attributes.policy_id],
-            { ignoreMissing: true }
+            { ignoreMissing: true, spaceId: '*' }
           );
         });
 
@@ -362,7 +362,7 @@ describe('UninstallTokenService', () => {
           expect(getAgentPoliciesByIDsMock).toHaveBeenCalledWith(
             soClientMock,
             [so.attributes.policy_id],
-            { ignoreMissing: true }
+            { ignoreMissing: true, spaceId: '*' }
           );
         });
 
