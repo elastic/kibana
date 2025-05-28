@@ -14,8 +14,8 @@
     "requiredBundles": [
       "kibanaUtils"
     ],
-    // "requiredPlugins": [
-    //   "taskManager"
-    // ],
+    "optionalPlugins": [
+      "taskManager"
+    ],
   }
 }
