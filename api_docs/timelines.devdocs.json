@@ -1299,7 +1299,7 @@
           "signature": [
             "() => (api: ",
             "SensorAPI",
-            ") => void"
+            "<string>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
           "deprecated": false,

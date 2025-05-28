@@ -156,7 +156,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Rules Page - Flyout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/220371
+    describe.skip('Rules Page - Flyout', () => {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
         // Ensure that the first rule is enabled
         await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'enable');

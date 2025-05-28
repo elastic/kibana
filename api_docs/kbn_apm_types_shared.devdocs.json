@@ -1,0 +1,93 @@
+{
+  "id": "@kbn/apm-types-shared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/apm-types-shared",
+        "id": "def-common.HistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "HistogramItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-types-shared/src/interfaces/correlations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types-shared",
+            "id": "def-common.HistogramItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-types-shared/src/interfaces/correlations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types-shared",
+            "id": "def-common.HistogramItem.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-types-shared/src/interfaces/correlations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/apm-types-shared",
+        "id": "def-common.ProcessorEvent",
+        "type": "Enum",
+        "tags": [],
+        "label": "ProcessorEvent",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-types-shared/src/enums/processor_event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/apm-types-shared",
+        "id": "def-common.Maybe",
+        "type": "Type",
+        "tags": [],
+        "label": "Maybe",
+        "description": [],
+        "signature": [
+          "T | null | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-types-shared/src/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

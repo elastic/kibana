@@ -25,13 +25,13 @@
       "fleet",
       "fieldFormats",
       "dataViews",
+      "lens",
       "fieldsMetadata",
       "taskManager",
       "usageCollection"
     ],
     "optionalPlugins": [
-      "telemetry",
-      "lens"
+      "telemetry"
     ],
     "requiredBundles": [
       "discover"
