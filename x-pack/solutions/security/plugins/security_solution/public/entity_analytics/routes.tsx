@@ -15,6 +15,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_RISK_ANALYTICS_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
@@ -22,6 +23,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
+import { EntityAnalyticsRiskAnalyticsPage } from './pages/entity_analytics_risk_analytics_page';
 
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
@@ -127,6 +129,27 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
 EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
+const EntityAnalyticsRiskAnalyticsWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityAnalyticsRiskAnalyticsPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityAnalyticsRiskAnalyticsContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_RISK_ANALYTICS_PATH}
+        exact
+        component={EntityAnalyticsRiskAnalyticsWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsRiskAnalyticsContainer.displayName = 'EntityAnalyticsRiskAnalyticsContainer';
+
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -158,6 +181,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
       SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_RISK_ANALYTICS_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsRiskAnalyticsContainer,
+      SecurityPageName.entityAnalyticsRiskAnalytics
     ),
   },
 ];
