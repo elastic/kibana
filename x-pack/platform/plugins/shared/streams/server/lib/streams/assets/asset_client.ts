@@ -259,22 +259,22 @@ export class AssetClient {
 
   async getAssetLinks<TAssetType extends AssetType>(
     name: string,
-    types?: TAssetType[],
-    ids?: string[]
+    assetTypes?: TAssetType[],
+    assetIds?: string[]
   ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
-    if (ids?.length && types?.length !== 1) {
+    if (assetIds?.length && assetTypes?.length !== 1) {
       throw new Error('You must provide only one type when providing ids');
     }
 
     const filters = [...termQuery(STREAM_NAME, name)];
-    if (types?.length) {
-      filters.push(...termsQuery(ASSET_TYPE, types));
+    if (assetTypes?.length) {
+      filters.push(...termsQuery(ASSET_TYPE, assetTypes));
     }
-    if (types?.length === 1 && ids?.length) {
+    if (assetTypes?.length === 1 && assetIds?.length) {
       filters.push(
         ...termsQuery(
           '_id',
-          ids.map((id) => getUuid(name, { [ASSET_TYPE]: types[0], [ASSET_ID]: id }))
+          assetIds.map((id) => getUuid(name, { [ASSET_TYPE]: assetTypes[0], [ASSET_ID]: id }))
         )
       );
     }
