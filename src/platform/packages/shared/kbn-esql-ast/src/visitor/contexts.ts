@@ -21,6 +21,7 @@ import type {
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRenameExpression,
+  ESQLAstRerankCommand,
   ESQLColumn,
   ESQLCommandOption,
   ESQLDecimalLiteral,
@@ -195,11 +196,6 @@ export class CommandVisitorContext<
     return this.node.name.toUpperCase();
   }
 
-  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
-    this.ctx.assertMethodExists('visitQuery');
-    return this.ctx.visitQuery(this, queryNode, undefined as any);
-  }
-
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
       if (!arg || Array.isArray(arg)) {
@@ -284,6 +280,25 @@ export class CommandVisitorContext<
         const sourceContext = new SourceExpressionVisitorContext(this.ctx, arg, this);
         const result = this.ctx.methods.visitSourceExpression!(sourceContext, input);
 
+        yield result;
+      }
+    }
+  }
+
+  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
+    this.ctx.assertMethodExists('visitQuery');
+    return this.ctx.visitQuery(this, queryNode, undefined as any);
+  }
+
+  public *visitSubQueries() {
+    this.ctx.assertMethodExists('visitQuery');
+    for (const arg of this.node.args) {
+      if (!arg || Array.isArray(arg)) {
+        continue;
+      }
+
+      if (arg.type === 'query') {
+        const result = this.visitSubQuery(arg);
         yield result;
       }
     }
@@ -486,6 +501,12 @@ export class JoinCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
+
+// RERANK <query> ON field [, field ...] WITH <inference-id>
+export class RerankCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstRerankCommand> {}
 
 // CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
 export class ChangePointCommandVisitorContext<

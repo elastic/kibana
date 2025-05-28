@@ -7,16 +7,13 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import pRetry from 'p-retry';
 import { errors } from '@elastic/elasticsearch';
-import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { populateMissingSemanticTextFieldWithLock } from './populate_missing_semantic_text_fields';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
-import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 import { updateExistingIndexAssets } from '../index_assets/update_existing_index_assets';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
@@ -56,29 +53,15 @@ export async function runStartupMigrations({
       });
 
       if (!isKbSemanticTextCompatible) {
-        const inferenceId = await getInferenceIdFromWriteIndex(esClient);
-        await reIndexKnowledgeBaseWithLock({ core, logger, esClient, inferenceId });
+        await reIndexKnowledgeBaseWithLock({ core, logger, esClient });
       }
-
-      await pRetry(
-        async () => populateMissingSemanticTextFieldWithLock({ core, logger, config, esClient }),
-        {
-          retries: 5,
-          minTimeout: 10_000,
-          onFailedAttempt: async (error) => {
-            const isLockAcquisitionError = error instanceof LockAcquisitionError;
-            if (!isLockAcquisitionError) {
-              throw error;
-            }
-          },
-        }
-      );
     })
     .catch((error) => {
-      const isLockAcquisitionError = error instanceof LockAcquisitionError;
-      if (!isLockAcquisitionError) {
+      // we should propogate the error if it is not a LockAcquisitionError
+      if (!isLockAcquisitionError(error)) {
         throw error;
       }
+      logger.info('Startup migrations are already in progress. Aborting startup migrations');
     });
 }
 

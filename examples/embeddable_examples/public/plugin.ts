@@ -55,7 +55,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
-        './react_embeddables/field_list/field_list_react_embeddable'
+        './react_embeddables/field_list/field_list_embeddable'
       );
       const [coreStart, deps] = await startServicesPromise;
       return getFieldListFactory(coreStart, deps);

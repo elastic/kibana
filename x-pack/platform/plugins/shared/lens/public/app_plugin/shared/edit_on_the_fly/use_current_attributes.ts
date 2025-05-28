@@ -23,7 +23,9 @@ export const useCurrentAttributes = ({
   visualizationMap: VisualizationMap;
   textBasedMode?: boolean;
 }) => {
-  const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
+  const { datasourceStates, visualization, activeDatasourceId } = useLensSelector(
+    (state) => state.lens
+  );
 
   const [currentAttributes, setCurrentAttributes] = useState<
     TypedLensSerializedState['attributes'] | undefined
@@ -47,6 +49,7 @@ export const useCurrentAttributes = ({
     const references =
       !textBasedMode && visualization.state
         ? extractReferencesFromState({
+            activeDatasourceId,
             activeDatasources: Object.keys(datasourceStates).reduce(
               (acc, id) => ({
                 ...acc,
@@ -74,6 +77,7 @@ export const useCurrentAttributes = ({
       setCurrentAttributes(attrs);
     }
   }, [
+    activeDatasourceId,
     activeVisualization,
     initialAttributes,
     datasourceMap,

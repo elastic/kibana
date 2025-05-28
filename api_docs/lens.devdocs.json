@@ -99,15 +99,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges$?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
+          " | undefined>; serializeState: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -329,221 +321,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; snapshotRuntimeState: () => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          "> | ",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          ">[] | undefined>; rendering?: ",
-          "Rendering",
-          " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
-          "Position",
-          " | ",
-          "LegendPositionConfig",
-          " | undefined; rotation?: ",
-          "Rotation",
-          " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
-          "MarkBuffer",
-          " | undefined; pointerUpdateTrigger?: ",
-          "PointerUpdateTrigger",
-          " | undefined; brushAxis?: ",
-          "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
-          "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
-          "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; labelMinor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; centralMajor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
-          {
-            "pluginId": "@kbn/coloring",
-            "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          },
-          "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
-          "[] | undefined; }; references: ",
-          "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1323,7 +1101,33 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; }"
+          "<object>[]>; createAlertRule: (initialValues: Partial<",
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormData",
+            "text": "RuleFormData"
+          },
+          "<Partial<Readonly<{ timeField?: string | undefined; aggField?: string | undefined; termField?: string | string[] | undefined; termSize?: number | undefined; sourceFields?: Readonly<{} & { label: string; searchPath: string; }>[] | undefined; } & { index: string[]; size: number; groupBy: string; searchConfiguration: Readonly<{} & {}>; esqlQuery: Readonly<{} & { esql: string; }>; esQuery: string; searchType: \"searchSource\" | \"esqlQuery\" | \"esQuery\"; timeWindowSize: number; excludeHitsFromPreviousRun: boolean; timeWindowUnit: string; threshold: number[]; thresholdComparator: ",
+          "Comparator",
+          "; aggType: string; }>>>>, ruleTypeRegistry: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeRegistryContract",
+            "text": "RuleTypeRegistryContract"
+          },
+          ", actionTypeRegistry: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionTypeRegistryContract",
+            "text": "ActionTypeRegistryContract"
+          },
+          "<unknown, unknown>) => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/type_guards.ts",
         "deprecated": false,
@@ -2588,6 +2392,27 @@
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/datatable/visualization.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.DatatableVisualizationState.density",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "density",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridDensity",
+                "text": "DataGridDensity"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/datatable/visualization.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3312,7 +3137,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3366,7 +3197,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -3414,7 +3251,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3468,7 +3311,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3522,7 +3371,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3576,7 +3431,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3630,7 +3491,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3684,7 +3551,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
@@ -3758,7 +3631,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3812,7 +3691,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -3860,7 +3745,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3914,7 +3805,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -3968,7 +3865,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4022,7 +3925,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4076,7 +3985,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4130,7 +4045,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; }) => void"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
@@ -4190,7 +4111,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -4244,7 +4171,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   "PieVisualizationState",
                   "; }; } | { title: string; description?: string | undefined; references: ",
@@ -4292,7 +4225,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -4346,7 +4285,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -4400,7 +4345,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -4454,7 +4405,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -4508,7 +4465,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -4562,7 +4525,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: unknown; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
@@ -4626,7 +4595,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4680,7 +4655,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -4728,7 +4709,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4782,7 +4769,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4836,7 +4829,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4890,7 +4889,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4944,7 +4949,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -4998,7 +5009,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; }) => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
@@ -5058,7 +5075,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -5112,7 +5135,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   "PieVisualizationState",
                   "; }; } | { title: string; description?: string | undefined; references: ",
@@ -5160,7 +5189,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -5214,7 +5249,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -5268,7 +5309,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -5322,7 +5369,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -5376,7 +5429,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -5430,7 +5489,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: unknown; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
@@ -6309,7 +6374,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -6363,7 +6434,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -6411,7 +6488,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -6465,7 +6548,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -6519,7 +6608,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -6573,7 +6668,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -6627,7 +6728,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -6681,7 +6788,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
               {
                 "pluginId": "uiActions",
@@ -6762,7 +6875,7 @@
                 "section": "def-public.UserMessage",
                 "text": "UserMessage"
               },
-              "[]) | undefined; }) => React.JSX.Element"
+              "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }) => React.JSX.Element"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts",
             "deprecated": false,
@@ -7000,7 +7113,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -7054,7 +7173,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   "PieVisualizationState",
                   "; }; } | { title: string; description?: string | undefined; references: ",
@@ -7102,7 +7227,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -7156,7 +7287,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -7210,7 +7347,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -7264,7 +7407,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -7318,7 +7467,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: ",
                   {
                     "pluginId": "lens",
@@ -7372,7 +7527,13 @@
                     "text": "FormBasedPersistedState"
                   },
                   " | undefined; textBased?: ",
-                  "TextBasedPersistedState",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.TextBasedPersistedState",
+                    "text": "TextBasedPersistedState"
+                  },
                   " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
                   {
                     "pluginId": "uiActions",
@@ -7453,7 +7614,7 @@
                     "section": "def-public.UserMessage",
                     "text": "UserMessage"
                   },
-                  "[]) | undefined; }"
+                  "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx",
                 "deprecated": false,
@@ -8301,6 +8462,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MetricVisualizationState.secondaryTrend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "secondaryTrend",
+            "description": [],
+            "signature": [
+              "SecondaryTrend",
+              " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
@@ -9261,7 +9437,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -9945,7 +10121,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.TagcloudState.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -10023,6 +10199,67 @@
               " | undefined; parentFormat?: { id: string; } | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/terms/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.TextBasedPersistedState",
+        "type": "Interface",
+        "tags": [],
+        "label": "TextBasedPersistedState",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.TextBasedPersistedState.layers",
+            "type": "Object",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "TextBasedLayer",
+              "; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.TextBasedPersistedState.initialContext",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.VisualizeFieldContext",
+                "text": "VisualizeFieldContext"
+              },
+              " | ",
+              "VisualizeEditorContext",
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Configuration",
+                "text": "Configuration"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10200,7 +10437,9 @@
               },
               "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
               "Config",
-              "; } | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
+              "; } | undefined, datasourceStates?: ",
+              "GeneralDatasourceStates",
+              " | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -10210,7 +10449,9 @@
               },
               "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
               "Config",
-              "; } | undefined, annotationGroups?: ",
+              "; } | undefined, datasourceStates?: ",
+              "GeneralDatasourceStates",
+              " | undefined, annotationGroups?: ",
               "AnnotationGroups",
               " | undefined, references?: ",
               "SavedObjectReference",
@@ -10631,7 +10872,25 @@
               "Visualizations can have references as well"
             ],
             "signature": [
-              "((state: T) => { state: P; savedObjectReferences: ",
+              "((state: T, datasource?: ",
+              "Datasource",
+              "<unknown, unknown, ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "> | undefined, datasourceState?: { state: unknown; } | undefined) => { state: P; savedObjectReferences: ",
               "SavedObjectReference",
               "[]; }) | undefined"
             ],
@@ -10653,6 +10912,65 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getPersistableState.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "datasource",
+                "description": [],
+                "signature": [
+                  "Datasource",
+                  "<unknown, unknown, ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  },
+                  "> | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getPersistableState.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "datasourceState",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.Visualization.getPersistableState.$3.state",
+                    "type": "Unknown",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "signature": [
+                      "unknown"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -14090,7 +14408,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.XYDataLayerConfig.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -15270,7 +15588,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -15324,7 +15648,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -15372,7 +15702,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -15426,7 +15762,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -15480,7 +15822,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -15534,7 +15882,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -15588,7 +15942,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -15642,7 +16002,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
@@ -15723,7 +16089,7 @@
             "section": "def-public.UserMessage",
             "text": "UserMessage"
           },
-          "[]) | undefined; }, any> | React.FunctionComponent<{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
+          "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }, any> | React.FunctionComponent<{ id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -15946,7 +16312,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -16000,7 +16372,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -16048,7 +16426,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -16102,7 +16486,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -16156,7 +16546,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -16210,7 +16606,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -16264,7 +16666,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -16318,7 +16726,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
@@ -16399,7 +16813,7 @@
             "section": "def-public.UserMessage",
             "text": "UserMessage"
           },
-          "[]) | undefined; }>"
+          "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }>"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx",
         "deprecated": false,
@@ -16676,15 +17090,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges$?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
+          " | undefined>; serializeState: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16906,221 +17312,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; snapshotRuntimeState: () => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          "> | ",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          ">[] | undefined>; rendering?: ",
-          "Rendering",
-          " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
-          "Position",
-          " | ",
-          "LegendPositionConfig",
-          " | undefined; rotation?: ",
-          "Rotation",
-          " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
-          "MarkBuffer",
-          " | undefined; pointerUpdateTrigger?: ",
-          "PointerUpdateTrigger",
-          " | undefined; brushAxis?: ",
-          "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
-          "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
-          "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; labelMinor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; centralMajor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
-          {
-            "pluginId": "@kbn/coloring",
-            "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          },
-          "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
-          "[] | undefined; }; references: ",
-          "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17900,7 +18092,33 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; }"
+          "<object>[]>; createAlertRule: (initialValues: Partial<",
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormData",
+            "text": "RuleFormData"
+          },
+          "<Partial<Readonly<{ timeField?: string | undefined; aggField?: string | undefined; termField?: string | string[] | undefined; termSize?: number | undefined; sourceFields?: Readonly<{} & { label: string; searchPath: string; }>[] | undefined; } & { index: string[]; size: number; groupBy: string; searchConfiguration: Readonly<{} & {}>; esqlQuery: Readonly<{} & { esql: string; }>; esQuery: string; searchType: \"searchSource\" | \"esqlQuery\" | \"esQuery\"; timeWindowSize: number; excludeHitsFromPreviousRun: boolean; timeWindowUnit: string; threshold: number[]; thresholdComparator: ",
+          "Comparator",
+          "; aggType: string; }>>>>, ruleTypeRegistry: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeRegistryContract",
+            "text": "RuleTypeRegistryContract"
+          },
+          ", actionTypeRegistry: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionTypeRegistryContract",
+            "text": "ActionTypeRegistryContract"
+          },
+          "<unknown, unknown>) => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -18173,7 +18391,7 @@
             "section": "def-public.UserMessage",
             "text": "UserMessage"
           },
-          "[]) | undefined; }"
+          "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -18401,7 +18619,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -18455,7 +18679,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -18503,7 +18733,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -18557,7 +18793,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -18611,7 +18853,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -18665,7 +18913,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -18719,7 +18973,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -18773,7 +19033,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; }; references?: ",
           "SavedObjectReference",
           "[] | undefined; executionContext?: ",
@@ -18866,7 +19132,7 @@
             "section": "def-public.UserMessage",
             "text": "UserMessage"
           },
-          "[]) | undefined; }"
+          "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -18998,15 +19264,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges$?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
+          " | undefined>; serializeState: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19228,221 +19486,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; snapshotRuntimeState: () => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          "> | ",
-          "RecursivePartial",
-          "<",
-          "Theme",
-          ">[] | undefined>; rendering?: ",
-          "Rendering",
-          " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
-          "Position",
-          " | ",
-          "LegendPositionConfig",
-          " | undefined; rotation?: ",
-          "Rotation",
-          " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
-          "MarkBuffer",
-          " | undefined; pointerUpdateTrigger?: ",
-          "PointerUpdateTrigger",
-          " | undefined; brushAxis?: ",
-          "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "LegendValue",
-          "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
-          "MakeOverridesSerializable",
-          "<",
-          "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
-          "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
-          "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; labelMinor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; centralMajor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
-          "GoalLabelAccessor",
-          " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; position?: ",
-          "Position",
-          " | undefined; hide?: boolean | undefined; ticks?: number | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
-          {
-            "pluginId": "@kbn/coloring",
-            "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
-          },
-          "<{ [key: string]: unknown; }> | undefined; hidePanelTitles?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          },
-          "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
-          "[] | undefined; }; references: ",
-          "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref?: (() => Promise<string | undefined>) | undefined; getTypeDisplayName: () => string; getTypeDisplayNameLowerCase?: (() => string) | undefined; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20222,7 +20266,33 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; }"
+          "<object>[]>; createAlertRule: (initialValues: Partial<",
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormData",
+            "text": "RuleFormData"
+          },
+          "<Partial<Readonly<{ timeField?: string | undefined; aggField?: string | undefined; termField?: string | string[] | undefined; termSize?: number | undefined; sourceFields?: Readonly<{} & { label: string; searchPath: string; }>[] | undefined; } & { index: string[]; size: number; groupBy: string; searchConfiguration: Readonly<{} & {}>; esqlQuery: Readonly<{} & { esql: string; }>; esQuery: string; searchType: \"searchSource\" | \"esqlQuery\" | \"esQuery\"; timeWindowSize: number; excludeHitsFromPreviousRun: boolean; timeWindowUnit: string; threshold: number[]; thresholdComparator: ",
+          "Comparator",
+          "; aggType: string; }>>>>, ruleTypeRegistry: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeRegistryContract",
+            "text": "RuleTypeRegistryContract"
+          },
+          ", actionTypeRegistry: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionTypeRegistryContract",
+            "text": "ActionTypeRegistryContract"
+          },
+          "<unknown, unknown>) => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -20460,7 +20530,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -20514,7 +20590,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -20562,7 +20644,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -20616,7 +20704,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -20670,7 +20764,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -20724,7 +20824,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -20778,7 +20884,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -20832,7 +20944,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; }; abortController?: AbortController | undefined; noPadding?: boolean | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
@@ -20913,7 +21031,7 @@
             "section": "def-public.UserMessage",
             "text": "UserMessage"
           },
-          "[]) | undefined; }"
+          "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -21520,7 +21638,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -21574,7 +21698,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -21622,7 +21752,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -21676,7 +21812,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -21730,7 +21872,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -21784,7 +21932,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -21838,7 +21992,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -21892,7 +22052,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; } | undefined) => ",
           {
             "pluginId": "lens",
@@ -22047,7 +22213,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -22101,7 +22273,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
@@ -22149,7 +22327,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -22203,7 +22387,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -22257,7 +22447,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -22311,7 +22507,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -22365,7 +22567,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
@@ -22419,7 +22627,13 @@
                 "text": "FormBasedPersistedState"
               },
               " | undefined; textBased?: ",
-              "TextBasedPersistedState",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
               " | undefined; }; visualization: unknown; }; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts",
@@ -22949,7 +23163,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -23003,7 +23223,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
@@ -23051,7 +23277,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -23105,7 +23337,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -23159,7 +23397,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -23213,7 +23457,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -23267,7 +23517,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
@@ -23321,7 +23577,13 @@
             "text": "FormBasedPersistedState"
           },
           " | undefined; textBased?: ",
-          "TextBasedPersistedState",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
           " | undefined; }; visualization: unknown; }; }; references?: ",
           "SavedObjectReference",
           "[] | undefined; executionContext?: ",
@@ -23414,7 +23676,7 @@
             "section": "def-public.UserMessage",
             "text": "UserMessage"
           },
-          "[]) | undefined; }"
+          "[]) | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,

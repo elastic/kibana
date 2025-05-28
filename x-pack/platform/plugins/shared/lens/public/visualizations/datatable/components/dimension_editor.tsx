@@ -14,6 +14,7 @@ import {
   PaletteOutput,
   PaletteRegistry,
   applyPaletteParams,
+  canCreateCustomMatch,
   getFallbackDataBounds,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
@@ -33,6 +34,8 @@ import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import { getColumnAlignment } from '../utils';
+import { FormatFactory } from '../../../../common/types';
+import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -57,10 +60,11 @@ export type TableDimensionEditorProps =
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;
     isDarkMode: boolean;
+    formatFactory: FormatFactory;
   };
 
 export function TableDimensionEditor(props: TableDimensionEditorProps) {
-  const { frame, accessor, isInlineEditing, isDarkMode } = props;
+  const { frame, accessor, isInlineEditing, isDarkMode, formatFactory } = props;
   const column = props.state.columns.find(({ columnId }) => accessor === columnId);
   const { inputValue: localState, handleInputChange: setLocalState } =
     useDebouncedValue<DatatableVisualizationState>({
@@ -83,6 +87,9 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
 
   const currentData =
     frame.activeData?.[localState.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
+  const columnMeta = getDatatableColumn(currentData, accessor)?.meta;
+  const formatter = formatFactory(columnMeta?.params);
+  const allowCustomMatch = canCreateCustomMatch(columnMeta);
   const datasource = frame.datasourceLayers?.[localState.layerId];
 
   const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
@@ -109,7 +116,6 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
-  const categories = getColorCategories(currentData?.rows, accessor, [null]);
 
   if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
     activePalette.params.stops = applyPaletteParams(
@@ -247,7 +253,9 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
-                categories={categories}
+                categories={getColorCategories(currentData?.rows, accessor, [null])}
+                formatter={formatter}
+                allowCustomMatch={allowCustomMatch}
               />
             ) : (
               <ColorMappingByValues

@@ -145,10 +145,7 @@ ROW a = ROUND(1.23, 0)
         <Markdown
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
             defaultMessage: `### SHOW
-The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
-
-* Use \`SHOW INFO\` to return the deployment's version, build date and hash.
-* Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
+The \`SHOW INFO\` source command returns the deployment's version, build date and hash.
             `,
             ignoreTag: true,
             description:
@@ -416,7 +413,7 @@ ROW language_code = 1
 | LOOKUP JOIN languages ON language_code
 \`\`\`
 
-An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. To create a lookup index, set the index mode to lookup.
+An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. This [index mode](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#_static_index_settings) needs to be set when the index is created.
 
 \`\`\` esql
 PUT languages

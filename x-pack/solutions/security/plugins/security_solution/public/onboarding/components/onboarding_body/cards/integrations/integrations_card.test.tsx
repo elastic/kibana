@@ -35,7 +35,17 @@ describe('IntegrationsCard', () => {
     const { queryByTestId } = render(
       <IntegrationsCard
         {...props}
-        checkCompleteMetadata={{ installedIntegrationsCount: 1, isAgentRequired: false }}
+        checkCompleteMetadata={{
+          activeIntegrations: [
+            {
+              name: 'test',
+              version: '1.0.0',
+              status: 'installed',
+              dataStreams: [{ name: 'test-data-stream', title: 'test' }],
+            },
+          ],
+          isAgentRequired: false,
+        }}
       />
     );
     expect(queryByTestId('loadingInstalledIntegrations')).not.toBeInTheDocument();

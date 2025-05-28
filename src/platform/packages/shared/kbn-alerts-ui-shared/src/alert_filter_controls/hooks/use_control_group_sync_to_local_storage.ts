@@ -9,7 +9,7 @@
 
 import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
 interface UseControlGroupSyncToLocalStorageArgs {
@@ -41,9 +41,9 @@ export const useControlGroupSyncToLocalStorage: UseControlGroupSyncToLocalStorag
     }
   }, [shouldSync, controlGroupState, storageKey]);
 
-  const getStoredControlGroupState = () => {
+  const getStoredControlGroupState = useCallback(() => {
     return (storage.current.get(storageKey) as ControlGroupRuntimeState) ?? undefined;
-  };
+  }, [storageKey]);
 
   return {
     controlGroupState,

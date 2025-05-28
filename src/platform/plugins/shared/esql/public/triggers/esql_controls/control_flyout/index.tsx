@@ -156,6 +156,8 @@ export function ESQLControlsFlyout({
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
           await onSaveControl?.(controlState, query);
+        } else {
+          await onSaveControl?.(controlState, queryString);
         }
       } else {
         await onSaveControl?.(controlState, '');

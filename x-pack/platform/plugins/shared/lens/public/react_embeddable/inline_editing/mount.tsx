@@ -20,19 +20,27 @@ import { type UseEuiTheme } from '@elastic/eui';
  * @param uuid
  * @param container
  */
-export function mountInlineEditPanel(
-  ConfigPanel: JSX.Element,
+export function mountInlinePanel(
+  InlinePanel: JSX.Element,
   coreStart: CoreStart,
   overlayTracker: TracksOverlays | undefined,
-  uuid?: string,
-  container?: HTMLElement | null
+  {
+    container,
+    dataTestSubj,
+    uuid,
+  }: {
+    dataTestSubj?: string;
+    uuid?: string;
+    container?: HTMLElement | null;
+  } = {}
 ) {
+  const dataTestSubjFinal = dataTestSubj ?? 'customizeLens';
   if (container) {
-    ReactDOM.render(ConfigPanel, container);
+    ReactDOM.render(InlinePanel, container);
   } else {
     const handle = coreStart.overlays.openFlyout(
       toMountPoint(
-        React.cloneElement(ConfigPanel, {
+        React.cloneElement(InlinePanel, {
           closeFlyout: () => {
             overlayTracker?.clearOverlays();
             handle.close();
@@ -44,7 +52,7 @@ export function mountInlineEditPanel(
         className: 'lnsConfigPanel__overlay',
         css: inlineFlyoutStyles,
         size: 's',
-        'data-test-subj': 'customizeLens',
+        'data-test-subj': dataTestSubjFinal,
         type: 'push',
         paddingSize: 'm',
         maxWidth: 800,

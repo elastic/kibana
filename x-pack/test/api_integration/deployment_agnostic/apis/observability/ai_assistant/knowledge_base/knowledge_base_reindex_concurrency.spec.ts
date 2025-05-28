@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe('POST /internal/observability_ai_assistant/kb/reindex', function () {
+  describe('Knowledge base: POST /internal/observability_ai_assistant/kb/reindex', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     const iterations = 5;
     describe(`when running ${iterations} re-index operations in sequence`, () => {
-      let results: Array<{ status: number; result: boolean; errorMessage: string | undefined }>;
+      let results: Array<{ status: number; success: boolean; errorMessage: string | undefined }>;
       let initialIndexSequenceNumber: number;
 
       before(async () => {
@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('every re-index operation succeeds', async () => {
         const successResults = results.filter((result) => result.status === 200);
         expect(successResults).to.have.length(iterations);
-        expect(successResults.every((r) => r.result === true)).to.be(true);
+        expect(successResults.every((r) => r.success === true)).to.be(true);
       });
 
       it('no requests should fail', async () => {
@@ -126,7 +126,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return {
       status: res.status,
-      result: res.body.result,
+      success: res.body.success,
       errorMessage: 'message' in res.body ? (res.body.message as string) : undefined,
     };
   }

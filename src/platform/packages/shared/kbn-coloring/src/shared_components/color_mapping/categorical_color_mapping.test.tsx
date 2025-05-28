@@ -8,105 +8,113 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { CategoricalColorMapping, ColorMappingInputData } from './categorical_color_mapping';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
-import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { fireEvent, render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { getKbnPalettes } from '@kbn/palettes';
 
-const ASSIGNMENTS_LIST = '[data-test-subj="lns-colorMapping-assignmentsList"]';
-const ASSIGNMENTS_PROMPT = '[data-test-subj="lns-colorMapping-assignmentsPrompt"]';
-const ASSIGNMENTS_PROMPT_ADD_ALL = '[data-test-subj="lns-colorMapping-assignmentsPromptAddAll"]';
-const ASSIGNMENT_ITEM = (i: number) => `[data-test-subj="lns-colorMapping-assignmentsItem${i}"]`;
+import {
+  CategoricalColorMapping,
+  ColorMappingInputCategoricalData,
+  ColorMappingInputData,
+  ColorMappingProps,
+} from './categorical_color_mapping';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
+
+const ASSIGNMENTS_LIST = 'lns-colorMapping-assignmentsList';
+const ASSIGNMENTS_PROMPT = 'lns-colorMapping-assignmentsPrompt';
+const ASSIGNMENTS_PROMPT_ADD_ALL = 'lns-colorMapping-assignmentsPromptAddAll';
+const ASSIGNMENT_ITEM = (i: number) => `lns-colorMapping-assignmentsItem${i}`;
+
+const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
+const specialTokens = new Map([
+  ['__other__', 'Other'],
+  ['__empty__', '(Empty)'],
+  ['', '(Empty)'],
+]);
+const categoryData: ColorMappingInputCategoricalData = {
+  type: 'categories',
+  categories: ['categoryA', 'categoryB'],
+};
+const mockFormatter = fieldFormatsServiceMock.createStartContract().deserialize();
 
 describe('color mapping', () => {
-  const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
+  let defaultProps: ColorMappingProps;
+
+  mockFormatter.convert = jest.fn(
+    (v: any) => (typeof v === 'string' ? specialTokens.get(v) ?? v : JSON.stringify(v)) // simple way to check formatting is applied
+  );
+  const onModelUpdateFn = jest.fn();
+
+  beforeEach(() => {
+    defaultProps = {
+      data: categoryData,
+      isDarkMode: false,
+      model: { ...DEFAULT_COLOR_MAPPING_CONFIG },
+      palettes,
+      onModelUpdate: onModelUpdateFn,
+      specialTokens,
+      formatter: mockFormatter,
+    };
+  });
+
+  const renderCategoricalColorMapping = (props: Partial<ColorMappingProps> = {}) => {
+    return render(<CategoricalColorMapping {...defaultProps} {...props} />);
+  };
 
   it('load a default color mapping', () => {
-    const dataInput: ColorMappingInputData = {
-      type: 'categories',
-      categories: ['categoryA', 'categoryB'],
-    };
-    const onModelUpdateFn = jest.fn();
-    const component = mount(
-      <CategoricalColorMapping
-        data={dataInput}
-        isDarkMode={false}
-        model={{ ...DEFAULT_COLOR_MAPPING_CONFIG }}
-        palettes={palettes}
-        onModelUpdate={onModelUpdateFn}
-        specialTokens={new Map()}
-      />
-    );
+    renderCategoricalColorMapping();
 
     // empty list prompt visible
-    expect(component.find(ASSIGNMENTS_PROMPT)).toBeTruthy();
-    expect(onModelUpdateFn).not.toBeCalled();
+    expect(screen.getByTestId(ASSIGNMENTS_PROMPT)).toBeInTheDocument();
+    expect(onModelUpdateFn).not.toHaveBeenCalled();
   });
 
   it('Add all terms to assignments', () => {
-    const dataInput: ColorMappingInputData = {
-      type: 'categories',
-      categories: ['categoryA', 'categoryB'],
-    };
-    const onModelUpdateFn = jest.fn();
-    const component = mount(
-      <CategoricalColorMapping
-        data={dataInput}
-        isDarkMode={false}
-        model={{ ...DEFAULT_COLOR_MAPPING_CONFIG }}
-        palettes={palettes}
-        onModelUpdate={onModelUpdateFn}
-        specialTokens={new Map()}
-      />
-    );
-    component.find(ASSIGNMENTS_PROMPT_ADD_ALL).hostNodes().simulate('click');
-    expect(onModelUpdateFn).toBeCalledTimes(1);
-    expect(component.find(ASSIGNMENTS_LIST).hostNodes().children().length).toEqual(
-      dataInput.categories.length
-    );
-    dataInput.categories.forEach((category, index) => {
-      const assignment = component.find(ASSIGNMENT_ITEM(index)).hostNodes();
-      expect(assignment.text()).toEqual(category);
-      expect(assignment.hasClass('euiComboBox-isDisabled')).toEqual(false);
+    renderCategoricalColorMapping();
+
+    fireEvent.click(screen.getByTestId(ASSIGNMENTS_PROMPT_ADD_ALL));
+
+    expect(onModelUpdateFn).toHaveBeenCalledTimes(1);
+    const assignmentsList = screen.getByTestId(ASSIGNMENTS_LIST);
+    expect(assignmentsList.children.length).toEqual(categoryData.categories.length);
+
+    categoryData.categories.forEach((category, index) => {
+      const assignment = screen.getByTestId(ASSIGNMENT_ITEM(index));
+      expect(assignment).toHaveTextContent(String(category));
+      expect(assignment).not.toHaveClass('euiComboBox-isDisabled');
     });
   });
 
   it('handle special tokens, multi-fields keys and non-trimmed whitespaces', () => {
-    const dataInput: ColorMappingInputData = {
+    const data: ColorMappingInputData = {
       type: 'categories',
-      categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
+      categories: [
+        '__other__',
+        '__empty__',
+        '',
+        '   with-whitespaces   ',
+        { type: 'multiFieldKey', keys: ['gz', 'CN'] },
+        { type: 'rangeKey', from: 0, to: 1000, ranges: [{ from: 0, to: 1000, label: '' }] },
+      ],
     };
-    const onModelUpdateFn = jest.fn();
-    const component = mount(
-      <CategoricalColorMapping
-        data={dataInput}
-        isDarkMode={false}
-        model={{ ...DEFAULT_COLOR_MAPPING_CONFIG }}
-        palettes={palettes}
-        onModelUpdate={onModelUpdateFn}
-        specialTokens={
-          new Map([
-            ['__other__', 'Other'],
-            ['__empty__', '(Empty)'],
-          ])
-        }
-      />
+    renderCategoricalColorMapping({ data });
+
+    fireEvent.click(screen.getByTestId(ASSIGNMENTS_PROMPT_ADD_ALL));
+
+    const assignmentsList = screen.getByTestId(ASSIGNMENTS_LIST);
+    expect(assignmentsList.children.length).toEqual(data.categories.length);
+
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(0))).toHaveTextContent('Other');
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(1))).toHaveTextContent('(Empty)');
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(2))).toHaveTextContent('(Empty)');
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(3))).toHaveTextContent('   with-whitespaces   ', {
+      normalizeWhitespace: false,
+    });
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(4))).toHaveTextContent('{"keys":["gz","CN"]}');
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(5))).toHaveTextContent(
+      '{"gte":0,"lt":1000,"label":""}'
     );
-    component.find(ASSIGNMENTS_PROMPT_ADD_ALL).hostNodes().simulate('click');
-    expect(component.find(ASSIGNMENTS_LIST).hostNodes().children().length).toEqual(
-      dataInput.categories.length
-    );
-    const assignment1 = component.find(ASSIGNMENT_ITEM(0)).hostNodes();
-    expect(assignment1.text()).toEqual('Other');
-
-    const assignment2 = component.find(ASSIGNMENT_ITEM(1)).hostNodes();
-    expect(assignment2.text()).toEqual(`fieldA${MULTI_FIELD_KEY_SEPARATOR}fieldB`);
-
-    const assignment3 = component.find(ASSIGNMENT_ITEM(2)).hostNodes();
-    expect(assignment3.text()).toEqual('(Empty)');
-
-    const assignment4 = component.find(ASSIGNMENT_ITEM(3)).hostNodes();
-    expect(assignment4.text()).toEqual('   with-whitespaces   ');
   });
 });

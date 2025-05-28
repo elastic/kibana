@@ -40,9 +40,9 @@ export type TotalHitsRequest = RequestState<number>;
 export type ChartRequest = RequestState<{}>;
 
 export interface InternalStateDataRequestParams {
-  timeRangeAbsolute?: TimeRange;
-  timeRangeRelative?: TimeRange;
-  searchSessionId?: string;
+  timeRangeAbsolute: TimeRange | undefined;
+  timeRangeRelative: TimeRange | undefined;
+  searchSessionId: string | undefined;
 }
 
 export interface TabState extends TabItem {
@@ -66,15 +66,21 @@ export interface TabState extends TabItem {
   chartRequest: ChartRequest;
 }
 
+export interface RecentlyClosedTabState extends TabState {
+  closedAt: number;
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
-    byId: Record<string, TabState>;
+    byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
+    recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,
