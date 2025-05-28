@@ -69,7 +69,7 @@ export const JsonEditor = () => {
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsHelpText"
           defaultMessage={
-            'A JSON-encoded array of {ingestPipelineProcessors}. If you run processors {conditionally}, the condition defined in "Optional fields" will be ignored.'
+            'A JSON-encoded array of {ingestPipelineProcessors}. {{conditions}} defined in the processor JSON take precedence over conditions defined in "Optional fields".'
           }
           values={{
             ingestPipelineProcessors: (
@@ -80,11 +80,11 @@ export const JsonEditor = () => {
                 )}
               </EuiLink>
             ),
-            conditionally: (
+            conditions: (
               <EuiLink href={docLinks.links.ingest.conditionalProcessor} target="_blank" external>
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsConditionallyLabel',
-                  { defaultMessage: 'conditionally' }
+                  { defaultMessage: 'Conditions' }
                 )}
               </EuiLink>
             ),
