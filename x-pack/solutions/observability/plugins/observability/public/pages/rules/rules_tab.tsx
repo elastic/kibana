@@ -11,7 +11,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
-import { observabilityAlertFeatureIds } from '../../../common';
+import { getObservabilityAlertFeatureIds } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
@@ -23,6 +23,7 @@ interface RulesTabProps {
 export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   const {
     triggersActionsUi: { getRulesList: RuleList },
+    serverless,
   } = useKibana().services;
   const history = useHistory();
 
@@ -77,7 +78,7 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   return (
     <RuleList
       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-      consumers={observabilityAlertFeatureIds}
+      consumers={getObservabilityAlertFeatureIds({ isServerless: Boolean(serverless) })}
       filteredRuleTypes={filteredRuleTypes}
       lastRunOutcomeFilter={stateLastResponse}
       refresh={stateRefresh}

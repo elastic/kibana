@@ -19,7 +19,7 @@ import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
-import { observabilityAlertFeatureIds } from '../../../../common';
+import { getObservabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import {
@@ -65,6 +65,7 @@ export function RuleDetailsTabs({
 }: Props) {
   const {
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
+    serverless,
   } = useKibana().services;
   const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
   const hasInitialControlLoadingFinished = useMemo(
@@ -112,7 +113,9 @@ export function RuleDetailsTabs({
                 <ObservabilityAlertsTable
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
-                  consumers={observabilityAlertFeatureIds}
+                  consumers={getObservabilityAlertFeatureIds({
+                    isServerless: Boolean(serverless),
+                  })}
                   query={esQuery}
                   columns={tableColumns}
                 />

@@ -18,7 +18,7 @@ import { getColumns } from '../../components/alerts_table/common/get_columns';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
+  getObservabilityAlertFeatureIds,
 } from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
 import { LoadingObservability } from '../../components/loading_observability';
@@ -243,7 +243,7 @@ export function OverviewPage() {
           >
             <AlertSummaryWidget
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-              consumers={observabilityAlertFeatureIds}
+              consumers={getObservabilityAlertFeatureIds({ isServerless: Boolean(isServerless) })}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -251,7 +251,7 @@ export function OverviewPage() {
             <ObservabilityAlertsTable
               id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-              consumers={observabilityAlertFeatureIds}
+              consumers={getObservabilityAlertFeatureIds({ isServerless: Boolean(isServerless) })}
               query={esQuery}
               initialPageSize={ALERTS_PER_PAGE}
               columns={tableColumns}

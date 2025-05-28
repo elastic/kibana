@@ -17,7 +17,11 @@ export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?
 export const ALERT_STATUS_ALL = 'all';
 export const ALERTS_URL_STORAGE_KEY = '_a';
 
-export const observabilityAlertFeatureIds: ValidFeatureId[] = [
+export const getObservabilityAlertFeatureIds = ({
+  isServerless,
+}: {
+  isServerless: boolean;
+}): ValidFeatureId[] => [
   AlertConsumers.APM,
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
@@ -25,7 +29,7 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
   AlertConsumers.SLO,
   AlertConsumers.OBSERVABILITY,
   AlertConsumers.ALERTS,
-  AlertConsumers.STACK_ALERTS,
+  ...(isServerless ? [AlertConsumers.STACK_ALERTS] : []),
 ];
 
 export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[] = [
