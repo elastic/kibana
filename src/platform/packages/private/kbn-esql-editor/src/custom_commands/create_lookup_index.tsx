@@ -93,14 +93,15 @@ export const useLookupIndexCommand = (
       text-align: start;
       border-width: 1px;
       border-style: solid;
+      color: ${euiTheme.colors.text};
     }
     .${lookupIndexAddBadgeClassName} {
-      border-color: ${euiTheme.colors.danger};
-      background-color: ${euiTheme.colors.danger};
+      border-color: ${euiTheme.colors.backgroundBaseDanger};
+      background-color: ${euiTheme.colors.backgroundBaseDanger};
     }
     .${lookupIndexEditBadgeClassName} {
-      border-color: ${euiTheme.colors.primary};
-      background-color: ${euiTheme.colors.primary};
+      border-color: ${euiTheme.colors.backgroundBasePrimary};
+      background-color: ${euiTheme.colors.backgroundBasePrimary};
     }
   `;
 

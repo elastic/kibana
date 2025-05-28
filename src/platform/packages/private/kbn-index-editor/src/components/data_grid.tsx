@@ -36,6 +36,7 @@ interface ESQLDataGridProps {
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
   controlColumnIds?: string[];
+  totalHits?: number;
 }
 
 const sortOrder: SortOrder[] = [];
@@ -180,17 +181,22 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       enableInTableSearch
       isPlainRecord
       isSortEnabled
-      loadingState={DataLoadingState.loaded}
-      dataView={props.dataView}
-      sampleSizeState={rows.length}
+      showMultiFields={false}
+      showColumnTokens
+      showTimeCol
+      enableComparisonMode
+      isPaginationEnabled
+      totalHits={props.totalHits}
       rowsPerPageState={rowsPerPage}
       rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+      sampleSizeState={10_000}
+      canDragAndDropColumns
+      loadingState={DataLoadingState.loaded}
+      dataView={props.dataView}
       onSetColumns={onSetColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
-      showTimeCol
-      enableComparisonMode
       sort={sortOrder}
       ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}

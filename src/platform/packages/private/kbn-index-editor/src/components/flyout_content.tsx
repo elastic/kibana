@@ -44,6 +44,9 @@ interface IndexInfo {
   canEdit: boolean;
 }
 
+// TODO add support for pagination
+const docsCount = 10_000;
+
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const isMounted = useMountedState();
 
@@ -51,6 +54,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const [columns, setColumns] = useState<DatatableColumn[]>([]);
   const [rows, setRows] = useState<DataTableRecord[]>([]);
+  const [totalHits, setTotalHits] = useState<number>(0);
   const [dataView, setDataView] = useState<DataView>();
 
   // Index
@@ -120,7 +124,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       if (!response || !isMounted()) {
         return;
       }
-      const hits = response.rawResponse.hits.hits;
+      const { hits, total } = response.rawResponse.hits;
 
       const resultRows: DataTableRecord[] = hits.map((hit: any, idx: number) => {
         return {
@@ -131,6 +135,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       });
 
       setRows(resultRows);
+      setTotalHits(total);
     } catch (e) {
       // TODO error handling
     }
@@ -146,7 +151,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     [fetchRows]
   );
 
-  if (!dataView || !dataViewColumns.length) return null;
+  if (!dataView || !dataViewColumns.length || !totalHits) return null;
 
   return (
     <KibanaContextProvider
@@ -175,6 +180,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
               dataView={dataView}
               columns={dataViewColumns}
               rows={rows}
+              totalHits={totalHits}
             />
           </CellActionsProvider>
         </EuiFlyoutBody>
