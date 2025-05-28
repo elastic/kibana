@@ -45,9 +45,12 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
           defaultMessage: 'Add guidelines for addressing alerts created by this rule',
         }
       )}
-      // placeholder={i18n.translate('responseOpsRuleForm.ruleDetails.investigationGuide.editor.placeholder', {
-      //   defaultMessage: 'Add guidelines for addressing alerts created by this rule',
-      // })}
+      placeholder={i18n.translate(
+        'responseOpsRuleForm.ruleDetails.investigationGuide.editor.placeholder',
+        {
+          defaultMessage: 'Add guidelines for addressing alerts created by this rule',
+        }
+      )}
       // css={css`
       //   .euiMarkdownFormat {
       //     word-wrap: break-word;
