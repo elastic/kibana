@@ -20181,7 +20181,8 @@
                               "REQUEST_DIAGNOSTICS",
                               "UPDATE_TAGS",
                               "POLICY_CHANGE",
-                              "INPUT_ACTION"
+                              "INPUT_ACTION",
+                              "MIGRATE"
                             ],
                             "type": "string"
                           },
@@ -22675,6 +22676,163 @@
         "summary": "Create an agent action",
         "tags": [
           "Elastic Agent actions"
+        ]
+      }
+    },
+    "/api/fleet/agents/{agentId}/migrate": {
+      "post": {
+        "description": "Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
+        "operationId": "post-fleet-agents-agentid-migrate",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "enrollment_token": {
+                    "type": "string"
+                  },
+                  "settings": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ca_sha256": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key_passphrase": {
+                        "type": "string"
+                      },
+                      "headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "insecure": {
+                        "type": "boolean"
+                      },
+                      "proxy_disabled": {
+                        "type": "boolean"
+                      },
+                      "proxy_headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "proxy_url": {
+                        "type": "string"
+                      },
+                      "replace_token": {
+                        "type": "boolean"
+                      },
+                      "staging": {
+                        "type": "boolean"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "uri": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "uri",
+                  "enrollment_token"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "actionId"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Migrate a single agent",
+        "tags": [
+          "Elastic Agents"
         ]
       }
     },
@@ -44165,7 +44323,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44197,6 +44356,21 @@
                           "id": {
                             "type": "string"
                           },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
                           "package_name": {
                             "type": "string"
                           },
@@ -44207,20 +44381,28 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
                           "updated_at": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
                           }
                         },
                         "required": [
-                          "sync_status"
+                          "sync_status",
+                          "install_status"
                         ],
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -44312,7 +44494,8 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
@@ -44344,6 +44527,21 @@
                           "id": {
                             "type": "string"
                           },
+                          "install_status": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "main": {
+                                "type": "string"
+                              },
+                              "remote": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "main"
+                            ],
+                            "type": "object"
+                          },
                           "package_name": {
                             "type": "string"
                           },
@@ -44354,20 +44552,28 @@
                             "enum": [
                               "completed",
                               "synchronizing",
-                              "failed"
+                              "failed",
+                              "warning"
                             ],
                             "type": "string"
                           },
                           "updated_at": {
                             "type": "string"
+                          },
+                          "warning": {
+                            "type": "string"
                           }
                         },
                         "required": [
-                          "sync_status"
+                          "sync_status",
+                          "install_status"
                         ],
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "warning": {
+                      "type": "string"
                     }
                   },
                   "required": [

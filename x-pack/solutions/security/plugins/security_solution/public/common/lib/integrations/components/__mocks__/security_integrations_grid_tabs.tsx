@@ -6,4 +6,6 @@
  */
 import React from 'react';
 
-export const PackageListGrid = () => <div data-test-subj="packageListGrid" />;
+export const SecurityIntegrationsGridTabs = jest.fn(() => (
+  <div data-test-subj="securityIntegrationsGridTabs" />
+));

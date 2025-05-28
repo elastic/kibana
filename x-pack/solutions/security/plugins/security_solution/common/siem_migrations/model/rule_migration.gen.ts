@@ -416,6 +416,27 @@ export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
 export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
 
 /**
+ * The migration rules integration stats object.
+ */
+export type RuleMigrationIntegrationStats = z.infer<typeof RuleMigrationIntegrationStats>;
+export const RuleMigrationIntegrationStats = z.object({
+  /**
+   * The integration id
+   */
+  id: NonEmptyString,
+  /**
+   * The number of rules that are associated with the integration.
+   */
+  total_rules: z.number().int(),
+});
+
+/**
+ * The integrations stats objects of all the rule of all the migrations.
+ */
+export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllIntegrationsStats>;
+export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
+
+/**
  * The type of the rule migration resource.
  */
 export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;
