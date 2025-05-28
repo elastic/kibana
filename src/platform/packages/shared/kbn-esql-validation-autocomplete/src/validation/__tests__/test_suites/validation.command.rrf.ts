@@ -9,7 +9,7 @@
 
 import * as helpers from '../helpers';
 
-export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
+export const validationRrfCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
       describe('RRF', () => {
