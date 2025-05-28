@@ -13,6 +13,7 @@ import { Logger } from '@kbn/logging';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import { groupBy } from 'lodash';
 import { Duration } from 'moment';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MAX_PAGE_SIZE, SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 
 export const durationToSeconds = (duration: Duration) => `${duration.asSeconds()}s`;
@@ -153,5 +154,20 @@ export const runDeleteUnusedUrlsTask = async ({
     await Promise.all(deletionPromises);
   } else {
     logger.debug('No unused URLs found');
+  }
+};
+
+export const scheduleUnusedUrlsCleanupTask = async ({
+  taskManager,
+  checkInterval,
+}: {
+  taskManager: TaskManagerStartContract;
+  checkInterval: Duration;
+}) => {
+  try {
+    const taskInstance = getDeleteUnusedUrlTaskInstance(checkInterval);
+    await taskManager.ensureScheduled(taskInstance);
+  } catch (e) {
+    throw new Error(e.message || 'Failed to schedule unused URLs cleanup task');
   }
 };

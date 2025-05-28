@@ -32,6 +32,7 @@ export {
   deleteUnusedUrls,
   fetchAllUnusedUrls,
   runDeleteUnusedUrlsTask,
+  scheduleUnusedUrlsCleanupTask,
 } from './unused_urls_task';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
