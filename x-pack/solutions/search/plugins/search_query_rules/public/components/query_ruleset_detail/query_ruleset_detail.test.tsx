@@ -30,7 +30,6 @@ describe('Query rule detail', () => {
   const TEST_IDS = {
     DetailPage: 'queryRulesetDetailPage',
     DetailPageHeader: 'queryRulesetDetailHeader',
-    HeaderDataButton: 'queryRulesetDetailHeaderDataButton',
     HeaderSaveButton: 'queryRulesetDetailHeaderSaveButton',
     AddRuleButton: 'queryRulesetDetailAddRuleButton',
     DraggableItem: 'searchQueryRulesDraggableItem',
@@ -49,7 +48,6 @@ describe('Query rule detail', () => {
 
       const header = screen.getByTestId(TEST_IDS.DetailPageHeader);
       expect(within(header).getByText('my-ruleset')).toBeInTheDocument();
-      expect(within(header).getByTestId(TEST_IDS.HeaderDataButton)).toBeInTheDocument();
       expect(within(header).getByTestId(TEST_IDS.HeaderSaveButton)).toBeInTheDocument();
       expect(screen.getByTestId(TEST_IDS.AddRuleButton)).toBeInTheDocument();
       expect(screen.getAllByTestId(TEST_IDS.DraggableItem)).toHaveLength(
