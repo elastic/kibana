@@ -228,10 +228,16 @@ const bulkQueriesRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const queryLinksDeleted = await assetClient.getAssetLinks(
-      streamName,
-      ['query'],
-      operations.filter(isDeleteOperation).map((op) => op.delete.id)
+    const existingQueryLinks = await assetClient.getAssetLinks(streamName, ['query']);
+    const deleted = existingQueryLinks.filter((link) =>
+      operations.some(
+        (operation) => isDeleteOperation(operation) && operation.delete.id === link.query.id
+      )
+    );
+    const updated = existingQueryLinks.filter((link) =>
+      operations.some(
+        (operation) => isIndexOperation(operation) && operation.index.id === link.query.id
+      )
     );
 
     const result = await assetClient.bulk(
@@ -276,7 +282,8 @@ const bulkQueriesRoute = createServerRoute({
 
     await streamsClient.manageQueries(streamName, {
       indexed: queryLinksIndexed,
-      deleted: queryLinksDeleted,
+      deleted,
+      updated,
     });
 
     return { acknowledged: true };
