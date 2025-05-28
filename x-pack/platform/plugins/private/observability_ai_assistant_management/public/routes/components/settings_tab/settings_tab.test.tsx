@@ -19,6 +19,7 @@ import {
 
 jest.mock('../../../hooks/use_app_context');
 jest.mock('../../../hooks/use_kibana');
+jest.mock('@kbn/ai-assistant/src/hooks');
 
 const useAppContextMock = useAppContext as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
