@@ -38,8 +38,7 @@ export const useFilterCards = ({
         setSelectedSubCategory,
       },
       allowedIntegrations: filteredCards.filter(
-        (card) =>
-          (featuredCardIds?.includes(card.name) || featuredCardIds?.includes(card.id)) ?? true
+        (card) => featuredCardIds?.includes(card.id) ?? true
       ),
     }),
     [

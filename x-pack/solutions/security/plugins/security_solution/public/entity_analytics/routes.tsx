@@ -132,10 +132,7 @@ export const routes = [
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsManagementContainer,
-      SecurityPageName.entityAnalyticsManagement,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.entityAnalyticsManagement
     ),
   },
   {
@@ -146,30 +143,21 @@ export const routes = [
     path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsEntityStoreContainer,
-      SecurityPageName.entityAnalyticsEntityStoreManagement,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.entityAnalyticsEntityStoreManagement
     ),
   },
   {
     path: ENTITY_ANALYTICS_LANDING_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsLandingContainer,
-      SecurityPageName.entityAnalyticsLanding,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.entityAnalyticsLanding
     ),
   },
   {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
-      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
     ),
   },
 ];

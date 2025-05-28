@@ -12,7 +12,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { parseNextURL } from '@kbn/std';
 
 import type { StartServices } from '../..';
@@ -47,12 +46,7 @@ export function renderLoggedOutPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <LoggedOutPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<LoggedOutPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }
