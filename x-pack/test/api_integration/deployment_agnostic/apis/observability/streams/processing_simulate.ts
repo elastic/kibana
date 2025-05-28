@@ -448,7 +448,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           processing: [
             {
               id: 'draft',
-              advanced_json: {
+              manual_ingest_pipeline: {
                 processors: [
                   {
                     set: {

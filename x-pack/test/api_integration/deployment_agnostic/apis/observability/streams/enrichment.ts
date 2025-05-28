@@ -189,7 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               lifecycle: { inherit: {} },
               processing: [
                 {
-                  advanced_json: {
+                  manual_ingest_pipeline: {
                     processors: [
                       {
                         // apply custom processor
@@ -265,7 +265,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               lifecycle: { inherit: {} },
               processing: [
                 {
-                  advanced_json: {
+                  manual_ingest_pipeline: {
                     processors: [
                       {
                         // apply custom processor
