@@ -17,6 +17,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RuntimeStateProvider } from '../../state_management/redux';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 describe('useTopNavLinks', () => {
   const services = {
@@ -31,17 +32,20 @@ describe('useTopNavLinks', () => {
     },
   } as unknown as DiscoverServices;
 
+  const queryClient = new QueryClient();
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
       <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={state}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-            {children}
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <QueryClientProvider client={queryClient}>
+          <DiscoverMainProvider value={state}>
+            <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+              {children}
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </QueryClientProvider>
       </KibanaContextProvider>
     );
   };

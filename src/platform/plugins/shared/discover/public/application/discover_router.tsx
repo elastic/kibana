@@ -12,6 +12,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { NotFoundRoute } from './not_found';
@@ -19,6 +20,8 @@ import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
 import { DiscoverMainRoute } from './main';
+
+const queryClient = new QueryClient();
 
 export interface DiscoverRouterProps {
   services: DiscoverServices;
@@ -29,9 +32,11 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
-        <Router history={services.history} data-test-subj="discover-react-router">
-          <DiscoverRoutes {...routeProps} />
-        </Router>
+        <QueryClientProvider client={queryClient}>
+          <Router history={services.history} data-test-subj="discover-react-router">
+            <DiscoverRoutes {...routeProps} />
+          </Router>
+        </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
   );
