@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
-import type { CustomScript } from '../../../../common/endpoint/types/custom_scripts';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
+import type { CustomScript } from '../../../../server/endpoint/services';
 
 jest.mock('../../hooks/custom_scripts/use_get_custom_scripts');
 

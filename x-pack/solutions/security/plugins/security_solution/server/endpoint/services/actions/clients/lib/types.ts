@@ -78,7 +78,7 @@ export interface GetFileDownloadMethodResponse {
   mimeType?: string;
 }
 
-interface CustomScript {
+export interface CustomScript {
   /**
    * Unique identifier for the script
    */
@@ -154,6 +154,9 @@ export interface ResponseActionsClient {
    */
   processPendingActions: (options: ProcessPendingActionsMethodOptions) => Promise<void>;
 
+  /**
+   * Retrieves a list of all custom scripts for a given agent type - ** not a Response Action **
+   */
   getCustomScripts: () => Promise<CustomScriptsResponse>;
 
   /**

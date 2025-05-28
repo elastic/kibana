@@ -57,7 +57,7 @@ export interface ArgumentSelectorWrapperProps {
  * handles displaying a custom argument value selector and manages its state
  */
 export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
-  ({ argName, argIndex, argDefinition: { SelectorComponent }, inputRef }) => {
+  ({ argName, argIndex, argDefinition: { SelectorComponent } }) => {
     const dispatch = useConsoleStateDispatch();
     const { valueText, value, store } = useWithCommandArgumentState(argName, argIndex);
 

@@ -19,11 +19,11 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { CustomScript } from '../../../../server/endpoint/services';
 import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
-import type { CustomScript } from '../../../../common/endpoint/types/custom_scripts';
 
 // Css to have a tooltip in place with a one line truncated description
 const truncationStyle = css({
