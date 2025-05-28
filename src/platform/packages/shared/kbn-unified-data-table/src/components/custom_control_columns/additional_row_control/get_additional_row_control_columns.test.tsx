@@ -83,7 +83,7 @@ describe('getAdditionalRowControlColumns', () => {
     expect(screen.getByTestId(mocks[0].id)).toBeVisible();
 
     // The other elements are hidden under the menu button
-    await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actions'));
+    await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
     expect(screen.getByTestId(mocks[1].id)).toBeVisible();
     expect(screen.getByTestId(mocks[2].id)).toBeVisible();
   });
