@@ -6,12 +6,12 @@
  */
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
+import { createPackageInfoMock } from '../../../common/mocks';
 import { PackagePolicyMocks } from '../../mocks';
 
 import { appContextService } from '../app_context';
 import { licenseService } from '../license';
 import { outputService } from '../output';
-import type { InstallSource, PackageInfo } from '../../types';
 
 import {
   canDeployAsAgentlessOrThrow,
@@ -190,35 +190,6 @@ describe('canDeployAsAgentlessOrThrow', () => {
     supports_agentless: supportsAgentless,
   });
 
-  const getTestPackageInfo = (installSource: InstallSource = 'custom'): PackageInfo => ({
-    status: 'installed',
-    type: 'integration',
-    name: 'test',
-    title: 'Test',
-    latestVersion: '0.0.1',
-    assets: { kibana: undefined, elasticsearch: undefined },
-    version: '0.0.1',
-    owner: {
-      type: 'community',
-    },
-    savedObject: {
-      id: 'abc-def',
-      type: 'integration',
-      attributes: {
-        name: 'test',
-        version: '0.0.1',
-        installed_es: [],
-        es_index_patterns: {},
-        installed_kibana: [],
-        install_status: 'installed',
-        install_version: '0.0.1',
-        install_started_at: new Date().toUTCString(),
-        verification_status: 'unknown',
-        install_source: installSource,
-      },
-    },
-  });
-
   const getMockConfig = (agentlessCustomIntegrations: boolean = false) => ({
     enabled: true,
     agents: { enabled: true, elasticsearch: {} },
@@ -229,7 +200,10 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(getTestPolicy(), getTestPackageInfo());
+      canDeployAsAgentlessOrThrow(
+        getTestPolicy(),
+        createPackageInfoMock({ installSource: 'custom' })
+      );
     } catch (e) {
       error = e;
     }
@@ -241,7 +215,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(getTestPolicy(), getTestPackageInfo('registry'));
+      canDeployAsAgentlessOrThrow(getTestPolicy(), createPackageInfoMock());
     } catch (e) {
       error = e;
     }
@@ -253,7 +227,10 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(getTestPolicy(false), getTestPackageInfo('upload'));
+      canDeployAsAgentlessOrThrow(
+        getTestPolicy(false),
+        createPackageInfoMock({ installSource: 'upload' })
+      );
     } catch (e) {
       error = e;
     }
@@ -265,7 +242,10 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig(true));
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(getTestPolicy(), getTestPackageInfo('custom'));
+      canDeployAsAgentlessOrThrow(
+        getTestPolicy(),
+        createPackageInfoMock({ installSource: 'custom' })
+      );
     } catch (e) {
       error = e;
     }
