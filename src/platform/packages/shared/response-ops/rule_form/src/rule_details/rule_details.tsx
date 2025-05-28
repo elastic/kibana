@@ -28,9 +28,9 @@ import {
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
-import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
+const InvestigationGuideEditor = React.lazy(() => import('./rule_investigation_guide_editor'));
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
@@ -169,10 +169,12 @@ export const RuleDetails = () => {
           MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
         }
       >
-        <InvestigationGuideEditor
-          setRuleParams={onSetArtifacts}
-          value={formData.artifacts?.investigation_guide?.blob ?? ''}
-        />
+        <React.Suspense fallback={null}>
+          <InvestigationGuideEditor
+            setRuleParams={onSetArtifacts}
+            value={formData.artifacts?.investigation_guide?.blob ?? ''}
+          />
+        </React.Suspense>
       </EuiFormRow>
       {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
       <EuiSpacer size="xxl" />
