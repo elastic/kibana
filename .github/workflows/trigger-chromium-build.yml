@@ -124,6 +124,5 @@ jobs:
             GITHUB_ISSUE_BASE_OWNER=${{ github.event.repository.owner.login }}
             GITHUB_ISSUE_BASE_REPO=${{ github.event.repository.name }}
             GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
-            GITHUB_ISSUE_LABELS=$(echo ${{ github.event.issue.labels }} | jq -r '. | map(.name) | join(",")')
             GITHUB_ISSUE_TRIGGER_USER=${{ github.event.issue.user.login }}
             PUPPETEER_VERSION=$(echo ${{ fromJSON(needs.matches_label.outputs.version_bump_config) }} | jq -r '.puppeteer_version')
