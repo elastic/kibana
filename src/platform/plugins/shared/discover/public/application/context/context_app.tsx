@@ -265,11 +265,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage css={dscDocsPageCss}>
+          <EuiPage css={styles.docsPage}>
             <EuiPageBody
               panelled
               paddingSize="none"
-              css={dscDocsContentCss}
+              css={styles.docsContent}
               panelProps={{ role: 'main' }}
             >
               <EuiText
@@ -325,12 +325,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 };
 
-const dscDocsPageCss = css`
-  ${kibanaFullBodyHeightCss(54)}; // 54px is the action bar height
-`;
-
-const dscDocsContentCss = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
+const styles = {
+  docsContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
+  docsPage: kibanaFullBodyHeightCss('54px'), // 54px is the action bar height
+};

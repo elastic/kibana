@@ -118,7 +118,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/presentation-containers",
-    "@kbn/object-utils"
+    "@kbn/object-utils",
+    "@kbn/coloring"
   ],
   "exclude": ["target/**/*"]
 }
