@@ -11,8 +11,13 @@ import { PackagePolicyMocks } from '../../mocks';
 import { appContextService } from '../app_context';
 import { licenseService } from '../license';
 import { outputService } from '../output';
+import type { InstallSource, PackageInfo } from '../../types';
 
-import { mapPackagePolicySavedObjectToPackagePolicy, preflightCheckPackagePolicy } from './utils';
+import {
+  canDeployAsAgentlessOrThrow,
+  mapPackagePolicySavedObjectToPackagePolicy,
+  preflightCheckPackagePolicy,
+} from './utils';
 
 describe('Package Policy Utils', () => {
   describe('mapPackagePolicySavedObjectToPackagePolicy()', () => {
@@ -167,5 +172,104 @@ describe('Package Policy Utils', () => {
         )
       ).resolves.not.toThrow();
     });
+  });
+});
+
+describe('canDeployAsAgentlessOrThrow', () => {
+  const getTestPolicy = (supportsAgentless: boolean = true) => ({
+    name: 'Test Package Policy',
+    namespace: 'test',
+    enabled: true,
+    policy_ids: ['test'],
+    inputs: [],
+    package: {
+      name: 'test',
+      title: 'Test',
+      version: '0.0.1',
+    },
+    supports_agentless: supportsAgentless,
+  });
+
+  const getTestPackageInfo = (installSource: InstallSource = 'custom'): PackageInfo => ({
+    status: 'installed',
+    type: 'integration',
+    name: 'test',
+    title: 'Test',
+    latestVersion: '0.0.1',
+    assets: { kibana: undefined, elasticsearch: undefined },
+    version: '0.0.1',
+    owner: {
+      type: 'community',
+    },
+    savedObject: {
+      id: 'abc-def',
+      type: 'integration',
+      attributes: {
+        name: 'test',
+        version: '0.0.1',
+        installed_es: [],
+        es_index_patterns: {},
+        installed_kibana: [],
+        install_status: 'installed',
+        install_version: '0.0.1',
+        install_started_at: new Date().toUTCString(),
+        verification_status: 'unknown',
+        install_source: installSource,
+      },
+    },
+  });
+
+  const getMockConfig = (agentlessCustomIntegrations: boolean = false) => ({
+    enabled: true,
+    agents: { enabled: true, elasticsearch: {} },
+    agentless: { enabled: true, customIntegrations: { enabled: agentlessCustomIntegrations } },
+  });
+
+  it('should throw if policy supports agentless, is custom package, and is not allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(getTestPolicy(), getTestPackageInfo());
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).not.toBe(null);
+  });
+
+  it('should not throw if policy supports agentless, is not custom package, and is not allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(getTestPolicy(), getTestPackageInfo('registry'));
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBe(null);
+  });
+
+  it('should not throw if policy does not support agentless, is custom package, and is not allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(getTestPolicy(false), getTestPackageInfo('upload'));
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBe(null);
+  });
+
+  it('should not throw if policy supports agentless, is custom package, and is allowed', () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig(true));
+    let error = null;
+    try {
+      canDeployAsAgentlessOrThrow(getTestPolicy(), getTestPackageInfo('custom'));
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBe(null);
   });
 });
