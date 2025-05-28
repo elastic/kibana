@@ -20,7 +20,9 @@ import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { pick } from 'lodash';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { buildAdditionalQuery } from './build_additional_query';
+import { ServiceDependencies, getRuleFlyoutComponent } from './rule_flyout_component';
 
 interface Context {
   data?: AlertRuleFromVisUIActionData;
@@ -30,16 +32,19 @@ interface Context {
 export class AlertRuleFromVisAction implements Action<Context> {
   private ruleTypeRegistry: RuleTypeRegistryContract;
   private actionTypeRegistry: ActionTypeRegistryContract;
+  private startDependencies: ServiceDependencies;
 
   public type = ALERT_RULE_TRIGGER;
   public id = ALERT_RULE_TRIGGER;
 
   constructor(
     ruleTypeRegistry: RuleTypeRegistryContract,
-    actionTypeRegistry: ActionTypeRegistryContract
+    actionTypeRegistry: ActionTypeRegistryContract,
+    startDependencies: ServiceDependencies
   ) {
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.actionTypeRegistry = actionTypeRegistry;
+    this.startDependencies = startDependencies;
   }
 
   public getIconType = () => 'bell';
@@ -138,7 +143,28 @@ export class AlertRuleFromVisAction implements Action<Context> {
       };
     }
 
-    embeddable.createAlertRule(initialValues, this.ruleTypeRegistry, this.actionTypeRegistry);
+    const parentApi = embeddable.parentApi;
+
+    const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+
+    const Component = await getRuleFlyoutComponent(
+      this.startDependencies,
+      this.ruleTypeRegistry,
+      this.actionTypeRegistry,
+      parentApi,
+      {
+        ...initialValues,
+        tags: [],
+        name: i18n.translate(
+          'xpack.triggersActionsUI.alertRuleFromVis.embeddable.alertRuleTitle.defaultName',
+          {
+            defaultMessage: 'Elasticsearch query rule from visualization',
+          }
+        ),
+      } as RuleFormData<EsQueryRuleParams>
+    );
+
+    embeddable.mountInlineFlyout(Component, overlayTracker, { dataTestSubj: 'lensAlertRule' });
   }
 }
 
