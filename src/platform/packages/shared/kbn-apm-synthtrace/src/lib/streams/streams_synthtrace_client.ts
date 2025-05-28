@@ -24,7 +24,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
       ...options,
       pipeline: streamsPipeline(),
     });
-    this.dataStreams = ['logs', 'logs.*'];
+    this.dataStreams = ['logs', 'logs.*', 'logs-generic-default'];
   }
 
   async forkStream(
@@ -86,7 +86,12 @@ function streamsRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
-      document._index = 'logs';
+      // 50-50 send to logs or to logs-generic-default
+      if (Math.random() > 0.5) {
+        document._index = 'logs-generic-default';
+      } else {
+        document._index = 'logs';
+      }
       callback(null, document);
     },
   });

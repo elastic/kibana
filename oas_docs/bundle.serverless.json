@@ -5430,7 +5430,8 @@
         "summary": "Schedule a snooze for the rule",
         "tags": [
           "alerting"
-        ]
+        ],
+        "x-state": "Generally available; added in 8.19.0"
       }
     },
     "/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}": {
@@ -5483,7 +5484,8 @@
         "summary": "Delete a snooze schedule for a rule",
         "tags": [
           "alerting"
-        ]
+        ],
+        "x-state": "Generally available; added in 8.19.0"
       }
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
@@ -24202,10 +24204,14 @@
                       "properties": {
                         "install_source": {
                           "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "install_source"
+                        "install_source",
+                        "name"
                       ],
                       "type": "object"
                     },
@@ -25197,10 +25203,14 @@
                       "properties": {
                         "install_source": {
                           "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "install_source"
+                        "install_source",
+                        "name"
                       ],
                       "type": "object"
                     },
@@ -26957,10 +26967,14 @@
                       "properties": {
                         "install_source": {
                           "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
                         }
                       },
                       "required": [
-                        "install_source"
+                        "install_source",
+                        "name"
                       ],
                       "type": "object"
                     },

@@ -737,7 +737,15 @@ export class HttpServer {
         },
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Route serves static assets',
+            },
+          },
+        },
         auth: false,
         cache: {
           privacy: 'public',
