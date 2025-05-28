@@ -194,7 +194,15 @@ const OutcomePreviewTable = () => {
 
   return draftProcessor?.processor &&
     isGrokProcessor(draftProcessor.processor) &&
-    !isEmpty(draftProcessor.processor.grok.field) ? (
+    !isEmpty(draftProcessor.processor.grok.field) &&
+    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
+    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
+      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
+      const fieldName = draftProcessor.processor?.grok.field;
+      return Array.from(grokExpression.getFields().values()).some(
+        (field) => field.name === fieldName
+      );
+    }) ? (
     <PreviewTable
       documents={previewDocuments}
       displayColumns={[draftProcessor.processor.grok.field]}
