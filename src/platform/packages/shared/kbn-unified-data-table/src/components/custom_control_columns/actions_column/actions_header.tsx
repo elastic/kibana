@@ -8,7 +8,7 @@
  */
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -27,7 +27,7 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   });
 
   return (
-    <>
+    <div>
       <EuiScreenReaderOnly>
         <span>
           {i18n.translate('unifiedDataTable.controlColumnHeader', {
@@ -35,29 +35,29 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
           })}
         </span>
       </EuiScreenReaderOnly>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {showText ? (
-          <EuiFlexItem data-test-subj="unifiedDataTable_actionsColumnHeaderText" grow={false}>
-            <span>{actionsText}</span>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem data-test-subj="unifiedDataTable_actionsColumnHeaderIcon" grow={false}>
-            <EuiIconTip type="iInCircle" content={actionsText} />
-          </EuiFlexItem>
-        )}
-        {/* Hidden measurement span */}
-        <span
-          ref={textRef}
-          css={css`
-            position: absolute;
-            visibility: hidden;
-            white-space: nowrap;
-            pointer-events: none;
-          `}
-        >
-          {actionsText}
-        </span>
-      </EuiFlexGroup>
-    </>
+      {showText ? (
+        <span data-test-subj="unifiedDataTable_actionsColumnHeaderText">{actionsText}</span>
+      ) : (
+        <EuiIconTip
+          iconProps={{
+            'data-test-subj': 'unifiedDataTable_actionsColumnHeaderIcon',
+          }}
+          type="iInCircle"
+          content={actionsText}
+        />
+      )}
+      {/* Hidden measurement span */}
+      <span
+        ref={textRef}
+        css={css`
+          position: absolute;
+          visibility: hidden;
+          white-space: nowrap;
+          pointer-events: none;
+        `}
+      >
+        {actionsText}
+      </span>
+    </div>
   );
 };
