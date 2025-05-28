@@ -16,7 +16,6 @@ import { registerKibanaFunction } from './kibana';
 import {
   registerExecuteConnectorFunction,
   EXECUTE_CONNECTOR_FUNCTION_NAME,
-  connectorParamsSchemas,
   registerGetConnectorInfoFunction,
   GET_CONNECTOR_INFO_FUNCTION_NAME,
 } from './execute_connector';
