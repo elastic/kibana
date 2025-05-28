@@ -5,7 +5,6 @@
   },
   "include": [
     "../../../../typings/**/*",
-    "common/**/*",
     "public/**/*",
     "server/**/*",
   ],
