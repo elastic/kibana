@@ -4613,6 +4613,7 @@ paths:
       summary: Schedule a snooze for the rule
       tags:
         - alerting
+      x-state: Generally available; added in 8.19.0
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -4718,6 +4719,7 @@ paths:
       summary: Delete a snooze schedule for a rule
       tags:
         - alerting
+      x-state: Generally available; added in 8.19.0
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
@@ -26051,6 +26053,109 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
+  /api/fleet/agents/{agentId}/migrate:
+    post:
+      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
+      operationId: post-fleet-agents-agentid-migrate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enrollment_token:
+                  type: string
+                settings:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ca_sha256:
+                      type: string
+                    certificate_authorities:
+                      type: string
+                    elastic_agent_cert:
+                      type: string
+                    elastic_agent_cert_key:
+                      type: string
+                    elastic_agent_cert_key_passphrase:
+                      type: string
+                    headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    proxy_disabled:
+                      type: boolean
+                    proxy_headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    proxy_url:
+                      type: string
+                    replace_token:
+                      type: boolean
+                    staging:
+                      type: boolean
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                uri:
+                  format: uri
+                  type: string
+              required:
+                - uri
+                - enrollment_token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Migrate a single agent
+      tags:
+        - Elastic Agents
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -26476,6 +26581,7 @@ paths:
                             - UPDATE_TAGS
                             - POLICY_CHANGE
                             - INPUT_ACTION
+                            - MIGRATE
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -41234,6 +41340,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -41255,6 +41362,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -41264,12 +41381,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -41328,6 +41451,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -41349,6 +41473,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -41358,12 +41492,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -75418,6 +75558,20 @@ components:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
           required:
             - asset
+        entity:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            id:
+              type: string
+          required:
+            - id
         host:
           type: object
           properties:
