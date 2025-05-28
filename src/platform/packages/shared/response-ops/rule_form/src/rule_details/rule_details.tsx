@@ -28,7 +28,7 @@ import {
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
-import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
+// import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 
@@ -85,18 +85,18 @@ export const RuleDetails = () => {
     }
   }, [dispatch, tags]);
 
-  const onSetArtifacts = useCallback(
-    (value: object) => {
-      dispatch({
-        type: 'setRuleProperty',
-        payload: {
-          property: 'artifacts',
-          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
-        },
-      });
-    },
-    [dispatch, formData.artifacts]
-  );
+  // const onSetArtifacts = useCallback(
+  //   (value: object) => {
+  //     dispatch({
+  //       type: 'setRuleProperty',
+  //       payload: {
+  //         property: 'artifacts',
+  //         value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
+  //       },
+  //     });
+  //   },
+  //   [dispatch, formData.artifacts]
+  // );
 
   return (
     <>
@@ -169,10 +169,11 @@ export const RuleDetails = () => {
           MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
         }
       >
-        <InvestigationGuideEditor
+        <div />
+        {/* <InvestigationGuideEditor
           setRuleParams={onSetArtifacts}
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
-        />
+        /> */}
       </EuiFormRow>
       {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
       <EuiSpacer size="xxl" />
