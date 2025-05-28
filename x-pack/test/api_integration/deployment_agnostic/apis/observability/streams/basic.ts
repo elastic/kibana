@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -511,6 +512,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await getStream(apiClient, 'logs.nginx', 404);
         await getStream(apiClient, 'logs.nginx.error', 404);
+      });
+    });
+
+    describe('Basic setup', () => {
+      before(async () => {
+        await enableStreams(apiClient);
+      });
+
+      after(async () => {
+        await disableStreams(apiClient);
+      });
+
+      it('fails to create a stream if an existing template takes precedence', async () => {
+        const index = 'logs.noprecedence';
+        await esClient.indices.putIndexTemplate({
+          name: 'highest_priority_template',
+          index_patterns: [index],
+          priority: `${MAX_PRIORITY}` as unknown as number,
+        });
+
+        await putStream(
+          apiClient,
+          index,
+          {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                lifecycle: { inherit: {} },
+                processing: [],
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+              },
+            },
+          },
+          500
+        );
       });
     });
   });
