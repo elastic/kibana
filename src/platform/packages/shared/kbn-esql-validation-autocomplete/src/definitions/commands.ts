@@ -49,6 +49,7 @@ import {
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
 import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
   suggest as suggestForGrok,
@@ -233,7 +234,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: '',
     examples: ['TS index', 'TS index, index2'],
-    suggest: () => [],
+    suggest: suggestForTimeseries,
   },
   {
     name: 'stats',

@@ -6,13 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export interface JoinIndicesAutocompleteResult {
-  indices: JoinIndexAutocompleteItem[];
+export interface IndicesAutocompleteResult {
+  indices: IndexAutocompleteItem[];
 }
 
-export interface JoinIndexAutocompleteItem {
+export interface IndexAutocompleteItem {
   name: string;
-  mode: 'lookup' | string;
+  mode: 'lookup' | 'time_series' | string;
   aliases: string[];
 }

@@ -415,7 +415,7 @@ describe('autocomplete', () => {
       'col0 = ',
       getDateHistogramCompletionItem(),
       ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { grouping: true, scalar: true }),
-      ...getFieldNamesByType('any').map((field) => `${field} `),
+      ...getFieldNamesByType('any'),
     ]);
 
     // WHERE argument
@@ -786,18 +786,14 @@ describe('autocomplete', () => {
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
       getDateHistogramCompletionItem(),
       attachTriggerCommand('col0 = '),
-      ...getFieldNamesByType('any')
-        .map((field) => `${field} `)
-        .map(attachTriggerCommand),
+      ...getFieldNamesByType('any').map(attachTriggerCommand),
       ...allByCompatibleFunctions,
     ]);
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY col0 = /', [
       getDateHistogramCompletionItem(),
-      ...getFieldNamesByType('any')
-        .map((field) => `${field} `)
-        .map(attachTriggerCommand),
+      ...getFieldNamesByType('any').map(attachTriggerCommand),
       ...allByCompatibleFunctions,
     ]);
 

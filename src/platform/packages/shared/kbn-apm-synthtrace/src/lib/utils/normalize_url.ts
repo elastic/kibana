@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as helpers from './helpers';
-import { validationTimeseriesCommandTestSuite } from './test_suites/validation.command.metrics';
-
-validationTimeseriesCommandTestSuite(helpers.setup);
+export function normalizeUrl(url: string): string {
+  return url.replace(/([^:]\/)\/+/g, '$1');
+}
