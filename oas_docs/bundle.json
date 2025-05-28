@@ -8385,7 +8385,7 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "i": {
-                                      "description": "The unique identifier of the section.",
+                                      "description": "The unique identifier of the section",
                                       "type": "string"
                                     },
                                     "y": {
@@ -9850,7 +9850,7 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "i": {
-                                      "description": "The unique identifier of the section.",
+                                      "description": "The unique identifier of the section",
                                       "type": "string"
                                     },
                                     "y": {
