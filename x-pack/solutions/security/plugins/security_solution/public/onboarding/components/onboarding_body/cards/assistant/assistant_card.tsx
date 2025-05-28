@@ -211,9 +211,9 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
           <EuiFlexItem grow={false}>
             <CardSubduedText size="s">
               {isEISConnectorAvailable ? (
-                i18n.ASSISTANT_CARD_DESCRIPTION
-              ) : (
                 <ElasticAIFeatureMessage />
+              ) : (
+                i18n.ASSISTANT_CARD_DESCRIPTION
               )}
             </CardSubduedText>
           </EuiFlexItem>

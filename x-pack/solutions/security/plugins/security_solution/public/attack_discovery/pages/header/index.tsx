@@ -117,7 +117,8 @@ const HeaderComponent: React.FC<Props> = ({
                   <ElasticLLMCostAwarenessTour
                     isDisabled={!connectorsAreConfigured}
                     selectedConnectorId={connectorId}
-                    zIndex={1}
+                    zIndex={1000} // Has to be higher than the z-index of the header toolbar but lower than the flyout
+                    anchorPosition="downLeft" // Position the tour downLeft to avoid overlapping with the header
                   >
                     <ConnectorSelectorInline
                       onConnectorSelected={noop}

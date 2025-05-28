@@ -28,6 +28,7 @@ interface Props {
   isDisabled: boolean;
   selectedConnectorId: string | undefined;
   zIndex?: number;
+  anchorPosition?: EuiTourStepProps['anchorPosition'];
 }
 
 const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
@@ -35,6 +36,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   isDisabled,
   selectedConnectorId,
   zIndex,
+  anchorPosition = 'leftCenter',
 }) => {
   const { http, inferenceEnabled } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
@@ -103,7 +105,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
 
   return (
     <EuiTourStep
-      anchorPosition="leftCenter"
+      anchorPosition={anchorPosition}
       content={<EuiText size="m">{elasticLLMTourStep1.content}</EuiText>}
       // Open the tour step after flyout is open
       isStepOpen={isTimerExhausted}
