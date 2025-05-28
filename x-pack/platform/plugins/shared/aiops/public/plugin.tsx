@@ -33,8 +33,9 @@ export class AiopsPlugin
     Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
       ([license, [coreStart, pluginStart]]) => {
         const { canUseAiops } = coreStart.application.capabilities.ml;
+        const aiopsEnabled = coreStart.application.capabilities.aiops.enabled;
 
-        if (license.hasAtLeast('platinum') && canUseAiops) {
+        if (license.hasAtLeast('platinum') && canUseAiops && aiopsEnabled) {
           if (embeddable) {
             registerEmbeddables(embeddable, core);
           }
