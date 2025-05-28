@@ -7,8 +7,6 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { FleetErrorWithStatusCode, FleetNotFoundError } from '.';
-
 export function isESClientError(error: unknown): error is errors.ResponseError {
   return error instanceof errors.ResponseError;
 }
@@ -17,56 +15,46 @@ export function isElasticsearchVersionConflictError(error: Error): boolean {
   return isESClientError(error) && error.meta.statusCode === 409;
 }
 
-export const wrapWithFleetErrorIfNeeded = (
-  err: Error,
-  messagePrefix?: string
-): FleetErrorWithStatusCode => {
-  if (err instanceof FleetErrorWithStatusCode) {
-    return err;
-  }
-
-  let message = `${messagePrefix ? `${messagePrefix}: ` : ''}${err.message}`;
-
-  if (isESClientError(err)) {
-    message += ` (Status Code: [${err.statusCode}], body: [${JSON.stringify(err.body)}])`;
-  }
-
-  return new FleetErrorWithStatusCode(message, undefined, err);
-};
-
-interface CatchAndWrapError {
-  (error: Error): Promise<never>;
+interface CatchAndSetErrorStackTrace {
+  (error: Error, message?: string): Promise<never>;
+  /**
+   * Adds a message to the stack trace of the error whose stack trace will be updated.
+   * Use it to further include info. for debugging purposes
+   */
   withMessage(message: string): (error: Error) => Promise<never>;
 }
 
 /**
- * Error handling utility for use with promises that will wrap any thrown error with a `FleetError`.
+ * Error handling utility for use with promises that will set the stack trace on the error provided.
  * Especially useful when working with ES/SO client, as errors thrown by those client normally do
  * not include a very helpful stack trace.
  *
  * @param error
+ * @param message
  *
  * @example
  *
- *    esClient.search(...).catch(catchAndWrapError);
+ *    esClient.search(...).catch(catchAndSetErrorStackTrace);
  *
  *    // With custom message on error thrown
- *    esClient.search(...).catch(catchAndWrapError.withMessage('update to item xyz failed'));
+ *    esClient.search(...).catch(catchAndSetErrorStackTrace.withMessage('update to item xyz failed'));
  *
  */
-export const catchAndWrapError: CatchAndWrapError = (error: Error): Promise<never> => {
-  return Promise.reject(wrapWithFleetErrorIfNeeded(error));
+export const catchAndSetErrorStackTrace: CatchAndSetErrorStackTrace = (
+  error: Error,
+  message: string = ''
+): Promise<never> => {
+  const priorStackTrace = error.stack;
+  Error.captureStackTrace(error, catchAndSetErrorStackTrace);
+  error.stack += `\n----[ ORIGINAL STACK TRACE ]----\n${priorStackTrace}`;
+
+  if (message) {
+    error.stack = message + '\n' + error.stack;
+  }
+
+  return Promise.reject(error);
 };
 
-catchAndWrapError.withMessage = (message) => {
-  return (err: Error) => Promise.reject(wrapWithFleetErrorIfNeeded(err, message));
-};
-
-/** Determine if an error from Fleet is a "Not found" type */
-export const isFleetNotFoundError = (err: Error): boolean => {
-  return (
-    err instanceof FleetNotFoundError ||
-    ('statusCode' in err && err.statusCode === 404) ||
-    (err as { output?: { statusCode: number } }).output?.statusCode === 404
-  );
+catchAndSetErrorStackTrace.withMessage = (message) => {
+  return (err: Error) => catchAndSetErrorStackTrace(err, message);
 };

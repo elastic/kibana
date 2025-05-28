@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type RequestHandler } from '@kbn/core/server';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -22,7 +22,7 @@ import type {
 } from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
-import { AgentPolicyNotFoundError, isFleetNotFoundError } from '../../errors';
+import { AgentPolicyNotFoundError } from '../../errors';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
@@ -59,10 +59,9 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   const { elasticsearch, savedObjects } = await context.core;
   const soClient = savedObjects.client;
   const esClient = elasticsearch.client.asInternalUser;
-
   // validate policy exists in the current space
   await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
-    if (isFleetNotFoundError(err)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
       throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
     }
 

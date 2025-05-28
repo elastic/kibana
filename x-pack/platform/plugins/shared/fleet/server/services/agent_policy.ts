@@ -31,7 +31,7 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 
-import { catchAndWrapError } from '../errors/utils';
+import { catchAndSetErrorStackTrace } from '../errors/utils';
 
 import {
   getAllowedOutputTypesForAgentPolicy,
@@ -248,7 +248,7 @@ class AgentPolicyService {
         updated_at: new Date().toISOString(),
         updated_by: user ? user.username : 'system',
       })
-      .catch(catchAndWrapError.withMessage(`SO update to agent policy [${id}] failed`));
+      .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
 
     const newAgentPolicy = await this.get(soClient, id, false);
 
@@ -479,7 +479,9 @@ class AgentPolicyService {
         options
       )
       .catch(
-        catchAndWrapError.withMessage(`Attempt to create agent policy [${agentPolicy.id}] failed`)
+        catchAndSetErrorStackTrace.withMessage(
+          `Attempt to create agent policy [${agentPolicy.id}] failed`
+        )
       );
 
     await appContextService
@@ -507,7 +509,7 @@ class AgentPolicyService {
         search: escapeSearchQueryPhrase(givenPolicy.name),
       })
       .catch(
-        catchAndWrapError.withMessage(
+        catchAndSetErrorStackTrace.withMessage(
           `Failed to find agent policies with name [${givenPolicy.name}]`
         )
       );
@@ -627,7 +629,7 @@ class AgentPolicyService {
 
     const bulkGetResponse = await soClient
       .bulkGet<AgentPolicySOAttributes>(objects)
-      .catch(catchAndWrapError.withMessage(`Failed to get agent policy by IDs`));
+      .catch(catchAndSetErrorStackTrace.withMessage(`Failed to get agent policy by IDs`));
 
     const agentPolicies = await pMap(
       bulkGetResponse.saved_objects,
@@ -740,7 +742,9 @@ class AgentPolicyService {
             search: kuery,
           })
           .catch(
-            catchAndWrapError.withMessage('Failed to find agent policies using simple search term')
+            catchAndSetErrorStackTrace.withMessage(
+              'Failed to find agent policies using simple search term'
+            )
           );
       } else {
         throw e;
@@ -1431,7 +1435,7 @@ class AgentPolicyService {
           id: String(id),
         })
         .catch(
-          catchAndWrapError.withMessage(
+          catchAndSetErrorStackTrace.withMessage(
             `Failed to create [${PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE}] with id [${id}]`
           )
         );
@@ -1441,7 +1445,7 @@ class AgentPolicyService {
       .delete(savedObjectType, id, {
         force: true, // need to delete through multiple space
       })
-      .catch(catchAndWrapError.withMessage(`Failed to delete agent policy [${id}]`));
+      .catch(catchAndSetErrorStackTrace.withMessage(`Failed to delete agent policy [${id}]`));
 
     if (!agentPolicy?.supports_agentless) {
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
@@ -1573,7 +1577,7 @@ class AgentPolicyService {
         operations: fleetServerPoliciesBulkBody,
         refresh: 'wait_for',
       })
-      .catch(catchAndWrapError.withMessage('ES bulk operation failed'));
+      .catch(catchAndSetErrorStackTrace.withMessage('ES bulk operation failed'));
 
     logger.debug(`Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`);
 
@@ -1836,7 +1840,7 @@ class AgentPolicyService {
     const bulkGetResponse = await soClient
       .bulkGet<AgentPolicySOAttributes>(objects)
       .catch(
-        catchAndWrapError.withMessage(
+        catchAndSetErrorStackTrace.withMessage(
           `Failed to bulk get agent policies [${agentPolicyIds.join(', ')}]`
         )
       );
@@ -1900,7 +1904,7 @@ class AgentPolicyService {
             };
           })
         )
-        .catch(catchAndWrapError.withMessage('bulkUpdate of agent policies failed'));
+        .catch(catchAndSetErrorStackTrace.withMessage('bulkUpdate of agent policies failed'));
       updatedAgentPolicies.push(...bulkUpdateSavedObjects);
     }
     if (!updatedAgentPolicies.length) {
@@ -1946,7 +1950,7 @@ class AgentPolicyService {
         perPage: SO_SEARCH_LIMIT,
         filter: normalizeKuery(savedObjectType, 'ingest-agent-policies.is_managed: true'),
       })
-      .catch(catchAndWrapError.withMessage('Failed to get all managed agent policies'));
+      .catch(catchAndSetErrorStackTrace.withMessage('Failed to get all managed agent policies'));
 
     return agentPolicies;
   }

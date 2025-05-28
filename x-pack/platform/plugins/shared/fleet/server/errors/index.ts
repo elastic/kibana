@@ -18,7 +18,7 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError, isFleetNotFoundError } from './utils';
+export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
   OutputInvalidError as OutputInvalidError,

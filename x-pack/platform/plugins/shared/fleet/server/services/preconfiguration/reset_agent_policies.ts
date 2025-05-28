@@ -22,7 +22,7 @@ import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
-import { AgentPolicyInvalidError, isFleetNotFoundError } from '../../errors';
+import { AgentPolicyInvalidError } from '../../errors';
 
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 
@@ -134,7 +134,7 @@ async function _deleteExistingData(
 
   if (agentPolicyId) {
     const policy = await agentPolicyService.get(soClient, agentPolicyId).catch((err) => {
-      if (isFleetNotFoundError(err)) {
+      if (err.output?.statusCode === 404) {
         return undefined;
       }
       throw err;

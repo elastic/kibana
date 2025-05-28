@@ -31,7 +31,7 @@ import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { catchAndWrapError, wrapWithFleetErrorIfNeeded } from '../errors/utils';
+import { catchAndSetErrorStackTrace } from '../errors/utils';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -457,7 +457,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         { ...options, id: packagePolicyId }
       )
-      .catch(catchAndWrapError.withMessage(`attempt to create package policy saved object failed`));
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          `attempt to create package policy saved object failed`
+        )
+      );
 
     for (const agentPolicy of agentPolicies) {
       if (
@@ -658,7 +662,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const { saved_objects: createdObjects } = await soClient
       .bulkCreate<PackagePolicySOAttributes>(policiesToCreate)
-      .catch(catchAndWrapError.withMessage('failed to bulk create pacakge policies'));
+      .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create pacakge policies'));
 
     // Filter out invalid SOs
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
@@ -789,7 +793,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const installation = await soClient
         .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, packagePolicy.package?.name)
         .catch(
-          catchAndWrapError.withMessage(`Failed to get package [${packagePolicy.package.name}]`)
+          catchAndSetErrorStackTrace.withMessage(
+            `Failed to get package [${packagePolicy.package.name}]`
+          )
         );
 
       // If possible, return the experimental features map for the package policy's `package` field
@@ -832,7 +838,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
       .catch(
-        catchAndWrapError.withMessage(
+        catchAndSetErrorStackTrace.withMessage(
           `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}]`
         )
       );
@@ -889,7 +895,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           namespaces: isSpacesEnabled ? options.spaceIds : undefined,
         }))
       )
-      .catch(catchAndWrapError.withMessage('bulkGet of package policies failed'));
+      .catch(catchAndSetErrorStackTrace.withMessage('bulkGet of package policies failed'));
 
     const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
@@ -958,7 +964,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
         namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
       })
-      .catch(catchAndWrapError.withMessage('failed to find package policies'));
+      .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies'));
 
     for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -1012,7 +1018,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
-      .catch(catchAndWrapError.withMessage('failed to find package policies IDs'));
+      .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies IDs'));
 
     for (const packagePolicy of packagePolicies.saved_objects) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -1210,7 +1216,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           version,
         }
       )
-      .catch(catchAndWrapError.withMessage(`update of package policy [${id}] failed`));
+      .catch(catchAndSetErrorStackTrace.withMessage(`update of package policy [${id}] failed`));
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
@@ -1526,14 +1532,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         failedPolicies.push({
           packagePolicy: packagePolicyUpdate,
-          error: wrapWithFleetErrorIfNeeded(error),
+          error,
         });
       }
     });
 
     const { saved_objects: updatedPolicies } = await soClient
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
-      .catch(catchAndWrapError.withMessage(`Saved objects bulk update failed]`));
+      .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
 
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([
@@ -1752,7 +1758,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         )
         .catch(
-          catchAndWrapError.withMessage(
+          catchAndSetErrorStackTrace.withMessage(
             `Bulk delete of package policies [${idsToDelete.join(', ')}] failed`
           )
         );

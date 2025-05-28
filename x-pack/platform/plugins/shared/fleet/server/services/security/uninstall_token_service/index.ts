@@ -35,7 +35,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { Logger } from '@kbn/logging';
 
-import { catchAndWrapError } from '../../../errors/utils';
+import { catchAndSetErrorStackTrace } from '../../../errors/utils';
 
 import type { AgentPolicySOAttributes } from '../../../types';
 import { UninstallTokenError } from '../../../../common/errors';
@@ -261,7 +261,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         type: agentPolicySavedObjectType,
         filter: policyNameFilter,
       })
-      .catch(catchAndWrapError);
+      .catch(catchAndSetErrorStackTrace);
 
     return agentPoliciesSOs.saved_objects.map((attr) => attr.id);
   }
