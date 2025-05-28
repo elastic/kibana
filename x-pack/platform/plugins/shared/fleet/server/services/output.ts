@@ -368,7 +368,7 @@ async function updateAgentPoliciesDataOutputId(
   }
 }
 
-function validateRemoteSyncIntegrationsCanBeEnabled(output: NewOutput) {
+function validateRemoteSyncIntegrationsCanBeEnabled(output: Partial<NewOutput>) {
   if (
     output.type === outputType.RemoteElasticsearch &&
     (output.sync_integrations === true || output.sync_uninstalled_integrations === true) &&
@@ -1118,6 +1118,7 @@ class OutputService {
         updateData.shipper = null;
       }
     }
+    validateRemoteSyncIntegrationsCanBeEnabled(data);
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {

@@ -18,6 +18,8 @@ import type { Output } from '../../types';
 
 import { FleetNotFoundError } from '../../errors';
 
+import { licenseService } from '../../services/license';
+
 import { getRemoteSyncedIntegrationsInfoByOutputId } from './get_remote_status';
 
 jest.mock('../../services/app_context');
@@ -66,6 +68,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -77,6 +80,17 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return empty integrations array if license is not at least Enterprise', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
     expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
       integrations: [],
     });
