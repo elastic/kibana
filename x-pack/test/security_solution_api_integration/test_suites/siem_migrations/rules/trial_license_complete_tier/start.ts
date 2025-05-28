@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Make sure the started_at is populated
       const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-      expect(migrationResponse.body?.last_execution?.started_at).to.not.be('');
+      expect(migrationResponse.body?.last_execution?.started_at).to.be.ok();
       expect(migrationResponse.body?.last_execution?.connector_id).to.eql('preconfigured-bedrock');
     });
 
