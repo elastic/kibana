@@ -36,7 +36,7 @@ export function initializeEditApi(
           });
         },
         isEditingEnabled: () => {
-          return getMapsCapabilities()?.save as boolean;
+          return getMapsCapabilities().save as boolean;
         },
         getEditHref: async () => {
           return getHttp().basePath.prepend(getFullPath(savedObjectId));

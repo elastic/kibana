@@ -166,14 +166,6 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   );
 }
 
-export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
-  return suggestions.map((d) => ({
-    ...d,
-    // "text" -> text
-    text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
-  }));
-}
-
 export function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: string
@@ -1045,11 +1037,11 @@ export function isExpressionComplete(
   );
 }
 
-export function getSourceSuggestions(sources: ESQLSourceResult[]) {
+export function getSourceSuggestions(sources: ESQLSourceResult[], alreadyUsed: string[]) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
     sources
-      .filter(({ hidden }) => !hidden)
+      .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
       .map(({ name, dataStreams, title, type }) => {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
       })
@@ -1059,15 +1051,15 @@ export function getSourceSuggestions(sources: ESQLSourceResult[]) {
 export async function additionalSourcesSuggestions(
   queryText: string,
   sources: ESQLSourceResult[],
+  ignored: string[],
   recommendedQuerySuggestions: SuggestionRawDefinition[]
 ) {
-  const canRemoveQuote = queryText.includes('"');
   const suggestionsToAdd = await handleFragment(
     queryText,
     (fragment) =>
       sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
     (_fragment, rangeToReplace) => {
-      return getSourceSuggestions(sources).map((suggestion) => ({
+      return getSourceSuggestions(sources, ignored).map((suggestion) => ({
         ...suggestion,
         rangeToReplace,
       }));
@@ -1080,7 +1072,7 @@ export async function additionalSourcesSuggestions(
           exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
         );
 
-        return canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions;
+        return definitions;
       } else {
         const _suggestions: SuggestionRawDefinition[] = [
           {

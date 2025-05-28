@@ -211,10 +211,10 @@ export function initializeEditApi(
       return false;
     }
     return (
-      Boolean(capabilities.visualize_v2?.save) ||
+      Boolean(capabilities.visualize_v2.save) ||
       (!getState().savedObjectId &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
-        Boolean(capabilities.visualize_v2?.show))
+        Boolean(capabilities.visualize_v2.show))
     );
   };
 

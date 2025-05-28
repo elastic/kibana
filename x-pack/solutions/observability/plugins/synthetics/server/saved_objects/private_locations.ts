@@ -26,7 +26,7 @@ export const PRIVATE_LOCATION_SAVED_OBJECT_TYPE: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
   },
 };
 
@@ -46,7 +46,7 @@ export const LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
   },
   modelVersions: {
     1: modelVersion1,
