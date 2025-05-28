@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
-
+import { SavedObject, SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 import type { DashboardSavedObjectAttributes } from '../schema';
 import { itemToSavedObject, savedObjectToItem } from '../../content_management/latest';
@@ -26,37 +26,44 @@ import { itemToSavedObject, savedObjectToItem } from '../../content_management/l
  */
 export function createExtractPanelReferencesMigration(
   deps: DashboardSavedObjectTypeMigrationsDeps
-): SavedObjectMigrationFn<DashboardSavedObjectAttributes> {
-  return (doc) => {
-    const references = doc.references ?? [];
+): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
+  let embeddableStart: EmbeddableStart;
+  void deps.core.getStartServices().then(([_, { embeddable }]) => {
+    embeddableStart = embeddable;
+  });
+  return {
+    deferred: true,
+    transform: (doc) => {
+      const references = doc.references ?? [];
 
-    /**
-     * Remembering this because dashboard's extractReferences won't return those
-     * All other references like `panel_` will be overwritten
-     */
-    const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
+      /**
+       * Remembering this because dashboard's extractReferences won't return those
+       * All other references like `panel_` will be overwritten
+       */
+      const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
 
-    // Content Management transform functions `savedObjectToItem` and `itemToSavedObject`
-    // will run embeddable inject and extract functions for each panel
-    const { item, error: itemError } = savedObjectToItem(
-      doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
-      deps.embeddable,
-      false
-    );
+      // Content Management transform functions `savedObjectToItem` and `itemToSavedObject`
+      // will run embeddable inject and extract functions for each panel
+      const { item, error: itemError } = savedObjectToItem(
+        doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
+        embeddableStart,
+        false
+      );
 
-    if (itemError) throw itemError;
+      if (itemError) throw itemError;
 
-    const {
-      attributes,
-      error: attributesError,
-      references: newPanelReferences,
-    } = itemToSavedObject({ attributes: item.attributes, embeddable: deps.embeddable });
-    if (attributesError) throw attributesError;
+      const {
+        attributes,
+        error: attributesError,
+        references: newPanelReferences,
+      } = itemToSavedObject({ attributes: item.attributes, embeddable: embeddableStart });
+      if (attributesError) throw attributesError;
 
-    return {
-      ...doc,
-      references: [...oldNonPanelReferences, ...newPanelReferences],
-      attributes,
-    };
+      return {
+        ...doc,
+        references: [...oldNonPanelReferences, ...newPanelReferences],
+        attributes,
+      };
+    },
   };
 }

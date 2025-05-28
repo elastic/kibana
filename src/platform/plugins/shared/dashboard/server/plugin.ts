@@ -66,6 +66,7 @@ export class DashboardPlugin
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {
+          core,
           embeddable: plugins.embeddable,
         },
       })

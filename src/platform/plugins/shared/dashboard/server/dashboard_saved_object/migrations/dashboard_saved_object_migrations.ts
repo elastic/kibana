@@ -9,12 +9,11 @@
 
 import { flow, mapValues } from 'lodash';
 
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
-} from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core-saved-objects-utils-server';
+
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import { SavedObjectMigration, SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
 
 import { migrations730, migrations700 } from './migrate_to_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
@@ -25,15 +24,16 @@ import { createExtractPanelReferencesMigration } from './migrate_extract_panel_r
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
   embeddable: EmbeddableSetup;
+  core: CoreSetup<{ embeddable: EmbeddableStart }>;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigration>(
     deps.embeddable.getAllMigrations(),
     migrateByValueDashboardPanels
-  ) as MigrateFunctionsObject;
+  );
 
   const dashboardMigrations = {
     '6.7.2': flow(migrateMatchAllQuery),
@@ -45,5 +45,5 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
 
-  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
+  return mergeSavedObjectMigrationMaps(dashboardMigrations, embeddableMigrations);
 };
