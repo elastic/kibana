@@ -69,7 +69,7 @@ export const JsonEditor = () => {
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsHelpText"
           defaultMessage={
-            'A JSON-encoded array of {ingestPipelineProcessors}. {{conditions}} defined in the processor JSON take precedence over conditions defined in "Optional fields".'
+            'A JSON-encoded array of {ingestPipelineProcessors}. {conditions} defined in the processor JSON take precedence over conditions defined in "Optional fields".'
           }
           values={{
             ingestPipelineProcessors: (
