@@ -354,7 +354,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(JSON.parse(contextMessage?.message.data!).suggestions.length).to.be(0);
       });
 
-      it('does not add the instruction conversation for other users', async () => {
+      it('does not add the user instruction for other users', async () => {
         const conversation = await getConversationForUser('admin');
 
         expect(conversation.systemMessage).to.not.contain(userInstructionText);

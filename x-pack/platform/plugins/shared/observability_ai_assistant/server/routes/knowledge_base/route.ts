@@ -34,7 +34,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   ): Promise<{
     errorMessage?: string;
     enabled: boolean;
-    endpoint?: Partial<InferenceInferenceEndpointInfo>;
+    endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
     kbState: KnowledgeBaseState;
     currentInferenceId?: string | undefined;
