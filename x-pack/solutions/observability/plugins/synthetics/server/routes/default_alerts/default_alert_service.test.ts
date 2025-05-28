@@ -286,8 +286,8 @@ describe('DefaultAlertService', () => {
 
       it('blocks on subsequent calls to avoid multiple default alert creations', async () => {
         const sampleAction = { alertsFilter: { query: { kql: 'some kql', filters: [] } } };
-        const monitorStatusRule = [];
-        const tlsRule = [];
+        const monitorStatusRule: unknown[] = [];
+        const tlsRule: unknown[] = [];
 
         // The purpose of this test is to simulate a race condition where we have multiple calls from
         // the client as the user initiates their Synthetics setup.
@@ -344,24 +344,18 @@ describe('DefaultAlertService', () => {
         );
         service.settings = { defaultConnectors: ['slack', 'email'] } as any;
 
-        const monitorStatusPromises: Array<Promise<void>> = [];
-        const tlsPromises: Array<Promise<void>> = [];
+        const monitorStatusPromises: Array<Promise<unknown>> = [];
+        const tlsPromises: Array<Promise<unknown>> = [];
         for (let i = 0; i < 3; i++) {
           monitorStatusPromises.push(
             service.createDefaultRuleIfNotExist(
               'xpack.synthetics.alerts.monitorStatus',
               'name',
-              '1m',
-              String(i + 1)
+              '1m'
             )
           );
           tlsPromises.push(
-            service.createDefaultRuleIfNotExist(
-              'xpack.synthetics.alerts.tls',
-              'name',
-              '1m',
-              String(i + 1)
-            )
+            service.createDefaultRuleIfNotExist('xpack.synthetics.alerts.tls', 'name', '1m')
           );
         }
 

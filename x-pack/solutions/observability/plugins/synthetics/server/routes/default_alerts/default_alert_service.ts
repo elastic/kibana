@@ -29,8 +29,8 @@ export class DefaultAlertService {
    * If multiple requests come in at the same time, they will wait for the first one to complete.
    * Without this mechanism, we could end up creating multiple default alerts at the same time.
    */
-  private static _defaultMonitorStatusAlertProcess: Promise<void> | null = null;
-  private static _defaultTlsAlertProcess: Promise<void> | null = null;
+  private static _defaultMonitorStatusAlertProcess: Promise<unknown> | null = null;
+  private static _defaultTlsAlertProcess: Promise<unknown> | null = null;
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -124,7 +124,7 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  private static setCreateDefaultAlertProcess(ruleType: string, process: Promise<void> | null) {
+  private static setCreateDefaultAlertProcess(ruleType: string, process: Promise<unknown> | null) {
     if (ruleType === SYNTHETICS_STATUS_RULE) {
       DefaultAlertService._defaultMonitorStatusAlertProcess = process;
     } else if (ruleType === SYNTHETICS_TLS_RULE) {
