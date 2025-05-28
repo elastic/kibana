@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('alerting api integration security and spaces disabled - Group 6', function () {
+  describe('alerting api integration security and spaces disabled - Group 5', function () {
     loadTestFile(require.resolve('./maintenance_window_disabled'));
     loadTestFile(require.resolve('./rules_settings_disabled'));
   });

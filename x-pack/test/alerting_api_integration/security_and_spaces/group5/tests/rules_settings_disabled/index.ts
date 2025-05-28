@@ -13,7 +13,7 @@ export default function rulesSettingsDisabledTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  describe('Rules Settings Disabled - Group 6', () => {
+  describe('Rules Settings Disabled - Group 5', () => {
     before(async () => {
       await setupSpacesAndUsers(getService);
     });
