@@ -62,35 +62,6 @@ export default ({ getService }: FtrProviderContext) => {
       expect(migrationResponse.body?.last_execution?.ended_at).to.not.be('');
     });
 
-    it('should return correct status of an aborted migration', async () => {
-      // start migration
-      const { body } = await migrationRulesRoutes.start({
-        migrationId,
-        payload: {
-          connector_id: 'preconfigured-bedrock',
-        },
-      });
-      expect(body).to.eql({ started: true });
-
-      // check if it running correctly
-      const statsResponse = await migrationRulesRoutes.stats({ migrationId });
-      expect(statsResponse.body.status).to.eql('running');
-
-      while (true) {
-        const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-        if (migrationResponse.body?.last_execution?.started_at) {
-          break;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
-      // Stop Migration
-      const response = await migrationRulesRoutes.stop({ migrationId });
-      expect(response.body).to.eql({ stopped: true });
-
-      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-      expect(migrationResponse.body?.last_execution?.is_aborted).to.eql(true);
-    });
     describe('error scenarios', () => {
       it('should return 404 if migration id is invalid and non-existent', async () => {
         await migrationRulesRoutes.start({

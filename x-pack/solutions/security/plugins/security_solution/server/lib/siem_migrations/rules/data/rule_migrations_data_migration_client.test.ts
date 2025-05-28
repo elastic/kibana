@@ -12,6 +12,8 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
+import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
+import type { RuleMigrationLastExecution } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -147,5 +149,92 @@ describe('RuleMigrationsDataMigrationClient', () => {
         },
       ]);
     });
+  });
+
+  describe('getAll', () => {
+    it('should return all migrations', async () => {
+      const response = {
+        hits: {
+          hits: [
+            {
+              _index: '.kibana-siem-rule-migrations',
+              _id: '1',
+              _source: {
+                created_by: currentUser.profile_uid,
+                created_at: new Date().toISOString(),
+              },
+            },
+            {
+              _index: '.kibana-siem-rule-migrations',
+              _id: '2',
+              _source: {
+                created_by: currentUser.profile_uid,
+                created_at: new Date().toISOString(),
+              },
+            },
+          ],
+        },
+      } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
+
+      (
+        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+      ).mockResolvedValueOnce(response);
+
+      await ruleMigrationsDataMigrationClient.getAll();
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        size: 10000,
+        query: {
+          match_all: {},
+        },
+        _source: true,
+      });
+    });
+  });
+
+  describe('updateLastExecution', () => {
+    const lastExecutionParams = {
+      started_at: new Date().toISOString(),
+      is_aborted: false,
+      error: '',
+      ended_at: new Date().toISOString(),
+      connector_id: 'testConnector',
+    };
+
+    for (const [key, value] of Object.entries(lastExecutionParams)) {
+      const localExecutionParam = {
+        [key]: value,
+      } as unknown as RuleMigrationLastExecution;
+
+      const expectedPainlessUpdateCommaned =
+        typeof value === 'string'
+          ? `ctx._source.last_execution.${key} = '${value}';`
+          : `ctx._source.last_execution.${key} = ${value};`;
+
+      it(`should update the last execution of a migration with given param : ${key}`, async () => {
+        const migrationId = 'testId';
+
+        await ruleMigrationsDataMigrationClient.updateLastExecution({
+          id: migrationId,
+          lastExecutionParams: localExecutionParam,
+        });
+
+        const expectedScript = `
+        if (ctx._source.last_execution == null) {
+          ctx._source.last_execution = [:];
+        }
+      ${expectedPainlessUpdateCommaned}
+      `;
+
+        expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+          index: '.kibana-siem-rule-migrations',
+          id: migrationId,
+          refresh: 'wait_for',
+          script: {
+            source: expectedScript,
+          },
+        });
+      });
+    }
   });
 });

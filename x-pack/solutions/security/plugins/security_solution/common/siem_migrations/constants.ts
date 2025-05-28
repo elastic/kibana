@@ -39,11 +39,14 @@ export enum SiemMigrationTaskStatus {
   READY = 'ready',
   /** The Migration is in progress */
   RUNNING = 'running',
-  /** The Migration is in progress but has been stopped because of some error */
+  /**
+   * The Migration is not running but has not been fully processed or aborted by user.
+   * In that case it gets the status of `stopped`
+   */
   STOPPED = 'stopped',
   /** The Migration is completed without any issues */
   FINISHED = 'finished',
-  /** The Migration is aborted by user */
+  /** The Migration is explicitly aborted by user */
   ABORTED = 'aborted',
 }
 
