@@ -80,6 +80,7 @@ export function TransactionOverview({
             formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
             id={transactionId}
             formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
+            showActions={showActions}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (
