@@ -134,7 +134,6 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       }
 
       const { savedObjectId, ...byRefState } = getByReferenceState(rawState, libraryId);
-      delete (byRefState as MapSerializedState).savedObjectId;
       return {
         rawState: byRefState,
         references: [{
