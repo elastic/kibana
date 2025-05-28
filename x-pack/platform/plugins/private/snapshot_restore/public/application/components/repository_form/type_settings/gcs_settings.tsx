@@ -7,7 +7,14 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSwitch,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
@@ -42,6 +49,9 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
       readonly,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({ prefix: 'gcsClientInput' });
+  const bucketId = useGeneratedHtmlId({ prefix: 'gcsBucketInput' });
+  const basePathId = useGeneratedHtmlId({ prefix: 'gcsBasePathInput' });
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const updateSettings = (name: string, value: string) => {
@@ -82,6 +92,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
+          id={clientId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -97,6 +108,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
+                id={clientId}
               />
             }
           />
@@ -133,6 +145,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
+          id={bucketId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -148,6 +161,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="bucketInput"
                 disabled={isManagedRepository}
+                id={bucketId}
               />
             }
           />
@@ -184,6 +198,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
+          id={basePathId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -199,6 +214,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
+                id={basePathId}
               />
             }
           />

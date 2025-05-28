@@ -14,6 +14,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
@@ -49,6 +50,15 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       maxSnapshotBytesPerSec,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({
+    prefix: 'azureClientInput',
+  });
+  const containerId = useGeneratedHtmlId({
+    prefix: 'azureContainerInput',
+  });
+  const basePathId = useGeneratedHtmlId({
+    prefix: 'azureBasePathInput',
+  });
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const locationModeOptions = ['primary_only', 'secondary_only'].map((option) => ({
@@ -94,6 +104,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
+          id={clientId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -109,6 +120,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
+                id={clientId}
               />
             }
           />
@@ -145,6 +157,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.container)}
           error={settingErrors.container}
+          id={containerId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -160,6 +173,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="containerInput"
                 disabled={isManagedRepository}
+                id={containerId}
               />
             }
           />
@@ -196,6 +210,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
+          id={basePathId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -211,6 +226,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
+                id={basePathId}
               />
             }
           />

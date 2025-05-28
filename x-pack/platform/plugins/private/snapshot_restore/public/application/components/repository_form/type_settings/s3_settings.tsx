@@ -15,6 +15,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { Repository, S3Repository } from '../../../../../common/types';
@@ -54,6 +55,9 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       readonly,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({ prefix: 's3ClientInput' });
+  const bucketId = useGeneratedHtmlId({ prefix: 's3BucketInput' });
+  const basePathId = useGeneratedHtmlId({ prefix: 's3BasePathInput' });
 
   const cannedAclOptions = [
     'private',
@@ -116,6 +120,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
+          id={clientId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -131,6 +136,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
+                id={clientId}
               />
             }
           />
@@ -167,6 +173,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
+          id={bucketId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -182,6 +189,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="bucketInput"
                 disabled={isManagedRepository}
+                id={bucketId}
               />
             }
           />
@@ -218,6 +226,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
+          id={basePathId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -233,6 +242,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
+                id={basePathId}
               />
             }
           />
