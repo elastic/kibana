@@ -64,7 +64,7 @@ describe('SpanSummaryTitle', () => {
   });
 
   it('renders FieldHoverActionPopover for spanName and id ', () => {
-    const { getByText, container } = render(
+    const { getByText } = render(
       <SpanSummaryTitle
         spanName="Test Span"
         formattedSpanName="<mark>Test Span</mark>"
