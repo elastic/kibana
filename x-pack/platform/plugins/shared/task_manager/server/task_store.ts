@@ -79,6 +79,7 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   spaces?: SpacesPluginStart;
+  getIsSecurityEnabled: () => boolean;
 }
 
 export interface SearchOpts {
@@ -149,6 +150,7 @@ export class TaskStore {
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private spaces?: SpacesPluginStart;
+  private getIsSecurityEnabled: () => boolean;
 
   /**
    * Constructs a new TaskStore.
@@ -183,6 +185,7 @@ export class TaskStore {
     this.security = opts.security;
     this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
+    this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -194,7 +197,7 @@ export class TaskStore {
   }
 
   private getSoClientForCreate(options: ApiKeyOptions) {
-    if (options.request) {
+    if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
@@ -204,6 +207,10 @@ export class TaskStore {
   }
 
   private async maybeGetApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
+    if (!this.getIsSecurityEnabled()) {
+      return null;
+    }
+
     if (!request) {
       return null;
     }
