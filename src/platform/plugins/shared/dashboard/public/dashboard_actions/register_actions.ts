@@ -19,13 +19,7 @@ import {
   BADGE_FILTERS_NOTIFICATION,
 } from './constants';
 
-export const registerActions = async ({
-  plugins,
-  allowByValueEmbeddables,
-}: {
-  allowByValueEmbeddables?: boolean;
-  plugins: DashboardStartDependencies;
-}) => {
+export const registerActions = async (plugins: DashboardStartDependencies) => {
   const { uiActions, share } = plugins;
 
   uiActions.registerActionAsync(ACTION_CLONE_PANEL, async () => {
@@ -54,23 +48,21 @@ export const registerActions = async ({
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_EXPORT_CSV);
   }
 
-  if (allowByValueEmbeddables) {
-    uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
-      const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
-      return new AddToLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
+  uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
+    const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    return new AddToLibraryAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_ADD_TO_LIBRARY);
 
-    uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
-      const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
-      return new UnlinkFromLibraryAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
+  uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
+    const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    return new UnlinkFromLibraryAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_UNLINK_FROM_LIBRARY);
 
-    uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
-      const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
-      return new CopyToDashboardAction();
-    });
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_COPY_TO_DASHBOARD);
-  }
+  uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
+    const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
+    return new CopyToDashboardAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_COPY_TO_DASHBOARD);
 };
