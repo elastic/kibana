@@ -501,7 +501,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('misc', () => {
+    describe('Basic setup', () => {
       before(async () => {
         await enableStreams(apiClient);
       });
