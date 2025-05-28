@@ -185,6 +185,128 @@ describe('compileConfigStack', () => {
   });
 });
 
+describe('pricing tiers configuration', () => {
+  it('adds pricing tier config to the stack when pricing.tiers.enabled is true', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        pricing: {
+          tiers: {
+            enabled: true,
+            products: [{ name: 'observability', tier: 'essentials' }],
+          },
+        },
+        serverless: 'oblt',
+      };
+    });
+
+    const configList = compileConfigStack({
+      serverless: 'oblt',
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.oblt.yml',
+      'kibana.yml',
+      'serverless.oblt.essentials.yml',
+    ]);
+  });
+
+  it('adds pricing tier config with dev mode when pricing.tiers.enabled is true', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        pricing: {
+          tiers: {
+            enabled: true,
+            products: [{ name: 'observability', tier: 'complete' }],
+          },
+        },
+        serverless: 'oblt',
+      };
+    });
+
+    const configList = compileConfigStack({
+      serverless: 'oblt',
+      dev: true,
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.oblt.yml',
+      'kibana.yml',
+      'kibana.dev.yml',
+      'serverless.dev.yml',
+      'serverless.oblt.dev.yml',
+      'serverless.oblt.complete.yml',
+      'serverless.oblt.complete.dev.yml',
+    ]);
+  });
+
+  it('does not add pricing tier config when pricing.tiers.enabled is false', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        pricing: {
+          tiers: {
+            enabled: false,
+            products: [{ name: 'observability', tier: 'essentials' }],
+          },
+        },
+        serverless: 'oblt',
+      };
+    });
+
+    const configList = compileConfigStack({
+      serverless: 'oblt',
+    }).map(toFileNames);
+
+    expect(configList).toEqual(['serverless.yml', 'serverless.oblt.yml', 'kibana.yml']);
+  });
+
+  it('does not add pricing tier config when pricing.tiers.enabled is true but no tier is specified', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        pricing: {
+          tiers: {
+            enabled: true,
+            products: [],
+          },
+        },
+        serverless: 'oblt',
+      };
+    });
+
+    const configList = compileConfigStack({
+      serverless: 'oblt',
+    }).map(toFileNames);
+
+    expect(configList).toEqual(['serverless.yml', 'serverless.oblt.yml', 'kibana.yml']);
+  });
+
+  it('throws an error when multiple different tiers are specified', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        pricing: {
+          tiers: {
+            enabled: true,
+            products: [
+              { name: 'observability', tier: 'complete' },
+              { name: 'observability', tier: 'essentials' },
+            ],
+          },
+        },
+        serverless: 'oblt',
+      };
+    });
+
+    expect(() => {
+      compileConfigStack({
+        serverless: 'oblt',
+      });
+    }).toThrow(
+      'Multiple tiers found in pricing.tiers.products, the applied tier should be the same for all the products.'
+    );
+  });
+});
+
 function toFileNames(path) {
   return Path.basename(path);
 }

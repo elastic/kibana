@@ -113,7 +113,7 @@ function getSecurityTierFromCfg(configs) {
   return productType?.product_tier;
 }
 
-/** @typedef {'essentials' | 'complete'} ServerlessProjectTier */
+/** @typedef {'essentials' | 'complete' | 'search_ai_lake' | 'ai_soc'} ServerlessProjectTier */
 /**
  * @param {string[]} config Configuration object from merged configs
  * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
@@ -123,13 +123,13 @@ function getServerlessProjectTierFromConfig(config) {
 
   // Constraint tier to be the same for
   const uniqueTiers = _.uniqBy(products, 'tier');
-  if (uniqueTiers.length !== 1) {
+  if (uniqueTiers.length > 1) {
     throw new Error(
       'Multiple tiers found in pricing.tiers.products, the applied tier should be the same for all the products.'
     );
   }
 
-  return uniqueTiers.at(0).tier;
+  return uniqueTiers.at(0)?.tier;
 }
 
 /**
