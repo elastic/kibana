@@ -22,7 +22,9 @@ type TransformAndDeleteLegacyActions = (
   context: RulesClientContext,
   rules: Array<SavedObject<RawRule>>,
   skipActionsValidation: boolean
-) => Promise<
+) => TransformAndDeleteLegacyActionsReturn;
+
+type TransformAndDeleteLegacyActionsReturn = Promise<
   Record<
     string,
     {
@@ -167,7 +169,7 @@ const validateTransformedActions = async ({
   const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
   await validateActions(context, ruleType, {
     ...rule.attributes,
-    // set to undefined to avoid both per-actin and rule level values clashing
+    // set to undefined to avoid both per-action and rule level values clashing
     throttle: undefined,
     notifyWhen: undefined,
     actions: transformRawActionsToDomainActions({

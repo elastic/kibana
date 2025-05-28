@@ -46,7 +46,7 @@ export const bulkMigrateLegacyActions = async ({
     Object.keys(transformed).forEach((ruleId) => {
       const rule = siemRulesMap[ruleId];
       const { transformedActions, transformedReferences } = transformed[ruleId];
-      // fix references for a case when actions present in a rule
+      // fix references for a case when non-legacy actions present in a rule before the migration
       const actions = rule.attributes.actions;
       if (actions.length) {
         transformedActions.forEach((transformedAction, i) => {
@@ -64,7 +64,7 @@ export const bulkMigrateLegacyActions = async ({
       }
 
       // put frequencies into existing actions
-      // the situation when both action in rule nad legacy exist should be rare one
+      // the situation when both action in rule and legacy exist should be rare one
       // but if it happens, we put frequency in existing actions per-action level
       const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
         ...action,
