@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    describe('w/ historical versions', () => {
+    describe('with historical versions', () => {
       const TEST_DATA = [
         { pickVersion: 'BASE', expectedTags: ['tagA'] },
         { pickVersion: 'CURRENT', expectedTags: ['tagB'] },
@@ -231,7 +231,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('w/o historical versions', () => {
+    describe('without historical versions', () => {
       const TEST_DATA = [
         { pickVersion: 'CURRENT', expectedTags: ['tagB'] },
         { pickVersion: 'TARGET', expectedTags: ['tagC'] },
