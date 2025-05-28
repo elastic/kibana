@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type {
-  GetRuleMigrationResponse,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationTranslationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../../rules/types';
@@ -19,9 +19,9 @@ const getMockMigrationResultRule = ({
   status = 'completed',
 }: {
   migrationId: string;
-  status?: GetRuleMigrationResponse['data'][number]['status'];
-  translationResult?: GetRuleMigrationResponse['data'][number]['translation_result'];
-}): GetRuleMigrationResponse['data'][number] => {
+  status?: GetRuleMigrationRulesResponse['data'][number]['status'];
+  translationResult?: GetRuleMigrationRulesResponse['data'][number]['translation_result'];
+}): GetRuleMigrationRulesResponse['data'][number] => {
   const ruleId = uuidv4();
   return {
     migration_id: migrationId,
@@ -92,7 +92,7 @@ export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
   },
 ];
 
-export const mockedMigrationResultsObj: Record<string, GetRuleMigrationResponse> = {
+export const mockedMigrationResultsObj: Record<string, GetRuleMigrationRulesResponse> = {
   '1': {
     total: 2,
     data: [
