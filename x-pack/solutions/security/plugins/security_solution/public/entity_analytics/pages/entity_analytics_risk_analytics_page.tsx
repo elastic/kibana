@@ -17,7 +17,7 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
-import { RiskAnalyticsHeader } from '../components/risk_analytics_header';
+import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
@@ -75,7 +75,7 @@ const EntityAnalyticsRiskAnalyticsComponent: React.FC = () => {
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="riskAnalyticsSections">
                 <EuiFlexItem>
-                  <RiskAnalyticsHeader />
+                  <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
                 {!isEntityStoreFeatureFlagDisabled ? (
