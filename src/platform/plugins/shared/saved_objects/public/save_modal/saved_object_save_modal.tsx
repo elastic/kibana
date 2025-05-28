@@ -87,7 +87,6 @@ class SavedObjectSaveModalComponent extends React.Component<
 > {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
-  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -98,13 +97,6 @@ class SavedObjectSaveModalComponent extends React.Component<
     visualizationDescription: this.props.description ? this.props.description : '',
     hasAttemptedSubmit: false,
   };
-
-  public componentDidMount() {
-    setTimeout(() => {
-      // defer so input focus ref value has been populated
-      this.savedObjectTitleInputRef.current?.focus();
-    }, 0);
-  }
 
   public render() {
     const { theme } = this.props;
@@ -129,7 +121,6 @@ class SavedObjectSaveModalComponent extends React.Component<
         >
           <EuiFieldText
             fullWidth
-            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
