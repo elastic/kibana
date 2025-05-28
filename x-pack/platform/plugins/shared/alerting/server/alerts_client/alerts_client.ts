@@ -73,7 +73,7 @@ import {
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
-import { TEMP_MAINTENANCE_WINDOW_ID } from './lib/get_summarized_alerts_query';
+import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -727,7 +727,7 @@ export class AlertsClient<
         return;
       }
       response.hits.hits.forEach(({ fields }) => {
-        const mwIdField = fields![TEMP_MAINTENANCE_WINDOW_ID];
+        const mwIdField = fields![RUNTIME_MAINTENANCE_WINDOW_ID_FIELD];
 
         if (!alertsByMaintenanceWindowIds[mwIdField]) {
           alertsByMaintenanceWindowIds[mwIdField] = [];

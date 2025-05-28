@@ -77,7 +77,7 @@ import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_window
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
-import { TEMP_MAINTENANCE_WINDOW_ID } from './lib/get_summarized_alerts_query';
+import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { DEFAULT_MAX_ALERTS } from '../config';
 
 const date = '2023-03-28T22:27:28.159Z';
@@ -2287,14 +2287,14 @@ describe('Alerts Client', () => {
                       _index: '.internal.alerts-test.alerts-default-000001',
                       fields: {
                         [ALERT_UUID]: ['alert_id_1'],
-                        [TEMP_MAINTENANCE_WINDOW_ID]: ['mw1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
                       },
                     },
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
                       fields: {
                         [ALERT_UUID]: ['alert_id_2'],
-                        [TEMP_MAINTENANCE_WINDOW_ID]: ['mw1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
                       },
                     },
                   ],
@@ -2311,7 +2311,7 @@ describe('Alerts Client', () => {
                       _index: '.internal.alerts-test.alerts-default-000001',
                       fields: {
                         [ALERT_UUID]: ['alert_id_1'],
-                        [TEMP_MAINTENANCE_WINDOW_ID]: ['mw2'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw2'],
                       },
                     },
                   ],
@@ -2420,14 +2420,14 @@ describe('Alerts Client', () => {
                       _index: '.internal.alerts-test.alerts-default-000001',
                       fields: {
                         [ALERT_UUID]: ['alert_id_1'],
-                        [TEMP_MAINTENANCE_WINDOW_ID]: ['mw1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
                       },
                     },
                     {
                       _index: '.internal.alerts-test.alerts-default-000001',
                       fields: {
                         [ALERT_UUID]: ['alert_id_2'],
-                        [TEMP_MAINTENANCE_WINDOW_ID]: ['mw1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
                       },
                     },
                   ],

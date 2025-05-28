@@ -47,7 +47,7 @@ enum AlertTypes {
   RECOVERED,
 }
 
-export const TEMP_MAINTENANCE_WINDOW_ID = 'maintenance_window_id';
+export const RUNTIME_MAINTENANCE_WINDOW_ID_FIELD = 'runtime_maintenance_window_id';
 
 const getLifecycleAlertsQueryByExecutionUuid = ({
   executionUuid,
@@ -341,14 +341,14 @@ export const getQueryByScopedQueries = ({
         },
       },
       runtime_mappings: {
-        [TEMP_MAINTENANCE_WINDOW_ID]: {
+        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: {
           script: {
             source: `emit('${id}');`,
           },
           type: 'keyword',
         },
       },
-      fields: [ALERT_UUID, TEMP_MAINTENANCE_WINDOW_ID],
+      fields: [ALERT_UUID, RUNTIME_MAINTENANCE_WINDOW_ID_FIELD],
       _source: false,
       size: maxAlertLimit,
       track_total_hits: true,
