@@ -55,6 +55,7 @@ export const login = (role?: string): void => {
         // "hostOnly: true" sets the cookie without a domain.
         // This makes cookie available only for the current host (not subdomains).
         // It's needed to match the Serverless backend behavior where cookies are set without a domain.
+        // More info: https://github.com/elastic/kibana/issues/221741
         hostOnly: true,
       });
     });
