@@ -12,7 +12,6 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import type { ChromeNavControl } from '@kbn/core-chrome-browser';
-import { HeaderExtension } from './header_extension';
 
 interface Props {
   navControls$: Observable<readonly ChromeNavControl[]>;
@@ -33,7 +32,7 @@ export function HeaderNavControls({ navControls$, append = null }: Props) {
     <>
       {navControls.map((navControl: ChromeNavControl, index: number) => (
         <EuiHeaderSectionItem key={index}>
-          <HeaderExtension extension={navControl.mount} />
+          <div>{navControl.control}</div>
         </EuiHeaderSectionItem>
       ))}
       {append}
