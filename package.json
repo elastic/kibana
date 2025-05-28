@@ -1178,7 +1178,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.3.1",
     "del": "^6.1.0",
-    "diff": "^8.0.0",
+    "diff": "^8.0.1",
     "dotenv": "^16.4.5",
     "elastic-apm-node": "^4.13.0",
     "email-addresses": "^5.0.0",
