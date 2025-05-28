@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { debounce } from 'lodash';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
@@ -40,6 +41,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   );
 
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
+  const [searchValue, setSearchValue] = useState<string>('');
 
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<EuiComboBoxOptionOption<string>> | undefined
@@ -113,6 +115,14 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     });
   };
 
+    const onSearchChange = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchValue(value);
+      }, 300),
+    []
+  );
+
   const getDashboardItem = (dashboard: DashboardItem) => ({
     value: dashboard.id,
     label: dashboard.attributes.title,
@@ -121,14 +131,14 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
       const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards()
+        .fetchDashboards({ limit: 1000, text: `${searchValue}*` })
         .catch(() => {});
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
       );
       setDashboardList(dashboardOptions);
     }
-  }, [contentManagement]);
+  }, [contentManagement, searchValue]);
 
   useMemo(() => {
     loadDashboards();
@@ -150,6 +160,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
               selectedOptions={selectedDashboards}
               placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}
               onChange={onChange}
+              onSearchChange={onSearchChange}
               data-test-subj="ruleLinkedDashboards"
             />
           </EuiFormRow>
