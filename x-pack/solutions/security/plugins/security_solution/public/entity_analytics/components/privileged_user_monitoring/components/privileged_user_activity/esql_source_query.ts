@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-const PRIV_MON_JOIN = `| RENAME @timestamp AS event_timestamp
-  | LOOKUP JOIN privileged-users ON user.name
-  | RENAME event_timestamp AS @timestamp
-  | EVAL is_privileged = COALESCE(labels.is_privileged, false)
-  | WHERE is_privileged == true`;
+const PRIV_MON_JOIN = ``;
 
 export const getGrantedRightsEsqlSource = () => {
-  return `FROM "logs-*" METADATA _id, _index
+  return `FROM logs-*, test* METADATA _id, _index
     ${PRIV_MON_JOIN}
     | WHERE (host.os.type == "linux"
       AND event.type == "start"
@@ -23,8 +19,14 @@ export const getGrantedRightsEsqlSource = () => {
       )) OR (
       host.os.type=="windows"
       AND event.action=="added-member-to-group"
-    )
-    | RENAME user.name as privileged_user, user.target.name as target_user, group.name as group_name, host.ip as host_ip
+    ) OR (
+      okta.event_type IN ("group.user_membership.add",  "user.account.privilege.grant")
+     )
+    | EVAL okta_privilege = MV_FIRST(okta.target.display_name)
+    | EVAL group_name = COALESCE(group.name, user.target.group.name, okta_privilege)
+    | EVAL host_ip = COALESCE(host.ip, source.ip)
+    | EVAL target_user = COALESCE(user.target.name, user.target.full_name, winlog.event_data.TargetUserName)  
+    | EVAL privileged_user = COALESCE(source.user.name, user.name)  
     | KEEP @timestamp, privileged_user, process.args, target_user, group_name, host_ip, _id, _index`;
 };
 
