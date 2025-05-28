@@ -146,9 +146,9 @@ export function getESQLForLayer(
     if (wrapInFilter || wrapInTimeFilter) {
       if (wrapInFilter) {
         if (col.filter?.language === 'kuery') {
-          metricESQL += ` WHERE KQL("""${col.filter.query}""")`;
+          metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
         } else if (col.filter?.language === 'lucene') {
-          metricESQL += ` WHERE QSTR("""${col.filter.query}""")`;
+          metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
         } else {
           return;
         }
