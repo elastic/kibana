@@ -153,6 +153,10 @@ export class DefaultAlertService {
   }
 
   async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+    const alert = await this.getExistingAlert(ruleType);
+    if (alert) {
+      return alert;
+    }
     if (DefaultAlertService.inProgress(ruleType)) {
       await DefaultAlertService.getDefaultAlertProcess(ruleType);
     }

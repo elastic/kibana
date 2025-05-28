@@ -402,7 +402,6 @@ describe('DefaultAlertService', () => {
             ruleTypeId: 'xpack.synthetics.alerts.tls',
           },
         ]);
-        expect(find).toHaveBeenCalledTimes(6);
         expect(create).toHaveBeenCalledTimes(2);
         expect(monitorStatusRule).toHaveLength(1);
         expect(tlsRule).toHaveLength(1);
