@@ -170,6 +170,16 @@ Review the following information about the {kib} 8.18.0 release.
 [[known-issues-8.18.0]]
 === Known issues
 
+// tag::known-issue-1508[]
+.Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector function and queries don't execute.
+[%collapsible]
+====
+*Details* +
+The Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector function and times out with the error message `Failed to parse function call arguments when converting messages for inference: SyntaxError: Unexpected non-whitespace character after JSON at position 72 and Error: Tool call arguments for execute_connector (...) were invalid`. 
+
+====
+// end::known-issue-1508[]
+
 // tag::known-issue-220339[]
 .Observability AI assistant Knowledge Base entries with empty text can lead to Kibana OOM or restarts.
 [%collapsible]
