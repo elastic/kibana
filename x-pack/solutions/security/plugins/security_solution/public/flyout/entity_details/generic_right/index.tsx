@@ -25,6 +25,9 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { GenericEntityFlyoutHeader } from './header';
 import { GenericEntityFlyoutContent } from './content';
+import { GenericEntityFlyoutFooter } from './footer';
+import { useKibana } from '../../../common/lib/kibana';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 interface CommonError {
   body: {
@@ -56,6 +59,9 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 }
 
 export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelProps) => {
+  const { uiSettings } = useKibana().services;
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!getGenericEntity.data?._source?.entity.id,
@@ -141,6 +147,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         insightsField={'related.entity'}
         insightsValue={source.entity.id}
       />
+      {assetInventoryEnabled && <GenericEntityFlyoutFooter entityId={entity.id} />}
     </>
   );
 };
