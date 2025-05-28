@@ -25,6 +25,7 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiTableHeaderMobile,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { PropTypes } from 'prop-types';
 
@@ -194,7 +195,15 @@ export function CustomSelectionTable({
     return (
       <EuiCheckbox
         id={`${mobile ? `mobile-` : ''}${selectAllCheckboxId}`}
-        label={mobile ? selectAll : null}
+        label={
+          mobile ? (
+            selectAll
+          ) : (
+            <EuiScreenReaderOnly>
+              <span>{selectAll}</span>
+            </EuiScreenReaderOnly>
+          )
+        }
         checked={areAllItemsSelected()}
         onChange={toggleAll}
       />
