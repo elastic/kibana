@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiCopy,
@@ -23,30 +23,44 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
 export const HeaderDataCards = ({
-  criticality,
   id,
   subType,
   type,
 }: {
-  criticality?: CriticalityLevelWithUnassigned;
   id: string;
   subType: string;
   type: string;
 }) => {
-  const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
-    criticality || 'unassigned'
+  const { getAssetCriticality, assignAssetCriticality } = useGenericEntityCriticality({
+    idField: EntityIdentifierFields.generic,
+    idValue: id,
+  });
+
+  const criticality = getAssetCriticality.data?.criticality_level;
+
+  const assignCriticality = useCallback(
+    (value: CriticalityLevelWithUnassigned) => {
+      assignAssetCriticality.mutate({
+        criticalityLevel: value,
+        idField: EntityIdentifierFields.generic,
+        idValue: id,
+      });
+    },
+    [assignAssetCriticality, id]
   );
 
   const cards = useMemo(
     () => [
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.criticalityLabel',
+          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.criticalityLabel',
           {
             defaultMessage: 'Criticality',
           }
@@ -66,8 +80,10 @@ export const HeaderDataCards = ({
               compressed
               hasDividers
               options={assetCriticalityOptions}
-              valueOfSelected={selectValue}
-              onChange={(newValue) => setSelectValue(newValue)}
+              valueOfSelected={criticality || 'unassigned'}
+              onChange={(newValue) => {
+                assignCriticality(newValue);
+              }}
             />
           </div>
         ),
@@ -87,7 +103,7 @@ export const HeaderDataCards = ({
       },
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.typeLabel',
+          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.typeLabel',
           {
             defaultMessage: 'Type',
           }
@@ -96,7 +112,7 @@ export const HeaderDataCards = ({
       },
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.subtypeLabel',
+          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.subtypeLabel',
           {
             defaultMessage: 'Sub Type',
           }
@@ -104,7 +120,7 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [selectValue, id, subType, type]
+    [id, subType, type, assignCriticality, criticality]
   );
 
   return <ResponsiveDataCards cards={cards} collapseWidth={750} />;
