@@ -30,6 +30,7 @@ import {
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
@@ -301,7 +302,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const aggregations: { migrationIds: AggregationsAggregationContainer } = {
       migrationIds: {
-        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: 10000 },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: MAX_ES_SEARCH_SIZE },
         aggregations: {
           status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },
@@ -424,7 +425,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    * */
   async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
     const index = await this.getIndexName();
-    const rulesToBeDeleted = await this.get(migrationId, { size: 10000 });
+    const rulesToBeDeleted = await this.get(migrationId, { size: MAX_ES_SEARCH_SIZE });
     const rulesToBeDeletedDocIds = rulesToBeDeleted.data.map((rule) => rule.id);
 
     return rulesToBeDeletedDocIds.map((docId) => ({

@@ -11,6 +11,7 @@ import type { RuleMigrationLastExecution } from '../../../../../common/siem_migr
 import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { isNotFoundError } from './utils';
+import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
   async create(): Promise<string> {
@@ -68,7 +69,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     return this.esClient
       .search<StoredSiemMigration>({
         index,
-        size: 10000, // Adjust size as needed
+        size: MAX_ES_SEARCH_SIZE, // Adjust size as needed
         query: {
           match_all: {},
         },
