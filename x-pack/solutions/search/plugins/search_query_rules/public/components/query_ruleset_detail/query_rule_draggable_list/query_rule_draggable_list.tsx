@@ -31,10 +31,12 @@ import { QueryRuleDraggableItemCriteriaDisplay } from './query_rule_draggable_it
 export interface QueryRuleDraggableListProps {
   rules: QueryRulesQueryRule[];
   onReorder: (queryRules: QueryRulesQueryRule[]) => void;
+  targetTour?: string;
 }
 export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
   onReorder,
+  targetTour,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -75,7 +77,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
                         {...provided.dragHandleProps}
                         aria-label="Drag Handle"
                       >
-                        <EuiIcon type="grab" />
+                        <EuiIcon id={targetTour} type="grab" />
                       </EuiPanel>
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>

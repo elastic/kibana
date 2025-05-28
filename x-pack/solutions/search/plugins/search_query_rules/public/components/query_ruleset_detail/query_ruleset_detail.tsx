@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   EuiButton,
-  EuiText,
   EuiTourStep,
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -20,6 +19,8 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
@@ -43,6 +44,11 @@ export const QueryRulesetDetail: React.FC = () => {
     rulesetId?: string;
   }>();
 
+  const [isPopoverActionsOpen, setPopoverActions] = useState(false);
+  const splitButtonPopoverActionsId = useGeneratedHtmlId({
+    prefix: 'splitButtonPopoverActionsId',
+  });
+
   const {
     data: queryRulesetData,
     isInitialLoading,
@@ -51,24 +57,40 @@ export const QueryRulesetDetail: React.FC = () => {
   } = useFetchQueryRuleset(rulesetId);
 
   const [rules, setRules] = useState<QueryRulesQueryRule[]>(queryRulesetData?.rules ?? []);
-  const TOUR_TRY_IN_CONSOLE_STORAGE_KEY = 'queryRules.tour.tryInConsole';
-  const [isOpenTour, setIsOpenTour] = useState(() => {
-    const storedPreference = localStorage.getItem(TOUR_TRY_IN_CONSOLE_STORAGE_KEY);
-    return storedPreference === null ? true : storedPreference !== 'false';
-  });
-  const tourTriggerRef = useRef<HTMLElement | null>(null);
-  const [isPopoverOpen, setPopover] = useState(false);
-  const splitButtonPopoverId = useGeneratedHtmlId({
-    prefix: 'splitButtonPopover',
-  });
-
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
+  const TOUR_QUERY_RULES_STORAGE_KEY = 'queryRules.tour';
+  const targetTourId = 'targetTourId';
+  const tourConfig = {
+    currentTourStep: 1,
+    isTourActive: true,
+    tourPopoverWidth: 360,
   };
 
-  const closePopover = () => {
-    setPopover(false);
+  const [tourState, setTourState] = useState(() => {
+    let initialState: any = localStorage.getItem(TOUR_QUERY_RULES_STORAGE_KEY);
+    if (initialState) {
+      initialState = JSON.parse(initialState);
+    } else {
+      initialState = tourConfig;
+    }
+    return initialState;
+  });
+  useEffect(() => {
+    localStorage.setItem(TOUR_QUERY_RULES_STORAGE_KEY, JSON.stringify(tourState));
+  }, [tourState]);
+  const incrementStep = () => {
+    setTourState({
+      ...tourState,
+      currentTourStep: tourState.currentTourStep + 1,
+    });
   };
+
+  const descrementStep = () => {
+    setTourState({
+      ...tourState,
+      currentTourStep: tourState.currentTourStep - 1,
+    });
+  };
+
   const items = [
     <EuiContextMenuItem
       color="danger"
@@ -85,16 +107,14 @@ export const QueryRulesetDetail: React.FC = () => {
   useEffect(() => {
     if (queryRulesetData?.rules) {
       setRules(queryRulesetData.rules);
-      const hasRules = queryRulesetData.rules.length > 0;
-      if (!hasRules) {
-        setIsOpenTour(false);
-      }
     }
-  }, [queryRulesetData?.rules]);
+  }, [queryRulesetData?.rules, tourState]);
 
-  const handleCloseTour = () => {
-    localStorage.setItem(TOUR_TRY_IN_CONSOLE_STORAGE_KEY, 'false');
-    setIsOpenTour(false);
+  const finishTour = () => {
+    setTourState({
+      ...tourState,
+      isTourActive: false,
+    });
   };
 
   return (
@@ -124,30 +144,67 @@ export const QueryRulesetDetail: React.FC = () => {
           data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
-              <EuiFlexItem ref={tourTriggerRef} grow={false}>
-                <UseRunQueryRuleset
-                  rulesetId={rulesetId}
-                  type="contextMenuItem"
-                  content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
-                    defaultMessage: 'Test in Console',
-                  })}
-                />
+              <EuiFlexItem grow={false}>
                 <EuiTourStep
-                  anchor={() => tourTriggerRef.current || document.body}
-                  content={
-                    <EuiText>
-                      <p>Now you can try out the query rule results in the console</p>
-                    </EuiText>
-                  }
-                  isStepOpen={isOpenTour}
-                  minWidth={300}
-                  onFinish={handleCloseTour}
+                  content={<p>Now you can try out the query rule results in the console</p>}
+                  isStepOpen={tourState.isTourActive && tourState.currentTourStep === 1}
+                  minWidth={tourState.tourPopoverWidth}
+                  onFinish={finishTour}
                   step={1}
-                  stepsTotal={1}
-                  title="Test in Console"
-                  anchorPosition="rightCenter"
+                  stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
+                  title={
+                    <EuiTitle size="xs">
+                      <h6>Test your ruleset</h6>
+                    </EuiTitle>
+                  }
+                  anchorPosition="rightUp"
                   zIndex={1}
-                />
+                  footerAction={
+                    <EuiFlexGroup direction="row">
+                      <EuiFlexItem>
+                        {queryRulesetData.rules.length > 1 ? (
+                          <EuiButtonEmpty
+                            data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                            size="s"
+                            color="text"
+                            onClick={finishTour}
+                          >
+                            Close tour
+                          </EuiButtonEmpty>
+                        ) : (
+                          <EuiButton
+                            data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                            size="s"
+                            color="success"
+                            onClick={finishTour}
+                          >
+                            Close tour
+                          </EuiButton>
+                        )}
+                      </EuiFlexItem>
+                      {queryRulesetData.rules.length > 1 && (
+                        <EuiFlexItem>
+                          <EuiButton
+                            data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
+                            color="success"
+                            size="s"
+                            onClick={incrementStep}
+                          >
+                            Next
+                          </EuiButton>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  }
+                >
+                  <UseRunQueryRuleset
+                    rulesetId={rulesetId}
+                    type="contextMenuItem"
+                    content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
+                      defaultMessage: 'Test in Console',
+                    })}
+                  />
+                </EuiTourStep>
               </EuiFlexItem>
               <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
@@ -168,7 +225,7 @@ export const QueryRulesetDetail: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
-                    id={splitButtonPopoverId}
+                    id={splitButtonPopoverActionsId}
                     button={
                       <EuiButtonIcon
                         data-test-subj="searchQueryRulesQueryRulesetDetailButton"
@@ -176,11 +233,11 @@ export const QueryRulesetDetail: React.FC = () => {
                         size="m"
                         iconType="boxesVertical"
                         aria-label="More"
-                        onClick={onButtonClick}
+                        onClick={() => setPopoverActions(!isPopoverActionsOpen)}
                       />
                     }
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
+                    isOpen={isPopoverActionsOpen}
+                    closePopover={() => setPopoverActions(false)}
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
@@ -203,7 +260,56 @@ export const QueryRulesetDetail: React.FC = () => {
           }}
         />
       )}
-      {!isError && <QueryRuleDetailPanel rules={rules} setRules={setRules} />}
+      {!isError && (
+        <>
+          <EuiTourStep
+            anchor="#targetTourId"
+            content={
+              <p>
+                Rules will trigger based on the priority order. The fist rule will take precedence
+                over any following rules.
+              </p>
+            }
+            isStepOpen={tourState.isTourActive && tourState.currentTourStep === 2}
+            maxWidth={tourState.tourPopoverWidth}
+            onFinish={finishTour}
+            step={1}
+            stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
+            title={
+              <EuiTitle size="xs">
+                <h6>Drag the rule to set the priority</h6>
+              </EuiTitle>
+            }
+            anchorPosition="rightCenter"
+            zIndex={1}
+            footerAction={
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
+                    size="s"
+                    color="text"
+                    onClick={descrementStep}
+                  >
+                    Back
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                    size="s"
+                    color="success"
+                    onClick={finishTour}
+                  >
+                    Close tour
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+          <QueryRuleDetailPanel targetTour={targetTourId} rules={rules} setRules={setRules} />
+        </>
+      )}
       {isError && (
         <ErrorPrompt
           errorType={
