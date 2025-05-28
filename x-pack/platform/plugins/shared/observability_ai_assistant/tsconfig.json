@@ -57,7 +57,8 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/lock-manager",
     "@kbn/i18n-react",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/stack-connectors-plugin"
   ],
   "exclude": ["target/**/*"]
 }
