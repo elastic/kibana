@@ -6,7 +6,12 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { getLensApiMock, getLensInternalApiMock, getValidExpressionParams } from '../mocks';
+import {
+  getLensApiMock,
+  getLensInternalApiMock,
+  getValidExpressionParams,
+  makeEmbeddableServices,
+} from '../mocks';
 import { LensApi, LensInternalApi } from '../types';
 import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
@@ -32,6 +37,7 @@ function getDefaultProps({
     internalApi,
     api: getLensApiMock(apiOverrides),
     onUnmount: jest.fn(),
+    services: makeEmbeddableServices(),
   };
 }
 

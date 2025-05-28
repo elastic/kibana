@@ -1793,7 +1793,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "default": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
         "error": [Function],
         "presence": "optional",
       },
@@ -5325,6 +5325,19 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "maxOutputTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "messages": Object {
       "flags": Object {
         "error": [Function],
@@ -5638,6 +5651,19 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "maxOutputTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "messages": Object {
       "flags": Object {
         "error": [Function],
@@ -5862,6 +5888,19 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "maxOutputTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "messages": Object {
       "flags": Object {
         "error": [Function],

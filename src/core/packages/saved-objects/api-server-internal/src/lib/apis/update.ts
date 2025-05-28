@@ -194,7 +194,7 @@ export const executeUpdate = async <T>(
       refresh,
       document: rawUpsert._source,
       ...(version ? decodeRequestVersion(version) : {}),
-      querystring: { require_alias: true },
+      require_alias: true,
     };
 
     const {

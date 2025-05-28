@@ -87,6 +87,7 @@ const ObservabilityApmAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'kibana.alert.grouping': schemaUnknown,
   labels: schemaUnknown,
   'processor.event': schemaString,
   'service.environment': schemaString,

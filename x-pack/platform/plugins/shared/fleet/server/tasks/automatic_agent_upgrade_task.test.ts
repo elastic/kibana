@@ -114,6 +114,10 @@ describe('AutomaticAgentUpgradeTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
+      config: {
+        taskInterval: '1m',
+        retryDelays: ['10m', '20m'],
+      },
     });
   });
 
@@ -451,10 +455,6 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
 
     it('Should pick up agents in failed upgrade state for retry if they are ready', async () => {
-      jest
-        .spyOn(appContextService, 'getConfig')
-        .mockReturnValue({ autoUpgrades: { retryDelays: ['10m', '20m'] } } as any);
-
       const agentPolicies = [
         {
           id: 'agent-policy-1',
