@@ -153,7 +153,8 @@ describe('vega_map_view/view', () => {
         }),
         new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
         {},
-        mockGetServiceSettings
+        mockGetServiceSettings,
+        { darkMode: false }
       );
       mockedConsoleLog = jest.spyOn(console, 'log'); // mocked console.log to avoid messages in the console when running tests
       mockedConsoleLog.mockImplementation(() => {}); //  comment this line when console logging for debugging

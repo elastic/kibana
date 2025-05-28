@@ -150,11 +150,3 @@ export interface Config {
   >;
   specialAssignments: Array<Assignment<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
 }
-
-export interface CategoricalPalette {
-  id: string;
-  name: string;
-  type: 'categorical';
-  colorCount: number;
-  getColor: (valueInRange: number, isDarkMode: boolean, loop: boolean) => string;
-}

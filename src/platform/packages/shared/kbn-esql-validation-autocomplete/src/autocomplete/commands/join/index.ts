@@ -17,12 +17,8 @@ import {
   CommandSuggestParams,
   CommandTypeDefinition,
 } from '../../../definitions/types';
-import {
-  getPosition,
-  joinIndicesToSuggestions,
-  suggestionIntersection,
-  suggestionUnion,
-} from './util';
+import { specialIndicesToSuggestions } from '../../helper';
+import { getPosition, suggestionIntersection, suggestionUnion } from './util';
 import { TRIGGER_SUGGESTION_COMMAND, buildFieldsDefinitionsWithMetadata } from '../../factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
@@ -145,7 +141,7 @@ export const suggest: CommandSuggestFunction<'join'> = async ({
         return [];
       }
 
-      return joinIndicesToSuggestions(joinIndices.indices);
+      return specialIndicesToSuggestions(joinIndices.indices);
     }
 
     case 'after_index': {

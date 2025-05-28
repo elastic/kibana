@@ -74,13 +74,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-    });
-
-    after(async () => {
-      await disableStreams(apiClient);
-    });
-
-    it('should read and return existing orphaned classic stream', async () => {
       await esClient.index({
         index: '.kibana_streams-000001',
         id: TEST_STREAM_NAME,
@@ -89,6 +82,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Refresh the index to make the document searchable
       await esClient.indices.refresh({ index: '.kibana_streams-000001' });
+    });
+
+    after(async () => {
+      await disableStreams(apiClient);
+    });
+
+    it('should read and return existing orphaned classic stream', async () => {
       const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: TEST_STREAM_NAME },
@@ -97,6 +97,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.stream).to.eql(expectedStreamsResponse);
+
+      const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+      expect(listResponse.status).to.eql(200);
+      expect(listResponse.body.streams).to.have.length(2); // logs stream + classic stream
+
+      const dashboardResponse = await apiClient.fetch(
+        'GET /api/streams/{name}/dashboards 2023-10-31',
+        {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+          },
+        }
+      );
+      expect(dashboardResponse.status).to.eql(200);
     });
 
     it('should read and return existing regular classic stream', async () => {
@@ -113,6 +127,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(getResponse.status).to.eql(200);
       expect(getResponse.body.stream).to.eql(expectedStreamsResponse);
+
+      const listResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+      expect(listResponse.status).to.eql(200);
+      expect(listResponse.body.streams).to.have.length(2); // logs stream + classic stream
+
+      const dashboardResponse = await apiClient.fetch(
+        'GET /api/streams/{name}/dashboards 2023-10-31',
+        {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+          },
+        }
+      );
+      expect(dashboardResponse.status).to.eql(200);
     });
   });
 }

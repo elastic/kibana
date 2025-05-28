@@ -716,11 +716,11 @@ export function getBracketsToClose(text: string) {
       }
 
       const substr = text.slice(i, i + openBracket.length);
-      if (substr === openBracket) {
-        stack.push(substr);
-        break;
-      } else if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
         break;
       }
     }
@@ -989,7 +989,7 @@ export async function getCurrentQueryAvailableFields(
   previousPipeFields: ESQLFieldWithMetadata[]
 ) {
   const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
-  previousPipeFields?.forEach((field) => cacheCopy.set(field.name, field));
+  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
   const commandDef = getCommandDefinition(lastCommand.name);
 

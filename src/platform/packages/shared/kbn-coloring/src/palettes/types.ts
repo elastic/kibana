@@ -140,7 +140,9 @@ export interface CustomPaletteParams {
   progression?: 'fixed';
   rangeMin?: number;
   rangeMax?: number;
+  /** lower color stops */
   stops?: ColorStop[];
+  /** upper color stops */
   colorStops?: ColorStop[];
   steps?: number;
   maxSteps?: number | undefined;
