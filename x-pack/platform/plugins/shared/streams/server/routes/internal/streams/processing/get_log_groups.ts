@@ -17,13 +17,17 @@ export interface LogGroup {
 /**
  * Groups a list of logs by pattern and calculates their probability.
  */
-export function getLogGroups(logs: string[], maxDepth = 2) {
+export function getLogGroups(
+  logs: string[],
+  maxDepth = 2,
+  splitChunks = (log: string) => splitLogSeparators(getBasicPattern(log))
+) {
   if (maxDepth <= 0) {
     throw new Error('maxDepth must be greater than 0');
   }
 
   // Generate log patterns and split into chunks
-  const logPatterns = logs.map((log) => [...splitLogSeparators(getBasicPattern(log)), log]); // Append the raw log message to the list of chunks so we've got it available for later (This does not affect probabilities but saves us a lookup step afterwards)
+  const logPatterns = logs.map((log) => [...splitChunks(log), log]); // Append the raw log message to the list of chunks so we've got it available for later (This does not affect probabilities but saves us a lookup step afterwards)
   const trie = ProbabilisticTrie.fromArray(logPatterns);
 
   const output: LogGroup[] = [];

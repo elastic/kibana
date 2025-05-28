@@ -9,10 +9,20 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
 import { FlattenRecord } from '@kbn/streams-schema';
+import {
+  MessageRole,
+  type FromToolSchema,
+  type OutputOptions,
+  type Message,
+} from '@kbn/inference-common';
 import { StreamsClient } from '../../../../lib/streams/client';
-import { simulateProcessing } from './simulation_handler';
+import { simulateProcessing, type SimulationDocReport } from './simulation_handler';
 import { ProcessingSuggestionBody } from './route';
 import { getLogGroups, sortByProbability, getVariedSamples } from './get_log_groups';
+
+export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
+  pattern: string;
+}
 
 export const handleProcessingSuggestion = async (
   name: string,
@@ -39,38 +49,17 @@ export const handleProcessingSuggestion = async (
   );
 };
 
-function getLogMessageGroups(sampleDocuments: FlattenRecord[], fieldName: string) {
-  const messages = sampleDocuments.reduce<string[]>((acc, sample) => {
-    const value = get(sample, fieldName);
-    if (typeof value === 'string') {
-      acc.push(value);
-    }
-    return acc;
-  }, []);
-
-  const groups = getLogGroups(messages, 2);
-  sortByProbability(groups);
-  return groups.map((group) => getVariedSamples(group, 10));
-}
-
-export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
-  pattern: string;
-}
-
 async function processPattern(
   exampleValues: string[],
-  name: string,
+  streamName: string,
   body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient,
   streamsClient: StreamsClient,
   field: string,
-  samples: FlattenRecord[]
+  sampleDocuments: FlattenRecord[]
 ) {
-  const chatResponse = await inferenceClient.output({
-    id: 'create_grok_processor',
-    connectorId: body.connectorId,
-    system: `
+  const systemPrompt = `
 You are a specialized assistant for parsing log lines in Elasticsearch using Grok processors.
 
 You are provided with a context block that defines built-in Grok pattern definitions. Use these definitions when constructing Grok patterns.
@@ -150,41 +139,8 @@ SYSLOGBASE %{SYSLOGTIMESTAMP:timestamp} (?:%{SYSLOGFACILITY} )?%{SYSLOGHOST:host
 LOGLEVEL ([Aa]lert|ALERT|[Tt]race|TRACE|[Dd]ebug|DEBUG|[Nn]otice|NOTICE|[Ii]nfo?(?:rmation)?|INFO?(?:RMATION)?|[Ww]arn?(?:ing)?|WARN?(?:ING)?|[Ee]rr?(?:or)?|ERR?(?:OR)?|[Cc]rit?(?:ical)?|CRIT?(?:ICAL)?|[Ff]atal|FATAL|[Ss]evere|SEVERE|EMERG(?:ENCY)?|[Ee]merg(?:ency)?)
 </built_in_grok_patterns>
 </context>
-`,
-    schema: {
-      type: 'object',
-      required: ['description', 'processors'],
-      properties: {
-        description: { type: 'string' },
-        processors: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              grok: {
-                type: 'object',
-                required: ['field', 'patterns'],
-                properties: {
-                  field: { type: 'string' },
-                  patterns: { type: 'array', items: { type: 'string' } },
-                  pattern_definitions: {
-                    type: 'object',
-                    properties: {},
-                  },
-                  ignore_missing: { type: 'boolean' },
-                  ignore_failure: { type: 'boolean' },
-                },
-              },
-              date: {
-                type: 'object',
-                properties: {},
-              },
-            },
-          },
-        },
-      },
-    } as const,
-    input: `
+`;
+  const taskPrompt = `
 # Task
 
 - I will provide you with sample logs from a single data source whose structure is **not known in advance**.  
@@ -209,10 +165,9 @@ LOGLEVEL ([Aa]lert|ALERT|[Tt]race|TRACE|[Dd]ebug|DEBUG|[Nn]otice|NOTICE|[Ii]nfo?
 3. **Important**: If you define a pattern named \`CUSTOM_TIMESTAMP\`, you **must** actually use it in the final Grok expression. Do **not** define separate captures for day, month, year, etc. if you choose the custom approach.  
 4. Capture relevant fields into [ECS-compatible keys](https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html) when possible (e.g. \`log.level\`, \`client.ip\`, \`process.name\`, \`message\`, etc.).  
 5. If there are optional fields in the logs, handle them using optional groups: \`(?: ... )?\`.  
-6. Use \`s+\` for 2+ spaces if needed; otherwise rely on direct match patterns.
+6. Use \`\\s+\` for 2+ spaces if needed; otherwise rely on direct match patterns.
 7. Use \`NONNEGINT\` instead of \`POSINT\` to match positive integers starting with 0.
 8. Use \`GREEDYDATA\` instead of \`DATA\` to match the log message.
-
 
 ---
 
@@ -260,21 +215,193 @@ ${exampleValues.join('\n')}
 
 - If you define a custom timestamp pattern, you must use it in your final Grok expression (e.g. \`\\[%{CUSTOM_TIMESTAMP:custom_timestamp}\\]\`).  
 - Do not define separate day, month, or year captures if you claim you are using a custom pattern.  
-`,
+  `;
+
+  const firstPass = await suggestAndValidateGrokProcessor({
+    streamName,
+    streamsClient,
+    scopedClusterClient,
+    inferenceClient,
+    connectorId: body.connectorId,
+    system: systemPrompt,
+    input: taskPrompt,
+    sampleDocuments,
   });
 
-  const grokProcessor = chatResponse.output.processors.find((p) => 'grok' in p)!.grok!;
+  const errors = getProcessingErrors(firstPass.simulationResult.documents);
+  if (errors.length === 0) {
+    return {
+      description: firstPass.output.description,
+      grokProcessor: firstPass.grokProcessor,
+      simulationResult: firstPass.simulationResult,
+    };
+  }
+
+  const sampleErrors = getErrorMessageGroups(errors);
+
+  const secondPass = await suggestAndValidateGrokProcessor({
+    streamName,
+    streamsClient,
+    scopedClusterClient,
+    inferenceClient,
+    connectorId: body.connectorId,
+    system: systemPrompt,
+    previousMessages: firstPass.messages,
+    input: `
+  The provided Grok processor returned the following errors when processing the sample logs:
+
+  ${sampleErrors.map((message) => `- ${message}`).join('\n')}
+
+  Adjust the Grok processor to handle these cases correctly.
+  `,
+    sampleDocuments,
+  });
+
+  if (
+    secondPass.simulationResult.documents_metrics.failed_rate <
+    firstPass.simulationResult.documents_metrics.failed_rate
+  ) {
+    return {
+      description: secondPass.output.description,
+      grokProcessor: secondPass.grokProcessor,
+      simulationResult: secondPass.simulationResult,
+    };
+  }
+
+  return {
+    description: firstPass.output.description,
+    grokProcessor: firstPass.grokProcessor,
+    simulationResult: firstPass.simulationResult,
+  };
+}
+
+const ingestPipelineSchema = {
+  type: 'object',
+  required: ['description', 'processors'],
+  properties: {
+    description: { type: 'string' },
+    processors: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          grok: {
+            type: 'object',
+            required: ['field', 'patterns'],
+            properties: {
+              field: { type: 'string' },
+              patterns: { type: 'array', items: { type: 'string' } },
+              pattern_definitions: {
+                type: 'object',
+                properties: {},
+              },
+              ignore_missing: { type: 'boolean' },
+              ignore_failure: { type: 'boolean' },
+            },
+          },
+          date: {
+            type: 'object',
+            properties: {},
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+type IngestPipeline = FromToolSchema<typeof ingestPipelineSchema>;
+type UnknownProcessor = IngestPipeline['processors'][number];
+type GrokProcessor = Pick<Required<UnknownProcessor>, 'grok'>;
+
+function isGrokProcessor(processor: UnknownProcessor): processor is GrokProcessor {
+  return 'grok' in processor;
+}
+
+export function getLogMessageGroups(sampleDocuments: FlattenRecord[], fieldName: string) {
+  const messages = sampleDocuments.reduce<string[]>((acc, sample) => {
+    const value = get(sample, fieldName);
+    if (typeof value === 'string') {
+      acc.push(value);
+    }
+    return acc;
+  }, []);
+
+  const groups = getLogGroups(messages, 2);
+  sortByProbability(groups);
+  return groups.map((group) => getVariedSamples(group, 10));
+}
+
+function getProcessingErrors(documents: SimulationDocReport[]) {
+  return documents.flatMap((doc) =>
+    doc.errors
+      .filter((error) => error.type !== 'non_additive_processor_failure')
+      .map((error) => error.message)
+  );
+}
+
+function getErrorMessageGroups(errors: string[]) {
+  const groups = getLogGroups(errors, 1);
+  sortByProbability(groups);
+  return getVariedSamples(
+    {
+      pattern: '',
+      probability: 1,
+      logs: [],
+      children: groups,
+    },
+    5
+  );
+}
+
+interface SuggestAndValidateGrokProcessorParams
+  extends Pick<OutputOptions, 'connectorId' | 'system' | 'previousMessages' | 'input'> {
+  streamName: string;
+  inferenceClient: InferenceClient;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  sampleDocuments: FlattenRecord[];
+}
+
+const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
+
+async function suggestAndValidateGrokProcessor({
+  streamName,
+  streamsClient,
+  scopedClusterClient,
+  inferenceClient,
+  connectorId,
+  system,
+  previousMessages = [],
+  input,
+  sampleDocuments,
+}: SuggestAndValidateGrokProcessorParams) {
+  const chatResponse = await inferenceClient.output({
+    id: 'create_grok_processor',
+    connectorId,
+    system,
+    previousMessages,
+    input,
+    schema: ingestPipelineSchema,
+  });
+
+  const grokProcessor = chatResponse.output.processors.find(isGrokProcessor);
+  if (!grokProcessor) {
+    throw new Error(
+      `Missing Grok processor in '${chatResponse.id}' response by '${connectorId}' connector`
+    );
+  }
+
   const simulationResult = await simulateProcessing({
     params: {
-      path: { name },
+      path: { name: streamName },
       body: {
         processing: [
           {
-            id: 'grok-processor',
-            grok: grokProcessor,
+            id: SUGGESTED_GROK_PROCESSOR_ID,
+            grok: grokProcessor.grok,
           },
         ],
-        documents: samples,
+        documents: sampleDocuments,
       },
     },
     scopedClusterClient,
@@ -282,8 +409,30 @@ ${exampleValues.join('\n')}
   });
 
   return {
+    messages: [
+      ...previousMessages,
+      {
+        role: MessageRole.User,
+        content: input,
+      },
+      {
+        role: MessageRole.Assistant,
+        content: `
+\`\`\`json
+${JSON.stringify(
+  {
     description: chatResponse.output.description,
-    grokProcessor,
+    processors: [grokProcessor],
+  },
+  null,
+  2
+)}
+\`\`\`
+        `,
+      },
+    ] as Message[],
+    output: chatResponse.output,
+    grokProcessor: grokProcessor.grok,
     simulationResult,
   };
 }
