@@ -36,9 +36,13 @@ const fetchGenericEntity = async (
 export const useGetGenericEntity = (docId: string) => {
   const { data: dataService } = useKibana().services;
 
-  return useQuery({
+  const getGenericEntity = useQuery({
     queryKey: ['use-get-generic-entity-key', docId],
     queryFn: () => fetchGenericEntity(dataService, docId),
     select: (response) => response.rawResponse.hits.hits[0], // extracting result out of ES
   });
+
+  return {
+    getGenericEntity,
+  };
 };
