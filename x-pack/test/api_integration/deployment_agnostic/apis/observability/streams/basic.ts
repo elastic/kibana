@@ -524,15 +524,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await disableStreams(apiClient);
       });
 
-      // this test verifies that the highest possible value did not change
-      // it('fails to create a template with a higher max value', async () => {
-      //  await esClient.indices.putIndexTemplate({
-      //    name: 'highest_priority_template',
-      //    index_patterns: ['just_a_test'],
-      //    priority: `${MAX_PRIORITY + 1n}` as unknown as number,
-      //  });
-      // });
-
       it('fails to create a stream if an existing template takes precedence', async () => {
         const index = 'logs.noprecedence';
         await esClient.indices.putIndexTemplate({
