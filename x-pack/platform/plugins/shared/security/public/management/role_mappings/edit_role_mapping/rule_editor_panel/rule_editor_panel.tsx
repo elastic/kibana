@@ -154,6 +154,7 @@ export class RuleEditorPanel extends Component<Props, State> {
   };
 
   private getModeToggle() {
+    console.log('getModeToggle', this.state.mode, this.state.maxDepth);
     if (this.state.mode === 'json' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
       return (
         <EuiCallOut

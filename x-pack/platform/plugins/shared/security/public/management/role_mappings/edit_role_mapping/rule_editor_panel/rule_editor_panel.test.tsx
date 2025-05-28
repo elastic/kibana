@@ -70,7 +70,7 @@ describe('RuleEditorPanel', () => {
     expect(rules!.toRaw()).toEqual(props.rawRules);
   });
 
-  it('allows switching to the visual editor, carrying over rules', () => {
+  it.only('allows switching to the visual editor, carrying over rules', () => {
     const props = {
       rawRules: {
         field: { username: '*' },
