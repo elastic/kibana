@@ -8488,55 +8488,55 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@moonrepo/cli@^1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.35.1.tgz#6509beab1d936222de1ee3ff03d80cfff16b07f5"
-  integrity sha512-8PVtzLKbzZHkFPHy/r1sPbV5SL/1aj+b+l8RF5NSRrQ3u3110S5FVa2dMihDOseSNkE9T9wKj6mTM6UGxoDs6A==
+"@moonrepo/cli@^1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.36.2.tgz#b77ce7e7e4caf6c4368ede3465106c940392a2b3"
+  integrity sha512-skKLw3c0Sxg5nsKQInbzs4nLjl8px4VA0KKeUq6Q+NhghGrzMq7mflfjM2yrIHuKAH982WJQv4Y3OxbSFeQqqQ==
   dependencies:
     detect-libc "^2.0.3"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "1.35.1"
-    "@moonrepo/core-linux-arm64-musl" "1.35.1"
-    "@moonrepo/core-linux-x64-gnu" "1.35.1"
-    "@moonrepo/core-linux-x64-musl" "1.35.1"
-    "@moonrepo/core-macos-arm64" "1.35.1"
-    "@moonrepo/core-macos-x64" "1.35.1"
-    "@moonrepo/core-windows-x64-msvc" "1.35.1"
+    "@moonrepo/core-linux-arm64-gnu" "1.36.2"
+    "@moonrepo/core-linux-arm64-musl" "1.36.2"
+    "@moonrepo/core-linux-x64-gnu" "1.36.2"
+    "@moonrepo/core-linux-x64-musl" "1.36.2"
+    "@moonrepo/core-macos-arm64" "1.36.2"
+    "@moonrepo/core-macos-x64" "1.36.2"
+    "@moonrepo/core-windows-x64-msvc" "1.36.2"
 
-"@moonrepo/core-linux-arm64-gnu@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.35.1.tgz#c9167ee3dfbde298e899dc38d136d82a6271ca36"
-  integrity sha512-//zNfY8R9fyBhfvGD1MbNcnlOI9ikcukBg01tsGYJywHefIZtR/4F2XcJhHgKSxx6bqXEBch5d6ChLSHVROKwA==
+"@moonrepo/core-linux-arm64-gnu@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.36.2.tgz#1aac5cbea62997328231e44c136f3d88cb76aa5c"
+  integrity sha512-uNV4EP0cnbYpEdw35TxI0CFJEY8BAzCRgKTSub4XgKo9d0zyLK/Ah7ZPUZSA21P5qJdFucX+9Joj5XcRUEctlg==
 
-"@moonrepo/core-linux-arm64-musl@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.35.1.tgz#7e8a0fc521ca7903b52bba1450022cc958edf37f"
-  integrity sha512-a9VjFuu99qt54MHChpwhtqmDd9BcbeNDjDVvDuHEgrG7Gb7V+RrHhOLZZWi7xKSEq1nGQeiKZrKi4Orx71HXxg==
+"@moonrepo/core-linux-arm64-musl@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.36.2.tgz#9a6645375b0733721469aded22b99420fb307607"
+  integrity sha512-qwnZ6TzqyOvfPHJHqC9dHzUrlVEeot6KNsii2XAnc3geOtewP9we88Gs1A+EKIuPCr7sK2PSO9Dzp4jgAlKE9A==
 
-"@moonrepo/core-linux-x64-gnu@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.35.1.tgz#17cda6280b994c39d02b80e5086a475dd88e439e"
-  integrity sha512-h6jC6br9ldu3ceM4oRyRAIfas2PfFGht1LNOiCSljaGq+KPqOveregu4M90j3QOsco7TNcAK52z2ds25EITiOQ==
+"@moonrepo/core-linux-x64-gnu@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.36.2.tgz#e67581127b195a9c79d1bce20f6f0fbabd1d7111"
+  integrity sha512-zZg8KQXXJ+EaG9KdkD9Bo+qsop2uAQf+g4mV4f+A4i4i1NYxDYNZ7lPr+evz+PQCx0ePum3JoTa6imzN2UIapQ==
 
-"@moonrepo/core-linux-x64-musl@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.35.1.tgz#6e568d269c767fcb38eac78d3403009a03673b84"
-  integrity sha512-NApPIwB1HeerRxBM2msSsqXT5Bs3IuGRDWEGuG/TZ2EaUqrgH9pUtIMf2diLw3LNevMDYxGiUAKduzNw9BXrcA==
+"@moonrepo/core-linux-x64-musl@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.36.2.tgz#5aafef4b1fd5866efbe306deedb9e6f70abc76db"
+  integrity sha512-yY5EPPF1l5Kk3d6kDFIJgzXTJzUqIwGUma+WzhE91ByvZXXWcfSkKazJA0O0FtittDxVvwHz9VbLJ32zSt2+8Q==
 
-"@moonrepo/core-macos-arm64@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.35.1.tgz#a06de54ca5d42bf9097ef6b85cc90ae011a3c2f9"
-  integrity sha512-3TeB30kO8PPGh642ATgi5NCLm9X6UHl3/sT603oZ+T2mKZLkN8ZsnAs8+VxhZnnjoAnb+Tad3Q+UfYkQfHV+SQ==
+"@moonrepo/core-macos-arm64@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.36.2.tgz#b223795f5a5299510d21d17b0712010856e58a77"
+  integrity sha512-uFAwBcobm+OCdY4fimuO4MJ9JaHI09FfqkOCyDdZQ55FeHi9YjFxx/t4F4OVBsz2Ye6WUWLR2YwQqeLDd2A2Rw==
 
-"@moonrepo/core-macos-x64@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.35.1.tgz#290ebffa931efe3b1216d29ddbb55950455e5369"
-  integrity sha512-IuPIyJwATvlWVkw/AptneE7FnFDiVJAS9x3iHXCceX3WRz2WwQBe2zTbkvmAmGZR7Znv/GaJWvdAlBrKCEDEuw==
+"@moonrepo/core-macos-x64@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.36.2.tgz#01291b9396ec67be606dd32c1a82261c8ae83c17"
+  integrity sha512-Qg9mCsuI+1K3pqhFpsUhjjjUteMDY7EWJ7WU2og6KqB1EdYg/XYMFi/3lR1uGD1Qt0i2JehApFPc8rTey9BeXg==
 
-"@moonrepo/core-windows-x64-msvc@1.35.1":
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.35.1.tgz#ccb6ce7bcd4024a29d02229dc35071523a40c55b"
-  integrity sha512-SBOprAneaRn9kG2XB9smHAOnYdWztQqG1xO8V01HFdIY7GSZBI/SSzmqac6b1qVsTfFXQx2wiMs7FJOq5HSLpQ==
+"@moonrepo/core-windows-x64-msvc@1.36.2":
+  version "1.36.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.36.2.tgz#67272ca247e94a8ea8a23684de76d484a1a36bc3"
+  integrity sha512-QOK50is64cwm9H77PkeBeoGFMRFOYyM93KJksWDHy7db4F6sfCLp7OpXsI6B4iGTzPh9BhVlHJJEVJlq8Y40/Q==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -14494,9 +14494,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001669:
-  version "1.0.30001685"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001685.tgz#2d10d36c540a9a5d47ad6ab9e1ed5f61fdeadd8c"
-  integrity sha512-e/kJN1EMyHQzgcMEEgoo+YTCO1NGCmIYHk5Qk8jT6AazWemS5QFKJ5ShCJlH3GZrNIdZofcNCEwZqbMjjKzmnA==
+  version "1.0.30001717"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001717.tgz"
+  integrity sha512-auPpttCq6BDEG8ZAuHJIplGw6GODhjw+/11e7IjpnYCxZcW/ONgPs0KVBJ0d1bY3e2+7PRe5RCLyP+PfwVgkYw==
 
 canvg@^3.0.9:
   version "3.0.9"

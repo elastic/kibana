@@ -15,6 +15,11 @@ vcs:
 hasher:
   batchSize: 1500
 
+# https://moonrepo.dev/docs/guides/remote-cache
+# Auth credentials will be missing on local environments, but that's OK.
 unstable_remote:
   host: "https://elastic-bazel-remote-h5qd3jkxkq-uc.a.run.app"
-  tls:
+  api: http
+  auth:
+    headers:
+      Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
