@@ -1499,24 +1499,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     updatedPoliciesSuccess = (
       await pMap(
-        chunk(updatedPoliciesSuccess, 100),
+        chunk(updatedPoliciesSuccess, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS),
         async (updatedPoliciesChunk) => {
           const updatedPoliciesComplete = await this.getByIDs(
             soClient,
             updatedPoliciesChunk.map((p) => p.id)
           );
-          return pMap(
-            updatedPoliciesComplete,
-            (packagePolicy) =>
-              packagePolicyService.runExternalCallbacks(
-                'packagePolicyPostUpdate',
-                packagePolicy,
-                soClient,
-                esClient
-              ),
-            {
-              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
-            }
+          return pMap(updatedPoliciesComplete, (packagePolicy) =>
+            packagePolicyService.runExternalCallbacks(
+              'packagePolicyPostUpdate',
+              packagePolicy,
+              soClient,
+              esClient
+            )
           );
         },
         { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
