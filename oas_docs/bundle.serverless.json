@@ -47787,7 +47787,7 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
-                                                        "advanced_json": {
+                                                        "manual_ingest_pipeline": {
                                                           "allOf": [
                                                             {
                                                               "properties": {
@@ -48048,7 +48048,7 @@
                                                         }
                                                       },
                                                       "required": [
-                                                        "advanced_json"
+                                                        "manual_ingest_pipeline"
                                                       ],
                                                       "type": "object"
                                                     },
@@ -49879,7 +49879,7 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
-                                                    "advanced_json": {
+                                                    "manual_ingest_pipeline": {
                                                       "allOf": [
                                                         {
                                                           "properties": {
@@ -50140,7 +50140,7 @@
                                                     }
                                                   },
                                                   "required": [
-                                                    "advanced_json"
+                                                    "manual_ingest_pipeline"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -51726,7 +51726,7 @@
                                                     {
                                                       "additionalProperties": false,
                                                       "properties": {
-                                                        "advanced_json": {
+                                                        "manual_ingest_pipeline": {
                                                           "allOf": [
                                                             {
                                                               "properties": {
@@ -51987,7 +51987,7 @@
                                                         }
                                                       },
                                                       "required": [
-                                                        "advanced_json"
+                                                        "manual_ingest_pipeline"
                                                       ],
                                                       "type": "object"
                                                     },
@@ -53565,7 +53565,7 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
-                                                    "advanced_json": {
+                                                    "manual_ingest_pipeline": {
                                                       "allOf": [
                                                         {
                                                           "properties": {
@@ -53826,7 +53826,7 @@
                                                     }
                                                   },
                                                   "required": [
-                                                    "advanced_json"
+                                                    "manual_ingest_pipeline"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -55810,7 +55810,7 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
-                                        "advanced_json": {
+                                        "manual_ingest_pipeline": {
                                           "allOf": [
                                             {
                                               "properties": {
@@ -56071,7 +56071,7 @@
                                         }
                                       },
                                       "required": [
-                                        "advanced_json"
+                                        "manual_ingest_pipeline"
                                       ],
                                       "type": "object"
                                     },
@@ -57763,7 +57763,7 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
-                                        "advanced_json": {
+                                        "manual_ingest_pipeline": {
                                           "allOf": [
                                             {
                                               "properties": {
@@ -58024,7 +58024,7 @@
                                         }
                                       },
                                       "required": [
-                                        "advanced_json"
+                                        "manual_ingest_pipeline"
                                       ],
                                       "type": "object"
                                     },
