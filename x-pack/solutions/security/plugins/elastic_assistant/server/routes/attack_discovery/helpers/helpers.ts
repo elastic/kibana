@@ -19,14 +19,12 @@ import type { Document } from '@langchain/core/documents';
 import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment/moment';
-import { uniq } from 'lodash/fp';
 
-import dateMath from '@kbn/datemath';
-import {
-  ATTACK_DISCOVERY_ERROR_EVENT,
-  ATTACK_DISCOVERY_SUCCESS_EVENT,
-} from '../../../lib/telemetry/event_based_telemetry';
 import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import {
+  reportAttackDiscoveryGenerationFailure,
+  reportAttackDiscoveryGenerationSuccess,
+} from './telemetry';
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
   canceled: 'canceled',
@@ -194,34 +192,25 @@ export const updateAttackDiscoveries = async ({
       attackDiscoveryUpdateProps: updateProps,
       authenticatedUser,
     });
-    const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ start, end });
 
-    telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
-      alertsContextCount: updateProps.alertsContextCount,
-      alertsCount:
-        uniq(
-          updateProps.attackDiscoveries?.flatMap(
-            (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
-          )
-        ).length ?? 0,
-      configuredAlertsCount: size,
-      dateRangeDuration,
-      discoveriesGenerated: updateProps.attackDiscoveries?.length ?? 0,
+    reportAttackDiscoveryGenerationSuccess({
+      alertsContextCount,
+      apiConfig,
+      attackDiscoveries,
       durationMs,
+      end,
       hasFilter,
-      isDefaultDateRange,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      size,
+      start,
+      telemetry,
     });
   } catch (updateErr) {
     logger.error(updateErr);
     const updateError = transformError(updateErr);
-    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
+    reportAttackDiscoveryGenerationFailure({
+      apiConfig,
       errorMessage: updateError.message,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      telemetry,
     });
   }
 };
@@ -279,41 +268,4 @@ export const getAttackDiscoveryStats = async ({
       connectorId: ad.apiConfig.connectorId,
     };
   });
-};
-
-const getTimeRangeDuration = ({
-  start,
-  end,
-}: {
-  start?: string;
-  end?: string;
-}): {
-  dateRangeDuration: number;
-  isDefaultDateRange: boolean;
-} => {
-  if (start && end) {
-    const forceNow = moment().toDate();
-    const dateStart = dateMath.parse(start, {
-      roundUp: false,
-      momentInstance: moment,
-      forceNow,
-    });
-    const dateEnd = dateMath.parse(end, {
-      roundUp: false,
-      momentInstance: moment,
-      forceNow,
-    });
-    if (dateStart && dateEnd) {
-      const dateRangeDuration = moment.duration(dateEnd.diff(dateStart)).asHours();
-      return {
-        dateRangeDuration,
-        isDefaultDateRange: end === 'now' && start === 'now-24h',
-      };
-    }
-  }
-  return {
-    // start and/or end undefined, return 0 hours
-    dateRangeDuration: 0,
-    isDefaultDateRange: false,
-  };
 };

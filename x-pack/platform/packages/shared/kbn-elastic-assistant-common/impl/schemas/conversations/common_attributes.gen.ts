@@ -108,6 +108,24 @@ export const SecurityAlertContentReference = BaseContentReference.merge(
 );
 
 /**
+ * References an external URL
+ */
+export type HrefContentReference = z.infer<typeof HrefContentReference>;
+export const HrefContentReference = BaseContentReference.merge(
+  z.object({
+    type: z.literal('Href'),
+    /**
+     * Label of the query
+     */
+    label: z.string().optional(),
+    /**
+     * URL to the external resource
+     */
+    href: z.string(),
+  })
+);
+
+/**
  * References the security alerts page
  */
 export type SecurityAlertsPageContentReference = z.infer<typeof SecurityAlertsPageContentReference>;
@@ -146,6 +164,7 @@ export const ContentReferenceInternal = z.union([
   SecurityAlertsPageContentReference,
   ProductDocumentationContentReference,
   EsqlContentReference,
+  HrefContentReference,
 ]);
 
 export type ContentReference = z.infer<typeof ContentReferenceInternal>;
@@ -164,6 +183,7 @@ export const ContentReferences = z
       SecurityAlertsPageContentReference,
       ProductDocumentationContentReference,
       EsqlContentReference,
+      HrefContentReference,
     ])
   );
 

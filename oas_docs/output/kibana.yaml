@@ -4613,6 +4613,7 @@ paths:
       summary: Schedule a snooze for the rule
       tags:
         - alerting
+      x-state: Generally available; added in 8.19.0
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -4718,6 +4719,7 @@ paths:
       summary: Delete a snooze schedule for a rule
       tags:
         - alerting
+      x-state: Generally available; added in 8.19.0
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
@@ -28023,8 +28025,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -28693,8 +28698,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -29618,8 +29626,11 @@ paths:
                     properties:
                       install_source:
                         type: string
+                      name:
+                        type: string
                     required:
                       - install_source
+                      - name
                   items:
                     items:
                       anyOf:
@@ -41225,6 +41236,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -41246,6 +41258,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -41255,12 +41277,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -41319,6 +41347,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -41340,6 +41369,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -41349,12 +41388,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -66531,6 +66576,7 @@ components:
           - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
           - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_HrefContentReference'
             additionalProperties: false
       description: A union of all content reference types
       type: object
@@ -66874,6 +66920,25 @@ components:
         - updated_at
       example: created_at
       type: string
+    Security_AI_Assistant_API_HrefContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            href:
+              description: URL to the external resource
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            type:
+              enum:
+                - Href
+              type: string
+          required:
+            - type
+            - href
+      description: References an external URL
     Security_AI_Assistant_API_IndexEntry:
       allOf:
         - type: object
