@@ -43,6 +43,7 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   pkgName: string;
   pkgVersion?: string;
   integration?: string;
+  pkgLabel?: string;
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;
     onSubmitCompleted: () => void;

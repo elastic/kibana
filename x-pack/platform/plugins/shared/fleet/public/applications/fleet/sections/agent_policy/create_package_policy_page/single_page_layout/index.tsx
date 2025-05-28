@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -75,7 +74,11 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { packageHasAtLeastOneSecret } from '../utils';
 
-import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
+import {
+  AddIntegrationFlyoutConfigureHeader,
+  CreatePackagePolicySinglePageLayout,
+  PostInstallAddAgentModal,
+} from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
@@ -107,6 +110,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   pkgName,
   pkgVersion,
   integration,
+  pkgLabel,
   addIntegrationFlyoutProps,
 }) => {
   const {
@@ -515,7 +519,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: !pkgName ? null : replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      children: !pkgName ? null : (
+        <>
+          {addIntegrationFlyoutProps ? (
+            <AddIntegrationFlyoutConfigureHeader
+              pkgLabel={pkgLabel}
+              pkgName={pkgName}
+              pkgVersion={packageInfo?.version}
+              integration={integration}
+            />
+          ) : null}
+          {replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy}
+        </>
+      ),
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },

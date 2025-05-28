@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -32,6 +33,7 @@ import { useGetSettings } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../../../../common';
 import { CreatePackagePolicySinglePage } from '../../../create_package_policy_page/single_page_layout';
 import { useAvailablePackages } from '../../../../../../integrations/sections/epm/screens/home/hooks/use_available_packages';
+import { PackageIcon } from '../../../../../../../components';
 
 export const AddIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -55,6 +57,15 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
         label: pkg.title,
         value: pkg.name,
         integration: pkg.integration,
+        prepend: (
+          <PackageIcon
+            packageName={pkg.name}
+            version={pkg.version}
+            integrationName={pkg.integration}
+            size="l"
+            tryApi={true}
+          />
+        ),
       })) ?? []
     );
   }, [filteredCards]);
@@ -83,29 +94,32 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     }),
     'data-test-subj': 'selectIntegrationStep',
     children: (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="m" color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.addIntegrationFlyout.selectIntegrationDescription"
-              defaultMessage="Search in our observability integrations collection."
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth>
-            <EuiComboBox
-              fullWidth
-              aria-label="Select integration"
-              placeholder="Select integrations..."
-              singleSelection={{ asPlainText: true }}
-              options={options}
-              selectedOptions={selectedOptions}
-              onChange={onChange}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiText size="m" color="subdued">
+              <FormattedMessage
+                id="xpack.fleet.addIntegrationFlyout.selectIntegrationDescription"
+                defaultMessage="Search in our observability integrations collection."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow fullWidth>
+              <EuiComboBox
+                fullWidth
+                aria-label="Select integration"
+                placeholder="Select integrations..."
+                singleSelection={{ asPlainText: true }}
+                options={options}
+                selectedOptions={selectedOptions}
+                onChange={onChange}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+      </>
     ),
     headingElement: 'h2',
   };
@@ -153,6 +167,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
               from="policy"
               queryParamsPolicyId={agentPolicy.id}
               prerelease={prerelease}
+              pkgLabel={selectedOptions[0]?.label}
               pkgName={selectedOptions[0]?.value}
               integration={selectedOptions[0]?.integration}
               addIntegrationFlyoutProps={{
