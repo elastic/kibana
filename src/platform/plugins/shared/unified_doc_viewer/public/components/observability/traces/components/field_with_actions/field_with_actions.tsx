@@ -59,7 +59,11 @@ export function FieldWithActions({
             </EuiFlexItem>
             {hasFieldDescription && (
               <EuiFlexItem grow={false}>
-                <EuiIconTip content={fieldMetadata.flat_name} color="subdued" />
+                <EuiIconTip
+                  content={fieldMetadata.flat_name}
+                  color="subdued"
+                  aria-label={fieldMetadata.flat_name}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
