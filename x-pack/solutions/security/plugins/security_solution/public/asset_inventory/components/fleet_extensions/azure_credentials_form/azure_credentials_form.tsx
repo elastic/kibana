@@ -139,30 +139,6 @@ const ArmTemplateSetup = () => {
           </li>
         </ol>
       </EuiText>
-      <EuiSpacer size="l" />
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupNote"
-          defaultMessage="Read the {documentation} for more details"
-          values={{
-            documentation: (
-              <EuiLink
-                href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
-                target="_blank"
-                rel="noopener nofollow noreferrer"
-                data-test-subj="externalLink"
-              >
-                {i18n.translate(
-                  'xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.documentationLinkText',
-                  {
-                    defaultMessage: 'documentation',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
     </>
   );
 };
