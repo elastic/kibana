@@ -81,7 +81,7 @@ function getDefaultLensApiMock() {
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
-    createAlertRule: jest.fn(),
+    mountInlineFlyout: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',
@@ -122,7 +122,7 @@ export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['att
   return deepMerge(getDefaultLensSerializedStateMock().attributes!, attributes ?? {});
 }
 
-export function getLensApiMock(overrides: Partial<LensApi> = {}) {
+export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
   return {
     ...getDefaultLensApiMock(),
     ...overrides,
@@ -322,8 +322,9 @@ export function createUnifiedSearchApi(
   };
 }
 
-export function createEsqlVariablesApi() {
+export function createParentApiMock(overrides: object = {}) {
   return {
     esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
+    ...overrides,
   };
 }

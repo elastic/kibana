@@ -56,6 +56,8 @@ export const buildESQLTheme = ({
         [
           'dev_time_series',
           'dev_rerank',
+          'dev_fork',
+          'dev_sample',
           'metadata',
           'mv_expand',
           'stats',
