@@ -70,21 +70,51 @@ export class InterceptPrompter {
       .pipe(Rx.filter((response) => !!response))
       .pipe(
         Rx.mergeMap((response) => {
-          const now = Date.now();
+          // Define safe timer bound at 24 days, javascript browser timers are not reliable for longer intervals
+          // see https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout#maximum_delay_value, rxjs can do longer intervals, but we want to avoid
+          // the risk of running into issues with browser timers.
+          const safeTimerInterval = 24 * 24 * 60 * 60 * 1000; // 24 days in milliseconds
+
+          // anchor for all calculations, this is the time when the trigger was registered
+          const timePoint = Date.now();
+
           let diff = 0;
 
           // Calculate the number of runs since the trigger was registered
           const runs = Math.floor(
-            (diff = now - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
+            (diff = timePoint - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
           );
 
           nextRunId = runs + 1;
 
-          // Calculate the time until the next run
-          const nextRun = nextRunId * response.triggerIntervalInMs - diff;
+          // setup a timer that will recursively count down to the next run, considering safe bounds
+          return Rx.timer(
+            Math.min(nextRunId * response.triggerIntervalInMs - diff, safeTimerInterval),
+            Math.min(response.triggerIntervalInMs, safeTimerInterval)
+          ).pipe(
+            Rx.switchMap((timerIterationCount) => {
+              if (response.triggerIntervalInMs < safeTimerInterval) {
+                return getUserTriggerData$(intercept.id);
+              } else {
+                const timeElapsedSinceRegistration = diff + safeTimerInterval * timerIterationCount;
 
-          return Rx.timer(nextRun, response.triggerIntervalInMs).pipe(
-            Rx.switchMap(() => getUserTriggerData$(intercept.id)),
+                const timeTillTriggerEvent =
+                  nextRunId * response.triggerIntervalInMs - timeElapsedSinceRegistration;
+
+                if (timeTillTriggerEvent <= safeTimerInterval) {
+                  // trigger event would happen sometime within this current slice
+                  // set up a single use timer that will emit the trigger event
+                  return Rx.timer(timeTillTriggerEvent).pipe(
+                    Rx.switchMap(() => {
+                      return getUserTriggerData$(intercept.id);
+                    })
+                  );
+                } else {
+                  // current timer slice requires no action
+                  return Rx.EMPTY;
+                }
+              }
+            }),
             Rx.takeWhile((triggerData) => {
               // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
               if (!response.recurrent && triggerData.lastInteractedInterceptId) {

@@ -178,3 +178,7 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 5m
   - id: attack-discovery
     timeout: 10m
+
+## Enable Kibana Product Intercept
+xpack.product_intercept.enabled: true
+xpack.product_intercept.interval: '90d'
