@@ -1926,6 +1926,159 @@
       },
       {
         "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getValidColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getValidColor",
+        "description": [],
+        "signature": [
+          "(color: string | null | undefined) => chroma.Color | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getValidColor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getValidColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getValidColor",
+        "description": [],
+        "signature": [
+          "(color: string | null | undefined, options: { shouldBeCompatibleWithColorJs: true; } | undefined) => chroma.Color"
+        ],
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getValidColor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getValidColor.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.getValidColor.$2.shouldBeCompatibleWithColorJs",
+                "type": "boolean",
+                "tags": [],
+                "label": "shouldBeCompatibleWithColorJs",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
+        "id": "def-common.getValidColor",
+        "type": "Function",
+        "tags": [],
+        "label": "getValidColor",
+        "description": [],
+        "signature": [
+          "(color: string | null | undefined, { shouldBeCompatibleWithColorJs }: { shouldBeCompatibleWithColorJs?: boolean | undefined; }) => chroma.Color | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getValidColor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/coloring",
+            "id": "def-common.getValidColor.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ shouldBeCompatibleWithColorJs }",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/coloring",
+                "id": "def-common.getValidColor.$2.shouldBeCompatibleWithColorJs",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "shouldBeCompatibleWithColorJs",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/coloring",
         "id": "def-common.getValueKey",
         "type": "Function",
         "tags": [],
