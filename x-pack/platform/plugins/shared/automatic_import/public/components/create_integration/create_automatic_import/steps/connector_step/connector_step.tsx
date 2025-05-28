@@ -174,7 +174,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
-              {isElasticManagedLlmConnector(connector) ? (
+              {inferenceEnabled && isElasticManagedLlmConnector(connector) ? (
                 <ElasticLLMNewIntegrationMessage />
               ) : (
                 i18n.SUPPORTED_MODELS_INFO

@@ -10,4 +10,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   ANONYMIZED_VALUES_AND_CITATIONS:
     'elasticAssistant.anonymizedValuesAndCitationsTourCompleted.v8.18',
   ELASTIC_LLM: 'elasticAssistant.elasticLLM.costAwarenessTour.v9.1',
+  CONVERSATION_CONNECTOR_ELASTIC_LLM:
+    'elasticAssistant.elasticLLM.conversation.costAwarenessTour.v9.1',
 };

@@ -12,7 +12,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { PRECONFIGURED_CONNECTOR } from './translations';
 import { AIConnector } from './connector_selector';
 

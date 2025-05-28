@@ -135,7 +135,7 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    application: { navigateToApp, currentAppId$ },
+    application: { navigateToApp, getUrlForApp, currentAppId$ },
     http,
     notifications,
     storage,
@@ -244,6 +244,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
+      getUrlForApp={getUrlForApp}
       getComments={getComments}
       http={http}
       inferenceEnabled={inferenceEnabled}

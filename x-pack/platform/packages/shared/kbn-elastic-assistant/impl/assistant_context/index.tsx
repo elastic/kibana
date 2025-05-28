@@ -61,6 +61,17 @@ type ShowAssistantOverlay = ({
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
 
+type GetUrlForApp = (
+  appId: string,
+  options?:
+    | {
+        path?: string | undefined;
+        absolute?: boolean | undefined;
+        deepLinkId?: string | undefined;
+      }
+    | undefined
+) => string;
+
 interface DocLinks {
   readonly ELASTIC_WEBSITE_URL: DocLinksStart['ELASTIC_WEBSITE_URL'];
   readonly ELASTIC_LLM_LINK: string;
@@ -83,6 +94,7 @@ export interface AssistantProviderProps {
   basePromptContexts?: PromptContextTemplate[];
   docLinks: DocLinks;
   children: React.ReactNode;
+  getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled?: boolean;
@@ -117,6 +129,7 @@ export interface UseAssistantContext {
   basePath: string;
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
+  getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
@@ -164,6 +177,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   basePromptContexts = [],
   children,
   getComments,
+  getUrlForApp,
   http,
   inferenceEnabled = false,
   navigateToApp,
@@ -304,6 +318,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentUserAvatar,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       knowledgeBase: {
@@ -353,6 +368,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentUserAvatar,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       localStorageKnowledgeBase,

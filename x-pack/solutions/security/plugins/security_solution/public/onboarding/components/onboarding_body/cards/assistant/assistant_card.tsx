@@ -17,7 +17,10 @@ import {
 import { useCurrentConversation } from '@kbn/elastic-assistant/impl/assistant/use_current_conversation';
 import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_data_stream_apis';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
-import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import {
+  getGenAiConfig,
+  isElasticManagedLlmConnector,
+} from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import {
   ELASTIC_LLM_AI_FEATURES,
@@ -112,6 +115,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
+    inferenceEnabled,
   } = useAssistantContext();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
   const {
@@ -182,6 +186,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
   );
 
+  const isEISConnectorAvailable = useMemo(
+    () => inferenceEnabled && (connectors?.some((c) => isElasticManagedLlmConnector(c)) ?? false),
+    [connectors, inferenceEnabled]
+  );
+
   if (!checkCompleteMetadata) {
     return (
       <OnboardingCardContentPanel>
@@ -201,7 +210,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <CardSubduedText size="s">
-              <ElasticAIFeatureMessage />
+              {isEISConnectorAvailable ? (
+                i18n.ASSISTANT_CARD_DESCRIPTION
+              ) : (
+                <ElasticAIFeatureMessage />
+              )}
             </CardSubduedText>
           </EuiFlexItem>
           <EuiFlexItem>

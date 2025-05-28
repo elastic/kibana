@@ -15,7 +15,6 @@ import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
 import { getGenAiConfig } from '../helpers';
-import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
