@@ -15,8 +15,9 @@ import {
   AggregationsStatsBucketAggregate,
   AggregationsStringTermsBucket,
   SearchResponse,
-} from 'elasticsearch-8.x/lib/api/types';
-import fs from 'node:fs'; // Switch to `@elastic/elasticsearch/lib/api/types` when the CI cluster is upgraded.
+} from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch/lib/api/types` when the CI cluster is upgraded.
+import fs from 'node:fs';
+import path from 'node:path';
 import { z } from '@kbn/zod';
 
 export const ScoutTestConfigStatsEntrySchema = z.object({
@@ -53,8 +54,8 @@ export type ScoutTestConfigStatsData = z.infer<typeof ScoutTestConfigStatsDataSc
 export class ScoutTestConfigStats {
   constructor(public data: ScoutTestConfigStatsData) {}
 
-  findConfigByPath(path: string): ScoutTestConfigStatsEntry | undefined {
-    return this.data.configs.find((config) => config.path === path);
+  findConfigByPath(configPath: string): ScoutTestConfigStatsEntry | undefined {
+    return this.data.configs.find((config) => config.path === configPath);
   }
 
   public get largestConfig(): ScoutTestConfigStatsEntry {
@@ -63,18 +64,21 @@ export class ScoutTestConfigStats {
     );
   }
 
-  writeToFile(path: string) {
-    fs.writeFileSync(path, JSON.stringify(this.data, null, 2));
+  writeToFile(outputPath: string) {
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    fs.writeFileSync(outputPath, JSON.stringify(this.data, null, 2));
   }
 
-  static fromFile(path: string): ScoutTestConfigStats {
-    if (!fs.existsSync(path)) {
+  static fromFile(statsFilePath: string): ScoutTestConfigStats {
+    if (!fs.existsSync(statsFilePath)) {
       throw new Error(
-        `Failed while trying to parse test config stats file: path ${path} does not exist`
+        `Failed while trying to parse test config stats file: path ${statsFilePath} does not exist`
       );
     }
 
-    const data = ScoutTestConfigStatsDataSchema.parse(JSON.parse(fs.readFileSync(path, 'utf8')));
+    const data = ScoutTestConfigStatsDataSchema.parse(
+      JSON.parse(fs.readFileSync(statsFilePath, 'utf8'))
+    );
     return new ScoutTestConfigStats(data);
   }
 
