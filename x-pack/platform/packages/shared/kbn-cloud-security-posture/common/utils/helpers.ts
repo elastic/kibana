@@ -193,11 +193,11 @@ export const buildEntityAlertsQuery = ({
   };
 };
 
-export const setIsIntegrationIncludesTransform = (value: boolean) => {
+export const setIsNewIndexAliasCreated = (value: boolean) => {
   IS_INTEGRATION_INCLUDES_TRANSFORM = value;
 };
 
-export const getIsIntegrationIncludesTransform = (): boolean => {
+export const getIsNewIndexAliasCreated = (): boolean => {
   if (IS_INTEGRATION_INCLUDES_TRANSFORM) {
     return true;
   }
@@ -205,13 +205,13 @@ export const getIsIntegrationIncludesTransform = (): boolean => {
 };
 
 export const getLatestFindingsIndexPattern = (): string => {
-  return getIsIntegrationIncludesTransform()
+  return getIsNewIndexAliasCreated()
     ? CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
     : DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN;
 };
 
 export const getCdrMisconfigurationsIndexPattern = (): string => {
-  return getIsIntegrationIncludesTransform()
+  return getIsNewIndexAliasCreated()
     ? `${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`
     : `${DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`;
 };

@@ -39,8 +39,8 @@ export {
   buildGenericEntityFlyoutPreviewQuery,
   buildMisconfigurationEntityFlyoutPreviewQuery,
   buildVulnerabilityEntityFlyoutPreviewQuery,
-  setIsIntegrationIncludesTransform,
-  getIsIntegrationIncludesTransform,
+  setIsNewIndexAliasCreated,
+  getIsNewIndexAliasCreated,
   getLatestFindingsIndexPattern as get_latest_findings_index_pattern,
   getCdrMisconfigurationsIndexPattern as get_cdr_misconfigurations_index_pattern,
 } from './utils/helpers';

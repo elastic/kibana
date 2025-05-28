@@ -31,9 +31,10 @@ import type {
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import {
-  getIsIntegrationIncludesTransform,
-  setIsIntegrationIncludesTransform,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  getIsNewIndexAliasCreated,
+  setIsNewIndexAliasCreated,
+} from '@kbn/cloud-security-posture-common';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -156,22 +157,32 @@ export class CspPlugin
           'packagePolicyUpdate',
           async (
             packagePolicy: UpdatePackagePolicy,
-            soClient: SavedObjectsClientContract,
-            esClient: ElasticsearchClient
+            soClient: SavedObjectsClientContract
           ): Promise<UpdatePackagePolicy> => {
-            if (!getIsIntegrationIncludesTransform()) {
-              const transforms = await esClient.transform.getTransformStats({
-                transform_id: 'logs-cloud_security_posture.misconfiguration*',
-              });
-              if (transforms.count > 0) {
-                setIsIntegrationIncludesTransform(true);
-              }
-            }
-
             if (isCspPackage(packagePolicy.package?.name)) {
               return cleanupCredentials(packagePolicy);
             }
 
+            return packagePolicy;
+          }
+        );
+
+        plugins.fleet.registerExternalCallback(
+          'packagePolicyPostUpdate',
+          async (
+            packagePolicy: PackagePolicy,
+            soClient: SavedObjectsClientContract,
+            esClient: ElasticsearchClient
+          ): Promise<PackagePolicy> => {
+            if (!getIsNewIndexAliasCreated()) {
+              const isNewIndexCreated = await esClient.indices.exists({
+                index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+              });
+              if (isNewIndexCreated) {
+                setIsNewIndexAliasCreated(true);
+                this.logger.info('Latest index reference has been updated.');
+              }
+            }
             return packagePolicy;
           }
         );
