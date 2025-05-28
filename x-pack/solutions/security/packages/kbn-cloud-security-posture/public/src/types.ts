@@ -22,7 +22,11 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { CspFinding, RuleResponse } from '@kbn/cloud-security-posture-common';
+import {
+  CspFinding,
+  CspVulnerabilityFinding,
+  RuleResponse,
+} from '@kbn/cloud-security-posture-common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
@@ -130,4 +134,33 @@ export interface FindingMisconfigurationFlyoutContentProps {
   finding: CspFinding;
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   isPreviewMode?: boolean;
+}
+
+export interface FindingVulnerabilityFlyoutProps extends Record<string, unknown> {
+  vulnerabilityId: string | string[];
+  resourceId: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId: string;
+}
+export interface FindingVulnerabilityPanelExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'findings-vulnerability-panel';
+  params: FindingVulnerabilityFlyoutProps;
+}
+
+export interface FindingsVulnerabilityFlyoutHeaderProps {
+  finding: CspVulnerabilityFinding;
+}
+
+export interface FindingsVulnerabilityFlyoutContentProps {
+  finding: CspVulnerabilityFinding;
+}
+
+export interface FindingsVulnerabilityFlyoutFooterProps {
+  createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+}
+
+export interface FindingVulnerabilityFullFlyoutContentProps {
+  finding: CspVulnerabilityFinding;
+  createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
 }

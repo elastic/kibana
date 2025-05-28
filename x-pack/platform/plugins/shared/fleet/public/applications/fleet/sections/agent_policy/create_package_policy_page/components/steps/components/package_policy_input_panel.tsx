@@ -197,7 +197,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             {showTopLevelDescription && (
               <EuiText size="s" color="subdued">
                 <ReactMarkdown>
-                  {String(inputStreams[0].packageInputStream.description)}
+                  {String(inputStreams[0]?.packageInputStream?.description)}
                 </ReactMarkdown>
               </EuiText>
             )}

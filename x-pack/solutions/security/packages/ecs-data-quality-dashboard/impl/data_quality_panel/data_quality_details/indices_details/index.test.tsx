@@ -107,7 +107,7 @@ describe('IndicesDetails', () => {
 
     describe('when the tour is dismissed', () => {
       test('it hides the tour and persists in localStorage', async () => {
-        const wrapper = screen.getByTestId('historicalResultsTourPanel');
+        const wrapper = await screen.findByTestId('historicalResultsTourPanel');
         const button = within(wrapper).getByText('Close');
         await userEvent.click(button);
 

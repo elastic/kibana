@@ -672,6 +672,10 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.autoUpgrades?.taskInterval,
+        retryDelays: config.autoUpgrades?.retryDelays,
+      },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
