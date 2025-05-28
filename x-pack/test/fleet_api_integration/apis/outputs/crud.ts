@@ -1821,7 +1821,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should allow to create a new remote_elasticsearch output with kibana_api_key field', async function () {
+      it('should not allow to create a new remote_elasticsearch output with kibana_api_key if the license is not at least enterprise', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -1833,7 +1833,7 @@ export default function (providerContext: FtrProviderContext) {
             kibana_url: 'https://testhost',
             kibana_api_key: 'aaaa',
           })
-          .expect(200);
+          .expect(400);
       });
     });
 
