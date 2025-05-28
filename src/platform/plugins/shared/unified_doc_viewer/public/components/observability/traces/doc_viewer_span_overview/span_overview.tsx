@@ -83,6 +83,7 @@ export function SpanOverview({
               formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
               spanId={flattenedDoc[SPAN_ID_FIELD]}
               formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
+              showActions={showActions}
             />
             <EuiSpacer size="m" />
             {spanFields.map((fieldId) => (
