@@ -34,7 +34,7 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
           request
         );
 
-        const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${OSQUERY_INTEGRATION_NAME}`;
+        const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: ${OSQUERY_INTEGRATION_NAME}`;
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const policies = await packagePolicyService?.list(spaceScopedClient, {
           kuery,
