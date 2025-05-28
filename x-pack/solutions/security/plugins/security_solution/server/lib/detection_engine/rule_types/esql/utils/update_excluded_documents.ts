@@ -11,7 +11,7 @@ import type { ExcludedDocument } from '../types';
 /**
  * Updates the list of excluded documents
  * The last document ID in the multiple results is not excluded to avoid missing alerts in case of mv_expand usage or reaching max_signals limit
- * It is to ensure that in the next page we will be able to catch the rest of expanded values
+ * It is to ensure that in the next page we will be able to catch the rest of expanded values or alerts not created when reached max_signals limit
  */
 export const updateExcludedDocuments = ({
   excludedDocuments,
