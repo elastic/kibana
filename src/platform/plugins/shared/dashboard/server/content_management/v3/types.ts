@@ -20,7 +20,7 @@ import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
   controlGroupInputSchema,
-  gridDataSchema,
+  panelGridDataSchema,
   panelSchema,
   sectionSchema,
   dashboardAttributesSchema,
@@ -56,7 +56,7 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 };
 
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
-export type GridData = WithRequiredProperty<TypeOf<typeof gridDataSchema>, 'i'>;
+export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;

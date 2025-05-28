@@ -15,10 +15,8 @@ import {
 
 // sections only include y + i for grid data
 export const sectionGridDataSchema = schema.object({
-  y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
-  i: schema.string({
-    meta: { description: 'The unique identifier of the section' },
-  }),
+  y: schema.number(),
+  i: schema.string(),
 });
 
 // panels include all grid data keys, including those that sections use
@@ -30,15 +28,8 @@ export const gridDataSchema = sectionGridDataSchema.extends({
 });
 
 export const sectionSchema = schema.object({
-  title: schema.string({
-    meta: { description: 'The title of the section.' },
-  }),
-  collapsed: schema.maybe(
-    schema.boolean({
-      meta: { description: 'The collapsed state of the section.' },
-      defaultValue: false,
-    })
-  ),
+  title: schema.string(),
+  collapsed: schema.maybe(schema.boolean()),
   gridData: sectionGridDataSchema,
 });
 
