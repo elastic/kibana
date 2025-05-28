@@ -65,6 +65,7 @@ import {
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
+  _normalizePackagePolicyKuery,
 } from './package_policy';
 import { appContextService } from './app_context';
 
@@ -6140,5 +6141,71 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         pkgInfo: { ...pkgInfo, type: 'integration' },
       })
     ).not.toThrow();
+  });
+});
+
+describe('_normalizePackagePolicyKuery', () => {
+  it('should work for ingest-agent-policies.attributes with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies.attributes without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies.attributes with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies.attributes without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
   });
 });

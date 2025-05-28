@@ -115,7 +115,7 @@ import { agentPolicyService } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
-import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
@@ -197,21 +197,21 @@ export async function getPackagePolicySavedObjectType() {
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 }
 
-function normalizeKuery(savedObjectType: string, kuery: string) {
+export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
-    return _normalizeKuery(
+    return normalizeKuery(
       savedObjectType,
       kuery.replace(
         new RegExp(`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}\\.`, 'g'),
-        `${savedObjectType}.attributes.`
+        `${savedObjectType}.`
       )
     );
   } else {
-    return _normalizeKuery(
+    return normalizeKuery(
       savedObjectType,
       kuery.replace(
         new RegExp(`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}\\.`, 'g'),
-        `${savedObjectType}.attributes.`
+        `${savedObjectType}.`
       )
     );
   }
@@ -877,7 +877,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       fields,
-      filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+      filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
       namespaces: options.spaceId ? [options.spaceId] : undefined,
     });
 
@@ -913,7 +913,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       fields: ['name'],
-      filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+      filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
     });
 
     for (const packagePolicy of packagePolicies.saved_objects) {
@@ -2137,7 +2137,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField: 'created_at',
         sortOrder: 'asc',
         fields: [],
-        filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
       },
       resultsMapper: (data) => {
         return data.saved_objects.map((packagePolicySO) => packagePolicySO.id);
@@ -2163,7 +2163,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField,
         sortOrder,
         perPage,
-        filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
       },
       resultsMapper(data) {
         return data.saved_objects.map((packagePolicySO) => {
