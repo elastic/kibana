@@ -66,7 +66,8 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         updateUrlParam({
           [DataViewManagerScopeName.default]: {
             id,
-            selectedPatterns: indexPattern.split(','),
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
           },
         });
       }
