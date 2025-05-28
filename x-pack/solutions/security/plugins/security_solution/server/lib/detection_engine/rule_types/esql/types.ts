@@ -9,7 +9,7 @@ import type { RuleTypeState } from '@kbn/alerting-plugin/server';
 
 export interface ExcludedDocument {
   id: string;
-  timestamp: string | undefined;
+  timestamp: string | number | undefined;
 }
 
 export interface EsqlState extends RuleTypeState {

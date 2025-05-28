@@ -165,6 +165,7 @@ export const esqlExecutor = async ({
           isRuleAggregating,
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
           hasLoggedRequestsReachedLimit,
+          runtimeMappings: sharedParams.runtimeMappings,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -226,6 +227,7 @@ export const esqlExecutor = async ({
             sourceDocuments,
             results,
             isRuleAggregating,
+            aggregatableTimestampField: sharedParams.aggregatableTimestampField,
           });
 
           if (bulkCreateResult.alertsWereTruncated) {
@@ -255,6 +257,7 @@ export const esqlExecutor = async ({
             sourceDocuments,
             results,
             isRuleAggregating,
+            aggregatableTimestampField: sharedParams.aggregatableTimestampField,
           });
 
           if (bulkCreateResult.alertsWereTruncated) {

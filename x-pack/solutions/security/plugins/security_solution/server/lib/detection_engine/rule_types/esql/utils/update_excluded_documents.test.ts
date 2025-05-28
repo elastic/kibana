@@ -9,7 +9,7 @@ import { updateExcludedDocuments } from './update_excluded_documents';
 import type { FetchedDocument } from '../fetch_source_documents';
 
 const fetchedDocumentMock: FetchedDocument = {
-  fields: {},
+  fields: { '@timestamp': ['2025-04-28T10:00:00Z'] },
   _source: { '@timestamp': '2025-04-28T10:00:00Z' },
   _index: 'index',
   _version: 1,
@@ -36,6 +36,7 @@ describe('updateExcludedDocuments', () => {
       sourceDocuments,
       results,
       isRuleAggregating: true,
+      aggregatableTimestampField: '@timestamp',
     });
 
     expect(excludedDocuments).toEqual([
@@ -57,6 +58,7 @@ describe('updateExcludedDocuments', () => {
       sourceDocuments,
       results,
       isRuleAggregating: false,
+      aggregatableTimestampField: '@timestamp',
     });
 
     expect(excludedDocuments).toEqual([
@@ -80,6 +82,7 @@ describe('updateExcludedDocuments', () => {
       sourceDocuments: { id1: fetchedDocumentMock },
       results,
       isRuleAggregating: false,
+      aggregatableTimestampField: '@timestamp',
     });
 
     expect(excludedDocuments).toEqual([
@@ -87,6 +90,35 @@ describe('updateExcludedDocuments', () => {
       { id: 'prev-id-1', timestamp: '2025-04-28T09:30:00Z' },
       { id: 'prev-id-2', timestamp: '2025-04-28T09:45:00Z' },
       { id: 'id1', timestamp: '2025-04-28T10:00:00Z' },
+    ]);
+  });
+
+  it('should use kibana.combined_timestamp as timestamp field', () => {
+    const fetchedDocumentWithCombined: FetchedDocument = {
+      fields: { 'kibana.combined_timestamp': ['2025-04-28T11:11:11Z'] },
+      _source: { '@timestamp': '2025-04-28T11:11:11Z' },
+      _index: 'index',
+      _version: 1,
+    };
+
+    const sourceDocumentsWithCombined = {
+      id1: fetchedDocumentWithCombined,
+      id2: fetchedDocumentWithCombined,
+    };
+
+    const excludedDocuments = [{ id: 'prev-id-0', timestamp: '2025-04-28T09:00:00Z' }];
+
+    updateExcludedDocuments({
+      excludedDocuments,
+      sourceDocuments: sourceDocumentsWithCombined,
+      results: [{ _id: 'id1' }, { _id: 'id2' }],
+      isRuleAggregating: false,
+      aggregatableTimestampField: 'kibana.combined_timestamp',
+    });
+
+    expect(excludedDocuments).toEqual([
+      { id: 'prev-id-0', timestamp: '2025-04-28T09:00:00Z' },
+      { id: 'id1', timestamp: '2025-04-28T11:11:11Z' },
     ]);
   });
 });
