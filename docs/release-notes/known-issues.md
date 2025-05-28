@@ -4,7 +4,7 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
-::::{dropdown} Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector function
+::::{dropdown} Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function
 :name:known-issue-1508
 
 Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
