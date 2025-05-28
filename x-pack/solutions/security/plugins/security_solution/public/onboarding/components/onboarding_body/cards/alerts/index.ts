@@ -11,7 +11,6 @@ import { OnboardingCardId } from '../../../../constants';
 import { ALERTS_CARD_TITLE } from './translations';
 import alertsIcon from './images/alerts_icon.png';
 import alertsDarkIcon from './images/alerts_icon_dark.png';
-import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 
 export const alertsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.alerts,
@@ -25,5 +24,4 @@ export const alertsCardConfig: OnboardingCardConfig = {
         './alerts_card'
       )
   ),
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.detections`],
 };
