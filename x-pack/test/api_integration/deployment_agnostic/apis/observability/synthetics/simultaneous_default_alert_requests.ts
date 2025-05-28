@@ -8,8 +8,10 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }: DeploymentAgnosticAPITestSetup) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const samlAuth = getService('samlAuth');
@@ -45,7 +47,7 @@ export default function ({ getService }: DeploymentAgnosticAPITestSetup) {
         statusRule: { id: statusId },
         tlsRule: { id: tlsId },
       } = responses[0].body;
-      responses.forEach((response) => {
+      responses.forEach((response: any) => {
         const {
           body: {
             statusRule: { id: curStatusId },
@@ -67,10 +69,10 @@ export default function ({ getService }: DeploymentAgnosticAPITestSetup) {
 
       // the two rules should have IDs matching the ones from our create responses above
       const statusRule = alertingResponse.body.data.find(
-        (rule) => rule.rule_type_id === 'xpack.synthetics.alerts.monitorStatus'
+        (rule: any) => rule.rule_type_id === 'xpack.synthetics.alerts.monitorStatus'
       );
       const tlsRule = alertingResponse.body.data.find(
-        (rule) => rule.rule_type_id === 'xpack.synthetics.alerts.tls'
+        (rule: any) => rule.rule_type_id === 'xpack.synthetics.alerts.tls'
       );
       expect(statusRule).to.be.ok();
       expect(tlsRule).to.be.ok();
