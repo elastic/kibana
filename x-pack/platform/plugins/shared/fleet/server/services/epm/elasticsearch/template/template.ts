@@ -328,6 +328,16 @@ function _generateMappings(
       case 'wildcard':
         dynProperties.type = field.object_type;
         matchingType = field.object_type_mapping_type ?? 'string';
+        // Copy additional fields/properties from the original field definition
+        // This ensures all properties like ignore_above, null_value, etc. are preserved
+        Object.entries(field).forEach(([key, value]) => {
+          if (
+            value !== undefined &&
+            !['name', 'type', 'object_type', 'object_type_mapping_type'].includes(key)
+          ) {
+            dynProperties[key] = value;
+          }
+        });
         break;
       case 'scaled_float':
         dynProperties = scaledFloat(field);
