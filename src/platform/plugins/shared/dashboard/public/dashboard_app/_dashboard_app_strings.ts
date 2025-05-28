@@ -140,12 +140,18 @@ export const shareModalStrings = {
       defaultMessage:
         'You are about to create an embedded dashboard with unsaved changes, and the embed code may not work properly. Save the dashboard first to create a permanent embedded dashboard.',
     }),
-  getDraftShareWarning: (shareType: 'embed' | 'link') =>
-    i18n.translate('dashboard.snapshotShare.draftWarning', {
+  getDraftShareWarning: (shareType: 'embed' | 'link' | 'export') => {
+    const shareTypeLabels: Record<typeof shareType, string> = {
+      embed: 'embed code',
+      export: 'export code',
+      link: 'link',
+    };
+    return i18n.translate('dashboard.snapshotShare.draftWarning', {
       defaultMessage:
         'This dashboard has unsaved changes. Consider saving your dashboard before generating the {shareType}.',
-      values: { shareType: shareType === 'embed' ? 'embed code' : 'link' },
-    }),
+      values: { shareType: shareTypeLabels[shareType] },
+    });
+  },
 };
 
 /*

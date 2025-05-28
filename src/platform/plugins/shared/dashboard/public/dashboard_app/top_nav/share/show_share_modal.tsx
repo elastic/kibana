@@ -37,6 +37,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  getSerializedState?: () => unknown;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -53,6 +54,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  getSerializedState,
 }: ShowShareModalProps) {
   if (!shareService) return;
 
@@ -272,6 +274,7 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
+      getSerializedState,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(

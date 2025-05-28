@@ -216,6 +216,8 @@
       "@kbn/content-management-content-insights-public/*": ["src/platform/packages/shared/content-management/content_insights/content_insights_public/*"],
       "@kbn/content-management-content-insights-server": ["src/platform/packages/shared/content-management/content_insights/content_insights_server"],
       "@kbn/content-management-content-insights-server/*": ["src/platform/packages/shared/content-management/content_insights/content_insights_server/*"],
+      "@kbn/content-management-content-source": ["src/platform/packages/shared/content-management/content_source"],
+      "@kbn/content-management-content-source/*": ["src/platform/packages/shared/content-management/content_source/*"],
       "@kbn/content-management-examples-plugin": ["examples/content_management_examples"],
       "@kbn/content-management-examples-plugin/*": ["examples/content_management_examples/*"],
       "@kbn/content-management-favorites-common": ["src/platform/packages/shared/content-management/favorites/favorites_common"],

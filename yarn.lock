@@ -4198,6 +4198,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-content-source@link:src/platform/packages/shared/content-management/content_source":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-examples-plugin@link:examples/content_management_examples":
   version "0.0.0"
   uid ""

@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject, filter, map } from 'rxjs';
-
+import React from 'react';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -50,7 +50,7 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ExportShare, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -60,6 +60,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 
+import { ContentSourceLoader } from '@kbn/content-management-content-source';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
@@ -166,6 +167,30 @@ export class DashboardPlugin
           },
         })
       );
+
+      share.registerShareIntegration<ExportShare>({
+        id: 'dashboardJson',
+        groupId: 'export',
+        config: ({ sharingData }) => {
+          const { getSerializedState } = sharingData;
+          return {
+            name: i18n.translate('dashboard.shareIntegration.exportDashboardJsonTitle', {
+              defaultMessage: 'JSON',
+            }),
+            icon: 'document',
+            label: 'JSON',
+            exportType: 'dashboardJson',
+            renderCopyURIButton: true,
+            generateAssetExport: () => Promise.resolve(),
+            generateAssetComponent: (
+              <ContentSourceLoader
+                css={{ height: '100%' }}
+                getContent={async () => getSerializedState()}
+              />
+            ),
+          };
+        },
+      });
     }
 
     const {
