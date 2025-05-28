@@ -140,7 +140,7 @@ const availableProcessors: TAvailableProcessors = {
     getDocUrl: () => (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
-        defaultMessage="Specify an array of ingest pipeline processors using JSON"
+        defaultMessage="Specify an array of ingest pipeline processors using JSON."
       />
     ),
   },
