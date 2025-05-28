@@ -675,7 +675,7 @@ export function getFormBasedDatasource({
       searchSessionId,
       forceDSL
     ) => {
-      if (isTextBasedLayer(state.layers[layerId])) {
+      if (state.layers[layerId] && isTextBasedLayer(state.layers[layerId])) {
         return toExpressionESQL(state, layerId);
       }
 
