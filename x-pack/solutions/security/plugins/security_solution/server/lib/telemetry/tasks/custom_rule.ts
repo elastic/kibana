@@ -17,7 +17,7 @@ import {
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { RulesParamsResponseActionsEntry, RuleSearchResult } from '../types';
+import type { RulesParamsResponseActionsEntry, ResponseActionRules } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
@@ -55,36 +55,50 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         const clusterInfo = safeValue(clusterInfoPromise);
         const licenseInfo = safeValue(licenseInfoPromise);
 
-        const { body: responseActionRules } = await receiver.fetchResponseActionsRules();
+        const { saved_objects: customRules } = await receiver.fetchResponseActionsRules();
 
-        if (!responseActionRules) {
-          log.debug('no prebuilt rules found');
+        if (!customRules.length) {
+          log.debug('no custom response action rules found');
           await taskMetricsService.end(trace);
           return 0;
         }
 
-        const cacheArray = responseActionRules.hits.hits.reduce((cache, searchHit) => {
-          const rule = searchHit._source as RuleSearchResult;
-          const ruleId = rule.alert.params.ruleId;
+        const cacheArray = customRules.reduce<ResponseActionRules[]>((acc, rule) => {
+          const ruleId = rule.id;
 
           const shouldNotProcess =
             rule === null ||
             rule === undefined ||
             ruleId === null ||
             ruleId === undefined ||
-            searchHit._source?.alert.params.responseActions.length === 0;
+            rule.attributes.params.responseActions.length === 0;
 
           if (shouldNotProcess) {
-            return cache;
+            return acc;
           }
 
-          cache.push(rule);
-          return cache;
-        }, [] as RuleSearchResult[]);
+          acc.push({
+            id: ruleId,
+            namespaces: rule.namespaces ?? [],
+            attributes: {
+              consumer: rule.attributes.consumer,
+              createdAt: rule.attributes.createdAt,
+              name: rule.attributes.name,
+              enabled: rule.attributes.enabled,
+              immutable: rule.attributes.params.immutable,
+              params: {
+                responseActions: rule.attributes.params.responseActions,
+              },
+              tags: rule.attributes.tags,
+              updatedAt: rule.attributes.updatedAt,
+            },
+          });
+          return acc;
+        }, []);
 
         const rulesParamsResponseActionsRulesEntries = [] as RulesParamsResponseActionsEntry[];
         for (const item of cacheArray) {
-          for (const el of item.alert.params.responseActions) {
+          for (const el of item.attributes.params.responseActions) {
             rulesParamsResponseActionsRulesEntries.push({
               ...el,
             });

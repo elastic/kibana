@@ -405,12 +405,28 @@ export interface RulesParamsResponseActionsEntry {
       };
 }
 
+export interface ResponseActionRules {
+  id: string;
+  namespaces: string[];
+  attributes: {
+    consumer: string;
+    createdAt: string;
+    name: string;
+    enabled: boolean;
+    immutable: boolean;
+    params: {
+      responseActions: RulesParamsResponseActionsEntry[];
+    };
+    tags: string[];
+    updatedAt: string;
+  };
+}
+
 interface DetectionRuleParms {
   ruleId: string;
   version: number;
   type: string;
   exceptionsList: ExceptionListEntry[];
-  responseActions: RulesParamsResponseActionsEntry[];
 }
 
 export interface RuleSearchResult {

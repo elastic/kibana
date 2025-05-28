@@ -222,7 +222,7 @@ export interface ITelemetryReceiver {
     >
   >;
 
-  fetchResponseActionsRules(): Promise<SavedObjectsFindResponse<RawRule, Record<string, unknown>>>;
+  fetchResponseActionsRules(): ReturnType<typeof findRulesSo>;
 
   fetchDetectionExceptionList(
     listId: string,
@@ -766,13 +766,21 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     const timeFrom = `alert.updated_at >= ${moment.utc().subtract(24, 'hours').valueOf()}`;
-    const enabledCustomRules = `alert.attributes.params.immutable: false AND alert.attributes.enabled: true`;
-    const responseActionsRules = `alert.attributes.params.responseActions: *`;
+    const enabledCustomRules =
+      'alert.attributes.params.immutable: false AND alert.attributes.consumer: "siem"';
+    const responseActionsRules =
+      'alert.attributes.params.responseActions.actionTypeId: .endpoint OR ' +
+      'alert.attributes.params.responseActions.actionTypeId: .osquery';
     const combinedFilters = [enabledCustomRules, responseActionsRules, timeFrom].join(' AND ');
 
     return findRulesSo({
       savedObjectsClient: this.soClient,
       savedObjectsFindOptions: {
+        fields: [
+          'alert.attributes.consumer',
+          'alert.attributes.params.immutable',
+          'alert.attributes.params.responseActions.actionTypeId',
+        ],
         filter: combinedFilters,
         perPage: this.maxRecords,
         page: 1,
