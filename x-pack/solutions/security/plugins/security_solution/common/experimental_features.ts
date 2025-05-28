@@ -237,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to edit highlighted fields in the alertflyout
    */
-  editHighlightedFieldsEnabled: false,
+  editHighlightedFieldsEnabled: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
