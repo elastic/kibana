@@ -4,6 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-
-export const SecurityIntegrations = () => <div data-test-subj="securityIntegrations" />;
+export { SecurityIntegrations } from './security_integrations';
