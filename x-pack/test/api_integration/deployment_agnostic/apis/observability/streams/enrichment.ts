@@ -161,7 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           query: {
             match: {
               'attributes.message2': 'mylogger',
-            }
+            },
           },
         },
       });
