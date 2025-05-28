@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
+      it(`Return kspm status indexed when logs-cloud_security_posture.misconfiguration_latest contains new kspm documents`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -129,7 +129,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
+      it(`Return cspm status indexed when logs-cloud_security_posture.misconfiguration_latest contains new cspm documents`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,

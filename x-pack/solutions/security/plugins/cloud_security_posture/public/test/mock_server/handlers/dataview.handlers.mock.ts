@@ -37,7 +37,7 @@ export const defaultDataViewFindHandler = http.get(
           generateDataViewField('rule.name'),
           generateDataViewField('rule.section'),
         ],
-        indices: ['logs-cloud_security_posture.findings_latest-default'],
+        indices: ['logs-cloud_security_posture.misconfiguration_latest'],
       });
     }
 

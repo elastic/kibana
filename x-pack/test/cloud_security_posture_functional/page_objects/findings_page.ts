@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
-const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.misconfiguration_latest';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities-default';
 export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
