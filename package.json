@@ -127,6 +127,7 @@
     "@elastic/elasticsearch": "9.0.2",
     "@elastic/ems-client": "8.6.3",
     "@elastic/eui": "102.2.0",
+    "@elastic/eui-amsterdam": "npm:@elastic/eui@102.2.0-amsterdam.0",
     "@elastic/eui-theme-borealis": "1.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/monaco-esql": "^3.1.1",
