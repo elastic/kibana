@@ -20,6 +20,10 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables cloud Connectors  for Cloud Security Posture
    */
   cloudConnectorsEnabled: false,
+  /**
+   * Enables Cloud Security Posture intergration namespace support
+   */
+  clousSecurityNamespaceSupportEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
