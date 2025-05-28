@@ -9,8 +9,6 @@
 
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -60,11 +58,7 @@ const setupComponentWithPluginStateMock = async (
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
   let testBed: TestBed;
   const GuidePanelComponent = () => (
-    <GuidePanel
-      application={applicationMock}
-      api={api}
-      notifications={notificationsMock}
-    />
+    <GuidePanel application={applicationMock} api={api} notifications={notificationsMock} />
   );
   await act(async () => {
     testBed = registerTestBed(GuidePanelComponent)();

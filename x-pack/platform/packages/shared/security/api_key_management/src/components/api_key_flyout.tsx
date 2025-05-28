@@ -40,9 +40,9 @@ import { CodeEditorField } from '@kbn/code-editor';
 import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FormField, FormRow } from '@kbn/security-form-components';
 import type {
   ApiKeyRoleDescriptors,
