@@ -13,7 +13,13 @@ import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { GET_DATASET_INFO_FUNCTION_NAME, registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
-import { registerExecuteConnectorFunction } from './execute_connector';
+import {
+  registerExecuteConnectorFunction,
+  EXECUTE_CONNECTOR_FUNCTION_NAME,
+  connectorParamsSchemas,
+  registerGetConnectorInfoFunction,
+  GET_CONNECTOR_INFO_FUNCTION_NAME,
+} from './execute_connector';
 import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from './get_data_on_screen';
 
 // cannot be imported from x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts due to circular dependency
@@ -128,6 +134,11 @@ ${
         `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`
       );
     }
+
+    instructions.push(
+      `you MUST use the "${GET_CONNECTOR_INFO_FUNCTION_NAME}" function to get information about the available connectors and their parameters before calling the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function.`
+    );
+
     return instructions.map((instruction) => dedent(instruction));
   });
 
@@ -151,5 +162,6 @@ ${
   }
   registerGetDatasetInfoFunction(registrationParameters);
 
+  registerGetConnectorInfoFunction(registrationParameters);
   registerExecuteConnectorFunction(registrationParameters);
 };

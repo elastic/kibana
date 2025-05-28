@@ -8,7 +8,7 @@
 import joiToJsonSchema from 'joi-to-json';
 import type { Type } from '@kbn/config-schema';
 import { castArray, isPlainObject, forEach, unset } from 'lodash';
-import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import type { CompatibleJSONSchema } from '../../common/functions/types';
 
 function dropUnknownProperties(object: CompatibleJSONSchema) {
   if (!isPlainObject(object)) {
