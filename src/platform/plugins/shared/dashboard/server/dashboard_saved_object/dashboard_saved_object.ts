@@ -45,6 +45,7 @@ export const createDashboardSavedObjectType = ({
       };
     },
   },
+  supportsAccessControl: true,
   modelVersions: {
     1: {
       changes: [],
