@@ -13,7 +13,7 @@ import { render, screen } from '@testing-library/react';
 import { createParentApiMock, makeEmbeddableServices } from '@kbn/lens-plugin/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import { getAlertFlyoutComponent } from './alert_flyout_component';
+import { getRuleFlyoutComponent } from './rule_flyout_component';
 import { RuleFormData } from '@kbn/response-ops-rule-form';
 import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -56,7 +56,7 @@ async function renderFlyout(
     },
     ...initialValues?.params,
   } as EsQueryRuleParams;
-  const Component = await getAlertFlyoutComponent(
+  const Component = await getRuleFlyoutComponent(
     startDependenciesMock,
     ruleTypeRegistry,
     actionTypeRegistry,

@@ -22,7 +22,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { pick } from 'lodash';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { buildAdditionalQuery } from './build_additional_query';
-import { ServiceDependencies, getAlertFlyoutComponent } from './alert_flyout_component';
+import { ServiceDependencies, getRuleFlyoutComponent } from './rule_flyout_component';
 
 interface Context {
   data?: AlertRuleFromVisUIActionData;
@@ -147,7 +147,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
 
     const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
-    const Component = await getAlertFlyoutComponent(
+    const Component = await getRuleFlyoutComponent(
       this.startDependencies,
       this.ruleTypeRegistry,
       this.actionTypeRegistry,

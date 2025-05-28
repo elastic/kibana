@@ -35,7 +35,7 @@ export interface ServiceDependencies {
   contentManagement?: ContentManagementPublicStart;
 }
 
-export async function getAlertFlyoutComponent(
+export async function getRuleFlyoutComponent(
   startDependencies: ServiceDependencies,
   ruleTypeRegistry: RuleTypeRegistryContract,
   actionTypeRegistry: ActionTypeRegistryContract,

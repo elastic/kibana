@@ -16,7 +16,7 @@ import { DimensionType } from '@kbn/expressions-plugin/common';
 import { last } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
-import * as AlertFlyoutComponentModule from './alert_flyout_component';
+import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { AggregateQuery, Query } from '@kbn/es-query';
 
@@ -65,7 +65,7 @@ const startDependenciesMock = {
   ...makeEmbeddableServices(),
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
 };
-const spy = jest.spyOn(AlertFlyoutComponentModule, 'getAlertFlyoutComponent');
+const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
 describe('AlertRuleFromVisAction', () => {
   const action = new AlertRuleFromVisAction(
