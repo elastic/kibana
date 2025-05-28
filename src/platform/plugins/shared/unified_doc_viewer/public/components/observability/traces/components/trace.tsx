@@ -28,6 +28,7 @@ export interface TraceProps {
   dataView: DocViewRenderProps['dataView'];
   tracesIndexPattern: string;
   showWaterfall?: boolean;
+  showActions?: boolean;
 }
 
 export const Trace = ({
@@ -38,6 +39,7 @@ export const Trace = ({
   dataView,
   tracesIndexPattern,
   showWaterfall = true,
+  showActions = true,
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
@@ -61,13 +63,19 @@ export const Trace = ({
   const fieldRows =
     displayType === 'span'
       ? spanTraceFields.map((fieldId: string) => (
-          <SpanSummaryField key={fieldId} fieldId={fieldId} fieldConfiguration={fields[fieldId]} />
+          <SpanSummaryField
+            key={fieldId}
+            fieldId={fieldId}
+            fieldConfiguration={fields[fieldId]}
+            showActions={showActions}
+          />
         ))
       : transactionTraceFields.map((fieldId: string) => (
           <TransactionSummaryField
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
+            showActions={showActions}
           />
         ));
 
