@@ -20,5 +20,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./start'));
     loadTestFile(require.resolve('./stop'));
     loadTestFile(require.resolve('./get_integrations'));
+    loadTestFile(require.resolve('./integrations_stats'));
   });
 }
