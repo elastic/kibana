@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../common/lib/integrations/components/security_integrations';
-import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
-import type { StartServices } from '../../../../../types';
-import type { OnboardingCardCheckComplete } from '../../../../types';
+import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../../common/lib/integrations/components/security_integrations';
+import type { IntegrationCardMetadata } from '../../../../../../common/lib/integrations/types';
+import type { StartServices } from '../../../../../../types';
+import type { OnboardingCardCheckComplete } from '../../../../../types';
 import {
   getAgentsData,
   getCompleteBadgeText,
   getActiveIntegrationList,
-} from '../common/integrations/integrations_check_complete_helpers';
+} from '../../common/integrations/integrations_check_complete_helpers';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
