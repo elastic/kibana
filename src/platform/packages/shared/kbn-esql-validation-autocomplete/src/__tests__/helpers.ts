@@ -113,7 +113,7 @@ export function getCallbackMocks(): ESQLCallbacks {
         };
         return [field];
       }
-      if (/METADATA/.test(query)) {
+      if (/METADATA/i.test(query)) {
         return [...fields, ...metadataFields];
       }
       return fields;
