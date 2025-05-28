@@ -9,7 +9,7 @@ import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 import {
-  CLOUD_SECURITY_LATEST_FINDINGS_INDEX_ALIAS,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '../constants';
@@ -203,16 +203,15 @@ export const getIsIntegrationIncludesTransform = (): boolean => {
   }
   return false;
 };
-export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const getLatestFindingsIndexPattern = (): string => {
   return getIsIntegrationIncludesTransform()
-    ? CLOUD_SECURITY_LATEST_FINDINGS_INDEX_ALIAS
+    ? CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
     : DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN;
 };
 
 export const getCdrMisconfigurationsIndexPattern = (): string => {
   return getIsIntegrationIncludesTransform()
-    ? `${CLOUD_SECURITY_LATEST_FINDINGS_INDEX_ALIAS},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`
+    ? `${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`
     : `${DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`;
 };

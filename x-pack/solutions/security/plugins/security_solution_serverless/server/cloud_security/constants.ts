@@ -8,8 +8,8 @@
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  get_latest_findings_index_pattern,
 } from '@kbn/cloud-security-posture-common';
 import { CNVM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-plugin/common/constants';
 
@@ -24,11 +24,11 @@ export const CNVM = CNVM_POLICY_TEMPLATE;
 
 export const METERING_CONFIGS = {
   [CSPM]: {
-    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+    index: get_latest_findings_index_pattern(),
     assets_identifier: 'resource.id',
   },
   [KSPM]: {
-    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+    index: get_latest_findings_index_pattern(),
     assets_identifier: 'agent.id',
   },
   [CNVM]: {

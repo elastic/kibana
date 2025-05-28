@@ -6,9 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  get_latest_findings_index_pattern,
+} from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import { LATEST_FINDINGS_INDEX } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
 import { createPackagePolicy } from '../helper';
@@ -20,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const latestFindingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX());
+  const latestFindingsIndex = new EsIndexDataProvider(es, get_latest_findings_index_pattern());
   const latestVulnerabilitiesIndex = new EsIndexDataProvider(
     es,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN

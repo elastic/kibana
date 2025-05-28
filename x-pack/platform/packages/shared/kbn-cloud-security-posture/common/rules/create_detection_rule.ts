@@ -6,8 +6,7 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import { RuleResponse } from './rule';
-import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../utils/helpers';
-
+import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../constants';
 interface RuleSeverityMapping {
   field: string;
   value: string;

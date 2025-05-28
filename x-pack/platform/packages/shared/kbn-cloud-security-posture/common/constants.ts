@@ -10,7 +10,7 @@ import { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 
-export const CLOUD_SECURITY_LATEST_FINDINGS_INDEX_ALIAS =
+export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS =
   'security_solution-cloud_security_posture.misconfiguration_latest';
 
 export const DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
@@ -64,6 +64,8 @@ export const MISCONFIGURATION_STATUS: Record<string, MisconfigurationEvaluationS
 };
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.

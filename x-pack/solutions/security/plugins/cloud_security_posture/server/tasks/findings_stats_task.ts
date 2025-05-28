@@ -26,6 +26,7 @@ import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_i
 import { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
@@ -52,8 +53,7 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        // interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
-        interval: `30s`,
+        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
       },
       state: emptyState,
       params: {},

@@ -9,7 +9,7 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
-import { getLatestFindingsIndexPattern } from '@kbn/cloud-security-posture-common/utils/helpers';
+
 import {
   FINDINGS_INDEX_NAME,
   LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
@@ -23,7 +23,7 @@ export const latestIndexConfigs: LatestIndexConfig = {
     indexName: FINDINGS_INDEX_NAME,
     indexPattern: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     indexTemplateName: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
-    indexDefaultName: getLatestFindingsIndexPattern(),
+    indexDefaultName: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   },
   vulnerabilities: {
     indexName: VULNERABILITIES_INDEX_NAME,

@@ -6,8 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { LATEST_FINDINGS_INDEX } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  get_latest_findings_index_pattern,
+} from '@kbn/cloud-security-posture-common';
 import * as http from 'http';
 import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
 import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
@@ -26,7 +28,7 @@ export default function (providerContext: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX());
+  const findingsIndex = new EsIndexDataProvider(es, get_latest_findings_index_pattern());
   const vulnerabilitiesIndex = new EsIndexDataProvider(
     es,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
