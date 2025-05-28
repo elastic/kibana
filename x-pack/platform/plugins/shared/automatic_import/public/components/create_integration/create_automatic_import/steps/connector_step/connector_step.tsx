@@ -60,7 +60,7 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
   return (
     <FormattedMessage
       id="xpack.automaticImport.steps.connector.esLLM.supportedModelsInfo"
-      defaultMessage="The Elastic LLM connector is selected by default. Review its {usageCost} or {thirdParty}. Model {performance} varies by task."
+      defaultMessage="The Elastic Managed LLM connector is selected by default. Review its {usageCost} or {thirdParty}. Model {performance} varies by task."
       values={{
         usageCost: (
           <EuiLink href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK} external>

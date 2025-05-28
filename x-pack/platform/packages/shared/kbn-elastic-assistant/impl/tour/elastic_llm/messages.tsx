@@ -18,7 +18,7 @@ export const CostAwareness = () => {
   return (
     <FormattedMessage
       id="xpack.elasticAssistant.elasticLLM.tour.content"
-      defaultMessage="Elastic LLM is our new default, pre-configured LLM connector. It will incur {additionalCost} You can continue to use other LLM connectors as normal. {learnMore}"
+      defaultMessage="Elastic Managed LLM connector is our new default, pre-configured LLM connector. It will incur {additionalCost} You can continue to use other LLM connectors as normal. {learnMore}"
       values={{
         additionalCost: (
           <EuiLink href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK} external>

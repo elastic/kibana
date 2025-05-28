@@ -58,7 +58,7 @@ export const ElasticAIFeatureMessage = React.memo(() => {
   return (
     <FormattedMessage
       id="xpack.elasticAssistant.elasticLLM.tour.elasticAIFeature.content"
-      defaultMessage="{elasticAiFeatures} require an LLM connector. You can use Elastic LLM, which is available by default, or {thirdParty}. Learn more about Elastic LLM's {usageCost}."
+      defaultMessage="{elasticAiFeatures} require an LLM connector. You can use Elastic Managed LLM connector, which is available by default, or {thirdParty}. Learn more about Elastic Managed LLM connector's {usageCost}."
       values={{
         elasticAiFeatures: (
           <EuiLink href={ELASTIC_LLM_TOUR_AI_FEATURES_LINK} external>

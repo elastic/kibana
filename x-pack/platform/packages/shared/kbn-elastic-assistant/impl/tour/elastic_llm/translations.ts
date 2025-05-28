@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ELASTIC_LLM_TOUR_TITLE = i18n.translate(
   'xpack.elasticAssistant.elasticLLM.tour.title',
   {
-    defaultMessage: 'Elastic managed AI connector',
+    defaultMessage: 'Elastic Managed LLM connector',
   }
 );
 
@@ -45,7 +45,7 @@ export const ELASTIC_LLM_TOUR_FINISH_TOUR = i18n.translate(
 export const ELASTIC_LLM_AS_DEFAULT_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.elasticLLM.tour.asDefaultConnector',
   {
-    defaultMessage: 'Make Elastic LLM the default connector',
+    defaultMessage: 'Make Elastic Managed LLM the default connector',
   }
 );
 
