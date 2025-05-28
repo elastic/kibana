@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContext): void => {
               });
             });
 
-            it(`asserts "has_update" is ${!withHistoricalVersions} for customized fields w/o upgrades`, async () => {
+            it(`asserts "has_update" is ${!withHistoricalVersions} for customized fields without upgrades`, async () => {
               await setUpRuleUpgrade({
                 assets: [
                   {

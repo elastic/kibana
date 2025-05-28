@@ -16,7 +16,7 @@ import {
 
 export function ruleScheduleField({ getService }: FtrProviderContext): void {
   describe('"rule_schedule"', () => {
-    describe('non-customized w/o an upgrade (AAA diff case)', () => {
+    describe('non-customized without an upgrade (AAA diff case)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -57,7 +57,7 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
       );
     });
 
-    describe('non-customized w/ an upgrade (AAB diff case)', () => {
+    describe('non-customized with an upgrade (AAB diff case)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -129,7 +129,7 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
       );
     });
 
-    describe('customized w/o an upgrade (ABA diff case)', () => {
+    describe('customized without an upgrade (ABA diff case)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -204,7 +204,7 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
       );
     });
 
-    describe('customized w/ the matching upgrade (ABB diff case)', () => {
+    describe('customized with the matching upgrade (ABB diff case)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -278,7 +278,7 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
       );
     });
 
-    describe('customized w/ an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
+    describe('customized with an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
       const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
         installed: {
           type: 'query',
@@ -345,7 +345,7 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
     });
 
     describe('without historical versions', () => {
-      describe('customized w/ the matching upgrade (-AA diff case)', () => {
+      describe('customized with the matching upgrade (-AA diff case)', () => {
         const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
           installed: {
             type: 'query',
@@ -389,7 +389,7 @@ export function ruleScheduleField({ getService }: FtrProviderContext): void {
         );
       });
 
-      describe('customized w/ an upgrade (-AB diff case)', () => {
+      describe('customized with an upgrade (-AB diff case)', () => {
         const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
           installed: {
             type: 'query',

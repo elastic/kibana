@@ -28,8 +28,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    describe('w/ historical versions', () => {
-      describe('w/o customizations', () => {
+    describe('with historical versions', () => {
+      describe('without customizations', () => {
         beforeEach(async () => {
           await setUpRuleUpgrade({
             assets: [
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      describe('w/ customizations resulting in conflicts', () => {
+      describe('with customizations resulting in conflicts', () => {
         beforeEach(async () => {
           await setUpRuleUpgrade({
             assets: [
@@ -360,7 +360,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('w/o historical versions', () => {
+    describe('without historical versions', () => {
       const TEST_DATA = [
         { pickVersion: 'CURRENT', expectedTags: ['tagB'] },
         { pickVersion: 'TARGET', expectedTags: ['tagC'] },
