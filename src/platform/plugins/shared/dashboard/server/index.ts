@@ -11,17 +11,14 @@ import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/serv
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
+  /**
+   * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
+   * This can be removed in 10.0. https://github.com/elastic/kibana/issues/221197
+   */
   allowByValueEmbeddables: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
-  exposeToBrowser: {
-    /**
-     * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
-     * This can be removed in 10.0. https://github.com/elastic/kibana/issues/221197
-     */
-    allowByValueEmbeddables: true,
-  },
   schema: configSchema,
   deprecations: ({ deprecate }) => {
     return [
