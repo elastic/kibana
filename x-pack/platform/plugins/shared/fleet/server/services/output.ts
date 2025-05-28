@@ -375,7 +375,7 @@ function validateRemoteSyncIntegrationsCanBeEnabled(output: NewOutput) {
     !canEnableSyncIntegrations()
   ) {
     throw new OutputUnauthorizedError(
-      'Remote sync integrations are only available with an Enterprise license.'
+      'Remote sync integrations require at least an Enterprise license.'
     );
   }
 }
