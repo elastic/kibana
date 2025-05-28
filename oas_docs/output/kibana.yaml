@@ -8934,7 +8934,7 @@ paths:
                                 type: object
                                 properties:
                                   i:
-                                    description: The unique identifier of the section.
+                                    description: The unique identifier of the section
                                     type: string
                                   'y':
                                     description: The y coordinate of the section in grid units
@@ -9984,7 +9984,7 @@ paths:
                                 type: object
                                 properties:
                                   i:
-                                    description: The unique identifier of the section.
+                                    description: The unique identifier of the section
                                     type: string
                                   'y':
                                     description: The y coordinate of the section in grid units
