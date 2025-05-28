@@ -20,9 +20,10 @@ import { i18n } from '@kbn/i18n';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { DiscoverSessionAttributes } from '../server/saved_objects/schema';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../common/types';
+import type { SavedSearch, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import type {
   getNewSavedSearch,
@@ -49,7 +50,7 @@ export interface SavedSearchPublicPluginStart {
     serialized?: Serialized
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
-  getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
+  getAll: () => Promise<Array<SOWithMetadata<DiscoverSessionAttributes>>>;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions

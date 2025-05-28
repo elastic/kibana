@@ -104,10 +104,10 @@ export const serializeState = ({
 
     // only save the current state that is **different** than the saved object state
     const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-      if (deepEqual(savedSearchAttributes[key], editableAttributesBackup[key])) {
+      if (deepEqual(savedSearchAttributes.tabs[0].attributes[key], editableAttributesBackup[key])) {
         return prev;
       }
-      return { ...prev, [key]: savedSearchAttributes[key] };
+      return { ...prev, [key]: savedSearchAttributes.tabs[0].attributes[key] };
     }, {});
 
     return {

@@ -12,10 +12,11 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { fromSavedSearchAttributes } from '../service/saved_searches_utils';
-import type { SavedSearchAttributes, SavedSearch } from '../types';
+import type { SavedSearch } from '../types';
 
 import type { KibanaContextStartDependencies } from './kibana_context';
 import { getKibanaContextFn } from './kibana_context';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects/schema';
 
 type StartServicesMock = DeeplyMockedKeys<KibanaContextStartDependencies>;
 
@@ -52,12 +53,18 @@ describe('kibanaContextFn', () => {
       fromSavedSearchAttributes(
         'abc',
         {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: JSON.stringify({
-              query: [],
-            }),
-          },
-        } as SavedSearchAttributes,
+          tabs: [
+            {
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    query: [],
+                  }),
+                },
+              },
+            },
+          ],
+        } as DiscoverSessionAttributes,
         [],
         undefined,
         {

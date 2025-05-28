@@ -11,24 +11,33 @@ import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_sear
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
-import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { SavedSearch } from '../types';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects/schema';
 
 describe('saved_searches_utils', () => {
   describe('fromSavedSearchAttributes', () => {
     test('should convert attributes into SavedSearch', () => {
-      const attributes: SavedSearchAttributes = {
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+      const attributes: DiscoverSessionAttributes = {
         title: 'saved search',
-        sort: [],
-        columns: ['a', 'b'],
         description: 'foo',
-        grid: {},
-        hideChart: true,
-        isTextBasedQuery: false,
-        usesAdHocDataView: false,
-        rowsPerPage: 250,
-        sampleSize: 1000,
-        breakdownField: 'extension.keyword',
+        tabs: [
+          {
+            id: 'foo',
+            label: '',
+            attributes: {
+              kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+              sort: [],
+              columns: ['a', 'b'],
+              grid: {},
+              hideChart: true,
+              isTextBasedQuery: false,
+              usesAdHocDataView: false,
+              rowsPerPage: 250,
+              sampleSize: 1000,
+              breakdownField: 'extension.keyword',
+            },
+          },
+        ],
       };
 
       expect(
@@ -121,37 +130,45 @@ describe('saved_searches_utils', () => {
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
-          "columns": Array [
-            "c",
-            "d",
-          ],
-          "density": undefined,
           "description": "description",
-          "grid": Object {},
-          "headerRowHeight": undefined,
-          "hideAggregatedPreview": undefined,
-          "hideChart": true,
-          "isTextBasedQuery": true,
-          "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{}",
-          },
-          "refreshInterval": undefined,
-          "rowHeight": undefined,
-          "rowsPerPage": undefined,
-          "sampleSize": undefined,
-          "sort": Array [
-            Array [
-              "a",
-              "asc",
-            ],
+          "tabs": Array [
+            Object {
+              "attributes": Object {
+                "breakdownField": undefined,
+                "columns": Array [
+                  "c",
+                  "d",
+                ],
+                "density": undefined,
+                "grid": Object {},
+                "headerRowHeight": undefined,
+                "hideAggregatedPreview": undefined,
+                "hideChart": true,
+                "isTextBasedQuery": true,
+                "kibanaSavedObjectMeta": Object {
+                  "searchSourceJSON": "{}",
+                },
+                "refreshInterval": undefined,
+                "rowHeight": undefined,
+                "rowsPerPage": undefined,
+                "sampleSize": undefined,
+                "sort": Array [
+                  Array [
+                    "a",
+                    "asc",
+                  ],
+                ],
+                "timeRange": undefined,
+                "timeRestore": false,
+                "usesAdHocDataView": false,
+                "viewMode": undefined,
+                "visContext": undefined,
+              },
+              "id": "",
+              "label": "",
+            },
           ],
-          "timeRange": undefined,
-          "timeRestore": false,
           "title": "title",
-          "usesAdHocDataView": false,
-          "viewMode": undefined,
-          "visContext": undefined,
         }
       `);
     });

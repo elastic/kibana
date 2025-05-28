@@ -9,7 +9,8 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { SavedSearch as SavedSearchCommon, SavedSearchAttributes } from '../../../common';
+import type { DiscoverSessionAttributes } from '../../../server/saved_objects/schema';
+import type { SavedSearch as SavedSearchCommon } from '../../../common';
 
 /** @public **/
 export interface SavedSearch extends SavedSearchCommon {
@@ -21,7 +22,7 @@ export interface SavedSearch extends SavedSearchCommon {
   };
 }
 
-export type SavedSearchByValueAttributes = Omit<SavedSearchAttributes, 'description'> & {
+export type SavedSearchByValueAttributes = Omit<DiscoverSessionAttributes, 'description'> & {
   description?: string;
   references: Reference[];
 };

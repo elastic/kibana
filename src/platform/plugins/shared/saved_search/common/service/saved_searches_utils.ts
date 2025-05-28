@@ -10,7 +10,8 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import type { SavedSearch, SavedSearchAttributes } from '..';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects/schema';
+import type { SavedSearch } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
 import type { SerializableSavedSearch } from '../types';
 
@@ -18,7 +19,7 @@ export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  attributes: DiscoverSessionAttributes,
   tags: string[] | undefined,
   references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
@@ -34,37 +35,34 @@ export const fromSavedSearchAttributes = (
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes =>
-  ({
-    title: savedSearch.title ?? '',
-    description: savedSearch.description ?? '',
-    tabs: [
-      {
-        id: '',
-        label: '',
-        attributes: {
-          kibanaSavedObjectMeta: { searchSourceJSON },
-          sort: savedSearch.sort ?? [],
-          columns: savedSearch.columns ?? [],
-          grid: savedSearch.grid ?? {},
-          hideChart: savedSearch.hideChart ?? false,
-          viewMode: savedSearch.viewMode,
-          hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-          rowHeight: savedSearch.rowHeight,
-          headerRowHeight: savedSearch.headerRowHeight,
-          isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-          usesAdHocDataView: savedSearch.usesAdHocDataView,
-          timeRestore: savedSearch.timeRestore ?? false,
-          timeRange: savedSearch.timeRange
-            ? pick(savedSearch.timeRange, ['from', 'to'])
-            : undefined,
-          refreshInterval: savedSearch.refreshInterval,
-          rowsPerPage: savedSearch.rowsPerPage,
-          sampleSize: savedSearch.sampleSize,
-          density: savedSearch.density,
-          breakdownField: savedSearch.breakdownField,
-          visContext: savedSearch.visContext,
-        },
+): DiscoverSessionAttributes => ({
+  title: savedSearch.title ?? '',
+  description: savedSearch.description ?? '',
+  tabs: [
+    {
+      id: '',
+      label: '',
+      attributes: {
+        kibanaSavedObjectMeta: { searchSourceJSON },
+        sort: savedSearch.sort ?? [],
+        columns: savedSearch.columns ?? [],
+        grid: savedSearch.grid ?? {},
+        hideChart: savedSearch.hideChart ?? false,
+        viewMode: savedSearch.viewMode,
+        hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+        rowHeight: savedSearch.rowHeight,
+        headerRowHeight: savedSearch.headerRowHeight,
+        isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+        usesAdHocDataView: savedSearch.usesAdHocDataView,
+        timeRestore: savedSearch.timeRestore ?? false,
+        timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
+        refreshInterval: savedSearch.refreshInterval,
+        rowsPerPage: savedSearch.rowsPerPage,
+        sampleSize: savedSearch.sampleSize,
+        density: savedSearch.density,
+        breakdownField: savedSearch.breakdownField,
+        visContext: savedSearch.visContext,
       },
-    ],
-  } as unknown as SavedSearchAttributes); // TODO: Fix SavedSearchAttributes type & remove cast
+    },
+  ],
+});

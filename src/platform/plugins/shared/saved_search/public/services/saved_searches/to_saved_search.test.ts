@@ -23,14 +23,22 @@ describe('toSavedSearch', () => {
   it('succesfully converts attributes to saved search', async () => {
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
-      sort: [['@timestamp', 'desc']],
-      columns: ['message', 'extension'],
-      grid: {},
-      hideChart: false,
-      isTextBasedQuery: false,
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '{}',
-      },
+      tabs: [
+        {
+          id: 'tab_0',
+          label: 'label_0',
+          attributes: {
+            sort: [['@timestamp', 'desc']],
+            columns: ['message', 'extension'],
+            grid: {},
+            hideChart: false,
+            isTextBasedQuery: false,
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: '{}',
+            },
+          },
+        },
+      ],
       references: [
         {
           id: '1',
