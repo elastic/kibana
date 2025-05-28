@@ -22,7 +22,15 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
 import { DefaultRuleType } from '../../../common/types/default_alerts';
+
 export class DefaultAlertService {
+  /**
+   * These static vars are used to ensure that only one default alert check is running at a time.
+   * If multiple requests come in at the same time, they will wait for the first one to complete.
+   * Without this mechanism, we could end up creating multiple default alerts at the same time.
+   */
+  private static _defaultMonitorStatusAlertProcess: Promise<void> | null = null;
+  private static _defaultTlsAlertProcess: Promise<void> | null = null;
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -116,7 +124,55 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
+  private static setCreateDefaultAlertProcess(ruleType: string, process: Promise<void> | null) {
+    if (ruleType === SYNTHETICS_STATUS_RULE) {
+      DefaultAlertService._defaultMonitorStatusAlertProcess = process;
+    } else if (ruleType === SYNTHETICS_TLS_RULE) {
+      DefaultAlertService._defaultTlsAlertProcess = process;
+    }
+  }
+
+  private static inProgress(ruleType: DefaultRuleType) {
+    switch (ruleType) {
+      case SYNTHETICS_STATUS_RULE:
+        return !!DefaultAlertService._defaultMonitorStatusAlertProcess;
+      case SYNTHETICS_TLS_RULE:
+        return !!DefaultAlertService._defaultTlsAlertProcess;
+      default:
+        return false;
+    }
+  }
+
+  private static getDefaultAlertProcess(ruleType: DefaultRuleType) {
+    if (ruleType === SYNTHETICS_STATUS_RULE) {
+      return DefaultAlertService._defaultMonitorStatusAlertProcess;
+    } else if (ruleType === SYNTHETICS_TLS_RULE) {
+      return DefaultAlertService._defaultTlsAlertProcess;
+    }
+    return null;
+  }
+
   async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+    if (DefaultAlertService.inProgress(ruleType)) {
+      await DefaultAlertService.getDefaultAlertProcess(ruleType);
+    }
+
+    const ruleCreationPromise = this.createDefaultRules(ruleType, name, interval);
+    DefaultAlertService.setCreateDefaultAlertProcess(ruleType, ruleCreationPromise);
+
+    try {
+      const defaultAlertCheckResult = await ruleCreationPromise;
+      // free the var for the next request
+      DefaultAlertService.setCreateDefaultAlertProcess(ruleType, null);
+      return defaultAlertCheckResult;
+    } catch (e) {
+      // when there is an error, reset the var for the next request
+      DefaultAlertService.setCreateDefaultAlertProcess(ruleType, null);
+      throw e;
+    }
+  }
+
+  private async createDefaultRules(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       return alert;
