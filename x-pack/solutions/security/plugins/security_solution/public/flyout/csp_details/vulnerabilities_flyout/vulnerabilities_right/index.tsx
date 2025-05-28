@@ -15,15 +15,12 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 
 export const FindingsVulnerabilityPanel = ({
   vulnerabilityId,
@@ -35,30 +32,6 @@ export const FindingsVulnerabilityPanel = ({
 }: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspVulnerabilityFlyout = cloudSecurityPosture.getCloudSecurityPostureVulnerabilityFlyout();
-
-  const getNavUrlParams = useGetNavigationUrlParams();
-  const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
-    VulnerabilityId: string | string[],
-    ResourceId: string,
-    PackageName: string | string[],
-    PackageVersion: string | string[]
-  ) => {
-    const encodedPackageNameArray = Array.isArray(PackageName)
-      ? PackageName.map((str) => encodeURIComponent(str))
-      : PackageName;
-    const encodedPackageVersionArray = Array.isArray(PackageVersion)
-      ? PackageVersion.map((str) => encodeURIComponent(str))
-      : PackageVersion;
-    return getNavUrlParams(
-      {
-        'vulnerability.id': VulnerabilityId,
-        'resource.id': ResourceId,
-        'package.name': encodedPackageNameArray,
-        'package.version': encodedPackageVersionArray,
-      },
-      'vulnerabilities'
-    );
-  };
 
   return (
     <>
@@ -114,23 +87,7 @@ export const FindingsVulnerabilityPanel = ({
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
-                {isPreviewMode ? (
-                  <SecuritySolutionLinkAnchor
-                    deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-                    path={`${getVulnerabilityUrlFilteredByVulnerabilityAndResourceId(
-                      vulnerabilityId,
-                      resourceId,
-                      packageName,
-                      packageVersion
-                    )}`}
-                    target={'_blank'}
-                    external={false}
-                  >
-                    <FlyoutTitle title={vulnerabilityTitle} isLink />
-                  </SecuritySolutionLinkAnchor>
-                ) : (
-                  <FlyoutTitle title={vulnerabilityTitle} />
-                )}
+                <FlyoutTitle title={vulnerabilityTitle} />
                 <EuiSpacer size="xs" />
                 <CspVulnerabilityFlyout.Header finding={finding} />
               </FlyoutHeader>
