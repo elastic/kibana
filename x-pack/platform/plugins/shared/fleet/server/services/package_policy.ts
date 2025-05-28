@@ -21,6 +21,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObject,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
@@ -84,6 +85,7 @@ import {
   AgentPolicyNotFoundError,
   InputNotFoundError,
   StreamNotFoundError,
+  FleetNotFoundError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -112,7 +114,7 @@ import type { FleetAuthzRouteConfig } from './security';
 
 import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
-import { agentPolicyService } from './agent_policy';
+import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
@@ -782,6 +784,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // SO client we are not able to use `*` in the `esClient.get()` `options.namespace`.
     const [packagePolicy] = await this.getByIDs(soClient, [id], {
       spaceIds: options.spaceId ? [options.spaceId] : undefined,
+    }).catch(async (err) => {
+      // Emulate prior implementation that threw a Saved Objects error so that backwards compatibility is maintained
+      if (err instanceof FleetNotFoundError) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          await getAgentPolicySavedObjectType(),
+          id
+        );
+      }
+
+      throw SavedObjectsErrorHelpers.createBadRequestError(err.message);
     });
 
     if (!packagePolicy) {

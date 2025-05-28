@@ -21,6 +21,7 @@ import type {
   SavedObjectsFindOptions,
   Logger,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
@@ -92,6 +93,7 @@ import {
   PackagePolicyRestrictionRelatedError,
   AgentlessPolicyExistsRequestError,
   OutputNotFoundError,
+  FleetNotFoundError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -562,8 +564,20 @@ class AgentPolicyService {
         }]`
     );
 
+    // We're using `getByIds()` here, instead of just `soClient.get()`, because when using an unscoped
+    // SO client we are not able to use `*` in the `esClient.get()` `options.namespace`.
     const [agentPolicy] = await this.getByIds(soClient, [{ id, spaceId: options.spaceId }], {
       withPackagePolicies,
+    }).catch(async (err) => {
+      // Emulate prior implementation that threw a Saved Objects error so that backwards compatibility is maintained
+      if (err instanceof FleetNotFoundError) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          await getAgentPolicySavedObjectType(),
+          id
+        );
+      }
+
+      throw SavedObjectsErrorHelpers.createBadRequestError(err.message);
     });
 
     return agentPolicy;
@@ -642,12 +656,15 @@ class AgentPolicyService {
             return null;
           } else if (agentPolicySO.error.statusCode === 404) {
             logger.debug(`Agent policy [${agentPolicySO.id}] was not found. Throwing error`);
-            throw new AgentPolicyNotFoundError(`Agent policy ${agentPolicySO.id} not found`);
+            throw new AgentPolicyNotFoundError(
+              `Agent policy ${agentPolicySO.id} not found`,
+              agentPolicySO.error
+            );
           } else {
             logger.debug(
               `Error encountered while bulkGet agent policy [${agentPolicySO.id}]: ${agentPolicySO.error.message}`
             );
-            throw new FleetError(agentPolicySO.error.message);
+            throw new FleetError(agentPolicySO.error.message, agentPolicySO.error);
           }
         }
 
