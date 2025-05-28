@@ -13,6 +13,7 @@ export interface IDispatchAction {
 }
 
 export interface IStoreState {
+  data: Array<Record<string, any>>;
   currentQueryString: string;
   groupByColumns: string[] | null;
   currentGroupByColumn: string | null;
@@ -29,6 +30,11 @@ export const storeReducer = (state: IStoreState, action: IDispatchAction) => {
       return {
         ...state,
         currentGroupByColumn: action.payload,
+      };
+    case 'EMPTY_GROUP_BY_COLUMN_SELECTION':
+      return {
+        ...state,
+        currentGroupByColumn: state.groupByColumns ? state?.groupByColumns[0] : null,
       };
     default:
       return state;
