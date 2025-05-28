@@ -82,10 +82,6 @@ import { setKibanaServices, untilPluginStartServicesReady } from './services/kib
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 
-export interface DashboardFeatureFlagConfig {
-  allowByValueEmbeddables: boolean;
-}
-
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
@@ -143,7 +139,6 @@ export interface DashboardStart {
    * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
    */
   locator?: DashboardAppLocator;
-  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
@@ -157,22 +152,19 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
   private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
   ): DashboardSetup {
-    this.dashboardFeatureFlagConfig =
-      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
 
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -339,16 +331,10 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      registerActions({
-        plugins,
-        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
-      });
-    });
+    untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
       locator: this.locator,
-      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(
