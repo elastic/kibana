@@ -58,14 +58,12 @@ const setupComponentWithPluginStateMock = async (
 };
 
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
-  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
   let testBed: TestBed;
   const GuidePanelComponent = () => (
     <GuidePanel
       application={applicationMock}
       api={api}
       notifications={notificationsMock}
-      theme$={coreTheme$}
     />
   );
   await act(async () => {
