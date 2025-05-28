@@ -53,6 +53,7 @@ export async function getTotalAlertsCountAggregations({
             ignored_field: {
               terms: {
                 field: '_ignored',
+                size: NUM_ALERTING_RULE_TYPES,
               },
             },
           },
