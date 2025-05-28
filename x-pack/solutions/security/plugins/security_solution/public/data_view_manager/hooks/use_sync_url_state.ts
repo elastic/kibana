@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SourcererScopeName, type SourcererUrlState } from '../../sourcerer/store/model';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
-import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
+import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import type { State } from '../../common/store/types';
 import { sourcererSelectors } from '../../common/store/selectors';
 import { sourcererActions } from '../../common/store/actions';
@@ -78,7 +78,7 @@ export const useSyncSourcererUrlState = (
 /**
  * Restores data view selection automatically if (and only if) the sourcerer url param is set during app init. (only during the initial render)
  * See `useInitializeUrlParam` for details.
- * The param itself is updated in a separate hook.
+ * The param itself is updated in the picker component, after user changes the selection manually.
  */
 export const useRestoreDataViewManagerStateFromURL = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
