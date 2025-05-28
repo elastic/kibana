@@ -67,7 +67,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
-    this.key = this.secrets.apiKey;
+    // apiKey could be undefined if PKI, use mock value when this is the case
+    this.key = 'apiKey' in this.secrets && this.secrets.apiKey ? this.secrets.apiKey : '';
     this.headers = {
       ...this.config.headers,
       ...('organizationId' in this.config
@@ -79,17 +80,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.openAI =
       this.config.apiProvider === OpenAiProviderType.AzureAi
         ? new OpenAI({
-            apiKey: this.secrets.apiKey,
+            apiKey: this.key,
             baseURL: this.config.apiUrl,
             defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
             defaultHeaders: {
               ...this.headers,
-              'api-key': this.secrets.apiKey,
+              'api-key': this.key,
             },
           })
         : new OpenAI({
             baseURL: removeEndpointFromUrl(this.config.apiUrl),
-            apiKey: this.secrets.apiKey,
+            apiKey: this.key,
             defaultHeaders: {
               ...this.headers,
             },

@@ -59,6 +59,7 @@
     "@kbn/react-hooks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-saved-objects-server",
+    "@kbn/search-queries"
   ],
   "exclude": [
     "target/**/*",

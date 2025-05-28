@@ -35,6 +35,9 @@ export const defaultExclusions: DataSourceExclusions = {
   '.logs-endpoint.diagnostic.collection-*': ['readOnly'],
   'kibana_sample_data_*': ['readOnly'],
   '.elastic-connectors*': ['readOnly'],
+  '.ml-annotations-*': ['readOnly'],
+  '.ml-notifications-*': ['readOnly'],
+  '.ml-state-*': ['readOnly'],
 };
 
 /**

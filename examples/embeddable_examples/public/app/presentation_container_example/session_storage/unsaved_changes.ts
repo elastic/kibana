@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnsavedChanges } from '../types';
+import { PageState } from '../types';
 
 const UNSAVED_CHANGES_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.unsavedChanges';
@@ -16,11 +16,11 @@ export const unsavedChangesSessionStorage = {
   clear: () => {
     sessionStorage.removeItem(UNSAVED_CHANGES_SESSION_STORAGE_KEY);
   },
-  load: (): UnsavedChanges => {
+  load: (): PageState | undefined => {
     const unsavedChanges = sessionStorage.getItem(UNSAVED_CHANGES_SESSION_STORAGE_KEY);
-    return unsavedChanges ? JSON.parse(unsavedChanges) : {};
+    return unsavedChanges ? JSON.parse(unsavedChanges) : undefined;
   },
-  save: (unsavedChanges: UnsavedChanges) => {
+  save: (unsavedChanges: PageState) => {
     sessionStorage.setItem(UNSAVED_CHANGES_SESSION_STORAGE_KEY, JSON.stringify(unsavedChanges));
   },
 };

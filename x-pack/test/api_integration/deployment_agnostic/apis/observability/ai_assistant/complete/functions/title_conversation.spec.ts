@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('when calling the title_conversation function', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         await clearConversations(es);
         const simulatorPromise = llmProxy.interceptTitle(TITLE);
-        void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
+        void llmProxy.interceptWithResponse('The sky is blue because of Rayleigh scattering.');
 
         const res = await chatComplete({
           userPrompt: 'Why the sky is blue?',

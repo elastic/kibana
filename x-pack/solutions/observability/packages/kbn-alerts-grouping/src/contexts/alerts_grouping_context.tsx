@@ -24,8 +24,11 @@ export const AlertsGroupingContext = createContext({
   setGroupingState: (() => {}) as Dispatch<SetStateAction<AlertsGroupingState>>,
 });
 
-export const AlertsGroupingContextProvider = ({ children }: PropsWithChildren<{}>) => {
-  const [groupingState, setGroupingState] = useState<AlertsGroupingState>({});
+export const AlertsGroupingContextProvider = ({
+  initialState = {},
+  children,
+}: PropsWithChildren<{ initialState?: AlertsGroupingState }>) => {
+  const [groupingState, setGroupingState] = useState<AlertsGroupingState>(initialState);
   return (
     <AlertsGroupingContext.Provider
       value={useMemo(

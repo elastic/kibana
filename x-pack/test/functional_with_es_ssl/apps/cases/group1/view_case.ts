@@ -359,7 +359,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('draft comments', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/207704
+    describe.skip('draft comments', () => {
       createOneCaseBeforeEachDeleteAllAfterEach(getPageObject, getService);
 
       it('persists new comment when status is updated in dropdown', async () => {

@@ -127,7 +127,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       // Open Project Settings
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
       // check Project Settings
       // > Trained Models
       await solutionNavigation.sidenav.clickLink({
@@ -172,7 +174,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('navigate management', async () => {
-      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
       await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
@@ -206,7 +210,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it('renders expected side navigation items', async () => {
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
       // Verify all expected top-level links exist
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Data' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
@@ -230,9 +236,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
 
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
+        'analyze',
+        'discover',
+        'dashboards',
         'data',
         'elasticsearchIndexManagement',
         'serverlessConnectors',
@@ -240,14 +251,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'build',
         'dev_tools',
         'searchPlayground',
-        'searchSynonyms',
         'relevance',
         'searchInferenceEndpoints',
-        'analyze',
-        'discover',
-        'dashboards',
+        'searchSynonyms',
         'otherTools',
         'maps',
+        'search_project_nav_footer',
         'gettingStarted',
         'project_settings_project_nav',
         'management:trained_models',

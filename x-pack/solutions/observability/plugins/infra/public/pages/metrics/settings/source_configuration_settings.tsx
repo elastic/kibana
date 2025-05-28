@@ -13,10 +13,7 @@ import {
   Prompt,
   useEditableSettings,
 } from '@kbn/observability-shared-plugin/public';
-import {
-  enableInfrastructureProfilingIntegration,
-  enableInfrastructureAssetCustomDashboards,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
@@ -35,6 +32,7 @@ import { useSourceConfigurationFormState } from './source_configuration_form_sta
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
 import { FeaturesConfigurationPanel } from './features_configuration_panel';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
   http?: HttpSetup;
@@ -51,6 +49,7 @@ export const SourceConfigurationSettings = ({
   ]);
 
   const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
+  const { featureFlags } = usePluginConfig();
 
   useEffect(() => {
     const getNumberOfInfraRules = async () => {
@@ -90,10 +89,7 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings([
-    enableInfrastructureProfilingIntegration,
-    enableInfrastructureAssetCustomDashboards,
-  ]);
+  const infraUiSettings = useEditableSettings([enableInfrastructureProfilingIntegration]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();
@@ -181,10 +177,14 @@ export const SourceConfigurationSettings = ({
           <EuiSpacer />
         </>
       )}
-      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-        <FeaturesConfigurationPanel readOnly={!isWriteable} {...infraUiSettings} />
-      </EuiPanel>
-      <EuiSpacer />
+      {featureFlags.profilingEnabled && (
+        <>
+          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+            <FeaturesConfigurationPanel {...infraUiSettings} />
+          </EuiPanel>
+          <EuiSpacer />
+        </>
+      )}
       {errors.length > 0 ? (
         <>
           <EuiCallOut color="danger">

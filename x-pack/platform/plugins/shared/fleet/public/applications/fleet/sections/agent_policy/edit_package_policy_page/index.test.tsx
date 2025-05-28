@@ -231,7 +231,8 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
 describe('edit package policy page', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () => (renderResult = testRenderer.render(<EditPackagePolicyPage />));
+  const render = () =>
+    (renderResult = testRenderer.render(<EditPackagePolicyPage />, { legacyRoot: true }));
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();

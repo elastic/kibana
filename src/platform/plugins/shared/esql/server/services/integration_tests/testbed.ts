@@ -76,6 +76,47 @@ export class EsqlServiceTestbed {
     });
   }
 
+  public async setupTimeseriesIndices() {
+    const client = this.esClient();
+
+    await client.indices.create({
+      index: 'ts_index1',
+      settings: {
+        'index.mode': 'time_series',
+        'index.routing_path': ['field1'],
+      },
+      mappings: {
+        properties: {
+          field1: {
+            type: 'long',
+            time_series_dimension: true,
+          },
+        },
+      },
+    });
+
+    // Lookup index with aliases
+    await client.indices.create({
+      index: 'ts_index2',
+      settings: {
+        'index.mode': 'time_series',
+        'index.routing_path': ['field2'],
+      },
+      aliases: {
+        ts_index2_alias1: {},
+        ts_index2_alias2: {},
+      },
+      mappings: {
+        properties: {
+          field2: {
+            type: 'long',
+            time_series_dimension: true,
+          },
+        },
+      },
+    });
+  }
+
   public readonly GET = (path: string) => {
     return request.get(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
   };

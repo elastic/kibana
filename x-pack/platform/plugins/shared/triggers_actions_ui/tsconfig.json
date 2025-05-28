@@ -78,7 +78,16 @@
     "@kbn/response-ops-rule-params",
     "@kbn/response-ops-rules-apis",
     "@kbn/fields-metadata-plugin",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ui-actions-browser",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/esql-utils",
+    "@kbn/esql-ast",
+    "@kbn/content-management-plugin",
+    "@kbn/esql-types",
+    "@kbn/presentation-containers"
   ],
   "exclude": ["target/**/*"]
 }

@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
+  EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiPopover,
@@ -29,7 +30,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, type Theme } from '@emotion/react';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
@@ -80,6 +81,12 @@ const pageHeaderCSS = css`
   max-width: 1248px;
   margin: auto;
   border-bottom: none;
+`;
+
+const betaBadgeCSS = ({ euiTheme }: Theme) => css`
+  padding: calc(${euiTheme.size.xxs} * 1.5);
+  border: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
+  border-radius: 50%;
 `;
 
 export interface UserProfileProps {
@@ -352,10 +359,30 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
         checkable={{
           legend: (
             <FormLabel for="data.userSettings.contrastMode">
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
-                defaultMessage="Interface contrast"
-              />
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={true}>
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
+                    defaultMessage="Interface contrast"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div css={betaBadgeCSS}>
+                    <EuiIconTip
+                      aria-label={i18n.translate(
+                        'xpack.security.accountManagement.userProfile.userSettings.contrastMode.betaBadge',
+                        { defaultMessage: 'beta' }
+                      )}
+                      content={i18n.translate(
+                        'xpack.security.accountManagement.userProfile.userSettings.contrastMode.betaBadge.tooltip',
+                        { defaultMessage: 'The contrast setting is currently a beta feature.' }
+                      )}
+                      type="beta"
+                      position="bottom"
+                    />
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </FormLabel>
           ),
         }}

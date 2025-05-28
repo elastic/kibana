@@ -40,6 +40,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchEditDescriptionFieldText', description);
         await testSubjects.click('serverlessSearchSaveDescriptionButton');
         await testSubjects.exists('serverlessSearchConnectorDescription');
+
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorDescription')).to.be(
           description
         );
@@ -61,10 +62,10 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.exists('serverlessSearchConnectorName');
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(name);
       },
-      async editType(type: string) {
+      async selectConnectorType(type: string) {
         await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
-        await comboBox.filterOptionsList('serverlessSearchEditConnectorTypeChoices', type);
+        await comboBox.set('serverlessSearchEditConnectorTypeChoices', type);
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
@@ -79,10 +80,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchConnectorsTableSelect', option);
       },
       async connectorNameExists(connectorName: string) {
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           const connectorsList = await this.getConnectorsList();
-          const isFound = Boolean(connectorsList.find((name) => name === connectorName));
-          expect(isFound).to.be(true);
+          expect(connectorsList).to.contain(connectorName);
         });
       },
       async confirmDeleteConnectorModalComponentsExists() {
@@ -108,6 +108,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       },
       async expectConnectorTableToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorTable');
+      },
+      async expectConnectorTableToHaveItems(timeout?: number) {
+        await testSubjects.existOrFail('serverlessSearchColumnsLink', { timeout });
       },
       async expectConnectorTableToHaveNoItems(timeout?: number) {
         await testSubjects.missingOrFail('serverlessSearchColumnsLink', { timeout });
@@ -145,20 +148,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         const isEnabled = await testSubjects.isEnabled('confirmModalConfirmButton');
         expect(isEnabled).to.be(false);
       },
-      async getConnectorFromConnectorTable(connectorName: string) {
-        await testSubjects.getAttribute('serverlessSearchColumnsLink', connectorName);
-      },
       async getConnectorsList() {
-        const rows = await (
-          await testSubjects.find('serverlessSearchConnectorTable')
-        ).findAllByCssSelector('.euiTableRow');
-        return await Promise.all(
-          rows.map(async (connector) => {
-            return await (
-              await connector.findByTestSubject('serverlessSearchColumnsLink')
-            ).getVisibleText();
-          })
-        );
+        const connectorNameCells = await testSubjects.findAll('serverlessSearchColumnsLink');
+        return Promise.all(connectorNameCells.map((element) => element.getVisibleText()));
       },
       async openDeleteConnectorModal() {
         await retry.try(

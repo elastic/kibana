@@ -11,6 +11,7 @@ import {
   KnowledgeBaseEntryContentReference,
   ProductDocumentationContentReference,
   EsqlContentReference,
+  HrefContentReference,
 } from '../../schemas';
 import { ContentReferenceId } from '../types';
 
@@ -60,6 +61,26 @@ export const knowledgeBaseReference = (
     id,
     knowledgeBaseEntryName,
     knowledgeBaseEntryId,
+  };
+};
+
+/**
+ * Generates a contentReference for when a external page is referenced.
+ * @param id id of the contentReference
+ * @param href the external page url
+ * @param label content reference label
+ * @returns HrefContentReference
+ */
+export const hrefReference = (
+  id: ContentReferenceId,
+  href: string,
+  label?: string
+): HrefContentReference => {
+  return {
+    type: 'Href',
+    id,
+    href,
+    label,
   };
 };
 

@@ -6,18 +6,118 @@
  */
 
 import { badData, badRequest } from '@hapi/boom';
-import {
-  IngestGetResponse,
-  StreamUpsertRequest,
-  ingestUpsertRequestSchema,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { StreamQuery, Streams } from '@kbn/streams-schema';
+import { Ingest } from '@kbn/streams-schema/src/models/ingest';
+import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
+import { UnwiredIngest } from '@kbn/streams-schema/src/models/ingest/unwired';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import { QueryAsset } from '../../../../common/assets';
+import { StreamsClient } from '../../../lib/streams/client';
+import { AssetClient } from '../../../lib/streams/assets/asset_client';
+
+async function getAssets({
+  name,
+  assetClient,
+}: {
+  name: string;
+  assetClient: AssetClient;
+}): Promise<{ dashboards: string[]; queries: StreamQuery[] }> {
+  const assets = await assetClient.getAssets(name);
+
+  const dashboards = assets
+    .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
+    .map((asset) => asset[ASSET_ID]);
+
+  const queries = assets
+    .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
+    .map((asset) => asset.query);
+
+  return {
+    dashboards,
+    queries,
+  };
+}
+
+async function updateWiredIngest({
+  streamsClient,
+  assetClient,
+  name,
+  ingest,
+}: {
+  streamsClient: StreamsClient;
+  assetClient: AssetClient;
+  name: string;
+  ingest: WiredIngest;
+}) {
+  const { dashboards, queries } = await getAssets({
+    name,
+    assetClient,
+  });
+
+  const definition = await streamsClient.getStream(name);
+
+  if (!Streams.WiredStream.Definition.is(definition)) {
+    throw badData(`Can't update wired capabilities of a non-wired stream`);
+  }
+
+  const { name: _name, ...stream } = definition;
+
+  const upsertRequest: Streams.WiredStream.UpsertRequest = {
+    dashboards,
+    queries,
+    stream: {
+      ...stream,
+      ingest,
+    },
+  };
+
+  return await streamsClient.upsertStream({
+    request: upsertRequest,
+    name,
+  });
+}
+
+async function updateUnwiredIngest({
+  streamsClient,
+  assetClient,
+  name,
+  ingest,
+}: {
+  streamsClient: StreamsClient;
+  assetClient: AssetClient;
+  name: string;
+  ingest: UnwiredIngest;
+}) {
+  const { dashboards, queries } = await getAssets({
+    name,
+    assetClient,
+  });
+
+  const definition = await streamsClient.getStream(name);
+
+  if (!Streams.UnwiredStream.Definition.is(definition)) {
+    throw badData(`Can't update unwired capabilities of a non-unwired stream`);
+  }
+
+  const { name: _name, ...stream } = definition;
+
+  const upsertRequest: Streams.UnwiredStream.UpsertRequest = {
+    dashboards,
+    queries,
+    stream: {
+      ...stream,
+      ingest,
+    },
+  };
+
+  return await streamsClient.upsertStream({
+    request: upsertRequest,
+    name,
+  });
+}
 
 const readIngestRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_ingest 2023-10-31',
@@ -37,7 +137,11 @@ const readIngestRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<IngestGetResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{ ingest: Streams.ingest.all.Definition['ingest'] }> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
@@ -46,11 +150,7 @@ const readIngestRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(name);
 
-    if (isWiredStreamDefinition(definition)) {
-      return { ingest: definition.ingest };
-    }
-
-    if (isUnwiredStreamDefinition(definition)) {
+    if (Streams.ingest.all.Definition.is(definition)) {
       return { ingest: definition.ingest };
     }
 
@@ -77,44 +177,29 @@ const upsertIngestRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    body: ingestUpsertRequestSchema,
+    body: z.object({
+      ingest: Ingest.right,
+    }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
 
-    if (
-      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
-      !(await streamsClient.isStreamsEnabled())
-    ) {
-      throw badData('Streams are not enabled for Wired streams.');
+    const { name } = params.path;
+    const { ingest } = params.body;
+
+    const definition = await streamsClient.getStream(name);
+
+    if (!Streams.ingest.all.Definition.is(definition)) {
+      throw badData(`_ingest is only supported on Wired and Classic streams`);
     }
 
-    const name = params.path.name;
+    if (WiredIngest.is(ingest)) {
+      return await updateWiredIngest({ streamsClient, assetClient, name, ingest });
+    }
 
-    const assets = await assetClient.getAssets(name);
-
-    const ingestUpsertRequest = params.body;
-
-    const dashboards = assets
-      .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
-      .map((asset) => asset[ASSET_ID]);
-
-    const queries = assets
-      .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
-      .map((asset) => asset.query);
-
-    const upsertRequest = {
-      dashboards,
-      stream: ingestUpsertRequest,
-      queries,
-    } as StreamUpsertRequest;
-
-    return await streamsClient.upsertStream({
-      request: upsertRequest,
-      name: params.path.name,
-    });
+    return await updateUnwiredIngest({ streamsClient, assetClient, name, ingest });
   },
 });
 

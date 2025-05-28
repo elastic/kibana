@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
+import { act, fireEvent, render, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../../../mocks/test_provider';
 import { ApiDefinitionInput } from './api_definition_input';
 
@@ -23,9 +23,8 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 const changeFile = async (input: HTMLElement, file: File) => {
   await act(async () => {
     fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(input).toHaveAttribute('data-loading', 'true'));
-    await waitFor(() => expect(input).toHaveAttribute('data-loading', 'false'));
   });
+  expect(input).toHaveAttribute('data-loading', 'false');
 };
 
 const simpleOpenApiJson = `{"openapi":"3.0.0","info":{"title":"Sample API"},"paths":{"/users":{"get":{"summary":"Returns a list of users.","description":"Optional extended description in CommonMark or HTML.","responses":{"200":{"description":"A JSON array of user names","content":{"application/json":{"schema":{"type":"array","items":{"type":"string"}}}}}}}}}}`;

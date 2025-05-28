@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiBadge,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
@@ -15,6 +21,7 @@ import { TYPE_DEFINITION } from '../../../constants';
 import { useDispatch } from '../../../mappings_state_context';
 import { getTypeLabelFromField } from '../../../lib';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
+import { getListItemStyle } from '../common/listItemStyle';
 
 interface Props {
   item: SearchResult;
@@ -30,7 +37,9 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
   isDimmed,
 }: Props) {
   const dispatch = useDispatch();
-  const { source, isMultiField, hasChildFields, hasMultiFields } = field;
+  const { source, isMultiField } = field;
+  const { euiTheme } = useEuiTheme();
+  const styles = getListItemStyle(euiTheme);
 
   const editField = () => {
     dispatch({
@@ -56,11 +65,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     );
 
     return (
-      <EuiFlexGroup
-        gutterSize="s"
-        className="mappingsEditor__fieldsListItem__actions"
-        data-test-subj="fieldActions"
-      >
+      <EuiFlexGroup gutterSize="s" css={styles.actions} data-test-subj="fieldActions">
         <EuiFlexItem grow={false}>
           <EuiToolTip content={editButtonLabel}>
             <EuiButtonIcon
@@ -92,29 +97,18 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
   };
 
   return (
-    <div className={classNames('mappingsEditor__fieldsListItem')} data-test-subj="fieldsListItem">
+    <div data-test-subj="fieldsListItem">
       <div
-        className={classNames('mappingsEditor__fieldsListItem__field', {
-          'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          'mappingsEditor__fieldsListItem__field--selected': isHighlighted,
-          'mappingsEditor__fieldsListItem__field--dim': isDimmed,
-        })}
+        css={[
+          styles.field,
+          areActionButtonsVisible && styles.fieldEnabled,
+          isHighlighted && styles.fieldHighlighted,
+          isDimmed && styles.fieldDim,
+        ]}
       >
-        <div className={classNames('mappingsEditor__fieldsListItem__wrapper')}>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            className={classNames('mappingsEditor__fieldsListItem__content', {
-              'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
-              'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
-            })}
-            tabIndex={0}
-          >
-            <EuiFlexItem
-              grow={false}
-              className="mappingsEditor__fieldsListItem__name"
-              data-test-subj="fieldName"
-            >
+        <div css={styles.wrapper}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" css={styles.content} tabIndex={0}>
+            <EuiFlexItem grow={false} data-test-subj="fieldName">
               {display}
             </EuiFlexItem>
 

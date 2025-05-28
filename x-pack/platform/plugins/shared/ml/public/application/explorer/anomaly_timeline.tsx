@@ -381,7 +381,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         };
 
         const state = {
-          input: embeddableInput,
+          serializedState: { rawState: embeddableInput, references: [] },
           type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
         };
 

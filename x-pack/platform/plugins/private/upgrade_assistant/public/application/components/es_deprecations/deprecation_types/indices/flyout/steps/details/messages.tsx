@@ -7,8 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ReindexStatus } from '../../../../../../../../../common/types';
 import { IndexClosedParagraph } from '../index_closed_paragraph';
@@ -47,28 +46,48 @@ export const getReindexButtonLabel = (status?: ReindexStatus) => {
   }
 };
 
+const RecommendedOptionBadge = () => (
+  <EuiBadge color="hollow">
+    <FormattedMessage
+      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.recommendedOption"
+      defaultMessage="Recommended"
+    />
+  </EuiBadge>
+);
+
 export const getDefaultGuideanceText = ({
   isClosedIndex,
   readOnlyExcluded,
   reindexExcluded,
   indexBlockUrl,
   indexManagementUrl,
+  isLargeIndex,
 }: {
   isClosedIndex: boolean;
   readOnlyExcluded: boolean;
   reindexExcluded: boolean;
   indexBlockUrl: string;
   indexManagementUrl: string;
+  isLargeIndex?: boolean;
 }) => {
   const guideanceListItems = [];
   if (!reindexExcluded) {
     guideanceListItems.push({
-      title: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
-        {
-          defaultMessage: 'Option {optionCount}: Reindex data',
-          values: { optionCount: guideanceListItems.length + 1 },
-        }
+      title: (
+        <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title"
+              defaultMessage="Option {optionCount}: Reindex data"
+              values={{ optionCount: guideanceListItems.length + 1 }}
+            />
+          </EuiFlexItem>
+          {!isLargeIndex && !readOnlyExcluded && (
+            <EuiFlexItem grow={false}>
+              <RecommendedOptionBadge />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       ),
       description: (
         <EuiText size="m">
@@ -89,12 +108,21 @@ export const getDefaultGuideanceText = ({
 
   if (!readOnlyExcluded) {
     guideanceListItems.push({
-      title: i18n.translate(
-        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title',
-        {
-          defaultMessage: 'Option {optionCount}: Mark as read-only',
-          values: { optionCount: guideanceListItems.length + 1 },
-        }
+      title: (
+        <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title"
+              defaultMessage="Option {optionCount}: Mark as read-only"
+              values={{ optionCount: guideanceListItems.length + 1 }}
+            />
+          </EuiFlexItem>
+          {(isLargeIndex || reindexExcluded) && (
+            <EuiFlexItem grow={false}>
+              <RecommendedOptionBadge />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       ),
       description: (
         <EuiText size="m">

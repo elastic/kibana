@@ -261,7 +261,12 @@ describe('runSaveLensVisualization', () => {
           // make sure the new savedObject id is removed from the new input
           expect.objectContaining({
             state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: undefined }),
+              serializedState: expect.objectContaining({
+                rawState: expect.objectContaining({ savedObjectId: undefined }),
+                references: expect.arrayContaining([
+                  expect.objectContaining({ type: 'index-pattern' }),
+                ]),
+              }),
             }),
           })
         );
@@ -288,7 +293,12 @@ describe('runSaveLensVisualization', () => {
           // make sure the new savedObject id is passed with the new input
           expect.objectContaining({
             state: expect.objectContaining({
-              input: expect.objectContaining({ savedObjectId: '1234' }),
+              serializedState: expect.objectContaining({
+                rawState: expect.objectContaining({ savedObjectId: '1234' }),
+                references: expect.arrayContaining([
+                  expect.objectContaining({ type: 'index-pattern' }),
+                ]),
+              }),
             }),
           })
         );

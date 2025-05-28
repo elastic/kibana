@@ -15,6 +15,7 @@ export enum AnalyticsEvents {
   citationDetailsCollapsed = 'citation_details_collapsed',
   editContextFieldToggled = 'edit_context_field_toggled',
   editContextDocSizeChanged = 'edit_context_doc_size_changed',
+  editElasticsearchQuery = 'edit_elasticsearch_query',
   genAiConnectorAdded = 'gen_ai_connector_added',
   genAiConnectorCreated = 'gen_ai_connector_created',
   genAiConnectorExists = 'gen_ai_connector_exists',

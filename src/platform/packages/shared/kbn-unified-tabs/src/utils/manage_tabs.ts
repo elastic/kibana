@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import type { TabItem } from '../types';
 
 export interface TabsState {
@@ -44,6 +45,14 @@ export const selectTab = ({ items, selectedItem }: TabsState, item: TabItem): Ta
   return {
     items,
     selectedItem: items.find((i) => i.id === item.id) || selectedItem,
+  };
+};
+
+export const selectRecentlyClosedTab = ({ items }: TabsState, item: TabItem): TabsState => {
+  const nextSelectedItem = omit(item, 'closedAt');
+  return {
+    items: [...items.filter((i) => i.id !== item.id), nextSelectedItem],
+    selectedItem: nextSelectedItem,
   };
 };
 

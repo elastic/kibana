@@ -9,12 +9,14 @@ import * as t from 'io-ts';
 
 export enum LatencyDistributionChartType {
   transactionLatency = 'transactionLatency',
+  spanLatency = 'spanLatency',
   latencyCorrelations = 'latencyCorrelations',
   failedTransactionsCorrelations = 'failedTransactionsCorrelations',
   dependencyLatency = 'dependencyLatency',
 }
 export const latencyDistributionChartTypeRt = t.union([
   t.literal(LatencyDistributionChartType.transactionLatency),
+  t.literal(LatencyDistributionChartType.spanLatency),
   t.literal(LatencyDistributionChartType.latencyCorrelations),
   t.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
   t.literal(LatencyDistributionChartType.dependencyLatency),

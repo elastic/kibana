@@ -221,7 +221,7 @@ export class State {
     const errors = validationResults.flatMap((validationResult) => validationResult.errors);
 
     if (!isValid) {
-      throw new InvalidStateError(`Desired stream state is invalid: ${errors.join(', ')}`);
+      throw new InvalidStateError(errors, `Desired stream state is invalid`);
     }
   }
 

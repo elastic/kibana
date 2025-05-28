@@ -33,6 +33,7 @@ export function RulePage() {
     actionTypeRegistry,
     ruleTypeRegistry,
     chrome,
+    contentManagement,
     ...startServices
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -84,6 +85,7 @@ export function RulePage() {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
         id={id}

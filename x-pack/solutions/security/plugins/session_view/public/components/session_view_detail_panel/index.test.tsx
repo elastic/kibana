@@ -14,6 +14,7 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionViewDetailPanel } from '.';
 import { useDateFormat } from '../../hooks';
 import { ENDPOINT_INDEX } from '../../methods';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -58,7 +59,7 @@ describe('SessionView component', () => {
 
     it('can switch tabs to show host details', async () => {
       renderResult = mockedContext.render(<SessionViewDetailPanel {...props} />);
-      renderResult.queryByText('Metadata')?.click();
+      await userEvent.click(renderResult.queryByText('Metadata')!);
       expect(renderResult.queryByText('hostname')).toBeVisible();
       expect(renderResult.queryAllByText('james-fleet-714-2')).toHaveLength(2);
     });
@@ -67,12 +68,12 @@ describe('SessionView component', () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel {...props} alerts={mockAlerts} alertsCount={mockAlerts.length} />
       );
-      renderResult.queryByText('Alerts')?.click();
+      await userEvent.click(renderResult.queryByText('Alerts')!);
       expect(renderResult.queryByText('List view')).toBeVisible();
     });
     it('alert tab disabled when no alerts', async () => {
       renderResult = mockedContext.render(<SessionViewDetailPanel {...props} />);
-      renderResult.queryByText('Alerts')?.click();
+      await userEvent.click(renderResult.queryByText('Alerts')!);
       expect(renderResult.queryByText('List view')).toBeFalsy();
     });
   });

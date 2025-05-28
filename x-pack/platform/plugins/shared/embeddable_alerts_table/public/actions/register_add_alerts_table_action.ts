@@ -12,14 +12,17 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_ALERTS_TABLE_ACTION_ID } from '../constants';
 
 export interface AddAlertsTableActionDeps {
-  http: CoreStart['http'];
+  coreServices: CoreStart;
   uiActions: UiActionsStart;
 }
 
-export const registerAddAlertsTableAction = ({ http, uiActions }: AddAlertsTableActionDeps) => {
+export const registerAddAlertsTableAction = ({
+  coreServices,
+  uiActions,
+}: AddAlertsTableActionDeps) => {
   uiActions.registerActionAsync<EmbeddableApiContext>(ADD_ALERTS_TABLE_ACTION_ID, async () => {
     const { getAddAlertsTableAction } = await import('./add_alerts_table_action');
-    return getAddAlertsTableAction({ http });
+    return getAddAlertsTableAction(coreServices);
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_ALERTS_TABLE_ACTION_ID);
 };

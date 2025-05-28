@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { UX_MESSAGES } from '../endpoint_response_actions_list/translations';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
@@ -62,8 +63,9 @@ const getAgentErrors = (action: MaybeImmutable<ActionDetails>) => {
         agentErrorInfo.errors.push(...errorMessages);
       }
 
-      if (agentErrorInfo.errors.length && action.hosts[agent]?.name) {
-        agentErrorInfo.name = action.hosts[agent].name;
+      if (agentErrorInfo.errors.length) {
+        agentErrorInfo.name =
+          action.hosts[agent]?.name || `${agent} (${UX_MESSAGES.unenrolled.host})`;
       }
 
       if (agentErrorInfo.errors.length) {

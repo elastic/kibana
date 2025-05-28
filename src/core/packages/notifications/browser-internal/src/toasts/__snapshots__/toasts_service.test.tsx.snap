@@ -3,31 +3,35 @@
 exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <GlobalToastList
-      dismissToast={[Function]}
-      reportEvent={
-        Object {
-          "onDismissToast": [Function],
-        }
-      }
-      toasts$={
-        Observable {
-          "operator": [Function],
-          "source": Observable {
-            "operator": [Function],
-            "source": Observable {
+    <I18nProvider>
+      <EuiProvider>
+        <GlobalToastList
+          dismissToast={[Function]}
+          reportEvent={
+            Object {
+              "onDismissToast": [Function],
+            }
+          }
+          toasts$={
+            Observable {
               "operator": [Function],
               "source": Observable {
                 "operator": [Function],
                 "source": Observable {
-                  "_subscribe": [Function],
+                  "operator": [Function],
+                  "source": Observable {
+                    "operator": [Function],
+                    "source": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
                 },
               },
-            },
-          },
-        }
-      }
-    />,
+            }
+          }
+        />
+      </EuiProvider>
+    </I18nProvider>,
     <div
       test="target-dom-element"
     />,

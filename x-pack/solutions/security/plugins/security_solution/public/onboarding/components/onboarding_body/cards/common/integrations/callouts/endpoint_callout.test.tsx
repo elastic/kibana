@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EndpointCallout } from './endpoint_callout';
 import { TestProviders } from '../../../../../../../common/mock/test_providers';
-import { mockTrackLinkClick } from '../../../../../../../common/lib/integrations/hooks/__mocks__/mocks';
+import { mockReportLinkClick } from '../../../../../../../common/lib/integrations/hooks/__mocks__/mocks';
 
 jest.mock('../../../../../../../common/lib/kibana');
 jest.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
@@ -38,6 +33,6 @@ describe('EndpointCallout', () => {
 
     getByTestId('endpointLearnMoreLink').click();
 
-    expect(mockTrackLinkClick).toHaveBeenCalledWith('endpoint_learn_more');
+    expect(mockReportLinkClick).toHaveBeenCalledWith('endpoint_learn_more');
   });
 });

@@ -14,3 +14,10 @@ export const isPermissionError = (error: { body: KibanaServerError }) => {
 export const isNotFoundError = (error: { body: KibanaServerError }) => {
   return error.body.statusCode === 404;
 };
+
+export const formatRulesetName = (rawName: string) =>
+  rawName
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '-') // Replace all special/non-alphanumerical characters with dashes
+    .replace(/^[-]+|[-]+$/g, '') // Strip all leading and trailing dashes
+    .toLowerCase();

@@ -169,6 +169,12 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
+                count_rules_snoozed_by_type: totalCountAggregations.count_rules_snoozed_by_type,
+                count_rules_muted_by_type: totalCountAggregations.count_rules_muted_by_type,
+                count_rules_with_linked_dashboards:
+                  totalCountAggregations.count_rules_with_linked_dashboards,
+                count_rules_with_investigation_guide:
+                  totalCountAggregations.count_rules_with_investigation_guide,
                 count_mw_total: MWTelemetry.count_mw_total,
                 count_mw_with_repeat_toggle_on: MWTelemetry.count_mw_with_repeat_toggle_on,
                 count_mw_with_filter_alert_toggle_on:
@@ -214,6 +220,8 @@ export function telemetryTaskRunner(
                 percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
                 count_alerts_total: totalAlertsCountAggregations.count_alerts_total,
                 count_alerts_by_rule_type: totalAlertsCountAggregations.count_alerts_by_rule_type,
+                count_ignored_fields_by_rule_type:
+                  totalAlertsCountAggregations.count_ignored_fields_by_rule_type,
               };
 
               return {

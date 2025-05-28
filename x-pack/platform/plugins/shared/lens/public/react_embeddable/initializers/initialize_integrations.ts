@@ -10,10 +10,10 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { noop, omit } from 'lodash';
+import { omit } from 'lodash';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { SavedObjectReference } from '@kbn/core/types';
-import { emptySerializer, isTextBasedLanguage } from '../helper';
+import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
@@ -44,11 +44,9 @@ export function initializeIntegrations(
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
+    | 'mountInlineFlyout'
   > &
     HasSerializableState;
-  cleanup: () => void;
-  serialize: () => {};
-  comparators: {};
 } {
   return {
     api: {
@@ -79,8 +77,5 @@ export function initializeIntegrations(
         return getLanguageDisplayName(language).toUpperCase();
       },
     },
-    comparators: {},
-    serialize: emptySerializer,
-    cleanup: noop,
   };
 }

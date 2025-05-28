@@ -41,8 +41,8 @@ export class EsqlQuery {
     public readonly src: string = '',
 
     /**
-     * Optional array of ANTLR tokens, in case the query was parsed from a
-     * source code.
+     * Optional array of ANTLR tokens, in case the query was parsed from
+     * source text.
      */
     public readonly tokens: Token[] = [],
 

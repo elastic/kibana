@@ -6,6 +6,7 @@
   "license": "Elastic License 2.0",
   "scripts": {
     "evaluate-model": "node ./scripts/model_evaluator",
+    "generate-security-ai-prompts": "node ./scripts/generate_security_ai_prompts",
     "draw-graph": "node ./scripts/draw_graph"
   }
 }

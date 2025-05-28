@@ -15,6 +15,7 @@
     "@kbn/utils",
     "@kbn/config-schema",
     "@kbn/std",
+    "@kbn/telemetry-config",
   ],
   "exclude": [
     "target/**/*",

@@ -58,6 +58,7 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { LazyAssetInventoryReplaceDefineStepExtension } from './asset_inventory/components/fleet_extensions/lazy_asset_inventory_replacestep_extension';
 import { LazyCustomCriblExtension } from './security_integrations/cribl/components/lazy_custom_cribl_extension';
 
 import type { SecurityAppStore } from './common/store/types';
@@ -482,6 +483,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         upsellingService: this.contract.upsellingService,
       },
     };
+
+    registerExtension({
+      package: 'cloud_asset_inventory',
+      view: 'package-policy-replace-define-step',
+      Component: LazyAssetInventoryReplaceDefineStepExtension,
+    });
 
     registerExtension({
       package: 'endpoint',

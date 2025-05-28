@@ -15,8 +15,6 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLMessage,
-  type ESQLAstRenameExpression,
-  Walker,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -55,6 +53,7 @@ import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
 } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
 import {
   suggest as suggestForGrok,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
@@ -244,7 +243,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: '',
     examples: ['TS index', 'TS index, index2'],
-    suggest: () => [],
+    suggest: suggestForTimeseries,
   },
   {
     name: 'stats',
@@ -301,35 +300,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]',
     examples: ['… | RENAME old AS new', '… | RENAME old AS new, a AS b'],
     suggest: suggestForRename,
-    validate: (command: ESQLCommand<'rename'>) => {
-      const messages: ESQLMessage[] = [];
-
-      const renameExpressions = Walker.findAll(command, (node) => {
-        return node.type === 'option' && node.name === 'as';
-      }) as ESQLAstRenameExpression[];
-
-      for (const expression of renameExpressions) {
-        const [column] = expression.args;
-        if (!isColumnItem(column)) {
-          continue;
-        }
-
-        if (hasWildcard(column.name)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'wildcardNotSupportedForCommand',
-              values: {
-                command: 'RENAME',
-                value: column.name,
-              },
-              locations: column.location,
-            })
-          );
-        }
-      }
-
-      return messages;
-    },
     fieldsSuggestionsAfter: fieldsSuggestionsAfterRename,
   },
   {

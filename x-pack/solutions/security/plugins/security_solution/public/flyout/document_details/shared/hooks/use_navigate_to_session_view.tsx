@@ -9,6 +9,7 @@ import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
+import { LeftPanelVisualizeTab } from '../../left';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
@@ -84,7 +85,7 @@ export const useNavigateToSessionView = ({
         scopeId,
       },
       path: {
-        tab: 'visualize',
+        tab: LeftPanelVisualizeTab,
         subTab: SESSION_VIEW_ID,
       },
     }),
@@ -98,7 +99,7 @@ export const useNavigateToSessionView = ({
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
-        tabId: 'visualize',
+        tabId: LeftPanelVisualizeTab,
       });
     }
     // if flyout is not currently open, open flyout with right and left panels

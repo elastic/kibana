@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiConfirmModalProps } from '@elastic/eui';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { CANCEL_BUTTON } from './property_actions/translations';
 
 type Pros = Pick<EuiConfirmModalProps, 'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'>;
@@ -18,9 +18,14 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
   onConfirm,
   onCancel,
 }) => {
+  const titleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       title={title}
+      titleProps={{
+        id: titleId,
+      }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={CANCEL_BUTTON}
@@ -28,6 +33,7 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
       buttonColor="danger"
       defaultFocusedButton="confirm"
       data-test-subj="property-actions-confirm-modal"
+      aria-labelledby={titleId}
     />
   );
 };

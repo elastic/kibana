@@ -6,12 +6,9 @@
  */
 
 import {
-  StreamGetResponse,
-  WiredStreamGetResponse,
+  Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
-  isGroupStreamDefinition,
-  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { partition } from 'lodash';
@@ -21,6 +18,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
 import { DashboardLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
@@ -34,7 +32,7 @@ export async function readStream({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<StreamGetResponse> {
+}): Promise<Streams.all.GetResponse> {
   const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
     await assetClient.getAssetLinks(name, ['dashboard', 'query']),
@@ -50,7 +48,7 @@ export async function readStream({
     return query.query;
   });
 
-  if (isGroupStreamDefinition(streamDefinition)) {
+  if (Streams.GroupStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       dashboards,
@@ -70,7 +68,7 @@ export async function readStream({
     streamsClient.getPrivileges(name),
   ]);
 
-  if (isUnwiredStreamDefinition(streamDefinition)) {
+  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
@@ -85,17 +83,21 @@ export async function readStream({
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-      inherited_fields: {},
-    };
+    } satisfies Streams.UnwiredStream.GetResponse;
   }
 
-  const body: WiredStreamGetResponse = {
+  const inheritedFields = addAliasesForNamespacedFields(
+    streamDefinition,
+    getInheritedFieldsFromAncestors(ancestors)
+  );
+
+  const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    inherited_fields: inheritedFields,
   };
 
   return body;

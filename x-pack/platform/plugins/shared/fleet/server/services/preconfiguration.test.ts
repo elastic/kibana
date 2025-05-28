@@ -156,6 +156,7 @@ jest.mock('./epm/packages/install', () => ({
             error: new Error(installError),
             installType: 'install',
             installSource: 'registry',
+            pkgName,
           };
         }
 
@@ -171,6 +172,7 @@ jest.mock('./epm/packages/install', () => ({
           status: 'installed',
           installType: 'install',
           installSource: 'registry',
+          pkgName,
         };
       } else if (args.installSource === 'upload') {
         const { archiveBuffer } = args;
@@ -182,7 +184,7 @@ jest.mock('./epm/packages/install', () => ({
         const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
         mockInstalledPackages.set(pkgName, packageInstallation);
 
-        return { status: 'installed', installType: 'install', installSource: 'upload' };
+        return { status: 'installed', installType: 'install', installSource: 'upload', pkgName };
       }
     }
   ),

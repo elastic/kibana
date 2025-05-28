@@ -19,7 +19,7 @@ paths:
               type: object
               properties:
                 delete:
-                  $ref: '#/components/schemas/BulkActionBase'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
                 create:
                   type: array
                   items:
@@ -110,7 +110,7 @@ components:
         alertId:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         'timestamp':
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
         summary:
           type: string
         recommendedActions:
@@ -158,24 +158,6 @@ components:
         - deleted
         - skipped
 
-
-    BulkCrudActionSummary:
-      type: object
-      properties:
-        failed:
-          type: integer
-        skipped:
-          type: integer
-        succeeded:
-          type: integer
-        total:
-          type: integer
-      required:
-        - failed
-        - skipped
-        - succeeded
-        - total
-
     AlertSummaryBulkCrudActionResponse:
       type: object
       properties:
@@ -193,7 +175,7 @@ components:
             results:
               $ref: '#/components/schemas/AlertSummaryBulkCrudActionResults'
             summary:
-              $ref: '#/components/schemas/BulkCrudActionSummary'
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
             errors:
               type: array
               items:
@@ -203,20 +185,6 @@ components:
             - summary
       required:
         - attributes
-
-    BulkActionBase:
-      x-inline: true
-      type: object
-      properties:
-        query:
-          type: string
-          description: Query to filter alert summaries
-        ids:
-          type: array
-          description: Array of alert summary IDs
-          minItems: 1
-          items:
-            type: string
 
     AlertSummaryCreateProps:
       type: object

@@ -17,6 +17,7 @@ const {
   latencyCorrelations,
   failedTransactionsCorrelations,
   dependencyLatency,
+  spanLatency,
 } = LatencyDistributionChartType;
 
 export function getDurationField(chartType: LatencyDistributionChartType, searchMetrics: boolean) {
@@ -31,6 +32,7 @@ export function getDurationField(chartType: LatencyDistributionChartType, search
     case failedTransactionsCorrelations:
       return TRANSACTION_DURATION;
     case dependencyLatency:
+    case spanLatency:
       return SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;

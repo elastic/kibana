@@ -26,14 +26,12 @@ export interface CreateDatasetQualityArgs {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
   telemetryClient: ITelemetryClient;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetails = ({
   core,
   plugins,
   telemetryClient,
-  isFailureStoreEnabled,
 }: CreateDatasetQualityArgs) => {
   return ({ controller }: DatasetQualityDetailsProps) => {
     const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
@@ -42,7 +40,6 @@ export const createDatasetQualityDetails = ({
       () => ({
         service: controller.service,
         telemetryClient,
-        isFailureStoreEnabled,
       }),
       [controller.service]
     );

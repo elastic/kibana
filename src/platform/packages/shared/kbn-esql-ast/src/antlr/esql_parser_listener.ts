@@ -21,6 +21,8 @@ import { ToDataTypeContext } from "./esql_parser.js";
 import { RowCommandContext } from "./esql_parser.js";
 import { FieldsContext } from "./esql_parser.js";
 import { FieldContext } from "./esql_parser.js";
+import { RerankFieldsContext } from "./esql_parser.js";
+import { RerankFieldContext } from "./esql_parser.js";
 import { FromCommandContext } from "./esql_parser.js";
 import { TimeSeriesCommandContext } from "./esql_parser.js";
 import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
@@ -230,6 +232,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitField?: (ctx: FieldContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rerankFields`.
+	 * @param ctx the parse tree
+	 */
+	enterRerankFields?: (ctx: RerankFieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rerankFields`.
+	 * @param ctx the parse tree
+	 */
+	exitRerankFields?: (ctx: RerankFieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rerankField`.
+	 * @param ctx the parse tree
+	 */
+	enterRerankField?: (ctx: RerankFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rerankField`.
+	 * @param ctx the parse tree
+	 */
+	exitRerankField?: (ctx: RerankFieldContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.fromCommand`.
 	 * @param ctx the parse tree

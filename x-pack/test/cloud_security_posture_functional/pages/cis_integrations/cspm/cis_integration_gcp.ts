@@ -201,18 +201,12 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        await cisIntegration.navigateToIntegrationCspList();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
 
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getSecretComponentReplaceButton(
-              'button-replace-credentials-json'
-            )) !== undefined
-          ).to.be(true);
-        });
+        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
       });
     });
 
@@ -302,12 +296,12 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.fillInTextField(CREDENTIALS_JSON_TEST_ID, credentialJsonName);
         await cisIntegration.clickSaveIntegrationButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.navigateToIntegrationCspList();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getSecretComponentReplaceButton(
-            'button-replace-credentials-json'
-          )) !== undefined
-        ).to.be(true);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
       });
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON', async () => {
         const projectName = 'PRJ_NAME_TEST';
@@ -315,6 +309,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_MANUAL_TEST_ID);
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.fillInTextField(PRJ_ID_TEST_ID, projectName);
         await cisIntegration.chooseDropDown(
           CREDENTIALS_TYPE_TEST_ID,
@@ -324,17 +319,13 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          await cisIntegration.clickFirstElementOnIntegrationTable();
-          expect(
-            (await cisIntegration.getSecretComponentReplaceButton(
-              'button-replace-credentials-json'
-            )) !== undefined
-          ).to.be(true);
-        });
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        await cisIntegration.navigateToIntegrationCspList();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await cisIntegration.clickFirstElementOnIntegrationTable();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
       });
       it('Users are able to switch credentials_type from/to Credential File fields ', async () => {
         const credentialFileName = 'CRED_FILE_TEST_NAME';

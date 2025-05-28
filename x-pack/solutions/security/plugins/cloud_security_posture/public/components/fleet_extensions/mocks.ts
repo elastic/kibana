@@ -353,3 +353,81 @@ export const getPackageInfoMock = () => {
     },
   };
 };
+
+export const getAwsPackageInfoMock = () => {
+  return {
+    ...getPackageInfoMock(),
+    policy_templates: [
+      {
+        name: 'cspm',
+        title: 'Cloud Security Posture Management (CSPM)',
+        description: 'Identify & remediate configuration risks in the Cloud services you leverage',
+        multiple: true,
+        inputs: [
+          {
+            title: 'Amazon Web Services',
+            vars: [
+              {
+                name: 'cloud_formation_template',
+                type: 'text',
+                title: 'CloudFormation Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Quick Create Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-8.18.0.yml&stackName=Elastic-Cloud-Security-Posture-Management&param_EnrollmentToken=FLEET_ENROLLMENT_TOKEN&param_FleetUrl=FLEET_URL&param_ElasticAgentVersion=KIBANA_VERSION&param_ElasticArtifactServer=https://artifacts.elastic.co/downloads/beats/elastic-agent',
+              },
+              {
+                name: 'cloud_formation_credentials_template',
+                type: 'text',
+                title: 'CloudFormation Credentials Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Cloud Credentials Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-8.18.0.yml',
+              },
+              {
+                name: 'cloud_formation_cloud_connectors_template',
+                type: 'text',
+                title: 'CloudFormation Cloud Connectors Template',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'Template URL to Cloud Formation Cloud Connectors Stack',
+                default:
+                  'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-8.18.0.yml&param_ElasticResourceId=RESOURCE_ID',
+              },
+            ],
+            type: 'cloudbeat/cis_aws',
+            description: 'CIS Benchmark for Amazon Web Services Foundations',
+          },
+        ],
+        categories: ['security', 'cloud', 'aws', 'google_cloud'],
+        icons: [
+          {
+            src: '/img/logo_cspm.svg',
+            title: 'CSPM logo',
+            size: '32x32',
+            type: 'image/svg+xml',
+          },
+        ],
+        data_streams: ['findings'],
+        deployment_modes: {
+          default: {
+            enabled: true,
+          },
+          agentless: {
+            enabled: true,
+            is_default: true,
+            organization: 'security',
+            division: 'engineering',
+            team: 'cloud-security-posture',
+          },
+        },
+      },
+    ],
+  };
+};

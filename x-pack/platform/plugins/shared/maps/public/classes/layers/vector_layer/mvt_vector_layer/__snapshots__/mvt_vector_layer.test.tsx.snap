@@ -5,7 +5,7 @@ exports[`getLayerIcon Layers with non-elasticsearch sources should display icon 
   style={
     Object {
       "fill": "#16C5C0",
-      "stroke": "#119793",
+      "stroke": "#009490",
       "strokeWidth": "1px",
     }
   }

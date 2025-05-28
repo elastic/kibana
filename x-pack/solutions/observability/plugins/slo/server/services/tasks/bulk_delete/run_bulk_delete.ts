@@ -103,7 +103,7 @@ export async function runBulkDelete(
 
   try {
     await rulesClient.bulkDeleteRules({
-      filter: `alert.attributes.params.sloId:${itemsDeletedSuccessfully.join(' or ')}`,
+      filter: `alert.attributes.params.sloId:(${itemsDeletedSuccessfully.join(' or ')})`,
     });
   } catch (err) {
     logger.debug(`Error deleting rules: ${err}`);

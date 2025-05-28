@@ -10,7 +10,7 @@ import { EuiFormRow, EuiColorPicker, EuiTextArea } from '@elastic/eui';
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { PromptContextTemplate } from '../../../..';
 import { getRandomEuiColor } from './helpers';
 import * as i18n from './translations';

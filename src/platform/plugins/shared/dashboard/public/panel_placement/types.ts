@@ -8,9 +8,10 @@
  */
 
 import { MaybePromise } from '@kbn/utility-types';
-import { DashboardPanelState } from '../../common';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { GridData } from '../../server/content_management';
 import { PanelPlacementStrategy } from '../plugin_constants';
+import { DashboardLayout } from '../dashboard_api/types';
 
 export interface PanelPlacementSettings {
   strategy?: PanelPlacementStrategy;
@@ -20,15 +21,15 @@ export interface PanelPlacementSettings {
 
 export interface PanelPlacementReturn {
   newPanelPlacement: Omit<GridData, 'i'>;
-  otherPanels: { [key: string]: DashboardPanelState };
+  otherPanels: DashboardLayout;
 }
 
 export interface PanelPlacementProps {
   width: number;
   height: number;
-  currentPanels: { [key: string]: DashboardPanelState };
+  currentPanels: DashboardLayout;
 }
 
 export type GetPanelPlacementSettings<SerializedState extends object = object> = (
-  serializedState?: SerializedState
+  serializedState?: SerializedPanelState<SerializedState>
 ) => MaybePromise<PanelPlacementSettings>;

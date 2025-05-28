@@ -74,11 +74,6 @@ export const FilterView: FC<Props> = ({
         title, // use native tooltip for non-read-only filter pills
         iconType: 'cross',
         iconSide: 'right',
-        closeButtonProps: {
-          // Removing tab focus on close button because the same option can be obtained through the context menu
-          // Also, we may want to add a `DEL` keyboard press functionality
-          tabIndex: -1,
-        },
         iconOnClick,
         iconOnClickAriaLabel: i18n.translate(
           'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',

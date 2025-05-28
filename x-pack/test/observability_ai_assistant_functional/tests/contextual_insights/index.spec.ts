@@ -122,7 +122,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       it('should show the contextual insight component on the APM error details page', async () => {
         await navigateToError();
 
-        void proxy.interceptConversation('This error is nothing to worry about. Have a nice day!');
+        void proxy.interceptWithResponse('This error is nothing to worry about. Have a nice day!');
 
         await openContextualInsights();
 

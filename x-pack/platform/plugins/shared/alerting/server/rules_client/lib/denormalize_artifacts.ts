@@ -15,8 +15,14 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
   const references: SavedObjectReference[] = [];
   const artifacts: Required<DenormalizedArtifacts> = {
     dashboards: [],
+    investigation_guide: { blob: '' },
   };
 
+  if (ruleArtifacts && ruleArtifacts.investigation_guide) {
+    artifacts.investigation_guide = {
+      blob: ruleArtifacts.investigation_guide.blob,
+    };
+  }
   if (ruleArtifacts && ruleArtifacts.dashboards) {
     ruleArtifacts.dashboards.forEach((dashboard, i) => {
       const refName = `dashboard_${i}`;

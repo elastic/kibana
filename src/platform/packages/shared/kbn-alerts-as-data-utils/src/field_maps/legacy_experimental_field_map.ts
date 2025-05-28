@@ -12,6 +12,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
+  ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
@@ -30,6 +31,12 @@ export const legacyExperimentalFieldMap = {
     scaling_factor: 100,
     required: false,
     array: true,
+  },
+  [ALERT_GROUPING]: {
+    type: 'object',
+    dynamic: true,
+    array: false,
+    required: false,
   },
   [ALERT_GROUP]: {
     type: 'object',

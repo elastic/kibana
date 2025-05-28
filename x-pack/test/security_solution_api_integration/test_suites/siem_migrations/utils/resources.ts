@@ -24,7 +24,7 @@ export interface GetRuleMigrationMissingResourcesParams {
   expectStatusCode?: number;
 }
 
-export const migrationResourcesRouteHelpersFactory = (supertest: SuperTest.Agent) => {
+export const ruleMigrationResourcesRouteHelpersFactory = (supertest: SuperTest.Agent) => {
   return {
     getMissingResources: async ({
       migrationId,

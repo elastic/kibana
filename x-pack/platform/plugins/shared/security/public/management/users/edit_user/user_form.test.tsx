@@ -47,9 +47,11 @@ describe('UserForm', () => {
 
   const renderUserForm = (props: Partial<UserFormProps> = {}) => {
     return render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <UserForm {...defaultProps} {...props} />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <UserForm {...defaultProps} {...props} />
+        </Providers>
+      )
     );
   };
 

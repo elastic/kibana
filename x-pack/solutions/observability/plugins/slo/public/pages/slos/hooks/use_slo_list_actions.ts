@@ -39,7 +39,7 @@ export function useSloListActions({
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: { rawState: embeddableInput },
         type: SLO_OVERVIEW_EMBEDDABLE_ID,
       };
 

@@ -8,16 +8,12 @@
 import { useMemo } from 'react';
 import { useStoredIntegrationTabId } from './use_stored_state';
 import type { Tab } from '../types';
+import { useIntegrationContext } from './integration_context';
 
 export type UseSelectedTabReturn = ReturnType<typeof useSelectedTab>;
 
-export const useSelectedTab = ({
-  spaceId,
-  integrationTabs,
-}: {
-  spaceId: string;
-  integrationTabs: Tab[];
-}) => {
+export const useSelectedTab = () => {
+  const { spaceId, integrationTabs } = useIntegrationContext();
   const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
     spaceId,
     integrationTabs[0].id

@@ -153,7 +153,7 @@ export class Visitor<
           if (isInside) return ctx.visitExpression(node);
           const isAfter = location.max < pos;
           if (isAfter) {
-            if (ctx.node.location && ctx.node.location.max === location.max) {
+            if (ctx.node.location && ctx.node.location.max >= location.max) {
               return ctx.visitExpression(node) || node;
             }
             return node;

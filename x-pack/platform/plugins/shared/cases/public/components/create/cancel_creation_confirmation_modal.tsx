@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiConfirmModalProps } from '@elastic/eui';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from './translations';
 
 type Props = Pick<
@@ -22,9 +22,14 @@ const CancelCreationConfirmationModalComponent: React.FC<Props> = ({
   onConfirm,
   onCancel,
 }) => {
+  const titleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       title={title}
+      titleProps={{
+        id: titleId,
+      }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={cancelButtonText}
@@ -32,6 +37,7 @@ const CancelCreationConfirmationModalComponent: React.FC<Props> = ({
       buttonColor="danger"
       defaultFocusedButton="confirm"
       data-test-subj="cancel-creation-confirmation-modal"
+      aria-labelledby={titleId}
     />
   );
 };

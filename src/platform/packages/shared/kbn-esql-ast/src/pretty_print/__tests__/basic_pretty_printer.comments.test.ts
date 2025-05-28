@@ -213,4 +213,18 @@ describe('commands', () => {
       assertPrint('FROM a | LEFT JOIN a /*1*/ /*2*/ /*3*/ /*4*/');
     });
   });
+
+  describe('RERANK', () => {
+    test('comments around all elements', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'
+      );
+    });
+
+    test('comments around all elements, two fields', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ id1 /*8*/'
+      );
+    });
+  });
 });

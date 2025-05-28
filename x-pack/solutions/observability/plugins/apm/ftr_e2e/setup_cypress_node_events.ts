@@ -44,11 +44,10 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       events: Array<Record<string, any>>;
       pipeline: ApmSynthtracePipelines;
     }) {
-      synthtraceEsClient.pipeline(
-        synthtraceEsClient.getPipeline(pipeline, { includeSerialization: false })
+      await synthtraceEsClient.index(
+        Readable.from(events),
+        synthtraceEsClient.resolvePipelineType(pipeline, { includeSerialization: false })
       );
-
-      await synthtraceEsClient.index(Readable.from(events));
       return null;
     },
     async 'synthtrace:clean'() {

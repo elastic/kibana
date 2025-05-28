@@ -111,6 +111,7 @@ export {
   isSupportedConnectorType,
   isSupportedConnector,
   getConnectorDefaultModel,
+  getConnectorModel,
   getConnectorProvider,
   connectorToInference,
   type InferenceConnector,
@@ -120,5 +121,11 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
 } from './src/inference_endpoints';
+
+export type {
+  InferenceTracingExportConfig,
+  InferenceTracingLangfuseExportConfig,
+  InferenceTracingPhoenixExportConfig,
+} from './src/tracing';
 
 export { Tokenizer } from './src/utils/tokenizer';

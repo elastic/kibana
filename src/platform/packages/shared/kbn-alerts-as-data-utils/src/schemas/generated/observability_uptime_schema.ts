@@ -89,6 +89,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'kibana.alert.grouping': schemaUnknown,
   labels: schemaUnknown,
   'location.id': schemaStringArray,
   'location.name': schemaStringArray,

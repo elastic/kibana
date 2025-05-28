@@ -30,10 +30,12 @@ import {
 import { licenseService } from '../license';
 import { outputService } from '../output';
 
-export const mapPackagePolicySavedObjectToPackagePolicy = (
-  { id, version, attributes }: SavedObject<PackagePolicySOAttributes>,
-  namespaces?: string[]
-): PackagePolicy => {
+export const mapPackagePolicySavedObjectToPackagePolicy = ({
+  id,
+  version,
+  attributes,
+  namespaces,
+}: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
   const { bump_agent_policy_revision: bumpAgentPolicyRevision, ...restAttributes } = attributes;
   return {
     id,

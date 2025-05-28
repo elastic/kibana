@@ -92,6 +92,7 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CREDENTIALS_TYPE: 'credentials_type_test_id',
   CREDENTIALS_FILE: 'credentials_file_test_id',
   CREDENTIALS_JSON: 'credentials_json_test_id',
+  CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
 };
 
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
@@ -99,3 +100,5 @@ export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscri
 export const COMPLIANCE_SCORE_BAR_UNKNOWN = 'complianceScoreBarUnknown';
 export const COMPLIANCE_SCORE_BAR_FAILED = 'complianceScoreBarFailed';
 export const COMPLIANCE_SCORE_BAR_PASSED = 'complianceScoreBarPassed';
+export const AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ =
+  'launchAwsCloudFormationAccordianInstructions';

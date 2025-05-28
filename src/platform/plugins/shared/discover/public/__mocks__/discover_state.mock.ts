@@ -17,12 +17,16 @@ import type { RuntimeStateManager } from '../application/main/state_management/r
 import {
   createInternalStateStore,
   createRuntimeStateManager,
+  selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import type { DiscoverCustomizationContext } from '../customizations';
+import { createCustomizationService } from '../customizations/customization_service';
+import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
+import { internalStateActions } from '../application/main/state_management/redux';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -57,12 +61,20 @@ export function getDiscoverStateMock({
       ...(toasts && withNotifyOnErrors(toasts)),
     });
   runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
+  const tabsStorageManager = createTabsStorageManager({
+    urlStateStorage: stateStorageContainer,
+    storage: services.storage,
+  });
   const internalState = createInternalStateStore({
     services,
     customizationContext,
     runtimeStateManager,
     urlStateStorage: stateStorageContainer,
+    tabsStorageManager,
   });
+  internalState.dispatch(
+    internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+  );
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
@@ -71,6 +83,15 @@ export function getDiscoverStateMock({
     internalState,
     runtimeStateManager,
   });
+  const tabRuntimeState = selectTabRuntimeState(
+    runtimeStateManager,
+    internalState.getState().tabs.unsafeCurrentId
+  );
+  tabRuntimeState.customizationService$.next({
+    ...createCustomizationService(),
+    cleanup: async () => {},
+  });
+  tabRuntimeState.stateContainer$.next(container);
   if (savedSearch !== false) {
     container.savedSearchState.set(
       savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock

@@ -23,6 +23,7 @@ import {
   EuiSelect,
   type EuiComboBoxOptionOption,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -129,6 +130,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       allowedOutputs,
       updatePackagePolicy,
     ]);
+
+    const advancedOptionsTitleId = useGeneratedHtmlId();
 
     // Managed policy
     const isManaged = packagePolicy.is_managed;
@@ -269,11 +272,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                       flush="left"
+                      aria-expanded={isShowingAdvanced}
                     >
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
-                        defaultMessage="Advanced options"
-                      />
+                      <span id={advancedOptionsTitleId}>
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                          defaultMessage="Advanced options"
+                        />
+                      </span>
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   {!isShowingAdvanced && !!validationResults.namespace ? (
@@ -294,7 +300,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {/* Advanced options content */}
             {isShowingAdvanced ? (
               <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="m"
+                  role="group"
+                  aria-labelledby={advancedOptionsTitleId}
+                >
                   {/* Namespace  */}
                   <EuiFlexItem>
                     <EuiFormRow

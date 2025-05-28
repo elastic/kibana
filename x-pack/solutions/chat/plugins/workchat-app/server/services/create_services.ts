@@ -20,7 +20,7 @@ import { IntegrationRegistry } from './integrations';
 interface CreateServicesParams {
   core: CoreStart;
   config: WorkChatAppConfig;
-  logger: LoggerFactory;
+  loggerFactory: LoggerFactory;
   pluginsDependencies: WorkChatAppPluginStartDependencies;
   integrationRegistry: IntegrationRegistry;
 }
@@ -28,14 +28,14 @@ interface CreateServicesParams {
 export function createServices({
   core,
   config,
-  logger,
+  loggerFactory,
   pluginsDependencies,
   integrationRegistry,
 }: CreateServicesParams): InternalServices {
   integrationRegistry.blockRegistration();
 
   const integrationsService = new IntegrationsServiceImpl({
-    logger: logger.get('services.integrations'),
+    logger: loggerFactory.get('services.integrations'),
     elasticsearch: core.elasticsearch,
     registry: integrationRegistry,
     savedObjects: core.savedObjects,
@@ -45,26 +45,26 @@ export function createServices({
   const conversationService = new ConversationServiceImpl({
     savedObjects: core.savedObjects,
     security: core.security,
-    logger: logger.get('services.conversations'),
+    logger: loggerFactory.get('services.conversations'),
   });
 
   const agentService = new AgentServiceImpl({
     savedObjects: core.savedObjects,
     security: core.security,
-    logger: logger.get('services.agent'),
+    logger: loggerFactory.get('services.agent'),
   });
 
   const agentFactory = new AgentFactory({
     inference: pluginsDependencies.inference,
     tracingConfig: config.tracing,
-    logger: logger.get('services.agentFactory'),
+    logger: loggerFactory.get('services.agentFactory'),
     agentService,
     integrationsService,
   });
 
   const chatService = new ChatService({
     inference: pluginsDependencies.inference,
-    logger: logger.get('services.chat'),
+    logger: loggerFactory.get('services.chat'),
     agentFactory,
     conversationService,
   });

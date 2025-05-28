@@ -25,20 +25,20 @@ export function embeddableInputToExpression<
   UseGenericEmbeddable extends boolean,
   ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined
 >(
-  input: object,
+  state: object,
   embeddableType: string,
   palettes?: PaletteRegistry,
   useGenericEmbeddable?: UseGenericEmbeddable
 ): ConditionalReturnType {
   // if `useGenericEmbeddable` is `true`, it **always** returns a string
   if (useGenericEmbeddable) {
-    return genericToExpression(input, embeddableType) as ConditionalReturnType;
+    return genericToExpression(state, embeddableType) as ConditionalReturnType;
   }
 
   // otherwise, depending on if the embeddable type is defined, it might return undefined
   if (inputToExpressionTypeMap[embeddableType]) {
     return inputToExpressionTypeMap[embeddableType](
-      input as any,
+      state as any,
       palettes
     ) as ConditionalReturnType;
   }

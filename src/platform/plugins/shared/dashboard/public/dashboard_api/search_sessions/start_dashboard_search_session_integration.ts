@@ -15,12 +15,14 @@ import { dataService } from '../../services/kibana_services';
 import type { DashboardApi, DashboardCreationOptions } from '../..';
 import { newSession$ } from './new_session';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
+import { DashboardInternalApi } from '../types';
 
 /**
  * Enables dashboard search sessions.
  */
 export function startDashboardSearchSessionIntegration(
   dashboardApi: DashboardApi,
+  dashboardInternalApi: DashboardInternalApi,
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   setSearchSessionId: (searchSessionId: string) => void
 ) {
@@ -33,15 +35,18 @@ export function startDashboardSearchSessionIntegration(
     createSessionRestorationDataProvider,
   } = searchSessionSettings;
 
-  dataService.search.session.enableStorage(createSessionRestorationDataProvider(dashboardApi), {
-    isDisabled: () =>
-      getDashboardCapabilities().storeSearchSession
-        ? { disabled: false }
-        : {
-            disabled: true,
-            reasonText: noSearchSessionStorageCapabilityMessage,
-          },
-  });
+  dataService.search.session.enableStorage(
+    createSessionRestorationDataProvider(dashboardApi, dashboardInternalApi),
+    {
+      isDisabled: () =>
+        getDashboardCapabilities().storeSearchSession
+          ? { disabled: false }
+          : {
+              disabled: true,
+              reasonText: noSearchSessionStorageCapabilityMessage,
+            },
+    }
+  );
 
   // force refresh when the session id in the URL changes. This will also fire off the "handle search session change" below.
   const searchSessionIdChangeSubscription = sessionIdUrlChangeObservable

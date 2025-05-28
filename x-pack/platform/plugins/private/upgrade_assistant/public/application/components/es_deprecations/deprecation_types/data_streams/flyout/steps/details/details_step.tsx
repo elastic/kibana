@@ -91,6 +91,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               }
               color="danger"
               iconType="warning"
+              data-test-subj="dsInsufficientPrivilegesCallout"
             />
           </Fragment>
         )}
@@ -162,7 +163,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        <EuiText>
+        <EuiText data-test-subj="dataStreamDetailsText">
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.notCompatibleIndicesText"
@@ -238,7 +239,12 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.closeButtonLabel"
                 defaultMessage="Close"
@@ -250,13 +256,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={
-                      status === DataStreamMigrationStatus.cancelled
-                        ? 'warning'
-                        : readOnlyExcluded
-                        ? 'primary'
-                        : 'accent'
-                    }
+                    color={status === DataStreamMigrationStatus.cancelled ? 'warning' : 'primary'}
                     iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
                     onClick={() => initAction('reindex')}
                     isLoading={loading}

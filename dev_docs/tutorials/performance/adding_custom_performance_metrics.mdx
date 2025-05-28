@@ -405,6 +405,38 @@ An event using custom metrics will be indexed with the following structure:
 }
 ```
 
+#### Add inline documentation
+
+The description metadata field is allowing teams to document how a page is instrumentented
+
+```typescript
+...
+  onPageReady({
+    meta: {
+      rangeFrom,
+      rangeTo,
+      description: '[ttfmp_dependencies] Dependencies table is  ready after fetching top_dependencies.'
+    }
+  });
+...
+```
+
+#### Track TTFMP on refresh load
+
+TTFMP supports a new dimension: isInitialLoad, distinguishing between an initial page load and a refresh triggered by actions like the time picker.
+This requires instrumenting `onPageRefreshStart()` when refreshing the page.
+
+```typescript
+...
+  const { onPageRefreshStart } = usePerformanceContext();
+
+   const handleRefresh = () => {
+    onPageRefreshStart()
+   }
+
+...
+```
+
 ### Development environment
 
 The metric will be delivered to the [Telemetry Staging](https://telemetry-v2-staging.elastic.dev/) cluster, alongside with the event's context.

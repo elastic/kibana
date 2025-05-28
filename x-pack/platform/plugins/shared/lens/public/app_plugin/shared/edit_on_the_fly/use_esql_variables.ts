@@ -6,7 +6,6 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -51,11 +50,12 @@ export const useESQLVariables = ({
       }
 
       // add a new control
-      controlGroupApi?.addNewPanel({
+      controlGroupApi?.addNewPanel?.({
         panelType: 'esqlControl',
-        initialState: {
-          ...controlState,
-          id: uuidv4(),
+        serializedState: {
+          rawState: {
+            ...controlState,
+          },
         },
       });
       if (panel && updatedQuery && attributes) {

@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
 import {
   IndexAdapter,
   IndexPatternAdapter,
@@ -27,6 +32,7 @@ import {
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
 } from './rule_migrations_field_maps';
+import { RuleMigrationIndexMigrator } from '../index_migrators';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
@@ -40,6 +46,10 @@ interface CreateClientParams {
 interface CreateAdapterParams {
   adapterId: AdapterId;
   fieldMap: FieldMap;
+}
+
+export interface SetupParams extends Omit<InstallParams, 'logger'> {
+  esClient: ElasticsearchClient;
 }
 
 export class RuleMigrationsDataService {
@@ -96,7 +106,12 @@ export class RuleMigrationsDataService {
     return adapter;
   }
 
-  public async install(params: Omit<InstallParams, 'logger'>): Promise<void> {
+  private async runIndexMigrations(esClient: SetupParams['esClient']) {
+    const indexMigrator = new RuleMigrationIndexMigrator(this.adapters, esClient, this.logger);
+    await indexMigrator.run();
+  }
+
+  private async install(params: SetupParams): Promise<void> {
     await Promise.all([
       this.adapters.rules.install({ ...params, logger: this.logger }),
       this.adapters.resources.install({ ...params, logger: this.logger }),
@@ -104,6 +119,11 @@ export class RuleMigrationsDataService {
       this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
       this.adapters.migrations.install({ ...params, logger: this.logger }),
     ]);
+  }
+
+  public async setup(params: SetupParams): Promise<void> {
+    await this.install(params);
+    await this.runIndexMigrations(params.esClient);
   }
 
   public createClient({ spaceId, currentUser, esScopedClient, dependencies }: CreateClientParams) {

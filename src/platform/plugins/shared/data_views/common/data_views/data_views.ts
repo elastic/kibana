@@ -1134,25 +1134,17 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
-    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
-
-    if (spec.id) {
-      const cachedDataView = this.dataViewCache.get(spec.id);
-
-      if (cachedDataView) {
-        return cachedDataView;
+    if (spec.id && this.dataViewCache.has(spec.id)) {
+      try {
+        return await this.dataViewCache.get(spec.id)!;
+      } catch (e) {
+        // The cached promise failed, so we need to create a new data view
       }
-
-      const dataViewPromise = doCreate();
-
-      this.dataViewCache.set(spec.id, dataViewPromise);
-
-      return dataViewPromise;
     }
 
-    const dataView = await doCreate();
-    this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
-    return dataView;
+    const dataViewPromise = this.createFromSpec(spec, skipFetchFields, displayErrors);
+    this.dataViewCache.set(spec.id ?? (await dataViewPromise).id!, dataViewPromise);
+    return dataViewPromise;
   }
 
   /**

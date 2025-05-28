@@ -63,35 +63,43 @@ export async function createMcpServer({
 
   const searchTool: McpServerTool = {
     name: 'search',
-    description: 'Searches through Salesforce data sources using a semantic query',
+    description: 'Use to search through Salesforce data (like Cases)',
     schema: {
       objects: z
         .array(z.string())
         .optional()
         .describe(
-          `Return what type of Salesforce documents to search through. Can only be a out of these ${dataSources}`
+          `If provided, will limit the types of Salesforce documents to return. Can only be a out of these ${dataSources}.`
         ),
       query: z
         .string()
         .describe(
-          'Return Salesforce documents that relate to this query to search content semantically'
+          'Only Salesforce documents that relate to this query string will be returned. For example, a query of "memory error" may return Case records where the issue was related to running out of RAM.'
         ),
       createdAfter: z
         .string()
         .optional()
-        .describe('Return documents created after this date (format: YYYY-MM-DD)'),
+        .describe(
+          'If provided, will limit results to only include documents created after this date (format: YYYY-MM-DD).'
+        ),
       createdBefore: z
         .string()
         .optional()
-        .describe('Return documents created before this date (format: YYYY-MM-DD)'),
+        .describe(
+          'If provided, will limit results to only include documents created before this date (format: YYYY-MM-DD).'
+        ),
       updatedAfter: z
         .string()
         .optional()
-        .describe('Return documents updated after this date (format: YYYY-MM-DD)'),
+        .describe(
+          'If provided, will limit results to only include documents updated after this date (format: YYYY-MM-DD).'
+        ),
       updatedBefore: z
         .string()
         .optional()
-        .describe('Return documents updated before this date (format: YYYY-MM-DD)'),
+        .describe(
+          'If provided, will limit results to only include documents updated before this date (format: YYYY-MM-DD).'
+        ),
     },
     execute: async ({
       objects,
@@ -126,17 +134,24 @@ export async function createMcpServer({
 
   const getTool: McpServerTool = {
     name: 'get',
-    description: 'Retrieves a Salesforce document by id only. If there is no id use another tool',
+    description:
+      'Retrieves a single Salesforce document by its ID. If there is no ID, use another tool (like "search").',
     schema: {
-      id: z.string().describe('id of document '),
+      id: z.string().describe('ID of the Salesforce document').min(1, 'ID cannot be empty'),
       dataSource: z
         .string()
         .describe(
-          `what Salesforce object type to search through. Supported object types ${dataSources}`
+          `which Salesforce object type to search through. Supported object types ${dataSources}`
         ),
     },
     execute: async ({ id, dataSource }) => {
       try {
+        if (!id) {
+          logger.warn('Salesforce `get` tool called without an ID.');
+          throw new Error(
+            "ID must have a non-empty value. If no ID is present, use another tool, like 'search'."
+          );
+        }
         const content = await getById({
           esClient: elasticsearchClient,
           logger,
@@ -154,7 +169,7 @@ export async function createMcpServer({
   };
 
   const getCasesTool: McpServerTool = {
-    name: 'search_cases',
+    name: 'get_cases',
     description: 'Retrieves Salesforce support cases with flexible filtering options',
     schema: {
       caseNumber: z.array(z.string()).optional().describe('Salesforce case number identifiers'),
@@ -264,7 +279,7 @@ export async function createMcpServer({
           },
         });
 
-        logger.info(`Retrieved ${caseContent.length} support cases`);
+        logger.debug(`Retrieved ${caseContent.length} support cases`);
 
         return toolResultFactory.contentList(caseContent);
       } catch (e) {
@@ -274,7 +289,7 @@ export async function createMcpServer({
   };
 
   const getAccountsTool: McpServerTool = {
-    name: 'search_accounts',
+    name: 'get_accounts',
     description: 'Retrieves Salesforce accounts with flexible filtering options',
     schema: {
       id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
@@ -335,7 +350,7 @@ export async function createMcpServer({
         },
       });
 
-      logger.info(`Retrieved ${accountContent.length} accounts`);
+      logger.debug(`Retrieved ${accountContent.length} accounts`);
 
       return toolResultFactory.contentList(accountContent);
     },

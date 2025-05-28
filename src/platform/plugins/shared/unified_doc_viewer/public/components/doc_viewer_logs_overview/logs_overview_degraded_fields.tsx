@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { forwardRef, useMemo, useState } from 'react';
 import { DataTableRecord } from '@kbn/discover-utils';
 import {
   EuiAccordion,
@@ -31,6 +31,10 @@ import {
 } from '@kbn/deeplinks-observability';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import {
+  ScrollableSectionWrapper,
+  ScrollableSectionWrapperApi,
+} from './scrollable_section_wrapper';
 
 type Direction = 'asc' | 'desc';
 type SortField = 'issue' | 'values';
@@ -108,7 +112,10 @@ export const datasetQualityLinkTitle = i18n.translate(
   }
 );
 
-export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord['raw'] }) => {
+export const LogsOverviewDegradedFields = forwardRef<
+  ScrollableSectionWrapperApi,
+  { rawDoc: DataTableRecord['raw'] }
+>(({ rawDoc }, ref) => {
   const { ignored_field_values: ignoredFieldValues = {}, fields: sourceFields = {} } = rawDoc;
   const countOfDegradedFields = Object.keys(ignoredFieldValues)?.length;
 
@@ -186,29 +193,34 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
   );
 
   return countOfDegradedFields > 0 ? (
-    <>
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={accordionTitle}
-        paddingSize="m"
-        initialIsOpen={false}
-        extraAction={<DatasetQualityLink urlService={urlService} dataStream={dataStream} />}
-        data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
-      >
-        <EuiBasicTable
-          tableLayout="fixed"
-          columns={columns}
-          items={renderedItems ?? []}
-          sorting={{ sort: tableOptions.sort }}
-          onChange={onTableChange}
-          pagination={pagination}
-          data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable"
-        />
-      </EuiAccordion>
-      <EuiHorizontalRule margin="xs" />
-    </>
+    <ScrollableSectionWrapper ref={ref}>
+      {({ forceState, onToggle }) => (
+        <>
+          <EuiAccordion
+            id={accordionId}
+            buttonContent={accordionTitle}
+            paddingSize="m"
+            forceState={forceState}
+            onToggle={onToggle}
+            extraAction={<DatasetQualityLink urlService={urlService} dataStream={dataStream} />}
+            data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
+          >
+            <EuiBasicTable
+              tableLayout="fixed"
+              columns={columns}
+              items={renderedItems ?? []}
+              sorting={{ sort: tableOptions.sort }}
+              onChange={onTableChange}
+              pagination={pagination}
+              data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable"
+            />
+          </EuiAccordion>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
+    </ScrollableSectionWrapper>
   ) : null;
-};
+});
 
 const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedField>> => [
   {

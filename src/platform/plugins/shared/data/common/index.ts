@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109904
-
 export {
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
@@ -17,6 +15,10 @@ export {
   SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
 } from './constants';
+export type { RawValue } from './serializable_field';
+export { SerializableField } from './serializable_field';
+export type { SerializedField, SerializedValue } from './serialize_utils';
+export { SerializableType, deserializeField, serializeField } from './serialize_utils';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
 export { getEsQueryConfig } from './es_query';
@@ -309,7 +311,7 @@ export {
   termsAggFilter,
   getTermsBucketAgg,
   MultiFieldKey,
-  isMultiFieldKey,
+  RangeKey,
   MULTI_FIELD_KEY_SEPARATOR,
   aggMultiTermsFnName,
   aggMultiTerms,

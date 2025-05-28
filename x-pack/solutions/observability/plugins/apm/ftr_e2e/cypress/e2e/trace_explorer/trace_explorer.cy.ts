@@ -29,10 +29,6 @@ describe('Trace Explorer', () => {
         to: new Date(end).getTime(),
       })
     );
-
-    cy.updateAdvancedSettings({
-      'observability:apmTraceExplorerTab': true,
-    });
   });
 
   after(() => {

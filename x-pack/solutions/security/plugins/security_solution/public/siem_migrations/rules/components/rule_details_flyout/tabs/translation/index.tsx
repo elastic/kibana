@@ -21,7 +21,7 @@ import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
-import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
 import * as i18n from './translations';
 import {
@@ -32,23 +32,23 @@ import { TranslationCallOut } from './callout';
 import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 
 interface TranslationTabProps {
-  ruleMigration: RuleMigration;
+  migrationRule: RuleMigrationRule;
   matchedPrebuiltRule?: RuleResponse;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
 export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
-  ({ ruleMigration, matchedPrebuiltRule, onTranslationUpdate }) => {
+  ({ migrationRule, matchedPrebuiltRule, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
 
-    const isInstalled = !!ruleMigration.elastic_rule?.id;
+    const isInstalled = !!migrationRule.elastic_rule?.id;
 
     return (
       <>
         <EuiSpacer size="m" />
-        {ruleMigration.translation_result && !isInstalled && (
+        {migrationRule.translation_result && !isInstalled && (
           <>
-            <TranslationCallOut ruleMigration={ruleMigration} />
+            <TranslationCallOut migrationRule={migrationRule} />
             <EuiSpacer size="m" />
           </>
         )}
@@ -74,11 +74,12 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiBadge
-                      color={convertTranslationResultIntoColor(ruleMigration.translation_result)}
+                      data-test-subj="translationResultBadge"
+                      color={convertTranslationResultIntoColor(migrationRule.translation_result)}
                     >
                       {isInstalled
                         ? i18n.INSTALLED_LABEL
-                        : convertTranslationResultIntoText(ruleMigration.translation_result)}
+                        : convertTranslationResultIntoText(migrationRule.translation_result)}
                     </EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -86,7 +87,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
               <EuiSplitPanel.Inner grow>
                 <EuiFlexGroup gutterSize="s" alignItems="flexStart">
                   <EuiFlexItem grow={1}>
-                    <OriginalRuleQuery ruleMigration={ruleMigration} />
+                    <OriginalRuleQuery migrationRule={migrationRule} />
                   </EuiFlexItem>
                   <EuiFlexItem
                     grow={0}
@@ -97,7 +98,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                   />
                   <EuiFlexItem grow={1}>
                     <TranslatedRuleQuery
-                      ruleMigration={ruleMigration}
+                      migrationRule={migrationRule}
                       matchedPrebuiltRule={matchedPrebuiltRule}
                       onTranslationUpdate={onTranslationUpdate}
                     />
@@ -107,8 +108,8 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             </EuiSplitPanel.Outer>
           </EuiFlexItem>
         </EuiAccordion>
-        {ruleMigration.translation_result === RuleTranslationResult.FULL &&
-          !ruleMigration.elastic_rule?.id && (
+        {migrationRule.translation_result === RuleTranslationResult.FULL &&
+          !migrationRule.elastic_rule?.id && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut

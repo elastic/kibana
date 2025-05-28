@@ -8,14 +8,14 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
-  RuleMigrationDocument,
   createMigrationRules,
   defaultElasticRule,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocuments,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -29,14 +29,14 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Get Prebuilt Rules API', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
 
       // Add some prebuilt rules
       const ruleAssetSavedObjects = [
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return all prebuilt rules matched by migration rules', async () => {
       const migrationId = uuidv4();
 
-      const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
+      const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
         const { query_language: queryLanguage, query, ...rest } = defaultElasticRule;
         return {
           migration_id: migrationId,

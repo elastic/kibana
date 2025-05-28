@@ -223,7 +223,7 @@
         "label": "OptionListWithFieldStats",
         "description": [],
         "signature": [
-          "({ options, placeholder, singleSelection, onChange, selectedOptions, fullWidth, isDisabled, isLoading, isClearable, prepend, compressed, \"aria-label\": ariaLabel, \"data-test-subj\": dataTestSubj, }: OptionListWithFieldStatsProps) => React.JSX.Element"
+          "({ options, placeholder, singleSelection, onChange, selectedOptions, fullWidth, isDisabled, isLoading, isClearable, prepend, compressed, \"aria-label\": ariaLabel, \"data-test-subj\": dataTestSubj, titleId, }: OptionListWithFieldStatsProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/ml/field_stats_flyout/options_list_with_stats/option_list_with_stats.tsx",
         "deprecated": false,
@@ -234,7 +234,7 @@
             "id": "def-public.OptionListWithFieldStats.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  options,\n  placeholder,\n  singleSelection = false,\n  onChange,\n  selectedOptions,\n  fullWidth,\n  isDisabled,\n  isLoading,\n  isClearable = true,\n  prepend,\n  compressed,\n  'aria-label': ariaLabel,\n  'data-test-subj': dataTestSubj,\n}",
+            "label": "{\n  options,\n  placeholder,\n  singleSelection = false,\n  onChange,\n  selectedOptions,\n  fullWidth,\n  isDisabled,\n  isLoading,\n  isClearable = true,\n  prepend,\n  compressed,\n  'aria-label': ariaLabel,\n  'data-test-subj': dataTestSubj,\n  titleId,\n}",
             "description": [],
             "signature": [
               "OptionListWithFieldStatsProps"

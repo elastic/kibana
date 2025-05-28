@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('returns task not found', async () => {
       const status = await sloApi.bulkDeleteStatus('inexistant', adminRoleAuthc);
-      expect(status).eql({ isDone: true, results: [], error: 'Task not found' });
+      expect(status).eql({ isDone: true, error: 'Task not found' });
     });
   });
 }

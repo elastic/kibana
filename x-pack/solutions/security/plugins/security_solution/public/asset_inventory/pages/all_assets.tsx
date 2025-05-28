@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { AssetInventorySearchBar } from '../components/asset_inventory_search_bar';
 import { AssetInventoryFilters } from '../components/filters/asset_inventory_filters';
@@ -31,9 +31,10 @@ import {
 } from '../constants';
 import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
 
-const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
+const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
   query,
   filters,
+  pageFilters,
   sort: [['@timestamp', 'desc']],
 });
 
@@ -85,13 +86,16 @@ const AllAssetsComponent = () => {
       <AssetInventorySearchBar query={urlQuery} setQuery={setUrlQuery} />
       <EuiPageTemplate.Section>
         <AssetInventoryTitle />
+        <EuiSpacer size="l" />
         <OnboardingSuccessCallout />
         <AssetInventoryFilters setQuery={setUrlQuery} />
+        <EuiSpacer size="l" />
         <AssetInventoryBarChart
           isLoading={isLoadingChartData}
           isFetching={isFetchingChartData}
           assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
         />
+        <EuiSpacer size="xl" />
         <AssetInventoryTableSection state={state} />
       </EuiPageTemplate.Section>
     </I18nProvider>

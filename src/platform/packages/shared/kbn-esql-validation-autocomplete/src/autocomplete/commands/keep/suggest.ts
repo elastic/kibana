@@ -33,7 +33,7 @@ export async function suggest({
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const alreadyDeclaredFields = command.args.filter(isColumnItem).map((arg) => arg.name);
+  const alreadyDeclaredFields = command.args.filter(isColumnItem).map((arg) => arg.parts.join('.'));
   const fieldSuggestions = await getColumnsByType('any', alreadyDeclaredFields);
 
   return handleFragment(

@@ -178,12 +178,6 @@ interface NodeDefinitionBase {
    */
   defaultIsCollapsed?: boolean;
   /**
-   * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
-   * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation
-   * panel opening on the right of the side nav.
-   */
-  appendHorizontalRule?: boolean;
-  /**
    * ["group" nodes only] Flag to indicate if the accordion is collapsible.
    * Must be used with `renderAs` set to `"accordion"`
    * @default `true`

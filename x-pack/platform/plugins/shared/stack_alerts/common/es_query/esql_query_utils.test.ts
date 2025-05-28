@@ -116,7 +116,7 @@ describe('ESQL query utils', () => {
               buckets: [
                 {
                   doc_count: 1,
-                  key: '1.8.0',
+                  key: ['1.8.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -135,7 +135,7 @@ describe('ESQL query utils', () => {
                 },
                 {
                   doc_count: 1,
-                  key: '1.2.0',
+                  key: ['1.2.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -161,6 +161,7 @@ describe('ESQL query utils', () => {
         },
         isCountAgg: false,
         isGroupAgg: true,
+        termField: ['ecs.version'],
       });
       expect(rows).toEqual([
         {
@@ -200,7 +201,7 @@ describe('ESQL query utils', () => {
               buckets: [
                 {
                   doc_count: 1,
-                  key: '1.8.0',
+                  key: ['1.8.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -219,7 +220,7 @@ describe('ESQL query utils', () => {
                 },
                 {
                   doc_count: 2,
-                  key: '1.2.0',
+                  key: ['1.2.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -254,6 +255,7 @@ describe('ESQL query utils', () => {
         },
         isCountAgg: false,
         isGroupAgg: true,
+        termField: ['ecs.version'],
       });
       expect(duplicateAlertIds?.size).toBe(1);
     });
@@ -323,7 +325,17 @@ describe('ESQL query utils', () => {
               buckets: [
                 {
                   doc_count: 1,
-                  key: '2023-07-12T13:32:04.174Z,1.8.0,www.elastic.co,test,US,Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1,info,test message,/app-search',
+                  key: [
+                    '2023-07-12T13:32:04.174Z',
+                    '1.8.0',
+                    'www.elastic.co',
+                    'test',
+                    'US',
+                    'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+                    'info',
+                    'test message',
+                    '/app-search',
+                  ],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -350,7 +362,18 @@ describe('ESQL query utils', () => {
                 },
                 {
                   doc_count: 1,
-                  key: '2025-07-12T13:32:04.174Z,1.2.0,400,artifacts.elastic.co,test,US,Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1,info,test message,/app-search',
+                  key: [
+                    '2025-07-12T13:32:04.174Z',
+                    '1.2.0',
+                    '400',
+                    'artifacts.elastic.co',
+                    'test',
+                    'US',
+                    'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+                    'info',
+                    'test message',
+                    '/app-search',
+                  ],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -387,6 +410,18 @@ describe('ESQL query utils', () => {
         },
         isCountAgg: false,
         isGroupAgg: true,
+        termField: [
+          '@timestamp',
+          'ecs.version',
+          'error.code',
+          'host',
+          'name',
+          'geo.dest',
+          'agent',
+          'tags',
+          'message',
+          'request',
+        ],
       });
       expect(longAlertIds?.size).toBe(1);
     });
@@ -406,7 +441,7 @@ describe('ESQL query utils', () => {
               buckets: [
                 {
                   doc_count: 1,
-                  key: '400',
+                  key: ['400'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -432,6 +467,7 @@ describe('ESQL query utils', () => {
         },
         isCountAgg: false,
         isGroupAgg: true,
+        termField: ['error.code'],
       });
       expect(rows).toEqual([
         {
@@ -466,7 +502,7 @@ describe('ESQL query utils', () => {
               buckets: [
                 {
                   doc_count: 1,
-                  key: '1.8.0',
+                  key: ['1.8.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -485,7 +521,7 @@ describe('ESQL query utils', () => {
                 },
                 {
                   doc_count: 1,
-                  key: '400,1.2.0',
+                  key: ['400', '1.2.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -504,7 +540,7 @@ describe('ESQL query utils', () => {
                 },
                 {
                   doc_count: 1,
-                  key: '1.2.0',
+                  key: ['1.2.0'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -530,6 +566,7 @@ describe('ESQL query utils', () => {
         },
         isCountAgg: false,
         isGroupAgg: true,
+        termField: ['error.code', 'ecs.version'],
       });
       expect(rows).toEqual([
         {

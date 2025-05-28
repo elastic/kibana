@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
+  canReadFailureStore: rt.boolean,
 });
 
 const datasetUserPrivilegesRt = rt.intersection([

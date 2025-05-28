@@ -12,7 +12,7 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { SerializedSearchSourceFields } from './types';
 
 export const injectReferences = (
-  searchSourceFields: SerializedSearchSourceFields & { indexRefName: string },
+  searchSourceFields: SerializedSearchSourceFields & { indexRefName?: string },
   references: SavedObjectReference[]
 ) => {
   const searchSourceReturnFields: SerializedSearchSourceFields = { ...searchSourceFields };

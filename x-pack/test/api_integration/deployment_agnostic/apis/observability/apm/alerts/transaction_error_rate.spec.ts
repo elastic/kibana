@@ -240,7 +240,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      beforeEach(async () => {
+      before(async () => {
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionErrorRate,
           name: 'Apm transaction error rate without kql query',
@@ -282,7 +282,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      afterEach(() =>
+      after(() =>
         alertingApi.cleanUpAlerts({
           roleAuthc,
           ruleId,

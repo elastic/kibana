@@ -8,10 +8,14 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
+import { getActionTypeId } from '../../../../../routes/utils';
 
 export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt,
@@ -28,6 +32,8 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
 export interface GenerateChatTitleParams extends NodeParamsBase {
   state: AgentState;
   model: BaseChatModel;
+  telemetryParams?: TelemetryParams;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export async function generateChatTitle({
@@ -36,6 +42,8 @@ export async function generateChatTitle({
   savedObjectsClient,
   state,
   model,
+  telemetryParams,
+  telemetry,
 }: GenerateChatTitleParams): Promise<Partial<AgentState>> {
   try {
     logger.debug(
@@ -65,6 +73,14 @@ export async function generateChatTitle({
       lastNode: NodeType.GENERATE_CHAT_TITLE,
     };
   } catch (e) {
+    telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+      actionTypeId: telemetryParams?.actionTypeId ?? getActionTypeId(state.llmType),
+      model: telemetryParams?.model,
+      errorMessage: e.message ?? e.toString(),
+      assistantStreamingEnabled: telemetryParams?.assistantStreamingEnabled ?? state.isStream,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
+      errorLocation: 'generateChatTitle',
+    });
     return {
       // generate a chat title if there is an error in order to complete the graph
       // limit title to 60 characters

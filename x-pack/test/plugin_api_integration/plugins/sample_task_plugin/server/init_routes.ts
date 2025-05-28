@@ -40,9 +40,22 @@ const taskSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     taskType: schema.string(),
     schedule: schema.maybe(
-      schema.object({
-        interval: schema.string(),
-      })
+      schema.oneOf([
+        schema.object({
+          interval: schema.string(),
+        }),
+        schema.object({
+          rrule: schema.object({
+            freq: schema.number(),
+            interval: schema.number(),
+            tzid: schema.string({ defaultValue: 'UTC' }),
+            byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }))),
+            byminute: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }))),
+            byweekday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 7 }))),
+            bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }))),
+          }),
+        }),
+      ])
     ),
     interval: schema.maybe(schema.string()),
     params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),

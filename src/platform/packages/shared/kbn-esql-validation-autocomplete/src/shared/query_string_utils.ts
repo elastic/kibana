@@ -6,17 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+export function removeComments(text: string): string {
+  // Remove single-line comments
+  const withoutSingleLineComments = text.replace(/\/\/.*?(?:\r\n|\r|\n|$)/gm, '');
+  // Remove multi-line comments
+  const withoutMultiLineComments = withoutSingleLineComments.replace(/\/\*[\s\S]*?\*\//g, '');
+  return withoutMultiLineComments.trim();
+}
 
 export function removeLastPipe(inputString: string): string {
-  const lastPipeIndex = inputString.lastIndexOf('|');
+  const queryNoComments = removeComments(inputString);
+  const lastPipeIndex = queryNoComments.lastIndexOf('|');
   if (lastPipeIndex !== -1) {
-    return inputString.substring(0, lastPipeIndex).trimEnd();
+    return queryNoComments.substring(0, lastPipeIndex).trimEnd();
   }
-  return inputString.trimEnd();
+  return queryNoComments.trimEnd();
 }
 
 export function processPipes(inputString: string) {
-  const parts = inputString.split('|');
+  const queryNoComments = removeComments(inputString);
+  const parts = queryNoComments.split('|');
   const results = [];
   let currentString = '';
 
@@ -33,17 +42,10 @@ export function processPipes(inputString: string) {
 }
 
 export function toSingleLine(inputString: string): string {
-  return inputString
+  const queryNoComments = removeComments(inputString);
+  return queryNoComments
     .split('|')
     .map((line) => line.trim())
     .filter((line) => line !== '')
     .join(' | ');
-}
-
-export function getFirstPipeValue(inputString: string): string {
-  const parts = inputString.split('|');
-  if (parts.length > 1) {
-    return parts[0].trim();
-  }
-  return inputString.trim();
 }

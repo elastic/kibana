@@ -14,6 +14,8 @@ import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistan
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import { SCORE_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/score_suggestions';
+import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -139,7 +141,9 @@ export class LlmProxy {
           )}`
         );
         if (this.interceptors.length > 0) {
-          throw new Error(`Interceptors were not called: ${unsettledInterceptors}`);
+          throw new Error(
+            `Interceptors were not called: ${unsettledInterceptors.map((name) => `\n - ${name}`)}`
+          );
         }
       },
       { retries: 5, maxTimeout: 1000 }
@@ -149,7 +153,7 @@ export class LlmProxy {
     });
   }
 
-  interceptConversation(
+  interceptWithResponse(
     msg: string | string[],
     {
       name,
@@ -158,7 +162,9 @@ export class LlmProxy {
     } = {}
   ) {
     return this.intercept(
-      `Conversation: "${name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`}"`,
+      `interceptWithResponse: "${
+        name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`
+      }"`,
       // @ts-expect-error
       (body) => body.tool_choice?.function?.name === undefined,
       msg
@@ -176,22 +182,26 @@ export class LlmProxy {
     when?: RequestInterceptor['when'];
     interceptorName?: string;
   }) {
-    // @ts-expect-error
-    return this.intercept(interceptorName ?? `Function request: "${name}"`, when, (body) => {
-      return {
-        content: '',
-        tool_calls: [
-          {
-            function: {
-              name,
-              arguments: argumentsCallback(body),
+    return this.intercept(
+      interceptorName ?? `interceptWithFunctionRequest: "${name}"`,
+      when,
+      // @ts-expect-error
+      (body) => {
+        return {
+          content: '',
+          tool_calls: [
+            {
+              function: {
+                name,
+                arguments: argumentsCallback(body),
+              },
+              index: 0,
+              id: `call_${uuidv4()}`,
             },
-            index: 0,
-            id: `call_${uuidv4()}`,
-          },
-        ],
-      };
-    }).completeAfterIntercept();
+          ],
+        };
+      }
+    ).completeAfterIntercept();
   }
 
   interceptSelectRelevantFieldsToolChoice({
@@ -200,9 +210,10 @@ export class LlmProxy {
   }: { from?: number; to?: number } = {}) {
     let relevantFields: RelevantField[] = [];
     const simulator = this.interceptWithFunctionRequest({
-      name: 'select_relevant_fields',
-      // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      name: SELECT_RELEVANT_FIELDS_NAME,
+      when: (requestBody) =>
+        // @ts-expect-error
+        requestBody.tool_choice?.function?.name === SELECT_RELEVANT_FIELDS_NAME,
       arguments: (requestBody) => {
         const messageWithFieldIds = last(requestBody.messages);
         const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
@@ -227,11 +238,13 @@ export class LlmProxy {
     let documents: KnowledgeBaseDocument[] = [];
 
     const simulator = this.interceptWithFunctionRequest({
-      name: 'score',
+      name: SCORE_FUNCTION_NAME,
       // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      when: (requestBody) => requestBody.tool_choice?.function?.name === SCORE_FUNCTION_NAME,
       arguments: (requestBody) => {
-        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
+        const lastMessage = last(requestBody.messages)?.content as string;
+        log.debug(`interceptScoreToolChoice: ${lastMessage}`);
+        documents = extractDocumentsFromMessage(lastMessage, log);
         const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
 
         return JSON.stringify({ scores });

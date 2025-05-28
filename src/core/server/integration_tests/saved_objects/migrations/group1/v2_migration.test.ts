@@ -34,11 +34,10 @@ import {
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
 } from '../kibana_migrator_test_kit.fixtures';
-import { delay, getDocVersion } from '../test_utils';
+import { delay } from '../test_utils';
 import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
-const docVersion = getDocVersion();
 
 describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
@@ -128,8 +127,12 @@ describe('v2 migration', () => {
         await clearLog(logFilePath);
         unknownTypesKit = await getReindexingMigratorTestKit({
           logFilePath,
-          // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true).filter(({ name }) => name !== 'task'),
+          // we must exclude 'deprecated' from the list of registered types
+          // so that it is considered unknown
+          types: getReindexingBaselineTypes(['server', 'task', 'deprecated']),
+          // however we don't want to flag 'deprecated' as a removed type
+          // because we want the migrator to consider it unknown
+          removedTypes: ['server', 'task'],
           settings: {
             migrations: {
               discardUnknownObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -142,7 +145,7 @@ describe('v2 migration', () => {
         await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
           "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
           To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
-          Please refer to https://www.elastic.co/guide/en/kibana/${docVersion}/resolve-migrations-failures.html for more information."
+          Please refer to https://www.elastic.co/docs/troubleshoot/kibana/migration-failures for more information."
         `);
         logs = await readLog(logFilePath);
         expect(logs).toMatch(
@@ -164,7 +167,7 @@ describe('v2 migration', () => {
         transformErrorsKit = await getReindexingMigratorTestKit({
           logFilePath,
           // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true).filter(({ name }) => name !== 'task'),
+          removedTypes: ['deprecated', 'server', 'task'],
           settings: {
             migrations: {
               discardCorruptObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -223,8 +226,8 @@ describe('v2 migration', () => {
         await clearLog(logFilePath);
         kit = await getReindexingMigratorTestKit({
           logFilePath,
-          filterDeprecated: true,
         });
+
         migrationResults = await kit.runMigrations();
         logs = await readLog(logFilePath);
       });

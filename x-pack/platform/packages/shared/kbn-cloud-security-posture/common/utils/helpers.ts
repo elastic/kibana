@@ -184,5 +184,11 @@ export const buildEntityAlertsQuery = ({
         ].filter(Boolean),
       },
     },
+    // TODO: Asset Inventory - remove temp runtime mappings
+    runtime_mappings: {
+      'related.entity': {
+        type: 'keyword',
+      },
+    },
   };
 };

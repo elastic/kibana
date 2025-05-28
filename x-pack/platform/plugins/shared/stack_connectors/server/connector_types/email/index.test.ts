@@ -550,6 +550,7 @@ describe('execute()', () => {
     delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "attachments": undefined,
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
@@ -606,6 +607,7 @@ describe('execute()', () => {
     delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "attachments": undefined,
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
@@ -703,6 +705,163 @@ describe('execute()', () => {
     `);
   });
 
+  test('ensure parameters are as expected with attachments with source NOTIFICATION', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithAttachments = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        attachments: [
+          {
+            content: 'test',
+            contentType: 'test',
+            encoding: 'base64',
+            filename: 'test.pdf',
+          },
+        ],
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithAttachments);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": undefined,
+        "status": "ok",
+      }
+    `);
+
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
+    expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "attachments": Array [
+          Object {
+            "content": "test",
+            "contentType": "test",
+            "encoding": "base64",
+            "filename": "test.pdf",
+          },
+        ],
+        "connectorId": "some-id",
+        "content": Object {
+          "message": "a message to you
+
+      ---
+
+      This message was sent by Elastic.",
+          "messageHTML": null,
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
+    `);
+  });
+
+  test('ensure error when using attachments with no source', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        attachments: [
+          {
+            content: 'test',
+            contentType: 'test',
+            encoding: 'base64',
+            filename: 'test.pdf',
+          },
+        ],
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "Email attachments can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using attachments with source HTTP_REQUEST', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        attachments: [
+          {
+            content: 'test',
+            contentType: 'test',
+            encoding: 'base64',
+            filename: 'test.pdf',
+          },
+        ],
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "Email attachments can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('ensure error when using attachments with source SAVED_OBJECT', async () => {
+    sendEmailMock.mockReset();
+
+    const executorOptionsWithHTML = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      params: {
+        ...executorOptions.params,
+        attachments: [
+          {
+            content: 'test',
+            contentType: 'test',
+            encoding: 'base64',
+            filename: 'test.pdf',
+          },
+        ],
+      },
+    };
+
+    const result = await connectorType.executor(executorOptionsWithHTML);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "Email attachments can only be sent via notifications",
+        "status": "error",
+      }
+    `);
+  });
+
   test('parameters are as expected with no auth', async () => {
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
@@ -723,6 +882,7 @@ describe('execute()', () => {
     delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "attachments": undefined,
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
@@ -775,6 +935,7 @@ describe('execute()', () => {
     delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "attachments": undefined,
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you

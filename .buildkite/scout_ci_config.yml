@@ -7,4 +7,5 @@ ui_tests:
     - observability_onboarding
     - painless_lab
     - security_solution
+    - streams_app
   disabled:

@@ -7669,6 +7669,13 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        frozen_indices_queried_count:
+          description: >-
+            Count of frozen indices queried during the rule execution. These
+            indices could not be entirely excluded after applying the time range
+            filter.
+          minimum: 0
+          type: integer
         gap_range:
           description: Range of the execution gap
           type: object

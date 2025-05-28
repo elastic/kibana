@@ -46,6 +46,7 @@ import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mo
 import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/privilege_monitoring_data_client.mock';
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -100,7 +101,10 @@ export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
 
 const createRequestContextMock = (
   clients: MockClients = createMockClients(),
-  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
+  overrides: {
+    endpointAuthz?: Partial<EndpointAuthz>;
+    endpointAppServices?: EndpointAppContextService;
+  } = {}
 ): SecuritySolutionRequestHandlerContextMock => {
   return {
     core: clients.core,
@@ -131,7 +135,10 @@ const convertRequestContextMock = (
 
 const createSecuritySolutionRequestContextMock = (
   clients: MockClients,
-  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
+  overrides: {
+    endpointAuthz?: Partial<EndpointAuthz>;
+    endpointAppServices?: EndpointAppContextService;
+  } = {}
 ): jest.Mocked<SecuritySolutionApiRequestHandlerContext> => {
   const core = clients.core;
   const kibanaRequest = requestMock.create();
@@ -143,6 +150,15 @@ const createSecuritySolutionRequestContextMock = (
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
+    getEndpointService: jest.fn(() => {
+      if (overrides.endpointAppServices) {
+        return overrides.endpointAppServices;
+      }
+
+      throw new Error(
+        `getEndpointService() not mocked. Needs to be done from withing testing context (due to circular dependencies)`
+      );
+    }),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {

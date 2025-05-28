@@ -221,6 +221,9 @@ export interface Dashboard {
 
 export interface Artifacts {
   dashboards?: Dashboard[];
+  investigation_guide?: {
+    blob: string;
+  };
 }
 
 export interface Rule<Params extends RuleTypeParams = never> {

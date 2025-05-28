@@ -10,7 +10,19 @@ import { injectReferencesIntoArtifacts } from './inject_references';
 
 describe('injectReferencesIntoArtifacts', () => {
   it('returns default value if no artifacts are provided', () => {
-    expect(injectReferencesIntoArtifacts('test-id', undefined, [])).toEqual({ dashboards: [] });
+    expect(injectReferencesIntoArtifacts('test-id', undefined, [])).toEqual({
+      dashboards: [],
+      investigation_guide: { blob: '' },
+    });
+  });
+
+  it('includes investigation guide fields', () => {
+    expect(
+      injectReferencesIntoArtifacts('test-id', { investigation_guide: { blob: '# Summary' } }, [])
+    ).toEqual({
+      dashboards: [],
+      investigation_guide: { blob: '# Summary' },
+    });
   });
 
   it('throws an error if references are not provided', () => {

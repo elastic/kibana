@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { migrationRulesRouteHelpersFactory } from '../../utils';
+import { ruleMigrationRouteHelpersFactory } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Get Integrations', () => {
     it('should return all integrations successfully', async () => {

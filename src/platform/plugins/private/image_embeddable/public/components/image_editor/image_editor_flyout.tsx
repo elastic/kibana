@@ -122,7 +122,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     <>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="s">
-          <h2>
+          <h2 id="image-editor-flyout-title">
             {isEditing ? (
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.editImagetitle"

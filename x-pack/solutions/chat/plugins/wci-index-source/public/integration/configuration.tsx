@@ -28,6 +28,7 @@ import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import type { WCIIndexSourceFilterField, WCIIndexSourceContextField } from '../../common/types';
 import { useGenerateSchema } from '../hooks/use_generate_schema';
 import { useIndexNameAutocomplete } from '../hooks/use_index_name_autocomplete';
+import { translations } from './i18n';
 
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
@@ -116,17 +117,17 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     <>
       <EuiDescribedFormGroup
         ratio="third"
-        title={<h3>Index Source Configuration</h3>}
-        description="Configure the index source details"
+        title={<h3>{translations.indexSourceConfiguration.title}</h3>}
+        description={translations.indexSourceConfiguration.description}
       >
-        <EuiFormRow label="Index">
+        <EuiFormRow label={translations.indexSourceConfiguration.index.label}>
           <Controller
             name="configuration.index"
             control={control}
             render={({ field }) => (
               <EuiComboBox
                 data-test-subj="workchatAppIntegrationEditViewIndex"
-                placeholder={'Select an index'}
+                placeholder={translations.indexSourceConfiguration.index.placeholder}
                 {...field}
                 isLoading={isLoading}
                 selectedOptions={
@@ -150,7 +151,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                       generateSchema({ indexName: field.value }, { onSuccess: onSchemaGenerated });
                     }}
                   >
-                    Generate configuration
+                    {translations.indexSourceConfiguration.index.generateConfig}
                   </EuiButtonEmpty>
                 }
               />
@@ -158,14 +159,14 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           />
         </EuiFormRow>
 
-        <EuiFormRow label="Description">
+        <EuiFormRow label={translations.indexSourceConfiguration.toolDescription.label}>
           <Controller
             name="configuration.description"
             control={control}
             render={({ field }) => (
               <EuiTextArea
                 data-test-subj="workchatAppIntegrationEditViewDescription"
-                placeholder="Enter description"
+                placeholder={translations.indexSourceConfiguration.toolDescription.placeholder}
                 rows={3}
                 {...field}
               />
@@ -173,14 +174,14 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           />
         </EuiFormRow>
 
-        <EuiFormRow label="Query Template">
+        <EuiFormRow label={translations.indexSourceConfiguration.queryTemplate.label}>
           <Controller
             name="configuration.queryTemplate"
             control={control}
             render={({ field }) => (
               <EuiTextArea
                 data-test-subj="workchatAppIntegrationEditViewQueryTemplate"
-                placeholder="Enter Elasticsearch query template"
+                placeholder={translations.indexSourceConfiguration.queryTemplate.placeholder}
                 rows={6}
                 {...field}
               />
@@ -191,13 +192,16 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
 
       <EuiDescribedFormGroup
         ratio="third"
-        title={<h3>Filter Fields</h3>}
-        description="Fields that can be used for filtering documents"
+        title={<h3>{translations.indexSourceConfiguration.filterFields.title}</h3>}
+        description={translations.indexSourceConfiguration.filterFields.description}
       >
         {filterFieldsArray.fields.length === 0 ? (
           <EuiFormRow>
-            <EuiCallOut title="No filter fields defined" color="primary">
-              <p>Add filter fields to allow filtering on specific document fields</p>
+            <EuiCallOut
+              title={translations.indexSourceConfiguration.filterFields.noFields.title}
+              color="primary"
+            >
+              <p>{translations.indexSourceConfiguration.filterFields.noFields.description}</p>
             </EuiCallOut>
           </EuiFormRow>
         ) : (
@@ -205,17 +209,24 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             <EuiPanel paddingSize="s" key={filterField.id} css={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
-                  <EuiFormRow label="Field name">
+                  <EuiFormRow label={translations.indexSourceConfiguration.filterFields.fieldName}>
                     <Controller
                       name={`configuration.fields.filterFields.${index}.field`}
                       control={control}
-                      render={({ field }) => <EuiFieldText placeholder="Field name" {...field} />}
+                      render={({ field }) => (
+                        <EuiFieldText
+                          placeholder={translations.indexSourceConfiguration.filterFields.fieldName}
+                          {...field}
+                        />
+                      )}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EuiFormRow label="Field type">
+                  <EuiFormRow
+                    label={translations.indexSourceConfiguration.filterFields.fieldType.label}
+                  >
                     <Controller
                       name={`configuration.fields.filterFields.${index}.type`}
                       control={control}
@@ -225,7 +236,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Get values">
+                  <EuiFormRow
+                    label={translations.indexSourceConfiguration.filterFields.getValues.label}
+                  >
                     <Controller
                       name={`configuration.fields.filterFields.${index}.getValues`}
                       control={control}
@@ -253,12 +266,20 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiFormRow label="Description">
+              <EuiFormRow
+                label={translations.indexSourceConfiguration.filterFields.fieldDescription.label}
+              >
                 <Controller
                   name={`configuration.fields.filterFields.${index}.description`}
                   control={control}
                   render={({ field }) => (
-                    <EuiFieldText placeholder="Field description" {...field} />
+                    <EuiFieldText
+                      placeholder={
+                        translations.indexSourceConfiguration.filterFields.fieldDescription
+                          .placeholder
+                      }
+                      {...field}
+                    />
                   )}
                 />
               </EuiFormRow>
@@ -279,20 +300,23 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
               })
             }
           >
-            Add filter field
+            {translations.indexSourceConfiguration.filterFields.addField}
           </EuiButton>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
       <EuiDescribedFormGroup
         ratio="third"
-        title={<h3>Context Fields</h3>}
-        description="Fields that provide additional context for the AI"
+        title={<h3>{translations.indexSourceConfiguration.contextFields.title}</h3>}
+        description={translations.indexSourceConfiguration.contextFields.description}
       >
         {contextFieldsArray.fields.length === 0 ? (
           <EuiFormRow>
-            <EuiCallOut title="No context fields defined" color="primary">
-              <p>Add context fields to provide additional information for the AI</p>
+            <EuiCallOut
+              title={translations.indexSourceConfiguration.contextFields.noFields.title}
+              color="primary"
+            >
+              <p>{translations.indexSourceConfiguration.contextFields.noFields.description}</p>
             </EuiCallOut>
           </EuiFormRow>
         ) : (
@@ -300,17 +324,26 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             <EuiPanel paddingSize="s" key={contextField.id} css={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
-                  <EuiFormRow label="Field name">
+                  <EuiFormRow label={translations.indexSourceConfiguration.contextFields.fieldName}>
                     <Controller
                       name={`configuration.fields.contextFields.${index}.field`}
                       control={control}
-                      render={({ field }) => <EuiFieldText placeholder="Field name" {...field} />}
+                      render={({ field }) => (
+                        <EuiFieldText
+                          placeholder={
+                            translations.indexSourceConfiguration.contextFields.fieldName
+                          }
+                          {...field}
+                        />
+                      )}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Semantic">
+                  <EuiFormRow
+                    label={translations.indexSourceConfiguration.contextFields.semantic.label}
+                  >
                     <Controller
                       name={`configuration.fields.contextFields.${index}.type`}
                       control={control}
@@ -347,7 +380,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             iconType="plusInCircle"
             onClick={() => contextFieldsArray.append({ field: '', description: '' })}
           >
-            Add context field
+            {translations.indexSourceConfiguration.contextFields.addField}
           </EuiButton>
         </EuiFormRow>
       </EuiDescribedFormGroup>

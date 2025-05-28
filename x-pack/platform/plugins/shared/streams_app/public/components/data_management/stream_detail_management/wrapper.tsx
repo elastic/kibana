@@ -8,7 +8,7 @@
 import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -60,7 +60,7 @@ export function Wrapper({
               values: { streamId },
             })}
             <EuiBadgeGroup gutterSize="s">
-              {isUnwiredStreamDefinition(definition.stream) && <ClassicStreamBadge />}
+              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>

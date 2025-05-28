@@ -6,7 +6,7 @@
  */
 import { ToolingLog } from '@kbn/tooling-log';
 import { dump } from 'js-yaml';
-import { writeTempfile } from './file_utils';
+import { writeTempfile } from '../util/file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
 import { EisCredentials } from './get_eis_credentials';

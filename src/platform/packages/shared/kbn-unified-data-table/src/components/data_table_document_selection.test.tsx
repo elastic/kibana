@@ -27,6 +27,7 @@ import { getDocId } from '@kbn/discover-utils';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { servicesMock } from '../../__mocks__/services';
+import userEvent from '@testing-library/user-event';
 
 describe('document selection', () => {
   describe('getDocId', () => {
@@ -409,7 +410,7 @@ describe('document selection', () => {
       return {
         getButton: async () => {
           const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
-          menuButton.click();
+          await userEvent.click(menuButton);
           return screen.queryByRole('button', { name: /Compare/ });
         },
       };

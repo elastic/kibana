@@ -8,11 +8,11 @@
  */
 
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { SEARCH_EMBEDDABLE_ID } from './constants';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { Services } from './types';
 
 export function registerSearchEmbeddable(embeddable: EmbeddableSetup, services: Promise<Services>) {
-  embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_ID, async () => {
+  embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
     const { getSearchEmbeddableFactory } = await import('./search_react_embeddable');
     return getSearchEmbeddableFactory(await services);
   });

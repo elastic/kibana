@@ -80,6 +80,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     mappings: getFlattenedObject(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
+    switchToModelVersionAt: soType.switchToModelVersionAt,
   };
 };
 

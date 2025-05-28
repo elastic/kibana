@@ -33,17 +33,12 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       isCollapsible: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.alertSummary,
-              link: securityLink(SecurityPageName.alertSummary),
-            },
-            {
-              id: SecurityPageName.attackDiscovery,
-              link: securityLink(SecurityPageName.attackDiscovery),
-            },
-          ],
+          id: SecurityPageName.alertSummary,
+          link: securityLink(SecurityPageName.alertSummary),
+        },
+        {
+          id: SecurityPageName.attackDiscovery,
+          link: securityLink(SecurityPageName.attackDiscovery),
         },
         {
           breadcrumbStatus: 'hidden',
@@ -96,17 +91,21 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
   ],
   footer: [
     {
-      type: 'navItem',
-      id: SecurityPageName.landing,
-      link: securityLink(SecurityPageName.landing),
-      icon: 'launch',
+      id: 'security_solution_ai_nav_footer',
+      type: 'navGroup',
+      children: [
+        {
+          id: SecurityPageName.landing,
+          link: securityLink(SecurityPageName.landing),
+          icon: 'launch',
+        },
+        {
+          link: 'dev_tools',
+          title: i18nStrings.devTools,
+          icon: 'editorCodeBlock',
+        },
+        createStackManagementNavigationTree(),
+      ],
     },
-    {
-      type: 'navItem',
-      link: 'dev_tools',
-      title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
-    },
-    createStackManagementNavigationTree(),
   ],
 });

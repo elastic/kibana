@@ -11,6 +11,7 @@ import type {
   PackageInfo,
   RegistryVarType,
   PackageListItem,
+  RegistryDataStream,
 } from '../types';
 
 import {
@@ -280,6 +281,75 @@ describe('getNormalizedDataStreams', () => {
     expect(result).toHaveLength(1);
     expect(result[0].streams).toHaveLength(1);
     expect(result?.[0].streams?.[0]?.vars).toEqual([datasetVar]);
+  });
+
+  const inputPkg: PackageInfo = {
+    name: 'log',
+    type: 'input',
+    title: 'Custom logs',
+    version: '2.4.0',
+    description: 'Collect custom logs with Elastic Agent.',
+    format_version: '3.1.5',
+    owner: { github: '' },
+    assets: {} as any,
+    data_streams: [],
+    policy_templates: [
+      {
+        name: 'logs',
+        type: 'logs',
+        title: 'Custom log file',
+        description: 'Collect logs from custom files.',
+        input: 'logfile',
+        template_path: 'input.yml.hbs',
+        vars: [
+          {
+            name: 'paths',
+            type: 'text',
+            title: 'Paths',
+            multi: true,
+            required: true,
+            show_user: true,
+            default: ['/var/log/nginx/access.log*'],
+          },
+        ],
+      },
+    ],
+    latestVersion: '1.3.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+  const expectedInputPackageDataStream: RegistryDataStream = {
+    type: 'logs',
+    dataset: 'log.logs',
+    elasticsearch: {
+      dynamic_dataset: true,
+      dynamic_namespace: true,
+    },
+    title: expect.any(String),
+    release: 'ga',
+    package: 'log',
+    path: 'log.logs',
+    streams: [
+      {
+        input: 'logfile',
+        vars: expect.any(Array),
+        template_path: 'input.yml.hbs',
+        title: 'Custom log file',
+        description: 'Custom log file',
+        enabled: true,
+      },
+    ],
+  };
+  it('should build data streams for input package', () => {
+    expect(getNormalizedDataStreams(inputPkg)).toEqual([expectedInputPackageDataStream]);
+  });
+  it('should use user-defined data stream type in input package', () => {
+    expect(getNormalizedDataStreams(inputPkg, undefined, 'metrics')).toEqual([
+      {
+        ...expectedInputPackageDataStream,
+        type: 'metrics',
+      },
+    ]);
   });
 });
 

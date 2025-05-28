@@ -10,8 +10,12 @@ import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { omit } from 'lodash';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import {
+  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
+  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
+} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
@@ -766,6 +770,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 artifacts: {
                   dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+                  investigation_guide: { blob: 'Sample investigation guide' },
                 },
               })
             );
@@ -788,6 +793,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                       id: dashboardId,
                     },
                   ],
+                  investigation_guide: { blob: 'Sample investigation guide' },
                 },
               })
             );
@@ -847,6 +853,83 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             type: 'dashboard',
           });
         });
+      });
+      describe('create rule with investigation guide artifacts', () => {
+        it('should not return investigation guide artifacts in the rule response', async () => {
+          const response = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  investigation_guide: { blob: 'Sample investigation guide' },
+                },
+              })
+            )
+            .expect(200);
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body.artifacts).to.be(undefined);
+        });
+
+        it('should store investigation guide in the artifacts field', async () => {
+          const expectedArtifacts = {
+            artifacts: {
+              investigation_guide: { blob: 'Sample investigation guide' },
+            },
+          };
+          const createResponse = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestRuleData(expectedArtifacts))
+            .expect(200);
+          objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
+
+          const esResponse = await es.get<SavedObject<RawRule>>(
+            {
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `alert:${createResponse.body.id}`,
+            },
+            { meta: true }
+          );
+
+          const rawInvestigationGuide =
+            (esResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {};
+
+          expect(rawInvestigationGuide).to.eql(expectedArtifacts.artifacts.investigation_guide);
+        });
+
+        it('should deny creating a rule with an investigation guide that exceeds size limits', () =>
+          supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  investigation_guide: {
+                    // purposefully exceed limit
+                    blob: 'a'.repeat(MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH + 1),
+                  },
+                },
+              })
+            )
+            .expect(400));
+
+        it('should deny creating a rule that exceeds dashboard length limits', () =>
+          supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  dashboards: Array.from(
+                    { length: MAX_ARTIFACTS_DASHBOARDS_LENGTH + 1 },
+                    (_, idx) => ({ id: `dashboard-${idx}` })
+                  ),
+                },
+              })
+            )
+            .expect(400));
       });
     });
   });

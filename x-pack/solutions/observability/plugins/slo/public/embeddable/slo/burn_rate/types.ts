@@ -25,7 +25,7 @@ export interface EmbeddableProps {
   reloadSubject?: Subject<boolean>;
 }
 
-interface BurnRateCustomInput {
+export interface BurnRateCustomInput {
   sloId: string;
   sloInstanceId: string;
   duration: string;

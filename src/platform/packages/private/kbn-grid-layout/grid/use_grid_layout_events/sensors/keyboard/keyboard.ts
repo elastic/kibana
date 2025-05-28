@@ -29,70 +29,67 @@ const preventDefault = (e: Event) => e.preventDefault();
 const disableScroll = () => window.addEventListener('wheel', preventDefault, { passive: false });
 const enableScroll = () => window.removeEventListener('wheel', preventDefault);
 
-const scrollToActiveElement = (shouldScrollToEnd: boolean) => {
-  document.activeElement?.scrollIntoView({
-    behavior: 'smooth',
-    block: shouldScrollToEnd ? 'end' : 'start',
-  });
-};
-
-const handleStart = (e: UserKeyboardEvent, onStart: EventHandler, onBlur?: EventHandler) => {
-  e.stopPropagation();
-  e.preventDefault();
-  onStart(e);
-  disableScroll();
-
-  const handleBlur = (blurEvent: Event) => {
-    onBlur?.(blurEvent as UserInteractionEvent);
-    enableScroll();
-  };
-
-  e.target?.addEventListener('blur', handleBlur, { once: true });
-};
-
-const handleMove = (e: UserKeyboardEvent, onMove: EventHandler) => {
-  e.stopPropagation();
-  e.preventDefault();
-  onMove(e);
-};
-
-const handleEnd = (e: UserKeyboardEvent, onEnd: EventHandler, shouldScrollToEnd: boolean) => {
-  e.preventDefault();
-  enableScroll();
-  onEnd(e);
-  scrollToActiveElement(shouldScrollToEnd);
-};
-
-const handleCancel = (e: UserKeyboardEvent, onCancel: EventHandler, shouldScrollToEnd: boolean) => {
-  enableScroll();
-  onCancel(e);
-  scrollToActiveElement(shouldScrollToEnd);
-};
-
 export const startKeyboardInteraction = ({
   e,
-  isEventActive,
   onStart,
   onMove,
   onEnd,
   onCancel,
   onBlur,
-  shouldScrollToEnd = false,
 }: {
   e: UserKeyboardEvent;
-  isEventActive: boolean;
-  shouldScrollToEnd?: boolean;
   onMove: EventHandler;
   onStart: EventHandler;
   onEnd: EventHandler;
   onCancel: EventHandler;
   onBlur?: EventHandler;
 }) => {
-  if (!isEventActive) {
-    if (isStartKey(e)) handleStart(e, onStart, onBlur);
-    return;
+  const handleStart = (ev: UserKeyboardEvent) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    onStart(ev);
+    disableScroll();
+
+    const handleBlur = (blurEvent: Event) => {
+      onBlur?.(blurEvent);
+      enableScroll();
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    /**
+     * TODO: Blur is firing on re-render, so use `mousedown` instead
+     * This should be fixed b∂y https://github.com/elastic/kibana/issues/220309
+     */
+    // ev.target?.addEventListener('blur', handleBlur, { once: true });
+    document.addEventListener('mousedown', handleBlur, { once: true });
+  };
+
+  const handleMove = (ev: UserKeyboardEvent) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    onMove(ev);
+  };
+
+  const handleEnd = (ev: UserKeyboardEvent) => {
+    document.removeEventListener('keydown', handleKeyPress);
+    ev.preventDefault();
+    enableScroll();
+    onEnd(ev);
+  };
+
+  const handleCancel = (ev: UserKeyboardEvent) => {
+    document.removeEventListener('keydown', handleKeyPress);
+    enableScroll();
+    onCancel(ev);
+  };
+
+  const handleKeyPress = (ev: UserKeyboardEvent) => {
+    if (isMoveKey(ev)) handleMove(ev);
+    else if (isEndKey(ev)) handleEnd(ev);
+    else if (isCancelKey(ev)) handleCancel(ev);
+  };
+
+  if (isStartKey(e)) {
+    handleStart(e);
   }
-  if (isMoveKey(e)) handleMove(e, onMove);
-  if (isEndKey(e)) handleEnd(e, onEnd, shouldScrollToEnd);
-  if (isCancelKey(e)) handleCancel(e, onCancel, shouldScrollToEnd);
 };

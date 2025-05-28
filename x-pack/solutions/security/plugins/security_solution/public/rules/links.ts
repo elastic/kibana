@@ -12,7 +12,6 @@ import {
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
-  RULES_MANAGEMENT_PATH,
   RULES_PATH,
   SECURITY_FEATURE_ID,
 } from '../../common/constants';
@@ -54,24 +53,14 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
-      capabilities: `${SECURITY_FEATURE_ID}.show`,
+      capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
       links: [
-        {
-          id: SecurityPageName.rulesManagement,
-          title: SIEM_RULES,
-          path: RULES_MANAGEMENT_PATH,
-          globalSearchDisabled: true,
-          skipUrlState: true,
-          hideTimeline: true,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
-        },
         {
           id: SecurityPageName.rulesAdd,
           title: ADD_RULES,
           path: RULES_ADD_PATH,
           skipUrlState: true,
           hideTimeline: true,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
         {
           id: SecurityPageName.rulesCreate,
@@ -79,7 +68,6 @@ export const links: LinkItem = {
           path: RULES_CREATE_PATH,
           skipUrlState: true,
           hideTimeline: false,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
       ],
     },

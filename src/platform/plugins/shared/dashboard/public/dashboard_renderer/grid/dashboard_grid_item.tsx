@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DASHBOARD_MARGIN_SIZE } from './constants';
-import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
+import { DASHBOARD_MARGIN_SIZE } from './constants';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -127,7 +125,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       };
 
       return (
-        <ReactEmbeddableRenderer
+        <EmbeddableRenderer
           type={type}
           maybeId={id}
           getParentApi={() => ({

@@ -19,7 +19,9 @@ import {
   GetOpId,
   assignToPaths,
   extractTags,
+  setXState,
 } from './util';
+import { CustomOperationObject } from './type';
 
 describe('extractTags', () => {
   test.each([
@@ -345,5 +347,61 @@ describe('createOpIdGenerator', () => {
     },
   ])('$input.method $input.path -> $output', ({ input, output }) => {
     expect(getOpId(input)).toBe(output);
+  });
+});
+
+describe('setXState', () => {
+  test.each([
+    {
+      name: 'stable with since',
+      availability: { stability: 'stable' as const, since: '8.0.0' },
+      expected: 'Generally available; added in 8.0.0',
+    },
+    {
+      name: 'stable without since',
+      availability: { stability: 'stable' as const },
+      expected: 'Generally available',
+    },
+    {
+      name: 'experimental with since',
+      availability: { stability: 'experimental' as const, since: '8.0.0' },
+      expected: 'Technical Preview; added in 8.0.0',
+    },
+    {
+      name: 'experimental without since',
+      availability: { stability: 'experimental' as const },
+      expected: 'Technical Preview',
+    },
+    {
+      name: 'beta with since',
+      availability: { stability: 'beta' as const, since: '8.0.0' },
+      expected: 'Beta; added in 8.0.0',
+    },
+    {
+      name: 'beta without since',
+      availability: { stability: 'beta' as const },
+      expected: 'Beta',
+    },
+    {
+      name: 'no availability',
+      availability: undefined,
+      expected: undefined,
+    },
+    {
+      name: 'only since',
+      availability: { since: '8.0.0' },
+      expected: 'Added in 8.0.0',
+    },
+  ])('$name', ({ availability, expected }) => {
+    // Create a minimal valid CustomOperationObject with required responses property
+    const operation: CustomOperationObject = {
+      responses: {
+        '200': {
+          description: 'OK',
+        },
+      },
+    };
+    setXState(availability, operation);
+    expect(operation['x-state']).toBe(expected);
   });
 });

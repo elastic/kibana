@@ -14,7 +14,7 @@ import {
 import {
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const bulkUpdatePrompts = async (
   http: HttpSetup,

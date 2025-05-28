@@ -6,8 +6,7 @@
  */
 
 import type { StateComparators } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointComponentApi, ChangePointEmbeddableState } from './types';
 
@@ -15,6 +14,16 @@ type ChangePointEmbeddableCustomState = Omit<
   ChangePointEmbeddableState,
   'timeRange' | 'title' | 'description' | 'hidePanelTitles'
 >;
+
+export const changePointComparators: StateComparators<ChangePointEmbeddableCustomState> = {
+  viewType: 'referenceEquality',
+  dataViewId: 'referenceEquality',
+  fn: 'referenceEquality',
+  metricField: 'referenceEquality',
+  splitField: 'referenceEquality',
+  partitions: 'deepEquality',
+  maxSeriesToPlot: 'referenceEquality',
+};
 
 export const initializeChangePointControls = (rawState: ChangePointEmbeddableState) => {
   const viewType = new BehaviorSubject<ChangePointDetectionViewType>(rawState.viewType);
@@ -35,7 +44,7 @@ export const initializeChangePointControls = (rawState: ChangePointEmbeddableSta
     maxSeriesToPlot.next(update.maxSeriesToPlot);
   };
 
-  const serializeChangePointChartState = (): ChangePointEmbeddableCustomState => {
+  const getLatestState = (): ChangePointEmbeddableCustomState => {
     return {
       viewType: viewType.getValue(),
       dataViewId: dataViewId.getValue(),
@@ -47,18 +56,8 @@ export const initializeChangePointControls = (rawState: ChangePointEmbeddableSta
     };
   };
 
-  const changePointControlsComparators: StateComparators<ChangePointEmbeddableCustomState> = {
-    viewType: [viewType, (arg) => viewType.next(arg)],
-    dataViewId: [dataViewId, (arg) => dataViewId.next(arg)],
-    fn: [fn, (arg) => fn.next(arg)],
-    metricField: [metricField, (arg) => metricField.next(arg)],
-    splitField: [splitField, (arg) => splitField.next(arg)],
-    partitions: [partitions, (arg) => partitions.next(arg), fastIsEqual],
-    maxSeriesToPlot: [maxSeriesToPlot, (arg) => maxSeriesToPlot.next(arg)],
-  };
-
   return {
-    changePointControlsApi: {
+    api: {
       viewType,
       dataViewId,
       fn,
@@ -68,7 +67,24 @@ export const initializeChangePointControls = (rawState: ChangePointEmbeddableSta
       maxSeriesToPlot,
       updateUserInput,
     } as unknown as ChangePointComponentApi,
-    serializeChangePointChartState,
-    changePointControlsComparators,
+    anyStateChange$: merge(
+      viewType,
+      dataViewId,
+      fn,
+      metricField,
+      splitField,
+      partitions,
+      maxSeriesToPlot
+    ).pipe(map(() => undefined)),
+    getLatestState,
+    reinitializeState: (lastSavedState: ChangePointEmbeddableCustomState) => {
+      viewType.next(lastSavedState.viewType);
+      dataViewId.next(lastSavedState.dataViewId);
+      fn.next(lastSavedState.fn);
+      metricField.next(lastSavedState.metricField);
+      splitField.next(lastSavedState.splitField);
+      partitions.next(lastSavedState.partitions);
+      maxSeriesToPlot.next(lastSavedState.maxSeriesToPlot);
+    },
   };
 };

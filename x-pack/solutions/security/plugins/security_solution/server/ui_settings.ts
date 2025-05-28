@@ -12,6 +12,9 @@ import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   APP_ID,
+  DEFAULT_AI_CONNECTOR,
+  DEFAULT_ALERT_TAGS_KEY,
+  DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -26,23 +29,19 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
+  ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_CCS_READ_WARNING_SETTING,
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
-  ENABLE_CCS_READ_WARNING_SETTING,
   SHOW_RELATED_INTEGRATIONS_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-  DEFAULT_ALERT_TAGS_KEY,
-  DEFAULT_ALERT_TAGS_VALUE,
-  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
-  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
-  ENABLE_ASSET_INVENTORY_SETTING,
-  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -66,12 +65,6 @@ export const initUiSettings = (
   experimentalFeatures: ExperimentalFeatures,
   validationsEnabled: boolean
 ) => {
-  const enableVisualizationsInFlyoutLabel = i18n.translate(
-    'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel',
-    {
-      defaultMessage: 'Enable visualizations in flyout',
-    }
-  );
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -215,22 +208,6 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solution: 'security',
     },
-    [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
-      name: enableVisualizationsInFlyoutLabel,
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
-        {
-          defaultMessage:
-            'Enable visualizations (analyzer and session viewer) in document details flyout.',
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solution: 'security',
-    },
     [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
         defaultMessage: 'Enable graph visualization',
@@ -238,13 +215,8 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.
-            <br/>Note: This feature requires the {visualizationFlyoutFeatureFlag} setting to be enabled.
-            <br/>Please ensure both settings are enabled to use graph visualizations in flyout.`,
-          values: {
-            em: (chunks) => `<em>${chunks}</em>`,
-            visualizationFlyoutFeatureFlag: `<code>${enableVisualizationsInFlyoutLabel}</code>`,
-          },
+          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.`,
+          values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),
       type: 'boolean',

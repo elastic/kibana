@@ -8,9 +8,9 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import type { GraphState } from '../../types';
+import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
 import { AnonymizedEventsRetriever } from './anonymized_events_retriever';
 
 export const getRetrieveAnonymizedEventsNode = ({
@@ -31,7 +31,7 @@ export const getRetrieveAnonymizedEventsNode = ({
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;
-}): ((state: GraphState) => Promise<GraphState>) => {
+}): ((state: DefendInsightsGraphState) => Promise<DefendInsightsGraphState>) => {
   let localReplacements = { ...(replacements ?? {}) };
   const localOnNewReplacements = (newReplacements: Replacements) => {
     localReplacements = { ...localReplacements, ...newReplacements };
@@ -39,7 +39,9 @@ export const getRetrieveAnonymizedEventsNode = ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  const retrieveAnonymizedEvents = async (state: GraphState): Promise<GraphState> => {
+  const retrieveAnonymizedEvents = async (
+    state: DefendInsightsGraphState
+  ): Promise<DefendInsightsGraphState> => {
     logger?.debug(() => '---RETRIEVE ANONYMIZED EVENTS---');
 
     const { start, end } = state;
@@ -62,7 +64,7 @@ export const getRetrieveAnonymizedEventsNode = ({
 
     return {
       ...state,
-      anonymizedEvents: documents,
+      anonymizedDocuments: documents,
       replacements: localReplacements,
     };
   };

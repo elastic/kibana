@@ -78,7 +78,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('navigates to maintenance windows', async () => {
       await svlCommonPage.loginAsAdmin();
       await svlSecNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.openSection('category-management');
+      await svlCommonNavigation.sidenav.openSection(
+        'security_solution_nav_footer.category-management'
+      );
       await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([

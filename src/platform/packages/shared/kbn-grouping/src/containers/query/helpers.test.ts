@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MAX_RUNTIME_FIELD_SIZE } from '.';
 import { createGroupFilter } from './helpers';
 
 const selectedGroup = 'host.name';
@@ -39,7 +40,12 @@ describe('createGroupFilter', () => {
     const selectedGroupMock = 'vulnerability.id';
     const cveMockData = ['CVE-2021-12345', 'CVE-2021-56789'];
     const result = createGroupFilter(selectedGroupMock, cveMockData, multiValueFields);
-    expect(result[0].query.script).toBeUndefined();
+    const mockResponse = {
+      source: `doc[params['field']].size() <  ${MAX_RUNTIME_FIELD_SIZE}`,
+      params: { field: 'vulnerability.id', size: 2 },
+    };
+
+    expect(result[0].query.script.script).toEqual(mockResponse);
   });
 
   it('returns filter with script key when selectedGroup is not included in multiValueFields', () => {

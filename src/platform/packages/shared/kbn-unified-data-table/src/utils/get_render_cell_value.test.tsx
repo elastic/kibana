@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { of } from 'rxjs';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -50,9 +49,6 @@ const mockServices = {
   },
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
-  },
-  theme: {
-    theme$: of({ darkMode: false }),
   },
 };
 

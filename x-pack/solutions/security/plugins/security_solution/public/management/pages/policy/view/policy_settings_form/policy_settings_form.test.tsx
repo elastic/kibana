@@ -81,11 +81,11 @@ describe('Endpoint Policy Settings Form', () => {
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
     });
 
-    it('should hide the event merging banner when user dismisses it', () => {
+    it('should hide the event merging banner when user dismisses it', async () => {
       render();
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
 
-      renderResult.getByTestId('euiDismissCalloutButton').click();
+      await userEvent.click(renderResult.getByTestId('euiDismissCalloutButton'));
 
       expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
     });

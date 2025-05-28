@@ -84,7 +84,11 @@ const RiskScoreBadge: React.FC<{
       data-test-subj={dataTestSubj ?? 'risk-score'}
     >
       <EuiTextColor color="default">
-        <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
+        <EuiHealth
+          className="eui-alignMiddle"
+          color={RISK_SEVERITY_COLOUR[severity]}
+          textSize="inherit"
+        >
           {severity}
         </EuiHealth>
       </EuiTextColor>

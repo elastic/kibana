@@ -27,6 +27,7 @@
     "@kbn/logging",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": [
     "target/**/*",

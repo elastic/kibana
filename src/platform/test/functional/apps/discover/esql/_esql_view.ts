@@ -26,6 +26,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dataViews = getService('dataViews');
+  const elasticChart = getService('elasticChart');
+  const filterBar = getService('filterBar');
+
   const { common, discover, dashboard, header, timePicker, unifiedFieldList, unifiedSearch } =
     getPageObjects([
       'common',
@@ -235,6 +238,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.dragFieldToTable('a');
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
+      });
+
+      it('should allow brushing time series', async () => {
+        await timePicker.setDefaultAbsoluteRange();
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from logstash-* | limit 100`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const initialTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(initialTimeConfig.start).to.equal(timePicker.defaultStartTime);
+        expect(initialTimeConfig.end).to.equal(timePicker.defaultEndTime);
+
+        const renderingCount = await elasticChart.getVisualizationRenderingCount();
+        await discover.brushHistogram();
+        await discover.waitUntilSearchingHasFinished();
+        // no filter pill created for time brush
+        expect(await filterBar.getFilterCount()).to.be(0);
+        // chart and time picker updated
+        await elasticChart.waitForRenderingCount(renderingCount + 1);
+        const updatedTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:41:22.854');
+        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 04:14:56.951');
       });
     });
 

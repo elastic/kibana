@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Document } from '@langchain/core/documents';
+import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
+import type { AttackDiscovery, DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common';
 
 import {
@@ -68,3 +71,31 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
     graphType: DEFEND_INSIGHTS_ID,
   },
 };
+
+export type GraphInsightTypes = AttackDiscovery | DefendInsight;
+
+export interface BaseGraphState<T extends GraphInsightTypes> {
+  anonymizedDocuments: Document[];
+  combinedGenerations: string;
+  combinedRefinements: string;
+  continuePrompt: string;
+  end?: DateMath;
+  errors: string[];
+  filter?: Record<string, unknown> | null;
+  generationAttempts: number;
+  generations: string[];
+  hallucinationFailures: number;
+  insights: T[] | null;
+  maxGenerationAttempts: number;
+  maxHallucinationFailures: number;
+  maxRepeatedGenerations: number;
+  prompt: string;
+  refinements: string[];
+  refinePrompt: string;
+  replacements: Replacements;
+  start?: DateMath;
+  unrefinedResults: T[] | null;
+}
+
+export type AttackDiscoveryGraphState = BaseGraphState<AttackDiscovery>;
+export type DefendInsightsGraphState = BaseGraphState<DefendInsight>;

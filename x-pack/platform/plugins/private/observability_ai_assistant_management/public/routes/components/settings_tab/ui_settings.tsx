@@ -13,24 +13,22 @@ import {
   aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
-import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
 
-export function UISettings() {
+export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const {
     docLinks,
     settings,
     notifications,
     application: { capabilities, getUrlForApp },
   } = useKibana().services;
-  const knowledgeBase = useKnowledgeBase();
   const { config } = useAppContext();
 
   const settingsKeys = [
@@ -43,6 +41,7 @@ export function UISettings() {
     useEditableSettings(settingsKeys);
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
+
   async function handleSave() {
     try {
       await saveAll();
@@ -62,7 +61,6 @@ export function UISettings() {
 
   return (
     <>
-      <EuiSpacer />
       {settingsKeys.map((settingKey) => {
         const field = fields[settingKey];
 

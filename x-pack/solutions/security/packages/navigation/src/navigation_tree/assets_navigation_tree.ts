@@ -80,8 +80,11 @@ export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => (
       ],
     },
     {
-      title: '',
-      renderItem: () => renderIntegrationsLinkCallout(core),
+      children: [
+        {
+          renderItem: () => renderIntegrationsLinkCallout(core),
+        },
+      ],
     },
   ],
 });

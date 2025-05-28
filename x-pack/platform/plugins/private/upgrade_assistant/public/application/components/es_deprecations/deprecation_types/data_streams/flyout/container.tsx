@@ -118,31 +118,40 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     await cancelReadonly();
   }, [cancelReadonly]);
 
-  const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
-    useMemo(() => {
-      if (!meta) {
-        return {
-          indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
-          docsSizeFormatted: containerMessages.unknownMessage,
-          lastIndexCreationDateFormatted: containerMessages.unknownMessage,
-        };
-      }
-
+  const {
+    docsSizeFormatted,
+    indicesRequiringUpgradeDocsCount,
+    lastIndexCreationDateFormatted,
+    oldestIncompatibleDocFormatted,
+  } = useMemo(() => {
+    if (!meta) {
       return {
-        indicesRequiringUpgradeDocsCount:
-          typeof meta.indicesRequiringUpgradeDocsCount === 'number'
-            ? `${meta.indicesRequiringUpgradeDocsCount}`
-            : 'Unknown',
-        docsSizeFormatted:
-          typeof meta.indicesRequiringUpgradeDocsSize === 'number'
-            ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
-            : 'Unknown',
-        lastIndexCreationDateFormatted:
-          typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
-            ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
-            : 'Unknown',
+        indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
+        docsSizeFormatted: containerMessages.unknownMessage,
+        lastIndexCreationDateFormatted: containerMessages.unknownMessage,
+        oldestIncompatibleDocFormatted: undefined,
       };
-    }, [meta]);
+    }
+
+    return {
+      indicesRequiringUpgradeDocsCount:
+        typeof meta.indicesRequiringUpgradeDocsCount === 'number'
+          ? `${meta.indicesRequiringUpgradeDocsCount}`
+          : 'Unknown',
+      docsSizeFormatted:
+        typeof meta.indicesRequiringUpgradeDocsSize === 'number'
+          ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
+          : 'Unknown',
+      lastIndexCreationDateFormatted:
+        typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
+          ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
+          : 'Unknown',
+      oldestIncompatibleDocFormatted:
+        typeof meta.oldestIncompatibleDocTimestamp === 'number'
+          ? `${moment(meta.oldestIncompatibleDocTimestamp).format(DATE_FORMAT)}`
+          : undefined,
+    };
+  }, [meta]);
 
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
@@ -224,11 +233,26 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 onStopReindex();
               }
             }}
+            startReadonly={startReadonly}
+            correctiveAction={correctiveAction as DataStreamsAction}
           />
         );
       }
       case 'completed': {
-        return <MigrationCompletedFlyoutStep meta={meta} resolutionType={resolutionType} />;
+        if (!meta || !resolutionType) {
+          return (
+            <InitializingFlyoutStep
+              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
+            />
+          );
+        }
+        return (
+          <MigrationCompletedFlyoutStep
+            meta={meta}
+            resolutionType={resolutionType}
+            closeFlyout={closeFlyout}
+          />
+        );
       }
     }
   }, [
@@ -246,6 +270,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     resolutionType,
     initMigration,
     correctiveAction,
+    startReadonly,
   ]);
 
   return (
@@ -253,7 +278,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       {flyoutStep !== 'initializing' && (
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
-            isCritical={deprecation.isCritical}
+            level={deprecation.level}
             isResolved={status === DataStreamMigrationStatus.completed}
           />
           <EuiSpacer size="s" />
@@ -267,17 +292,34 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 <EuiFlexItem>
                   <EuiDescriptionList
                     textStyle="reverse"
-                    listItems={[
-                      {
-                        title: i18n.translate(
-                          'xpack.upgradeAssistant.dataStream.flyout.container.affectedIndicesCreatedOnOrBefore',
-                          {
-                            defaultMessage: 'Migration required for indices created on or before',
-                          }
-                        ),
-                        description: lastIndexCreationDateFormatted,
-                      },
-                    ]}
+                    data-test-subj="dataStreamLastIndexCreationDate"
+                    listItems={
+                      oldestIncompatibleDocFormatted
+                        ? [
+                            {
+                              title: i18n.translate(
+                                'xpack.upgradeAssistant.dataStream.flyout.container.oldestIncompatibleDoc',
+                                {
+                                  defaultMessage:
+                                    'Migration required for data indexed on or before',
+                                }
+                              ),
+                              description: oldestIncompatibleDocFormatted,
+                            },
+                          ]
+                        : [
+                            {
+                              title: i18n.translate(
+                                'xpack.upgradeAssistant.dataStream.flyout.container.affectedIndicesCreatedOnOrBefore',
+                                {
+                                  defaultMessage:
+                                    'Migration required for indices created on or before',
+                                }
+                              ),
+                              description: lastIndexCreationDateFormatted,
+                            },
+                          ]
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexGroup>
@@ -295,6 +337,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                           description: docsSizeFormatted,
                         },
                       ]}
+                      data-test-subj="dataStreamSize"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -311,6 +354,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                           description: indicesRequiringUpgradeDocsCount,
                         },
                       ]}
+                      data-test-subj="dataStreamDocumentCount"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -13,19 +13,13 @@ import {
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
 import {
-  IngestStreamGetResponse,
   IngestStreamLifecycle,
-  StreamGetResponse,
-  UnwiredStreamGetResponse,
-  WiredStreamGetResponse,
   getAncestors,
   isIlmLifecycle,
-  isUnwiredStreamGetResponse,
-  isWiredStreamDefinition,
-  isWiredStreamGetResponse,
   findInheritedLifecycle,
   findInheritingStreams,
   isDslLifecycle,
+  Streams,
 } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -68,7 +62,7 @@ interface ModalOptions {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   getIlmPolicies: () => Promise<PolicyFromES[]>;
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   updateInProgress: boolean;
 }
 
@@ -378,9 +372,9 @@ function IlmModal({
 }
 
 function InheritModal({ definition, ...options }: ModalOptions) {
-  if (isWiredStreamGetResponse(definition)) {
+  if (Streams.WiredStream.GetResponse.is(definition)) {
     return <InheritModalWired definition={definition} {...options} />;
-  } else if (isUnwiredStreamGetResponse(definition)) {
+  } else if (Streams.UnwiredStream.GetResponse.is(definition)) {
     return <InheritModalUnwired definition={definition} {...options} />;
   }
 }
@@ -390,7 +384,7 @@ function InheritModalWired({
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: WiredStreamGetResponse }) {
+}: ModalOptions & { definition: Streams.WiredStream.GetResponse }) {
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
 
   const parents = useMemo(() => {
@@ -458,7 +452,7 @@ function InheritModalUnwired({
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: UnwiredStreamGetResponse }) {
+}: ModalOptions & { definition: Streams.UnwiredStream.GetResponse }) {
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
@@ -495,7 +489,7 @@ function ModalFooter({
   onConfirm,
   closeModal,
 }: {
-  definition: StreamGetResponse;
+  definition: Streams.all.GetResponse;
   updateInProgress: boolean;
   confirmationLabel: string;
   confirmationIsDisabled?: boolean;
@@ -504,19 +498,19 @@ function ModalFooter({
 }) {
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
   const inheritingStreams = useMemo(() => {
-    if (!isWiredStreamGetResponse(definition) || wiredStreamsLoading || !wiredStreams) {
+    if (!Streams.WiredStream.GetResponse.is(definition) || wiredStreamsLoading || !wiredStreams) {
       return [];
     }
     return findInheritingStreams(
       definition.stream,
-      wiredStreams.filter(isWiredStreamDefinition)
+      wiredStreams.filter(Streams.WiredStream.Definition.is)
     ).filter((name) => name !== definition.stream.name);
   }, [definition, wiredStreams, wiredStreamsLoading]);
 
   return (
     <EuiModalFooter>
       <EuiFlexGroup direction="column">
-        {isWiredStreamGetResponse(definition) ? (
+        {Streams.WiredStream.GetResponse.is(definition) ? (
           <EuiFlexItem>
             <EuiCallOut
               title={i18n.translate(

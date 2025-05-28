@@ -21,6 +21,7 @@ describe('getOutdatedDocumentsQuery', () => {
   it('generates the correct query for types using model versions', () => {
     const fooType = createType({
       name: 'foo',
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -28,6 +29,7 @@ describe('getOutdatedDocumentsQuery', () => {
     });
     const barType = createType({
       name: 'bar',
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,
@@ -158,6 +160,7 @@ describe('getOutdatedDocumentsQuery', () => {
         '7.17.2': dummyMigration,
         '8.5.0': dummyMigration,
       },
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: dummyModelVersion,
         2: dummyModelVersion,

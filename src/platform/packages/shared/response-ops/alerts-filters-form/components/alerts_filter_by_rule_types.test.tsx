@@ -115,6 +115,22 @@ describe('AlertsFilterByRuleTypes', () => {
     expect(comboboxInput).toHaveAttribute('disabled');
   });
 
+  it('should disable the combobox when no rule types are available', async () => {
+    mockUseGetInternalRuleTypesQuery.mockReturnValue({
+      types: [],
+      isLoading: false,
+      isError: false,
+    });
+    render(
+      <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
+        <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
+      </AlertsFiltersFormContextProvider>
+    );
+    const comboboxInput = screen.getByTestId('comboBoxSearchInput');
+    expect(comboboxInput).toHaveAttribute('disabled');
+    expect(comboboxInput).toHaveAttribute('placeholder', 'No rule types available');
+  });
+
   describe('filterMetadata', () => {
     it('should have the correct type id and component', () => {
       expect(filterMetadata.id).toEqual('ruleTypes');

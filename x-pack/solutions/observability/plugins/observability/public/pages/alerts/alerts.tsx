@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
@@ -133,6 +133,13 @@ function InternalAlertsPage() {
       });
     }
   };
+
+  const onGroupingsChange = useCallback(
+    ({ activeGroups }: { activeGroups: string[] }) => {
+      alertSearchBarStateProps.onGroupingsChange(activeGroups);
+    },
+    [alertSearchBarStateProps]
+  );
 
   useEffect(() => {
     return setScreenContext?.({
@@ -330,6 +337,12 @@ function InternalAlertsPage() {
                 globalQuery={globalQuery}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                initialGroupings={
+                  alertSearchBarStateProps?.groupings?.length
+                    ? alertSearchBarStateProps.groupings
+                    : undefined
+                }
+                onGroupingsChange={onGroupingsChange}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
                 renderGroupPanel={renderGroupPanel}
                 getGroupStats={getGroupStats}

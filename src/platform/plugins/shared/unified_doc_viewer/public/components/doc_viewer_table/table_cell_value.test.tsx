@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { TableFieldValue } from './table_cell_value';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
@@ -64,7 +65,7 @@ describe('TableFieldValue', () => {
     expect(valueElement.getAttribute('css')).toBeDefined();
     expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
 
-    toggleButton.click();
+    await userEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();
@@ -74,7 +75,7 @@ describe('TableFieldValue', () => {
     expect(valueElement.getAttribute('css')).toBeNull();
     expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
 
-    toggleButton.click();
+    await userEvent.click(toggleButton);
 
     toggleButton = screen.getByTestId('toggleLongFieldValue-message');
     expect(toggleButton).toBeInTheDocument();

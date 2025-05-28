@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { camelCase, pick } from 'lodash';
+import { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -25,9 +25,7 @@ import {
   euiFocusRing,
   useEuiFontSize,
   euiTextTruncate,
-  transparentize,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +37,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { CoreStart } from '@kbn/core/public';
+import chroma from 'chroma-js';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
   Datasource,
@@ -46,7 +45,6 @@ import {
   FramePublicAPI,
   DatasourceMap,
   VisualizationMap,
-  DatasourceLayers,
   UserMessagesGetter,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -608,6 +606,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
+  const dangerAlpha10 = chroma(euiTheme.colors.danger).alpha(0.1).css();
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -616,7 +615,7 @@ export function SuggestionPanel({
         paddingSize: wrapSuggestions ? 'm' : 's',
       }}
       css={css`
-        padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
+        padding-bottom: ${wrapSuggestions ? 0 : euiTheme.size.s};
         .euiAccordion__buttonContent {
           width: 100%;
         }
@@ -672,10 +671,10 @@ export function SuggestionPanel({
           padding-top: ${euiTheme.size.xs};
           mask-image: linear-gradient(
             to right,
-            ${transparentize(euiTheme.colors.danger, 0.1)} 0%,
+            ${dangerAlpha10} 0%,
             ${euiTheme.colors.danger} 5px,
             ${euiTheme.colors.danger} calc(100% - 5px),
-            ${transparentize(euiTheme.colors.danger, 0.1)} 100%
+            ${dangerAlpha10} 100%
           );
         `}
       >
@@ -708,30 +707,6 @@ function getPreviewExpression(
     datasourceLayers: { ...frame.datasourceLayers },
   };
   try {
-    // use current frame api and patch apis for changed datasource layers
-    if (
-      visualizableState.keptLayerIds &&
-      visualizableState.datasourceId &&
-      visualizableState.datasourceState
-    ) {
-      const datasource = datasources[visualizableState.datasourceId];
-      const datasourceState = visualizableState.datasourceState;
-      const updatedLayerApis: DatasourceLayers = pick(
-        frame.datasourceLayers,
-        visualizableState.keptLayerIds
-      );
-      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
-      changedLayers.forEach((layerId) => {
-        if (updatedLayerApis[layerId]) {
-          updatedLayerApis[layerId] = datasource.getPublicAPI({
-            layerId,
-            state: datasourceState,
-            indexPatterns: frame.dataViews.indexPatterns,
-          });
-        }
-      });
-    }
-
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,
@@ -743,7 +718,7 @@ function getPreviewExpression(
     return visualization.toPreviewExpression(
       visualizableState.visualizationState,
       suggestionFrameApi.datasourceLayers,
-      datasourceExpressionsByLayers ?? undefined
+      datasourceExpressionsByLayers
     );
   } catch (error) {
     showMemoizedErrorNotification(error);

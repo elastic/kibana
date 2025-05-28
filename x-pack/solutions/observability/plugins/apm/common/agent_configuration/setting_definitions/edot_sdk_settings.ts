@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { RawSettingDefinition } from './types';
+import { loggingLevelRt } from '../runtime_types/logging_level_rt';
 
 export const edotSDKSettings: RawSettingDefinition[] = [
   {
@@ -43,6 +44,28 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         defaultMessage: 'No spans will be collected for any instrumentation modules.\n' + '\n',
       }
     ),
+    includeAgents: ['opentelemetry/java/elastic'],
+  },
+  {
+    key: 'logging_level',
+    validation: loggingLevelRt,
+    type: 'select',
+    defaultValue: 'info',
+    label: i18n.translate('xpack.apm.agentConfig.loggingLevel.label', {
+      defaultMessage: 'Logging level',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.loggingLevel.description', {
+      defaultMessage: 'Sets the logging level for the agent',
+    }),
+    options: [
+      { text: 'trace', value: 'trace' },
+      { text: 'debug', value: 'debug' },
+      { text: 'info', value: 'info' },
+      { text: 'warn', value: 'warn' },
+      { text: 'error', value: 'error' },
+      { text: 'fatal', value: 'fatal' },
+      { text: 'off', value: 'off' },
+    ],
     includeAgents: ['opentelemetry/java/elastic'],
   },
   {

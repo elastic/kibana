@@ -11,7 +11,7 @@
         "label": "DeprecationBadge",
         "description": [],
         "signature": [
-          "({ isCritical, isResolved }: Props) => React.JSX.Element"
+          "({ level, isResolved }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/src/components/deprecation_badge.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.DeprecationBadge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ isCritical, isResolved }",
+            "label": "{ level, isResolved }",
             "description": [],
             "signature": [
               "Props"

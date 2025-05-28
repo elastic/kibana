@@ -34,7 +34,7 @@ export interface TabPreviewProps {
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
   tabItem: TabItem;
-  getPreviewData: (item: TabItem) => TabPreviewData;
+  previewData: TabPreviewData;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
 }
@@ -60,7 +60,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   showPreview,
   setShowPreview,
   tabItem,
-  getPreviewData,
+  previewData,
   stopPreviewOnHover,
   previewDelay = 500,
 }) => {
@@ -86,14 +86,14 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         leftPosition = windowWidth - PREVIEW_WIDTH + window.scrollX;
       }
 
-      setTabPreviewData(getPreviewData(tabItem));
+      setTabPreviewData(previewData);
 
       setTabPosition({
         top: rect.bottom + window.scrollY,
         left: leftPosition,
       });
     }
-  }, [showPreview, getPreviewData, tabItem]);
+  }, [showPreview, previewData, tabItem]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {

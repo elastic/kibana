@@ -273,6 +273,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -471,6 +472,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -499,6 +501,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -541,6 +544,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -567,6 +571,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -593,6 +598,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -632,6 +638,7 @@ describe('Discover state', () => {
             discoverSessionId: 'the-saved-search-id',
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -659,6 +666,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -690,6 +698,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -722,6 +731,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -754,6 +764,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -773,6 +784,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -794,6 +806,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -822,6 +835,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -843,6 +857,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -882,6 +897,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -912,6 +928,7 @@ describe('Discover state', () => {
             discoverSessionId: 'the-saved-search-id-with-timefield',
             dataViewSpec: undefined,
             defaultUrlState: {},
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -945,6 +962,7 @@ describe('Discover state', () => {
                 dataViewId: 'index-pattern-with-timefield-id',
               }),
             },
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -975,6 +993,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: dataViewSpecMock,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1000,6 +1019,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1024,6 +1044,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1045,6 +1066,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchAdHoc.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1070,6 +1092,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMockWithESQL.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1119,6 +1142,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1155,6 +1179,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1181,6 +1206,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1212,6 +1238,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1246,6 +1273,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1272,6 +1300,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1285,6 +1314,7 @@ describe('Discover state', () => {
             discoverSessionId: undefined,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1301,6 +1331,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1325,6 +1356,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );
@@ -1378,6 +1410,7 @@ describe('Discover state', () => {
             discoverSessionId: savedSearchMock.id,
             dataViewSpec: undefined,
             defaultUrlState: undefined,
+            shouldClearAllTabs: false,
           },
         })
       );

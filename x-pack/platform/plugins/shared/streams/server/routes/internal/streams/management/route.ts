@@ -7,10 +7,10 @@
 
 import {
   SampleDocument,
+  Streams,
   conditionSchema,
   conditionToQueryDsl,
-  getFields,
-  isUnwiredStreamDefinition,
+  getConditionFields,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -76,7 +76,7 @@ export const sampleStreamRoute = createServerRoute({
       // This can be optimized in the future.
       runtime_mappings: condition
         ? Object.fromEntries(
-            getFields(condition).map((field) => [
+            getConditionFields(condition).map((field) => [
               field.name,
               { type: field.type === 'string' ? ('keyword' as const) : ('double' as const) },
             ])
@@ -127,7 +127,7 @@ export const unmanagedAssetDetailsRoute = createServerRoute({
 
     const stream = await streamsClient.getStream(params.path.name);
 
-    if (!isUnwiredStreamDefinition(stream)) {
+    if (!Streams.UnwiredStream.Definition.is(stream)) {
       throw new WrongStreamTypeError(
         `Stream definition for ${params.path.name} is not an unwired stream`
       );

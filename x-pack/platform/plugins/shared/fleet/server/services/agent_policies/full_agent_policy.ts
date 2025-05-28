@@ -579,11 +579,14 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
-      ? { ssl }
-      : {}),
     ...(secrets ? { secrets } : {}),
   };
+  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+    newOutput.ssl = {
+      ...newOutput.ssl,
+      ...ssl,
+    };
+  }
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;

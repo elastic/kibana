@@ -75,6 +75,13 @@ describe('contentReferenceComponentFactory', () => {
         type: 'SecurityAlertsPage',
       } as ContentReference,
     ],
+    [
+      'HrefReference',
+      {
+        id: '1',
+        type: 'Href',
+      } as ContentReference,
+    ],
   ])(
     "Renders correct component for '%s'",
     async (testId: string, contentReference: ContentReference) => {

@@ -20,6 +20,7 @@ import { useState, MutableRefObject, useCallback } from 'react';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
 import type { TagcloudState } from './types';
 import {
   PalettePanelContainer,
@@ -28,6 +29,7 @@ import {
 } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 
 interface Props {
   paletteService: PaletteRegistry;
@@ -38,6 +40,7 @@ interface Props {
   panelRef: MutableRefObject<HTMLDivElement | null>;
   isDarkMode: boolean;
   isInlineEditing?: boolean;
+  formatFactory: FormatFactory;
 }
 
 export function TagsDimensionEditor({
@@ -49,13 +52,14 @@ export function TagsDimensionEditor({
   palettes,
   paletteService,
   isInlineEditing,
+  formatFactory,
 }: Props) {
   const { inputValue: localState, handleInputChange: setLocalState } =
     useDebouncedValue<TagcloudState>({
       value: state,
       onChange: setState,
     });
-  const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
+  const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(state.colorMapping));
 
   const colors = getPaletteDisplayColors(
     paletteService,
@@ -64,8 +68,10 @@ export function TagsDimensionEditor({
     state.palette,
     state.colorMapping
   );
-  const table = frame.activeData?.[state.layerId];
-  const splitCategories = getColorCategories(table?.rows, state.tagAccessor);
+  const currentData = frame.activeData?.[state.layerId];
+  const formatter = !state.tagAccessor
+    ? undefined
+    : formatFactory(getDatatableColumn(currentData, state.tagAccessor)?.meta?.params);
 
   const setColorMapping = useCallback(
     (colorMapping?: ColorMapping.Config) => {
@@ -88,15 +94,13 @@ export function TagsDimensionEditor({
     [localState, setLocalState]
   );
 
-  const canUseColorMapping = state.colorMapping;
-
   return (
     <EuiFormRow
       display="columnCompressed"
       label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
-      style={{ alignItems: 'center' }}
+      css={{ alignItems: 'center' }}
       fullWidth
     >
       <PalettePanelContainer
@@ -142,7 +146,7 @@ export function TagsDimensionEditor({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              {canUseColorMapping || useNewColorMapping ? (
+              {useNewColorMapping ? (
                 <CategoricalColorMapping
                   isDarkMode={isDarkMode}
                   model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
@@ -150,9 +154,10 @@ export function TagsDimensionEditor({
                   palettes={palettes}
                   data={{
                     type: 'categories',
-                    categories: splitCategories,
+                    categories: getColorCategories(currentData?.rows, state.tagAccessor),
                   }}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
+                  formatter={formatter}
                 />
               ) : (
                 <PalettePicker

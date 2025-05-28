@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
 import { i18n } from '@kbn/i18n';
 import { get, isEqual } from 'lodash';
@@ -19,8 +19,8 @@ import type { FieldPreview, PreviewState } from '../types';
 import { PreviewListItem } from './field_list_item';
 import type { PreviewListItemProps } from './field_list_item';
 import { useStateSelector } from '../../../state_utils';
-
 import './field_list.scss';
+import { getPositionAfterToggling } from './get_item_position';
 
 const ITEM_HEIGHT = 40;
 const SHOW_MORE_HEIGHT = 40;
@@ -75,6 +75,7 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
+  const virtualListRef = useRef<VirtualList>(null);
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const fieldMap = useStateSelector(controller.state$, fieldMapSelector);
@@ -201,9 +202,31 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       </div>
     );
 
+  const toggleIsPinnedItem = useCallback(
+    (fieldName: string, keyboardEvent: { isKeyboardEvent: boolean; buttonId: string }) => {
+      controller.togglePinnedField(fieldName);
+
+      if (!keyboardEvent.isKeyboardEvent) return;
+      const newIndex = getPositionAfterToggling(fieldName, pinnedFields, fieldList);
+      // If the field is currently pinned and it goes over the limit of the fields to show we need to show all of them
+      if (newIndex >= INITIAL_MAX_NUMBER_OF_FIELDS && !showAllFields) toggleShowAllFields();
+      requestAnimationFrame(() => {
+        virtualListRef.current?.scrollToItem(newIndex, 'smart');
+        // We need to wait for the scroll to finish so the element is in the DOM before focusing it
+        requestAnimationFrame(() => {
+          document.getElementById(keyboardEvent.buttonId)?.focus();
+        });
+      });
+    },
+    [controller, showAllFields, pinnedFields, fieldList, toggleShowAllFields]
+  );
+
   const itemData = useMemo(
-    () => ({ filteredFields, toggleIsPinned: controller.togglePinnedField }),
-    [filteredFields, controller.togglePinnedField]
+    () => ({
+      filteredFields,
+      toggleIsPinned: toggleIsPinnedItem,
+    }),
+    [filteredFields, toggleIsPinnedItem]
   );
 
   if (currentDocument === undefined || height === -1) {
@@ -219,6 +242,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           className="eui-scrollBar"
           style={{ overflowX: 'hidden' }}
           width="100%"
+          ref={virtualListRef}
           height={listHeight}
           itemData={itemData}
           itemCount={filteredFields.length}

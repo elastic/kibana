@@ -45,7 +45,7 @@ export const FailedFieldInfo = () => {
   return (
     <>
       <EuiFlexGroup
-        data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-cause`}
+        data-test-subj={`datasetQualityDetailsFailedDocsFlyoutFieldsList-cause`}
         direction="column"
         gutterSize="xs"
       >
@@ -55,7 +55,7 @@ export const FailedFieldInfo = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause"
+          data-test-subj="datasetQualityDetailsFailedDocsFlyoutFieldsList-cause"
           grow={2}
         >
           <EuiSpacer size="m" />
@@ -76,9 +76,9 @@ export const FailedFieldInfo = () => {
             loading={isFailedDocsErrorsLoading}
             sorting={failedDocsErrorsSort}
             onChange={onFailedDocsErrorsTableChange}
-            data-test-subj="datasetQualityDetailsDegradedFieldTable"
+            data-test-subj="datasetQualityDetailsFailedDocsTable"
             rowProps={{
-              'data-test-subj': 'datasetQualityDetailsDegradedTableRow',
+              'data-test-subj': 'datasetQualityDetailsFailedDocsTableRow',
             }}
             noItemsMessage={
               isDegradedFieldsLoading

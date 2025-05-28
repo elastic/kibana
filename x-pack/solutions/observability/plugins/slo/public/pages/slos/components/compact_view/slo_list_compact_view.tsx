@@ -15,32 +15,24 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
 import { RulesParams } from '@kbn/observability-plugin/public';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
-import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
-import { useCloneSlo } from '../../../../hooks/use_clone_slo';
-import { useDisableSlo } from '../../../../hooks/use_disable_slo';
-import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
-import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { useSpace } from '../../../../hooks/use_space';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import {
@@ -50,6 +42,7 @@ import {
   createRemoteSloEnableUrl,
   createRemoteSloResetUrl,
 } from '../../../../utils/slo/remote_slo_urls';
+import { useActionModal } from '../../../../context/action_modal';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SLOGroupings } from '../common/slo_groupings';
@@ -83,57 +76,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const { data: permissions } = usePermissions();
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
-
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
-  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { triggerAction } = useActionModal();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
-  const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
-  const [sloToReset, setSloToReset] = useState<SLOWithSummaryResponse | undefined>(undefined);
-  const [sloToEnable, setSloToEnable] = useState<SLOWithSummaryResponse | undefined>(undefined);
-  const [sloToDisable, setSloToDisable] = useState<SLOWithSummaryResponse | undefined>(undefined);
-
-  const handleDeleteConfirm = () => {
-    setSloToDelete(undefined);
-  };
-
-  const handleDeleteCancel = () => {
-    setSloToDelete(undefined);
-  };
-
-  const handleResetConfirm = () => {
-    if (sloToReset) {
-      resetSlo({ id: sloToReset.id, name: sloToReset.name });
-      setSloToReset(undefined);
-    }
-  };
-
-  const handleResetCancel = () => {
-    setSloToReset(undefined);
-  };
-
-  const handleEnableConfirm = async () => {
-    if (sloToEnable) {
-      enableSlo({ id: sloToEnable.id, name: sloToEnable.name });
-      setSloToEnable(undefined);
-    }
-  };
-
-  const handleEnableCancel = () => {
-    setSloToEnable(undefined);
-  };
-
-  const handleDisableConfirm = async () => {
-    if (sloToDisable) {
-      disableSlo({ id: sloToDisable.id, name: sloToDisable.name });
-      setSloToDisable(undefined);
-    }
-  };
-
-  const handleDisableCancel = () => {
-    setSloToDisable(undefined);
-  };
 
   const handleSavedRule = () => {
     queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
@@ -148,8 +93,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     useFetchHistoricalSummary({
       sloList,
     });
-
-  const navigateToClone = useCloneSlo();
 
   const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
@@ -276,11 +219,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         if (!!remoteUrl) {
           window.open(remoteUrl, '_blank');
         } else {
-          if (isEnabled) {
-            setSloToDisable(slo);
-          } else {
-            setSloToEnable(slo);
-          }
+          triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
         }
       },
     },
@@ -299,7 +238,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       enabled: (slo: SLOWithSummaryResponse) =>
         (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        navigateToClone(slo);
+        triggerAction({ item: slo, type: 'clone' });
       },
     },
     {
@@ -321,7 +260,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         if (!!remoteDeleteUrl) {
           window.open(remoteDeleteUrl, '_blank');
         } else {
-          setSloToDelete(slo);
+          triggerAction({ item: slo, type: 'delete' });
         }
       },
     },
@@ -344,7 +283,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         if (!!remoteResetUrl) {
           window.open(remoteResetUrl, '_blank');
         } else {
-          setSloToReset(slo);
+          triggerAction({ item: slo, type: 'reset' });
         }
       },
     },
@@ -531,41 +470,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             setSloToAddRule(undefined);
           }}
           shouldUseRuleProducer
-        />
-      ) : null}
-
-      {sloToDelete ? (
-        <SloDeleteModal
-          slo={sloToDelete}
-          onCancel={handleDeleteCancel}
-          onSuccess={handleDeleteConfirm}
-        />
-      ) : null}
-
-      {sloToReset ? (
-        <SloResetConfirmationModal
-          slo={sloToReset}
-          onCancel={handleResetCancel}
-          onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
-        />
-      ) : null}
-
-      {sloToEnable ? (
-        <SloEnableConfirmationModal
-          slo={sloToEnable}
-          onCancel={handleEnableCancel}
-          onConfirm={handleEnableConfirm}
-          isLoading={isEnableLoading}
-        />
-      ) : null}
-
-      {sloToDisable ? (
-        <SloDisableConfirmationModal
-          slo={sloToDisable}
-          onCancel={handleDisableCancel}
-          onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
         />
       ) : null}
     </>

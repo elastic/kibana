@@ -9,7 +9,6 @@
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
-  IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
   type ChangePointCommandContext,
@@ -32,18 +31,14 @@ import {
   type StatsCommandContext,
   type TimeSeriesCommandContext,
   type WhereCommandContext,
+  RerankCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
-import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
-import {
-  createAstBaseItem,
-  createCommand,
-  createFunction,
-  textExistsAndIsValid,
-  visitSource,
-} from './factories';
+import type { ESQLAst } from '../types';
+import { createCommand, createFunction, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
+import { createEvalCommand } from './factories/eval';
 import { createForkCommand } from './factories/fork';
 import { createFromCommand } from './factories/from';
 import { createGrokCommand } from './factories/grok';
@@ -57,13 +52,14 @@ import { getPosition } from './helpers';
 import {
   collectAllAggFields,
   collectAllColumnIdentifiers,
-  collectAllFields,
   getEnrichClauses,
   getMatchField,
   getPolicyName,
   visitByOption,
   visitRenameClauses,
 } from './walkers';
+import { createTimeseriesCommand } from './factories/timeseries';
+import { createRerankCommand } from './factories/rerank';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -138,17 +134,8 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
-    const node: ESQLAstTimeseriesCommand = {
-      ...createAstBaseItem('ts', ctx),
-      type: 'command',
-      args: [],
-      sources: ctx
-        .indexPatternAndMetadataFields()
-        .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => visitSource(sourceCtx)),
-    };
-    this.ast.push(node);
-    node.args.push(...node.sources);
+    const command = createTimeseriesCommand(ctx);
+    this.ast.push(command);
   }
 
   /**
@@ -156,9 +143,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEvalCommand(ctx: EvalCommandContext) {
-    const commandAst = createCommand('eval', ctx);
-    this.ast.push(commandAst);
-    commandAst.args.push(...collectAllFields(ctx.fields()));
+    if (this.inFork) {
+      return;
+    }
+    this.ast.push(createEvalCommand(ctx));
   }
 
   /**
@@ -166,7 +154,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitStatsCommand(ctx: StatsCommandContext) {
-    const command = createStatsCommand(ctx, this.src);
+    if (this.inFork) {
+      return;
+    }
+
+    const command = createStatsCommand(ctx);
 
     this.ast.push(command);
   }
@@ -251,9 +243,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitDissectCommand(ctx: DissectCommandContext) {
-    const command = createDissectCommand(ctx);
-
-    this.ast.push(command);
+    if (this.inFork) {
+      return;
+    }
+    this.ast.push(createDissectCommand(ctx));
   }
 
   /**
@@ -339,6 +332,21 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitChangePointCommand(ctx: ChangePointCommandContext): void {
     const command = createChangePointCommand(ctx);
+
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rerankCommand`.
+   *
+   * Parse the RERANK command:
+   *
+   * RERANK <query> ON <fields> WITH <referenceId>
+   *
+   * @param ctx the parse tree
+   */
+  exitRerankCommand(ctx: RerankCommandContext): void {
+    const command = createRerankCommand(ctx);
 
     this.ast.push(command);
   }

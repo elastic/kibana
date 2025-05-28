@@ -147,6 +147,7 @@ export const LatestFindingsTable = ({
             height={height}
             createRuleFn={createMisconfigurationRuleFn}
             columnHeaders={findingsTableFieldLabels}
+            flyoutType="misconfiguration"
           />
         </>
       )}

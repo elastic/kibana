@@ -579,7 +579,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Osquery Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/216514
+      // We should revisit this test and decide if it is usefull and worth to keep
+      describe.skip('Osquery Tab', () => {
         before(async () => {
           await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();

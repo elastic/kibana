@@ -40,6 +40,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
     "@kbn/core-security-server",
+    "@kbn/telemetry-config",
   ],
   "exclude": [
     "target/**/*",

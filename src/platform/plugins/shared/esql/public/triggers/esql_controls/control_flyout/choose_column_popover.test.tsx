@@ -9,22 +9,25 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 describe('ChooseColumnPopover', () => {
-  it('should render a search input and a list', () => {
+  it('should render a search input and a list', async () => {
+    const user = userEvent.setup();
     render(<ChooseColumnPopover columns={['col1', 'col2']} updateQuery={jest.fn()} />);
     // open the popover
-    screen.getByTestId('chooseColumnBtn').click();
+    await user.click(screen.getByTestId('chooseColumnBtn'));
     // expect the search input to be rendered
     expect(screen.getByTestId('selectableColumnSearch')).toBeInTheDocument();
     expect(screen.getByTestId('selectableColumnList')).toBeInTheDocument();
   });
 
-  it('should update the list when there is a text in the input', () => {
+  it('should update the list when there is a text in the input', async () => {
+    const user = userEvent.setup();
     render(<ChooseColumnPopover columns={['col1', 'col2']} updateQuery={jest.fn()} />);
     // open the popover
-    screen.getByTestId('chooseColumnBtn').click();
+    await user.click(screen.getByTestId('chooseColumnBtn'));
     // expect the search input to be rendered
 
     // type in the search input
@@ -37,11 +40,12 @@ describe('ChooseColumnPopover', () => {
     expect(listItems).toHaveTextContent('col2');
   });
 
-  it('should call the updateQuery prop if a list item is clicked', () => {
+  it('should call the updateQuery prop if a list item is clicked', async () => {
+    const user = userEvent.setup();
     const updateQuerySpy = jest.fn();
     render(<ChooseColumnPopover columns={['col1', 'col2']} updateQuery={updateQuerySpy} />);
     // open the popover
-    screen.getByTestId('chooseColumnBtn').click();
+    await user.click(screen.getByTestId('chooseColumnBtn'));
     // expect the search input to be rendered
 
     // type in the search input
@@ -52,7 +56,7 @@ describe('ChooseColumnPopover', () => {
     const listItems = list.querySelector('li');
 
     // click the list item
-    if (listItems) fireEvent.click(listItems);
+    if (listItems) await user.click(listItems);
     expect(updateQuerySpy).toHaveBeenCalledWith('col2');
   });
 });

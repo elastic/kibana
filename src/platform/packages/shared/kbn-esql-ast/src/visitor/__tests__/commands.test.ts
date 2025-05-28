@@ -140,3 +140,27 @@ test('can visit CHANGE_POINT command', () => {
 
   expect(list).toEqual(['CHANGE_POINT']);
 });
+
+test('can visit RERANK command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM k8s
+      | RERANK "test" ON field WITH id
+      | LIMIT 123
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return null;
+    })
+    .on('visitRerankCommand', (ctx) => {
+      return 'RERANK';
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['RERANK']);
+});

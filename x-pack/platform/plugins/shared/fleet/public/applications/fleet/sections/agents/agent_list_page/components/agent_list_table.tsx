@@ -28,7 +28,7 @@ import type { Pagination } from '../../../../hooks';
 import { useAgentVersion } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
-import { AgentPolicySummaryLine } from '../../../../components';
+import { AgentPolicySummaryLine } from '../../../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';

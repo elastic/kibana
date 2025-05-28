@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabsBarMenu } from './tabs_bar_menu';
+export { TabsBarMenu, type TabsBarMenuProps } from './tabs_bar_menu';

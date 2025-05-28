@@ -1,0 +1,128 @@
+name: Trigger Chromium Build
+
+on:
+  issues:
+    types: [labeled, opened, reopened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  matches_label:
+    if: ${{ contains(github.event.issue.labels.*.name, 'trigger-chromium-build') && contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association) }}
+    runs-on: ubuntu-latest
+    outputs:
+      version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq wget -y
+      - name: Install mdsh
+        run: |
+          wget https://github.com/bashup/mdsh/raw/master/bin/mdsh && \
+          chmod +x mdsh && \
+          export PATH=$PATH:mdsh
+      - name: Extract version bump configuration
+        id: extract_version_bump_config
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          # mdsh-* functions are informed from https://github.com/bashup/mdsh/blob/master/mdsh.md 
+
+          # Function to parse markdown and extract fenced code blocks
+          mdsh-parse() {
+              local cmd=$1 lno=0 block_start lang mdsh_block ln indent fence close_fence indent_remove
+              local mdsh_fence=$'^( {0,3})(~~~+|```+) *([^`]*)$'
+              while mdsh-find-block; do
+                  indent=${BASH_REMATCH[1]} fence=${BASH_REMATCH[2]} lang=${BASH_REMATCH[3]} mdsh_block=
+                  block_start=$lno close_fence="^( {0,3})$fence+ *\$" indent_remove="^${indent// / ?}"
+                  while ((lno++)); IFS= read -r ln && ! [[ $ln =~ $close_fence ]]; do
+                      ! [[ $ln =~ $indent_remove ]] || ln=${ln#${BASH_REMATCH[0]}}; mdsh_block+=$ln$'\n'
+                  done
+                  lang="${lang%\"${lang##*[![:space:]]}\"}"; "$cmd" fenced "$lang" "$mdsh_block"
+              done
+          }
+
+          # Function to find fenced code blocks
+          mdsh-find-block() {
+              while ((lno++)); IFS= read -r ln; do if [[ $ln =~ $mdsh_fence ]]; then return; fi; done; false
+          }
+
+          # Variable to hold the upgrade config if found
+          UPGRADE_CONFIG=""
+          # Variable to track if multiple puppeteer_version properties are found
+          PUPPETEER_VERSION_COUNT=0
+
+          # Handler function to process each code block
+          handle_code_block() {
+              local block_type=$1
+              local lang=$2
+              local block_content=$3
+              if [[ $lang == "json" ]]; then
+                # Remove leading and trailing whitespace from the block content
+                block_content=$(echo "$block_content" | jq -c .)
+
+                # Check for puppeteer_version property
+                if echo "$block_content" | jq -e 'has("puppeteer_version")' > /dev/null; then
+                  PUPPETEER_VERSION_COUNT=$((PUPPETEER_VERSION_COUNT + 1))
+                  if [[ $PUPPETEER_VERSION_COUNT -gt 1 ]]; then
+                    # Mark multiple puppeteer_version properties found, exit with error
+                    echo "multiple_puppeteer_version_properties=true" >> $GITHUB_OUTPUT
+                    exit 0
+                  fi
+                  UPGRADE_CONFIG="$block_content"
+                fi
+              fi
+          }
+
+          # Main function to extract code blocks from a markdown file
+          extract_code_blocks() {
+              mdsh-parse handle_code_block
+              # Output the upgrade config if found
+              if [[ -n "$UPGRADE_CONFIG" ]]; then
+                  echo "result=$UPGRADE_CONFIG" >> $GITHUB_OUTPUT
+              fi
+          }
+
+          # attempt extracting puppeteer version bump config from the issue body
+          echo "$ISSUE_BODY" | extract_code_blocks
+      - name: Report multiple puppeteer_version properties
+        if: ${{ steps.extract_version_bump_config.outputs.multiple_puppeteer_version_properties == 'true' }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Multiple JSON blocks with puppeteer_version found. Please provide only one JSON block with the puppeteer_version property.'
+            })
+      - name: Report missing puppeteer_version properties
+        if: ${{ steps.extract_version_bump_config.outputs.result == '' }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'No puppeteer_version property found in the issue body. Please provide the puppeteer_version property in a JSON code block.'
+            })
+
+  trigger_build:
+    runs-on: ubuntu-latest
+    needs: [matches_label]
+    if: ${{ needs.matches_label.outputs.version_bump_config }}
+    steps:
+      - uses: elastic/oblt-actions/buildkite/run@v1
+        with:
+          token: ${{ secrets.SHAREDUX_BUILDKITE_TOKEN }}
+          pipeline: 'kibana-chromium-linux-build'
+          env-vars: |
+            GITHUB_ISSUE_BASE_OWNER=${{ github.event.repository.owner.login }}
+            GITHUB_ISSUE_BASE_REPO=${{ github.event.repository.name }}
+            GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
+            GITHUB_ISSUE_TRIGGER_USER=${{ github.event.issue.user.login }}
+            PUPPETEER_VERSION=$(echo ${{ fromJSON(needs.matches_label.outputs.version_bump_config) }} | jq -r '.puppeteer_version')

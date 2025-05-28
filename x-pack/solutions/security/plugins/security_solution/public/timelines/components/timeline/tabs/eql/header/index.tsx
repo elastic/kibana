@@ -18,14 +18,22 @@ import type { TimelineFullScreen } from '../../../../../../common/containers/use
 import { EqlQueryBarTimeline } from '../../../query_bar/eql';
 import { Sourcerer } from '../../../../../../sourcerer/components';
 import { StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
+import { DataViewPicker } from '../../../../../../data_view_manager/components/data_view_picker';
 
 export type EqlTabHeaderProps = {
   activeTab: TimelineTabs;
   timelineId: string;
+  newDataViewPickerEnabled: boolean;
 } & TimelineFullScreen;
 
 export const EqlTabHeader = memo(
-  ({ activeTab, setTimelineFullScreen, timelineFullScreen, timelineId }: EqlTabHeaderProps) => (
+  ({
+    activeTab,
+    setTimelineFullScreen,
+    timelineFullScreen,
+    timelineId,
+    newDataViewPickerEnabled,
+  }: EqlTabHeaderProps) => (
     <>
       <EuiFlexItem grow={false}>
         <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
@@ -43,7 +51,12 @@ export const EqlTabHeader = memo(
               />
             )}
             <EuiFlexItem grow={false}>
-              {activeTab === TimelineTabs.eql && <Sourcerer scope={SourcererScopeName.timeline} />}
+              {activeTab === TimelineTabs.eql &&
+                (newDataViewPickerEnabled ? (
+                  <DataViewPicker scope={SourcererScopeName.timeline} />
+                ) : (
+                  <Sourcerer scope={SourcererScopeName.timeline} />
+                ))}
             </EuiFlexItem>
             <EuiFlexItem>
               <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />

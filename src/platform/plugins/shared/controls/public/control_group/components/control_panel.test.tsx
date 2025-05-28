@@ -55,7 +55,7 @@ describe('render', () => {
     test('should use small class when using small width', async () => {
       mockApi = {
         uuid: 'control1',
-        width: new BehaviorSubject<ControlWidth>('small'),
+        width$: new BehaviorSubject<ControlWidth>('small'),
       };
       const controlPanel = render(<ControlPanel uuid="control1" Component={Component} />);
       await waitFor(() => {

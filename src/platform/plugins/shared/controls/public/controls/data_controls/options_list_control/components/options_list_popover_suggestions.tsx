@@ -29,8 +29,7 @@ export const OptionsListPopoverSuggestions = ({
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
   const {
-    api,
-    stateManager,
+    componentApi,
     displaySettings: { hideExists },
   } = useOptionsListContext();
 
@@ -50,18 +49,18 @@ export const OptionsListPopoverSuggestions = ({
     fieldFormatter,
     allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
-    stateManager.sort,
-    stateManager.searchString,
-    stateManager.existsSelected,
-    stateManager.searchTechnique,
-    stateManager.selectedOptions,
-    stateManager.fieldName,
-    api.invalidSelections$,
-    api.availableOptions$,
-    api.totalCardinality$,
-    api.dataLoading$,
-    api.fieldFormatter,
-    api.parentApi.allowExpensiveQueries$
+    componentApi.sort$,
+    componentApi.searchString$,
+    componentApi.existsSelected$,
+    componentApi.searchTechnique$,
+    componentApi.selectedOptions$,
+    componentApi.fieldName$,
+    componentApi.invalidSelections$,
+    componentApi.availableOptions$,
+    componentApi.totalCardinality$,
+    componentApi.dataLoading$,
+    componentApi.fieldFormatter,
+    componentApi.parentApi.allowExpensiveQueries$
   );
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -152,10 +151,10 @@ export const OptionsListPopoverSuggestions = ({
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiTheme.size.xxl, 10)) {
       // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
       // have to scroll **all the way** to the bottom in order to load more options
-      stateManager.requestSize.next(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
-      api.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
+      componentApi.setRequestSize(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
+      componentApi.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
     }
-  }, [api.loadMoreSubject, euiTheme.size.xxl, stateManager.requestSize, totalCardinality]);
+  }, [componentApi, euiTheme.size.xxl, totalCardinality]);
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
@@ -199,7 +198,7 @@ export const OptionsListPopoverSuggestions = ({
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, event, changedOption) => {
-            api.makeSelection(changedOption.key, showOnlySelected);
+            componentApi.makeSelection(changedOption.key, showOnlySelected);
           }}
         >
           {(list) => list}

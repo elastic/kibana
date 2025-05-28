@@ -7,18 +7,21 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { IngestStreamGetResponse, isWiredStreamDefinition } from '@kbn/streams-schema';
-
+import { Streams } from '@kbn/streams-schema';
 import { QuickLinks } from './quick_links';
 import { ChildStreamList } from './child_stream_list';
 import { StreamStatsPanel } from './components/stream_stats_panel';
 import { StreamChartPanel } from './components/stream_chart_panel';
 import { TabsPanel } from './components/tabs_panel';
 
-export function StreamDetailOverview({ definition }: { definition: IngestStreamGetResponse }) {
+export function StreamDetailOverview({
+  definition,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+}) {
   const tabs = useMemo(
     () => [
-      ...(definition && isWiredStreamDefinition(definition.stream)
+      ...(definition && Streams.WiredStream.GetResponse.is(definition)
         ? [
             {
               id: 'streams',

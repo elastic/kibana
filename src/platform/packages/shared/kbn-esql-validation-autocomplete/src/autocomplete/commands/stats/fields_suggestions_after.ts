@@ -8,13 +8,13 @@
  */
 import { uniqBy } from 'lodash';
 import { type ESQLAstCommand, walk } from '@kbn/esql-ast';
-import type { ESQLRealField } from '../../../validation/types';
+import type { ESQLFieldWithMetadata } from '../../../validation/types';
 import { isColumnItem } from '../../../shared/helpers';
 
 export const fieldsSuggestionsAfter = (
   command: ESQLAstCommand,
-  previousCommandFields: ESQLRealField[],
-  userDefinedColumns: ESQLRealField[]
+  previousCommandFields: ESQLFieldWithMetadata[],
+  userDefinedColumns: ESQLFieldWithMetadata[]
 ) => {
   const columns: string[] = [];
 

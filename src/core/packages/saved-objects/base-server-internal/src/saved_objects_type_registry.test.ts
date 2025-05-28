@@ -48,6 +48,18 @@ describe('SavedObjectTypeRegistry', () => {
       }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
     });
 
+    it('throws when trying to register a removed type: %', () => {
+      const legacyTypes = ['old-removed-type', 'another_old_type', 'firstTypeEver'];
+
+      registry = new SavedObjectTypeRegistry({ legacyTypes });
+
+      for (const legacyType of legacyTypes) {
+        expect(() => registry.registerType(createType({ name: legacyType }))).toThrow(
+          `Type '${legacyType}' can't be used because it's been added to the legacy types`
+        );
+      }
+    });
+
     it('throws when `management.visibleInManagement` is specified but `management.importableAndExportable` is undefined or false', () => {
       expect(() => {
         registry.registerType(

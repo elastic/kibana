@@ -9,7 +9,7 @@ import type {
   EqlSearchRequest,
   FieldCapsRequest,
   FieldCapsResponse,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
@@ -247,7 +247,7 @@ export class APMEventClient {
           filters.push(...excludeTiersQuery(this.excludedDataTiers));
         }
 
-        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+        const searchParams: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
           {
             index,
             preference: 'any',

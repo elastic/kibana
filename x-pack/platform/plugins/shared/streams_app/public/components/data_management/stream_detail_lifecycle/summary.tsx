@@ -9,15 +9,14 @@ import React, { useMemo } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  IngestStreamGetResponse,
+  Streams,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
-  isUnwiredStreamGetResponse,
 } from '@kbn/streams-schema';
 
-export function RetentionSummary({ definition }: { definition: IngestStreamGetResponse }) {
+export function RetentionSummary({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const summary = useMemo(() => summaryText(definition), [definition]);
 
   return (
@@ -34,7 +33,7 @@ export function RetentionSummary({ definition }: { definition: IngestStreamGetRe
   );
 }
 
-function summaryText(definition: IngestStreamGetResponse) {
+function summaryText(definition: Streams.ingest.all.GetResponse) {
   const lifecycle = definition.stream.ingest.lifecycle;
 
   if (isInheritLifecycle(lifecycle)) {
@@ -42,7 +41,7 @@ function summaryText(definition: IngestStreamGetResponse) {
       defaultMessage: 'This data stream is inheriting its lifecycle configuration.',
     });
   } else if (isDslLifecycle(lifecycle)) {
-    return isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
+    return isRoot(definition.stream.name) || Streams.UnwiredStream.GetResponse.is(definition)
       ? i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleRootNote', {
           defaultMessage: 'This data stream is using a custom data retention.',
         })
@@ -51,7 +50,7 @@ function summaryText(definition: IngestStreamGetResponse) {
             'This data stream is using a custom data retention as an override at this level.',
         });
   } else if (isIlmLifecycle(lifecycle)) {
-    return isRoot(definition.stream.name) || isUnwiredStreamGetResponse(definition)
+    return isRoot(definition.stream.name) || Streams.UnwiredStream.GetResponse.is(definition)
       ? i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyRootNote', {
           defaultMessage: 'This data stream is using an ILM policy.',
         })

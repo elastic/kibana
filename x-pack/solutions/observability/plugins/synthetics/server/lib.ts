@@ -6,7 +6,7 @@
  */
 
 import {
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -125,10 +125,10 @@ export class SyntheticsEsClient {
     TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
     TDocument = unknown
   >(
-    requests: MsearchMultisearchBody[],
+    requests: SearchSearchRequestBody[],
     operationName?: string
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
-    const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
+    const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
       searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
       searches.push(request);

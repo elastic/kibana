@@ -224,8 +224,18 @@ describe('SyncIntegrationsTask', () => {
               },
             ],
             remote_es_hosts: [
-              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
-              { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
+              {
+                hosts: ['https://remote1:9200'],
+                name: 'remote1',
+                sync_integrations: true,
+                sync_uninstalled_integrations: false,
+              },
+              {
+                hosts: ['https://remote2:9200'],
+                name: 'remote2',
+                sync_integrations: false,
+                sync_uninstalled_integrations: false,
+              },
             ],
             custom_assets: {
               'component_template:logs-system.auth@custom': {
@@ -297,7 +307,12 @@ describe('SyncIntegrationsTask', () => {
               },
             ],
             remote_es_hosts: [
-              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+              {
+                hosts: ['https://remote1:9200'],
+                name: 'remote1',
+                sync_integrations: true,
+                sync_uninstalled_integrations: false,
+              },
             ],
             custom_assets: {},
             custom_assets_error: {
@@ -461,7 +476,12 @@ describe('SyncIntegrationsTask', () => {
               },
             ],
             remote_es_hosts: [
-              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+              {
+                hosts: ['https://remote1:9200'],
+                name: 'remote1',
+                sync_integrations: true,
+                sync_uninstalled_integrations: true,
+              },
             ],
             custom_assets: {
               'component_template:logs-system.auth@custom': {

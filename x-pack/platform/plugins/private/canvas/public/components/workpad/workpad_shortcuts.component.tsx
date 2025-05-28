@@ -9,6 +9,7 @@ import React from 'react';
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../lib/is_text_input';
 import { Props } from './workpad.component';
+import { forceReload } from '../hooks/use_canvas_api';
 
 type ShortcutProps = Pick<
   Props,
@@ -69,7 +70,10 @@ export class WorkpadShortcuts extends React.Component<ShortcutProps> {
 
   // handle keypress events for editor events
   _keyMap: Shortcuts = {
-    REFRESH: this.props.fetchAllRenderables,
+    REFRESH: () => {
+      forceReload();
+      this.props.fetchAllRenderables();
+    },
     UNDO: this.props.undoHistory,
     REDO: this.props.redoHistory,
     GRID: () => this.props.setGrid(!this.props.grid),

@@ -63,7 +63,7 @@ export function createAddPatternAnalysisEmbeddableAction(
           PatternAnalysisEmbeddableApi
         >({
           panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-          initialState,
+          serializedState: { rawState: initialState },
         });
 
         if (!embeddable) {

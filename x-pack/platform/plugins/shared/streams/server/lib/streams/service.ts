@@ -7,7 +7,7 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
-import { StreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
@@ -17,6 +17,7 @@ export const streamsStorageSettings = {
   schema: {
     properties: {
       name: types.keyword(),
+      description: types.text(),
       ingest: types.object({ enabled: false }),
       group: types.object({ enabled: false }),
     },
@@ -24,7 +25,7 @@ export const streamsStorageSettings = {
 } satisfies StorageSettings;
 
 export type StreamsStorageSettings = typeof streamsStorageSettings;
-export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, StreamDefinition>;
+export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, Streams.all.Definition>;
 
 export class StreamsService {
   constructor(
@@ -50,7 +51,7 @@ export class StreamsService {
 
     const storageAdapter = new StorageIndexAdapter<
       StreamsStorageSettings,
-      StreamDefinition & { _id: string }
+      Streams.all.Definition & { _id: string }
     >(scopedClusterClient.asInternalUser, logger, streamsStorageSettings);
 
     return new StreamsClient({

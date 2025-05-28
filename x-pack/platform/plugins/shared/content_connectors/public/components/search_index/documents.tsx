@@ -126,7 +126,7 @@ export const SearchIndexDocuments: React.FC = () => {
               mappings={mappingData ? { [indexName]: mappingData } : undefined}
               meta={data?.meta ?? DEFAULT_PAGINATION}
               onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
-              setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
+              setDocsPerPage={(pageSize) => setPagination({ ...DEFAULT_PAGINATION, pageSize })}
             />
           )}
         </>

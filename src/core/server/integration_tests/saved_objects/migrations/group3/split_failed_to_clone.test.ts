@@ -65,7 +65,6 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     migratorTestKitFactory = () =>
       getRelocatingMigratorTestKit({
         logFilePath,
-        filterDeprecated: true,
         relocateTypes: {
           // move 'basic' to a new index
           basic: kibanaSplitIndex,

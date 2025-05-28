@@ -42,6 +42,89 @@ describe('solutionFormatter', () => {
     ]);
   });
 
+  it('should not include missing links', () => {
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [
+        { type: 'navItem', id },
+        { type: 'navItem', id: id2 },
+      ],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'sideNav'],
+      },
+    ]);
+  });
+
+  it('should not include unauthorized links', () => {
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [
+        { type: 'navItem', id },
+        { type: 'navItem', id: id2 },
+      ],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+      [id2]: createMockLink(id2, { unauthorized: true }),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'sideNav'],
+      },
+    ]);
+  });
+
+  it('should include unavailable links with sideNav visibility only', () => {
+    const id = 'page-1' as SecurityPageName;
+    const id2 = 'page-2' as SecurityPageName;
+    const tree: NavigationTreeDefinition = {
+      body: [
+        { type: 'navItem', id },
+        { type: 'navItem', id: id2 },
+      ],
+    };
+
+    const normalizedLinks: NormalizedLinks = {
+      [id]: createMockLink(id),
+      [id2]: createMockLink(id2, { unavailable: true }),
+    };
+
+    const result = solutionFormatter(tree, normalizedLinks);
+    expect(result).toEqual([
+      {
+        id,
+        path: `/path/${id}`,
+        title: `Title for ${id}`,
+        visibleIn: ['globalSearch', 'sideNav'],
+      },
+      {
+        id: id2,
+        path: `/path/${id2}`,
+        title: `Title for ${id2}`,
+        visibleIn: ['sideNav'],
+      },
+    ]);
+  });
+
   it('should handle navGroup and include its children', () => {
     const id = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {

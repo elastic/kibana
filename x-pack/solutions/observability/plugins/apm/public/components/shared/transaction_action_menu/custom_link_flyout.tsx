@@ -25,10 +25,10 @@ export function CustomLinkFlyout({
   const filters = useMemo(
     () =>
       [
-        { key: 'service.name', value: transaction?.service.name },
-        { key: 'service.environment', value: transaction?.service.environment },
-        { key: 'transaction.name', value: transaction?.transaction.name },
-        { key: 'transaction.type', value: transaction?.transaction.type },
+        { key: 'service.name', value: transaction?.service?.name },
+        { key: 'service.environment', value: transaction?.service?.environment },
+        { key: 'transaction.name', value: transaction?.transaction?.name },
+        { key: 'transaction.type', value: transaction?.transaction?.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
     [transaction]
   );

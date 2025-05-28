@@ -29,9 +29,15 @@ PUT /_query_rules/my-ruleset
         }
       ],
       "actions": {
-        "ids": [
-          "id1",
-          "id2"
+        "docs": [
+          {
+            "_index": "my-index-000001",
+            "_id": "id1"
+          },
+          {
+            "_index": "my-index-000002",
+            "_id": "id2"
+          }
         ]
       }
     },

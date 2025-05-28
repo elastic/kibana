@@ -577,7 +577,7 @@ ${s1Info.status}
         .toISOString()
         .replace(/:/g, '.')}.zip`;
       const vmDiagnosticsFile = `/tmp/${fileName}`;
-      const localDiagnosticsDir = `${REPO_ROOT}/target/test_failures`;
+      const localDiagnosticsDir = `${REPO_ROOT}/target/agent_diagnostics`;
       const localDiagnosticsFile = `${localDiagnosticsDir}/${
         fileNamePrefix
           ? // Insure the file name prefix does not have characters that can't be used in file names

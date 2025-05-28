@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export async function deleteConversations(getService: FtrProviderContext['getService']) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   const response = await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/conversations',

@@ -34,6 +34,7 @@ import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useSelectedTab } from './hooks/use_selected_tab';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
+import { ActionModalProvider } from '../../context/action_modal';
 
 export function SloDetailsPage() {
   const { onPageReady } = usePerformanceContext();
@@ -128,7 +129,9 @@ export function SloDetailsPage() {
         children: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: !isLoading
           ? [
-              <HeaderControl slo={slo!} />,
+              <ActionModalProvider>
+                <HeaderControl slo={slo!} />
+              </ActionModalProvider>,
               <AutoRefreshButton
                 isAutoRefreshing={isAutoRefreshing}
                 onClick={handleToggleAutoRefresh}

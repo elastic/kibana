@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import {
-  isGroupStreamDefinition,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
-import type { StreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type { StateDependencies } from '../types';
 import type { StreamActiveRecord } from './stream_active_record';
 import { UnwiredStream } from '../streams/unwired_stream';
 import { WiredStream } from '../streams/wired_stream';
 import { GroupStream } from '../streams/group_stream';
+import { migrateOnRead } from '../../helpers/migrate_on_read';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
-  definition: StreamDefinition,
+  definition: Streams.all.Definition,
   dependencies: StateDependencies
 ): StreamActiveRecord {
-  if (isWiredStreamDefinition(definition)) {
+  definition = migrateOnRead(definition);
+  if (Streams.WiredStream.Definition.is(definition)) {
     return new WiredStream(definition, dependencies);
-  } else if (isUnwiredStreamDefinition(definition)) {
+  } else if (Streams.UnwiredStream.Definition.is(definition)) {
     return new UnwiredStream(definition, dependencies);
-  } else if (isGroupStreamDefinition(definition)) {
+  } else if (Streams.GroupStream.Definition.is(definition)) {
     return new GroupStream(definition, dependencies);
   }
 

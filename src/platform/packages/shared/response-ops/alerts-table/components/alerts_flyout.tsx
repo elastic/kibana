@@ -54,6 +54,8 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
     renderFlyoutHeader: Header = DefaultAlertsFlyoutHeader,
     renderFlyoutBody: Body = DefaultAlertsFlyoutBody,
     renderFlyoutFooter,
+    flyoutOwnsFocus = false,
+    flyoutPagination = true,
   } = renderContext;
   const Footer: FlyoutSectionRenderer<AC> | undefined = renderFlyoutFooter;
   const prevAlert = usePrevious(alert);
@@ -99,23 +101,27 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={false}>
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={flyoutOwnsFocus}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <FlyoutHeader />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiPagination
-              aria-label={PAGINATION_LABEL}
-              pageCount={alertsCount}
-              activePage={flyoutIndex}
-              onPageClick={onPaginate}
-              compressed
-              data-test-subj="alertsFlyoutPagination"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {flyoutPagination && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  aria-label={PAGINATION_LABEL}
+                  pageCount={alertsCount}
+                  activePage={flyoutIndex}
+                  onPageClick={onPaginate}
+                  compressed
+                  data-test-subj="alertsFlyoutPagination"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiFlyoutHeader>
       <FlyoutBody />
       <FlyoutFooter />

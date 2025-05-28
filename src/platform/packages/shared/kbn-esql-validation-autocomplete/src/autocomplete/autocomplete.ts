@@ -15,6 +15,7 @@ import {
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  Walker,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isNumericType } from '../shared/esql_types';
@@ -40,7 +41,7 @@ import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
 } from '../shared/user_defined_columns';
-import type { ESQLRealField, ESQLUserDefinedColumn } from '../validation/types';
+import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../validation/types';
 import {
   allStarConstant,
   commaCompleteItem,
@@ -58,7 +59,6 @@ import {
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
 import {
-  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -84,7 +84,7 @@ import {
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
-type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
+type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 
 export async function suggest(
@@ -96,7 +96,7 @@ export async function suggest(
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {
@@ -104,10 +104,7 @@ export async function suggest(
   }
 
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(ast, correctedQuery),
-    ast
-  );
+  const queryForFields = getQueryForFields(correctedQuery, root);
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
@@ -182,10 +179,38 @@ export async function suggest(
     return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
+    const getCommandAndOptionWithinFORK = (
+      command: ESQLCommand<'fork'>
+    ): {
+      command: ESQLCommand;
+      option: ESQLCommandOption | undefined;
+    } => {
+      let option;
+      let subCommand;
+      Walker.walk(command, {
+        visitCommandOption: (_node) => {
+          option = _node;
+        },
+        visitCommand: (_node) => {
+          subCommand = _node;
+        },
+      });
+
+      return {
+        option,
+        command: subCommand ?? command,
+      };
+    };
+
     const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
-      astContext,
+      {
+        ...astContext,
+        ...(astContext.command.name === 'fork'
+          ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+          : {}),
+      },
       getFieldsByType,
       getFieldsMap,
       fullText,
@@ -279,7 +304,7 @@ async function getSuggestionsWithinCommandExpression(
   const commandDef = getCommandDefinition(astContext.command.name);
 
   // collect all fields + userDefinedColumns to suggest
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
   const references = { fields: fieldsMap, userDefinedColumns: anyUserDefinedColumns };
@@ -366,7 +391,7 @@ async function getFunctionArgsSuggestions(
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
   const references = {
@@ -604,7 +629,7 @@ async function getListArgsSuggestions(
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
   if (node && isFunctionItem(node)) {
-    const fieldsMap: Map<string, ESQLRealField> = await getFieldsMaps();
+    const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMaps();
     const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
     // extract the current node from the userDefinedColumns inferred
     anyUserDefinedColumns.forEach((values, key) => {

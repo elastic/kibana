@@ -106,7 +106,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         isPtrIncluded={isPtrIncluded}
         endDate={endDate}
         filterQuery={filterQuery}
-        setQuery={setQuery}
         startDate={startDate}
         {...dnsHistogramConfigs}
       />

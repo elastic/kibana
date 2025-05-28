@@ -17,19 +17,19 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 
 export const OptionsListPopover = () => {
-  const { api, displaySettings } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
 
   const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
-    api.field$,
-    api.availableOptions$,
-    api.invalidSelections$,
-    api.dataLoading$
+    componentApi.field$,
+    componentApi.availableOptions$,
+    componentApi.invalidSelections$,
+    componentApi.dataLoading$
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
     <div
-      id={`control-popover-${api.uuid}`}
+      id={`control-popover-${componentApi.uuid}`}
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >

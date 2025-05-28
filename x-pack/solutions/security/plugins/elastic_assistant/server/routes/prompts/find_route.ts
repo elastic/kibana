@@ -12,7 +12,7 @@ import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elasti
 import {
   FindPromptsRequestQuery,
   FindPromptsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';

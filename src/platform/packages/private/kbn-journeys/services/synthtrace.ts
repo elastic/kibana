@@ -84,9 +84,10 @@ async function initApmSynthtraceClient(options: SynthtraceClientOptions) {
     logger,
     refreshAfterIndex: true,
     version: packageVersion,
+    pipeline: {
+      includeSerialization: false,
+    },
   });
-
-  synthEsClient.pipeline(synthEsClient.getDefaultPipeline({ includeSerialization: false }));
 
   return synthEsClient;
 }

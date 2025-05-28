@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiToolTip, logicalCSS, useEuiTheme } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -39,14 +39,9 @@ Updated.displayName = 'Updated';
 
 const prefix = ` ${i18n.UPDATED} `;
 
-const anchorStyles = {
-  css: css`
-    align-self: center;
-  `,
-};
-
 export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
   ({ compact = false, updatedAt, showUpdating = false }) => {
+    const { euiTheme } = useEuiTheme();
     const [date, setDate] = useState(Date.now());
 
     function tick() {
@@ -75,7 +70,14 @@ export const LastUpdatedAt = React.memo<LastUpdatedAtProps>(
     return (
       <EuiToolTip
         content={<Updated date={date} prefix={prefix} updatedAt={updatedAt} />}
-        anchorProps={anchorStyles}
+        anchorProps={{
+          css: css`
+            // Replicate the sizing of neighbouring buttons
+            line-height: ${euiTheme.size.l};
+            ${logicalCSS('padding-horizontal', euiTheme.size.s)}
+            align-self: center;
+          `,
+        }}
       >
         <EuiText color="subdued" size="xs" data-test-subj="toolbar-updated-at">
           {updateText}

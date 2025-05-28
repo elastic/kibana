@@ -15,7 +15,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import {
   DeleteKnowledgeBaseEntryRequestParams,
   DeleteKnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';

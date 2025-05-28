@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -25,11 +25,13 @@ import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
 import queryRulesBackground from '../../assets/query-rule-background.svg';
 import { QueryRulesSets } from '../query_rules_sets/query_rules_sets';
+import { CreateRulesetModal } from '../query_rules_sets/create_ruleset_modal';
+
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 
 export const QueryRulesOverview = () => {
   const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
-
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const backgroundProps = css({
     backgroundImage: `url(${queryRulesBackground})`,
     backgroundSize: 'contain',
@@ -68,12 +70,12 @@ export const QueryRulesOverview = () => {
                   fill
                   iconType="plusInCircle"
                   onClick={() => {
-                    // Logic to create a new query rule set
+                    setIsCreateModalVisible(true);
                   }}
                 >
                   <FormattedMessage
                     id="xpack.queryRules.queryRulesSetDetail.createButton"
-                    defaultMessage="Create"
+                    defaultMessage="Create ruleset"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -97,6 +99,13 @@ export const QueryRulesOverview = () => {
               : backgroundProps,
         }}
       >
+        {isCreateModalVisible && (
+          <CreateRulesetModal
+            onClose={() => {
+              setIsCreateModalVisible(false);
+            }}
+          />
+        )}
         {isInitialLoading && <EuiLoadingSpinner />}
         {isError && (
           <ErrorPrompt errorType={isPermissionError(error) ? 'missingPermissions' : 'generic'} />
@@ -109,7 +118,7 @@ export const QueryRulesOverview = () => {
             <EuiFlexItem>
               <EmptyPrompt
                 getStartedAction={() => {
-                  // Logic to create a new query rule set
+                  setIsCreateModalVisible(true);
                 }}
               />
             </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDefinition, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { StreamEnrichmentContextType } from './types';
 import {
   convertToFieldDefinition,
@@ -30,7 +30,7 @@ export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
 export function getUpsertWiredFields(
   context: StreamEnrichmentContextType
 ): FieldDefinition | undefined {
-  if (!isWiredStreamGetResponse(context.definition) || !context.simulatorRef) {
+  if (!Streams.WiredStream.GetResponse.is(context.definition) || !context.simulatorRef) {
     return undefined;
   }
 

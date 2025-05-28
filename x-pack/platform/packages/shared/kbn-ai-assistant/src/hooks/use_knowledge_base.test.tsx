@@ -12,6 +12,9 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 jest.mock('./use_kibana');
 jest.mock('./use_ai_assistant_app_service');
+jest.mock('p-retry', () => {
+  return (fn: () => Promise<any>) => fn();
+});
 
 describe('useKnowledgeBase', () => {
   const mockCallApi = jest.fn();
@@ -73,7 +76,7 @@ describe('useKnowledgeBase', () => {
 
     // Trigger setup
     act(() => {
-      result.current.install();
+      result.current.install('.elser-2-elasticsearch');
     });
 
     // Verify that the install was called
@@ -81,9 +84,30 @@ describe('useKnowledgeBase', () => {
       expect(mockCallApi).toHaveBeenCalledWith(
         'POST /internal/observability_ai_assistant/kb/setup',
         {
+          params: {
+            query: {
+              inference_id: '.elser-2-elasticsearch',
+            },
+          },
           signal: null,
         }
       );
+    });
+  });
+
+  it('shows an error toast on install failure', async () => {
+    const error = new Error('setup failed');
+
+    mockCallApi.mockResolvedValueOnce({ kbState: 'NOT_INSTALLED' }).mockRejectedValueOnce(error);
+
+    const { result } = renderHook(() => useKnowledgeBase());
+
+    await act(async () => {
+      await result.current.install('failing-id');
+    });
+
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
+      title: expect.any(String),
     });
   });
 });

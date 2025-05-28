@@ -29,6 +29,35 @@ export async function getESUpgradeStatus(
     const healthIndicators = await getHealthIndicators(dataClient);
     const enrichedDeprecations = await getEnrichedDeprecations(dataClient);
 
+    // Get all indices with reindex actions to fetch their sizes
+    const indicesNeedingSize = enrichedDeprecations
+      .filter(
+        (deprecation) => deprecation.correctiveAction?.type === 'reindex' && deprecation.index
+      )
+      .map((deprecation) => deprecation.index!);
+
+    // Get index stats if we have indices that need size information
+    let indexSizes: Record<string, number> = {};
+    if (indicesNeedingSize.length > 0) {
+      try {
+        const response = await dataClient.indices.stats({
+          index: indicesNeedingSize,
+          metric: ['store'],
+        });
+
+        // Extract index sizes from response
+        indexSizes = Object.entries(response.indices || {}).reduce((acc, [indexName, stats]) => {
+          acc[indexName] = stats.total?.store?.size_in_bytes || 0;
+          return acc;
+        }, {} as Record<string, number>);
+      } catch (error) {
+        // If we can't get sizes, continue without them
+        // Log error but continue without index sizes
+        // eslint-disable-next-line no-console
+        console.error('Error fetching index sizes:', error);
+      }
+    }
+
     const toggledMigrationsDeprecations = enrichedDeprecations
       .map((deprecation) => {
         const correctiveActionType = deprecation.correctiveAction?.type;
@@ -39,6 +68,12 @@ export async function getESUpgradeStatus(
         } else if (correctiveActionType === 'reindex') {
           const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
           (deprecation.correctiveAction as ReindexAction).excludedActions = excludedActions;
+
+          // Add index size information if available
+          if (deprecation.index && indexSizes[deprecation.index]) {
+            (deprecation.correctiveAction as ReindexAction).indexSizeInBytes =
+              indexSizes[deprecation.index];
+          }
         }
         return deprecation;
       })
@@ -111,13 +146,11 @@ export async function getESUpgradeStatus(
   const { enrichedHealthIndicators, migrationsDeprecations } = await getCombinedDeprecations();
 
   const result = {
-    totalCriticalDeprecations: migrationsDeprecations.filter(
-      ({ isCritical }) => isCritical === true
-    ).length,
+    totalCriticalDeprecations: migrationsDeprecations.filter(({ level }) => level === 'critical')
+      .length,
     migrationsDeprecations,
-    totalCriticalHealthIssues: enrichedHealthIndicators.filter(
-      ({ isCritical }) => isCritical === true
-    ).length,
+    totalCriticalHealthIssues: enrichedHealthIndicators.filter(({ level }) => level === 'critical')
+      .length,
     enrichedHealthIndicators,
   };
   return result;

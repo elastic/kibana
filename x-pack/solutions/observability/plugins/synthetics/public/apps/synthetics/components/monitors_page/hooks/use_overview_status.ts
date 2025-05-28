@@ -58,7 +58,7 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
         isInitialMount.current = false;
         return;
       }
-      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+      dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
     },
     100,
     [pageState, scopeStatusByLocation]

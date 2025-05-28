@@ -22,11 +22,11 @@ const i18nTexts = {
 };
 
 interface Props {
-  isCritical: boolean;
+  level: 'none' | 'info' | 'warning' | 'critical' | 'fetch_error';
   isResolved?: boolean;
 }
 
-export const DeprecationBadge: FunctionComponent<Props> = ({ isCritical, isResolved }) => {
+export const DeprecationBadge: FunctionComponent<Props> = ({ level, isResolved }) => {
   if (isResolved) {
     return (
       <EuiBadge color="success" data-test-subj="resolvedDeprecationBadge">
@@ -35,7 +35,7 @@ export const DeprecationBadge: FunctionComponent<Props> = ({ isCritical, isResol
     );
   }
 
-  if (isCritical) {
+  if (level === 'critical') {
     return (
       <EuiBadge color="danger" data-test-subj="criticalDeprecationBadge">
         {i18nTexts.criticalBadgeLabel}

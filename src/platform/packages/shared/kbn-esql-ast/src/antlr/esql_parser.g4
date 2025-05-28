@@ -89,6 +89,14 @@ field
     : (qualifiedName ASSIGN)? booleanExpression
     ;
 
+rerankFields
+    : rerankField (COMMA rerankField)*
+    ;
+
+rerankField
+    : qualifiedName (ASSIGN booleanExpression)?
+    ;
+
 fromCommand
     : FROM indexPatternAndMetadataFields
     ;
@@ -298,7 +306,7 @@ rrfCommand
    ;
 
 rerankCommand
-    : DEV_RERANK queryText=constant ON fields WITH inferenceId=identifierOrParameter
+    : DEV_RERANK queryText=constant ON rerankFields WITH inferenceId=identifierOrParameter
     ;
 
 completionCommand

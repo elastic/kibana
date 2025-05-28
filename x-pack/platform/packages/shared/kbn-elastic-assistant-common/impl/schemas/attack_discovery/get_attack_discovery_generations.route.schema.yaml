@@ -19,7 +19,7 @@ paths:
           required: false
           schema:
             type: string
-          description: Optional relative or absolute end time for filtering generations
+          description: Relative or absolute end time for filtering generations
         - name: size
           in: query
           required: true
@@ -31,7 +31,7 @@ paths:
           required: false
           schema:
             type: string
-          description: Optional relative or absolute start time for filtering generations
+          description: Relative or absolute start time for filtering generations
       responses:
         200:
           description: Successful response

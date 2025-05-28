@@ -276,6 +276,7 @@ export const chatCompleteRoute = (
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.isStream ?? false,
             isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
+            errorLocation: 'chatCompleteRoute',
           });
           return assistantResponse.error({
             body: error.message,

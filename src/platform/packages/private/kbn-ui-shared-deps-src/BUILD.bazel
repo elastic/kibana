@@ -59,7 +59,8 @@ webpack_cli(
       "NODE_ENV": "production",
     },
     "//conditions:default": {
-      "NODE_ENV": "development"
+      "NODE_ENV": "development",
+      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
   }),
   visibility = ["//visibility:public"],

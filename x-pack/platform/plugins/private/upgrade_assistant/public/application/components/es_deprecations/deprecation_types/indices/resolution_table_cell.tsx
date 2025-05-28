@@ -67,10 +67,22 @@ const i18nTexts = {
   reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.reindexLabel', {
     defaultMessage: 'Reindex',
   }),
+  reindexFollowerIndexText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexLabel',
+    {
+      defaultMessage: 'Unfollow leader index',
+    }
+  ),
   reindexTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.reindexTooltipLabel',
     {
       defaultMessage: 'Resolve this issue by reindexing into a new, compatible index.',
+    }
+  ),
+  reindexFollowerIndexTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexTooltipLabel',
+    {
+      defaultMessage: 'Resolve this issue by terminating replication.',
     }
   ),
   updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.updateLabel', {
@@ -148,16 +160,19 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
         </EuiFlexGroup>
       );
     case ReindexStatus.failed:
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+      if (updateIndexState.status !== 'complete') {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+      break;
     case ReindexStatus.fetchFailed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -209,16 +224,31 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       </EuiFlexGroup>
     </EuiToolTip>
   ) : reindexState.meta.isReadonly ? (
-    <EuiToolTip position="top" content={i18nTexts.reindexTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.reindexText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+    <>
+      {reindexState.meta.isFollowerIndex ? (
+        <EuiToolTip position="top" content={i18nTexts.reindexFollowerIndexTooltipLabel}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="indexSettings" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{i18nTexts.reindexFollowerIndexText}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      ) : (
+        <EuiToolTip position="top" content={i18nTexts.reindexTooltipLabel}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="indexSettings" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{i18nTexts.reindexText}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      )}
+    </>
   ) : (
     <EuiToolTip position="top" content={i18nTexts.updateTooltipLabel}>
       <EuiFlexGroup gutterSize="s" alignItems="center">

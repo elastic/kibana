@@ -6,29 +6,26 @@
  */
 
 import { forbidden } from '@hapi/boom';
-import type { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SecurityHasPrivilegesPrivileges,
+  SecurityIndexPrivilege,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { streamPartsToIndexPattern } from '../../common/utils';
-import { DEFAULT_DATASET_TYPE } from '../../common/constants';
+import { DEFAULT_DATASET_TYPE, FAILURE_STORE_PRIVILEGE } from '../../common/constants';
 
 class DatasetQualityPrivileges {
   public async getHasIndexPrivileges(
     esClient: ElasticsearchClient,
     indexes: string[],
     privileges: SecurityIndexPrivilege[]
-  ): Promise<Awaited<Record<string, boolean>>> {
+  ): Promise<Awaited<Record<string, SecurityHasPrivilegesPrivileges>>> {
     const indexPrivileges = await esClient.security.hasPrivileges({
       index: indexes.map((dataStream) => ({ names: dataStream, privileges })),
     });
 
-    const indexesList = Object.keys(indexPrivileges.index);
-    return indexesList.reduce<Record<string, boolean>>((acc, index) => {
-      const privilegesList = Object.values(indexPrivileges.index[index]);
-      const hasAllPrivileges = privilegesList.every((hasPrivilege) => hasPrivilege);
-
-      return Object.assign(acc, { [index]: hasAllPrivileges });
-    }, {});
+    return indexPrivileges.index;
   }
 
   public async getCanViewIntegrations(
@@ -55,17 +52,28 @@ class DatasetQualityPrivileges {
     esClient: ElasticsearchClient,
     dataset: string,
     space = '*'
-  ): Promise<{ canRead: boolean; canMonitor: boolean; canViewIntegrations: boolean }> {
+  ): Promise<{
+    canRead: boolean;
+    canMonitor: boolean;
+    canViewIntegrations: boolean;
+    canReadFailureStore: boolean;
+  }> {
     const indexPrivileges = await esClient.security.hasPrivileges({
-      index: [{ names: dataset, privileges: ['read', 'monitor', 'view_index_metadata'] }],
+      index: [
+        {
+          names: dataset,
+          privileges: ['read', 'monitor', 'view_index_metadata', FAILURE_STORE_PRIVILEGE],
+        },
+      ],
     });
 
     const canRead = indexPrivileges.index[dataset]?.read ?? false;
     const canViewIndexMetadata = indexPrivileges.index[dataset]?.view_index_metadata ?? false;
+    const canReadFailureStore = indexPrivileges.index[dataset]?.[FAILURE_STORE_PRIVILEGE] ?? false;
 
     const canViewIntegrations = await this.getCanViewIntegrations(esClient, space);
 
-    return { canRead, canMonitor: canViewIndexMetadata, canViewIntegrations };
+    return { canRead, canMonitor: canViewIndexMetadata, canViewIntegrations, canReadFailureStore };
   }
 
   public async canReadDataset(

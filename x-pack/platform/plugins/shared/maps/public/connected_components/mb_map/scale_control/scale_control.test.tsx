@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { ScaleControl } from './scale_control';
 import type { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from '@kbn/mapbox-gl';
 
@@ -49,12 +49,12 @@ const mockMBMap = {
 } as unknown as MapboxMap;
 
 test('render', () => {
-  const component = shallow(<ScaleControl mbMap={mockMBMap} isFullScreen={false} />);
+  const component = mount(<ScaleControl mbMap={mockMBMap} isFullScreen={false} />);
   expect(component).toMatchSnapshot();
 });
 
 test('isFullScreen', () => {
-  const component = shallow(<ScaleControl mbMap={mockMBMap} isFullScreen={true} />);
+  const component = mount(<ScaleControl mbMap={mockMBMap} isFullScreen={true} />);
   expect(component).toMatchSnapshot();
 });
 

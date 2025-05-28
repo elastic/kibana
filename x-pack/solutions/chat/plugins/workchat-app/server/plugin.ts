@@ -19,6 +19,7 @@ import type { InternalServices } from './services/types';
 import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
+import { AppLogger } from './utils';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -35,13 +36,14 @@ export class WorkChatAppPlugin
       WorkChatAppPluginStartDependencies
     >
 {
-  private readonly logger: LoggerFactory;
+  private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkChatAppConfig;
   private readonly integrationRegistry = new IntegrationRegistry();
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
-    this.logger = context.logger;
+    this.loggerFactory = context.logger;
+    AppLogger.setInstance(this.loggerFactory.get('workchat.app'));
     this.config = context.config.get<WorkChatAppConfig>();
   }
 
@@ -53,7 +55,7 @@ export class WorkChatAppPlugin
     registerRoutes({
       core,
       router,
-      logger: this.logger.get('routes'),
+      logger: this.loggerFactory.get('routes'),
       getServices: () => {
         if (!this.services) {
           throw new Error('getServices called before #start');
@@ -68,8 +70,8 @@ export class WorkChatAppPlugin
 
     return {
       integrations: {
-        register: (integration) => {
-          return this.integrationRegistry.register(integration);
+        register: (tool) => {
+          return this.integrationRegistry.register(tool);
         },
       },
     };
@@ -82,7 +84,7 @@ export class WorkChatAppPlugin
     this.services = createServices({
       core,
       config: this.config,
-      logger: this.logger,
+      loggerFactory: this.loggerFactory,
       pluginsDependencies,
       integrationRegistry: this.integrationRegistry,
     });

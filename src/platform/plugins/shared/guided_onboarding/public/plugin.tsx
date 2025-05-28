@@ -86,15 +86,9 @@ export class GuidedOnboardingPlugin
     application: ApplicationStart;
     notifications: NotificationsStart;
   }) {
-    const { theme } = startServices;
     ReactDOM.render(
       <KibanaRenderContextProvider {...startServices}>
-        <GuidePanel
-          api={api}
-          application={application}
-          notifications={notifications}
-          theme$={theme.theme$}
-        />
+        <GuidePanel api={api} application={application} notifications={notifications} />
       </KibanaRenderContextProvider>,
       targetDomElement
     );

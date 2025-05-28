@@ -50,7 +50,11 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
                 title: (column.displayAsText as string) ?? column.id,
                 description:
                   value != null ? (
-                    <DefaultCellValue columnId={column.id} alert={props.alert} />
+                    <DefaultCellValue
+                      columnId={column.id}
+                      alert={props.alert}
+                      openLinksInNewTab={props.openLinksInNewTab}
+                    />
                   ) : (
                     '—'
                   ),

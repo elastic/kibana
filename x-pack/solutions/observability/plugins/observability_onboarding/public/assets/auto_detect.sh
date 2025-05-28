@@ -134,7 +134,6 @@ elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
 elastic_agent_tmp_config_path="/tmp/elastic-agent-config.tar"
 integration_names=()
 integration_titles=()
-config_files_with_password=()
 
 OS="$(uname)"
 ARCH="$(uname -m)"
@@ -197,36 +196,48 @@ install_elastic_agent() {
 
 wait_for_elastic_agent_status() {
   local MAX_RETRIES=10
+  local DELAY_SECONDS=2
   local i=0
-  elastic-agent status >/dev/null 2>&1
-  local ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
-  while [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ] && [ $i -le $MAX_RETRIES ]; do
-    sleep 1
-    elastic-agent status >/dev/null 2>&1
-    ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
+
+  local output=$(elastic-agent status --output json 2>/dev/null)
+
+  while [ output != \{* ] && [ $i -le $MAX_RETRIES ]; do
+    sleep "$DELAY_SECONDS"
+    output=$(elastic-agent status --output json 2>/dev/null)
     ((i++))
   done
 
-  if [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ]; then
-    update_step_progress "ea-status" "warning" "Unable to determine agent status"
+  if [ "$i" -eq "$MAX_RETRIES" ]; then
+    update_step_progress "ea-status" "danger" "Elastic Agent did not report status in the allocated wait time ($((MAX_RETRIES * DELAY_SECONDS)) seconds)."
+    fail "Unable to get Elastic Agent status to proceed. Try re-running the script."
   fi
 }
 
 ensure_elastic_agent_healthy() {
-  # https://www.elastic.co/guide/en/fleet/current/elastic-agent-cmd-options.html#elastic-agent-status-command
-  ELASTIC_AGENT_STATES=(STARTING CONFIGURING HEALTHY DEGRADED FAILED STOPPING UPGRADING ROLLBACK)
-  # Get elastic-agent status in json format | removing extra states in the json | finding "state":value | removing , | removing "state": | trimming the result
-  ELASTIC_AGENT_STATE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep state | sed 's/\(.*\),/\1 /' | sed 's/"state": //' | sed 's/[[:space:]]//g')"
-  # Get elastic-agent status in json format | removing extra states in the json | finding "message":value | removing , | removing "message": | trimming the result | removing ""
-  ELASTIC_AGENT_MESSAGE="$(elastic-agent status --output json | sed -n '/components/q;p' | grep message | sed 's/\(.*\),/\1 /' | sed 's/"message": //' | sed 's/[[:space:]]//g' | sed 's/\"//g')"
-  # Get elastic-agent status in json format | removing extra ids in the json | finding "id":value | removing , | removing "id": | trimming the result | removing ""
   ELASTIC_AGENT_ID="$(elastic-agent status --output json | sed -n '/components/q;p' | grep \"id\" | sed 's/\(.*\),/\1 /' | sed 's/"id": //' | sed 's/[[:space:]]//g' | sed 's/\"//g')"
 
-  if [ "${ELASTIC_AGENT_STATE}" = "2" ] && [ "${ELASTIC_AGENT_MESSAGE}" = "Running" ]; then
+  local MAX_RETRIES=10
+  local DELAY_SECONDS=2
+  local FOUND_HEALTHY=0
+
+  for ((i=0; i<MAX_RETRIES; i++)); do
+      local output=$(sudo elastic-agent status --output json 2>/dev/null)
+
+      if [[ "$output" =~ \"status\":\ *\"HEALTHY\" ]]; then
+          FOUND_HEALTHY=1
+          break
+      fi
+
+      sleep "$DELAY_SECONDS"
+  done
+
+  if [[ $FOUND_HEALTHY -eq 1 ]]; then
     update_step_progress "ea-status" "complete" "" "{\"agentId\": \"${ELASTIC_AGENT_ID}\"}"
   else
-    update_step_progress "ea-status" "danger" "Expected agent status HEALTHY / Running but got ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}"
-    fail "Elastic Agent is not healthy.\nCurrent status: ${ELASTIC_AGENT_STATES[ELASTIC_AGENT_STATE]} / ${ELASTIC_AGENT_MESSAGE}.\nFor help, please see our troubleshooting guide at https://www.elastic.co/guide/en/fleet/8.13/fleet-troubleshooting.html."
+    local current_status = $(elastic-agent status --output human)
+
+    update_step_progress "ea-status" "danger" "${current_status}"
+    fail "Elastic Agent is not healthy.\nCurrent status:\n${current_status}"
   fi
 }
 
@@ -323,10 +334,6 @@ apply_elastic_agent_config() {
     while IFS= read -r file; do
       local path="$(dirname "$elastic_agent_config_path")/$file"
       printf "  \e[36m%s\e[0m\n" "$path"
-      grep '<PASSWORD>' "$path" >/dev/null
-      if [ "$?" -eq 0 ]; then
-        config_files_with_password+=("$path")
-      fi
     done < <(tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$')
 
     update_step_progress "ea-config" "complete"
@@ -637,7 +644,7 @@ extract_elastic_agent
 install_elastic_agent
 apply_elastic_agent_config
 
-printf "\n\e[1m%s\e[0m\n" "Waiting for healthy status..."
+printf "\n\e[1m%s\e[0m\n" "Waiting for Elastic Agent status..."
 wait_for_elastic_agent_status
 ensure_elastic_agent_healthy
 
@@ -645,7 +652,12 @@ printf "\n\e[32m%s\e[0m\n" "🎉 Elastic Agent is configured and running!"
 
 printf "\n\e[1m%s\e[0m\n" "Next steps:"
 printf "\n• %s\n" "Go back to Kibana and check for incoming data"
-for path in "${config_files_with_password[@]}"; do
-  printf "\n• %s:\n  \e[36m%s\e[0m\n" "Collect $(known_integration_title "$(basename "${path%.yml}")") metrics by adding your username and password to" "$path"
-done
+
+current_status=$(elastic-agent status --output human)
+status_exit_code=$?
+
+if [ $status_exit_code -ne 0 ]; then
+  printf "\n• %s\n  %s\n\e[36m%s\e[0m\n" "Some integration may require additional configuration, like login and password to collect metrics." "Here is the current Elastic Agent status for unhealthy data streams:" "$current_status"
+fi
+
 printf "\n• %s:\n  \e[36;4m%s\e[0m\n" "For information on other standalone integration setups, visit" "https://www.elastic.co/guide/en/fleet/current/elastic-agent-configuration.html"

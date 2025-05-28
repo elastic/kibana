@@ -13,7 +13,7 @@ import {
   waitForPluginInitialized,
   EsIndexDataProvider,
 } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 

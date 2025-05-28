@@ -43,6 +43,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
@@ -80,6 +81,7 @@ export interface ReportingInternalStart {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
+  notifications: NotificationsPluginStart;
   screenshotting?: ScreenshottingStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
@@ -251,7 +253,7 @@ export class ReportingCore {
 
   public async getHealthInfo(): Promise<ReportingHealthInfo> {
     const { encryptedSavedObjects } = this.getPluginSetupDeps();
-    const { securityService } = await this.getPluginStartDeps();
+    const { notifications, securityService } = await this.getPluginStartDeps();
     const isSecurityEnabled = await this.isSecurityEnabled();
 
     let isSufficientlySecure: boolean;
@@ -272,6 +274,7 @@ export class ReportingCore {
     return {
       isSufficientlySecure,
       hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
+      areNotificationsEnabled: notifications.isEmailServiceAvailable(),
     };
   }
 

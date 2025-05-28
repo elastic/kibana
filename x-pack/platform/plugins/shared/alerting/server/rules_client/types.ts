@@ -191,6 +191,11 @@ interface DashboardItem {
   refId: string;
 }
 
+interface InvestigationGuide {
+  blob: string;
+}
+
 export interface DenormalizedArtifacts {
   dashboards?: DashboardItem[];
+  investigation_guide?: InvestigationGuide;
 }

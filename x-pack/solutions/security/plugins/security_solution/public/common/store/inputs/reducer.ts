@@ -196,8 +196,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       queries: state.global.queries.slice(state.global.queries.length),
     },
   }))
-  .case(setQuery, (state, { inputId, id, inspect, loading, refetch, searchSessionId }) =>
-    upsertQuery({ inputId, id, inspect, loading, refetch, state, searchSessionId })
+  .case(setQuery, (state, { inputId, id, inspect, loading, refetch, searchSessionId, tables }) =>
+    upsertQuery({ inputId, id, inspect, loading, refetch, state, searchSessionId, tables })
   )
   .case(deleteOneQuery, (state, { inputId, id }) => helperDeleteOneQuery({ inputId, id, state }))
   .case(setDuration, (state, { id, duration }) => ({

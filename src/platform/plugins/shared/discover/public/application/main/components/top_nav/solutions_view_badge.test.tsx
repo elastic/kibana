@@ -10,108 +10,182 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { SolutionsViewBadge } from './solutions_view_badge';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../../hooks/use_discover_services');
+const useDiscoverServicesMock = jest.mocked(useDiscoverServices);
 
-const useDiscoverServicesMock = useDiscoverServices as jest.Mock;
+const mockUseDiscoverServicesMock = ({
+  getActiveSpaceReturn,
+  isSolutionViewEnabled,
+  canManageSpaces = true,
+}: {
+  getActiveSpaceReturn: object | undefined;
+  isSolutionViewEnabled: boolean;
+  canManageSpaces?: boolean;
+}) => {
+  useDiscoverServicesMock.mockReturnValue({
+    spaces: {
+      getActiveSpace$: jest.fn().mockReturnValue(of(getActiveSpaceReturn)),
+      isSolutionViewEnabled,
+    },
+    docLinks: {
+      ELASTIC_WEBSITE_URL: 'https://www.elastic.co',
+    },
+    addBasePath: (path: string) => path,
+    capabilities: { spaces: { manage: canManageSpaces } },
+  } as unknown as ReturnType<typeof useDiscoverServices>);
+};
+
+const setup = () => {
+  const user = userEvent.setup();
+
+  const { container } = render(
+    <IntlProvider locale="en">
+      <SolutionsViewBadge badgeText="Toggle popover" />
+    </IntlProvider>
+  );
+
+  return { container, user };
+};
 
 describe('SolutionsViewBadge', () => {
-  test('renders badge', async () => {
-    useDiscoverServicesMock.mockReturnValue({
-      spaces: {
-        getActiveSpace$: jest.fn().mockReturnValue(
-          of({
-            id: 'default',
-            solution: 'classic',
-          })
-        ),
-        isSolutionViewEnabled: true,
-      },
-      docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co' },
-      addBasePath: (path: string) => path,
-      capabilities: { spaces: { manage: true } },
+  describe('when the solution visibility feature is disabled', () => {
+    it('does not render the badge', () => {
+      // Given
+      mockUseDiscoverServicesMock({
+        getActiveSpaceReturn: {
+          id: 'default',
+          solution: 'classic',
+        },
+        isSolutionViewEnabled: false,
+      });
+
+      // When
+      const { container } = setup();
+
+      // Then
+      expect(container).toBeEmptyDOMElement();
     });
-
-    const { container, findByTitle, findByRole } = render(
-      <IntlProvider locale="en">
-        <SolutionsViewBadge badgeText="Toggle popover" />
-      </IntlProvider>
-    );
-    expect(container).not.toBeEmptyDOMElement();
-
-    const button = await findByTitle('Toggle popover');
-    await button.click();
-    const dialog = await findByRole('dialog');
-    expect(dialog).not.toBeEmptyDOMElement();
   });
 
-  test('does not render badge when active space is already configured to use a solution view other than "classic"', async () => {
-    useDiscoverServicesMock.mockReturnValue({
-      spaces: {
-        getActiveSpace$: jest.fn().mockReturnValue(
-          of({
+  describe('when spaces is disabled (no active space available)', () => {
+    it('does not render the badge', () => {
+      // Given
+      mockUseDiscoverServicesMock({
+        getActiveSpaceReturn: undefined,
+        isSolutionViewEnabled: true,
+      });
+
+      // When
+      const { container } = setup();
+
+      // Then
+      expect(container).toBeEmptyDOMElement();
+    });
+  });
+
+  describe('when there is an active space', () => {
+    describe('when the active space is configured to use a solution view other than "classic"', () => {
+      it('does not render the badge', () => {
+        // Given
+        mockUseDiscoverServicesMock({
+          getActiveSpaceReturn: {
             id: 'default',
             solution: 'oblt',
-          })
-        ),
-        isSolutionViewEnabled: true,
-      },
-      docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co' },
-      addBasePath: (path: string) => path,
-      capabilities: { spaces: { manage: true } },
+          },
+          isSolutionViewEnabled: true,
+        });
+
+        // When
+        const { container } = setup();
+
+        // Then
+        expect(container).toBeEmptyDOMElement();
+      });
     });
 
-    const { container } = render(
-      <IntlProvider locale="en">
-        <SolutionsViewBadge badgeText="Toggle popover" />
-      </IntlProvider>
-    );
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  test('does not render badge when spaces is disabled (no active space available)', async () => {
-    useDiscoverServicesMock.mockReturnValue({
-      spaces: {
-        getActiveSpace$: jest.fn().mockReturnValue(of(undefined)),
-        isSolutionViewEnabled: true,
-      },
-      docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co' },
-      addBasePath: (path: string) => path,
-      capabilities: { spaces: { manage: true } },
-    });
-
-    const { container } = render(
-      <IntlProvider locale="en">
-        <SolutionsViewBadge badgeText="Toggle popover" />
-      </IntlProvider>
-    );
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  test('does not render badge when solution visibility feature is disabled', async () => {
-    useDiscoverServicesMock.mockReturnValue({
-      spaces: {
-        getActiveSpace$: jest.fn().mockReturnValue(
-          of({
+    describe('when the active space is configured to use the classic solution view', () => {
+      it('renders the badge', () => {
+        // Given
+        mockUseDiscoverServicesMock({
+          getActiveSpaceReturn: {
             id: 'default',
             solution: 'classic',
-          })
-        ),
-        isSolutionViewEnabled: false,
-      },
-      docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co' },
-      addBasePath: (path: string) => path,
-      capabilities: { spaces: { manage: true } },
-    });
+          },
+          isSolutionViewEnabled: true,
+          canManageSpaces: false,
+        });
 
-    const { container } = render(
-      <IntlProvider locale="en">
-        <SolutionsViewBadge badgeText="Toggle popover" />
-      </IntlProvider>
-    );
-    expect(container).toBeEmptyDOMElement();
+        // When
+        setup();
+
+        // Then
+        expect(screen.getByText('Toggle popover')).toBeVisible();
+      });
+
+      describe('when the user clicks the badge', () => {
+        describe('and the user has manage spaces capability', () => {
+          it('opens the popover', async () => {
+            // Given
+            mockUseDiscoverServicesMock({
+              getActiveSpaceReturn: {
+                id: 'default',
+                solution: 'classic',
+              },
+              isSolutionViewEnabled: true,
+              canManageSpaces: true,
+            });
+
+            // When
+            const { user } = setup();
+
+            // Then
+            await user.click(screen.getByTitle('Toggle popover'));
+
+            const dialog = screen.getByRole('dialog');
+            await waitFor(() =>
+              expect(
+                within(dialog).getByText(
+                  `We improved Discover so your view adapts to what you're exploring. Choose Observability or Security as your “solution view” in your space settings.`
+                )
+              ).toBeVisible()
+            );
+          });
+        });
+
+        describe('and the user does not have manage spaces capability', () => {
+          it('opens the popover', async () => {
+            // Given
+            mockUseDiscoverServicesMock({
+              getActiveSpaceReturn: {
+                id: 'default',
+                solution: 'classic',
+              },
+              isSolutionViewEnabled: true,
+              canManageSpaces: false,
+            });
+
+            // When
+            const { user } = setup();
+
+            // Then
+            await user.click(screen.getByTitle('Toggle popover'));
+
+            const dialog = screen.getByRole('dialog');
+            await waitFor(() =>
+              expect(
+                within(dialog).getByText(
+                  `We enhanced Discover to adapt seamlessly to what you're exploring. Select Observability or Security as the “solution view” — ask your admin to set it in the space settings.`
+                )
+              ).toBeVisible()
+            );
+          });
+        });
+      });
+    });
   });
 });

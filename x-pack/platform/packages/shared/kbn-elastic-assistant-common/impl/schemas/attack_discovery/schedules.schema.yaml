@@ -166,7 +166,7 @@ components:
 
     AttackDiscoveryScheduleActionGroup:
       type: string
-      description: Optionally groups actions by use cases. Use `default` for alert notifications.
+      description: Groups actions by use cases. Use `default` for alert notifications.
 
     AttackDiscoveryScheduleActionId:
       type: string

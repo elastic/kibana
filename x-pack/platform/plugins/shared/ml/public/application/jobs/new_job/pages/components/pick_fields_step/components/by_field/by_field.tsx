@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
 import { SplitFieldSelect } from '../split_field_select';
@@ -24,6 +25,7 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
   const newJobCapsService = useNewJobCapsService();
+  const titleId = useGeneratedHtmlId({ prefix: 'byFieldSelector' });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
@@ -72,6 +74,7 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
           defaultMessage: 'Split data',
         }
       )}
+      titleId={titleId}
     />
   );
 };

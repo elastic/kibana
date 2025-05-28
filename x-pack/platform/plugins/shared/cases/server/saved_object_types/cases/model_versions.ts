@@ -33,7 +33,6 @@ export const modelVersion1: SavedObjectsModelVersion = {
                   ignore_malformed: true,
                 },
                 boolean: {
-                  // @ts-expect-error: es types are not correct. ignore_malformed is supported.
                   ignore_malformed: true,
                   type: 'boolean',
                 },

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import * as i18n from './translations';
 import { QuickPromptSettingsEditor } from './quick_prompt_editor';

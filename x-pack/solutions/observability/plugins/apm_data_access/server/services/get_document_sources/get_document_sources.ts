@@ -23,8 +23,6 @@ export interface DocumentSourcesRequest {
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
-  enableContinuousRollups: boolean;
 }
 
 const getRequest = ({
@@ -61,18 +59,14 @@ export async function getDocumentSources({
   start,
   end,
   kuery,
-  enableServiceTransactionMetrics,
-  enableContinuousRollups,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
-  enableContinuousRollups: boolean;
 }): Promise<TimeRangeMetadata['sources']> {
   const documentTypesToCheck = [
-    ...(enableServiceTransactionMetrics ? [ApmDocumentType.ServiceTransactionMetric as const] : []),
+    ApmDocumentType.ServiceTransactionMetric as const,
     ApmDocumentType.TransactionMetric as const,
   ];
 
@@ -81,7 +75,6 @@ export async function getDocumentSources({
     start,
     end,
     kuery,
-    enableContinuousRollups,
     documentTypesToCheck,
   });
 
@@ -101,18 +94,15 @@ const getDocumentTypesInfo = async ({
   start,
   end,
   kuery,
-  enableContinuousRollups,
   documentTypesToCheck,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
-  enableContinuousRollups: boolean;
   documentTypesToCheck: ApmDocumentType[];
 }): Promise<TimeRangeMetadata['sources']> => {
   const getRequests = getDocumentTypeRequestsFn({
-    enableContinuousRollups,
     start,
     end,
     kuery,
@@ -156,24 +146,12 @@ const getDocumentTypesInfo = async ({
 };
 
 const getDocumentTypeRequestsFn =
-  ({
-    enableContinuousRollups,
-    start,
-    end,
-    kuery,
-  }: {
-    enableContinuousRollups: boolean;
-    start: number;
-    end: number;
-    kuery: string;
-  }) =>
+  ({ start, end, kuery }: { start: number; end: number; kuery: string }) =>
   (documentType: ApmDocumentType) => {
     const currentRange = rangeQuery(start, end);
     const kql = kqlQuery(kuery);
 
-    const rollupIntervals = enableContinuousRollups
-      ? getConfigForDocumentType(documentType).rollupIntervals
-      : [RollupInterval.OneMinute];
+    const rollupIntervals = getConfigForDocumentType(documentType).rollupIntervals;
 
     return rollupIntervals.map((rollupInterval) => ({
       documentType,

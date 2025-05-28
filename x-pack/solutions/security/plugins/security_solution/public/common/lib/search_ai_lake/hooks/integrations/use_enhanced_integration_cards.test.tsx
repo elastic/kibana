@@ -72,10 +72,10 @@ describe('applyCategoryBadgeAndStyling', () => {
     expect(result.showReleaseBadge).toBe(false);
   });
 
-  it('should set maxCardHeight to 88', () => {
+  it('should set minCardHeight to 88', () => {
     const result = applyCategoryBadgeAndStyling(mockInt, IntegrationsFacets.available);
 
-    expect(result.maxCardHeight).toBe(88);
+    expect(result.minCardHeight).toBe(88);
   });
 });
 

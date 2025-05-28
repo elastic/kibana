@@ -101,7 +101,7 @@ export const ComponentTemplateForm = ({
   onStepChange,
 }: Props) => {
   const {
-    template: { settings, mappings, aliases, lifecycle },
+    template: { settings, mappings, aliases, lifecycle, data_stream_options: dataStreamOptions },
     ...logistics
   } = defaultValue;
 
@@ -274,6 +274,7 @@ export const ComponentTemplateForm = ({
           getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
           dataStreams={dataStreams}
           canRollover={canRollover}
+          dataStreamOptions={dataStreamOptions}
         />
       </FormWizardStep>
     </FormWizard>

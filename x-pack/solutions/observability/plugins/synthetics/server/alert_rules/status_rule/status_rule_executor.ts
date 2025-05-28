@@ -172,9 +172,10 @@ export class StatusRuleExecutor {
     const queryLocations = this.params?.locations;
 
     // Account for locations filter
-    const listOfLocationAfterFilter = queryLocations
-      ? intersection(monitorLocationIds, queryLocations)
-      : monitorLocationIds;
+    const listOfLocationAfterFilter =
+      queryLocations && queryLocations.length
+        ? intersection(monitorLocationIds, queryLocations)
+        : monitorLocationIds;
 
     const currentStatus = await queryMonitorStatusAlert({
       esClient: this.esClient,

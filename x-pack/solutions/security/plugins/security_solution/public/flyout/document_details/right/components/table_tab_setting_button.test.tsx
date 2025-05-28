@@ -32,7 +32,9 @@ const renderComponent = () => {
       setTableTabState={mockSetTableTabState}
       isPopoverOpen={false}
       setIsPopoverOpen={mockSetIsPopoverOpen}
-    />
+    />,
+    // TODO: fails with concurrent mode
+    { legacyRoot: true }
   );
 };
 

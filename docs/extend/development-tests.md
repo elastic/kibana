@@ -75,7 +75,20 @@ We use functional tests to make sure the {{kib}} UI works as expected. It replac
 
 #### Running functional tests [_running_functional_tests]
 
-The `FunctionalTestRunner` (FTR) is very bare bones and gets most of its functionality from its config file. The {{kib}} repo contains many FTR config files which use slightly different configurations for the {{kib}} server or {{es}}, have different test files, and potentially other config differences. FTR config files are organised in manifest files, based on testing area and type of distribution: serverless: - ftr_base_serverless_configs.yml - ftr_oblt_serverless_configs.yml - ftr_security_serverless_configs.yml - ftr_search_serverless_configs.yml stateful: - ftr_platform_stateful_configs.yml - ftr_oblt_stateful_configs.yml - ftr_security_stateful_configs.yml - ftr_search_stateful_configs.yml If you’re writing a plugin outside the {{kib}} repo, you will have your own config file. See [Functional Tests for Plugins outside the {{kib}} repo](/extend/external-plugin-functional-tests.md) for more info.
+The `FunctionalTestRunner` (FTR) is very bare bones and gets most of its functionality from its config file. The {{kib}} repo contains many FTR config files which use slightly different configurations for the {{kib}} server or {{es}}, have different test files, and potentially other config differences. FTR config files are organised in manifest files, based on testing area and type of distribution:
+
+- serverless:
+  - `ftr_base_serverless_configs.yml`
+  - `ftr_oblt_serverless_configs.yml`
+  - `ftr_security_serverless_configs.yml`
+  - `ftr_search_serverless_configs.yml`
+- stateful:
+  - `ftr_platform_stateful_configs.yml`
+  - `ftr_oblt_stateful_configs.yml`
+  - `ftr_security_stateful_configs.yml`
+  - `ftr_search_stateful_configs.yml`
+
+If you’re writing a plugin outside the {{kib}} repo, you will have your own config file. See [Functional Tests for Plugins outside the {{kib}} repo](/extend/external-plugin-functional-tests.md) for more info.
 
 There are three ways to run the tests depending on your goals:
 
@@ -292,7 +305,7 @@ export default function ({ getService, getPageObject }) {
   describe('My Test Suite', () => {
 
     // most suites start with a before hook that navigates to a specific
-    // app/page and restores some archives into {es} with esArchiver
+    // app/page and restores some archives into Elasticsearch with esArchiver
     before(async () => {
       await Promise.all([
         // start by clearing Saved Objects from the .kibana index
@@ -305,7 +318,7 @@ export default function ({ getService, getPageObject }) {
     });
 
     // right after the before() hook definition, add the teardown steps
-    // that will tidy up {es} for other test suites
+    // that will tidy up Elasticsearch for other test suites
     after(async () => {
       // we clear Kibana Saved Objects but not the makelogs
       // archive because we don't make any changes to it, and subsequent
@@ -586,7 +599,12 @@ log.debug(‘done clicking menu’);
 
 #### MacOS testing performance tip [_macos_testing_performance_tip]
 
-macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator’s GPU settings. In iTerm2: * Open Preferences (Command + ,) * In the General tab, under the "Magic" section, ensure "GPU rendering" is checked * Open "Advanced GPU Settings…​" * Uncheck the "Prefer integrated to discrete GPU" option * Restart iTerm
+macOS users on a machine with a discrete graphics card may see significant speedups (up to 2x) when running tests by changing your terminal emulator’s GPU settings. In iTerm2:
+* Open Preferences (Command + ,)
+* In the General tab, under the "Magic" section, ensure "GPU rendering" is checked
+* Open "Advanced GPU Settings…​"
+* Uncheck the "Prefer integrated to discrete GPU" option
+* Restart iTerm
 
 
 ### Flaky Test Runner [_flaky_test_runner]

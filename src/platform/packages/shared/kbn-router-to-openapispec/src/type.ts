@@ -38,7 +38,7 @@ export interface OpenAPIConverter {
 
 export type CustomOperationObject = OpenAPIV3.OperationObject<{
   // Custom OpenAPI from ES API spec based on @availability
-  'x-state'?: 'Technical Preview' | 'Beta';
+  'x-state'?: string;
 }>;
 
 export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];

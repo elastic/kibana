@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { StreamDefinition, isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 
-export function getIndexPatterns(stream: StreamDefinition | undefined) {
+export function getIndexPatterns(stream: Streams.all.Definition | undefined) {
   if (!stream) {
     return undefined;
   }
-  if (isUnwiredStreamDefinition(stream)) {
+  if (Streams.UnwiredStream.Definition.is(stream)) {
     return [stream.name];
   }
   const isRoot = stream.name.indexOf('.') === -1;

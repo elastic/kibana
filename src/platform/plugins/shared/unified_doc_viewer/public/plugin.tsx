@@ -94,7 +94,11 @@ export class UnifiedDocViewerPublicPlugin
   }
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
-    const { analytics, uiSettings } = core;
+    const {
+      analytics,
+      uiSettings,
+      notifications: { toasts },
+    } = core;
     const { data, fieldFormats, fieldsMetadata, share } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
@@ -105,6 +109,7 @@ export class UnifiedDocViewerPublicPlugin
       data,
       fieldFormats,
       fieldsMetadata,
+      toasts,
       storage,
       uiSettings,
       unifiedDocViewer,

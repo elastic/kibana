@@ -352,5 +352,6 @@ describe('getBracketsToClose', () => {
         'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
       )
     ).toEqual([')']);
+    expect(getBracketsToClose('FROM a | WHERE ("""field: *""")')).toEqual([]);
   });
 });

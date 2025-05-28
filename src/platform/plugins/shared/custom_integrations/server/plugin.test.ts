@@ -94,7 +94,7 @@ describe('CustomIntegrationsPlugin', () => {
           type: 'ui_link',
           shipper: 'language_clients',
           uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
+            'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/current/index.html',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'elasticsearch_sdk'],
@@ -116,8 +116,7 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the Rust client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
+          uiInternalPath: 'https://www.elastic.co/docs/reference/elasticsearch/clients/rust',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'elasticsearch_sdk'],

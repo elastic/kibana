@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 
 export interface IntegrationCardMetadata {
-  installedIntegrationsCount: number;
   isAgentRequired: boolean;
+  activeIntegrations: GetInstalledPackagesResponse['items'];
 }
 
 export interface Tab {
@@ -21,6 +21,7 @@ export interface Tab {
   overflow?: 'hidden' | 'scroll';
   showSearchTools?: boolean;
   subCategory?: string;
+  appendAutoImportCard?: boolean;
   sortByFeaturedIntegrations: boolean;
   height?: string;
 }
@@ -37,21 +38,7 @@ export enum IntegrationTabId {
 }
 
 export type TopCalloutRenderer = React.FC<{
-  installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  activeIntegrationsCount: number;
+  isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
-}>;
-
-export type AvailablePackagesResult = Pick<
-  ReturnType<AvailablePackagesHookType>,
-  'isLoading' | 'searchTerm' | 'setCategory' | 'setSearchTerm' | 'setSelectedSubCategory'
->;
-
-export type RenderChildrenType = React.FC<{
-  allowedIntegrations: IntegrationCardItem[];
-  availablePackagesResult: AvailablePackagesResult;
-  checkCompleteMetadata?: IntegrationCardMetadata;
-  featuredCardIds?: string[];
-  selectedTabResult: UseSelectedTabReturn;
-  topCalloutRenderer?: TopCalloutRenderer;
 }>;
