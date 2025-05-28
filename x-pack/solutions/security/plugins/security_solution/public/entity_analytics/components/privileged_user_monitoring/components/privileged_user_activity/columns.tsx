@@ -219,19 +219,19 @@ export const buildAuthenticationsColumns = (
     ),
     truncateText: true,
   },
-  {
-    field: 'method',
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.method"
-        defaultMessage="Method"
-      />
-    ),
-    render: (method: string) => {
-      // TODO: Implement method rendering logic
-      return '// TODO';
-    },
-  },
+  // {
+  //   field: 'method',
+  //   name: (
+  //     <FormattedMessage
+  //       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.method"
+  //       defaultMessage="Method"
+  //     />
+  //   ),
+  //   render: (method: string) => {
+  //     // TODO: Implement method rendering logic
+  //     return '// TODO';
+  //   },
+  // },
   {
     field: 'result',
     name: (

@@ -57,7 +57,6 @@ describe('UserActivityPrivilegedUsersPanel', () => {
 
   it('renders the "View all events by privileged users" link', () => {
     render(<UserActivityPrivilegedUsersPanel />, { wrapper: TestProviders });
-    // TODO fix when the link is implemented
-    expect(screen.getByText('[TODO] View all events by privileged users')).toBeInTheDocument();
+    expect(screen.getByText('View all events')).toBeInTheDocument();
   });
 });

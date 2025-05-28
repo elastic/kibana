@@ -152,5 +152,3 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
     </InspectButtonContainer>
   );
 };
-
-// TODO Handle index not found error

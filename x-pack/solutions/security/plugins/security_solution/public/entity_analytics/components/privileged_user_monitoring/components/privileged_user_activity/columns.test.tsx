@@ -146,12 +146,6 @@ describe('columns', () => {
       expect(screen.getByText('login')).toBeInTheDocument();
     });
 
-    it('renders method column with TODO', () => {
-      const col = columns[5] as EuiTableFieldDataColumnType<TableItemType>;
-      render(<>{col.render?.('password', baseRecord)}</>, { wrapper: TestProviders });
-      expect(screen.getByText('// TODO')).toBeInTheDocument();
-    });
-
     it('renders result column with badge', () => {
       const col = columns[6] as EuiTableFieldDataColumnType<TableItemType>;
       render(<>{col.render?.('success', baseRecord)}</>, { wrapper: TestProviders });
