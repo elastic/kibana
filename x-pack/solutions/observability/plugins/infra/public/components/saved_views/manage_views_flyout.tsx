@@ -33,6 +33,7 @@ export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem> {
   onMakeDefaultView: SavedViewOperations<TSavedViewState>['setDefaultViewById'];
   onSwitchView: SavedViewOperations<TSavedViewState>['switchViewById'];
   onDeleteView: SavedViewOperations<TSavedViewState>['deleteViewById'];
+  triggerRef: React.RefObject<HTMLButtonElement>;
 }
 
 interface DeleteConfimationProps {
@@ -51,6 +52,7 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
   onMakeDefaultView,
   onDeleteView,
   loading,
+  triggerRef,
 }: ManageViewsFlyoutProps<TSavedViewState>) {
   // Add name as top level property to allow in memory search
   const namedViews = useMemo(() => views.map(addOwnName), [views]);
@@ -133,6 +135,15 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
         aria-label={i18n.translate('xpack.infra.openView.flyout.ariaLabel', {
           defaultMessage: 'Manage saved views dialog',
         })}
+        focusTrapProps={{
+          returnFocus: (triggerElement: Element) => {
+            if (!triggerElement || triggerElement === document.body) {
+              triggerRef.current?.focus();
+              return false;
+            }
+            return true;
+          },
+        }}
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
