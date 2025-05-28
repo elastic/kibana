@@ -92,13 +92,7 @@ export const TagTable: FC<TagTableProps> = ({
                     'xpack.savedObjectsTagging.management.table.managedTagTooltip',
                     {
                       defaultMessage:
-                        'This tag is managed by Elastic and cannot be deleted, edited, or assigned to objects.',
-                    }
-                  )}
-                  aria-label={i18n.translate(
-                    'xpack.savedObjectsTagging.management.table.managedTagAriaLabel',
-                    {
-                      defaultMessage: 'Tag: {tagName}',
+                        'This {tagName} is managed by Elastic and cannot be deleted, edited, or assigned to objects.',
                       values: { tagName: tag.name },
                     }
                   )}
