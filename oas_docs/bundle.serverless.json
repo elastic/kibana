@@ -45572,7 +45572,8 @@
         "summary": "Create a maintenance window.",
         "tags": [
           "maintenance-window"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/maintenance_window/{id}": {
@@ -45617,7 +45618,8 @@
         "summary": "Delete a maintenance window.",
         "tags": [
           "maintenance-window"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       },
       "get": {
         "description": "[Required authorization] Route required privileges: read-maintenance-window.",
@@ -45812,7 +45814,8 @@
         "summary": "Get maintenance window details.",
         "tags": [
           "maintenance-window"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       },
       "patch": {
         "description": "[Required authorization] Route required privileges: write-maintenance-window.",
@@ -46148,7 +46151,8 @@
         "summary": "Update a maintenance window.",
         "tags": [
           "maintenance-window"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/maintenance_window/{id}/_archive": {
@@ -46562,7 +46566,8 @@
         "summary": "Unarchive a maintenance window.",
         "tags": [
           "maintenance-window"
-        ]
+        ],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/saved_objects/_export": {
