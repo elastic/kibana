@@ -336,6 +336,8 @@ export const streamEnrichmentMachine = setup({
             managingDataSources: {
               on: {
                 'dataSources.closeManagement': 'displayingSimulation',
+                'dataSources.create': 'displayingSimulation',
+                'dataSources.removeById': 'displayingSimulation',
               },
             },
           },
