@@ -799,7 +799,9 @@ describe('UnifiedDataTable', () => {
         ).toBeTruthy();
 
         // The other actions are within the popover
-        findTestSubject(component, 'unifiedDataTable_actions').first().simulate('click');
+        findTestSubject(component, 'unifiedDataTable_additionalRowControl_actions')
+          .first()
+          .simulate('click');
         expect(findTestSubject(component, 'exampleRowControl-heart').exists()).toBeTruthy();
         expect(findTestSubject(component, 'exampleRowControl-inspect').exists()).toBeTruthy();
       },
