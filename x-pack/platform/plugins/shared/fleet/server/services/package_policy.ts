@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
+import { omit, partition, isEqual, cloneDeep, without, chunk } from 'lodash';
 import { indexBy } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
@@ -100,6 +100,7 @@ import type { ExternalCallback } from '..';
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
@@ -1489,13 +1490,35 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const updatedPoliciesSuccess = updatedPolicies
+    let updatedPoliciesSuccess = updatedPolicies
       .filter((policy) => !policy.error && policy.attributes)
       .map((soPolicy) =>
         mapPackagePolicySavedObjectToPackagePolicy(
           soPolicy as SavedObject<PackagePolicySOAttributes>
         )
       );
+
+    updatedPoliciesSuccess = (
+      await pMap(chunk(updatedPoliciesSuccess, 200), async (updatedPoliciesChunk) => {
+        const updatedPoliciesComplete = await this.getByIDs(
+          soClient,
+          updatedPoliciesChunk.map((p) => p.id)
+        );
+        return pMap(
+          updatedPoliciesComplete,
+          (packagePolicy) =>
+            packagePolicyService.runExternalCallbacks(
+              'packagePolicyPostUpdate',
+              packagePolicy,
+              soClient,
+              esClient
+            ),
+          {
+            concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+          }
+        );
+      })
+    ).flat();
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
