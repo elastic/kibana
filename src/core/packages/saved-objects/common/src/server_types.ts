@@ -37,6 +37,11 @@ export type SavedObjectAttributeSingle =
  */
 export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
 
+export interface SavedObjectAccessControl {
+  owner: string;
+  accessMode: 'read_only' | undefined;
+}
+
 /**
  * The data for a Saved Object is stored as an object in the `attributes`
  * property.
@@ -114,4 +119,6 @@ export interface SavedObject<T = unknown> {
    * make their edits to the copy.
    */
   managed?: boolean;
+
+  accessControlCapabilities?: SavedObjectAccessControl;
 }

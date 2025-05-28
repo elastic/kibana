@@ -249,6 +249,8 @@ export interface SavedObjectsType<Attributes = any> {
    * If not defined, will use the object's type and id to generate a label.
    */
   getTitle?: (savedObject: Attributes) => string;
+
+  supportsAccessControl?: boolean;
 }
 
 /**
