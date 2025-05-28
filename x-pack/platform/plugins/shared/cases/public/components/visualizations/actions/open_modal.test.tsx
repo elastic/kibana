@@ -112,7 +112,7 @@ describe('openModal', () => {
     ]);
   });
 
-  it('should have correct onClose handler - when close modal clicked', () => {
+  it('should have correct onClose handler - when close modal clicked', async () => {
     openModal(
       getMockLensApi(),
       'myAppId',
@@ -120,12 +120,14 @@ describe('openModal', () => {
       getMockServices()
     );
 
-    const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
-    onClose();
-    expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    await waitFor(() => {
+      const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
+      onClose();
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    });
   });
 
-  it('should have correct onClose handler - when case selected', () => {
+  it('should have correct onClose handler - when case selected', async () => {
     openModal(
       getMockLensApi(),
       'myAppId',
@@ -133,12 +135,14 @@ describe('openModal', () => {
       getMockServices()
     );
 
-    const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
-    onClose({ id: 'case-id', title: 'case-title' });
-    expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    await waitFor(() => {
+      const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
+      onClose({ id: 'case-id', title: 'case-title' });
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    });
   });
 
-  it('should have correct onClose handler - when case created', () => {
+  it('should have correct onClose handler - when case created', async () => {
     openModal(
       getMockLensApi(),
       'myAppId',
@@ -146,12 +150,14 @@ describe('openModal', () => {
       getMockServices()
     );
 
-    const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
-    onClose(null, true);
-    expect(unmountComponentAtNode as jest.Mock).not.toHaveBeenCalled();
+    await waitFor(() => {
+      const onClose = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onClose;
+      onClose(null, true);
+      expect(unmountComponentAtNode as jest.Mock).not.toHaveBeenCalled();
+    });
   });
 
-  it('should have correct onSuccess handler', () => {
+  it('should have correct onSuccess handler', async () => {
     openModal(
       getMockLensApi(),
       'myAppId',
@@ -159,9 +165,11 @@ describe('openModal', () => {
       getMockServices()
     );
 
-    const onSuccess = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess;
-    onSuccess();
-    expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    await waitFor(() => {
+      const onSuccess = mockUseCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess;
+      onSuccess();
+      expect(unmountComponentAtNode as jest.Mock).toHaveBeenCalled();
+    });
   });
 
   it('should open modal with an attachment with the time range in absolute values', async () => {

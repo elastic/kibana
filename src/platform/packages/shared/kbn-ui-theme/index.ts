@@ -16,5 +16,6 @@ export {
   euiDarkVars,
   euiLightVars,
   euiThemeVars,
+  getEuiThemeVars,
   _setDarkMode,
 } from './src/theme';

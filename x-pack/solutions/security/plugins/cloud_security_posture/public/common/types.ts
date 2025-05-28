@@ -72,3 +72,8 @@ export interface RuleCreateProps {
 export interface RuleResponse extends RuleCreateProps {
   id: string;
 }
+export type VulnerabilityGroupingMultiValueOptions =
+  | 'vulnerability.id'
+  | 'package.name'
+  | 'package.version'
+  | 'package.fixed_version';
