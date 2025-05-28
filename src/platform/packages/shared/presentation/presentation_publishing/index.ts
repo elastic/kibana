@@ -157,3 +157,7 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export {
+  SAVED_OBJECT_REF_NAME,
+  findSavedObjectRef
+} from './saved_object_ref';

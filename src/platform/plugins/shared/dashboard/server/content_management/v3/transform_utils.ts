@@ -33,6 +33,7 @@ import {
   transformPanelsOut,
   transformSearchSourceIn,
   transformSearchSourceOut,
+  transformReferencesOut,
 } from './transforms';
 
 export function dashboardAttributesOut(
@@ -227,9 +228,10 @@ export function savedObjectToItem(
       : dashboardAttributesOut(attributes, references, getTagNamesFromReferences);
 
     // if includeReferences is provided, only include references of those types
-    const referencesOut = allowedReferences
+    const filteredReferences = allowedReferences
       ? references?.filter((reference) => allowedReferences.includes(reference.type))
       : references;
+    const referencesOut = transformReferencesOut(filteredReferences ?? []);
 
     return {
       item: {

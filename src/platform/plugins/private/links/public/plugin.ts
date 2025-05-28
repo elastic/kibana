@@ -32,6 +32,7 @@ import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
+import { createLinksSavedObjectRef } from './lib/saved_object_ref_utils';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -69,9 +70,8 @@ export class LinksPlugin
             {
               panelType: CONTENT_ID,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
+                rawState: {},
+                references: [createLinksSavedObjectRef(savedObject.id)],
               },
             },
             true
