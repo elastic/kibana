@@ -5,7 +5,7 @@ Tabs bar components.
 ## Storybook 
 
 Run the following command:
-`NODE_OPTIONS="--openssl-legacy-provider" node scripts/storybook unified_tabs`.
+`yarn storybook unified_tabs`.
 
 ## Example plugin
 

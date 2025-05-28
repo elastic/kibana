@@ -24,7 +24,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { getAlertByIdRoute } from './get_alert_by_id';
 import { requestContextMock } from './__mocks__/request_context';
 import { getReadRequest } from './__mocks__/request_responses';

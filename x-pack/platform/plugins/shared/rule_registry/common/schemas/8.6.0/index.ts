@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
-import { AlertWithCommonFields800 } from '../8.0.0';
+import type { AlertWithCommonFields800 } from '../8.0.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.

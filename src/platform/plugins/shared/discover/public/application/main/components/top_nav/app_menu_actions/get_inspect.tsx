@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionId, AppMenuActionType, AppMenuActionSecondary } from '@kbn/discover-utils';
+import type { AppMenuActionSecondary } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getInspectAppMenuItem = ({

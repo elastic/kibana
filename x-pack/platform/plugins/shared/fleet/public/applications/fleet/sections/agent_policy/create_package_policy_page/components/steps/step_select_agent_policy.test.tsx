@@ -80,9 +80,7 @@ describe('stepStepSelectAgentPolicy', () => {
       />
     ));
 
-  // FLAKY: https://github.com/elastic/kibana/issues/192792
-  // FLAKY: https://github.com/elastic/kibana/issues/192793
-  describe.skip('with single agent policy', () => {
+  describe('with single agent policy', () => {
     beforeEach(() => {
       testRenderer = createFleetTestRendererMock();
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
@@ -129,8 +127,7 @@ describe('stepStepSelectAgentPolicy', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/197985
-  describe.skip('with multiple agent policies', () => {
+  describe('with multiple agent policies', () => {
     beforeEach(() => {
       testRenderer = createFleetTestRendererMock();
       useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });

@@ -20,6 +20,8 @@ import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_chart
 import { useTableSeverity } from '../components/controls/select_severity';
 import { AnomalyDetectionAlertsStateService } from './alerts';
 import { useMlJobService } from '../services/job_service';
+import { useTableInterval } from '../components/controls/select_interval';
+import { AnomalyTableStateService } from './anomaly_table_state_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -28,6 +30,7 @@ export interface AnomalyExplorerContextValue {
   anomalyTimelineStateService: AnomalyTimelineStateService;
   chartsStateService: AnomalyChartsStateService;
   anomalyDetectionAlertsStateService: AnomalyDetectionAlertsStateService;
+  anomalyTableService: AnomalyTableStateService;
 }
 
 /**
@@ -68,7 +71,8 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
   } = useMlKibana();
   const mlJobService = useMlJobService();
 
-  const [, , tableSeverityState] = useTableSeverity();
+  const [, , tableSeverityUrlStateService] = useTableSeverity();
+  const [, , tableIntervalUrlStateService] = useTableInterval();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApi), []);
@@ -113,13 +117,24 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService,
       anomalyExplorerChartsService,
       anomalyExplorerUrlStateService,
-      tableSeverityState
+      tableSeverityUrlStateService
     );
 
     const anomalyDetectionAlertsStateService = new AnomalyDetectionAlertsStateService(
       anomalyTimelineStateService,
       data,
       timefilter
+    );
+
+    const anomalyTableService = new AnomalyTableStateService(
+      mlApi,
+      mlJobService,
+      uiSettings,
+      timefilter,
+      anomalyExplorerCommonStateService,
+      anomalyTimelineStateService,
+      tableSeverityUrlStateService,
+      tableIntervalUrlStateService
     );
 
     setAnomalyExplorerContextValue({
@@ -129,6 +144,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService,
       chartsStateService,
       anomalyDetectionAlertsStateService,
+      anomalyTableService,
     });
 
     return () => {
@@ -138,6 +154,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       anomalyTimelineStateService.destroy();
       chartsStateService.destroy();
       anomalyDetectionAlertsStateService.destroy();
+      anomalyTableService.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

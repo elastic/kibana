@@ -13,7 +13,7 @@ import {
   hasRuleErrors,
   validateAction,
 } from './validate_form';
-import { RuleFormData } from '../types';
+import type { RuleFormData } from '../types';
 import {
   CONSUMER_REQUIRED_TEXT,
   INTERVAL_MINIMUM_TEXT,
@@ -23,7 +23,7 @@ import {
   RULE_TYPE_REQUIRED_TEXT,
 } from '../translations';
 import { formatDuration } from '../utils';
-import { RuleTypeModel } from '../common';
+import type { RuleTypeModel } from '../common';
 import { getAction } from '../common/test_utils/actions_test_utils';
 
 const formDataMock: RuleFormData = {

@@ -16,6 +16,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId } from '@kbn/observability-plugin/common';
 import {
   formatDurationFromTimeUnitChar,
   getAlertDetailsUrl,
@@ -26,6 +27,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -33,6 +35,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
+import { unflattenObject } from '@kbn/object-utils';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -78,6 +81,7 @@ export const errorCountActionVariables = [
   apmActionVariables.transactionName,
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
+  apmActionVariables.grouping,
 ];
 
 type ErrorCountRuleTypeParams = ApmRuleParamsType[ApmRuleType.ErrorCount];
@@ -118,6 +122,7 @@ export function registerErrorCountRuleType({
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: APM_SERVER_FEATURE_ID,
+    solution: observabilityFeatureId,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async (
@@ -238,6 +243,7 @@ export function registerErrorCountRuleType({
           );
           const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
           const groupByActionVariables = getGroupByActionVariables(groupByFields);
+          const groupingObject = unflattenObject(groupByFields);
 
           const payload = {
             [PROCESSOR_EVENT]: ProcessorEvent.error,
@@ -261,6 +267,7 @@ export function registerErrorCountRuleType({
             errorGroupingKey: ruleParams.errorGroupingKey,
             triggerValue: errorCount,
             viewInAppUrl,
+            grouping: groupingObject,
             ...groupByActionVariables,
           };
 
@@ -278,7 +285,16 @@ export function registerErrorCountRuleType({
         const recoveredAlertId = recoveredAlert.alert.getId();
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
-        const groupByFields: Record<string, string> = allGroupByFields.reduce(
+
+        const ruleParamsOfRecoveredAlert = alertHits?.[
+          ALERT_RULE_PARAMETERS
+        ] as ErrorCountRuleTypeParams;
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
+          ApmRuleType.ErrorCount,
+          groupByFieldsOfRecoveredAlert
+        );
+        const groupByFields: Record<string, string> = allGroupByFieldsOfRecoveredAlert.reduce(
           (acc, sourceField: string) => {
             if (alertHits?.[sourceField] !== undefined) {
               acc[sourceField] = alertHits[sourceField];
@@ -298,6 +314,8 @@ export function registerErrorCountRuleType({
           relativeViewInAppUrl
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -310,6 +328,7 @@ export function registerErrorCountRuleType({
           threshold: ruleParams.threshold,
           triggerValue: alertHits?.[ALERT_EVALUATION_VALUE],
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 

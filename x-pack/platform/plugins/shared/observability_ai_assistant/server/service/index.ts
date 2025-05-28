@@ -17,9 +17,9 @@ import { ObservabilityAIAssistantClient } from './client';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
-import { createOrUpdateIndexAssets } from './create_or_update_index_assets';
+import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
 
-function getResourceName(resource: string) {
+export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
@@ -28,7 +28,7 @@ export const resourceNames = {
     conversations: getResourceName('component-template-conversations'),
     kb: getResourceName('component-template-kb'),
   },
-  aliases: {
+  writeIndexAlias: {
     conversations: getResourceName('conversations'),
     kb: getResourceName('kb'),
   },
@@ -40,15 +40,15 @@ export const resourceNames = {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
   },
-  concreteIndexName: {
+  concreteWriteIndexName: {
     conversations: getResourceName('conversations-000001'),
     kb: getResourceName('kb-000001'),
   },
 };
 
-const createIndexAssetsOnce = once(
+const createConversationIndexAssetsOnce = once(
   (logger: Logger, core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>) =>
-    pRetry(() => createOrUpdateIndexAssets({ logger, core }))
+    pRetry(() => createOrUpdateConversationIndexAssets({ logger, core }))
 );
 
 export class ObservabilityAIAssistantService {
@@ -86,7 +86,7 @@ export class ObservabilityAIAssistantService {
 
     const [[coreStart, plugins]] = await Promise.all([
       this.core.getStartServices(),
-      createIndexAssetsOnce(this.logger, this.core),
+      createConversationIndexAssetsOnce(this.logger, this.core),
     ]);
 
     // user will not be found when executed from system connector context

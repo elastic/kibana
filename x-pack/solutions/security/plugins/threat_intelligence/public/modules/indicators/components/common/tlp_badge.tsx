@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import capitalize from 'lodash/capitalize';
+import { capitalize } from 'lodash';
 import React, { useMemo, VFC } from 'react';
 import { EMPTY_VALUE } from '../../../../constants/common';
 

@@ -220,7 +220,7 @@ async function upgradePackagePolicy(
     await packagePolicyService.upgrade(
       soClient,
       esClient,
-      [packagePolicy.id],
+      packagePolicy.id,
       { force: true },
       packagePolicy,
       installedPackage.version

@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectReference, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { trackingContainmentRuleParamsSchema } from '@kbn/response-ops-rule-params/geo_containment';
 import type {
@@ -167,6 +168,7 @@ export function getRuleType(): GeoContainmentRuleType {
     executor,
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
+    solution: 'stack',
     validate: {
       params: trackingContainmentRuleParamsSchema,
     },
@@ -192,7 +194,6 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
-    // @ts-ignore
     alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

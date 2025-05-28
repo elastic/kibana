@@ -12,7 +12,8 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
+import type { ObjectRemover } from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData, getEventLog } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
@@ -211,6 +212,35 @@ export const expectNoActionsFired = async ({
   });
 
   expect(actionEvents.length).eql(0);
+};
+
+export const expectActionsFired = async ({
+  id,
+  supertest,
+  retry,
+  expectedNumberOfActions,
+}: {
+  id: string;
+  supertest: SuperTestAgent;
+  retry: RetryService;
+  expectedNumberOfActions: number;
+}) => {
+  const events = await retry.try(async () => {
+    const { body: result } = await supertest
+      .get(`${getUrlPrefix(Spaces.space1.id)}/_test/event_log/alert/${id}/_find?per_page=5000`)
+      .expect(200);
+
+    if (!result.total) {
+      throw new Error('no events found yet');
+    }
+    return result.data as IValidatedEvent[];
+  });
+
+  const actionEvents = events.filter((event) => {
+    return event?.event?.action === 'execute-action';
+  });
+
+  expect(actionEvents.length).eql(expectedNumberOfActions);
 };
 
 export const runSoon = async ({

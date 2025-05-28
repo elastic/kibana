@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import {
+  AgentPolicyNotFoundError,
+  PackagePolicyNotFoundError,
+} from '@kbn/fleet-plugin/server/errors';
+import { NotFoundError } from '../errors';
 import { EndpointError } from '../../../common/endpoint/errors';
 
 /**
@@ -12,7 +18,21 @@ import { EndpointError } from '../../../common/endpoint/errors';
  * our code the error originated (better stack trace).
  */
 export const wrapErrorIfNeeded = <E extends EndpointError = EndpointError>(error: Error): E => {
-  return (error instanceof EndpointError ? error : new EndpointError(error.message, error)) as E;
+  if (error instanceof EndpointError) {
+    return error as E;
+  }
+
+  // Check for known "Not Found" errors and wrap them with our own `NotFoundError`, which will enable
+  // the correct HTTP status code to be used if it is thrown during processing of an API route
+  if (
+    error instanceof AgentNotFoundError ||
+    error instanceof AgentPolicyNotFoundError ||
+    error instanceof PackagePolicyNotFoundError
+  ) {
+    return new NotFoundError(error.message, error) as E;
+  }
+
+  return new EndpointError(error.message, error) as E;
 };
 
 /**

@@ -194,70 +194,72 @@ export default {
   ],
 };
 
-export const SolutionSideNav = (params: SolutionSideNavProps) => (
-  <>
-    <SolutionNav
-      name={'Security'}
-      icon={'logoSecurity'}
-      isOpenOnDesktop={true}
-      canBeCollapsed={false}
-      // eslint-disable-next-line react/no-children-prop
-      children={
-        <SolutionSideNavComponent
-          items={params.items}
-          selectedId={params.selectedId}
-          categories={params.categories}
-          panelBottomOffset={params.panelBottomOffset || undefined}
-          panelTopOffset={params.panelTopOffset || undefined}
-        />
-      }
-    />
-    <div
-      css={{
-        'flex-grow': '1',
-        background: 'white',
-      }}
-    />
-  </>
-);
+export const SolutionSideNav = {
+  render: (params: SolutionSideNavProps) => (
+    <>
+      <SolutionNav
+        name={'Security'}
+        icon={'logoSecurity'}
+        isOpenOnDesktop={true}
+        canBeCollapsed={false}
+        // eslint-disable-next-line react/no-children-prop
+        children={
+          <SolutionSideNavComponent
+            items={params.items}
+            selectedId={params.selectedId}
+            categories={params.categories}
+            panelBottomOffset={params.panelBottomOffset || undefined}
+            panelTopOffset={params.panelTopOffset || undefined}
+          />
+        }
+      />
+      <div
+        css={{
+          'flex-grow': '1',
+          background: 'white',
+        }}
+      />
+    </>
+  ),
 
-SolutionSideNav.argTypes = {
-  selectedId: {
-    control: { type: 'radio' },
-    options: items.map(({ id }) => id),
-    defaultValue: 'simpleLink',
+  argTypes: {
+    selectedId: {
+      control: { type: 'radio' },
+      options: items.map(({ id }) => id),
+      defaultValue: 'simpleLink',
+    },
+    items: {
+      control: 'object',
+      defaultValue: items,
+    },
+    categories: {
+      control: 'object',
+      defaultValue: [
+        {
+          type: 'separator',
+          linkIds: ['simpleLink', 'panelLink', 'categoriesPanelLink'],
+        },
+        {
+          type: 'separator',
+          linkIds: ['linkWrapped'],
+        },
+        {
+          type: 'separator',
+          linkIds: ['bottomLink', 'bottomLinkPanel', 'bottomLinkSeparator', 'bottomLinkIcon'],
+        },
+      ],
+    },
+    panelTopOffset: {
+      control: 'text',
+      defaultValue: '0px',
+    },
+    panelBottomOffset: {
+      control: 'text',
+      defaultValue: '0px',
+    },
   },
-  items: {
-    control: 'object',
-    defaultValue: items,
-  },
-  categories: {
-    control: 'object',
-    defaultValue: [
-      {
-        type: 'separator',
-        linkIds: ['simpleLink', 'panelLink', 'categoriesPanelLink'],
-      },
-      {
-        type: 'separator',
-        linkIds: ['linkWrapped'],
-      },
-      {
-        type: 'separator',
-        linkIds: ['bottomLink', 'bottomLinkPanel', 'bottomLinkSeparator', 'bottomLinkIcon'],
-      },
-    ],
-  },
-  panelTopOffset: {
-    control: 'text',
-    defaultValue: '0px',
-  },
-  panelBottomOffset: {
-    control: 'text',
-    defaultValue: '0px',
-  },
-};
 
-SolutionSideNav.parameters = {
-  layout: 'fullscreen',
+  parameters: {
+    layout: 'fullscreen',
+  },
 };

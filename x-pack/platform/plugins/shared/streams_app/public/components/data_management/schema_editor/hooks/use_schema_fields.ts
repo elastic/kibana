@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  NamedFieldDefinitionConfig,
-  WiredStreamGetResponse,
-  getAdvancedParameters,
-} from '@kbn/streams-schema';
+import { NamedFieldDefinitionConfig, Streams, getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
@@ -24,7 +20,7 @@ export const useSchemaFields = ({
   definition,
   refreshDefinition,
 }: {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) => {
   const {
@@ -46,7 +42,7 @@ export const useSchemaFields = ({
     refresh: refreshUnmappedFields,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/schema/unmapped_fields', {
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
         signal,
         params: {
           path: {
@@ -63,9 +59,10 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
+        format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
+        alias_for: field.alias_for,
         status: 'inherited',
       })
     );
@@ -74,7 +71,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
+        format: 'format' in field ? field.format : undefined,
         additionalParameters: getAdvancedParameters(name, field),
         parent: definition.stream.name,
         status: 'mapped',
@@ -110,7 +107,7 @@ export const useSchemaFields = ({
           throw new Error('The field is not different, hence updating is not necessary.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
           signal: abortController.signal,
           params: {
             path: {
@@ -120,6 +117,7 @@ export const useSchemaFields = ({
               ingest: {
                 ...definition.stream.ingest,
                 wired: {
+                  ...definition.stream.ingest.wired,
                   fields: {
                     ...definition.stream.ingest.wired.fields,
                     [field.name]: nextFieldDefinitionConfig,
@@ -161,7 +159,7 @@ export const useSchemaFields = ({
           throw new Error('The field is not mapped, hence it cannot be unmapped.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
           signal: abortController.signal,
           params: {
             path: {
@@ -171,6 +169,7 @@ export const useSchemaFields = ({
               ingest: {
                 ...definition.stream.ingest,
                 wired: {
+                  ...definition.stream.ingest.wired,
                   fields: omit(definition.stream.ingest.wired.fields, fieldName),
                 },
               },

@@ -8,15 +8,14 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CONTROL_TYPES } from '../../editor_utils';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
 import { ListControl as ListControlComponent } from './list_control';
 import { RangeControl as RangeControlComponent } from './range_control';
-
-import './input_control_vis.scss';
 
 function isListControl(control: RangeControl | ListControl): control is ListControl {
   return control.type === CONTROL_TYPES.LIST;
@@ -159,8 +158,16 @@ export class InputControlVis extends Component<InputControlVisProps> {
     }
 
     return (
-      <div className="icvContainer__wrapper">
-        <div className="icvContainer">
+      <div
+        className="eui-scrollBar"
+        css={css({
+          minHeight: 0,
+          flex: '1 1 0',
+          display: 'flex',
+          overflow: 'auto',
+        })}
+      >
+        <div css={icvContainerStyles}>
           <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
           {stagingButtons}
         </div>
@@ -168,3 +175,8 @@ export class InputControlVis extends Component<InputControlVisProps> {
     );
   }
 }
+const icvContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
+  width: 100%;
+  margin: 0 ${euiTheme.size.xs};
+  padding: ${euiTheme.size.s};
+`;

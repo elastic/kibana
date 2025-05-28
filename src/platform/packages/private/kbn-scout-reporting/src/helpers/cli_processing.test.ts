@@ -12,10 +12,19 @@ import { getRunTarget, stripRunCommand } from './cli_processing';
 describe('cli_processing', () => {
   describe('stripRunCommand', () => {
     it(`should return the correct run command when started with 'npx'`, () => {
-      const argv = ['npx', 'playwright', 'test', '--config', 'path/to/config', '--grep=@svlSearch'];
+      const argv = [
+        'npx',
+        'playwright',
+        'test',
+        '--config',
+        'path/to/config',
+        '--project',
+        'local',
+        '--grep=@svlSearch',
+      ];
 
       expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --grep=@svlSearch'
+        'npx playwright test --config path/to/config --project local --grep=@svlSearch'
       );
     });
 
@@ -26,11 +35,13 @@ describe('cli_processing', () => {
         'test',
         '--config',
         'path/to/config',
+        '--project',
+        'local',
         '--grep=@svlSearch',
       ];
 
       expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --grep=@svlSearch'
+        'npx playwright test --config path/to/config --project local --grep=@svlSearch'
       );
     });
 

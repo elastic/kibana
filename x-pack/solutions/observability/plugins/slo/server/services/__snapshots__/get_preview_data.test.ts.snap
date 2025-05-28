@@ -92,14 +92,23 @@ exports[`GetPreviewData for 'APM Availability' indicator type builds the query f
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "bar",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -237,14 +246,23 @@ exports[`GetPreviewData for 'APM Availability' indicator type builds the query w
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "bar",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -389,14 +407,23 @@ exports[`GetPreviewData for 'APM Availability' indicator type builds the query w
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "bar",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -498,14 +525,23 @@ exports[`GetPreviewData for 'APM Availability' indicator type builds the query w
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "bar",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -630,14 +666,23 @@ exports[`GetPreviewData for 'APM Latency' indicator type builds the query for a 
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "foo",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -797,14 +842,23 @@ exports[`GetPreviewData for 'APM Latency' indicator type builds the query with 1
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "foo",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -971,14 +1025,23 @@ exports[`GetPreviewData for 'APM Latency' indicator type builds the query with 2
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "foo",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -1093,14 +1156,23 @@ exports[`GetPreviewData for 'APM Latency' indicator type builds the query withou
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "match": Object {
-                        "some.lable": "foo",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -1680,30 +1752,48 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query for a s
               "good": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "range": Object {
-                          "http.response.status_code": Object {
-                            "lt": "500",
-                          },
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
               "total": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "exists": Object {
-                          "field": "http.response.status_code",
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
@@ -1732,14 +1822,23 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query for a s
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "exists": Object {
-                        "field": "http.response.status_code",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
               Object {
@@ -1782,30 +1881,48 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 1 
                   "good": Object {
                     "filter": Object {
                       "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
+                        "filter": Array [
                           Object {
-                            "range": Object {
-                              "http.response.status_code": Object {
-                                "lt": "500",
-                              },
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "range": Object {
+                                    "http.response.status_code": Object {
+                                      "lt": "500",
+                                    },
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
                       },
                     },
                   },
                   "total": Object {
                     "filter": Object {
                       "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
+                        "filter": Array [
                           Object {
-                            "exists": Object {
-                              "field": "http.response.status_code",
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "exists": Object {
+                                    "field": "http.response.status_code",
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
                       },
                     },
                   },
@@ -1830,30 +1947,48 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 1 
               "good": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "range": Object {
-                          "http.response.status_code": Object {
-                            "lt": "500",
-                          },
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
               "total": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "exists": Object {
-                          "field": "http.response.status_code",
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
@@ -1882,14 +2017,23 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 1 
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "exists": Object {
-                        "field": "http.response.status_code",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -1922,30 +2066,48 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 2 
                   "good": Object {
                     "filter": Object {
                       "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
+                        "filter": Array [
                           Object {
-                            "range": Object {
-                              "http.response.status_code": Object {
-                                "lt": "500",
-                              },
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "range": Object {
+                                    "http.response.status_code": Object {
+                                      "lt": "500",
+                                    },
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
                       },
                     },
                   },
                   "total": Object {
                     "filter": Object {
                       "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
+                        "filter": Array [
                           Object {
-                            "exists": Object {
-                              "field": "http.response.status_code",
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "exists": Object {
+                                    "field": "http.response.status_code",
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
                       },
                     },
                   },
@@ -1977,30 +2139,48 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 2 
               "good": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "range": Object {
-                          "http.response.status_code": Object {
-                            "lt": "500",
-                          },
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
               "total": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "exists": Object {
-                          "field": "http.response.status_code",
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
@@ -2029,14 +2209,23 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 2 
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "exists": Object {
-                        "field": "http.response.status_code",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],
@@ -2067,30 +2256,48 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query without
               "good": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "range": Object {
-                          "http.response.status_code": Object {
-                            "lt": "500",
-                          },
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
               "total": Object {
                 "filter": Object {
                   "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
+                    "filter": Array [
                       Object {
-                        "exists": Object {
-                          "field": "http.response.status_code",
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
                         },
                       },
                     ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
                   },
                 },
               },
@@ -2119,14 +2326,23 @@ exports[`GetPreviewData for 'Custom KQL' indicator type builds the query without
               },
               Object {
                 "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
+                  "filter": Array [
                     Object {
-                      "exists": Object {
-                        "field": "http.response.status_code",
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
                 },
               },
             ],

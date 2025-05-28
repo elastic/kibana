@@ -15,19 +15,12 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
   apmLabsButton,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   entityCentricExperience,
-  enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -41,10 +34,9 @@ import {
   profilingAzureCostDiscountRate,
   enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
-  enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
-  profilingFetchTopNFunctionsFromStacktraces,
   searchExcludedDataTiers,
+  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -121,8 +113,7 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        'Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
     }),
     value: ProgressiveLoadingQuality.off,
     schema: schema.oneOf([
@@ -168,28 +159,6 @@ export const uiSettings: Record<string, UiSettings> = {
     showInLabs: true,
     solution: 'oblt',
   },
-  [apmServiceInventoryOptimizedSorting]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize services list load performance in APM',
-    }),
-    description: i18n.translate(
-      'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
-      }
-    ),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
@@ -200,28 +169,6 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
-    solution: 'oblt',
-  },
-  [apmTraceExplorerTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
-      defaultMessage: 'APM Trace Explorer',
-    }),
-    description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        link: traceExplorerDocsLink({
-          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
-        }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [apmLabsButton]: {
@@ -252,61 +199,6 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableInfrastructureAssetCustomDashboards]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
-      defaultMessage: 'Custom dashboards for asset details in Infrastructure',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
-      }
-    ),
-    schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableAwsLambdaMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
-      defaultMessage: 'AWS Lambda Metrics',
-    }),
-    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
-  [enableAgentExplorerView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAgentExplorer', {
-      defaultMessage: 'Agent explorer',
-    }),
-    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{betaLabel} Enables Agent explorer view.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
@@ -365,6 +257,23 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     solution: 'oblt',
   },
+  [apmEnableServiceMapApiV2]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMapApiV2', {
+      defaultMessage: 'Service Map API v2',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
+      defaultMessage: '{technicalPreviewLabel} Enables the usage of the new Service Map API v2.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
+    type: 'boolean',
+    solution: 'oblt',
+  },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmAWSLambdaPricePerGbSeconds', {
@@ -388,54 +297,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [apmEnableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service transaction metrics',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
-      defaultMessage:
-        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [apmEnableContinuousRollups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
-      defaultMessage: 'Continuous rollups',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
-      defaultMessage:
-        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [enableCriticalPath]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableCriticalPath', {
-      defaultMessage: 'Critical path',
-    }),
-    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
-      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [syntheticsThrottlingEnabled]: {
@@ -632,22 +493,6 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     solution: 'oblt',
   },
-  [profilingFetchTopNFunctionsFromStacktraces]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
-      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
-    }),
-    description: i18n.translate(
-      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
-      {
-        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
-      }
-    ),
-    value: false,
-    schema: schema.boolean(),
-    requiresPageReload: false,
-    solution: 'oblt',
-  },
   [searchExcludedDataTiers]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.searchExcludedDataTiers', {
@@ -674,12 +519,5 @@ function throttlingDocsLink({ href }: { href: string }) {
   return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
     'xpack.observability.uiSettings.throttlingDocsLinkText',
     { defaultMessage: 'read notice here.' }
-  )}</a>`;
-}
-
-function traceExplorerDocsLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank">${i18n.translate(
-    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
-    { defaultMessage: 'Learn more.' }
   )}</a>`;
 }

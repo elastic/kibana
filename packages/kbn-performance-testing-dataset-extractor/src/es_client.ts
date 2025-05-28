@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
+import { Client, HttpConnection } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import {
+  QueryDslQueryContainer,
+  SearchRequest,
+  MsearchRequestItem,
+} from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {

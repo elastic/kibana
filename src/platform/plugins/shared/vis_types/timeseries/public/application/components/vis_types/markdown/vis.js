@@ -8,7 +8,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useMemo } from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames } from '@emotion/react';
@@ -37,6 +37,11 @@ function MarkdownVisualization(props) {
   const panelBackgroundColor = model.background_color || backgroundColor;
   const style = { backgroundColor: panelBackgroundColor };
 
+  const isReversed = useMemo(
+    () => isBackgroundInverted(panelBackgroundColor),
+    [panelBackgroundColor]
+  );
+
   let markdown;
 
   if (model.markdown) {
@@ -49,15 +54,10 @@ function MarkdownVisualization(props) {
       }
     );
 
-    const markdownClasses = classNames('kbnMarkdown__body', {
-      'kbnMarkdown__body--reversed': isBackgroundInverted(panelBackgroundColor),
-    });
-
     const contentClasses = classNames(
       'tvbMarkdown__content',
       `tvbMarkdown__content--${model.markdown_vertical_align}`,
-      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars },
-      markdownClasses
+      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars }
     );
 
     const markdownError = markdownSource instanceof Error ? markdownSource : null;
@@ -79,6 +79,7 @@ function MarkdownVisualization(props) {
               <div>
                 {!markdownError && (
                   <Markdown
+                    isReversed={isReversed}
                     onRender={initialRender}
                     markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}

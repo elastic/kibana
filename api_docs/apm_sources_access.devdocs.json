@@ -1,0 +1,756 @@
+{
+  "id": "apmSourcesAccess",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-public.callSourcesAPI",
+        "type": "Function",
+        "tags": [],
+        "label": "callSourcesAPI",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "server",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-server.APIEndpoint",
+            "text": "APIEndpoint"
+          },
+          ">(http: ",
+          "HttpSetup",
+          ", pathname: T, options?: ",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          " | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ReturnOf",
+            "text": "ReturnOf"
+          },
+          "<{ \"POST /internal/apm-sources/settings/apm-indices/save\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/apm-sources/settings/apm-indices/save\", ",
+          "TypeC",
+          "<{ body: ",
+          "PartialC",
+          "<{ error: ",
+          "StringC",
+          "; onboarding: ",
+          "StringC",
+          "; span: ",
+          "StringC",
+          "; transaction: ",
+          "StringC",
+          "; metric: ",
+          "StringC",
+          "; sourcemap: ",
+          "StringC",
+          "; }>; }>, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "SavedObject",
+          "<{}>, {}>; \"GET /internal/apm-sources/settings/apm-index-settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-index-settings\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "ApmIndexSettingsResponse",
+          ", {}>; \"GET /internal/apm-sources/settings/apm-indices\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }, T>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "apmSourcesAccess",
+            "id": "def-public.callSourcesAPI.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmSourcesAccess",
+            "id": "def-public.callSourcesAPI.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "pathname",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "apmSourcesAccess",
+            "id": "def-public.callSourcesAPI.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-public.SourcesApiOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SourcesApiOptions",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "apmSourcesAccess",
+            "id": "def-public.SourcesApiOptions.body",
+            "type": "Unknown",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "apmSourcesAccess",
+            "id": "def-public.SourcesApiOptions.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/apm_sources_access/public/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-public.APMIndices",
+        "type": "Type",
+        "tags": [],
+        "label": "APMIndices",
+        "description": [
+          "\nSchema for APM indices"
+        ],
+        "signature": [
+          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "apmSourcesAccess",
+      "id": "def-public.ApmSourceAccessPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ApmSourceAccessPluginStart",
+      "description": [
+        "\nAPM Source start services"
+      ],
+      "signature": [
+        "{ getApmIndices: (options?: Omit<",
+        {
+          "pluginId": "apmSourcesAccess",
+          "scope": "public",
+          "docId": "kibApmSourcesAccessPluginApi",
+          "section": "def-public.SourcesApiOptions",
+          "text": "SourcesApiOptions"
+        },
+        ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+        {
+          "pluginId": "apmSourcesAccess",
+          "scope": "public",
+          "docId": "kibApmSourcesAccessPluginApi",
+          "section": "def-public.SourcesApiOptions",
+          "text": "SourcesApiOptions"
+        },
+        ", \"body\"> | undefined) => Promise<",
+        "ApmIndexSettingsResponse",
+        ">; saveApmIndices: (options: ",
+        {
+          "pluginId": "apmSourcesAccess",
+          "scope": "public",
+          "docId": "kibApmSourcesAccessPluginApi",
+          "section": "def-public.SourcesApiOptions",
+          "text": "SourcesApiOptions"
+        },
+        " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+        "SavedObject",
+        "<{}>>; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/apm_sources_access/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "apmSourcesAccess",
+      "id": "def-public.ApmSourceAccessPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "ApmSourceAccessPluginSetup",
+      "description": [
+        "\nAPM Source setup services"
+      ],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/platform/plugins/shared/apm_sources_access/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APIClientRequestParamsOf",
+        "type": "Type",
+        "tags": [],
+        "label": "APIClientRequestParamsOf",
+        "description": [],
+        "signature": [
+          "{ \"POST /internal/apm-sources/settings/apm-indices/save\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/apm-sources/settings/apm-indices/save\", ",
+          "TypeC",
+          "<{ body: ",
+          "PartialC",
+          "<{ error: ",
+          "StringC",
+          "; onboarding: ",
+          "StringC",
+          "; span: ",
+          "StringC",
+          "; transaction: ",
+          "StringC",
+          "; metric: ",
+          "StringC",
+          "; sourcemap: ",
+          "StringC",
+          "; }>; }>, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "SavedObject",
+          "<{}>, {}>; \"GET /internal/apm-sources/settings/apm-index-settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-index-settings\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "ApmIndexSettingsResponse",
+          ", {}>; \"GET /internal/apm-sources/settings/apm-indices\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }[TEndpoint] extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<any, infer TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined, any, any, ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
+          " | undefined> ? TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APIEndpoint",
+        "type": "Type",
+        "tags": [],
+        "label": "APIEndpoint",
+        "description": [],
+        "signature": [
+          "\"GET /internal/apm-sources/settings/apm-indices\" | \"GET /internal/apm-sources/settings/apm-index-settings\" | \"POST /internal/apm-sources/settings/apm-indices/save\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APIReturnType",
+        "type": "Type",
+        "tags": [],
+        "label": "APIReturnType",
+        "description": [],
+        "signature": [
+          "{ \"POST /internal/apm-sources/settings/apm-indices/save\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/apm-sources/settings/apm-indices/save\", ",
+          "TypeC",
+          "<{ body: ",
+          "PartialC",
+          "<{ error: ",
+          "StringC",
+          "; onboarding: ",
+          "StringC",
+          "; span: ",
+          "StringC",
+          "; transaction: ",
+          "StringC",
+          "; metric: ",
+          "StringC",
+          "; sourcemap: ",
+          "StringC",
+          "; }>; }>, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "SavedObject",
+          "<{}>, {}>; \"GET /internal/apm-sources/settings/apm-index-settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-index-settings\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "ApmIndexSettingsResponse",
+          ", {}>; \"GET /internal/apm-sources/settings/apm-indices\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }[TEndpoint] extends ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
+          "IKibanaResponse",
+          "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
+          "ResponseErrorAttributes",
+          " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APM_AGENT_CONFIGURATION_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "APM_AGENT_CONFIGURATION_INDEX",
+        "description": [],
+        "signature": [
+          "\".apm-agent-configuration\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APM_CUSTOM_LINK_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "APM_CUSTOM_LINK_INDEX",
+        "description": [],
+        "signature": [
+          "\".apm-custom-link\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APM_SOURCE_MAP_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "APM_SOURCE_MAP_INDEX",
+        "description": [],
+        "signature": [
+          "\".apm-source-map\""
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APMIndices",
+        "type": "Type",
+        "tags": [],
+        "label": "APMIndices",
+        "description": [
+          "\nSchema for APM indices"
+        ],
+        "signature": [
+          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APMSourcesAccessConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "APMSourcesAccessConfig",
+        "description": [
+          "\nSchema for APM Sources configuration"
+        ],
+        "signature": [
+          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.APMSourcesServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "APMSourcesServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{ \"POST /internal/apm-sources/settings/apm-indices/save\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/apm-sources/settings/apm-indices/save\", ",
+          "TypeC",
+          "<{ body: ",
+          "PartialC",
+          "<{ error: ",
+          "StringC",
+          "; onboarding: ",
+          "StringC",
+          "; span: ",
+          "StringC",
+          "; transaction: ",
+          "StringC",
+          "; metric: ",
+          "StringC",
+          "; sourcemap: ",
+          "StringC",
+          "; }>; }>, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "SavedObject",
+          "<{}>, {}>; \"GET /internal/apm-sources/settings/apm-index-settings\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-index-settings\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", ",
+          "ApmIndexSettingsResponse",
+          ", {}>; \"GET /internal/apm-sources/settings/apm-indices\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm-sources/settings/apm-indices\", undefined, ",
+          "APMSourcesRouteHandlerResources",
+          ", Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>, {}>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/server/routes/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "apmSourcesAccess",
+        "id": "def-server.configSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "configSchema",
+        "description": [
+          "\nSchema for APM Sources configuration"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ indices: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ transaction: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; span: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; error: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; metric: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; onboarding: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; sourcemap: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; }>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/apm_sources_access/common/config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "parentPluginId": "apmSourcesAccess",
+      "id": "def-server.ApmSourcesAccessPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "ApmSourcesAccessPluginSetup",
+      "description": [
+        "\nAPM Source setup services"
+      ],
+      "signature": [
+        "{ apmIndicesFromConfigFile: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; getApmIndices: (savedObjectsClient: ",
+        "SavedObjectsClientContract",
+        ") => Promise<{ error: string; onboarding: string; span: string; transaction: string; metric: string; sourcemap: string; }>; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/apm_sources_access/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "apmSourcesAccess",
+      "id": "def-server.ApmSourcesAccessPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ApmSourcesAccessPluginStart",
+      "description": [
+        "\nAPM Source start services"
+      ],
+      "signature": [
+        "{ getApmIndices: (savedObjectsClient: ",
+        "SavedObjectsClientContract",
+        ") => Promise<{ error: string; onboarding: string; span: string; transaction: string; metric: string; sourcemap: string; }>; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/apm_sources_access/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

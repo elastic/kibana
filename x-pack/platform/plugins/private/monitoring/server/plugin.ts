@@ -411,6 +411,7 @@ export class MonitoringPlugin
         const routeConfig = {
           path: options.path,
           validate: options.validate,
+          security: options.security,
         };
 
         if (method.toLowerCase() === 'post') {

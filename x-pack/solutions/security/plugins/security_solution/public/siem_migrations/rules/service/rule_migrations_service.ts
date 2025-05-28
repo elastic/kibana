@@ -19,7 +19,7 @@ import type {
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
-  CreateRuleMigrationRequestBody,
+  CreateRuleMigrationRulesRequestBody,
   GetRuleMigrationStatsResponse,
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
@@ -39,6 +39,7 @@ import {
   getMissingResources,
   upsertMigrationResources,
   getIntegrations,
+  addRulesToMigration,
 } from '../api';
 import {
   getMissingCapabilities,
@@ -96,14 +97,7 @@ export class SiemRulesMigrationsService {
     return this.getMissingCapabilities(level).length > 0;
   }
 
-  /**
-   * checks if the service is available based on
-   *
-   * - the license
-   * - capabilities
-   * - feature flag
-   *
-   */
+  /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */
   public isAvailable() {
     return (
       !ExperimentalFeaturesService.get().siemMigrationsDisabled &&
@@ -126,22 +120,36 @@ export class SiemRulesMigrationsService {
       });
   }
 
-  public async createRuleMigration(body: CreateRuleMigrationRequestBody): Promise<string> {
-    const rulesCount = body.length;
+  public async addRulesToMigration(
+    migrationId: string,
+    rules: CreateRuleMigrationRulesRequestBody
+  ) {
+    const rulesCount = rules.length;
+    if (rulesCount === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    // Batching creation to avoid hitting the max payload size limit of the API
+    for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+      const rulesBatch = rules.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+      await addRulesToMigration({ migrationId, body: rulesBatch });
+    }
+  }
+
+  public async createRuleMigration(data: CreateRuleMigrationRulesRequestBody): Promise<string> {
+    const rulesCount = data.length;
     if (rulesCount === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
 
     try {
-      let migrationId: string | undefined;
-      // Batching creation to avoid hitting the max payload size limit of the API
-      for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-        const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-        const response = await createRuleMigration({ migrationId, body: bodyBatch });
-        migrationId = response.migration_id;
-      }
+      // create the migration
+      const { migration_id: migrationId } = await createRuleMigration({});
+
+      await this.addRulesToMigration(migrationId, data);
+
       this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
-      return migrationId as string;
+      return migrationId;
     } catch (error) {
       this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
       throw error;
@@ -278,10 +286,10 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        if (result.status === SiemMigrationTaskStatus.STOPPED) {
+        // automatically resume stopped migrations when all conditions are met
+        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_error) {
           const connectorId = this.connectorIdStorage.get();
           if (connectorId && !this.hasMissingCapabilities('all')) {
-            // automatically resume stopped migrations when connector is available
             await startRuleMigration({ migrationId: result.id, connectorId });
             pendingMigrationIds.push(result.id);
           }

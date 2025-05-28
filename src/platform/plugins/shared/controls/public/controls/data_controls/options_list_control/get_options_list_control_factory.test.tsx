@@ -15,13 +15,14 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
-import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
-import * as initializeControl from '../initialize_data_control';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
   const controlGroupApi = getMockedControlGroupApi();
+  const factory = getOptionsListControlFactory();
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
   dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
@@ -55,33 +56,31 @@ describe('Options List Control Api', () => {
     return stubDataView;
   });
 
-  const factory = getOptionsListControlFactory();
-
   describe('filters$', () => {
     test('should not set filters$ when selectedOptions is not provided', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toBeUndefined();
     });
 
     test('should set filters$ when selectedOptions is provided', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['cool', 'test'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -112,16 +111,16 @@ describe('Options List Control Api', () => {
     });
 
     test('should set filters$ when exists is selected', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -138,17 +137,17 @@ describe('Options List Control Api', () => {
     });
 
     test('should set filters$ when exclude is selected', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
           exclude: true,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -178,16 +177,16 @@ describe('Options List Control Api', () => {
     });
 
     test('clicking another option unselects "Exists"', async () => {
-      const { Component } = await factory.buildControl(
-        {
+      const { Component } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
@@ -207,16 +206,16 @@ describe('Options List Control Api', () => {
     });
 
     test('clicking "Exists" unselects all other selections', async () => {
-      const { Component } = await factory.buildControl(
-        {
+      const { Component } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['woof', 'bark'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
@@ -241,16 +240,16 @@ describe('Options List Control Api', () => {
     });
 
     test('deselects when showOnlySelected is true', async () => {
-      const { Component, api } = await factory.buildControl(
-        {
+      const { Component, api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['woof', 'bark'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
       await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
@@ -287,17 +286,17 @@ describe('Options List Control Api', () => {
     });
 
     test('replace selection when singleSelect is true', async () => {
-      const { Component, api } = await factory.buildControl(
-        {
+      const { Component, api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           singleSelect: true,
           selectedOptions: ['woof'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
 
       const control = render(<Component className={'controlPanel'} />);
 
@@ -345,36 +344,5 @@ describe('Options List Control Api', () => {
         },
       ]);
     });
-  });
-
-  test('ensure initialize data control contains all editor state', async () => {
-    const initializeSpy = jest.spyOn(initializeControl, 'initializeDataControl');
-    const initialState = {
-      dataViewId: 'myDataViewId',
-      fieldName: 'myFieldName',
-      runPastTimeout: true,
-    };
-    await factory.buildControl(
-      {
-        dataViewId: 'myDataViewId',
-        fieldName: 'myFieldName',
-        runPastTimeout: true,
-      },
-      getMockedBuildApi(uuid, factory, controlGroupApi),
-      uuid,
-      controlGroupApi
-    );
-    expect(initializeSpy).toHaveBeenCalledWith(
-      uuid,
-      'optionsListControl',
-      'optionsListDataView',
-      initialState,
-      {
-        searchTechnique: expect.anything(),
-        singleSelect: expect.anything(),
-        runPastTimeout: expect.anything(),
-      },
-      controlGroupApi
-    );
   });
 });

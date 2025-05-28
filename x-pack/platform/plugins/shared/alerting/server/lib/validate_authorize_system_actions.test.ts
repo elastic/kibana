@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter } from '../connector_adapters/types';
-import { NormalizedSystemAction } from '../rules_client';
-import { RuleSystemAction } from '../types';
+import type { ConnectorAdapter } from '../connector_adapters/types';
+import type { NormalizedSystemAction } from '../rules_client';
+import type { RuleSystemAction } from '../types';
 import { validateAndAuthorizeSystemActions } from './validate_authorize_system_actions';
 
 describe('validateAndAuthorizeSystemActions', () => {

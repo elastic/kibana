@@ -18,28 +18,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiIcon,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
-  EuiToolTip,
+  EuiIconTip,
   type EuiRadioGroupOption,
 } from '@elastic/eui';
-import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
+import { ExportShareConfig } from '../../../types';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
   layoutOption?: 'print';
-  aggregateReportTypes: ShareMenuItemV2[];
+  aggregateExportTypes: ExportShareConfig[];
   intl: InjectedIntl;
   publicAPIEnabled: boolean;
 };
 
 const ExportContentUi = ({
   isDirty,
-  aggregateReportTypes,
+  aggregateExportTypes,
   intl,
   onClose,
   publicAPIEnabled,
@@ -48,33 +47,32 @@ const ExportContentUi = ({
   const [usePrintLayout, setPrintLayout] = useState(false);
 
   const radioOptions = useMemo(() => {
-    return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { reportType, label }) => {
-      if (reportType) {
-        acc.push({
-          id: reportType,
-          label,
-          'data-test-subj': `${reportType}-radioOption`,
-        });
-      }
+    return aggregateExportTypes.reduce<EuiRadioGroupOption[]>((acc, { id, config }) => {
+      acc.push({
+        id: config.exportType,
+        label: config.label,
+        'data-test-subj': `${config.exportType}-radioOption`,
+      });
+
       return acc;
     }, []);
-  }, [aggregateReportTypes]);
+  }, [aggregateExportTypes]);
 
-  const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
-    radioOptions[0].id as SupportedExportTypes
-  );
+  const [selectedRadio, setSelectedRadio] = useState(radioOptions[0].id);
 
   const {
-    generateExportButton,
-    helpText,
-    warnings = [],
-    renderCopyURLButton,
-    generateExport,
-    generateExportUrl,
-    renderLayoutOptionSwitch,
+    config: {
+      generateExportButton,
+      helpText,
+      warnings = [],
+      renderCopyURIButton: renderCopyURLButton,
+      generateAssetExport: generateExport,
+      generateAssetURIValue: generateExportUrl,
+      renderLayoutOptionSwitch,
+    },
   } = useMemo(() => {
-    return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
-  }, [selectedRadio, aggregateReportTypes]);
+    return aggregateExportTypes?.find(({ config }) => config.exportType === selectedRadio)!;
+  }, [selectedRadio, aggregateExportTypes]);
 
   const handlePrintLayoutChange = useCallback(
     (evt: EuiSwitchEvent) => {
@@ -113,16 +111,14 @@ const ExportContentUi = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               content={
                 <FormattedMessage
                   id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
                   defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
                 />
               }
-            >
-              <EuiIcon type="questionInCircle" />
-            </EuiToolTip>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -152,7 +148,7 @@ const ExportContentUi = ({
             </EuiCopy>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               content={
                 <EuiText size="s">
                   <FormattedMessage
@@ -161,9 +157,7 @@ const ExportContentUi = ({
                   />
                 </EuiText>
               }
-            >
-              <EuiIcon type="questionInCircle" />
-            </EuiToolTip>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -201,7 +195,7 @@ const ExportContentUi = ({
           <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
             <EuiRadioGroup
               options={radioOptions}
-              onChange={(id) => setSelectedRadio(id as SupportedExportTypes)}
+              onChange={(id) => setSelectedRadio(id)}
               name="image reporting radio group"
               idSelected={selectedRadio}
               legend={{

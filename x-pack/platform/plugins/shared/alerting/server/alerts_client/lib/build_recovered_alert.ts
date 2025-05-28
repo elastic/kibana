@@ -23,15 +23,17 @@ import {
   ALERT_TIME_RANGE,
   ALERT_START,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
-import { Alert as LegacyAlert } from '../../alert/alert';
-import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { Alert as LegacyAlert } from '../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
@@ -105,8 +107,9 @@ export const buildRecoveredAlert = <
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
+    [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set status to 'recovered'
-    [ALERT_STATUS]: 'recovered',
+    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }

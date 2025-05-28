@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DropdownFilter } from '../dropdown_filter';
 
@@ -16,15 +15,38 @@ const choices: Array<[string, string]> = [
   ['3', 'Item Three'],
 ];
 
-storiesOf('renderers/DropdownFilter', module)
-  .add('default', () => <DropdownFilter commit={action('commit')} />)
-  .add('with new value', () => (
-    <DropdownFilter commit={action('commit')} initialValue="selectedValue" />
-  ))
-  .add('with choices', () => <DropdownFilter commit={action('commit')} choices={choices} />)
-  .add('with choices and value', () => (
+export default {
+  title: 'renderers/DropdownFilter',
+};
+
+export const Default = {
+  render: () => <DropdownFilter commit={action('commit')} />,
+  name: 'default',
+};
+
+export const WithNewValue = {
+  render: () => <DropdownFilter commit={action('commit')} initialValue="selectedValue" />,
+
+  name: 'with new value',
+};
+
+export const WithChoices = {
+  render: () => <DropdownFilter commit={action('commit')} choices={choices} />,
+  name: 'with choices',
+};
+
+export const WithChoicesAndValue = {
+  render: () => (
     <DropdownFilter commit={action('commit')} choices={choices} initialValue="Item Two" />
-  ))
-  .add('with choices and new value', () => (
+  ),
+
+  name: 'with choices and value',
+};
+
+export const WithChoicesAndNewValue = {
+  render: () => (
     <DropdownFilter commit={action('commit')} choices={choices} initialValue="selectedValue" />
-  ));
+  ),
+
+  name: 'with choices and new value',
+};

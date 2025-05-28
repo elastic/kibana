@@ -9,8 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   APP_ID,
+  DEFAULT_AI_CONNECTOR,
+  DEFAULT_ALERT_TAGS_KEY,
+  DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -19,30 +23,25 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_MAX_UNASSOCIATED_NOTES,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  ENABLE_NEWS_FEED_SETTING,
-  IP_REPUTATION_LINKS_SETTING,
-  IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  MAX_UNASSOCIATED_NOTES,
-  NEWS_FEED_URL_SETTING,
-  NEWS_FEED_URL_SETTING_DEFAULT,
+  ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
-  SHOW_RELATED_INTEGRATIONS_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-  DEFAULT_ALERT_TAGS_KEY,
-  DEFAULT_ALERT_TAGS_VALUE,
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
+  ENABLE_NEWS_FEED_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
-  ENABLE_ASSET_INVENTORY_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -66,12 +65,6 @@ export const initUiSettings = (
   experimentalFeatures: ExperimentalFeatures,
   validationsEnabled: boolean
 ) => {
-  const enableVisualizationsInFlyoutLabel = i18n.translate(
-    'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel',
-    {
-      defaultMessage: 'Enable visualizations in flyout',
-    }
-  );
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -215,22 +208,6 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solution: 'security',
     },
-    [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
-      name: enableVisualizationsInFlyoutLabel,
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
-        {
-          defaultMessage:
-            'Enable visualizations (analyzer and session viewer) in document details flyout.',
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solution: 'security',
-    },
     [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
         defaultMessage: 'Enable graph visualization',
@@ -238,13 +215,8 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.
-            <br/>Note: This feature requires the {visualizationFlyoutFeatureFlag} setting to be enabled.
-            <br/>Please ensure both settings are enabled to use graph visualizations in flyout.`,
-          values: {
-            em: (chunks) => `<em>${chunks}</em>`,
-            visualizationFlyoutFeatureFlag: `<code>${enableVisualizationsInFlyoutLabel}</code>`,
-          },
+          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.`,
+          values: { em: (chunks) => `<em>${chunks}</em>` },
         }
       ),
       type: 'boolean',
@@ -384,28 +356,6 @@ export const initUiSettings = (
       schema: schema.arrayOf(schema.string()),
       solution: 'security',
     },
-    [MAX_UNASSOCIATED_NOTES]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel', {
-        defaultMessage: 'Maximum amount of unassociated notes',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription',
-        {
-          defaultMessage:
-            'Defines the maximum amount of unassociated notes (notes that are not assigned to a timeline) that can be created.',
-        }
-      ),
-      type: 'number',
-      value: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      schema: schema.number({
-        min: 1,
-        max: 10000,
-        defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      }),
-      category: [APP_ID],
-      requiresPageReload: false,
-      solution: 'security',
-    },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
       name: i18n.translate(
         'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
@@ -536,3 +486,29 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
+export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
+  connectors.length > 0
+    ? {
+        [DEFAULT_AI_CONNECTOR]: {
+          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
+            defaultMessage: 'Default AI Connector',
+          }),
+          // TODO, make Elastic LLM the default value once fully available in serverless
+          value: connectors[0].id,
+          description: i18n.translate(
+            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
+            {
+              // TODO update this copy, waiting on James Spiteri's input
+              defaultMessage: 'Default AI connector for serverless AI features (AI for SOC)',
+            }
+          ),
+          type: 'select',
+          options: connectors.map(({ id }) => id),
+          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
+          category: [APP_ID],
+          requiresPageReload: true,
+          schema: schema.string(),
+          solution: 'security',
+        },
+      }
+    : null;

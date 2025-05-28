@@ -6,18 +6,16 @@
  */
 
 import type { Observable } from 'rxjs';
-import { type Either, isLeft, left, right } from 'fp-ts/lib/Either';
+import { type Either, isLeft, left, right } from 'fp-ts/Either';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import {
-  PublicFrameworkAlertsService,
-  DataStreamAdapter,
-  InstallShutdownError,
-} from '@kbn/alerting-plugin/server';
+import type { PublicFrameworkAlertsService, DataStreamAdapter } from '@kbn/alerting-plugin/server';
+import { InstallShutdownError } from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
-import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
+import type { WaitResult } from '../rule_data_client';
+import { type IRuleDataClient, RuleDataClient } from '../rule_data_client';
 import { IndexInfo } from './index_info';
 import type { Dataset, IndexOptions } from './index_options';
 import { type IResourceInstaller, ResourceInstaller } from './resource_installer';

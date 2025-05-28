@@ -14,6 +14,8 @@ import { StreamsServer } from '../types';
 import { AssetService } from '../lib/streams/assets/asset_service';
 import { AssetClient } from '../lib/streams/assets/asset_client';
 import { StreamsClient } from '../lib/streams/client';
+import { StreamsTelemetryClient } from '../lib/telemetry/client';
+import { ContentClient } from '../lib/content/content_client';
 
 type GetScopedClients = ({
   request,
@@ -27,11 +29,13 @@ export interface RouteHandlerScopedClients {
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
+  contentClient: ContentClient;
 }
 
 export interface RouteDependencies {
   assets: AssetService;
   server: StreamsServer;
+  telemetry: StreamsTelemetryClient;
   getScopedClients: GetScopedClients;
 }
 

@@ -10,8 +10,7 @@ import React from 'react';
 import type { EditCategoryProps } from './edit_category';
 import { EditCategory } from './edit_category';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, readCasesPermissions } from '../../../common/mock';
+import { readCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 
 import { waitFor, screen } from '@testing-library/react';
 import { useGetCategories } from '../../../containers/use_get_categories';
@@ -31,7 +30,6 @@ const useGetCategoriesMock = useGetCategories as jest.Mock;
 
 describe('EditCategory ', () => {
   let user: UserEvent;
-  let appMockRender: AppMockRenderer;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -44,7 +42,6 @@ describe('EditCategory ', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRender = createAppMockRenderer();
 
     useGetCategoriesMock.mockReturnValue({
       data: categories,
@@ -57,27 +54,27 @@ describe('EditCategory ', () => {
   });
 
   it('Shows the category header', () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     expect(screen.getByText('Category')).toBeInTheDocument();
   });
 
   it('renders no categories', () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     expect(screen.getByTestId('cases-categories')).toBeInTheDocument();
     expect(screen.getByTestId('no-categories')).toBeInTheDocument();
   });
 
   it('renders category value', () => {
-    appMockRender.render(<EditCategory {...defaultProps} category="sample" />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} category="sample" />);
 
     expect(screen.getByText('sample')).toBeInTheDocument();
     expect(screen.queryByTestId('no-categories')).not.toBeInTheDocument();
   });
 
   it('renders loading state', () => {
-    appMockRender.render(<EditCategory {...defaultProps} isLoading={true} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} isLoading={true} />);
 
     expect(screen.getByTestId('category-loading')).toBeInTheDocument();
     expect(screen.queryByTestId('category-edit-button')).not.toBeInTheDocument();
@@ -89,7 +86,7 @@ describe('EditCategory ', () => {
       isLoading: true,
     });
 
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     expect(screen.getByTestId('category-loading')).toBeInTheDocument();
 
@@ -99,7 +96,7 @@ describe('EditCategory ', () => {
   });
 
   it('shows combo box on edit', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -109,7 +106,7 @@ describe('EditCategory ', () => {
   });
 
   it('should select category from list', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -129,7 +126,7 @@ describe('EditCategory ', () => {
   });
 
   it('should add new category', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -149,7 +146,7 @@ describe('EditCategory ', () => {
   });
 
   it('should trim category', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -169,7 +166,7 @@ describe('EditCategory ', () => {
   });
 
   it('should not save category on cancel click', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -187,12 +184,13 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(onSubmit).not.toBeCalled();
-      expect(screen.getByTestId('no-categories')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('no-categories')).toBeInTheDocument();
   });
 
   it('should be able to remove category', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} category={'My category'} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} category={'My category'} />);
 
     expect(screen.getByText('My category')).toBeInTheDocument();
 
@@ -216,7 +214,7 @@ describe('EditCategory ', () => {
   it('should disabled the save button on error', async () => {
     const bigCategory = 'a'.repeat(51);
 
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -238,7 +236,7 @@ describe('EditCategory ', () => {
   });
 
   it('should disabled the save button on empty state', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
@@ -250,28 +248,29 @@ describe('EditCategory ', () => {
   });
 
   it('should disabled the save button when not changing category', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} category={'My category'} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} category={'My category'} />);
 
     await user.click(screen.getByTestId('category-edit-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
     });
+
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
 
     expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
   });
 
   it('does not show edit button when the user does not have update permissions', () => {
-    const newAppMockRenderer = createAppMockRenderer({ permissions: readCasesPermissions() });
-
-    newAppMockRenderer.render(<EditCategory {...defaultProps} />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} />, {
+      wrapperProps: { permissions: readCasesPermissions() },
+    });
 
     expect(screen.queryByTestId('category-edit-button')).not.toBeInTheDocument();
   });
 
   it('should set the category correctly if it is updated', async () => {
-    const { rerender } = appMockRender.render(
+    const { rerender } = renderWithTestingProviders(
       <EditCategory {...defaultProps} category={'My category'} />
     );
 
@@ -279,8 +278,9 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
     });
+
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
 
     await user.click(screen.getByTestId('edit-category-cancel'));
 
@@ -290,12 +290,13 @@ describe('EditCategory ', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('category from the API');
     });
+
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('category from the API');
   });
 
   it('removes the category correctly using the cross button', async () => {
-    appMockRender.render(<EditCategory {...defaultProps} category="My category" />);
+    renderWithTestingProviders(<EditCategory {...defaultProps} category="My category" />);
 
     await waitFor(() => {
       expect(screen.getByText('My category')).toBeInTheDocument();

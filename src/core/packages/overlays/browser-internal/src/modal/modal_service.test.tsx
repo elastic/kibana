@@ -25,6 +25,10 @@ const i18nMock = i18nServiceMock.createStartContract();
 const themeMock = themeServiceMock.createStartContract();
 const userProfileMock = userProfileServiceMock.createStart();
 
+const MODAL_CONTENT = 'Modal content 1';
+const MODAL_CONTENT_TWO = 'Modal content 2';
+const SOME_CONFIRM = 'Some confirm';
+
 beforeEach(() => {
   mockReactDomRender.mockClear();
   mockReactDomUnmount.mockClear();
@@ -52,25 +56,30 @@ describe('ModalService', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       modals.open((container) => {
         const content = document.createElement('span');
-        content.textContent = 'Modal content';
+        content.textContent = MODAL_CONTENT;
         container.append(content);
         return () => {};
       });
-      expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+      expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual('EuiModal');
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.render()).toMatchSnapshot();
+      expect(modalContent.find('div.euiModal').text()).toEqual(MODAL_CONTENT);
     });
 
     describe('with a currently active modal', () => {
       let ref1: OverlayRef;
 
       beforeEach(() => {
-        ref1 = modals.open(mountReactNode(<span>Modal content 1</span>));
+        ref1 = modals.open(mountReactNode(<span>`${MODAL_CONTENT}`</span>));
       });
 
       it('replaces the current modal with a new one', () => {
-        modals.open(mountReactNode(<span>Flyout content 2</span>));
-        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        const mountPoint = mountReactNode(<span>Flyout content 2</span>);
+        modals.open(mountPoint);
+        expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual('EuiModal');
+        expect(mockReactDomRender.mock.calls[1][0].props.children.type.name).toEqual('EuiModal');
+
+        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
+        expect((modalContent.find('MountWrapper').props() as any).mount).toEqual(mountPoint);
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
@@ -93,8 +102,20 @@ describe('ModalService', () => {
       });
 
       it('replaces the current confirm with the new one', () => {
-        modals.openConfirm('some confirm');
-        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        modals.openConfirm(SOME_CONFIRM);
+
+        expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual(
+          'EuiConfirmModal'
+        );
+        expect(mockReactDomRender.mock.calls[1][0].props.children.type.name).toEqual(
+          'EuiConfirmModal'
+        );
+
+        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
+        expect(modalContent.find('EuiText[data-test-subj="confirmModalBodyText"]').text()).toEqual(
+          SOME_CONFIRM
+        );
+
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
@@ -110,33 +131,49 @@ describe('ModalService', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       modals.openConfirm((container) => {
         const content = document.createElement('span');
-        content.textContent = 'Modal content';
+        content.textContent = MODAL_CONTENT;
         container.append(content);
         return () => {};
       });
-      expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+      expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual(
+        'EuiConfirmModal'
+      );
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.render()).toMatchSnapshot();
+      expect(modalContent.find('EuiText[data-test-subj="confirmModalBodyText"]').text()).toEqual(
+        MODAL_CONTENT
+      );
     });
 
     it('renders a string confirm message', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
-      modals.openConfirm('Some message');
-      expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+      modals.openConfirm(SOME_CONFIRM);
+      expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual(
+        'EuiConfirmModal'
+      );
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
-      expect(modalContent.render()).toMatchSnapshot();
+      expect(modalContent.find('EuiText[data-test-subj="confirmModalBodyText"]').text()).toEqual(
+        SOME_CONFIRM
+      );
     });
 
     describe('with a currently active modal', () => {
       let ref1: OverlayRef;
 
       beforeEach(() => {
-        ref1 = modals.open(mountReactNode(<span>Modal content 1</span>));
+        ref1 = modals.open(mountReactNode(<span>`${MODAL_CONTENT}`</span>));
       });
 
       it('replaces the current modal with the new confirm', () => {
-        modals.openConfirm('some confirm');
-        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        modals.openConfirm(SOME_CONFIRM);
+
+        expect(mockReactDomRender.mock.calls[1][0].props.children.type.name).toEqual(
+          'EuiConfirmModal'
+        );
+        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
+        expect(modalContent.find('EuiText[data-test-subj="confirmModalBodyText"]').text()).toEqual(
+          SOME_CONFIRM
+        );
+
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         expect(() => ref1.close()).not.toThrowError();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
@@ -145,7 +182,7 @@ describe('ModalService', () => {
       it('resolves onClose on the previous ref', async () => {
         const onCloseComplete = jest.fn();
         ref1.onClose.then(onCloseComplete);
-        modals.openConfirm('some confirm');
+        modals.openConfirm(SOME_CONFIRM);
         await ref1.onClose;
         expect(onCloseComplete).toBeCalledTimes(1);
       });
@@ -159,13 +196,24 @@ describe('ModalService', () => {
       });
 
       it('replaces the current confirm with the new one', () => {
-        modals.openConfirm('some confirm');
-        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        modals.openConfirm(SOME_CONFIRM);
+
+        expect(mockReactDomRender.mock.calls[0][0].props.children.type.name).toEqual(
+          'EuiConfirmModal'
+        );
+        expect(mockReactDomRender.mock.calls[1][0].props.children.type.name).toEqual(
+          'EuiConfirmModal'
+        );
+
+        const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
+        expect(modalContent.find('EuiText[data-test-subj="confirmModalBodyText"]').text()).toEqual(
+          SOME_CONFIRM
+        );
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
       it('resolves the previous confirm promise', async () => {
-        modals.openConfirm('some confirm');
+        modals.openConfirm(SOME_CONFIRM);
         expect(await confirm1).toEqual(false);
       });
     });
@@ -186,14 +234,20 @@ describe('ModalService', () => {
       const ref = modals.open(mountReactNode(<span>Flyout content</span>));
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
       await ref.close();
-      expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
+      expect(mockReactDomUnmount.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            <div />,
+          ],
+        ]
+      `);
       await ref.close();
       expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
     });
 
     it("on a stale ModalRef doesn't affect the active flyout", async () => {
-      const ref1 = modals.open(mountReactNode(<span>Modal content 1</span>));
-      const ref2 = modals.open(mountReactNode(<span>Modal content 2</span>));
+      const ref1 = modals.open(mountReactNode(<span>`${MODAL_CONTENT}`</span>));
+      const ref2 = modals.open(mountReactNode(<span>`${MODAL_CONTENT_TWO}`</span>));
       const onCloseComplete = jest.fn();
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();

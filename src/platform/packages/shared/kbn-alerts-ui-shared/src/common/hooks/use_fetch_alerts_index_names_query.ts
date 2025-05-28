@@ -8,10 +8,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchAlertsIndexNames,
-  FetchAlertsIndexNamesParams,
-} from '../apis/fetch_alerts_index_names';
+import type { FetchAlertsIndexNamesParams } from '../apis/fetch_alerts_index_names';
+import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 
 export type UseFetchAlertsIndexNamesQueryParams = FetchAlertsIndexNamesParams;

@@ -39,7 +39,7 @@ const TestComponent = (props: Partial<DiscoverContainerInternalProps>) => {
       overrideServices={props.overrideServices ?? mockOverrideService}
       customizationCallbacks={props.customizationCallbacks ?? [customizeMock]}
       scopedHistory={props.scopedHistory ?? getScopedHistory()!}
-      getDiscoverServices={getDiscoverServicesMock}
+      getDiscoverServices={() => Promise.resolve(getDiscoverServicesMock())}
     />
   );
 };

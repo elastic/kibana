@@ -34,6 +34,7 @@ import type {
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
+  PackageSpecCategory,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -52,6 +53,7 @@ import type {
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  CustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -65,6 +67,7 @@ import {
   getLimitedPackages,
   getBulkAssets,
   getTemplateInputs,
+  updateCustomIntegration,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
@@ -83,6 +86,7 @@ import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
+import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -105,12 +109,25 @@ export const getListHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
-  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
   const res = await getPackages({
     savedObjectsClient,
     ...request.query,
   });
   const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+
+  if (request.query.withPackagePoliciesCount) {
+    const countByPackage = await getPackagePoliciesCountByPackageName(
+      appContextService.getInternalUserSOClientForSpaceId(fleetContext.spaceId)
+    );
+    for (const item of flattenedRes) {
+      item.packagePoliciesInfo = {
+        count: countByPackage[item.name] ?? 0,
+      };
+    }
+  }
+
   const body: GetPackagesResponse = {
     items: flattenedRes,
   };
@@ -309,6 +326,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
       items: res.assets || [],
       _meta: {
         install_source: res.installSource ?? installSource,
+        name: pkgName,
       },
     };
     return response.ok({ body });
@@ -350,6 +368,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
         items: res.assets || [],
         _meta: {
           install_source: res.installSource ?? installSource,
+          name: integrationName,
         },
       };
       return response.ok({ body });
@@ -374,6 +393,31 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
     }
     throw error;
   }
+};
+export const updateCustomIntegrationHandler: FleetRequestHandler<
+  TypeOf<typeof CustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  const { readMeData, categories } = request.body as TypeOf<
+    typeof CustomIntegrationRequestSchema.body
+  >;
+  const { pkgName } = request.params as unknown as TypeOf<
+    typeof CustomIntegrationRequestSchema.params
+  >;
+  const result = await updateCustomIntegration(esClient, soClient, pkgName, {
+    readMeData,
+    categories: categories?.map((category) => category as PackageSpecCategory),
+  });
+
+  return response.ok({
+    body: {
+      id: pkgName,
+      result,
+    },
+  });
 };
 
 const bulkInstallServiceResponseToHttpEntry = (
@@ -451,6 +495,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       items: res.assets || [],
       _meta: {
         install_source: res.installSource ?? installSource,
+        name: res.pkgName,
       },
     };
     return response.ok({ body });

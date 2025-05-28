@@ -1,0 +1,100 @@
+{
+  "id": "@kbn/wc-framework-types-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-browser",
+        "id": "def-common.FunctionWorkflowDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "FunctionWorkflowDefinition",
+        "description": [],
+        "signature": [
+          "{ id: string; type: \"function\"; name: string; description?: string | undefined; inputs: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.WorkflowDefinitionInput",
+            "text": "WorkflowDefinitionInput"
+          },
+          "[]; outputs: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.WorkflowDefinitionOutput",
+            "text": "WorkflowDefinitionOutput"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-browser/src/workflows.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-browser",
+        "id": "def-common.GraphWorkflowDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "GraphWorkflowDefinition",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-browser/src/workflows.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-browser",
+        "id": "def-common.WorkflowDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.GraphWorkflowDefinition",
+            "text": "GraphWorkflowDefinition"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-browser",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesBrowserPluginApi",
+            "section": "def-common.FunctionWorkflowDefinition",
+            "text": "FunctionWorkflowDefinition"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-browser/src/workflows.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

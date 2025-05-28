@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`should show kspm without agentless option`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should show cnvm without agentless option`, async () => {
       //   const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`should show cspm with agentless option`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
 

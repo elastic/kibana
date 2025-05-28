@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleActionParams } from '@kbn/alerting-types';
+import type { RuleActionParams } from '@kbn/alerting-types';
 import { isEmpty, omit } from 'lodash';
-import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../common';
-import { RuleFormData, RuleFormState } from '../types';
+import type { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../common';
+import type { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
 
 export type RuleFormStateReducerAction =

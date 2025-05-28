@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Meta, Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -74,10 +74,12 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const ExampleData: Story<Args> = (args) => {
-  return <AgentKeysTable {...args} />;
-};
+export const ExampleData: StoryObj<Args> = {
+  render: (args) => {
+    return <AgentKeysTable {...args} />;
+  },
 
-ExampleData.args = {
-  agentKeys,
+  args: {
+    agentKeys,
+  },
 };

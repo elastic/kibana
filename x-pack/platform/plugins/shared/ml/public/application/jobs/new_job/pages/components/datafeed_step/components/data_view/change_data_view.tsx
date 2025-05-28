@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { useNavigateToManagementMlLink } from '../../../../../../../contexts/kibana/use_create_url';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -36,7 +37,7 @@ import type {
 } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
-import { useMlKibana, useMlApi, useNavigateToPath } from '../../../../../../../contexts/kibana';
+import { useMlKibana, useMlApi } from '../../../../../../../contexts/kibana';
 
 const fixedPageSize: number = 8;
 
@@ -57,7 +58,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       uiSettings,
     },
   } = useMlKibana();
-  const navigateToPath = useNavigateToPath();
+  const navigateToMlManagementLink = useNavigateToManagementMlLink('anomaly_detection');
   const { validateDatafeedPreview } = useMlApi();
 
   const { jobCreator: jc } = useContext(JobCreatorContext);
@@ -119,9 +120,8 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const applyDataView = useCallback(() => {
     const newIndices = newDataViewTitle.split(',');
     jobCreator.indices = newIndices;
-    resetAdvancedJob(jobCreator, navigateToPath);
-    // exclude mlJobService from deps
-  }, [jobCreator, newDataViewTitle, navigateToPath]);
+    resetAdvancedJob(jobCreator, navigateToMlManagementLink);
+  }, [jobCreator, newDataViewTitle, navigateToMlManagementLink]);
 
   return (
     <>

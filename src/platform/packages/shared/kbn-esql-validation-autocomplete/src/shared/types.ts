@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
+import type { ESQLControlVariable, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '../validation/types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -39,16 +39,17 @@ export interface ESQLSourceResult {
 
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
-  getColumnsFor?: CallbackFn<{ query: string }, ESQLRealField>;
+  getColumnsFor?: CallbackFn<{ query: string }, ESQLFieldWithMetadata>;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
-  getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, skip } from 'rxjs';
 import { PublishingSubject, ValueFromPublishingSubject } from './types';
 
@@ -31,26 +31,21 @@ export const usePublishingSubject = <T extends unknown = unknown>(
 /**
  * Declares a state variable that is synced with a publishing subject value.
  * @param subject Publishing subject.
- *   When 'subject' is expected to change, 'subject' must be part of component react state.
  */
-export const useStateFromPublishingSubject = <
-  SubjectType extends PublishingSubject<any> | undefined = PublishingSubject<any> | undefined
->(
+export const useStateFromPublishingSubject = <SubjectType extends PublishingSubject<any>>(
   subject: SubjectType
 ): ValueFromPublishingSubject<SubjectType> => {
-  const isFirstRender = useRef(true);
-  const [value, setValue] = useState<ValueFromPublishingSubject<SubjectType>>(subject?.getValue());
-  useEffect(() => {
-    if (!isFirstRender.current) {
-      setValue(subject?.getValue());
-    } else {
-      isFirstRender.current = false;
-    }
+  const [value, setValue] = useState<ValueFromPublishingSubject<SubjectType>>(subject.getValue());
 
-    if (!subject) return;
+  const subscription = useMemo(() => {
     // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
-    const subscription = subject.pipe(skip(1)).subscribe((newValue) => setValue(newValue));
+    return subject.pipe(skip(1)).subscribe((newValue) => setValue(newValue));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     return () => subscription.unsubscribe();
-  }, [subject]);
+  }, [subscription]);
+
   return value;
 };

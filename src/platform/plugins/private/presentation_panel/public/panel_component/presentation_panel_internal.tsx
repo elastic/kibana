@@ -11,6 +11,7 @@ import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elas
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
+  PublishesTitle,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
@@ -48,10 +49,10 @@ export const PresentationPanelInternal = <
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
-  const viewModeSubject = (() => {
+  const viewModeSubject = useMemo(() => {
     if (apiPublishesViewMode(api)) return api.viewMode$;
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
-  })();
+  }, [api]);
 
   const [
     dataLoading,
@@ -72,7 +73,7 @@ export const PresentationPanelInternal = <
     api?.defaultTitle$,
     api?.defaultDescription$,
     viewModeSubject,
-    api?.parentApi?.hideTitle$
+    (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
   );
   const viewMode = rawViewMode ?? 'view';
 
@@ -186,6 +187,7 @@ const styles = {
     flexDirection: 'column',
     height: '100%',
     position: 'relative',
+    overflow: 'hidden',
   }),
   embPanelContent: css({
     '&.embPanel__content': {
@@ -193,7 +195,6 @@ const styles = {
       flex: '1 1 100%',
       zIndex: 1,
       minHeight: 0, // Absolute must for Firefox to scroll contents
-      borderRadius: '4px',
       overflow: 'hidden',
     },
     '&.embPanel__content--hidden, &[data-error]': {

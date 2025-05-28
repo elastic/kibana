@@ -400,7 +400,21 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+            ],
+            "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-overlays-browser",
+            "id": "def-public.OverlayModalConfirmOptions.arialabelledby",
+            "type": "string",
+            "tags": [],
+            "label": "'aria-labelledby'",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
             "deprecated": false,
@@ -487,6 +501,20 @@
             "description": [],
             "signature": [
               "string | number | boolean | undefined"
+            ],
+            "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-overlays-browser",
+            "id": "def-public.OverlayModalOpenOptions.arialabelledby",
+            "type": "string",
+            "tags": [],
+            "label": "'aria-labelledby'",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
             "deprecated": false,

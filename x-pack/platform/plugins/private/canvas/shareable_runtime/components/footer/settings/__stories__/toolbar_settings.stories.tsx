@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ExampleContext } from '../../../../test/context_example';
@@ -20,19 +19,36 @@ const style = {
   background: '#fff',
 };
 
-storiesOf('shareables/Footer/Settings/ToolbarSettings', module)
-  .add('contextual', () => (
+export default {
+  title: 'shareables/Footer/Settings/ToolbarSettings',
+};
+
+export const Contextual = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <ToolbarSettings onSetAutohide={action('onSetAutohide')} />
     </ExampleContext>
-  ))
-  .add('component: on', () => (
+  ),
+
+  name: 'contextual',
+};
+
+export const ComponentOn = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <ToolbarSettingsComponent isAutohide={true} onSetAutohide={action('onSetAutohide')} />
     </ExampleContext>
-  ))
-  .add('component: off', () => (
+  ),
+
+  name: 'component: on',
+};
+
+export const ComponentOff = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <ToolbarSettingsComponent isAutohide={false} onSetAutohide={action('onSetAutohide')} />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'component: off',
+};

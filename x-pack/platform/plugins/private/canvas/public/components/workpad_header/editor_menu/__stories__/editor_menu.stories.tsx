@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { EditorMenu } from '../editor_menu.component';
 
-storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
-  <EditorMenu
-    addPanelActions={[]}
-    createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
-  />
-));
+export default {
+  title: 'components/WorkpadHeader/EditorMenu',
+};
+
+export const Default = {
+  render: () => (
+    <EditorMenu
+      addPanelActions={[]}
+      createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
+    />
+  ),
+
+  name: 'default',
+};

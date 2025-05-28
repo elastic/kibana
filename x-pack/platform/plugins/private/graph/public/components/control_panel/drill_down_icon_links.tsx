@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 import { UrlTemplate } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 
@@ -48,11 +55,16 @@ export const DrillDownIconLinks = ({
 
   return (
     <EuiFlexGroup
-      className="gphDrillDownIconLinks"
       justifyContent="flexStart"
       alignItems="center"
       gutterSize="xs"
       responsive={false}
+      css={({ euiTheme }: UseEuiTheme) =>
+        css({
+          marginTop: `calc(0.5 * ${euiTheme.size.xs})`,
+          marginBottom: `calc(0.5 * ${euiTheme.size.xs})`,
+        })
+      }
     >
       {drillDowns}
     </EuiFlexGroup>

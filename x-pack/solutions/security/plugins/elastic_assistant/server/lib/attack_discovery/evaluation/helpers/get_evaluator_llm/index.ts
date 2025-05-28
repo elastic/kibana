@@ -61,5 +61,8 @@ export const getEvaluatorLlm = async ({
     temperature: 0, // zero temperature for evaluation
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_attack_discovery',
+    },
   });
 };

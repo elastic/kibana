@@ -17,14 +17,6 @@ import type { RuleAlertType } from '../../../rule_schema';
 
 export const MAX_PREBUILT_RULES_COUNT = 10_000;
 
-export const getNonPackagedRulesCount = async ({
-  rulesClient,
-}: {
-  rulesClient: RulesClient;
-}): Promise<number> => {
-  return getRulesCount({ rulesClient, filter: KQL_FILTER_MUTABLE_RULES });
-};
-
 export const getRulesCount = async ({
   rulesClient,
   filter,

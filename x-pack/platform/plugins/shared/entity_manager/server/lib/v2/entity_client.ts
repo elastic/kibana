@@ -154,7 +154,7 @@ export class EntityClient {
           start,
           end,
         });
-        this.options.logger.info(
+        this.options.logger.debug(
           `Entity count query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
         );
 

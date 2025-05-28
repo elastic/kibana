@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS, ALERT_URL } from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
-import { RuleAlertData } from '../../types';
+import type { RuleAlertData } from '../../types';
 
 const allowedFrameworkFields = new Set<string>([
   ALERT_REASON,

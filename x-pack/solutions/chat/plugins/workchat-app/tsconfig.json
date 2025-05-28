@@ -1,0 +1,45 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/inference-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/sse-utils-client",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-server",
+    "@kbn/inference-langchain",
+    "@kbn/inference-common",
+    "@kbn/wci-common",
+    "@kbn/i18n",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/datemath",
+    "@kbn/zod",
+    "@kbn/logging-mocks",
+    "@kbn/wci-server",
+    "@kbn/actions-plugin",
+    "@kbn/wci-browser",
+    "@kbn/features-plugin",
+    "@kbn/wc-genai-utils",
+    "@kbn/workchat-framework-plugin",
+    "@kbn/logging",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

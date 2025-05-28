@@ -14,6 +14,8 @@ import {
   type AllFieldsDiff,
   MissingVersion,
 } from '../../../../../../common/api/detection_engine';
+import type { UpgradeConflictResolution } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
@@ -40,7 +42,11 @@ export const createModifiedPrebuiltRuleAssets = ({
   defaultPickVersion,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
-    const { pick_version: globalPickVersion = defaultPickVersion, mode } = requestBody;
+    const {
+      pick_version: globalPickVersion = defaultPickVersion,
+      mode,
+      on_conflict: onConflict,
+    } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =
       upgradeableRules.reduce<ProcessedRules>(
@@ -77,7 +83,9 @@ export const createModifiedPrebuiltRuleAssets = ({
             ) as AllFieldsDiff;
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
-              const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
+              const fieldsWithConflicts = Object.keys(
+                getFieldsDiffConflicts(calculatedRuleDiff, onConflict)
+              );
               if (fieldsWithConflicts.length > 0) {
                 // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
                 // than "MERGED", so throw an error for the fields that have conflicts.
@@ -152,7 +160,12 @@ function createModifiedPrebuiltRuleAsset({
   return modifiedPrebuiltRuleAsset as PrebuiltRuleAsset;
 }
 
-const getFieldsDiffConflicts = (ruleFieldsDiff: Partial<AllFieldsDiff>) =>
-  pickBy(ruleFieldsDiff, (diff) => {
-    return diff.conflict !== 'NONE';
-  });
+const getFieldsDiffConflicts = (
+  ruleFieldsDiff: Partial<AllFieldsDiff>,
+  onConflict?: UpgradeConflictResolution
+) =>
+  pickBy(ruleFieldsDiff, (diff) =>
+    onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+      ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
+      : diff.conflict !== 'NONE'
+  );

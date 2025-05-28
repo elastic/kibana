@@ -10,7 +10,7 @@ import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getBackfillTests({ getService }: FtrProviderContext) {
@@ -119,8 +119,8 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
             .send([
-              { rule_id: ruleId1, start, end: end1 },
-              { rule_id: ruleId2, start, end: end2 },
+              { rule_id: ruleId1, ranges: [{ start, end: end1 }] },
+              { rule_id: ruleId2, ranges: [{ start, end: end2 }] },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -272,7 +272,7 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
-            .send([{ rule_id: ruleId, start, end: end1 }]);
+            .send([{ rule_id: ruleId, ranges: [{ start, end: end1 }] }]);
 
           const scheduleResult = scheduleResponse.body;
           expect(scheduleResult.length).to.eql(1);

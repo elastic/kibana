@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findGaps } from './find_gaps';
+import { findGaps, findGapsSearchAfter } from './find_gaps';
 import { gapStatus } from '../../../common/constants/gap_status';
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -152,6 +152,161 @@ describe('findGaps', () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to find gaps for rule test-rule')
+    );
+  });
+});
+
+describe('findGapsSearchAfter', () => {
+  const mockLogger = loggerMock.create();
+  const mockEventLogClient = eventLogClientMock.create();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should call findEventsBySavedObjectIdsSearchAfter with correct parameters', async () => {
+    mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockResolvedValue({
+      total: 0,
+      data: [],
+      search_after: undefined,
+      pit_id: 'test-pit-id',
+    });
+
+    await findGapsSearchAfter({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      params: {
+        ruleId: 'test-rule',
+        start: '2024-01-01',
+        end: '2024-01-02',
+        perPage: 10,
+        statuses: [gapStatus.UNFILLED],
+      },
+    });
+
+    expect(mockEventLogClient.findEventsBySavedObjectIdsSearchAfter).toHaveBeenCalledWith(
+      'alert',
+      ['test-rule'],
+      expect.objectContaining({
+        filter: expect.stringContaining('event.action: gap'),
+        sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+        per_page: 10,
+      })
+    );
+  });
+
+  it('should use provided PIT and search_after values', async () => {
+    mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockResolvedValue({
+      total: 0,
+      data: [],
+      search_after: ['2024-01-02'],
+      pit_id: 'test-pit-id',
+    });
+
+    await findGapsSearchAfter({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      params: {
+        ruleId: 'test-rule',
+        start: '2024-01-01',
+        end: '2024-01-02',
+        perPage: 10,
+        pitId: 'existing-pit-id',
+        searchAfter: ['2024-01-01'],
+      },
+    });
+
+    expect(mockEventLogClient.findEventsBySavedObjectIdsSearchAfter).toHaveBeenCalledWith(
+      'alert',
+      ['test-rule'],
+      expect.objectContaining({
+        pit_id: 'existing-pit-id',
+        search_after: ['2024-01-01'],
+      })
+    );
+  });
+
+  it('should transform response data to Gap objects', async () => {
+    const mockResponse = {
+      total: 1,
+      data: [createMockGapEvent()],
+      search_after: ['2024-01-02'],
+      pit_id: 'test-pit-id',
+    };
+
+    mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockResolvedValue(mockResponse);
+
+    const result = await findGapsSearchAfter({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      params: {
+        ruleId: 'test-rule',
+        perPage: 10,
+        start: '2024-01-01',
+        end: '2024-01-02',
+      },
+    });
+
+    expect(result.data[0]).toBeInstanceOf(Gap);
+    expect(result.data[0].range).toEqual({
+      gte: new Date('2024-01-01'),
+      lte: new Date('2024-01-02'),
+    });
+    expect(result.data[0].filledIntervals).toEqual([]);
+    expect(result.data[0].inProgressIntervals).toEqual([]);
+    expect(result.searchAfter).toEqual(['2024-01-02']);
+    expect(result.pitId).toBe('test-pit-id');
+  });
+
+  it('should handle custom sort field', async () => {
+    mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockResolvedValue({
+      total: 0,
+      data: [],
+      search_after: undefined,
+      pit_id: 'test-pit-id',
+    });
+
+    await findGapsSearchAfter({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      params: {
+        ruleId: 'test-rule',
+        perPage: 10,
+        sortField: 'kibana.alert.rule.gap.total_gap_duration_ms',
+        sortOrder: 'asc',
+        start: '2024-01-01',
+        end: '2024-01-02',
+      },
+    });
+
+    expect(mockEventLogClient.findEventsBySavedObjectIdsSearchAfter).toHaveBeenCalledWith(
+      'alert',
+      ['test-rule'],
+      expect.objectContaining({
+        sort: [{ sort_field: 'kibana.alert.rule.gap.total_gap_duration_ms', sort_order: 'asc' }],
+      })
+    );
+  });
+
+  it('should handle errors and log them', async () => {
+    const error = new Error('Test error');
+    mockEventLogClient.findEventsBySavedObjectIdsSearchAfter.mockRejectedValue(error);
+
+    await expect(
+      findGapsSearchAfter({
+        eventLogClient: mockEventLogClient,
+        logger: mockLogger,
+        params: {
+          ruleId: 'test-rule',
+          perPage: 10,
+          start: '2024-01-01',
+          end: '2024-01-02',
+        },
+      })
+    ).rejects.toThrow(error);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to find gaps with search after for rule test-rule')
     );
   });
 });

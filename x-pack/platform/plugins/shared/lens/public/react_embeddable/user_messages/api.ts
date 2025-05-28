@@ -192,7 +192,8 @@ export function buildUserMessagesHelpers(
 
     userMessages.push(
       ...(activeDatasource?.getUserMessages(activeDatasourceState, {
-        setState: () => {},
+        // limit the fixAction within the embeddable for now
+        setState: undefined,
         frame: framePublicAPI,
         visualizationInfo: activeVisualization?.getVisualizationInfo?.(
           activeVisualizationState,

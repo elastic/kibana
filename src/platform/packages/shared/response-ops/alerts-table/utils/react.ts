@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, memo, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import type React from 'react';
+import { forwardRef, memo } from 'react';
 
 /**
  * A `React.memo` variant that keeps generic type information

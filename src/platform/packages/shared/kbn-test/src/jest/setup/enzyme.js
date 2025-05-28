@@ -37,5 +37,15 @@ jest.mock('enzyme', () => {
       mockEnsureEmotionStyleTag();
       return actual.render(node, options);
     },
+    mount: (node, options) => {
+      // Since we're using React 17 enzyme adapter, we need to mute the warning about using legacy root API
+      // Otherwise console will be flooded with warnings
+      const unmute = require('@kbn/react-mute-legacy-root-warning').muteLegacyRootWarning();
+      try {
+        return actual.mount(node, options);
+      } finally {
+        unmute();
+      }
+    },
   };
 });

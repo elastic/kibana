@@ -17,14 +17,24 @@ import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
 
 const POLL_INTERVAL = 30000;
+const PAUSE_THRESHOLD_MULTIPLIER = 4;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
-const PAUSE_WINDOW = POLL_INTERVAL * 4;
+const PAUSE_WINDOW = POLL_INTERVAL * PAUSE_THRESHOLD_MULTIPLIER;
 
 /**
- * To avoid running the worker loop very tightly and causing a CPU bottleneck we use this
- * padding to simulate an asynchronous sleep. See the description of the tight loop below.
+ * Initial worker padding to avoid CPU bottlenecks when running the worker loop.
+ * This value will start at 1 second and increase exponentially (doubling each time)
+ * up to a maximum value, reducing unnecessary load on the system.
+ *
+ * IMPORTANT: The maximum padding must be significantly less than PAUSE_WINDOW to ensure
+ * that other Kibanas never see the updated_at field being older than the PAUSE_WINDOW.
+ * PAUSE_WINDOW = 2 minutes (120000ms), so we set the max padding to 30s, which ensures
+ * at least 4 update attempts would happen before hitting the PAUSE_WINDOW threshold.
  */
-const WORKER_PADDING_MS = 1000;
+const INITIAL_WORKER_PADDING_MS = 1000;
+// Maximum worker padding set to POLL_INTERVAL (1/4 of PAUSE_WINDOW) to guarantee multiple
+// updates will happen before operations are considered "stuck"
+const MAX_WORKER_PADDING_MS = Math.floor(PAUSE_WINDOW / PAUSE_THRESHOLD_MULTIPLIER);
 
 /**
  * A singleton worker that will coordinate two polling loops:
@@ -48,6 +58,7 @@ export class ReindexWorker {
   private readonly reindexService: ReindexService;
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
+  private currentWorkerPadding: number = INITIAL_WORKER_PADDING_MS;
 
   public static create(
     client: SavedObjectsClientContract,
@@ -88,7 +99,7 @@ export class ReindexWorker {
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser),
+      reindexActionsFactory(this.client, callAsInternalUser, this.log),
       log,
       this.licensing
     );
@@ -114,12 +125,15 @@ export class ReindexWorker {
     this.log.debug('Stopping worker...');
     this.stop$.next();
     this.updateOperationLoopRunning = false;
+    this.currentWorkerPadding = INITIAL_WORKER_PADDING_MS;
   };
 
   /**
    * Should be called immediately after this server has started a new reindex operation.
    */
   public forceRefresh = () => {
+    // Reset worker padding for immediate responsiveness to new operations
+    this.currentWorkerPadding = INITIAL_WORKER_PADDING_MS;
     // We know refresh won't throw, but just in case it does in the future
     this.refresh().catch((error) => {
       this.log.warn(`Failed to force refresh the reindex operations: ${error}`);
@@ -151,9 +165,17 @@ export class ReindexWorker {
           this.inProgressOps.length &&
           this.inProgressOps.every((op) => !this.credentialStore.get(op))
         ) {
-          // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
-          // This scheduler should be revisited in future.
-          await new Promise((resolve) => setTimeout(resolve, WORKER_PADDING_MS));
+          // Apply exponential backoff to reduce system load
+          await new Promise((resolve) => setTimeout(resolve, this.currentWorkerPadding));
+          // Double the worker padding for next iteration, up to the maximum
+          this.currentWorkerPadding = Math.min(
+            this.currentWorkerPadding * 2,
+            MAX_WORKER_PADDING_MS
+          );
+          this.log.debug(`Worker padding increased to ${this.currentWorkerPadding}ms`);
+        } else {
+          // Reset to initial value when we have operations with credentials
+          this.currentWorkerPadding = INITIAL_WORKER_PADDING_MS;
         }
       }
     } catch (error) {
@@ -173,7 +195,7 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser);
+    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log);
     return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };
 

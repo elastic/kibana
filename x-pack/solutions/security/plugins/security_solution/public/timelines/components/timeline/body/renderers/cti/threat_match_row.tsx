@@ -28,16 +28,19 @@ export interface ThreatMatchRowProps {
   indicatorType?: string;
   sourceField: string;
   sourceValue: string;
+  scopeId: string;
 }
 
 export const ThreatMatchRow = ({
   contextId,
   data,
   eventId,
+  scopeId,
 }: {
   contextId: string;
   data: Fields;
   eventId: string;
+  scopeId: string;
 }) => {
   const props = {
     contextId,
@@ -47,6 +50,7 @@ export const ThreatMatchRow = ({
     indicatorType: getOr([], MATCHED_TYPE, data)[0] as string | undefined,
     sourceField: get(MATCHED_FIELD, data)[0] as string,
     sourceValue: get(MATCHED_ATOMIC, data)[0] as string,
+    scopeId,
   };
 
   return <ThreatMatchRowView {...props} />;
@@ -60,6 +64,7 @@ export const ThreatMatchRowView = ({
   indicatorType,
   sourceField,
   sourceValue,
+  scopeId,
 }: ThreatMatchRowProps) => {
   return (
     <EuiFlexGroup
@@ -70,6 +75,7 @@ export const ThreatMatchRowView = ({
     >
       <EuiFlexItem grow={false}>
         <MatchDetails
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           sourceField={sourceField}
@@ -78,6 +84,7 @@ export const ThreatMatchRowView = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <IndicatorDetails
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           feedName={feedName}

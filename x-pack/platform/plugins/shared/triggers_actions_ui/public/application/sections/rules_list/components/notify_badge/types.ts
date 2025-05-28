@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
+import type { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 
 export interface RulesListNotifyBadgeProps {
   /**
@@ -26,6 +26,7 @@ export interface RulesListNotifyBadgeProps {
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showTooltipInline?: boolean;
   showOnHover?: boolean;
+  isRuleEditable?: boolean;
 }
 
 export type RulesListNotifyBadgePropsWithApi = Pick<

@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.errors).toHaveLength(1);
         expect(body.errors[0]).toMatchObject({
           error: {
-            message: `rule_id: \"rule-1\" already exists`,
+            message: 'Rule with this rule_id already exists',
             status_code: 409,
           },
         });
@@ -271,7 +271,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(importedRule).toMatchObject({
           rule_id: rule.rule_id,
           version: 9999,
-          rule_source: { type: 'external', is_customized: true },
+          rule_source: { type: 'external', is_customized: false },
           immutable: true,
         });
       });

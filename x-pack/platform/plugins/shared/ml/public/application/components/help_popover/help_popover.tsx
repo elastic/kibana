@@ -10,12 +10,11 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
-import './help_popover.scss';
+import { useHelpPopoverStyles } from './help_popover_styles';
 
 export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
   return (
     <EuiButtonIcon
-      className="mlHelpPopover__buttonIcon"
       size="s"
       iconType="help"
       aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
@@ -37,21 +36,21 @@ export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
   title,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { helpPopoverPanel, helpPopoverContent } = useHelpPopoverStyles();
 
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
       button={<HelpPopoverButton onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)} />}
-      className="mlHelpPopover"
       closePopover={setIsPopoverOpen.bind(null, false)}
       isOpen={isPopoverOpen}
       ownFocus
-      panelClassName="mlHelpPopover__panel"
+      panelProps={{ css: helpPopoverPanel }}
       panelPaddingSize="none"
     >
       {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
 
-      <EuiText className="mlHelpPopover__content eui-scrollBar" size="s" tabIndex={0}>
+      <EuiText css={helpPopoverContent} size="s" tabIndex={0}>
         {children}
       </EuiText>
     </EuiPopover>

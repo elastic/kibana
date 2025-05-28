@@ -67,9 +67,9 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
           const { id, title, description, landingImage, isBeta, betaOptions } = item;
           return (
             <EuiFlexItem key={id} data-test-subj="LandingItem">
-              <LinkAnchor {...linkProps} tabIndex={-1} css={styles.link}>
+              <LinkAnchor {...linkProps} css={styles.link}>
                 {/* Empty onClick is to force hover style on `EuiPanel` */}
-                <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
+                <EuiPanel element="div" hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false} css={styles.image}>
                       {landingImage && (
@@ -85,7 +85,7 @@ export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
                     <EuiFlexItem css={styles.content}>
                       <div css={styles.titleContainer}>
                         <EuiTitle size="s" css={styles.title}>
-                          <h2>{title}</h2>
+                          <span>{title}</span>
                         </EuiTitle>
                         {isBeta && <BetaBadge text={betaOptions?.text} />}
                       </div>

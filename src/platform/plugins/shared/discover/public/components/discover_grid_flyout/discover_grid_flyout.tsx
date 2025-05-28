@@ -9,11 +9,12 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -37,7 +38,9 @@ export interface DiscoverGridFlyoutProps {
   onClose: () => void;
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
+  setExpandedDoc: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  initialTabId?: string;
+  docViewerRef?: DocViewerProps['ref'];
 }
 
 /**
@@ -57,6 +60,8 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  initialTabId,
+  docViewerRef,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -87,7 +92,7 @@ export function DiscoverGridFlyout({
     }));
 
     return getDocViewer({ record: actualHit });
-  }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
+  }, [getDocViewerAccessor, actualHit, flyoutCustomization]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
@@ -117,6 +122,8 @@ export function DiscoverGridFlyout({
       onClose={onClose}
       onFilter={onFilter}
       setExpandedDoc={setExpandedDoc}
+      initialTabId={initialTabId}
+      docViewerRef={docViewerRef}
     />
   );
 }

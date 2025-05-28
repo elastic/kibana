@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
-import { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export interface LogErrorDetailsInterface {
   (this: SuperTest.Test, err: Error & { response?: any }): SuperTest.Test;

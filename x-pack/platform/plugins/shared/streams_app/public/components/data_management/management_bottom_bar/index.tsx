@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
-  confirmTooltip?: Partial<EuiToolTipProps>;
   disabled?: boolean;
+  insufficientPrivileges?: boolean;
   isLoading?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
@@ -21,9 +21,9 @@ interface ManagementBottomBarProps {
 
 export function ManagementBottomBar({
   confirmButtonText = defaultConfirmButtonText,
-  confirmTooltip,
   disabled = false,
   isLoading = false,
+  insufficientPrivileges = false,
   onCancel,
   onConfirm,
 }: ManagementBottomBarProps) {
@@ -34,31 +34,11 @@ export function ManagementBottomBar({
     cancelButtonText: keepEditingLabel,
   });
 
-  const confirmButtonContent = (
-    <EuiButton
-      data-test-subj="streamsAppManagementBottomBarButton"
-      disabled={disabled}
-      color="primary"
-      fill
-      size="s"
-      iconType="check"
-      onClick={onConfirm}
-      isLoading={isLoading}
-    >
-      {confirmButtonText}
-    </EuiButton>
-  );
-
-  const confirmButton = confirmTooltip ? (
-    <EuiToolTip {...confirmTooltip}>{confirmButtonContent}</EuiToolTip>
-  ) : (
-    confirmButtonContent
-  );
-
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
       <EuiButtonEmpty
         data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
+        disabled={disabled}
         color="text"
         size="s"
         iconType="cross"
@@ -68,7 +48,31 @@ export function ManagementBottomBar({
           defaultMessage: 'Cancel changes',
         })}
       </EuiButtonEmpty>
-      {confirmButton}
+      <EuiToolTip
+        content={
+          insufficientPrivileges
+            ? i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
+                {
+                  defaultMessage: "You don't have sufficient privileges to save changes.",
+                }
+              )
+            : undefined
+        }
+      >
+        <EuiButton
+          data-test-subj="streamsAppManagementBottomBarButton"
+          disabled={disabled || insufficientPrivileges}
+          color="primary"
+          fill
+          size="s"
+          iconType="check"
+          onClick={onConfirm}
+          isLoading={isLoading}
+        >
+          {confirmButtonText}
+        </EuiButton>
+      </EuiToolTip>
     </EuiFlexGroup>
   );
 }

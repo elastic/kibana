@@ -9,12 +9,12 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
 import { basicFileMock } from '../../containers/mock';
-import type { AppMockRenderer } from '../../common/mock';
 
 import { constructFileKindIdByOwner } from '../../../common/files';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import { FilesTable } from './files_table';
 import userEvent from '@testing-library/user-event';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 
 describe('FilesTable', () => {
   const onTableChange = jest.fn();
@@ -26,15 +26,12 @@ describe('FilesTable', () => {
     onChange: onTableChange,
   };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} />);
 
     expect(await screen.findByTestId('cases-files-table-results-count')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
@@ -46,19 +43,19 @@ describe('FilesTable', () => {
   });
 
   it('renders loading state', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} isLoading={true} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} isLoading={true} />);
 
     expect(await screen.findByTestId('cases-files-table-loading')).toBeInTheDocument();
   });
 
   it('renders empty table', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} items={[]} />);
 
     expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
   });
 
   it('FileAdd in empty table is clickable', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} items={[]} />);
 
     expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
 
@@ -73,7 +70,7 @@ describe('FilesTable', () => {
 
   it('renders single result count properly', async () => {
     const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 1 };
-    appMockRender.render(<FilesTable {...defaultProps} pagination={mockPagination} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} pagination={mockPagination} />);
 
     expect(await screen.findByTestId('cases-files-table-results-count')).toHaveTextContent(
       `Showing ${defaultProps.items.length} file`
@@ -83,7 +80,7 @@ describe('FilesTable', () => {
   it('non image rows dont open file preview', async () => {
     const nonImageFileMock = { ...basicFileMock, mimeType: 'something/else' };
 
-    appMockRender.render(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} items={[nonImageFileMock]} />);
 
     await userEvent.click(
       await within(await screen.findByTestId('cases-files-table-filename')).findByTitle(
@@ -95,7 +92,7 @@ describe('FilesTable', () => {
   });
 
   it('image rows open file preview', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} />);
 
     await userEvent.click(
       await screen.findByRole('button', {
@@ -108,7 +105,7 @@ describe('FilesTable', () => {
 
   it('different mimeTypes are displayed correctly', async () => {
     const mockPagination = { pageIndex: 0, pageSize: 10, totalItemCount: 7 };
-    appMockRender.render(
+    renderWithTestingProviders(
       <FilesTable
         {...defaultProps}
         pagination={mockPagination}
@@ -131,18 +128,19 @@ describe('FilesTable', () => {
   });
 
   it('download button renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    const filesClient = createMockFilesClient();
+    renderWithTestingProviders(<FilesTable {...defaultProps} />, { wrapperProps: { filesClient } });
 
     await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
+      expect(filesClient.getDownloadHref).toBeCalled();
     });
 
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+      expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
         id: basicFileMock.id,
       });
@@ -152,7 +150,7 @@ describe('FilesTable', () => {
   });
 
   it('delete button renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} />);
 
     await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
@@ -162,7 +160,7 @@ describe('FilesTable', () => {
   });
 
   it('clicking delete button opens deletion modal', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} />);
 
     await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
@@ -174,7 +172,7 @@ describe('FilesTable', () => {
   });
 
   it('clicking the copy file hash button rerenders the popover correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} />);
 
     const popoverButton = await screen.findByTestId(
       `cases-files-actions-popover-button-${basicFileMock.id}`
@@ -201,7 +199,7 @@ describe('FilesTable', () => {
   it('go to next page calls onTableChange with correct values', async () => {
     const mockPagination = { pageIndex: 0, pageSize: 1, totalItemCount: 2 };
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FilesTable
         {...defaultProps}
         pagination={mockPagination}
@@ -221,7 +219,7 @@ describe('FilesTable', () => {
   it('go to previous page calls onTableChange with correct values', async () => {
     const mockPagination = { pageIndex: 1, pageSize: 1, totalItemCount: 2 };
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FilesTable
         {...defaultProps}
         pagination={mockPagination}
@@ -239,7 +237,7 @@ describe('FilesTable', () => {
   });
 
   it('changing perPage calls onTableChange with correct values', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FilesTable {...defaultProps} items={[{ ...basicFileMock }, { ...basicFileMock }]} />
     );
 

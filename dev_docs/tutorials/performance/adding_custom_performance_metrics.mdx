@@ -330,8 +330,9 @@ This will be indexed as:
     "duration": 736,                                                    // Event duration as specified when reporting it
     "meta": {
       "target": '/home',
-      "query_range_secs": 900
-      "query_offset_secs": 0 // now
+      "query_range_secs": 900, // 15 minutes
+      "query_from_offset_secs": -900 // From 15 minutes ago
+      "query_to_offset_secs": 0 // To now
     },
     "context": {                                                        // Context holds information identifying the deployment, version, application and page that generated the event
       "version": "8.16.0-SNAPSHOT",

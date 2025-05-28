@@ -21,7 +21,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { action } from '@storybook/addon-actions';
 
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
@@ -35,7 +35,7 @@ const i18n: I18nStart = {
   Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
 };
 
-export const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
+export const KibanaContextDecorator: Decorator (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
 
   useEffect(() => {

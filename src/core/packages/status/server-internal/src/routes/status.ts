@@ -82,6 +82,12 @@ export const registerStatusRoute = ({
   router.get(
     {
       path: '/api/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Status route should be accessible without authorization.',
+        },
+      },
       options: {
         authRequired: 'optional',
         // The `api` tag ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page.

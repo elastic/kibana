@@ -11,11 +11,11 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   TermsEnumRequest,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import supertest from 'supertest';
 import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsRequest } from '.';
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
 import * as observabilityPluginModule from '@kbn/observability-plugin/server';
@@ -201,7 +201,7 @@ describe('APMEventClient', () => {
       });
 
       const msearchParams = esClientMock.msearch.mock.calls[0][0] as {
-        searches: MsearchMultisearchBody[];
+        searches: SearchSearchRequestBody[];
       };
 
       expect(msearchParams.searches[1].query?.bool).toEqual({

@@ -10,7 +10,7 @@ import { Global, css } from '@emotion/react';
 const globalStyles = css`
   html,
   body,
-  #root {
+  #storybook-root {
     width: 100%;
     height: 100%;
     margin: 0;

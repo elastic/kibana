@@ -101,7 +101,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             type: ActionType.Refreshed,
             timestamp: currentTime,
           },
-          value: `${defendInsight.group} ${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
+          value: `${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
           metadata: {
             notes: {
               llm_model: apiConfig.model ?? '',
@@ -113,7 +113,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
               {
                 list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
                 name: defendInsight.group,
-                description: 'Suggested by Security Workflow Insights',
+                description: 'Suggested by Automatic Troubleshooting',
                 entries: [
                   {
                     field: 'process.executable.caseless',

@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { enableRuleParamsSchema } from '../schemas';
+import type { enableRuleParamsSchema } from '../schemas';
 
 export type EnableRuleParams = TypeOf<typeof enableRuleParamsSchema>;

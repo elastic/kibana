@@ -66,7 +66,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
     );
 
     const mockSetupDeps = createMockPluginSetup({
-      security: { license: { isEnabled: () => true } },
+      security: { license: { isEnabled: () => true, getFeature: () => true } },
       router: httpSetup.createRouter(''),
     });
 
@@ -74,10 +74,16 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       {
         licensing: {
           ...licensingMock.createStart(),
-          license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+          license$: new BehaviorSubject({
+            isActive: true,
+            isAvailable: true,
+            type: 'gold',
+            getFeature: () => true,
+          }),
         },
         securityService: {
           authc: {
+            apiKeys: { areAPIKeysEnabled: () => true },
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
         },

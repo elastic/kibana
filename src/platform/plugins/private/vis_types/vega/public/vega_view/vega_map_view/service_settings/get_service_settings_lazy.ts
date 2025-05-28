@@ -9,25 +9,21 @@
 
 import type { IServiceSettings } from './service_settings_types';
 
-let lazyLoaded: () => Promise<IServiceSettings>;
+let servicesPromise: Promise<IServiceSettings>;
 
 export async function getServiceSettingsLazy(): Promise<IServiceSettings> {
-  if (lazyLoaded) {
-    return await lazyLoaded();
+  if (servicesPromise) {
+    return await servicesPromise;
   }
 
-  lazyLoaded = await new Promise(async (resolve, reject) => {
+  servicesPromise = new Promise(async (resolve, reject) => {
     try {
-      try {
-        const { getServiceSettings } = await import('./get_service_settings');
-        resolve(getServiceSettings);
-      } catch (error) {
-        reject(error);
-      }
+      const { getServiceSettings } = await import('../../../async_services');
+      resolve(await getServiceSettings());
     } catch (error) {
       reject(error);
     }
   });
 
-  return await lazyLoaded();
+  return await servicesPromise;
 }

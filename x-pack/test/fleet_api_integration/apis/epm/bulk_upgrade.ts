@@ -6,123 +6,209 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  BulkInstallPackageInfo,
-  BulkInstallPackagesResponse,
-  IBulkInstallPackageHTTPError,
-} from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const fleetAndAgents = getService('fleetAndAgents');
+  const kibanaServer = getService('kibanaServer');
 
   const deletePackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('bulk package upgrade api', () => {
+  const installPackage = async (name: string, version: string) => {
+    await supertest
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
+      .send({ force: true })
+      .set('kbn-xsrf', 'xxxx');
+  };
+
+  describe('packages/_bulk_upgrade', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
     });
 
-    describe('bulk package upgrade with a package already installed', () => {
-      beforeEach(async () => {
-        await supertest
-          .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
-      });
-      afterEach(async () => {
-        await deletePackage('multiple_versions', '0.1.0');
-        await deletePackage('multiple_versions', '0.3.0');
-        await deletePackage('overrides', '0.1.0');
-      });
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
-      it('should return 400 if no packages are requested for upgrade', async function () {
-        await supertest.post(`/api/fleet/epm/packages/_bulk`).set('kbn-xsrf', 'xxxx').expect(400);
-      });
-      it('should return 403 if user without integrations all requests upgrade', async function () {
-        await supertestWithoutAuth
-          .post(`/api/fleet/epm/packages/_bulk`)
-          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+    describe('Validations', () => {
+      it('should not allow to create a _bulk_upgrade with non-installed packages', async () => {
+        const res = await supertest
+          .post(`/api/fleet/epm/packages/_bulk_upgrade`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions', 'overrides'] })
-          .expect(403);
-      });
-      it('should return 403 if user without fleet access requests upgrade', async function () {
-        await supertestWithoutAuth
-          .post(`/api/fleet/epm/packages/_bulk`)
-          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions', 'overrides'] })
-          .expect(403);
-      });
-      it('should return 200 and an array for upgrading a package', async function () {
-        const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions'] })
-          .expect(200);
-        expect(body.items.length).equal(1);
-        expect(body.items[0].name).equal('multiple_versions');
-        const entry = body.items[0] as BulkInstallPackageInfo;
-        expect(entry.version).equal('0.3.0');
-      });
-      it('should return an error for packages that do not exist', async function () {
-        const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions', 'blahblah'] })
-          .expect(200);
-        expect(body.items.length).equal(2);
-        expect(body.items[0].name).equal('multiple_versions');
-        const entry = body.items[0] as BulkInstallPackageInfo;
-        expect(entry.version).equal('0.3.0');
+          .send({ packages: [{ name: 'idonotexists' }] })
+          .expect(400);
 
-        const err = body.items[1] as IBulkInstallPackageHTTPError;
-        expect(err.statusCode).equal(404);
-        expect(body.items[1].name).equal('blahblah');
-      });
-      it('should upgrade multiple packages', async function () {
-        const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions', 'overrides'] })
-          .expect(200);
-        expect(body.items.length).equal(2);
-        expect(body.items[0].name).equal('multiple_versions');
-        let entry = body.items[0] as BulkInstallPackageInfo;
-        expect(entry.version).equal('0.3.0');
-
-        entry = body.items[1] as BulkInstallPackageInfo;
-        expect(entry.version).equal('0.1.0');
-        expect(entry.name).equal('overrides');
+        expect(res.body.message).equal('Cannot upgrade non-installed packages: idonotexists');
       });
     });
 
-    describe('bulk upgrade without package already installed', () => {
-      afterEach(async () => {
-        await deletePackage('multiple_versions', '0.3.0');
+    describe('Success upgrade', () => {
+      const POLICIES_IDS = ['multiple-versions-1', 'multiple-versions-2'];
+      beforeEach(async () => {
+        await installPackage('multiple_versions', '0.1.0');
+        // Create package policies
+        for (const id of POLICIES_IDS) {
+          await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id,
+              policy_ids: [],
+              package: {
+                name: 'multiple_versions',
+                version: '0.1.0',
+              },
+              name: id,
+              description: '',
+              namespace: '',
+              inputs: {},
+            })
+            .expect(200);
+        }
       });
 
-      it('should return 200 and an array for upgrading a package', async function () {
-        const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+      afterEach(async () => {
+        await deletePackage('multiple_versions', '0.2.0');
+        for (const id of POLICIES_IDS) {
+          await supertest
+            .delete(`/api/fleet/package_policies/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+        }
+      });
+
+      async function assertPackagePoliciesVersion(expectedVersion: string) {
+        for (const id of POLICIES_IDS) {
+          const res = await supertest
+            .get(`/api/fleet/package_policies/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          expect(res.body.item.package.version).equal(expectedVersion);
+        }
+      }
+
+      async function assetPackageInstallVersion(expectedVersion: string) {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/multiple_versions`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ packages: ['multiple_versions'] })
           .expect(200);
-        expect(body.items.length).equal(1);
-        expect(body.items[0].name).equal('multiple_versions');
-        const entry = body.items[0] as BulkInstallPackageInfo;
-        expect(entry.version).equal('0.3.0');
+
+        expect(res.body.item.installationInfo.version).equal(expectedVersion);
+      }
+
+      it('should allow to create a _bulk_upgrade with installed packages that will succeed', async () => {
+        const res = await supertest
+          .post(`/api/fleet/epm/packages/_bulk_upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packages: [{ name: 'multiple_versions', version: '0.2.0' }],
+            force: true,
+            prerelease: true,
+          })
+          .expect(200);
+
+        const maxTimeout = Date.now() + 60 * 1000;
+        let lastPollResult: string = '';
+        while (Date.now() < maxTimeout) {
+          const pollRes = await supertest
+            .get(`/api/fleet/epm/packages/_bulk_upgrade/${res.body.taskId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          if (pollRes.body.status === 'success') {
+            await assetPackageInstallVersion('0.2.0');
+            await assertPackagePoliciesVersion('0.1.0');
+            return;
+          }
+
+          lastPollResult = JSON.stringify(pollRes.body);
+        }
+
+        throw new Error(`bulk upgrade of "multiple_versions" never succeed: ${lastPollResult}`);
+      });
+
+      it('should upgrade related policies if upgrade_package_policies:true', async () => {
+        const res = await supertest
+          .post(`/api/fleet/epm/packages/_bulk_upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            packages: [{ name: 'multiple_versions', version: '0.2.0' }],
+            prerelease: true,
+            force: true,
+            upgrade_package_policies: true,
+          })
+          .expect(200);
+
+        const maxTimeout = Date.now() + 60 * 1000;
+        let lastPollResult: string = '';
+        while (Date.now() < maxTimeout) {
+          const pollRes = await supertest
+            .get(`/api/fleet/epm/packages/_bulk_upgrade/${res.body.taskId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          if (pollRes.body.status === 'success') {
+            await assertPackagePoliciesVersion('0.2.0');
+            await assetPackageInstallVersion('0.2.0');
+            return;
+          }
+
+          lastPollResult = JSON.stringify(pollRes.body);
+        }
+
+        throw new Error(`bulk upgrade of "multiple_versions" never succeed: ${lastPollResult}`);
+      });
+    });
+
+    describe('Failed upgrade', () => {
+      const goodPackageVersion = '0.1.0';
+      const badPackageVersion = '0.2.0';
+      beforeEach(async () => {
+        await installPackage('error_handling', goodPackageVersion);
+      });
+
+      afterEach(async () => {
+        await deletePackage('error_handling', goodPackageVersion);
+      });
+
+      it('should allow to create a _bulk_upgrade with installed packages that will fail', async () => {
+        const res = await supertest
+          .post(`/api/fleet/epm/packages/_bulk_upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packages: [{ name: 'error_handling', version: badPackageVersion }] })
+          .expect(200);
+
+        const maxTimeout = Date.now() + 60 * 1000;
+        let lastPollResult: string = '';
+        while (Date.now() < maxTimeout) {
+          const pollRes = await supertest
+            .get(`/api/fleet/epm/packages/_bulk_upgrade/${res.body.taskId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          if (pollRes.body.status === 'failed') {
+            return;
+          }
+
+          lastPollResult = JSON.stringify(pollRes.body);
+        }
+
+        throw new Error(`bulk upgrade of "multiple_versions" never failed: ${lastPollResult}`);
       });
     });
   });

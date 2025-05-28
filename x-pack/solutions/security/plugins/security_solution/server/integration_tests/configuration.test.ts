@@ -114,8 +114,12 @@ describe('configuration', () => {
         indices_metadata_config: {
           indices_threshold: getRandomInt(1, 100),
           datastreams_threshold: getRandomInt(1, 100),
+          indices_settings_threshold: getRandomInt(1, 100),
           max_prefixes: getRandomInt(1, 100),
           max_group_size: getRandomInt(1, 100),
+        },
+        ingest_pipelines_stats_config: {
+          enabled: false,
         },
       };
 
@@ -146,6 +150,9 @@ describe('configuration', () => {
       expect(telemetryConfiguration.pagination_config).toEqual(expected.pagination_config);
       expect(telemetryConfiguration.indices_metadata_config).toEqual(
         expected.indices_metadata_config
+      );
+      expect(telemetryConfiguration.ingest_pipelines_stats_config).toEqual(
+        expected.ingest_pipelines_stats_config
       );
     });
   });

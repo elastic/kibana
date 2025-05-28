@@ -1,0 +1,43 @@
+{
+  "id": "@kbn/serverless-chat-settings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/serverless-chat-settings",
+        "id": "def-common.CHAT_PROJECT_SETTINGS",
+        "type": "Array",
+        "tags": [],
+        "label": "CHAT_PROJECT_SETTINGS",
+        "description": [],
+        "signature": [
+          "never[]"
+        ],
+        "path": "src/platform/packages/shared/serverless/settings/chat_project/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

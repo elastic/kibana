@@ -10,6 +10,7 @@
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import SummaryColumn, {
   AllSummaryColumnProps,
   SummaryCellPopover,
@@ -130,8 +131,7 @@ describe('SummaryColumn', () => {
     it('should render a badge indicating the count of additional resources', () => {
       const record = getBaseRecord();
       renderSummary(record);
-      expect(screen.queryByText('+2')).toBeInTheDocument();
-      expect(screen.queryByText('+3')).not.toBeInTheDocument();
+      expect(screen.queryByText('+1')).toBeInTheDocument();
     });
 
     it('should render all the available resources in row autofit/custom mode', () => {
@@ -149,22 +149,16 @@ describe('SummaryColumn', () => {
       expect(
         screen.queryByTestId(`dataTableCellActionsPopover_${constants.HOST_NAME_FIELD}`)
       ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId(
-          `dataTableCellActionsPopover_${constants.ORCHESTRATOR_NAMESPACE_FIELD}`
-        )
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId(`dataTableCellActionsPopover_${constants.CLOUD_INSTANCE_ID_FIELD}`)
-      ).toBeInTheDocument();
       expect(screen.queryByText('+2')).not.toBeInTheDocument();
     });
 
-    it('should display a popover with details and actions upon a badge click', () => {
+    it('should display a popover with details and actions upon a badge click', async () => {
       const record = getBaseRecord();
       renderSummary(record);
       // Open badge popover
-      screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`).click();
+      await userEvent.click(
+        screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      );
 
       expect(screen.getByTestId('dataTableCellActionPopoverTitle')).toHaveTextContent(
         'service.name synth-service-2'
@@ -188,7 +182,7 @@ describe('SummaryColumn', () => {
   describe('when rendering trace badges', () => {
     it('should display service.name with different fields exposed', () => {
       const record = getBaseRecord({
-        'event.outcome': 'success',
+        'event.outcome': 'failure',
         'transaction.name': 'GET /',
         'transaction.duration.us': 100,
         'data_stream.type': 'traces',
@@ -213,6 +207,24 @@ describe('SummaryColumn', () => {
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId(`dataTableCellActionsPopover_${constants.CONTAINER_NAME_FIELD}`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not display the event.outcome badge if the outcome is not "failure"', () => {
+      const record = getBaseRecord({
+        'event.outcome': 'success',
+        'transaction.name': 'GET /',
+        'transaction.duration.us': 100,
+        'data_stream.type': 'traces',
+      });
+      renderSummary(record, {
+        density: DataGridDensity.COMPACT,
+        rowHeight: ROWS_HEIGHT_OPTIONS.auto,
+        isTracesSummary: true,
+      });
+
+      expect(
+        screen.queryByTestId(`dataTableCellActionsPopover_${constants.EVENT_OUTCOME_FIELD}`)
       ).not.toBeInTheDocument();
     });
   });

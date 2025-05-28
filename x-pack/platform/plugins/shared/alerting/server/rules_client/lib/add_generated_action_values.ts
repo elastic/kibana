@@ -6,9 +6,10 @@
  */
 
 import { v4 } from 'uuid';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import Boom from '@hapi/boom';
-import {
+import type {
   NormalizedAlertAction,
   NormalizedAlertDefaultActionWithGeneratedValues,
   NormalizedAlertSystemActionWithGeneratedValues,

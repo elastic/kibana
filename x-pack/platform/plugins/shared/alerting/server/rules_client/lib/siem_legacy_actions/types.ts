@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleActionParams } from '../../../types';
+import type { RuleActionParams } from '../../../types';
 import type { RuleTypeParams } from '../../..';
 import type { Rule } from '../../../../common';
 

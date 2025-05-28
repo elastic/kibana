@@ -8,7 +8,6 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { lazy } from 'react';
 import {
   Plugin,
   ObservabilityPublicPluginsStart,
@@ -39,8 +38,8 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
+  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 export {
   alertsLocatorID,
@@ -55,8 +54,6 @@ export type { RulesParams } from './locators/rules';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
-
-export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
 export type {
   Stat,
@@ -100,7 +97,6 @@ export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
-export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { buildEsQuery } from './utils/build_es_query';
 
 export type {

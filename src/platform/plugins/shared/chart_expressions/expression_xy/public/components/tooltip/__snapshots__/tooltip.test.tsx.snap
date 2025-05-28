@@ -2,7 +2,7 @@
 
 exports[`Tooltip should render plain tooltip 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -38,10 +38,10 @@ exports[`Tooltip should render plain tooltip 1`] = `
 
 exports[`Tooltip should render tooltip with partial buckets 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <div
-    className="detailedTooltip__header"
+    css="unknown styles"
   >
     <EndzoneTooltipHeader />
   </div>
@@ -79,10 +79,10 @@ exports[`Tooltip should render tooltip with partial buckets 1`] = `
 
 exports[`Tooltip should render tooltip with partial buckets 2`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <div
-    className="detailedTooltip__header"
+    css="unknown styles"
   >
     <EndzoneTooltipHeader />
   </div>
@@ -120,7 +120,7 @@ exports[`Tooltip should render tooltip with partial buckets 2`] = `
 
 exports[`Tooltip should render tooltip with xDomain 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -156,7 +156,7 @@ exports[`Tooltip should render tooltip with xDomain 1`] = `
 
 exports[`Tooltip should render tooltip without split-column-values 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -187,7 +187,7 @@ exports[`Tooltip should render tooltip without split-column-values 1`] = `
 
 exports[`Tooltip should render tooltip without split-row-values 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -218,7 +218,7 @@ exports[`Tooltip should render tooltip without split-row-values 1`] = `
 
 exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -249,7 +249,7 @@ exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
 
 exports[`Tooltip should render tooltip without x-value 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -280,7 +280,7 @@ exports[`Tooltip should render tooltip without x-value 1`] = `
 
 exports[`Tooltip should render tooltip without x-value 2`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>
@@ -311,7 +311,7 @@ exports[`Tooltip should render tooltip without x-value 2`] = `
 
 exports[`Tooltip should render tooltip without y-value 1`] = `
 <div
-  className="detailedTooltip"
+  css="unknown styles"
 >
   <table>
     <tbody>

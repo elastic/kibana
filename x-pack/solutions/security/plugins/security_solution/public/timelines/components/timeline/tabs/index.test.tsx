@@ -69,8 +69,7 @@ describe('Timeline', () => {
       expect(screen.getByTestId(esqlTabSubj)).toBeVisible();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/194510
-    describe.skip('no existing esql query is present', () => {
+    describe('no existing esql query is present', () => {
       it('should not show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isEsqlAdvancedSettingEnabled: false,
@@ -116,16 +115,6 @@ describe('Timeline', () => {
   describe('analyzer tab and session view tab', () => {
     const analyzerTabSubj = `timelineTabs-${TimelineTabs.graph}`;
     const sessionViewTabSubj = `timelineTabs-${TimelineTabs.session}`;
-    it('should show the analyzer tab when the advanced setting is disabled', () => {
-      (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-      render(
-        <TestProviders>
-          <TabsContent {...defaultProps} />
-        </TestProviders>
-      );
-      expect(screen.getByTestId(analyzerTabSubj)).toBeInTheDocument();
-      expect(screen.getByTestId(sessionViewTabSubj)).toBeInTheDocument();
-    });
 
     it('should not show the analyzer tab when the advanced setting is enabled', async () => {
       mockUseUiSetting.mockReturnValue([true]);

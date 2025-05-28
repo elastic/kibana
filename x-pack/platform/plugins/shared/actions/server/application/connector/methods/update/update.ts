@@ -7,15 +7,15 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from '@kbn/core/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 import { isUndefined, omitBy } from 'lodash';
-import { Connector } from '../../types';
-import { ConnectorUpdateParams } from './types';
+import type { Connector } from '../../types';
+import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import { RawAction, HookServices } from '../../../../types';
+import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 
 export async function update({ context, id, action }: ConnectorUpdateParams): Promise<Connector> {

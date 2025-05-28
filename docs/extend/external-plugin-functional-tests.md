@@ -12,9 +12,9 @@ Plugins use the `FunctionalTestRunner` by running it out of the {{kib}} repo. En
 
 Every project or plugin should have its own `FunctionalTestRunner` config file. Just like {{kib}}'s, this config file will define all of the test files to load, providers for Services and PageObjects, as well as configuration options for certain services.
 
-To get started copy and paste this example to `test/functional/config.js`:
+To get started copy and paste this example to `src/platform/test/functional/config.js`:
 
-```js
+```js subs=true
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 
@@ -25,9 +25,9 @@ import { MyAppPageProvider } from './services/my_app_page';
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
 
-  // read the {kib} config file so that we can utilize some of
+  // read the Kibana config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.base.js'));
+  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'src/platform/test/functional/config.base.js'));
 
   return {
     // list paths to the files that contain your plugins tests
@@ -44,7 +44,7 @@ export default async function ({ readConfigFile }) {
     },
 
     // just like services, PageObjects are defined as a map of
-    // names to Providers. Merge in {kib}'s or pick specific ones
+    // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
       management: kibanaConfig.get('pageObjects.management'),
       myApp: MyAppPageProvider,
@@ -53,7 +53,7 @@ export default async function ({ readConfigFile }) {
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.
     // Merge urls for your plugin with the urls defined in
-    // {kib}'s config in order to use this helper
+    // Kibana's config in order to use this helper
     apps: {
       ...kibanaConfig.get('apps'),
       myApp: {
@@ -68,7 +68,7 @@ export default async function ({ readConfigFile }) {
 
     // more settings, like timeouts, mochaOpts, etc are
     // defined in the config schema.
-    // See {kibana-blob}packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
+    // https://github.com/elastic/kibana/blob/{{branch}}/src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
   };
 }
 ```
@@ -83,4 +83,3 @@ node ../../kibana/scripts/functional_test_runner
 ## Using esArchiver [_using_esarchiver]
 
 We’re working on documentation for this, but for now the best place to look is the original [pull request](https://github.com/elastic/kibana/issues/10359).
-

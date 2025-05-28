@@ -6,7 +6,6 @@
  */
 
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
@@ -44,7 +43,6 @@ import { UpdateSLO } from './update_slo';
 describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
@@ -55,13 +53,11 @@ describe('UpdateSLO', () => {
     mockTransformManager = createTransformManagerMock();
     mockLogger = loggingSystemMock.createLogger();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     updateSLO = new UpdateSLO(
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
-      mockEsClient,
       mockScopedClusterClient,
       mockLogger,
       'some-space',
@@ -72,7 +68,7 @@ describe('UpdateSLO', () => {
 
   describe('when the update does not change the original SLO', () => {
     function expectNoCallsToAnyMocks() {
-      expect(mockEsClient.security.hasPrivileges).not.toBeCalled();
+      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toBeCalled();
 
       expect(mockTransformManager.stop).not.toBeCalled();
       expect(mockTransformManager.uninstall).not.toBeCalled();
@@ -84,7 +80,7 @@ describe('UpdateSLO', () => {
       expect(mockSummaryTransformManager.install).not.toBeCalled();
       expect(mockSummaryTransformManager.start).not.toBeCalled();
 
-      expect(mockEsClient.deleteByQuery).not.toBeCalled();
+      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).not.toBeCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
     }
 
@@ -202,7 +198,7 @@ describe('UpdateSLO', () => {
 
   describe('without breaking changes update', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
     });
@@ -227,7 +223,7 @@ describe('UpdateSLO', () => {
         expect(mockSummaryTransformManager.install).not.toHaveBeenCalled();
         expect(mockSummaryTransformManager.start).not.toHaveBeenCalled();
 
-        expect(mockEsClient.index).not.toHaveBeenCalled();
+        expect(mockScopedClusterClient.asCurrentUser.index).not.toHaveBeenCalled();
       }
     });
 
@@ -258,7 +254,7 @@ describe('UpdateSLO', () => {
 
   describe('with breaking changes update', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
       mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
@@ -370,14 +366,14 @@ describe('UpdateSLO', () => {
 
   describe('when error happens during the update', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
       mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
     });
 
     it('throws a SecurityException error when the user does not have the required privileges on the source index', async () => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
       } as SecurityHasPrivilegesResponse);
 
@@ -449,7 +445,7 @@ describe('UpdateSLO', () => {
 
   describe('Update also updates updatedBy field', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
     });
@@ -480,22 +476,20 @@ describe('UpdateSLO', () => {
     expect(mockSummaryTransformManager.install).toHaveBeenCalled();
     expect(mockSummaryTransformManager.start).toHaveBeenCalled();
 
-    expect(mockEsClient.index).toHaveBeenCalled();
+    expect(mockScopedClusterClient.asCurrentUser.index).toHaveBeenCalled();
   }
 
   function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    expect(mockTransformManager.stop).toHaveBeenCalledWith(transformId);
     expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
 
     const summaryTransformId = getSLOSummaryTransformId(originalSlo.id, originalSlo.revision);
-    expect(mockSummaryTransformManager.stop).toHaveBeenCalledWith(summaryTransformId);
     expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
 
     expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
 
-    expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
-    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
+    expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenCalledTimes(2);
+    expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         index: SLI_DESTINATION_INDEX_PATTERN,
@@ -509,7 +503,7 @@ describe('UpdateSLO', () => {
         },
       })
     );
-    expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
+    expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         index: SUMMARY_DESTINATION_INDEX_PATTERN,

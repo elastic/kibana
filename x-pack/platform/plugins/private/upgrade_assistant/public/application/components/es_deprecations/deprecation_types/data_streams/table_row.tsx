@@ -6,9 +6,9 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DataStreamsAction, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -20,21 +20,23 @@ import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DataStreamReindexResolutionCell } from './resolution_table_cell';
 import { DataStreamReindexFlyout } from './flyout';
-import { DataStreamReindexStatusProvider, useDataStreamReindexContext } from './context';
+import { DataStreamMigrationStatusProvider, useDataStreamMigrationContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
 interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  index: number;
 }
 
 const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const dataStreamContext = useDataStreamReindexContext();
+  const dataStreamContext = useDataStreamMigrationContext();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
 
@@ -57,8 +59,8 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         flyoutProps: {
           onClose: closeFlyout,
           className: 'eui-textBreakWord',
-          'data-test-subj': 'reindexDetails',
-          'aria-labelledby': 'reindexDetailsFlyoutTitle',
+          'data-test-subj': 'reindexDataStreamDetails',
+          'aria-labelledby': 'reindexDataStreamDetailsFlyoutTitle',
         },
       });
     }
@@ -71,7 +73,11 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   }, [showFlyout]);
 
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
@@ -81,14 +87,17 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
-              resolutionTableCell={<DataStreamReindexResolutionCell />}
+              resolutionTableCell={
+                <DataStreamReindexResolutionCell
+                  correctiveAction={deprecation.correctiveAction as DataStreamsAction}
+                />
+              }
             />
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };
 
@@ -98,8 +107,8 @@ export const DataStreamTableRow: React.FunctionComponent<TableRowProps> = (props
   } = useAppContext();
 
   return (
-    <DataStreamReindexStatusProvider dataStreamName={props.deprecation.index!} api={api}>
+    <DataStreamMigrationStatusProvider dataStreamName={props.deprecation.index!} api={api}>
       <DataStreamTableRowCells {...props} />
-    </DataStreamReindexStatusProvider>
+    </DataStreamMigrationStatusProvider>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 
 export interface ActionsUsage {
   has_errors: boolean;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { Gap } from './gap';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 
 export const mgetGaps = async ({

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { ClusterPutComponentTemplateRequest } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import {
   buildkiteProperties,
   reporterProperties,

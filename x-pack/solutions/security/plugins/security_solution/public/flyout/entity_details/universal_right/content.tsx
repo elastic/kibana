@@ -6,13 +6,35 @@
  */
 
 import React from 'react';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
+import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import { FieldsTable } from './components/fields_table';
+import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface UniversalEntityFlyoutContentProps {
-  entity: EntityEcs;
+  source: GenericEntityRecord;
 }
 
-export const UniversalEntityFlyoutContent = ({ entity }: UniversalEntityFlyoutContentProps) => {
-  return <FlyoutBody>{entity.type}</FlyoutBody>;
+export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutContentProps) => {
+  return (
+    <FlyoutBody>
+      <ExpandableSection
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.universalEntityFlyout.flyoutContent.expandableSection.fieldsLabel"
+            defaultMessage="Fields"
+          />
+        }
+        expanded
+        localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
+      >
+        <FieldsTable
+          document={source || {}}
+          tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
+        />
+      </ExpandableSection>
+    </FlyoutBody>
+  );
 };

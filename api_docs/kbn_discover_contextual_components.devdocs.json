@@ -177,6 +177,39 @@
       },
       {
         "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.isFieldAllowed",
+        "type": "Function",
+        "tags": [],
+        "label": "isFieldAllowed",
+        "description": [],
+        "signature": [
+          "(field: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.isFieldAllowed.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
         "id": "def-public.isTraceDocument",
         "type": "Function",
         "tags": [],

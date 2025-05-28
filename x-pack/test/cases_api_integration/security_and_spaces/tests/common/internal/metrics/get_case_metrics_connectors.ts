@@ -11,7 +11,7 @@ import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   deleteAllCaseItems,

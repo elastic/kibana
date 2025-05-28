@@ -9,8 +9,12 @@ import { appContextService } from '../app_context';
 import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 
 export function getFilteredSearchPackages() {
+  const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
   const shouldFilterFleetServer = appContextService.getConfig()?.internal?.fleetServerStandalone;
-  const filtered: string[] = ['profiler_collector', 'profiler_symbolizer', 'elastic_connectors'];
+  const filtered: string[] = ['profiler_collector', 'profiler_symbolizer'];
+  if (!isElasticConnectorsServerlessEnabled) {
+    filtered.push('elastic_connectors');
+  }
   // Do not allow to search for Fleet server integration if configured to use  standalone fleet server
   if (shouldFilterFleetServer) {
     filtered.push(FLEET_SERVER_PACKAGE);
@@ -22,9 +26,25 @@ export function getFilteredSearchPackages() {
 }
 
 export function getFilteredInstallPackages() {
-  const filtered: string[] = ['elastic_connectors'];
+  const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
+  const filtered: string[] = [];
+  if (!isElasticConnectorsServerlessEnabled) {
+    filtered.push('elastic_connectors');
+  }
 
   const excludePackages = appContextService.getConfig()?.internal?.registry?.excludePackages ?? [];
 
   return filtered.concat(excludePackages);
+}
+
+export function getElasticConnectorsServerlessEnabled() {
+  const ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES = ['security', 'observability'];
+
+  const cloud = appContextService.getCloud();
+  return (
+    cloud?.isServerlessEnabled &&
+    ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
+      appContextService.getCloud()?.serverless.projectType ?? ''
+    )
+  );
 }

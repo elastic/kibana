@@ -28,6 +28,7 @@ import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import {
   validateDuplicatedObservablesInRequest,
   validateObservableTypeKeyExists,
+  validateObservableValue,
 } from '../validators';
 
 const ensureUpdateAuthorized = async (
@@ -75,6 +76,8 @@ export const addObservable = async (
       caseOwner: retrievedCase.attributes.owner,
       observableTypeKey: params.observable.typeKey,
     });
+
+    validateObservableValue(paramArgs.observable.typeKey, paramArgs.observable.value);
 
     const currentObservables = retrievedCase.attributes.observables ?? [];
 
@@ -155,6 +158,11 @@ export const updateObservable = async (
     if (observableIndex === -1) {
       throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
     }
+
+    validateObservableValue(
+      currentObservables[observableIndex].typeKey,
+      paramArgs.observable.value
+    );
 
     const updatedObservables = [...currentObservables];
     updatedObservables[observableIndex] = {

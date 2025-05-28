@@ -33,6 +33,7 @@ export const GetPackagesRequestSchema = {
     category: schema.maybe(schema.string()),
     prerelease: schema.maybe(schema.boolean()),
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
+    withPackagePoliciesCount: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
 
@@ -336,6 +337,7 @@ export const InstallPackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
   _meta: schema.object({
     install_source: schema.string(),
+    name: schema.string(),
   }),
 });
 
@@ -366,6 +368,22 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
 
 export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
   items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
+});
+
+export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
+
+export const GetOneBulkOperationPackagesResponseSchema = schema.object({
+  status: schema.string(),
+  error: schema.maybe(schema.object({ message: schema.string() })),
+  results: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        success: schema.boolean(),
+        error: schema.maybe(schema.object({ message: schema.string() })),
+      })
+    )
+  ),
 });
 
 export const DeletePackageResponseSchema = schema.object({
@@ -548,6 +566,40 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
   }),
 };
 
+export const GetOneBulkOperationPackagesRequestSchema = {
+  params: schema.object({
+    taskId: schema.string(),
+  }),
+};
+
+export const BulkUpgradePackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.maybe(schema.string()),
+      }),
+      { minSize: 1 }
+    ),
+    prerelease: schema.maybe(schema.boolean()),
+    force: schema.boolean({ defaultValue: false }),
+    upgrade_package_policies: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkUninstallPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
+  }),
+};
+
 export const InstallPackageByUploadRequestSchema = {
   query: schema.object({
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
@@ -590,10 +642,18 @@ export const InstallKibanaAssetsRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
-  // body is deprecated on delete request
   body: schema.nullable(
     schema.object({
       force: schema.maybe(schema.boolean()),
+      space_ids: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          minSize: 1,
+          meta: {
+            description:
+              'When provided install assets in the specified spaces instead of the current space.',
+          },
+        })
+      ),
     })
   ),
 };

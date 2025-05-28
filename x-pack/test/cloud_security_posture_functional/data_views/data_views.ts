@@ -40,7 +40,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const retry = getService('retry');
-  const fetchingOfDataViewsTimeout = 1000 * 20; // 20 seconds
+  const fetchingOfDataViewsTimeout = 1000 * 30; // 30 seconds
 
   const pageObjects = getPageObjects([
     'common',

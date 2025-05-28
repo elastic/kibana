@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`ImportDataModal renders correctly against snapshot 1`] = `<div />`;
-
-exports[`ImportDataModal should import file, with warnings 1`] = `<div />`;
-
-exports[`ImportDataModal should import file, with warnings but no action_connectors_success_count 1`] = `<div />`;

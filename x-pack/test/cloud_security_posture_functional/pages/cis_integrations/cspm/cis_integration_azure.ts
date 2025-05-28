@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { testSubjectIds } from '../../../constants/test_subject_ids';
+import { policiesSavedObjects } from '../constants';
 
 const {
   CIS_AZURE_OPTION_TEST_ID,
@@ -28,6 +29,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const retry = getService('retry');
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const kibanaServer = getService('kibanaServer');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
@@ -35,10 +37,13 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAzure: typeof pageObjects.cisAddIntegration.cisAzure;
 
+    before(async () => {
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
+    });
+
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAzure = pageObjects.cisAddIntegration.cisAzure;
-
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 

@@ -24,6 +24,7 @@ const routeValidation = {
 const routeConfig = {
   path: '/_dev/cpu_profile',
   validate: routeValidation,
+  security: { authz: { requiredPrivileges: ['foo'] } },
 };
 
 export function registerRoute(logger: Logger, router: IRouter): void {

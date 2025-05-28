@@ -60,7 +60,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana
          */
-        `--uiSettings.overrides.securitySolution:enableVisualizationsInFlyout=true`,
         `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
@@ -71,7 +70,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // Required for telemetry e2e tests
         `--plugin-path=${resolve(
           __dirname,
-          '../../../test/analytics/plugins/analytics_ftr_helpers'
+          '../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
         )}`,
       ],
     },

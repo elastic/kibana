@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RulesSettingsQueryDelay } from '../../../../../common';
-import { QueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/response';
+import type { RulesSettingsQueryDelay } from '../../../../../common';
+import type { QueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/response';
 
 export const transformQueryDelaySettingsToResponse = (
   settings: RulesSettingsQueryDelay

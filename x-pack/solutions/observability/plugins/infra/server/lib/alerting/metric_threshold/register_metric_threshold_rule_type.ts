@@ -11,7 +11,7 @@ import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import { metricThresholdRuleParamsSchema } from '@kbn/response-ops-rule-params/metric_threshold';
 
 import type { InfraConfig } from '../../../../common/plugin_config_types';
@@ -43,7 +43,6 @@ import {
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 export function registerMetricThresholdRuleType(
   alertingPlugin: AlertingServerSetup,
@@ -68,7 +67,6 @@ export function registerMetricThresholdRuleType(
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
     }),
-    fieldsForAAD: O11Y_AAD_FIELDS,
     validate: {
       params: metricThresholdRuleParamsSchema,
     },
@@ -121,6 +119,7 @@ export function registerMetricThresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
+    solution: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

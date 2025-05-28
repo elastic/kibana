@@ -10,9 +10,10 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
   useSpaceAwareness: false,
-  enableAutomaticAgentUpgrades: false,
+  enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: false,
   enableSSLSecrets: false,
+  installedIntegrationsTabularUI: false,
   enabledUpgradeAgentlessDeploymentsTask: false,
 };
 

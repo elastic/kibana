@@ -64,12 +64,12 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
                 onClick: () => history.push(`/rule_status_filter`),
               },
               {
-                id: 'alerts table',
+                id: 'alerts_table',
                 name: 'Alert Table',
                 onClick: () => history.push('/alerts_table'),
               },
               {
-                id: 'rules settings link',
+                id: 'rules_settings_link',
                 name: 'Rules Settings Link',
                 onClick: () => history.push('/rules_settings_link'),
               },
@@ -88,6 +88,17 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
                 id: 'rule-edit',
                 name: 'Rule Edit',
                 onClick: () => history.push('/rule/edit/test'),
+              },
+            ],
+          },
+          {
+            name: 'Task Manager with API key',
+            id: 'task-manager-with-api-key',
+            items: [
+              {
+                id: 'task-manager-with-api-key-page',
+                name: 'Task Manager with API Key',
+                onClick: () => history.push('/task_manager_with_api_key'),
               },
             ],
           },

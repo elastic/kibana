@@ -8,17 +8,20 @@
  */
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import type {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasType,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  HasType,
 } from '@kbn/presentation-publishing';
 
-import { apiPublishesSavedSearch, PublishesSavedSearch } from '../types';
+import type { PublishesSavedSearch } from '../types';
+import { apiPublishesSavedSearch } from '../types';
 
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 

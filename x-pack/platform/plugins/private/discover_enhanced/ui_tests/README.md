@@ -13,10 +13,10 @@ Then you can run the tests multiple times in another terminal with:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts --grep @ess
+npx playwright test --config x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts --project local --grep @ess
 
 // Serverless
-npx playwright test --config x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts --grep @svlSearch
+npx playwright test --config x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts --project local --grep @svlSearch
 
 // @svlOblt, @svlSecurity
 ```

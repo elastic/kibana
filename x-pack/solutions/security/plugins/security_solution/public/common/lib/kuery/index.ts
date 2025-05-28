@@ -30,7 +30,7 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern?: DataViewSpec;
+  dataViewSpec?: DataViewSpec;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -245,7 +245,7 @@ export interface CombinedQuery {
 export const combineQueries = ({
   config,
   dataProviders = [],
-  indexPattern,
+  dataViewSpec,
   browserFields,
   filters = [],
   kqlQuery,
@@ -258,7 +258,7 @@ export const combineQueries = ({
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
-      dataViewSpec: indexPattern,
+      dataViewSpec,
       filters,
     });
 
@@ -286,7 +286,7 @@ export const combineQueries = ({
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
-    dataViewSpec: indexPattern,
+    dataViewSpec,
     filters,
   });
 

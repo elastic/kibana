@@ -6,6 +6,7 @@
  */
 
 import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
+import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
@@ -28,7 +29,6 @@ import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_b
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
 import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
-import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
@@ -79,7 +79,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
   getIndexSizesRoute,
-  syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
   updateDefaultAlertingRoute,
@@ -103,6 +102,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
+  syntheticsInspectTLSRuleRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [

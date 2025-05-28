@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { either, isRight } from 'fp-ts/lib/Either';
+import { either, isRight } from 'fp-ts/Either';
 import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
 import { MergeType } from '../merge_rt';
 

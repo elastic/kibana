@@ -64,7 +64,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
 
   function getChart() {
     if (isLoading) {
-      return <EuiLoadingChart size="m" mono data-test-subj="eventsLoadingChart" />;
+      return <EuiLoadingChart size="m" data-test-subj="eventsLoadingChart" />;
     }
 
     switch (slo.indicator.type) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -20,8 +20,8 @@ import {
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
-import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
@@ -45,6 +45,19 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+  const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
+  const docViewerRef = useRef<DocViewerApi>(null);
+
+  const setExpandedDocWithInitialTab = useCallback(
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      setExpandedDoc(doc);
+      setInitialTabId(options?.initialTabId);
+      if (options?.initialTabId) {
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
+      }
+    },
+    []
+  );
 
   const renderDocumentView = useCallback(
     (
@@ -65,19 +78,23 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
+        setExpandedDoc={setExpandedDocWithInitialTab}
+        initialTabId={initialTabId}
         query={props.query}
         filters={props.filters}
+        docViewerRef={docViewerRef}
       />
     ),
     [
       props.dataView,
-      props.onAddColumn,
+      props.savedSearchId,
       props.onFilter,
       props.onRemoveColumn,
+      props.onAddColumn,
       props.query,
       props.filters,
-      props.savedSearchId,
+      setExpandedDocWithInitialTab,
+      initialTabId,
     ]
   );
 
@@ -128,7 +145,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
-        setExpandedDoc={setExpandedDoc}
+        setExpandedDoc={setExpandedDocWithInitialTab}
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}

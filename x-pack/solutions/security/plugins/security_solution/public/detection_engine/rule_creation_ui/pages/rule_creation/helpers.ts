@@ -10,7 +10,7 @@
 import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import deepmerge from 'deepmerge';
-import omit from 'lodash/omit';
+import { omit } from 'lodash';
 
 import type {
   ExceptionListType,
@@ -49,11 +49,8 @@ import type {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  AlertSuppressionDurationType,
-} from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/types';
+import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
 import type {
   RuleCreateProps,
   AlertSuppression,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from '@kbn/core/server';
-import {
+import type { CoreStart, Logger } from '@kbn/core/server';
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { HealthStatus } from '@kbn/alerting-types';
-import { AlertingConfig } from '../config';
-import { AlertingPluginsStart } from '../plugin';
+import type { AlertingConfig } from '../config';
+import type { AlertingPluginsStart } from '../plugin';
 import { getAlertingHealthStatus } from './get_health';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 

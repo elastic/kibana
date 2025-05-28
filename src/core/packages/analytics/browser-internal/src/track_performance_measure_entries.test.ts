@@ -117,7 +117,8 @@ describe('trackPerformanceMeasureEntries', () => {
           meta: {
             isInitialLoad: true,
             queryRangeSecs: 86400,
-            queryOffsetSecs: 0,
+            queryFromOffsetSecs: -86400,
+            queryToOffsetSecs: 0,
           },
         },
       },
@@ -129,7 +130,12 @@ describe('trackPerformanceMeasureEntries', () => {
       duration: 1000,
       eventName: 'kibana:plugin_render_time',
       key1: 'key1',
-      meta: { is_initial_load: true, query_range_secs: 86400, query_offset_secs: 0 },
+      meta: {
+        is_initial_load: true,
+        query_range_secs: 86400,
+        query_from_offset_secs: -86400,
+        query_to_offset_secs: 0,
+      },
       value1: 'value1',
     });
   });
@@ -146,7 +152,8 @@ describe('trackPerformanceMeasureEntries', () => {
           type: 'kibana:performance',
           meta: {
             queryRangeSecs: 86400,
-            queryOffsetSecs: 0,
+            queryFromOffsetSecs: -86400,
+            queryToOffsetSecs: 0,
           },
         },
       },
@@ -159,7 +166,8 @@ describe('trackPerformanceMeasureEntries', () => {
       eventName: 'kibana:plugin_render_time',
       meta: {
         query_range_secs: 86400,
-        query_offset_secs: 0,
+        query_from_offset_secs: -86400,
+        query_to_offset_secs: 0,
       },
     });
   });
@@ -191,7 +199,8 @@ describe('trackPerformanceMeasureEntries', () => {
       meta: {
         is_initial_load: false,
         query_range_secs: undefined,
-        query_offset_secs: undefined,
+        query_from_offset_secs: undefined,
+        query_to_offset_secs: undefined,
         description:
           '[ttfmp_dependencies] onPageReady is called when the most important content is rendered',
       },
@@ -227,7 +236,8 @@ describe('trackPerformanceMeasureEntries', () => {
       meta: {
         is_initial_load: false,
         query_range_secs: undefined,
-        query_offset_secs: undefined,
+        query_from_offset_secs: undefined,
+        query_to_offset_secs: undefined,
         description: truncatedDescription,
       },
     });

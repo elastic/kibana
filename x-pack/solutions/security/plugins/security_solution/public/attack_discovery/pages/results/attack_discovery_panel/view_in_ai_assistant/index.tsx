@@ -46,7 +46,7 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
       onClick={showAssistantOverlay}
       size="s"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
         <EuiFlexItem data-test-subj="assistantAvatar" grow={false}>
           <AssistantIcon size="m" />
         </EuiFlexItem>

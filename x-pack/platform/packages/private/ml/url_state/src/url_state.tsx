@@ -291,7 +291,7 @@ export const useUrlStateService = <K extends Accessor, T>(
     ? state?.[optionsRef.current.pageKey]
     : state;
 
-  const setCallback = useRef<typeof setState>();
+  const setCallback = useRef<typeof setState>(setState);
 
   useEffect(() => {
     setCallback.current = setState;

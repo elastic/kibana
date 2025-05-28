@@ -46,6 +46,8 @@ export function createOpenFileUploadLiteAction(
       autoAddInference,
       autoCreateDataView,
       indexSettings,
+      initialIndexName,
+      flyoutContent,
     }: OpenFileUploadLiteContext) {
       try {
         const { share, data } = plugins;
@@ -55,6 +57,8 @@ export function createOpenFileUploadLiteAction(
           autoAddInference,
           autoCreateDataView,
           indexSettings,
+          initialIndexName,
+          flyoutContent,
         });
       } catch (e) {
         return Promise.reject();

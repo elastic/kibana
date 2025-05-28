@@ -106,7 +106,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
           }}
           setRuleParams={() => {}}
           setRuleProperty={() => {}}
-          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
           data={dataMock}
           dataViews={dataViewMock}
           defaultActionGroupId=""
@@ -134,7 +134,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -151,6 +151,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     expect(result.getByTestId('timeFieldSelect')).toBeInTheDocument();
     expect(result.getByTestId('timeWindowSizeNumber')).toBeInTheDocument();
     expect(result.getByTestId('timeWindowUnitSelect')).toBeInTheDocument();
+    expect(result.getByTestId('groupByRadioGroup')).toBeInTheDocument();
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
@@ -166,7 +167,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -211,7 +212,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""
@@ -232,6 +233,54 @@ describe('EsqlQueryRuleTypeExpression', () => {
     expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
 
+  test('should show grouped success message if Test Query is successful', async () => {
+    fetchFieldsFromESQL.mockResolvedValue({
+      type: 'datatable',
+      columns: [
+        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'ecs.version', name: 'ecs.version', meta: { type: 'string' } },
+        { id: 'error.code', name: 'error.code', meta: { type: 'string' } },
+      ],
+      rows: [
+        {
+          '@timestamp': '2023-07-12T13:32:04.174Z',
+          'ecs.version': '1.8.0',
+          'error.code': null,
+        },
+      ],
+    });
+    getFields.mockResolvedValue([]);
+
+    render(
+      <EsqlQueryExpression
+        unifiedSearch={unifiedSearchMock}
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={{ ...defaultEsqlQueryExpressionParams, groupBy: 'row' }}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+        data={dataMock}
+        dataViews={dataViewMock}
+        defaultActionGroupId=""
+        actionGroups={[]}
+        charts={chartsStartMock}
+        onChangeMetaData={() => {}}
+      />,
+      {
+        wrapper: AppWrapper,
+      }
+    );
+
+    fireEvent.click(screen.getByTestId('testQuery'));
+    await waitFor(() => expect(fetchFieldsFromESQL).toBeCalled());
+
+    expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
+    expect(screen.getByText('Query returned 1 rows in the last 15s.')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
+  });
+
   test('should show error message if Test Query is throws error', async () => {
     fetchFieldsFromESQL.mockRejectedValue('Error getting test results.!');
     const result = render(
@@ -243,7 +292,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
         ruleParams={defaultEsqlQueryExpressionParams}
         setRuleParams={() => {}}
         setRuleProperty={() => {}}
-        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [] }}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
         data={dataMock}
         dataViews={dataViewMock}
         defaultActionGroupId=""

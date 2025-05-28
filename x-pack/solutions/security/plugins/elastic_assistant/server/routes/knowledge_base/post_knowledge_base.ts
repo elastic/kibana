@@ -19,7 +19,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
-const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+const ROUTE_HANDLER_TIMEOUT = 20 * 60 * 1000; // 20 * 60 seconds = 20 minutes
 
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
@@ -59,9 +59,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              modelIdOverride: request.query.modelId,
-            });
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }

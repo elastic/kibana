@@ -37,6 +37,7 @@ import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
+import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
 import { RoleMappingsPageProvider } from './role_mappings_page';
@@ -48,7 +49,7 @@ import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
-import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
+import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { WatcherPageObject } from './watcher_page';
@@ -96,6 +97,7 @@ export const pageObjects = {
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   datasetQuality: DatasetQualityPageObject,
   observability: ObservabilityPageProvider,
+  alertControls: AlertControlsProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
@@ -116,7 +118,7 @@ export const pageObjects = {
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
-  upgradeAssistant: UpgradeAssistantPageObject,
+  upgradeAssistant: UpgradeAssistantFlyoutObject,
   uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
 import { getRequestValidation } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { RacRequestHandlerContext } from '../../types';
+import type { RacRequestHandlerContext } from '../../types';
 import { requestContextMock } from './request_context';
 import { responseAdapter } from './response_adapters';
 

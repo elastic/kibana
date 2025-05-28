@@ -2,40 +2,11 @@
 
 exports[`PartitionVisComponent should render correct structure for donut 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -327,24 +298,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -448,18 +401,18 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "top": 0,
               },
               "colors": Object {
-                "defaultVizColor": "#6092C0",
+                "defaultVizColor": "#16C5C0",
                 "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
+                  "#16C5C0",
+                  "#A6EDEA",
+                  "#61A2FF",
+                  "#BFDBFF",
+                  "#EE72A6",
+                  "#FFC7DB",
+                  "#F6726A",
+                  "#FFC9C2",
+                  "#EAAE01",
+                  "#FCD883",
                 ],
               },
               "crosshair": Object {
@@ -933,40 +886,11 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
 
 exports[`PartitionVisComponent should render correct structure for mosaic 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -1258,24 +1182,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -1379,18 +1285,18 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "top": 0,
               },
               "colors": Object {
-                "defaultVizColor": "#6092C0",
+                "defaultVizColor": "#16C5C0",
                 "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
+                  "#16C5C0",
+                  "#A6EDEA",
+                  "#61A2FF",
+                  "#BFDBFF",
+                  "#EE72A6",
+                  "#FFC7DB",
+                  "#F6726A",
+                  "#FFC9C2",
+                  "#EAAE01",
+                  "#FCD883",
                 ],
               },
               "crosshair": Object {
@@ -1865,40 +1771,11 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
 
 exports[`PartitionVisComponent should render correct structure for multi-metric pie 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -2249,24 +2126,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -2370,18 +2229,18 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "top": 0,
               },
               "colors": Object {
-                "defaultVizColor": "#6092C0",
+                "defaultVizColor": "#16C5C0",
                 "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
+                  "#16C5C0",
+                  "#A6EDEA",
+                  "#61A2FF",
+                  "#BFDBFF",
+                  "#EE72A6",
+                  "#FFC7DB",
+                  "#F6726A",
+                  "#FFC9C2",
+                  "#EAAE01",
+                  "#FCD883",
                 ],
               },
               "crosshair": Object {
@@ -2917,40 +2776,11 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
 
 exports[`PartitionVisComponent should render correct structure for pie 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -3242,24 +3072,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -3363,18 +3175,18 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "top": 0,
               },
               "colors": Object {
-                "defaultVizColor": "#6092C0",
+                "defaultVizColor": "#16C5C0",
                 "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
+                  "#16C5C0",
+                  "#A6EDEA",
+                  "#61A2FF",
+                  "#BFDBFF",
+                  "#EE72A6",
+                  "#FFC7DB",
+                  "#F6726A",
+                  "#FFC9C2",
+                  "#EAAE01",
+                  "#FCD883",
                 ],
               },
               "crosshair": Object {
@@ -3848,40 +3660,11 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
 
 exports[`PartitionVisComponent should render correct structure for treemap 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -4173,24 +3956,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -4294,18 +4059,18 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "top": 0,
               },
               "colors": Object {
-                "defaultVizColor": "#6092C0",
+                "defaultVizColor": "#16C5C0",
                 "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
+                  "#16C5C0",
+                  "#A6EDEA",
+                  "#61A2FF",
+                  "#BFDBFF",
+                  "#EE72A6",
+                  "#FFC7DB",
+                  "#F6726A",
+                  "#FFC9C2",
+                  "#EAAE01",
+                  "#FCD883",
                 ],
               },
               "crosshair": Object {
@@ -4777,40 +4542,11 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
 
 exports[`PartitionVisComponent should render correct structure for waffle 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "13h2mjc",
-      "next": undefined,
-      "styles": "
-  
-  min-height: 0;
-  min-width: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  height: 100%;
-;
-
-  inset: 0;
-  position: absolute;
-  padding: 8px;
-",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="partitionVisChart"
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "19k4zle",
-        "next": undefined,
-        "styles": "display:flex;flex:1 1 auto;min-height:0;min-width:0;width:100%;height:100%;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -5059,24 +4795,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                     "strokeWidth": 1,
                     "visible": true,
                   },
-                  "lumaSteps": Array [
-                    224,
-                    184,
-                    128,
-                    96,
-                    64,
-                    32,
-                    16,
-                    8,
-                    4,
-                    2,
-                    1,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                  ],
                   "vertical": Object {
                     "dash": Array [
                       0,
@@ -5180,18 +4898,18 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "top": 0,
               },
               "colors": Object {
-                "defaultVizColor": "#6092C0",
+                "defaultVizColor": "#16C5C0",
                 "vizColors": Array [
-                  "#54B399",
-                  "#6092C0",
-                  "#9170B8",
-                  "#CA8EAE",
-                  "#D36086",
-                  "#E7664C",
-                  "#AA6556",
-                  "#DA8B45",
-                  "#B9A888",
-                  "#D6BF57",
+                  "#16C5C0",
+                  "#A6EDEA",
+                  "#61A2FF",
+                  "#BFDBFF",
+                  "#EE72A6",
+                  "#FFC7DB",
+                  "#F6726A",
+                  "#FFC9C2",
+                  "#EAAE01",
+                  "#FCD883",
                 ],
               },
               "crosshair": Object {

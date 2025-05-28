@@ -53,6 +53,7 @@ export interface ChatTimelineProps {
   hasConnector: boolean;
   chatState: ChatState;
   isConversationOwnedByCurrentUser: boolean;
+  isArchived: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
@@ -75,6 +76,7 @@ export function ChatTimeline({
   hasConnector,
   currentUser,
   isConversationOwnedByCurrentUser,
+  isArchived,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -93,6 +95,7 @@ export function ChatTimeline({
       isConversationOwnedByCurrentUser,
       chatState,
       onActionClick,
+      isArchived,
     });
 
     const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
@@ -123,6 +126,7 @@ export function ChatTimeline({
     currentUser,
     chatState,
     isConversationOwnedByCurrentUser,
+    isArchived,
     onActionClick,
   ]);
 

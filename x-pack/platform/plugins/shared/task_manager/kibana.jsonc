@@ -16,7 +16,7 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
     ]
   }
 }

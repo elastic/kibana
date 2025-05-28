@@ -11,9 +11,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { getFetch$ } from './get_fetch_observable';
 import { FetchStatus } from '../../types';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
-import { DataRefetch$ } from '../state_management/discover_data_state_container';
+import type { DataRefetch$ } from '../state_management/discover_data_state_container';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 
 function createDataMock(

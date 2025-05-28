@@ -25,6 +25,7 @@ Learn how users can edit and customize prebuilt rules:
 
 Learn how users can upgrade prebuilt rules:
 
+- [Test plan: prebuilt rule upgrade notifications](./prebuilt_rule_upgrade_notifications.md)
 - [Test plan: upgrading prebuilt rules one-by-one or in bulk without preview](./prebuilt_rule_upgrade_without_preview.md)
 - [Test plan: upgrading prebuilt rules one-by-one with preview](./prebuilt_rule_upgrade_with_preview.md)
 - [Test plan: diff algorithms for upgrading prebuilt rules](./prebuilt_rule_upgrade_diff_algorithms.md)
