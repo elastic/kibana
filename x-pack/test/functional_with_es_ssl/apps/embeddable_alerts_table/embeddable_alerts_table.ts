@@ -211,8 +211,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`button#security`);
 
         expect(await find.byButtonText('Switch solution')).to.be.ok();
-
-        await new Promise((r) => setTimeout(r, 20000));
       });
     });
 
