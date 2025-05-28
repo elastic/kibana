@@ -10,7 +10,6 @@ import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../uti
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Stop Migration', () => {
