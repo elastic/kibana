@@ -25,11 +25,14 @@ import {
   waitForKnowledgeBaseReady,
   setupKnowledgeBase,
 } from '../utils/knowledge_base';
+import { getLoggerMock } from '../utils/kibana_mocks';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const log = getService('log');
+  const loggerMock = getLoggerMock(log);
 
   describe('Knowledge base: POST /internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
@@ -55,7 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('has "pt_tiny_elser_inference_id" as initial inference id', async () => {
-      const inferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
+      const inferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es }, loggerMock);
       expect(inferenceId).to.be(TINY_ELSER_INFERENCE_ID);
     });
 
