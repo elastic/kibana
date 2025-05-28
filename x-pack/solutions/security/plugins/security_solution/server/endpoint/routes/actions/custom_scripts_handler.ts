@@ -6,9 +6,10 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { ResponseActionsClient } from '../../services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import { errorHandler } from '../error_handler';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
-import { getCustomScriptsClient } from '../../services/custom_scripts/clients/get_custom_scripts_client';
 import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import { CustomScriptsRequestSchema } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 
@@ -75,27 +76,20 @@ export const getCustomScriptsRouteHandler = (
     logger.debug(`Retrieving custom scripts for: agentType ${agentType}`);
 
     try {
-      const [securitySolutionPlugin, corePlugin, actionsPlugin] = await Promise.all([
-        context.securitySolution,
-        context.core,
-        context.actions,
-      ]);
-      const esClient = corePlugin.elasticsearch.client.asInternalUser;
-      const spaceId = endpointContext.service.experimentalFeatures
-        .endpointManagementSpaceAwarenessEnabled
-        ? securitySolutionPlugin.getSpaceId()
-        : undefined;
-      const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient({
-        spaceId,
-      });
-      const connectorActionsClient = actionsPlugin.getActionsClient();
-      const customScriptsClient = getCustomScriptsClient(agentType, {
+      const coreContext = await context.core;
+      const user = coreContext.security.authc.getCurrentUser();
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
+      const connectorActions = (await context.actions).getActionsClient();
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
         esClient,
-        soClient,
-        connectorActionsClient,
+        spaceId,
         endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
       });
-      const data = await customScriptsClient.getCustomScripts();
+
+      const data = await responseActionsClient.getCustomScripts();
 
       return response.ok({ body: data });
     } catch (e) {

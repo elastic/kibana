@@ -9,8 +9,8 @@ import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { CustomScriptsResponse } from '../../../../server/endpoint/services';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import type { CustomScriptsResponse } from '../../../../common/endpoint/types/custom_scripts';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 import { useHttp } from '../../../common/lib/kibana';
 
@@ -49,7 +49,7 @@ export const useGetCustomScripts = (
             agentType,
           },
         })
-        .then((response) => response);
+        .then((response) => response.data);
     },
   });
 };
