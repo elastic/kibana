@@ -9,7 +9,7 @@ import { getESQLResults, getIndexPatternFromESQLQuery, prettifyQuery } from '@kb
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_query_with_global_filter';
+import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';

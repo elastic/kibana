@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_query_with_global_filter';
+import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetDefaultRiskIndex } from '../../../../hooks/use_get_default_risk_index';
 import { RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY } from './constants';

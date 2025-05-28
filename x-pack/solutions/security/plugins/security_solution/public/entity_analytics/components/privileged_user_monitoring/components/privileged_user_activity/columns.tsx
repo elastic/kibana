@@ -123,7 +123,7 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
         iconType="expand"
         onClick={onClick}
         aria-label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.preview.ariaLabel',
           {
             defaultMessage: 'Preview event with id {id}',
             values: { id: record._id },
