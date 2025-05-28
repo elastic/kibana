@@ -262,14 +262,17 @@ export const AlertDeleteModal = ({
   const onScheduleCleanUpTask = (ev: React.FormEvent) => {
     ev.preventDefault();
 
-    createAlertDeleteSchedule({
+    const bodyParams = {
       activeAlertDeleteThreshold: validations.isActiveThresholdValid
         ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
         : undefined,
       inactiveAlertDeleteThreshold: validations.isInactiveThresholdValid
         ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
         : undefined,
-    });
+      categoryIds,
+    };
+
+    createAlertDeleteSchedule(bodyParams);
   };
 
   const onClose = () => {

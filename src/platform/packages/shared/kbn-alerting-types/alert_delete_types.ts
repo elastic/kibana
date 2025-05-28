@@ -14,7 +14,7 @@ export interface AlertDeletePreview {
 export interface AlertDeleteParams {
   activeAlertDeleteThreshold?: number;
   inactiveAlertDeleteThreshold?: number;
-  categoryIds?: Array<'securitySolution' | 'observability' | 'management'>;
+  categoryIds: Array<'securitySolution' | 'observability' | 'management'>;
 }
 
 export interface AlertDeleteLastRun {
