@@ -82,9 +82,17 @@ export function replaceIndexPatterns(
         .map((index) => patternReplacements[index] ?? index)
         .join(',');
 
+      // data view references may be named after the index patterns they represent,
+      // so we attempt to replace index patterns to avoid wrongly named data views
+      const updatedName = pattern.name
+        ?.split(',')
+        .map((index) => patternReplacements[index] ?? index)
+        .join(',');
+
       return {
         ...pattern,
         title: updatedPattern,
+        name: updatedName,
       };
     },
     field(field: any) {

@@ -593,8 +593,11 @@ export function getColumnExists(
   return false;
 }
 
+const removeSourceNameQuotes = (sourceName: string) =>
+  sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
+
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index) || index.startsWith('-')) {
+  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));
@@ -635,6 +638,11 @@ export function isRestartingExpression(text: string) {
 export function findPreviousWord(text: string) {
   const words = text.split(/\s+/);
   return words[words.length - 2];
+}
+
+export function withinQuotes(text: string) {
+  const quoteCount = (text.match(/"/g) || []).length;
+  return quoteCount % 2 === 1;
 }
 
 export function endsInWhitespace(text: string) {
@@ -716,11 +724,11 @@ export function getBracketsToClose(text: string) {
       }
 
       const substr = text.slice(i, i + openBracket.length);
-      if (substr === openBracket) {
-        stack.push(substr);
-        break;
-      } else if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
         break;
       }
     }

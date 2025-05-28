@@ -20,6 +20,7 @@
       "actions",
       "data",
       "embeddable",
+      "lens",
       "licensing",
       "features",
       "triggersActionsUi",
@@ -38,15 +39,13 @@
       "taskManager",
       "usageCollection",
       "spaces",
-      "serverless",
-      "lens"
+      "serverless"
     ],
     "requiredBundles": [
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjectsFinder",
-      "lens"
+      "savedObjectsFinder"
     ],
     "extraPublicDirs": [
       "common"

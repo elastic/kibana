@@ -45,7 +45,7 @@ export async function parseArchive(filename: string, archive: Readable): Promise
     archive.on('error', (error) => reject(error));
   });
 
-  const rootDir = path.parse(filename).name;
+  const rootDir = getRootDir(zip.getEntries());
   const manifest = await extractManifest(rootDir, zip);
   const entries = await extractEntries(rootDir, zip);
 
@@ -112,6 +112,8 @@ async function extractManifest(rootDir: string, zip: AdmZip): Promise<ContentPac
   if (!entry) {
     throw new InvalidContentPackError(`Expected manifest at [${manifestPath}]`);
   }
+
+  assertUncompressedSize(entry);
 
   const { data: manifest, success } = contentPackManifestSchema.safeParse(
     YAML.parse((await readEntry(entry)).toString())
@@ -200,6 +202,22 @@ async function resolveFields(entry: AdmZip.IZipEntry): Promise<ContentPackFields
 async function resolveProcessors(entry: AdmZip.IZipEntry): Promise<ContentPackProcessors> {
   const processors = JSON.parse((await readEntry(entry)).toString()) as ProcessorDefinition[];
   return { id: entry.name, type: 'processors', content: processors };
+}
+
+function getRootDir(entries: AdmZip.IZipEntry[]) {
+  const rootDirs = new Set<string>();
+  for (const entry of entries) {
+    const rootDir = entry.entryName.split(path.sep)[0];
+    rootDirs.add(rootDir);
+  }
+
+  if (rootDirs.size !== 1) {
+    throw new InvalidContentPackError(
+      `Expected a single root directory but got [${Array.from(rootDirs)}]`
+    );
+  }
+
+  return rootDirs.keys().next().value;
 }
 
 function assertUncompressedSize(entry: AdmZip.IZipEntry) {

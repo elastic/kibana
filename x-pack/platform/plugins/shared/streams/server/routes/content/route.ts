@@ -14,6 +14,7 @@ import {
   ContentPack,
   contentPackIncludedObjectsSchema,
   isConfigurationEntry,
+  isIncludeAll,
   isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import { Streams } from '@kbn/streams-schema';
