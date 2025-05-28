@@ -11,6 +11,7 @@ import { SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH } from '../../../../../com
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
+import { SiemMigrationAuditLogger } from './util/audit';
 
 export const registerSiemRuleMigrationsIntegrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,17 +34,20 @@ export const registerSiemRuleMigrationsIntegrationsStatsRoute = (
           _req,
           res
         ): Promise<IKibanaResponse<GetRuleMigrationIntegrationsStatsResponse>> => {
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
-            const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
+            const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            await siemMigrationAuditLogger.logGetAllIntegrationsStats();
 
             const allIntegrationsStats =
               await ruleMigrationsClient.data.rules.getAllIntegrationsStats();
 
             return res.ok({ body: allIntegrationsStats });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logGetAllIntegrationsStats({ error });
+            return res.customError({ statusCode: 500, body: error.message });
           }
         }
       )

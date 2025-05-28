@@ -281,7 +281,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             if (integrations && integrationIds) {
               relatedIntegrations = integrationIds
                 .map((integrationId) => integrations[integrationId])
-                .filter((integration) => !!integration); // Filter out undefined, null or empty string integrations
+                .filter((integration) => integration != null);
             }
           }
           return {

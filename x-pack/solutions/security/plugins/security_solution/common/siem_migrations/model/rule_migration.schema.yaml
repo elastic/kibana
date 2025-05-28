@@ -386,8 +386,8 @@ components:
       description: The integrations stats objects of all the rule of all the migrations.
       items:
         description: The migration rules integration stats object.
-        $ref: '#/components/schemas/RuleMigrationAllIntegrationStats'
-    RuleMigrationAllIntegrationStats:
+        $ref: '#/components/schemas/RuleMigrationIntegrationStats'
+    RuleMigrationIntegrationStats:
       type: object
       description: The migration rules integration stats object.
       required:

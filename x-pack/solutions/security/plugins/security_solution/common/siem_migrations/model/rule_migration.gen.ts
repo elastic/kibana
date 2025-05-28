@@ -418,10 +418,10 @@ export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
 /**
  * The migration rules integration stats object.
  */
-export type RuleMigrationAllIntegrationStats = z.infer<typeof RuleMigrationAllIntegrationStats>;
-export const RuleMigrationAllIntegrationStats = z.object({
+export type RuleMigrationIntegrationStats = z.infer<typeof RuleMigrationIntegrationStats>;
+export const RuleMigrationIntegrationStats = z.object({
   /**
-   * The migration id, usually the integration name
+   * The integration id
    */
   id: NonEmptyString,
   /**
@@ -434,7 +434,7 @@ export const RuleMigrationAllIntegrationStats = z.object({
  * The integrations stats objects of all the rule of all the migrations.
  */
 export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllIntegrationsStats>;
-export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationAllIntegrationStats);
+export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
 
 /**
  * The type of the rule migration resource.
