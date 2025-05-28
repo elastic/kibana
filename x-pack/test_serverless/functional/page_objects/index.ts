@@ -7,7 +7,7 @@
 
 import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
 
-import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack/cloud_security_posture_functional/page_objects';
+import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack-security/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
 import { SvlCommonNavigationProvider } from './svl_common_navigation';
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
