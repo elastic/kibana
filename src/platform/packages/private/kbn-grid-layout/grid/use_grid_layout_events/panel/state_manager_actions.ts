@@ -88,11 +88,18 @@ export const moveAction = (
   let previousSection;
   let targetSectionId: string | undefined = (() => {
     if (isResize) return lastSectionId;
-    // early return - target the first "main" section if the panel is dragged above the layout element
-    if (previewRect.top < (gridLayoutElement?.getBoundingClientRect().top ?? 0)) {
+    const layoutRect = gridLayoutElement?.getBoundingClientRect();
+    // early returns for edge cases
+    if (previewRect.top < (layoutRect?.top ?? 0)) {
+      // target the first "main" section if the panel is dragged above the layout element
       return `main-0`;
+    } else if (previewRect.top > (layoutRect?.bottom ?? Infinity)) {
+      // target the last "main" section if the panel is dragged below the layout element
+      const sections = Object.values(currentLayout);
+      const maxOrder = sections.length - 1;
+      previousSection = sections.filter(({ order }) => order === maxOrder)[0].id;
+      return `main-${maxOrder}`;
     }
-
     const previewBottom = previewRect.top + rowHeight;
     let highestOverlap = -Infinity;
     let highestOverlapSectionId = '';
@@ -172,7 +179,6 @@ export const moveAction = (
       // section doesn't exist, so add it
       const { order: nextOrder } =
         targetSectionId === 'main-0' ? { order: -1 } : nextLayout[previousSection!];
-
       // push other sections down
       Object.keys(nextLayout).forEach((sectionId) => {
         if (nextLayout[sectionId].order > nextOrder) {
