@@ -7,69 +7,77 @@
 
 import { last } from 'lodash';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { createEsqlVariablesApi, makeEmbeddableServices } from '../mocks';
-import { initializeAlertRules } from './initialize_alert_rules';
+import { createParentApiMock, makeEmbeddableServices } from '@kbn/lens-plugin/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { getRuleFlyoutComponent } from './rule_flyout_component';
+import { RuleFormData } from '@kbn/response-ops-rule-form';
+import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TypeRegistry } from '../../application/type_registry';
 
-const mockRender = render;
 const mockRuleFormFlyout = jest.fn((props) => <div data-test-subj={props['data-test-subj']} />);
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: jest.fn((node: ReactNode) => mockRender(node)),
-}));
 
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
   RuleFormFlyout: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
 }));
-const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
-  has: jest.fn(),
-  register: jest.fn(),
-  get: jest.fn(),
-  list: jest.fn(),
-};
-const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
-  has: jest.fn(),
-  register: jest.fn(),
-  get: jest.fn(),
-  list: jest.fn(),
-};
-const parentApiMock = {
-  ...createEsqlVariablesApi(),
-};
 
-const startDependenciesMock = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
-  visOverrides: { id: 'lnsXY' },
-  dataOverrides: { id: 'formBased' },
-});
+function createRegistryMock<
+  T extends PublicMethodsOf<TypeRegistry<{ id: string }>>
+>(): jest.Mocked<T> {
+  return {
+    has: jest.fn(),
+    register: jest.fn(),
+    get: jest.fn(),
+    list: jest.fn(),
+  } as jest.Mocked<T>;
+}
+const ruleTypeRegistry = createRegistryMock<RuleTypeRegistryContract>();
+const actionTypeRegistry = createRegistryMock<ActionTypeRegistryContract>();
 
-const uuid = '000-000-000';
+const startDependenciesMock = {
+  ...makeEmbeddableServices(),
+  fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+};
 
 const getLastCalledInitialValues = () => last(mockRuleFormFlyout.mock.calls)![0].initialValues;
 
-describe('Alert rules API', () => {
-  const { api } = initializeAlertRules(uuid, parentApiMock, startDependenciesMock);
+async function renderFlyout(
+  initialValues?: Partial<RuleFormData<Partial<EsQueryRuleParams>>>,
+  parentApi: unknown = createParentApiMock()
+) {
+  const defaultParams = {
+    searchType: 'esqlQuery',
+    esqlQuery: {
+      esql: 'FROM index | STATS `number of documents` = COUNT(*)',
+    },
+    ...initialValues?.params,
+  } as EsQueryRuleParams;
+  const Component = await getRuleFlyoutComponent(
+    startDependenciesMock,
+    ruleTypeRegistry,
+    actionTypeRegistry,
+    parentApi,
+    {
+      ...initialValues,
+      params: defaultParams,
+    } as RuleFormData<EsQueryRuleParams>
+  );
 
+  return render(<Component />);
+}
+
+describe('Alert rules API', () => {
   describe('createAlertRule', () => {
     it('should pass initial values to the rule form and open it', async () => {
-      api.createAlertRule(
-        {
-          params: {
-            searchType: 'esqlQuery',
-            esqlQuery: {
-              esql: 'FROM index | STATS `number of documents` = COUNT(*)',
-            },
-          },
-        },
-        ruleTypeRegistry,
-        actionTypeRegistry
-      );
+      await renderFlyout();
+
       expect(await screen.findByTestId('lensEmbeddableRuleForm')).toBeInTheDocument();
       expect(getLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
-          "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
               "esql": "FROM index | STATS \`number of documents\` = COUNT(*)",
@@ -81,12 +89,7 @@ describe('Alert rules API', () => {
     });
 
     it('should parse esql variables in the query', async () => {
-      parentApiMock.esqlVariables$.next([
-        { type: ESQLVariableType.FIELDS, key: 'field', value: 'field.zero' },
-        { type: ESQLVariableType.FIELDS, key: 'field1', value: 'field.one' },
-        { type: ESQLVariableType.TIME_LITERAL, key: 'interval', value: '5 minutes' },
-      ]);
-      api.createAlertRule(
+      await renderFlyout(
         {
           params: {
             searchType: 'esqlQuery',
@@ -97,13 +100,17 @@ describe('Alert rules API', () => {
             },
           },
         },
-        ruleTypeRegistry,
-        actionTypeRegistry
+        createParentApiMock({
+          esqlVariables$: new BehaviorSubject([
+            { type: ESQLVariableType.FIELDS, key: 'field', value: 'field.zero' },
+            { type: ESQLVariableType.FIELDS, key: 'field1', value: 'field.one' },
+            { type: ESQLVariableType.TIME_LITERAL, key: 'interval', value: '5 minutes' },
+          ]),
+        })
       );
       expect(await screen.findByTestId('lensEmbeddableRuleForm')).toBeInTheDocument();
       expect(getLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
-          "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
               "esql": "FROM index | STATS aggregatedFields = field.one, field.zero BY BUCKET(@timestamp, 5 minutes)",
