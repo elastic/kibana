@@ -100,6 +100,7 @@ export const moveAction = (
       previousSection = sections.filter(({ order }) => order === maxOrder)[0].id;
       return `main-${maxOrder}`;
     }
+
     const previewBottom = previewRect.top + rowHeight;
     let highestOverlap = -Infinity;
     let highestOverlapSectionId = '';
@@ -179,6 +180,7 @@ export const moveAction = (
       // section doesn't exist, so add it
       const { order: nextOrder } =
         targetSectionId === 'main-0' ? { order: -1 } : nextLayout[previousSection!];
+
       // push other sections down
       Object.keys(nextLayout).forEach((sectionId) => {
         if (nextLayout[sectionId].order > nextOrder) {
