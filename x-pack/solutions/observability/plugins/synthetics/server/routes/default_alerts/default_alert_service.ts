@@ -25,7 +25,8 @@ import { DefaultRuleType } from '../../../common/types/default_alerts';
 
 export class DefaultAlertService {
   /**
-   * These static vars are used to ensure that only one default alert check is running at a time.
+   * These static vars are used to ensure that only one default alert create procedure is running
+   * at a time for a given rule type.
    * If multiple requests come in at the same time, they will wait for the first one to complete.
    * Without this mechanism, we could end up creating multiple default alerts at the same time.
    */
