@@ -217,6 +217,27 @@ export const buildAuthenticationsColumns = (
         defaultMessage="Type"
       />
     ),
+    render: (type: string) => {
+      if (type.startsWith('/api/v1/authn')) {
+        return i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.direct',
+          { defaultMessage: 'Direct' }
+        );
+      }
+
+      if (
+        type.startsWith('/oauth2/v1/authorize') ||
+        type.startsWith('/oauth2/v1/token') ||
+        type.includes('/sso/saml')
+      ) {
+        return i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.federated',
+          { defaultMessage: 'Federated' }
+        );
+      }
+
+      return type;
+    },
     truncateText: true,
   },
   // {
