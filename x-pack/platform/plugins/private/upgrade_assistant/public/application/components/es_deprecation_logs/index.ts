@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EsDeprecationLogs } from './es_deprecation_logs';
 export { useDeprecationLogging } from './fix_deprecation_logs';

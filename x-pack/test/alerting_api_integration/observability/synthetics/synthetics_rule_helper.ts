@@ -16,7 +16,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { Agent as SuperTestAgent } from 'supertest';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { PrivateLocationTestService } from '../../../api_integration/apis/synthetics/services/private_location_test_service';
+import { PrivateLocationTestService } from '@kbn/test-suites-xpack-observability/api_integration/apis/synthetics/services/private_location_test_service';
 import { waitForAlertInIndex } from '../helpers/alerting_wait_for_helpers';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';

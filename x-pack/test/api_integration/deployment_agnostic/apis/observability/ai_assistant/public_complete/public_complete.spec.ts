@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/api/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -159,7 +159,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         void llmProxy.interceptTitle('My Title');
-        void llmProxy.interceptConversation('Hello');
+        void llmProxy.interceptWithResponse('Hello');
 
         responseBody = await callPublicChatComplete({ format: 'openai' });
 

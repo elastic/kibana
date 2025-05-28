@@ -34,10 +34,11 @@ import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_me
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import {
+  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
   CHANGE_POINT_DETECTION_VIEW_TYPE,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointEmbeddableRuntimeState } from '../../embeddables/change_point_chart/types';
+import type { ChangePointEmbeddableState } from '../../embeddables/change_point_chart/types';
 import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -57,6 +58,7 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
+import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 
 const selectControlCss = { width: '350px' };
 
@@ -479,7 +481,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
     ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const embeddableInput: Partial<ChangePointEmbeddableRuntimeState> = {
+      const embeddableInput: Partial<ChangePointEmbeddableState> = {
         title: newTitle,
         description: newDescription,
         viewType: dashboardAttachment.viewType,
@@ -493,7 +495,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: {
+          rawState: embeddableInput,
+          references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
+        },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
       };
 

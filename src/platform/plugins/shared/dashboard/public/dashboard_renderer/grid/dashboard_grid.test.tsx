@@ -116,9 +116,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
 
   // remove panel
   await act(async () => {
-    dashboardApi.setPanels({
-      '2': PANELS['2'],
-    });
+    dashboardApi.removePanel('1');
     await new Promise((resolve) => setTimeout(resolve, 1));
   });
 

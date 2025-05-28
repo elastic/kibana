@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Promise<undefined>) {
+export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -44,7 +44,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const id = highlightPanelId$.value;
 
       if (id && panelRef) {
-        untilEmbeddableLoaded(id).then(() => {
+        untilLoaded(id).then(() => {
           panelRef.classList.add('dshDashboardGrid__item--highlighted');
           // Removes the class after the highlight animation finishes
           setTimeout(() => {
@@ -59,7 +59,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       const id = scrollToPanelId$.value;
       if (!id) return;
 
-      untilEmbeddableLoaded(id).then(() => {
+      untilLoaded(id).then(() => {
         setScrollToPanelId(undefined);
         if (scrollPosition !== undefined) {
           window.scrollTo({ top: scrollPosition });

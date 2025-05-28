@@ -92,7 +92,6 @@ export const PresentationPanelTitle = ({
     if (!panelDescription) {
       return panelTitleElement;
     }
-
     return (
       <EuiToolTip
         title={panelTitle}
@@ -101,18 +100,25 @@ export const PresentationPanelTitle = ({
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
-          css: css`
-            max-width: 100%;
+        }}
+      >
+        <div
+          data-test-subj="embeddablePanelTitleInner"
+          className="embPanel__titleInner"
+          css={css`
             display: flex;
             flex-wrap: nowrap;
             column-gap: ${euiTheme.size.xs};
             align-items: center;
-          `,
-        }}
-      >
-        <div data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+          `}
+        >
           {!hideTitle ? (
-            <h2>
+            <h2
+              // styles necessary for applying ellipsis and showing the info icon if description is present
+              css={css`
+                overflow: hidden;
+              `}
+            >
               <EuiScreenReaderOnly>
                 <span id={headerId}>
                   {panelTitle
@@ -127,7 +133,7 @@ export const PresentationPanelTitle = ({
                       })}
                 </span>
               </EuiScreenReaderOnly>
-              {panelTitleElement}&nbsp;
+              {panelTitleElement}
             </h2>
           ) : null}
           <EuiIcon

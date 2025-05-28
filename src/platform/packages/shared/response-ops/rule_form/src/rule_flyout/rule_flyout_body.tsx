@@ -143,7 +143,11 @@ export const RuleFlyoutBody = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj={isEdit ? 'editRuleFlyoutTitle' : 'addRuleFlyoutTitle'}>
-          <h3 id="flyoutTitle" data-test-subj="ruleFlyoutTitle">
+          <h3
+            id="flyoutTitle"
+            data-test-subj="ruleFlyoutTitle"
+            aria-label={isEdit ? RULE_FLYOUT_HEADER_EDIT_TITLE : RULE_FLYOUT_HEADER_CREATE_TITLE}
+          >
             {isEdit ? RULE_FLYOUT_HEADER_EDIT_TITLE : RULE_FLYOUT_HEADER_CREATE_TITLE}
           </h3>
         </EuiTitle>

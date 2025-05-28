@@ -20,6 +20,7 @@ import {
   AgentPolicyNotFoundError,
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
 import { NotFoundError } from '../../errors';
@@ -29,23 +30,31 @@ import type { SavedObjectsClientFactory } from '../saved_objects';
  * The set of Fleet services used by Endpoint
  */
 export interface EndpointFleetServicesInterface {
+  /** The space id used to initialize the current `EndpointFleetServicesInterface` instance */
+  spaceId: string;
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
   packagePolicy: PackagePolicyClient;
   /** The `kuery` that can be used to filter for Endpoint integration policies */
   endpointPolicyKuery: string;
+  logger: Logger;
 
   /**
    * Will check the data provided to ensure it is visible for the current space. Supports
    * several types of data (ex. integration policies, agent policies, etc)
    */
   ensureInCurrentSpace(
-    options: Pick<
+    checks: Pick<
       CheckInCurrentSpaceOptions,
-      'agentIds' | 'integrationPolicyIds' | 'agentPolicyIds'
+      'agentIds' | 'integrationPolicyIds' | 'agentPolicyIds' | 'options'
     >
   ): Promise<void>;
+
+  /**
+   * Returns the SO client that is scoped to the current `EndpointFleetServicesInterface` instance.
+   */
+  getSoClient(): SavedObjectsClientContract;
 
   /**
    * Retrieves the `namespace` assigned to Integration Policies
@@ -92,21 +101,29 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       : agentService.asInternalUser;
 
     // Lazily Initialized at the time it is needed
-    let soClient: SavedObjectsClientContract;
+    let _soClient: SavedObjectsClientContract;
+    const getSoClient = (): SavedObjectsClientContract => {
+      if (!_soClient) {
+        _soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
+      }
+
+      return _soClient;
+    };
 
     const ensureInCurrentSpace: EndpointFleetServicesInterface['ensureInCurrentSpace'] = async ({
       integrationPolicyIds = [],
       agentPolicyIds = [],
       agentIds = [],
+      options,
     }): Promise<void> => {
-      if (!soClient) {
-        soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
-      }
+      this.logger.debug(`EnsureInCurrentSpace(): Checking access for space [${spaceId}]`);
+
       return checkInCurrentSpace({
-        soClient,
+        soClient: getSoClient(),
         agentService: agent,
         agentPolicyService: agentPolicy,
         packagePolicyService: packagePolicy,
+        options,
         integrationPolicyIds,
         agentPolicyIds,
         agentIds,
@@ -116,13 +133,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     const getPolicyNamespace: EndpointFleetServicesInterface['getPolicyNamespace'] = async (
       options
     ) => {
-      if (!soClient) {
-        soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
-      }
-
       return fetchIntegrationPolicyNamespace({
         ...options,
-        soClient,
+        soClient: getSoClient(),
         logger: this.logger,
         packagePolicyService: packagePolicy,
         agentPolicyService: agentPolicy,
@@ -131,12 +144,8 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
 
     const getIntegrationNamespaces: EndpointFleetServicesInterface['getIntegrationNamespaces'] =
       async (integrationNames) => {
-        if (!soClient) {
-          soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
-        }
-
         return fetchIntegrationNamespaces({
-          soClient,
+          soClient: getSoClient(),
           logger: this.logger,
           packagePolicyService: packagePolicy,
           agentPolicyService: agentPolicy,
@@ -145,6 +154,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       };
 
     return {
+      spaceId: spaceId || DEFAULT_SPACE_ID,
+      logger: this.logger,
+
       agent,
       agentPolicy,
 
@@ -157,6 +169,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       ensureInCurrentSpace,
       getPolicyNamespace,
       getIntegrationNamespaces,
+      getSoClient,
     };
   }
 }
@@ -166,6 +179,14 @@ interface CheckInCurrentSpaceOptions {
   agentService: AgentClient;
   agentPolicyService: AgentPolicyServiceInterface;
   packagePolicyService: PackagePolicyClient;
+  options?: {
+    /**
+     * Ensures that all IDs passed on input MUST be accessible in active space. When set to `false`,
+     * at least 1 of the IDs passed on input must be accessible.
+     * Defaults to `true` (all must be accessible)
+     */
+    matchAll?: boolean;
+  };
   agentIds?: string[];
   agentPolicyIds?: string[];
   integrationPolicyIds?: string[];
@@ -182,6 +203,7 @@ interface CheckInCurrentSpaceOptions {
  * @param integrationPolicyIds
  * @param agentPolicyIds
  * @param agentIds
+ * @param options
  *
  * @throws NotFoundError
  */
@@ -193,6 +215,7 @@ const checkInCurrentSpace = async ({
   integrationPolicyIds = [],
   agentPolicyIds = [],
   agentIds = [],
+  options: { matchAll = true } = {},
 }: CheckInCurrentSpaceOptions): Promise<void> => {
   const handlePromiseErrors = (err: Error): never => {
     // We wrap the error with our own Error class so that the API can property return a 404
@@ -208,14 +231,42 @@ const checkInCurrentSpace = async ({
   };
 
   await Promise.all([
-    agentIds.length ? agentService.getByIds(agentIds).catch(handlePromiseErrors) : null,
+    agentIds.length
+      ? agentService
+          .getByIds(agentIds, { ignoreMissing: !matchAll })
+          .catch(handlePromiseErrors)
+          .then((response) => {
+            // When `matchAll` is false, the results must have at least matched 1 id
+            if (!matchAll && response.length === 0) {
+              throw new NotFoundError(`Agent ID(s) not found: [${agentIds.join(', ')}]`);
+            }
+          })
+      : null,
 
     agentPolicyIds.length
-      ? agentPolicyService.getByIds(soClient, agentPolicyIds).catch(handlePromiseErrors)
+      ? agentPolicyService
+          .getByIds(soClient, agentPolicyIds, { ignoreMissing: !matchAll })
+          .catch(handlePromiseErrors)
+          .then((response) => {
+            if (!matchAll && response.length === 0) {
+              throw new NotFoundError(
+                `Agent policy ID(s) not found: [${agentPolicyIds.join(', ')}]`
+              );
+            }
+          })
       : null,
 
     integrationPolicyIds.length
-      ? packagePolicyService.getByIDs(soClient, integrationPolicyIds).catch(handlePromiseErrors)
+      ? packagePolicyService
+          .getByIDs(soClient, integrationPolicyIds, { ignoreMissing: !matchAll })
+          .catch(handlePromiseErrors)
+          .then((response) => {
+            if (!matchAll && response.length === 0) {
+              throw new NotFoundError(
+                `Integration policy ID(s) not found: [${integrationPolicyIds.join(', ')}]`
+              );
+            }
+          })
       : null,
   ]);
 };

@@ -8,78 +8,108 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Duration } from '@kbn/apm-ui-shared';
+import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { useRootTransactionContext } from '../../hooks/use_root_transaction';
+import { useTransactionLatencyChart } from '../../hooks/use_transaction_latency_chart';
+import { Section } from '../../../components/section';
+import { FieldWithoutActions } from '../../../components/field_without_actions';
 
 export interface TransactionDurationSummaryProps {
-  duration: number;
+  transactionDuration: number;
+  transactionName: string;
+  transactionType: string;
+  serviceName: string;
 }
 
-export function TransactionDurationSummary({ duration }: TransactionDurationSummaryProps) {
-  const { transaction, loading } = useRootTransactionContext();
+export function TransactionDurationSummary({
+  transactionDuration,
+  transactionName,
+  transactionType,
+  serviceName,
+}: TransactionDurationSummaryProps) {
+  const { transaction: rootTransaction, loading: rootTransactionLoading } =
+    useRootTransactionContext();
+
+  const {
+    data: latencyChartData,
+    loading: latencyChartLoading,
+    hasError: latencyChartHasError,
+  } = useTransactionLatencyChart({
+    transactionName,
+    transactionType,
+    serviceName,
+  });
 
   return (
-    <>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate(
-            'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.title',
+    <Section
+      title={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.title',
+        {
+          defaultMessage: 'Duration',
+        }
+      )}
+      subtitle={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.description',
+        {
+          defaultMessage: 'Time taken to complete this transaction from start to finish.',
+        }
+      )}
+    >
+      <>
+        <FieldWithoutActions
+          label={i18n.translate(
+            'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.duration.title',
             {
               defaultMessage: 'Duration',
             }
           )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.description',
-          {
-            defaultMessage: 'Time taken to complete this transaction from start to finish.',
-          }
-        )}
-      </EuiText>
-      <EuiSpacer size="m" />
+        >
+          <EuiText size="xs">
+            <Duration
+              duration={transactionDuration}
+              parent={{
+                type: 'trace',
+                duration: rootTransaction?.duration,
+                loading: rootTransactionLoading,
+              }}
+            />
+          </EuiText>
+        </FieldWithoutActions>
+        <EuiHorizontalRule margin="xs" />
 
-      <>
         <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxxs">
-                  <h3>
-                    {i18n.translate(
-                      'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.duration.title',
-                      {
-                        defaultMessage: 'Duration',
-                      }
-                    )}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h3>
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
+                  {
+                    defaultMessage: 'Latency',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
 
-          <EuiFlexItem grow={2}>
-            <EuiText size="xs">
-              <Duration
-                duration={duration}
-                parent={{ type: 'trace', duration: transaction?.duration, loading }}
+            {(latencyChartLoading || latencyChartData) && (
+              <DurationDistributionChart
+                data={latencyChartData?.transactionDistributionChartData ?? []}
+                markerValue={latencyChartData?.percentileThresholdValue ?? 0}
+                markerCurrentEvent={transactionDuration}
+                hasData={!!latencyChartData}
+                loading={latencyChartLoading}
+                hasError={latencyChartHasError}
+                eventType={ProcessorEvent.transaction}
+                showAxisTitle={false}
+                showLegend={false}
+                dataTestSubPrefix="docViewerTransactionOverview"
               />
-            </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule margin="xs" />
       </>
-    </>
+    </Section>
   );
 }

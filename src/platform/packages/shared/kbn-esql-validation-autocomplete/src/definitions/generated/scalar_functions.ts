@@ -2948,7 +2948,7 @@ const kqlDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: ['FROM books\n| WHERE KQL("author: Faulkner")'],
   customParametersSnippet: '"""$0"""',
@@ -4662,7 +4662,7 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")',
@@ -8335,7 +8335,7 @@ const qstrDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.'}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.'}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).'}, {name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).'}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.'}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.'}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.'}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.'}, {name='rewrite', values=[standard], description='Method used to rewrite the query.'}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.'}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.'}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.'}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false. '}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.'}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.'}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).'}",
+            "{name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.'}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.'}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).'}, {name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).'}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.'}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.'}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.'}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.'}, {name='rewrite', values=[standard], description='Method used to rewrite the query.'}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.'}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.'}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.'}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.'}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.'}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).'}",
           optional: true,
           constantOnly: true,
         },
@@ -8354,7 +8354,7 @@ const qstrDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.'}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.'}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).'}, {name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).'}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.'}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.'}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.'}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.'}, {name='rewrite', values=[standard], description='Method used to rewrite the query.'}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.'}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.'}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.'}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false. '}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.'}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.'}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).'}",
+            "{name='max_determinized_states', values=[10000], description='Maximum number of automaton states required for the query. Default is 10000.'}, {name='fuzziness', values=[AUTO, 1, 2], description='Maximum edit distance allowed for matching.'}, {name='auto_generate_synonyms_phrase_query', values=[true, false], description='If true, match phrase queries are automatically created for multi-term synonyms. Defaults to true.'}, {name='phrase_slop', values=[0], description='Maximum number of positions allowed between matching tokens for phrases. Defaults to 0 (which means exact matches are required).'}, {name='default_field', values=[standard], description='Default field to search if no field is provided in the query string. Supports wildcards (*).'}, {name='allow_leading_wildcard', values=[true, false], description='If true, the wildcard characters * and ? are allowed as the first character of the query string. Defaults to true.'}, {name='minimum_should_match', values=[standard], description='Minimum number of clauses that must match for a document to be returned.'}, {name='fuzzy_transpositions', values=[true, false], description='If true, edits for fuzzy matching include transpositions of two adjacent characters (ab → ba). Defaults to true.'}, {name='fuzzy_prefix_length', values=[0], description='Number of beginning characters left unchanged for fuzzy matching. Defaults to 0.'}, {name='time_zone', values=[standard], description='Coordinated Universal Time (UTC) offset or IANA time zone used to convert date values in the query string to UTC.'}, {name='lenient', values=[true, false], description='If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.'}, {name='rewrite', values=[standard], description='Method used to rewrite the query.'}, {name='default_operator', values=[OR, AND], description='Default boolean logic used to interpret text in the query string if no operators are specified.'}, {name='analyzer', values=[standard], description='Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the default_field.'}, {name='fuzzy_max_expansions', values=[50], description='Maximum number of terms to which the query expands for fuzzy matching. Defaults to 50.'}, {name='quote_analyzer', values=[standard], description='Analyzer used to convert quoted text in the query string into tokens. Defaults to the search_quote_analyzer mapped for the default_field.'}, {name='allow_wildcard', values=[false, true], description='If true, the query attempts to analyze wildcard terms in the query string. Defaults to false.'}, {name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.'}, {name='quote_field_suffix', values=[standard], description='Suffix appended to quoted text in the query string.'}, {name='enable_position_increments', values=[true, false], description='If true, enable position increments in queries constructed from a query_string search. Defaults to true.'}, {name='fields', values=[standard], description='Array of fields to search. Supports wildcards (*).'}",
           optional: true,
           constantOnly: true,
         },
@@ -8362,7 +8362,7 @@ const qstrDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
@@ -8901,6 +8901,208 @@ const roundDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const roundToDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'round_to',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.round_to', {
+    defaultMessage: 'Rounds down to one of a list of fixed points.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'points',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: [
+    'FROM employees\n| STATS COUNT(*) BY birth_window=ROUND_TO(\n    birth_date,\n    "1900-01-01T00:00:00Z"::DATETIME,\n    "1950-01-01T00:00:00Z"::DATETIME,\n    "1955-01-01T00:00:00Z"::DATETIME,\n    "1960-01-01T00:00:00Z"::DATETIME,\n    "1965-01-01T00:00:00Z"::DATETIME,\n    "1970-01-01T00:00:00Z"::DATETIME,\n    "1975-01-01T00:00:00Z"::DATETIME\n)\n| SORT birth_window ASC',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const rtrimDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'rtrim',
@@ -8944,6 +9146,151 @@ const rtrimDefinition: FunctionDefinition = {
   examples: [
     'ROW message = "   some text  ",  color = " red "\n| EVAL message = RTRIM(message)\n| EVAL color = RTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
   ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const scalbDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: 'scalb',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.scalb', {
+    defaultMessage:
+      "Returns the result of `d * 2 ^ scaleFactor`,\nSimilar to Java's `scalb` function. Result is rounded as if\nperformed by a single correctly rounded floating-point multiply\nto a member of the double value set.",
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'd',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'scaleFactor',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['row x = 3.0, y = 10 | eval z = scalb(x, y)'],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -12773,7 +13120,9 @@ export const scalarFunctionDefinitions = [
   reverseDefinition,
   rightDefinition,
   roundDefinition,
+  roundToDefinition,
   rtrimDefinition,
+  scalbDefinition,
   sha1Definition,
   sha256Definition,
   signumDefinition,

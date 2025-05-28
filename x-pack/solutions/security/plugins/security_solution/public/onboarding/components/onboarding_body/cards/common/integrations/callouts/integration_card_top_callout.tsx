@@ -10,39 +10,29 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { useOnboardingService } from '../../../../../hooks/use_onboarding_service';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
-import { InstalledIntegrationsCallout } from './installed_integrations_callout';
+import { ActiveIntegrationsCallout } from './active_integrations_callout';
 import { EndpointCallout } from './endpoint_callout';
 import { IntegrationTabId } from '../../../../../../../common/lib/integrations/types';
 
-export const useShowInstalledCallout = ({
-  installedIntegrationsCount,
-  isAgentRequired,
-}: {
-  installedIntegrationsCount: number;
-  isAgentRequired: boolean;
-}) => {
-  return installedIntegrationsCount > 0 || isAgentRequired;
-};
-
-export const IntegrationCardTopCalloutComponent: React.FC<{
-  installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+export const IntegrationCardTopCallout = React.memo<{
+  activeIntegrationsCount: number;
+  isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
-}> = ({ installedIntegrationsCount, isAgentRequired, selectedTabId }) => {
+}>(({ activeIntegrationsCount, isAgentRequired, selectedTabId }) => {
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
-  const showInstalledCallout = useShowInstalledCallout({
-    installedIntegrationsCount,
-    isAgentRequired,
-  });
+
+  const showActiveCallout = activeIntegrationsCount > 0 || isAgentRequired;
+
   const showAgentlessCallout =
     isAgentlessAvailable &&
-    installedIntegrationsCount === 0 &&
+    activeIntegrationsCount === 0 &&
     selectedTabId !== IntegrationTabId.endpoint;
-  const showEndpointCallout =
-    installedIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
-  if (!showAgentlessCallout && !showEndpointCallout && !showInstalledCallout) {
+  const showEndpointCallout =
+    activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
+
+  if (!showAgentlessCallout && !showEndpointCallout && !showActiveCallout) {
     return null;
   }
 
@@ -50,16 +40,13 @@ export const IntegrationCardTopCalloutComponent: React.FC<{
     <>
       {showEndpointCallout && <EndpointCallout />}
       {showAgentlessCallout && <AgentlessAvailableCallout />}
-      {showInstalledCallout && (
-        <InstalledIntegrationsCallout
+      {showActiveCallout && (
+        <ActiveIntegrationsCallout
           isAgentRequired={isAgentRequired}
-          installedIntegrationsCount={installedIntegrationsCount}
+          activeIntegrationsCount={activeIntegrationsCount}
         />
       )}
     </>
   );
-};
-
-export const IntegrationCardTopCallout = React.memo(IntegrationCardTopCalloutComponent);
-
+});
 IntegrationCardTopCallout.displayName = 'IntegrationCardTopCallout';

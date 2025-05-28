@@ -51,7 +51,11 @@ const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
     <IntlProvider locale="en">
       <Investigation {...args} />
-    </IntlProvider>
+    </IntlProvider>,
+    {
+      // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
   );
 };
 
@@ -112,8 +116,7 @@ const isSearchBarVisible = (container: HTMLElement) => {
   return searchBarContainer === null;
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/206646
-describe.skip('GraphInvestigation Component', () => {
+describe('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
       if (Object.prototype.hasOwnProperty.call(actionMocks, key)) {
