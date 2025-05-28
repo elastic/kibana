@@ -3533,6 +3533,10 @@
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
               },
               {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/server/services/intercept_user_interaction.ts"
+              },
+              {
                 "plugin": "logstash",
                 "path": "x-pack/platform/plugins/private/logstash/server/routes/cluster/load.ts"
               },
@@ -3819,6 +3823,10 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "guidedOnboarding",
@@ -6031,6 +6039,18 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
+              },
+              {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/server/services/intercept_user_interaction.ts"
+              },
+              {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/server/orchestrator.ts"
+              },
+              {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/server/orchestrator.ts"
               },
               {
                 "plugin": "logstash",

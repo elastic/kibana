@@ -180,6 +180,7 @@ mapped_pages:
 | [observabilityLogsExplorer](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md) | This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances. |
 | [observabilityOnboarding](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_onboarding/README.md) | This plugin provides an onboarding framework for observability solutions: Logs and APM. |
 | [observabilityShared](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_shared/README.md) | A plugin that contains components and utilities shared by all Observability plugins. |
+| [onechat](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/onechat/README.md) | Home of the workchat framework. |
 | [osquery](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/osquery/README.md) | This plugin adds extended support to Security Solution Fleet Osquery integration |
 | [painlessLab](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/painless_lab/README.md) | This plugin helps users learn how to use the Painless scripting language. |
 | [productDocBase](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md) | This plugin contains the product documentation base service. |
