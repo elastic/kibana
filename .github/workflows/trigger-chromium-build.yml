@@ -17,7 +17,8 @@ jobs:
     steps:
       - name: Install Dependencies
         run: |
-          apt-get update && apt-get install jq wget -y
+          sudo apt-get update
+          sudo apt-get install jq wget -y
       - name: Install mdsh
         run: |
           wget https://github.com/bashup/mdsh/raw/master/bin/mdsh && \
