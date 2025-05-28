@@ -9,7 +9,6 @@
 
 export {
   getLexer,
-  getParser,
   createParser,
   parse,
   parseErrors,

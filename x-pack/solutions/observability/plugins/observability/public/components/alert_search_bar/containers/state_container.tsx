@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { type FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { Filter } from '@kbn/es-query';
 import {
   createStateContainer,
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatus } from '../../../../common/typings';
-import { ALL_ALERTS } from '../constants';
 import { AlertSearchBarContainerState } from '../types';
 
 interface AlertSearchBarStateTransitions {
@@ -46,8 +45,6 @@ const DEFAULT_STATE: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
-  status: ALL_ALERTS.status,
-  filters: [],
   groupings: [],
 };
 

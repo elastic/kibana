@@ -8,15 +8,22 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry, getFallbackDataBounds } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  CustomPaletteParams,
+  PaletteOutput,
+  PaletteRegistry,
+  applyPaletteParams,
+  getFallbackDataBounds,
+} from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
+import { KbnPalettes } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
 import {
-  applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
   getAccessorType,
@@ -48,6 +55,7 @@ function updateColumn(
 export type TableDimensionEditorProps =
   VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
     isDarkMode: boolean;
   };
 
@@ -93,13 +101,23 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
   const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
 
-  const activePalette = column?.palette ?? {
+  const activePalette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
     name: showColorByTerms ? 'default' : defaultPaletteParams.name,
+    ...column?.palette,
+    params: { ...column?.palette?.params },
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
   const categories = getColorCategories(currentData?.rows, accessor, [null]);
+
+  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
+    activePalette.params.stops = applyPaletteParams(
+      props.paletteService,
+      activePalette,
+      currentMinMax
+    );
+  }
 
   return (
     <>
@@ -219,6 +237,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 isDarkMode={isDarkMode}
                 colorMapping={column.colorMapping}
                 palette={activePalette}
+                palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
                   updateColumnState(accessor, { palette });

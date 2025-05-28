@@ -10,9 +10,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { CategoricalColorMapping, ColorMappingInputData } from './categorical_color_mapping';
-import { AVAILABLE_PALETTES } from './palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { getKbnPalettes } from '@kbn/palettes';
 
 const ASSIGNMENTS_LIST = '[data-test-subj="lns-colorMapping-assignmentsList"]';
 const ASSIGNMENTS_PROMPT = '[data-test-subj="lns-colorMapping-assignmentsPrompt"]';
@@ -20,6 +20,8 @@ const ASSIGNMENTS_PROMPT_ADD_ALL = '[data-test-subj="lns-colorMapping-assignment
 const ASSIGNMENT_ITEM = (i: number) => `[data-test-subj="lns-colorMapping-assignmentsItem${i}"]`;
 
 describe('color mapping', () => {
+  const palettes = getKbnPalettes({ darkMode: false });
+
   it('load a default color mapping', () => {
     const dataInput: ColorMappingInputData = {
       type: 'categories',
@@ -31,7 +33,7 @@ describe('color mapping', () => {
         data={dataInput}
         isDarkMode={false}
         model={{ ...DEFAULT_COLOR_MAPPING_CONFIG }}
-        palettes={AVAILABLE_PALETTES}
+        palettes={palettes}
         onModelUpdate={onModelUpdateFn}
         specialTokens={new Map()}
       />
@@ -53,7 +55,7 @@ describe('color mapping', () => {
         data={dataInput}
         isDarkMode={false}
         model={{ ...DEFAULT_COLOR_MAPPING_CONFIG }}
-        palettes={AVAILABLE_PALETTES}
+        palettes={palettes}
         onModelUpdate={onModelUpdateFn}
         specialTokens={new Map()}
       />
@@ -81,7 +83,7 @@ describe('color mapping', () => {
         data={dataInput}
         isDarkMode={false}
         model={{ ...DEFAULT_COLOR_MAPPING_CONFIG }}
-        palettes={AVAILABLE_PALETTES}
+        palettes={palettes}
         onModelUpdate={onModelUpdateFn}
         specialTokens={
           new Map([
