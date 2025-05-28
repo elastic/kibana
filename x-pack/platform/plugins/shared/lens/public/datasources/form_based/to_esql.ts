@@ -143,19 +143,17 @@ export function getESQLForLayer(
 
     metricESQL = `${esAggsId} = ` + metricESQL;
 
-    if (wrapInFilter || wrapInTimeFilter) {
-      if (wrapInFilter) {
-        if (col.filter?.language === 'kuery') {
-          metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
-        } else if (col.filter?.language === 'lucene') {
-          metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
-        } else {
-          return;
-        }
+    if (wrapInFilter) {
+      if (col.filter?.language === 'kuery') {
+        metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
+      } else if (col.filter?.language === 'lucene') {
+        metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
+      } else {
+        return;
       }
-      if (wrapInTimeFilter) {
-        return undefined;
-      }
+    }
+    if (wrapInTimeFilter) {
+      return undefined;
     }
 
     return metricESQL;
