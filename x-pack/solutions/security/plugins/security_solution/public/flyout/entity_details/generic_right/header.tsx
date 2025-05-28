@@ -20,7 +20,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 const initialBadgeLimit = 3;
-const maxBadgeContainerHeight = undefined;
+const maxBadgeContainerHeight = 200;
 
 const HeaderTags = ({
   tags = [],
@@ -80,7 +80,7 @@ const HeaderTags = ({
   );
 };
 
-interface UniversalEntityFlyoutHeaderProps {
+interface GenericEntityFlyoutHeaderProps {
   entity: EntityEcs;
   source: GenericEntityRecord;
 }
@@ -90,17 +90,14 @@ enum GenericEntityType {
   container = 'container',
 }
 
-export const UniversalEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
+export const GenericEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
   ...EntityIconByType,
   container: 'container',
 };
 
 const isDate = (value: unknown): value is Date => value instanceof Date;
 
-export const UniversalEntityFlyoutHeader = ({
-  entity,
-  source,
-}: UniversalEntityFlyoutHeaderProps) => {
+export const GenericEntityFlyoutHeader = ({ entity, source }: GenericEntityFlyoutHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
   const docTimestamp = source?.['@timestamp'];
@@ -121,7 +118,7 @@ export const UniversalEntityFlyoutHeader = ({
           <EuiFlexItem grow={false}>
             <FlyoutTitle
               title={entity?.name}
-              iconType={UniversalEntityIconByType[entity?.type] || 'globe'}
+              iconType={GenericEntityIconByType[entity?.type] || 'globe'}
               iconColor="primary"
             />
           </EuiFlexItem>
@@ -139,12 +136,7 @@ export const UniversalEntityFlyoutHeader = ({
               </>
             )}
           </div>
-          <HeaderDataCards
-            id={entity.id}
-            type={entity.type}
-            subType={entity.sub_type}
-            criticality={source?.asset?.criticality}
-          />
+          <HeaderDataCards id={entity.id} type={entity.type} subType={entity.sub_type} />
         </>
       </FlyoutHeader>
     </>

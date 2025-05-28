@@ -331,6 +331,12 @@ describe('test helper methods', () => {
       return {
         sort: sortField ? [{ [sortField]: sortDirection }] : [],
         size: size || 0,
+        // TODO: Asset Invnetory - remove temp runtime mapping
+        runtime_mappings: {
+          'related.entity': {
+            type: 'keyword',
+          },
+        },
         _source: false,
         fields: [
           '_id',

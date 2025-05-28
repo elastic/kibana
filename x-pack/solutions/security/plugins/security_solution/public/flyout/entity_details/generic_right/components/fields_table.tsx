@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiCode, EuiCodeBlock, EuiInMemoryTable, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { EcsFlat } from '@elastic/ecs';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
 
 interface FlattenedItem {
   key: string; // Flattened dot notation object path for an object;
   value: unknown;
 }
-
-const TABLE_PINS_STORAGE_KEY = 'pinned_fields';
 
 const isValidEcsField = (fieldName: string): fieldName is keyof typeof EcsFlat =>
   fieldName in EcsFlat;
@@ -49,19 +48,51 @@ const getSortedFlattenedItems = (
     value,
   }));
 
-  const sortedItems = flattenedItems.sort((a, b) => {
-    const isAPinned = pinnedFields.includes(a.key);
-    const isBPinned = pinnedFields.includes(b.key);
+  return flattenedItems.sort((a, b) => {
+    const isAPinned = pinnedFields?.includes(a.key);
+    const isBPinned = pinnedFields?.includes(b.key);
 
     if (isAPinned && !isBPinned) return -1;
     if (!isAPinned && isBPinned) return 1;
     return 0; // Keep original order if neither are pinned
   });
-
-  return sortedItems;
 };
 
-interface FieldsTableProps {
+const getPinnedFieldsFromLocalStorage = (storageKey: string): string[] => {
+  const storedPinned = localStorage.getItem(storageKey);
+  return storedPinned ? JSON.parse(storedPinned) : [];
+};
+
+const setPinnedFieldsInLocalStorage = (storageKey: string, fields: string[]) => {
+  localStorage.setItem(storageKey, JSON.stringify(fields));
+};
+
+export const usePinnedFields = (storageKey: string) => {
+  const queryClient = useQueryClient();
+
+  const { data: pinnedFields = [] } = useQuery<string[]>({
+    queryKey: ['pinnedFields', storageKey],
+    queryFn: () => getPinnedFieldsFromLocalStorage(storageKey),
+    initialData: getPinnedFieldsFromLocalStorage(storageKey) || [],
+  });
+
+  const togglePin = (fieldKey: string) => {
+    const updatedPinnedFields = pinnedFields.includes(fieldKey)
+      ? pinnedFields.filter((key) => key !== fieldKey)
+      : [...pinnedFields, fieldKey];
+
+    setPinnedFieldsInLocalStorage(storageKey, updatedPinnedFields);
+    queryClient.setQueryData(['pinnedFields', storageKey], updatedPinnedFields);
+    queryClient.invalidateQueries(['pinnedFields', storageKey]);
+  };
+
+  return {
+    pinnedFields,
+    togglePin,
+  };
+};
+
+export interface FieldsTableProps {
   /**
    * The document object containing the fields and values to be displayed in the table.
    */
@@ -73,53 +104,38 @@ interface FieldsTableProps {
    * If not provided, pinning functionality will be disabled.
    */
   tableStorageKey?: string;
+
+  /**
+   * Optional key to override component's defaults or set custom behaviors.
+   */
+  euiInMemoryTableProps?: Partial<EuiInMemoryTableProps>;
 }
 
 /**
  * Displays a table of flattened fields and values with an option to pin items to the top.
  */
-export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorageKey }) => {
-  const storageKey = tableStorageKey ? `${TABLE_PINS_STORAGE_KEY}-${tableStorageKey}` : null;
-  const [pinnedFields, setPinnedFields] = useState<string[]>([]);
+export const FieldsTable: React.FC<FieldsTableProps> = ({
+  document,
+  tableStorageKey,
+  euiInMemoryTableProps,
+}) => {
+  const { pinnedFields, togglePin } = usePinnedFields(tableStorageKey || 'fields-table-pins');
 
-  // load pinned fields from localStorage into state if a storageKey is provided
-  useEffect(() => {
-    if (!storageKey) return;
-    const storedPinned = localStorage.getItem(storageKey);
-    if (storedPinned) {
-      setPinnedFields(JSON.parse(storedPinned));
-    }
-  }, [storageKey]);
-
-  const togglePin = useCallback(
-    (fieldKey: string) => {
-      if (!storageKey) return;
-
-      setPinnedFields((prev) => {
-        const updatedPinned = prev.includes(fieldKey)
-          ? prev.filter((key) => key !== fieldKey) // remove pin
-          : [...prev, fieldKey]; // add pin
-
-        localStorage.setItem(storageKey, JSON.stringify(updatedPinned));
-
-        return updatedPinned;
-      });
-    },
-    [setPinnedFields, storageKey]
+  const sortedItems: FlattenedItem[] = useMemo(
+    () => getSortedFlattenedItems(document, pinnedFields),
+    [document, pinnedFields]
   );
 
-  const sortedItems = getSortedFlattenedItems(document, pinnedFields);
-
-  const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = useMemo(
+  const columns = useMemo(
     () => [
-      ...(storageKey
+      ...(tableStorageKey
         ? [
             {
               field: 'key',
               name: '',
               width: '40px',
               render: (fieldKey: string) => {
-                const isPinned = pinnedFields.includes(fieldKey);
+                const isPinned = pinnedFields?.includes(fieldKey);
                 return (
                   <EuiButtonIcon
                     iconType={isPinned ? 'pinFilled' : 'pin'}
@@ -157,16 +173,18 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
         ),
       },
     ],
-    [pinnedFields, storageKey, togglePin]
+    [pinnedFields, tableStorageKey, togglePin]
   );
 
   return (
-    <EuiInMemoryTable
+    <EuiInMemoryTable<FlattenedItem>
+      // @ts-ignore
       items={sortedItems}
       columns={columns}
       sorting={{ sort: { field: 'key', direction: 'asc' } }}
       search={{ box: { incremental: true } }}
       pagination={{ initialPageSize: 100, showPerPageOptions: false }}
+      {...euiInMemoryTableProps}
     />
   );
 };
