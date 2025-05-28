@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  coreMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
   KibanaRequest,
@@ -2906,17 +2911,72 @@ describe('Package policy service', () => {
         {
           id: 'test-package-policy-1',
           type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
+          attributes: createPackagePolicyMock(),
           references: [],
         },
         {
           id: 'test-package-policy-2',
           type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
+          attributes: createPackagePolicyMock(),
           references: [],
         },
       ];
 
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [...mockPackagePolicies],
+      });
+
+      soClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
+
+      await packagePolicyService.bulkUpdate(soClient, esClient, [
+        {
+          id: 'test-package-policy-1',
+          name: 'Test Package Policy 1',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-agent-policy',
+          policy_ids: ['test-agent-policy'],
+          inputs: [],
+        },
+        {
+          id: 'test-package-policy-2',
+          name: 'Test Package Policy 2',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-agent-policy',
+          policy_ids: ['test-agent-policy'],
+          inputs: [],
+        },
+      ]);
+    });
+
+    it('should call external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const callbackOne = jest.fn().mockImplementation((p) => p);
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callbackOne);
+      const callbackTwo = jest.fn().mockImplementation((p) => p);
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callbackTwo);
+      const mockPackagePolicies = [
+        {
+          id: 'test-package-policy-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createPackagePolicyMock(),
+          references: [],
+        },
+        {
+          id: 'test-package-policy-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createPackagePolicyMock(),
+          references: [],
+        },
+      ];
+
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [...mockPackagePolicies],
       });
@@ -2945,6 +3005,9 @@ describe('Package policy service', () => {
           inputs: [],
         },
       ]);
+
+      expect(callbackOne).toBeCalledTimes(2);
+      expect(callbackTwo).toBeCalledTimes(2);
     });
 
     describe('remove protections', () => {
