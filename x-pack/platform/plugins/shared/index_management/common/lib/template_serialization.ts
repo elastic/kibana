@@ -20,10 +20,14 @@ import {
   STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
 } from '../constants';
+import { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
+export function serializeTemplate(
+  templateDeserialized: TemplateDeserialized,
+  dataStreamOptions?: DataStreamOptions
+): TemplateSerialized {
   const {
     version,
     priority,
@@ -50,6 +54,9 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
           mode: indexMode,
         },
       },
+      // If the existing template contains data stream options, we need to persist them.
+      // Otherwise, they will be lost when the template is updated.
+      ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
     },
     index_patterns: indexPatterns,
     data_stream: dataStream,
