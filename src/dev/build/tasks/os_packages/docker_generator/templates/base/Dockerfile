@@ -31,7 +31,7 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
-WORKDIR /usr/share/kibana
+WOARKDIR /usr/share/kibana
 RUN tar \
   --strip-components=1 \
   -zxf /tmp/kibana.tar.gz
