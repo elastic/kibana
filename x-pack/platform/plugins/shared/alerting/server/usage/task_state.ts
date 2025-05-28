@@ -119,7 +119,6 @@ const stateSchemaV2 = stateSchemaV1.extends({
   count_mw_with_filter_alert_toggle_on: schema.number(),
   count_alerts_total: schema.number(),
   count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
-  count_ignored_fields_by_rule_type: schema.recordOf(schema.string(), schema.number()),
 });
 
 const stateSchemaV3 = stateSchemaV2.extends({
