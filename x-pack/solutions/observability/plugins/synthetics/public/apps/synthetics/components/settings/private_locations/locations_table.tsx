@@ -123,7 +123,7 @@ export const PrivateLocationsTable = ({
           isPrimary: true,
           'data-test-subj': 'action-edit',
           onClick: onEdit,
-          icon: 'documentEdit',
+          icon: 'pencil',
           type: 'icon',
         },
         {
