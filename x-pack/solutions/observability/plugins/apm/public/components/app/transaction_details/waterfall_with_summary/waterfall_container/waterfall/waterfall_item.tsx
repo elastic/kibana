@@ -389,9 +389,11 @@ function RelatedErrors({
 
   if (errorCount > 0) {
     return (
-      <div
+      <EuiBadge
+        color={euiTheme.colors.danger}
+        iconType="arrowRight"
         onClick={onClick}
-        onKeyDown={(e) => {
+        onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
             onClick(e);
           }
@@ -399,11 +401,10 @@ function RelatedErrors({
         tabIndex={0}
         role="button"
         aria-label={viewRelatedErrorsLabel}
+        onClickAriaLabel={viewRelatedErrorsLabel}
       >
-        <EuiBadge color={euiTheme.colors.danger} iconType="arrowRight">
-          {viewRelatedErrorsLabel}
-        </EuiBadge>
-      </div>
+        {viewRelatedErrorsLabel}
+      </EuiBadge>
     );
   }
 
