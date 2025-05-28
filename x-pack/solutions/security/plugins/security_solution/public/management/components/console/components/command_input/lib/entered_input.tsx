@@ -12,11 +12,6 @@ import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper
 import type { ParsedCommandInterface } from '../../../service/types';
 import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
 
-interface InputFocusInterface {
-  focus: (force?: boolean) => void;
-  blur: () => void;
-}
-
 interface InputCharacter {
   value: string;
   renderValue: ReactNode;
@@ -78,16 +73,13 @@ export class EnteredInput {
   private rightOfCursorContent: InputCharacter[];
   private canHaveArgValueSelectors: boolean;
   private argState: undefined | EnteredCommand['argState'];
-  private inputRef: React.MutableRefObject<InputFocusInterface | null> | undefined;
 
   constructor(
     leftOfCursorText: string,
     rightOfCursorText: string,
     parsedInput: ParsedCommandInterface,
-    enteredCommand: undefined | EnteredCommand,
-    inputRef?: React.MutableRefObject<InputFocusInterface | null>
+    enteredCommand: undefined | EnteredCommand
   ) {
-    this.inputRef = inputRef;
     this.leftOfCursorContent = getInputCharacters(leftOfCursorText);
     this.rightOfCursorContent = getInputCharacters(rightOfCursorText);
 
@@ -153,7 +145,6 @@ export class EnteredInput {
                       argName={argName}
                       argIndex={argIndex}
                       argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
-                      inputRef={this.inputRef}
                     />
                   ),
                   isArgSelector: true,

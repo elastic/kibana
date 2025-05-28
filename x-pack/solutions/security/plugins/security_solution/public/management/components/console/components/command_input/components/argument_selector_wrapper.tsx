@@ -51,10 +51,6 @@ export interface ArgumentSelectorWrapperProps {
   argName: string;
   argIndex: number;
   argDefinition: ArgDefinitionWithRequiredSelector;
-  inputRef?: React.MutableRefObject<{
-    focus: (force?: boolean) => void;
-    blur: () => void;
-  } | null>;
 }
 
 /**
@@ -104,7 +100,6 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
                 argIndex={argIndex}
                 store={store}
                 onChange={handleSelectorComponentOnChange}
-                inputRef={inputRef}
               />
             </div>
           </EuiFlexItem>

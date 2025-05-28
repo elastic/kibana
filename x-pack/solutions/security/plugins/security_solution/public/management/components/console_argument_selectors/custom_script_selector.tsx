@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
@@ -57,7 +58,8 @@ type SelectableOption = EuiSelectableOption<Partial<{ description: CustomScript[
 export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   const CustomScriptSelectorComponent = memo<
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
-  >(({ value, valueText, onChange, store: _store, inputRef }) => {
+  >(({ value, valueText, onChange, store: _store }) => {
+    const dispatch = useConsoleStateDispatch();
     const state = useMemo<CustomScriptSelectorState>(() => {
       return _store ?? { isPopoverOpen: true };
     }, [_store]);
@@ -120,17 +122,15 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       setIsPopoverOpen(false);
     }, [setIsPopoverOpen]);
 
-    // Focus on the input element when the popover closes after selection
+    // Focus on the console's input element when the popover closes
     useEffect(() => {
       if (!state.isPopoverOpen) {
         // Use setTimeout to ensure focus happens after the popover closes
         setTimeout(() => {
-          if (inputRef?.current) {
-            inputRef?.current.focus(true);
-          }
+          dispatch({ type: 'addFocusToKeyCapture' });
         }, 0);
       }
-    }, [state.isPopoverOpen, inputRef]);
+    }, [state.isPopoverOpen, dispatch]);
 
     const handleScriptSelection = useCallback(
       (options: EuiSelectableOption[]) => {
