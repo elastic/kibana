@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/esql-data-pooler",
+  "id": "@kbn/document-data-cascader",
   "owner": [
     "@elastic/appex-sharedux"
   ],

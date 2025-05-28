@@ -447,6 +447,9 @@ function DiscoverDocumentsComponent({
     );
   }
 
+  console.log('document state:: %o \n', documentState);
+  console.log('document rows:: %o \n', rows);
+
   return (
     // class is used in tests
     <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
