@@ -440,7 +440,10 @@ export class Plugin
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const createAlertRuleAction = async () => {
-      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
+        coreStart: core,
+        ...plugins,
+      });
       return action;
     };
 
