@@ -303,6 +303,10 @@ async function getSuggestionsWithinCommandExpression(
 ) {
   const commandDef = getCommandDefinition(astContext.command.name);
 
+  if (commandDef.hidden) {
+    return [];
+  }
+
   // collect all fields + userDefinedColumns to suggest
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
