@@ -113,7 +113,6 @@ const upsertQueryRoute = createServerRoute({
     await streamsClient.ensureStream(streamName);
 
     const updated = await assetClient.getAssetLinks(streamName, ['query'], [queryId]);
-
     const assetLinked = await assetClient.linkAsset(streamName, {
       [ASSET_TYPE]: 'query',
       [ASSET_ID]: queryId,

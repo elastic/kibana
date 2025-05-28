@@ -216,7 +216,6 @@ export class AssetClient {
     const newAssetLinks = links.map((link) => {
       return toAssetLink(name, link);
     });
-
     const nextIds = newAssetLinks.map((link) => link[ASSET_UUID]);
 
     const assetLinksDeleted = existingAssetLinks.filter(
@@ -264,7 +263,7 @@ export class AssetClient {
     ids?: string[]
   ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
     if (ids?.length && types?.length !== 1) {
-      throw new Error('You must provide only one type when using ids');
+      throw new Error('You must provide only one type when providing ids');
     }
 
     const filters = [...termQuery(STREAM_NAME, name)];
