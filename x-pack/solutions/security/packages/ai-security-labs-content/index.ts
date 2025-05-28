@@ -6,5 +6,13 @@
  */
 
 export { encryptSecurityLabsContent, decryptSecurityLabsContent } from './src/utils';
+
+/**
+ * Micromatch pattern for plain text markdown files in the security labs content.
+ */
 export const PLAIN_TEXT_FILE_MICROMATCH_PATTERN = ['*.md', '!*.encoded.md'];
+
+/**
+ * Micromatch pattern for encoded markdown files in the security labs content.
+ */
 export const ENCODED_FILE_MICROMATCH_PATTERN = ['*.encoded.md'];
