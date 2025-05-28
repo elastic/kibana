@@ -804,8 +804,7 @@
         "diff",
         "fastest-levenshtein",
         "usng.js",
-        "react-reverse-portal",
-        "@types/diff"
+        "react-reverse-portal"
       ],
       "reviewers": [
         "team:kibana-data-discovery"

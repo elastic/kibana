@@ -6,6 +6,7 @@
  */
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { normalizeSecrets } from '../utils';
@@ -274,8 +275,10 @@ export class SyntheticsMonitorClient {
     spaceId,
     allPrivateLocations,
     encryptedSavedObjects,
+    soClient,
   }: {
     spaceId: string;
+    soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
@@ -285,6 +288,7 @@ export class SyntheticsMonitorClient {
 
     const { allConfigs: monitors, paramsBySpace } = await this.getAllMonitorConfigs({
       encryptedSavedObjects,
+      soClient,
       spaceId,
     });
 
@@ -309,14 +313,20 @@ export class SyntheticsMonitorClient {
 
   async getAllMonitorConfigs({
     spaceId,
+    soClient,
     encryptedSavedObjects,
   }: {
     spaceId: string;
+    soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const paramsBySpacePromise = this.syntheticsService.getSyntheticsParams({ spaceId });
+    const monitorConfigRepository = new MonitorConfigRepository(
+      soClient,
+      encryptedSavedObjects.getClient()
+    );
 
-    const monitorsPromise = this.getAllMonitors({ encryptedSavedObjects, spaceId });
+    const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({ spaceId });
 
     const [paramsBySpace, monitors] = await Promise.all([paramsBySpacePromise, monitorsPromise]);
 

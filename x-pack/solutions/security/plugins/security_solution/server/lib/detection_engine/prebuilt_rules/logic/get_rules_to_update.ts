@@ -19,9 +19,9 @@ export const getRulesToUpdate = (
   latestPrebuiltRules: PrebuiltRuleAsset[],
   installedRules: Map<string, RuleAlertType>
 ) => {
-  return latestPrebuiltRules
-    .filter((latestRule) => filterInstalledRules(latestRule, installedRules))
-    .map((latestRule) => mergeExceptionLists(latestRule, installedRules));
+  return latestPrebuiltRules.filter((latestRule) =>
+    filterInstalledRules(latestRule, installedRules)
+  );
 };
 
 /**
@@ -37,34 +37,4 @@ export const filterInstalledRules = (
   const installedRule = installedRules.get(latestPrebuiltRule.rule_id);
 
   return !!installedRule && installedRule.params.version < latestPrebuiltRule.version;
-};
-
-/**
- * Given a rule from the file system and the set of installed rules this will merge the exception lists
- * from the installed rules onto the rules from the file system.
- * @param latestPrebuiltRule The latest prepackaged rule version that might have exceptions_lists
- * @param installedRules The installed rules which might have user driven exceptions_lists
- */
-export const mergeExceptionLists = (
-  latestPrebuiltRule: PrebuiltRuleAsset,
-  installedRules: Map<string, RuleAlertType>
-): PrebuiltRuleAsset => {
-  if (latestPrebuiltRule.exceptions_list != null) {
-    const installedRule = installedRules.get(latestPrebuiltRule.rule_id);
-
-    if (installedRule != null && installedRule.params.exceptionsList != null) {
-      const installedExceptionList = installedRule.params.exceptionsList;
-      const fileSystemExceptions = latestPrebuiltRule.exceptions_list.filter((potentialDuplicate) =>
-        installedExceptionList.every((item) => item.list_id !== potentialDuplicate.list_id)
-      );
-      return {
-        ...latestPrebuiltRule,
-        exceptions_list: [...fileSystemExceptions, ...installedRule.params.exceptionsList],
-      };
-    } else {
-      return latestPrebuiltRule;
-    }
-  } else {
-    return latestPrebuiltRule;
-  }
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
@@ -536,7 +535,7 @@ describe('current status route', () => {
       [['North America - US Central', 'US Central QA'], 2],
       [undefined, 2],
     ])('handles disabled count when using location filters', async (locations, disabledCount) => {
-      jest.spyOn(monitorsFns, 'getAllMonitors').mockResolvedValue([
+      const getAll = jest.fn().mockResolvedValue([
         {
           type: 'synthetics-monitor',
           id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
@@ -691,6 +690,9 @@ describe('current status route', () => {
           },
         },
         syntheticsEsClient,
+        monitorConfigRepository: {
+          getAll,
+        },
       } as any);
 
       const result = await overviewStatusService.getOverviewStatus();
@@ -708,7 +710,7 @@ describe('current status route', () => {
       [['North America - US Central', 'US Central QA'], 2],
       [undefined, 2],
     ])('handles pending count when using location filters', async (locations, pending) => {
-      jest.spyOn(monitorsFns, 'getAllMonitors').mockResolvedValue([
+      const getAll = jest.fn().mockResolvedValue([
         {
           type: 'synthetics-monitor',
           id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
@@ -761,6 +763,9 @@ describe('current status route', () => {
           },
         },
         syntheticsEsClient,
+        monitorConfigRepository: {
+          getAll,
+        },
       } as any);
 
       const result = await overviewStatusService.getOverviewStatus();

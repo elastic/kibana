@@ -58,9 +58,15 @@
   line-height: 1.5;
   flex-grow: 1;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
 
+  // all direct children now share the available parent width equally, ensuring consistent layout regardless of their content length
+  > * {
+    min-width: 0;
+    flex: 1 !important;
+    max-width: fit-content !important;
+  }
   &:not(:empty) {
     line-height: $euiSizeL;
     padding-left: $euiSizeS;

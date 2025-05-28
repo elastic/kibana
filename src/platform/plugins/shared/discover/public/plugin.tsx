@@ -397,10 +397,13 @@ export class DiscoverPlugin
           },
           discoverServices: services,
         });
-        container.addNewPanel({
-          panelType: SEARCH_EMBEDDABLE_TYPE,
-          initialState,
-        });
+        container.addNewPanel(
+          {
+            panelType: SEARCH_EMBEDDABLE_TYPE,
+            initialState,
+          },
+          true
+        );
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {

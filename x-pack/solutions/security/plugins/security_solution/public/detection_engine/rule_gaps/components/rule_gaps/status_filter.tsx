@@ -12,7 +12,8 @@ import { MultiselectFilter } from '../../../../common/components/multiselect_fil
 import * as i18n from './translations';
 import type { GapStatus } from '../../types';
 import { getStatusLabel } from './utils';
-
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
+import { useKibana } from '../../../../common/lib/kibana';
 interface GapStatusFilterComponent {
   selectedItems: GapStatus[];
   onChange: (selectedItems: GapStatus[]) => void;
@@ -25,11 +26,16 @@ export const GapStatusFilter = ({ selectedItems, onChange }: GapStatusFilterComp
     return getStatusLabel(status);
   }, []);
 
+  const { telemetry } = useKibana().services;
+
   const handleSelectionChange = useCallback(
     (statuses: GapStatus[]) => {
+      telemetry.reportEvent(ManualRuleRunEventTypes.FilterGaps, {
+        status: statuses?.join(','),
+      });
       onChange(statuses);
     },
-    [onChange]
+    [onChange, telemetry]
   );
 
   return (

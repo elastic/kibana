@@ -12,10 +12,11 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
+import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -57,27 +58,33 @@ describe('tlsRuleExecutor', () => {
 
   const syntheticsService = new SyntheticsService(serverMock);
 
+  const commonFilter =
+    'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)';
+
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
+  const getTLSRuleExecutorParams = (
+    ruleParams: TLSRuleParams = {}
+  ): [
+    Date,
+    TLSRuleParams,
+    SavedObjectsClientContract,
+    ElasticsearchClient,
+    SyntheticsServerSetup,
+    SyntheticsMonitorClient
+  ] => [moment().toDate(), ruleParams, soClient, mockEsClient, serverMock, monitorClient];
+
   it('should only query enabled monitors', async () => {
-    const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
-    const tlsRule = new TLSRuleExecutor(
-      moment().toDate(),
-      {},
-      soClient,
-      mockEsClient,
-      serverMock,
-      monitorClient
-    );
+    const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams());
+    const configRepo = tlsRule.monitorConfigRepository;
+    const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
     const { certs } = await tlsRule.getExpiredCertificates();
 
     expect(certs).toEqual([]);
 
     expect(spy).toHaveBeenCalledWith({
-      filter:
-        'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)',
-      soClient,
+      filter: commonFilter,
     });
   });
 });
