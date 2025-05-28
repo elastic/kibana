@@ -305,7 +305,7 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
 );
 
 export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
-  'responseOpsRuleForm.investigationGuide.editor.title',
+  'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
   {
     defaultMessage: 'Investigation guide',
   }
