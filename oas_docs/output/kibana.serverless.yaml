@@ -39001,6 +39001,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -39022,6 +39023,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -39031,12 +39042,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':
@@ -39095,6 +39112,7 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         type:
                           type: string
@@ -39116,6 +39134,16 @@ paths:
                           type: string
                         id:
                           type: string
+                        install_status:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            main:
+                              type: string
+                            remote:
+                              type: string
+                          required:
+                            - main
                         package_name:
                           type: string
                         package_version:
@@ -39125,12 +39153,18 @@ paths:
                             - completed
                             - synchronizing
                             - failed
+                            - warning
                           type: string
                         updated_at:
                           type: string
+                        warning:
+                          type: string
                       required:
                         - sync_status
+                        - install_status
                     type: array
+                  warning:
+                    type: string
                 required:
                   - integrations
         '400':

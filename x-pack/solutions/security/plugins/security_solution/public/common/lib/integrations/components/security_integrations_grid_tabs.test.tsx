@@ -7,18 +7,21 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 
-import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_component';
+import { SecurityIntegrationsGridTabs } from './security_integrations_grid_tabs';
 import * as module from '@kbn/fleet-plugin/public';
-
+import { TestProviders } from '../../../mock';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
 } from '../hooks/use_stored_state';
 import { INTEGRATION_TABS } from '../configs/integration_tabs_configs';
+import { useSelectedTab } from '../hooks/use_selected_tab';
 import { mockReportLinkClick } from '../hooks/__mocks__/mocks';
+import type { AvailablePackages } from './with_available_packages';
 
 jest.mock('../hooks/integration_context');
 jest.mock('../hooks/use_stored_state');
+jest.mock('../hooks/use_selected_tab');
 jest.mock('../../kibana', () => ({
   ...jest.requireActual('../../kibana'),
   useNavigation: jest.fn().mockReturnValue({
@@ -29,13 +32,21 @@ jest.mock('../../kibana', () => ({
 
 const mockPackageList = jest.fn<
   React.JSX.Element,
-  Array<{ showSearchTools?: boolean; searchTerm: string }>
+  Array<{ showSearchTools?: boolean; searchTerm: string; list: unknown[] }>
 >(() => <div data-test-subj="packageList" />);
 
 jest.mock('@kbn/fleet-plugin/public');
 jest
   .spyOn(module, 'PackageList')
   .mockImplementation(() => Promise.resolve({ PackageListGrid: mockPackageList }));
+
+const mockUseSelectedTab = useSelectedTab as jest.MockedFunction<typeof useSelectedTab>;
+const mockUseStoredIntegrationTabId = useStoredIntegrationTabId as jest.MockedFunction<
+  typeof useStoredIntegrationTabId
+>;
+const mockUseStoredIntegrationSearchTerm = useStoredIntegrationSearchTerm as jest.MockedFunction<
+  typeof useStoredIntegrationSearchTerm
+>;
 
 describe('IntegrationsCardGridTabsComponent', () => {
   const mockSetTabId = jest.fn();
@@ -45,43 +56,47 @@ describe('IntegrationsCardGridTabsComponent', () => {
   const props = {
     activeIntegrationsCount: 1,
     isAgentRequired: false,
-    availablePackagesResult: {
+    availablePackages: {
       isLoading: false,
       setCategory: mockSetCategory,
       setSelectedSubCategory: mockSetSelectedSubCategory,
       setSearchTerm: mockSetSearchTerm,
       searchTerm: 'new search term',
-    },
+    } as unknown as AvailablePackages,
     integrationList: [],
-    selectedTabResult: {
-      selectedTab: INTEGRATION_TABS[0],
-      toggleIdSelected: INTEGRATION_TABS[0].id,
-      setSelectedTabIdToStorage: mockSetTabId,
-      integrationTabs: INTEGRATION_TABS,
-    },
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useStoredIntegrationTabId as jest.Mock).mockReturnValue([INTEGRATION_TABS[0].id, jest.fn()]);
-    (useStoredIntegrationSearchTerm as jest.Mock).mockReturnValue(['', jest.fn()]);
+    mockUseStoredIntegrationTabId.mockReturnValue([INTEGRATION_TABS[0].id, jest.fn()]);
+    mockUseStoredIntegrationSearchTerm.mockReturnValue(['', jest.fn()]);
+    mockUseSelectedTab.mockReturnValue({
+      selectedTab: INTEGRATION_TABS[0],
+      toggleIdSelected: INTEGRATION_TABS[0].id,
+      setSelectedTabIdToStorage: mockSetTabId,
+      integrationTabs: INTEGRATION_TABS,
+    });
   });
 
   it('renders loading skeleton when data is loading', () => {
     const testProps = {
       ...props,
-      availablePackagesResult: {
-        ...props.availablePackagesResult,
+      availablePackages: {
+        ...props.availablePackages,
         isLoading: true,
       },
     };
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...testProps} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...testProps} />, {
+      wrapper: TestProviders,
+    });
 
     expect(getByTestId('loadingPackages')).toBeInTheDocument();
   });
 
   it('renders the package list when data is available', async () => {
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...props} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />, {
+      wrapper: TestProviders,
+    });
 
     await waitFor(() => {
       expect(getByTestId('packageList')).toBeInTheDocument();
@@ -91,9 +106,11 @@ describe('IntegrationsCardGridTabsComponent', () => {
   it('saves the selected tab to storage', () => {
     (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
 
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...props} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />, {
+      wrapper: TestProviders,
+    });
 
-    const tabButton = getByTestId('user');
+    const tabButton = getByTestId('securitySolutionIntegrationsTab-user');
 
     act(() => {
       fireEvent.click(tabButton);
@@ -104,9 +121,11 @@ describe('IntegrationsCardGridTabsComponent', () => {
   it('tracks the tab clicks', () => {
     (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
 
-    const { getByTestId } = render(<IntegrationsCardGridTabsComponent {...props} />);
+    const { getByTestId } = render(<SecurityIntegrationsGridTabs {...props} />, {
+      wrapper: TestProviders,
+    });
 
-    const tabButton = getByTestId('user');
+    const tabButton = getByTestId('securitySolutionIntegrationsTab-user');
 
     act(() => {
       fireEvent.click(tabButton);
@@ -116,7 +135,7 @@ describe('IntegrationsCardGridTabsComponent', () => {
   });
 
   it('renders no search tools when showSearchTools is false', async () => {
-    render(<IntegrationsCardGridTabsComponent {...props} />);
+    render(<SecurityIntegrationsGridTabs {...props} />, { wrapper: TestProviders });
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].showSearchTools).toEqual(false);
@@ -130,10 +149,29 @@ describe('IntegrationsCardGridTabsComponent', () => {
       mockSetSearchTermToStorage,
     ]);
 
-    render(<IntegrationsCardGridTabsComponent {...props} />);
+    render(<SecurityIntegrationsGridTabs {...props} />, { wrapper: TestProviders });
 
     await waitFor(() => {
       expect(mockPackageList.mock.calls[0][0].searchTerm).toEqual('new search term');
+    });
+  });
+
+  it('renders auto-import card if appendAutoImport is true', async () => {
+    mockUseSelectedTab.mockReturnValue({
+      selectedTab: { ...INTEGRATION_TABS[0], appendAutoImportCard: true },
+      toggleIdSelected: INTEGRATION_TABS[0].id,
+      setSelectedTabIdToStorage: mockSetTabId,
+      integrationTabs: INTEGRATION_TABS,
+    });
+
+    render(<SecurityIntegrationsGridTabs {...props} />, {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => {
+      expect(mockPackageList.mock.calls[0][0].list).toEqual([
+        expect.objectContaining({ id: 'placeholder:auto_import' }),
+      ]);
     });
   });
 });
