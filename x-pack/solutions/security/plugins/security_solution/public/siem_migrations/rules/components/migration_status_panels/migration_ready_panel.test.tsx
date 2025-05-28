@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// look at the contents of file './migration_ready_panel.test.tsx' in the same directory
-//
-//
-
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MigrationReadyPanel } from './migration_ready_panel';
