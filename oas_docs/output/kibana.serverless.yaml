@@ -45712,7 +45712,7 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
-                                                      advanced_json:
+                                                      manual_ingest_pipeline:
                                                         allOf:
                                                           - type: object
                                                             properties:
@@ -45907,7 +45907,7 @@ paths:
                                                             required:
                                                               - processors
                                                     required:
-                                                      - advanced_json
+                                                      - manual_ingest_pipeline
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
@@ -47033,7 +47033,7 @@ paths:
                                               - additionalProperties: false
                                                 type: object
                                                 properties:
-                                                  advanced_json:
+                                                  manual_ingest_pipeline:
                                                     allOf:
                                                       - type: object
                                                         properties:
@@ -47228,7 +47228,7 @@ paths:
                                                         required:
                                                           - processors
                                                 required:
-                                                  - advanced_json
+                                                  - manual_ingest_pipeline
                                               - additionalProperties: false
                                                 type: object
                                                 properties:
@@ -48209,7 +48209,7 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
-                                                      advanced_json:
+                                                      manual_ingest_pipeline:
                                                         allOf:
                                                           - type: object
                                                             properties:
@@ -48404,7 +48404,7 @@ paths:
                                                             required:
                                                               - processors
                                                     required:
-                                                      - advanced_json
+                                                      - manual_ingest_pipeline
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
@@ -49383,7 +49383,7 @@ paths:
                                               - additionalProperties: false
                                                 type: object
                                                 properties:
-                                                  advanced_json:
+                                                  manual_ingest_pipeline:
                                                     allOf:
                                                       - type: object
                                                         properties:
@@ -49578,7 +49578,7 @@ paths:
                                                         required:
                                                           - processors
                                                 required:
-                                                  - advanced_json
+                                                  - manual_ingest_pipeline
                                               - additionalProperties: false
                                                 type: object
                                                 properties:
@@ -50805,7 +50805,7 @@ paths:
                                   - additionalProperties: false
                                     type: object
                                     properties:
-                                      advanced_json:
+                                      manual_ingest_pipeline:
                                         allOf:
                                           - type: object
                                             properties:
@@ -51000,7 +51000,7 @@ paths:
                                             required:
                                               - processors
                                     required:
-                                      - advanced_json
+                                      - manual_ingest_pipeline
                                   - additionalProperties: false
                                     type: object
                                     properties:
@@ -52043,7 +52043,7 @@ paths:
                                   - additionalProperties: false
                                     type: object
                                     properties:
-                                      advanced_json:
+                                      manual_ingest_pipeline:
                                         allOf:
                                           - type: object
                                             properties:
@@ -52238,7 +52238,7 @@ paths:
                                             required:
                                               - processors
                                     required:
-                                      - advanced_json
+                                      - manual_ingest_pipeline
                                   - additionalProperties: false
                                     type: object
                                     properties:
