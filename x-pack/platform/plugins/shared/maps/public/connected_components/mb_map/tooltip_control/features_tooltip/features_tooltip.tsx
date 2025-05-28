@@ -52,6 +52,8 @@ interface State {
   view: string;
 }
 
+const mapFeatureTooltipBackButtonStyles = css({ paddingLeft: '0' });
+
 export class FeaturesTooltip extends Component<Props, State> {
   state: State = {
     currentFeature: null,
@@ -128,8 +130,10 @@ export class FeaturesTooltip extends Component<Props, State> {
   _renderBackButton(label: string) {
     return (
       <EuiContextMenuItem
-        className="mapFeatureTooltip_backButton"
-        css={(euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title}
+        css={[
+          mapFeatureTooltipBackButtonStyles,
+          (euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title,
+        ]}
         onClick={this._showPropertiesView}
         icon="arrowLeft"
       >
