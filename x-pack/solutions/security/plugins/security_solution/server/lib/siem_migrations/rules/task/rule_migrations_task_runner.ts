@@ -129,10 +129,9 @@ export class RuleMigrationTaskRunner {
 
     try {
       // TODO: track the duration of the initialization alone in the telemetry
-      this.logger.info('Initializing migration');
+      this.logger.debug('Initializing migration');
       await this.withAbort(this.initialize()); // long running operation
     } catch (error) {
-      this.logger.error(`Migration initialization failed: ${error.message}`);
       migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
         this.logger.info('Abort signal received, stopping initialization');
