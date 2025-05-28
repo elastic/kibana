@@ -100,9 +100,9 @@ export class TelemetryConfigWatcher {
             onFailedAttempt: (error) =>
               this.logger.debug(
                 () =>
-                  `Failed to read package policies on ${
+                  `Failed to fetch list of package policies. Attempt [${
                     error.attemptNumber
-                  }. attempt on page ${page}, reason: ${stringify(error)}`
+                  }] for page [${page}] returned error: ${stringify(error)}\n${error.stack}`
               ),
             ...this.retryOptions,
           }
