@@ -257,6 +257,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
               }
             )}{' '}
             <EuiLink
+              data-test-subj="observabilityAiAssistantManagementChangeKbModelLearnMoreLink"
               href="https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-built-in-models"
               target="_blank"
             >
