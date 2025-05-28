@@ -100,7 +100,6 @@ import type { ExternalCallback } from '..';
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
-  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
@@ -1499,25 +1498,29 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       );
 
     updatedPoliciesSuccess = (
-      await pMap(chunk(updatedPoliciesSuccess, 200), async (updatedPoliciesChunk) => {
-        const updatedPoliciesComplete = await this.getByIDs(
-          soClient,
-          updatedPoliciesChunk.map((p) => p.id)
-        );
-        return pMap(
-          updatedPoliciesComplete,
-          (packagePolicy) =>
-            packagePolicyService.runExternalCallbacks(
-              'packagePolicyPostUpdate',
-              packagePolicy,
-              soClient,
-              esClient
-            ),
-          {
-            concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
-          }
-        );
-      })
+      await pMap(
+        chunk(updatedPoliciesSuccess, 100),
+        async (updatedPoliciesChunk) => {
+          const updatedPoliciesComplete = await this.getByIDs(
+            soClient,
+            updatedPoliciesChunk.map((p) => p.id)
+          );
+          return pMap(
+            updatedPoliciesComplete,
+            (packagePolicy) =>
+              packagePolicyService.runExternalCallbacks(
+                'packagePolicyPostUpdate',
+                packagePolicy,
+                soClient,
+                esClient
+              ),
+            {
+              concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+            }
+          );
+        },
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+      )
     ).flat();
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
