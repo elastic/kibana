@@ -40,6 +40,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/ui-actions-browser",
     "@kbn/ebt-tools",
+    "@kbn/palettes"
   ],
   "exclude": [
     "target/**/*",

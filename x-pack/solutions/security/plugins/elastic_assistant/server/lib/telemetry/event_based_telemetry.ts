@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { EventTypeOpts, SchemaValue } from '@kbn/core/server';
 
 export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   model: string;
@@ -198,6 +198,7 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   isEnabledKnowledgeBase: boolean;
   actionTypeId: string;
+  errorLocation: string;
   model?: string;
 }> = {
   eventType: 'invoke_assistant_error',
@@ -233,10 +234,42 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
         description: 'Is knowledge base enabled',
       },
     },
+    errorLocation: {
+      type: 'keyword',
+      _meta: {
+        description: 'Location of error in code',
+      },
+    },
   },
 };
 
-export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
+interface AttackDiscoveryScheduleInfo {
+  id: string;
+  interval: string;
+}
+
+const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> = {
+  properties: {
+    id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Attack discovery schedule id',
+      },
+    },
+    interval: {
+      type: 'keyword',
+      _meta: {
+        description: 'Attack discovery schedule interval',
+      },
+    },
+  },
+  _meta: {
+    description: 'Attack discovery schedule info',
+    optional: true,
+  },
+};
+
+interface AttackDiscoverySuccessTelemetryEvent {
   actionTypeId: string;
   alertsContextCount: number;
   alertsCount: number;
@@ -248,7 +281,10 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
   isDefaultDateRange: boolean;
   model?: string;
   provider?: string;
-}> = {
+  schedule?: AttackDiscoveryScheduleInfo;
+}
+
+export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySuccessTelemetryEvent> = {
   eventType: 'attack_discovery_success',
   schema: {
     actionTypeId: {
@@ -328,15 +364,19 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
         optional: true,
       },
     },
+    schedule: scheduleInfoSchema,
   },
 };
 
-export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<{
+interface AttackDiscoveryErrorTelemetryEvent {
   actionTypeId: string;
   errorMessage: string;
   model?: string;
   provider?: string;
-}> = {
+  schedule?: AttackDiscoveryScheduleInfo;
+}
+
+export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTelemetryEvent> = {
   eventType: 'attack_discovery_error',
   schema: {
     actionTypeId: {
@@ -367,6 +407,7 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<{
         optional: true,
       },
     },
+    schedule: scheduleInfoSchema,
   },
 };
 
@@ -543,7 +584,12 @@ export const DEFEND_INSIGHT_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
-export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
+export type ElasticAssistantTelemetryEvents =
+  | { [key: string]: unknown }
+  | AttackDiscoveryErrorTelemetryEvent
+  | AttackDiscoverySuccessTelemetryEvent;
+
+export const events: Array<EventTypeOpts<ElasticAssistantTelemetryEvents>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
   CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
