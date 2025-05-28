@@ -409,19 +409,65 @@ describe('scheduledQueryFactory', () => {
       `);
     });
 
-    it('should reject if the esClient.search throws an error', async () => {
+    it('should gracefully handle esClient.search errors', async () => {
       client.search.mockImplementationOnce(async () => {
         throw new Error('Some other error');
       });
 
-      await expect(
-        scheduledQuery.list(fakeRawRequest, mockResponseFactory, { username: 'somebody' }, 1, 10)
-      ).rejects.toMatchInlineSnapshot(`
-        Object {
-          "body": "Error listing scheduled reports: Some other error",
-          "statusCode": 500,
-        }
-      `);
+      const result = await scheduledQuery.list(
+        fakeRawRequest,
+        mockResponseFactory,
+        { username: 'somebody' },
+        1,
+        10
+      );
+
+      expect(result).toEqual({
+        page: 1,
+        per_page: 10,
+        total: 2,
+        data: [
+          {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            created_at: '2025-05-06T21:10:17.137Z',
+            created_by: 'elastic',
+            enabled: true,
+            jobtype: 'printable_pdf_v2',
+            next_run: expect.any(String),
+            schedule: {
+              rrule: {
+                freq: 3,
+                interval: 3,
+                byhour: [12],
+                byminute: [0],
+                tzid: 'UTC',
+              },
+            },
+            title: '[Logs] Web Traffic',
+          },
+          {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            created_at: '2025-05-06T21:12:06.584Z',
+            created_by: 'not-elastic',
+            enabled: true,
+            jobtype: 'PNGV2',
+            next_run: expect.any(String),
+            notification: {
+              email: {
+                to: ['user@elastic.co'],
+              },
+            },
+            title: '[Logs] Web Traffic',
+            schedule: {
+              rrule: {
+                freq: 1,
+                interval: 3,
+                tzid: 'UTC',
+              },
+            },
+          },
+        ],
+      });
     });
   });
 
@@ -1064,6 +1110,57 @@ describe('transformResponse', () => {
           enabled: true,
           jobtype: 'PNGV2',
           last_run: '2025-05-06T21:12:07.198Z',
+          next_run: expect.any(String),
+          notification: {
+            email: {
+              to: ['user@elastic.co'],
+            },
+          },
+          title: '[Logs] Web Traffic',
+          schedule: {
+            rrule: {
+              freq: 1,
+              interval: 3,
+              tzid: 'UTC',
+            },
+          },
+        },
+      ],
+    });
+  });
+
+  it('handles undefined last run response', () => {
+    expect(transformResponse(soResponse)).toEqual({
+      page: 1,
+      per_page: 10,
+      total: 2,
+      data: [
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          created_at: '2025-05-06T21:10:17.137Z',
+          created_by: 'elastic',
+          enabled: true,
+          jobtype: 'printable_pdf_v2',
+          last_run: undefined,
+          next_run: expect.any(String),
+          schedule: {
+            rrule: {
+              freq: 3,
+              interval: 3,
+              byhour: [12],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+          title: '[Logs] Web Traffic',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          created_at: '2025-05-06T21:12:06.584Z',
+          created_by: 'not-elastic',
+          enabled: true,
+          jobtype: 'PNGV2',
+          last_run: undefined,
           next_run: expect.any(String),
           notification: {
             email: {

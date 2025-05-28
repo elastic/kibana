@@ -26,7 +26,7 @@ const mockDefendInsight = {
 const validInput = {
   insights: [mockDefendInsight],
   prompt: 'test prompt',
-  anonymizedEvents: [
+  anonymizedDocuments: [
     {
       pageContent: 'event content',
       metadata: {

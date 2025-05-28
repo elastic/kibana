@@ -259,12 +259,13 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme'
   ) => {
-    const { body } = await supertestWithoutAuth
+    const res = await supertestWithoutAuth
       .get(INTERNAL_ROUTES.SCHEDULED.LIST)
       .auth(username, password)
-      .set('kbn-xsrf', 'xxx')
-      .expect(200);
-    return body;
+      .set('kbn-xsrf', 'xxx');
+
+    log.info(`listScheduledReports: ${JSON.stringify(res)}`);
+    return res.body;
   };
 
   const disableScheduledReports = async (

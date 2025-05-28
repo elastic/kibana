@@ -9,7 +9,7 @@ export * from './src/types';
 export * from './src/constants/navigation';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
-export { encodeQuery, decodeQuery } from './src/utils/query_utils';
+export { updateUrlQuery, encodeQuery, decodeQuery } from './src/utils/query_utils';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
 export {
   getSeverityStatusColor,
@@ -24,3 +24,4 @@ export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_
 export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
 export { findReferenceLink } from './src/utils/find_reference_link.util';
+export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';

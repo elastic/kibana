@@ -3980,6 +3980,14 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
+          "[] | undefined; \"kibana.alert.grouping\"?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
           "[] | undefined; \"ecs.version\"?: ",
           {
             "pluginId": "@kbn/utility-types",
