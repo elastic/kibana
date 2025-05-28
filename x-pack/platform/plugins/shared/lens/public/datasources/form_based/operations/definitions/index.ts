@@ -64,7 +64,7 @@ import type {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
+import { DataViewDragDropOperation, FormBasedLayer, TextBasedLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../../common/types';
 import { rangeOperation } from './ranges';
 import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
@@ -492,7 +492,7 @@ export interface FieldBasedOperationErrorMessage {
       core: CoreStart,
       frame: FramePublicAPI,
       layerId: string
-    ) => Promise<FormBasedLayer>;
+    ) => Promise<FormBasedLayer | TextBasedLayer>;
   };
 }
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
@@ -700,11 +700,11 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    * root level
    */
   createCopy: (
-    layers: Record<string, FormBasedLayer>,
+    layers: Record<string, FormBasedLayer | TextBasedLayer>,
     source: DataViewDragDropOperation,
     target: DataViewDragDropOperation,
     operationDefinitionMap: Record<string, GenericOperationDefinition>
-  ) => Record<string, FormBasedLayer>;
+  ) => Record<string, FormBasedLayer | TextBasedLayer>;
 
   /**
    * Special managed columns can be used in a formula

@@ -25,6 +25,7 @@ describe('getAlertSummaryLensAttributes', () => {
           textBased: {
             layers: {
               '094d6c10-a28a-4780-8a0c-5789b73e4cef': {
+                type: 'esql',
                 columns: [
                   {
                     columnId: 'tableStackBy0',
@@ -40,7 +41,7 @@ describe('getAlertSummaryLensAttributes', () => {
                     },
                   },
                 ],
-                index: 'F2772070-4F12-4603-A318-82F98BA69DAB',
+                indexPatternId: 'F2772070-4F12-4603-A318-82F98BA69DAB',
                 query: {
                   esql: esqlQuery,
                 },

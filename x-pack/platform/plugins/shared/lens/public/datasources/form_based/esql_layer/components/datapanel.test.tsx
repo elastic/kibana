@@ -101,7 +101,8 @@ const fieldsOne = [
 const initialState: TextBasedPrivateState = {
   layers: {
     first: {
-      index: '1',
+      type: 'esql' as const,
+      indexPatternId: '1',
       columns: [],
       query: { esql: 'FROM foo' },
     },

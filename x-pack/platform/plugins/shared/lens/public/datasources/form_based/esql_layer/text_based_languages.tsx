@@ -39,6 +39,7 @@ import type {
   TextBasedPersistedState,
   TextBasedLayerColumn,
   TextBasedField,
+  TextBasedLayer,
 } from './types';
 import type { Datasource, DatasourceSuggestion } from '../../../types';
 import { getUniqueLabelGenerator, nonNullable } from '../../../utils';
@@ -269,7 +270,8 @@ export function getTextBasedDatasource({
         layers: {
           ...state.layers,
           [newLayerId]: {
-            index,
+            type: 'esql' as const,
+            indexPatternId: index,
             query,
             columns: newColumns ?? [],
             timeField: context.dataViewSpec.timeFieldName,
@@ -349,6 +351,10 @@ export function getTextBasedDatasource({
       });
 
       const initState = state || { layers: {} };
+      for (const layer of Object.values(initState.layers)) {
+        if (!layer.type) layer.type = 'esql';
+      }
+
       return {
         ...initState,
         indexPatternRefs: refs,
@@ -365,17 +371,17 @@ export function getTextBasedDatasource({
 
     getUsedDataViews: (state) => {
       return Object.values(state.layers)
-        .map(({ index }) => index)
+        .map(({ indexPatternId }) => indexPatternId)
         .filter(nonNullable);
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {
       const savedObjectReferences: SavedObjectReference[] = [];
-      Object.entries(layers).forEach(([layerId, { index, ...persistableLayer }]) => {
-        if (index) {
+      Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
+        if (indexPatternId) {
           savedObjectReferences.push({
             type: 'index-pattern',
-            id: index,
+            id: indexPatternId,
             name: getLayerReferenceName(layerId),
           });
         }
@@ -386,7 +392,7 @@ export function getTextBasedDatasource({
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
       const index =
-        layer?.index ??
+        layer?.indexPatternId ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
           state.indexPatternRefs[0].id);
       return {
@@ -450,22 +456,24 @@ export function getTextBasedDatasource({
       return (
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
+          return (
+            layer.indexPatternId && Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName)
+          );
         })
       );
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
-      if (!layerId || !state.layers[layerId].index) {
+      if (!layerId || !state.layers[layerId].indexPatternId) {
         const layers = Object.values(state.layers);
-        return layers?.[0]?.index as string;
+        return layers?.[0]?.indexPatternId as string;
       }
-      return state.layers[layerId].index as string;
+      return state.layers[layerId].indexPatternId as string;
     },
 
     removeColumn,
 
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
-      return toExpression(state, layerId);
+      return toExpression({ ...state, currentIndexPatternId: '' }, layerId);
     },
     getSelectedFields(state) {
       return getSelectedFieldsFromColumns(
@@ -488,9 +496,11 @@ export function getTextBasedDatasource({
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
+      const { state, ...rest } = props;
       return (
         <TextBasedDimensionTrigger
-          {...props}
+          {...rest}
+          state={{ ...state, currentIndexPatternId: '' }}
           expressions={expressions}
           columnLabelMap={columnLabelMap}
         />
@@ -508,7 +518,17 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      const { state, setState, ...rest } = props;
+      return (
+        <TextBasedDimensionEditor
+          {...rest}
+          state={{ ...state, currentIndexPatternId: '' }}
+          setState={(s) => {
+            setState(s as TextBasedPrivateState);
+          }}
+          expressions={expressions}
+        />
+      );
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
@@ -582,7 +602,7 @@ export function getTextBasedDatasource({
         },
         getSourceId: () => {
           const layer = state.layers[layerId];
-          return layer.index;
+          return layer.indexPatternId;
         },
         getFilters: () => {
           return {
@@ -706,7 +726,7 @@ export function getTextBasedDatasource({
         acc.push({
           layerId: key,
           columns,
-          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.indexPatternId),
         });
 
         return acc;
@@ -717,9 +737,10 @@ export function getTextBasedDatasource({
   return TextBasedDatasource;
 }
 
-function blankLayer(index: string, query?: AggregateQuery) {
+function blankLayer(index: string, query?: AggregateQuery): TextBasedLayer {
   return {
-    index,
+    type: 'esql' as const,
+    indexPatternId: index,
     query,
     columns: [],
   };

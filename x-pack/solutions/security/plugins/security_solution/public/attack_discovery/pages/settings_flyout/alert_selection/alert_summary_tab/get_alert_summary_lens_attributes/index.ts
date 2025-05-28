@@ -32,6 +32,7 @@ export const getAlertSummaryLensAttributes = ({
       textBased: {
         layers: {
           [LAYER_ID]: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'tableStackBy0',
@@ -47,7 +48,7 @@ export const getAlertSummaryLensAttributes = ({
                 },
               },
             ],
-            index: 'F2772070-4F12-4603-A318-82F98BA69DAB',
+            indexPatternId: 'F2772070-4F12-4603-A318-82F98BA69DAB',
             query: {
               esql: esqlQuery,
             },

@@ -2943,7 +2943,7 @@ describe('state_helpers', () => {
         },
         indexPatternId: 'original',
       };
-      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern) as FormBasedLayer;
       expect(updatedLayer.columnOrder).toEqual(['col1']);
       expect(updatedLayer.columns).toEqual({
         col1: layer.columns.col1,
@@ -2977,7 +2977,7 @@ describe('state_helpers', () => {
         },
         indexPatternId: 'original',
       };
-      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern) as FormBasedLayer;
       expect(updatedLayer.columnOrder).toEqual([]);
       expect(updatedLayer.columns).toEqual({});
     });
@@ -3006,7 +3006,7 @@ describe('state_helpers', () => {
         },
         indexPatternId: 'original',
       };
-      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern) as FormBasedLayer;
       expect(updatedLayer.columnOrder).toEqual(['col2']);
       expect(updatedLayer.columns).toEqual({
         col2: layer.columns.col2,
@@ -3038,7 +3038,7 @@ describe('state_helpers', () => {
         },
         indexPatternId: 'original',
       };
-      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern) as FormBasedLayer;
       expect(updatedLayer.columnOrder).toEqual(['col1']);
       expect(updatedLayer.columns).toEqual({
         col1: {
@@ -3077,7 +3077,7 @@ describe('state_helpers', () => {
         },
         indexPatternId: 'original',
       };
-      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern) as FormBasedLayer;
       expect(updatedLayer.columnOrder).toEqual(['col1']);
       expect(updatedLayer.columns).toEqual({
         col1: layer.columns.col1,
@@ -3110,7 +3110,7 @@ describe('state_helpers', () => {
         },
         indexPatternId: 'original',
       };
-      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern);
+      const updatedLayer = updateLayerIndexPattern(layer, newIndexPattern) as FormBasedLayer;
       expect(updatedLayer.columnOrder).toEqual(['col1']);
       expect(updatedLayer.columns).toEqual({
         col1: layer.columns.col1,

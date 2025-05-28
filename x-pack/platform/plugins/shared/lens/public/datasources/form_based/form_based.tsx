@@ -25,6 +25,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
+import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -40,6 +41,10 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
+  DatasourceSuggestion,
+  DataType,
+  TableChangeType,
+  DatasourceDimensionDropHandlerProps,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -52,6 +57,7 @@ import {
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
+import { toExpression as toExpressionESQL } from './esql_layer/to_expression';
 import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
@@ -88,7 +94,16 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
+import {
+  FormBasedPrivateState,
+  DataViewDragDropOperation,
+  CombinedFormBasedPersistedState,
+  CombinedFormBasedPrivateState,
+  isFormBasedLayer,
+  isTextBasedLayer,
+  hasTextBasedLayers,
+  TextBasedField,
+} from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
@@ -102,8 +117,25 @@ import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';
+import { TextBasedDimensionEditor } from './esql_layer/components/dimension_editor';
+import { TextBasedDimensionTrigger } from './esql_layer/components/dimension_trigger';
+import {
+  addColumnsToCache,
+  getColumnsFromCache,
+  retrieveLayerColumnsFromCache,
+} from './esql_layer/fieldlist_cache';
+import { generateId } from '../../id_generator';
+import {
+  canColumnBeUsedBeInMetricDimension,
+  MAX_NUM_OF_COLUMNS,
+  isNotNumeric,
+  isNumeric,
+  getOperationForColumnIdESQL,
+} from './esql_layer/utils';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
+
+import { getSuggestionsByRules, getUnchangedSuggestionTable } from './esql_layer/suggestions';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -137,25 +169,30 @@ function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPatte
   }
 }
 
-export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = ({
+export const removeColumn: Datasource<CombinedFormBasedPrivateState>['removeColumn'] = ({
   prevState,
   layerId,
   columnId,
   indexPatterns,
 }) => {
-  const indexPattern = indexPatterns?.[prevState.layers[layerId]?.indexPatternId];
-  if (!indexPattern) {
-    throw new Error('indexPatterns is not passed to the function');
+  const layer = prevState.layers[layerId];
+  if (layer && isFormBasedLayer(layer)) {
+    const indexPattern = indexPatterns?.[layer.indexPatternId];
+    if (!indexPattern) {
+      throw new Error('indexPatterns is not passed to the function');
+    }
+    return mergeLayer({
+      state: prevState,
+      layerId,
+      newLayer: deleteColumn({
+        layer,
+        columnId,
+        indexPattern,
+      }),
+    });
+  } else {
+    return prevState;
   }
-  return mergeLayer({
-    state: prevState,
-    layerId,
-    newLayer: deleteColumn({
-      layer: prevState.layers[layerId],
-      columnId,
-      indexPattern,
-    }),
-  });
 };
 
 export function columnToOperation(
@@ -202,6 +239,7 @@ export function getFormBasedDatasource({
   charts,
   dataViewFieldEditor,
   uiActions,
+  expressions,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -213,19 +251,157 @@ export function getFormBasedDatasource({
   charts: ChartsPluginSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
+  expressions: ExpressionsStart;
 }) {
   const { uiSettings, featureFlags } = core;
 
   const DATASOURCE_ID = 'formBased';
   const ALIAS_IDS = ['indexpattern'];
 
+  const getSuggestionsForState = (state: CombinedFormBasedPrivateState) => {
+    return Object.entries(state.layers)?.flatMap((entry) => {
+      const [id] = entry;
+      const layer = entry[1];
+      if (isFormBasedLayer(layer)) {
+        return [];
+      }
+      const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
+
+      if (!allColumns.length && layer.query) {
+        const layerColumns = layer.columns.map((c) => ({
+          id: c.columnId,
+          name: c.fieldName,
+          meta: c.meta,
+        })) as DatatableColumn[];
+        addColumnsToCache(layer.query, layerColumns);
+      }
+
+      const unchangedSuggestionTable = getUnchangedSuggestionTable(state, allColumns, id);
+
+      // we are trying here to cover the most common cases for the charts we offer
+      const metricTable = getSuggestionsByRules(state, allColumns, id, [{ isBucketed: false }]);
+      const metricBucketTable = getSuggestionsByRules(state, allColumns, id, [
+        { isBucketed: false },
+        { isBucketed: true, allowAll: true },
+      ]);
+      const metricBucketBucketTable = getSuggestionsByRules(state, allColumns, id, [
+        { isBucketed: false },
+        { isBucketed: true, allowAll: true },
+        { isBucketed: true, allowAll: true },
+      ]);
+
+      return [unchangedSuggestionTable, metricBucketBucketTable, metricBucketTable, metricTable]
+        .filter(nonNullable)
+        .reduce<Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>>((acc, cur) => {
+          if (acc.find(({ table }) => isEqual(table.columns, cur.table.columns))) {
+            return acc;
+          }
+          return [...acc, cur];
+        }, []);
+    });
+  };
+  const getSuggestionsForVisualizeField = (
+    state: CombinedFormBasedPrivateState,
+    indexPatternId: string,
+    fieldName: string
+  ) => {
+    const context = state.initialContext;
+    // on text based mode we offer suggestions for the query and not for a specific field
+    if (fieldName) return [];
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
+      const newLayerId = generateId();
+      const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
+      // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
+      // will not return number fields. In these cases we want to suggest a datatable
+      // Datatable works differently in this case. On the metrics dimension can be all type of fields
+      const hasNumberTypeColumns = textBasedQueryColumns?.some(isNumeric);
+      const newColumns = textBasedQueryColumns.map((c) => {
+        const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+          textBasedQueryColumns,
+          c?.meta?.type
+        );
+        return {
+          columnId: c.id,
+          fieldName: c.name,
+          meta: c.meta,
+          // makes non-number fields to act as metrics, used for datatable suggestions
+          ...(inMetricDimension && {
+            inMetricDimension,
+          }),
+        };
+      });
+
+      addColumnsToCache(context.query, textBasedQueryColumns);
+
+      const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
+      const query = context.query;
+      const updatedState = {
+        ...state,
+        initialContext: undefined,
+        ...(context.dataViewSpec.id
+          ? {
+              indexPatternRefs: [
+                {
+                  id: context.dataViewSpec.id,
+                  title: context.dataViewSpec.title,
+                  timeField: context.dataViewSpec.timeFieldName,
+                },
+              ],
+            }
+          : {}),
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            type: 'esql',
+            index,
+            query,
+            columns: newColumns ?? [],
+            timeField: context.dataViewSpec.timeFieldName,
+          },
+        },
+      };
+
+      return [
+        {
+          state: {
+            ...updatedState,
+          },
+          table: {
+            changeType: 'initial' as TableChangeType,
+            isMultiRow: false,
+            notAssignedMetrics: !hasNumberTypeColumns,
+            layerId: newLayerId,
+            columns:
+              newColumns?.map((f) => {
+                return {
+                  columnId: f.columnId,
+                  operation: {
+                    dataType: f?.meta?.type as DataType,
+                    label: f.fieldName,
+                    isBucketed: Boolean(isNotNumeric(f)),
+                  },
+                };
+              }) ?? [],
+          },
+          keptLayerIds: [newLayerId],
+        },
+      ];
+    }
+
+    return [];
+  };
+
   // Not stateful. State is persisted to the frame
-  const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query> = {
+  const formBasedDatasource: Datasource<
+    CombinedFormBasedPrivateState,
+    CombinedFormBasedPersistedState,
+    Query
+  > = {
     id: DATASOURCE_ID,
     alias: ALIAS_IDS,
 
     initialize(
-      persistedState?: FormBasedPersistedState,
+      persistedState?: CombinedFormBasedPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
@@ -242,12 +418,12 @@ export function getFormBasedDatasource({
       });
     },
 
-    getPersistableState(state: FormBasedPrivateState) {
+    getPersistableState(state: CombinedFormBasedPrivateState) {
       return extractReferences(state);
     },
 
     insertLayer(
-      state: FormBasedPrivateState,
+      state: CombinedFormBasedPrivateState,
       newLayerId: string,
       linkToLayers: string[] | undefined
     ) {
@@ -264,6 +440,7 @@ export function getFormBasedDatasource({
       return {
         currentIndexPatternId: indexPatternId,
         layers: {},
+        indexPatternRefs: [],
       };
     },
 
@@ -274,14 +451,18 @@ export function getFormBasedDatasource({
       };
     },
 
-    removeLayer(state: FormBasedPrivateState, layerId: string) {
+    removeLayer(state: CombinedFormBasedPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
       const removedLayerIds: string[] = [layerId];
 
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
-        const linkedLayers = newLayers[id]?.linkToLayers;
+        const layer = newLayers[id];
+        if (!layer || isTextBasedLayer(layer)) {
+          return;
+        }
+        const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
           removedLayerIds.push(id);
@@ -297,32 +478,48 @@ export function getFormBasedDatasource({
       };
     },
 
-    clearLayer(state: FormBasedPrivateState, layerId: string) {
+    clearLayer(state: CombinedFormBasedPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
 
       const removedLayerIds: string[] = [];
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
-        const linkedLayers = newLayers[id]?.linkToLayers;
+        const layer = newLayers[id];
+        if (!layer || isTextBasedLayer(layer)) {
+          return;
+        }
+        const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
           removedLayerIds.push(id);
         }
       });
 
+      const layer = newLayers[layerId];
+      if (!layer || isTextBasedLayer(layer)) {
+        return {
+          removedLayerIds,
+          newState: {
+            ...state,
+            layers: newLayers,
+          },
+        };
+      }
+
+      const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
       return {
         removedLayerIds,
         newState: {
           ...state,
           layers: {
             ...newLayers,
-            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId]?.linkToLayers),
+            [layerId]: blankLayer(state.currentIndexPatternId, linkedLayers),
           },
         },
       };
     },
 
-    getLayers(state: FormBasedPrivateState) {
+    getLayers(state: CombinedFormBasedPrivateState) {
       return Object.keys(state?.layers);
     },
 
@@ -334,48 +531,55 @@ export function getFormBasedDatasource({
       indexPatterns,
       { columnId, groupId, staticValue, autoTimeField, visualizationGroups }
     ) {
-      const indexPattern = indexPatterns[state.layers[layerId]?.indexPatternId];
-      let ret = state;
+      const layer = state.layers[layerId];
+      if (layer && isFormBasedLayer(layer)) {
+        const indexPattern = indexPatterns[layer.indexPatternId];
+        let ret = state;
 
-      if (staticValue != null) {
-        ret = mergeLayer({
-          state,
-          layerId,
-          newLayer: insertNewColumn({
-            layer: state.layers[layerId],
-            op: 'static_value',
-            columnId,
-            field: undefined,
-            indexPattern,
-            visualizationGroups,
-            initialParams: { params: { value: staticValue } },
-            targetGroup: groupId,
-          }),
-        });
+        if (staticValue != null) {
+          ret = mergeLayer({
+            state,
+            layerId,
+            newLayer: insertNewColumn({
+              layer,
+              op: 'static_value',
+              columnId,
+              field: undefined,
+              indexPattern,
+              visualizationGroups,
+              initialParams: { params: { value: staticValue } },
+              targetGroup: groupId,
+            }),
+          });
+        }
+
+        if (autoTimeField && indexPattern.timeFieldName) {
+          ret = mergeLayer({
+            state,
+            layerId,
+            newLayer: insertNewColumn({
+              layer,
+              op: 'date_histogram',
+              columnId,
+              field: indexPattern.fields.find((field) => field.name === indexPattern.timeFieldName),
+              indexPattern,
+              visualizationGroups,
+              targetGroup: groupId,
+            }),
+          });
+        }
+
+        return ret;
+      } else {
+        return state;
       }
-
-      if (autoTimeField && indexPattern.timeFieldName) {
-        ret = mergeLayer({
-          state,
-          layerId,
-          newLayer: insertNewColumn({
-            layer: state.layers[layerId],
-            op: 'date_histogram',
-            columnId,
-            field: indexPattern.fields.find((field) => field.name === indexPattern.timeFieldName),
-            indexPattern,
-            visualizationGroups,
-            targetGroup: groupId,
-          }),
-        });
-      }
-
-      return ret;
     },
 
     syncColumns({ state, links, indexPatterns, getDimensionGroups }) {
-      let modifiedLayers: Record<string, FormBasedLayer> = state.layers;
-
+      const filteredLayers = Object.entries(state.layers).filter(([_, layer]) =>
+        isFormBasedLayer(layer)
+      );
+      let modifiedLayers = Object.fromEntries(filteredLayers) as Record<string, FormBasedLayer>;
       links.forEach((link) => {
         const source: DataViewDragDropOperation = {
           ...link.from,
@@ -393,7 +597,7 @@ export function getFormBasedDatasource({
           layers: modifiedLayers,
           target,
           source,
-        });
+        }) as Record<string, FormBasedLayer>;
 
         const updatedColumnOrder = reorderByGroups(
           getDimensionGroups(target.layerId),
@@ -418,28 +622,37 @@ export function getFormBasedDatasource({
       });
 
       links
-        .filter((link) =>
-          isColumnOfType<TermsIndexPatternColumn>(
-            'terms',
-            newState.layers[link.from.layerId].columns[link.from.columnId]
-          )
-        )
-        .forEach(({ from, to }) => {
-          const fromColumn = newState.layers[from.layerId].columns[
-            from.columnId
-          ] as TermsIndexPatternColumn;
-          if (fromColumn.params.orderBy.type === 'column') {
-            const fromOrderByColumnId = fromColumn.params.orderBy.columnId;
-            const orderByColumnLink = links.find(
-              ({ from: { columnId } }) => columnId === fromOrderByColumnId
+        .filter((link) => {
+          const layer = newState.layers[link.from.layerId];
+          if (layer && isFormBasedLayer(layer)) {
+            return isColumnOfType<TermsIndexPatternColumn>(
+              'terms',
+              layer.columns[link.from.columnId]
             );
+          }
+          return false;
+        })
+        .forEach(({ from, to }) => {
+          const fromLayer = newState.layers[from.layerId];
+          if (fromLayer && isFormBasedLayer(fromLayer)) {
+            const fromColumn = fromLayer.columns[from.columnId] as TermsIndexPatternColumn;
+            if (fromColumn.params.orderBy.type === 'column') {
+              const fromOrderByColumnId = fromColumn.params.orderBy.columnId;
+              const orderByColumnLink = links.find(
+                ({ from: { columnId } }) => columnId === fromOrderByColumnId
+              );
 
-            if (orderByColumnLink) {
-              // order the synced column by the dimension which is linked to the column that the original column was ordered by
-              const toColumn = newState.layers[to.layerId].columns[
-                to.columnId
-              ] as TermsIndexPatternColumn;
-              toColumn.params.orderBy = { type: 'column', columnId: orderByColumnLink.to.columnId };
+              if (orderByColumnLink) {
+                // order the synced column by the dimension which is linked to the column that the original column was ordered by
+                const toLayer = newState.layers[to.layerId];
+                if (toLayer && isFormBasedLayer(toLayer)) {
+                  const toColumn = toLayer.columns[to.columnId] as TermsIndexPatternColumn;
+                  toColumn.params.orderBy = {
+                    type: 'column',
+                    columnId: orderByColumnLink.to.columnId,
+                  };
+                }
+              }
             }
           }
         });
@@ -461,8 +674,12 @@ export function getFormBasedDatasource({
       nowInstant,
       searchSessionId,
       forceDSL
-    ) =>
-      toExpression(
+    ) => {
+      if (state.layers[layerId] && isTextBasedLayer(state.layers[layerId])) {
+        return toExpressionESQL(state, layerId);
+      }
+
+      return toExpression(
         state,
         layerId,
         indexPatterns,
@@ -472,14 +689,19 @@ export function getFormBasedDatasource({
         nowInstant,
         searchSessionId,
         forceDSL
-      ),
+      );
+    },
 
     LayerSettingsComponent(props) {
+      if (props.layerId && isTextBasedLayer(props.state.layers[props.layerId])) {
+        return null;
+      }
       return <LayerSettingsPanel {...props} />;
     },
-    DataPanelComponent(props: DatasourceDataPanelProps<FormBasedPrivateState, Query>) {
+    DataPanelComponent(props: DatasourceDataPanelProps<CombinedFormBasedPrivateState, Query>) {
       const { onChangeIndexPattern, ...otherProps } = props;
       const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
+
       return (
         <FormBasedDataPanel
           data={data}
@@ -495,42 +717,66 @@ export function getFormBasedDatasource({
         />
       );
     },
-    uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
+    uniqueLabels(state: CombinedFormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
 
       const uniqueLabelGenerator = getUniqueLabelGenerator();
 
       Object.values(layers).forEach((layer) => {
-        if (!layer.columns) {
-          return;
+        if (isFormBasedLayer(layer)) {
+          if (!layer.columns) {
+            return;
+          }
+          Object.entries(layer.columns).forEach(([columnId, column]) => {
+            columnLabelMap[columnId] = uniqueLabelGenerator(
+              column.customLabel
+                ? column.label
+                : operationDefinitionMap[column.operationType].getDefaultLabel(
+                    column,
+                    layer.columns,
+                    indexPatternsMap[layer.indexPatternId]
+                  )
+            );
+          });
+        } else if (isTextBasedLayer(layer)) {
+          Object.values(layer.columns).forEach((column) => {
+            columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          });
         }
-        Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = uniqueLabelGenerator(
-            column.customLabel
-              ? column.label
-              : operationDefinitionMap[column.operationType].getDefaultLabel(
-                  column,
-                  layer.columns,
-                  indexPatternsMap[layer.indexPatternId]
-                )
-          );
-        });
       });
 
       return columnLabelMap;
     },
 
-    DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<FormBasedPrivateState>) => {
+    DimensionTriggerComponent: (
+      props: DatasourceDimensionTriggerProps<CombinedFormBasedPrivateState>
+    ) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
+      if (props.layerId && isTextBasedLayer(props.state.layers[props.layerId])) {
+        return (
+          <TextBasedDimensionTrigger
+            {...props}
+            expressions={expressions}
+            columnLabelMap={columnLabelMap}
+          />
+        );
+      }
+
       return <DimensionTrigger id={props.columnId} label={formattedLabel} />;
     },
 
-    DimensionEditorComponent: (props: DatasourceDimensionEditorProps<FormBasedPrivateState>) => {
+    DimensionEditorComponent: (
+      props: DatasourceDimensionEditorProps<CombinedFormBasedPrivateState>
+    ) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
+
+      if (props.layerId && isTextBasedLayer(props.state.layers[props.layerId])) {
+        return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      }
 
       return (
         <FormBasedDimensionEditor
@@ -548,8 +794,14 @@ export function getFormBasedDatasource({
       );
     },
 
-    LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
+    LayerPanelComponent: (props: DatasourceLayerPanelProps<CombinedFormBasedPrivateState>) => {
       const { onChangeIndexPattern, ...otherProps } = props;
+
+      const layer = props.state.layers[props.layerId];
+      if (!layer || isTextBasedLayer(layer)) {
+        return null;
+      }
+
       return (
         <LayerPanel
           onChangeIndexPattern={(indexPatternId) => {
@@ -567,10 +819,14 @@ export function getFormBasedDatasource({
     },
 
     getDropProps,
-    onDrop,
+    onDrop: (props) => {
+      if (props.state && !hasTextBasedLayers(props.state)) {
+        return onDrop(props as DatasourceDimensionDropHandlerProps<FormBasedPrivateState>);
+      }
+    },
 
     getCustomWorkspaceRenderer: (
-      state: FormBasedPrivateState,
+      state: CombinedFormBasedPrivateState,
       dragging: DraggingIdentifier,
       indexPatterns: Record<string, IndexPattern>
     ) => {
@@ -616,7 +872,9 @@ export function getFormBasedDatasource({
           layerId,
           ...Object.entries(state.layers)
             .map(([possiblyLinkedId, layer]) =>
-              layer.linkToLayers?.includes(layerId) ? possiblyLinkedId : ''
+              isFormBasedLayer(layer) && layer.linkToLayers?.includes(layerId)
+                ? possiblyLinkedId
+                : ''
             )
             .filter(Boolean),
         ];
@@ -635,7 +893,7 @@ export function getFormBasedDatasource({
     onIndexPatternRename: (state, oldIndexPatternId, newIndexPatternId) => {
       return renameIndexPattern({ state, oldIndexPatternId, newIndexPatternId });
     },
-    getRenderEventCounters(state: FormBasedPrivateState): string[] {
+    getRenderEventCounters(state: CombinedFormBasedPrivateState): string[] {
       const additionalEvents = {
         time_shift: false,
         filter: false,
@@ -669,6 +927,9 @@ export function getFormBasedDatasource({
     // update the state if it's not needed
     updateStateOnCloseDimension: ({ state, layerId }) => {
       const layer = state.layers[layerId];
+      if (!layer || isTextBasedLayer(layer)) {
+        return state;
+      }
       if (!Object.values(layer.incompleteColumns || {}).length) {
         return;
       }
@@ -679,10 +940,13 @@ export function getFormBasedDatasource({
       });
     },
 
-    getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<FormBasedPrivateState>) {
+    getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<CombinedFormBasedPrivateState>) {
       const columnLabelMap = formBasedDatasource.uniqueLabels(state, indexPatterns);
       const layer = state.layers[layerId];
-      const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
+
+      const visibleColumnIds = isFormBasedLayer(layer)
+        ? layer.columnOrder.filter((colId) => !isReferenced(layer, colId))
+        : [];
 
       return {
         datasourceId: DATASOURCE_ID,
@@ -690,6 +954,14 @@ export function getFormBasedDatasource({
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column
+          if (!layer || isTextBasedLayer(layer)) {
+            return (
+              layer?.columns.map((column) => ({
+                columnId: column.columnId,
+                fields: [column.fieldName],
+              })) || []
+            );
+          }
           const fieldsPerColumn: Record<string, string[]> = {};
           Object.keys(layer.columns).forEach((colId) => {
             const visibleColumnId = getReferenceRoot(layer, colId);
@@ -710,8 +982,22 @@ export function getFormBasedDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
-        isTextBasedLanguage: () => false,
+        isTextBasedLanguage: () => {
+          return Boolean(layer && isTextBasedLayer(layer));
+        },
         getOperationForColumnId: (columnId: string) => {
+          if (!layer) {
+            return null;
+          }
+          if (isTextBasedLayer(layer)) {
+            return getOperationForColumnIdESQL(
+              state,
+              layerId,
+              columnId,
+              indexPatterns,
+              this.uniqueLabels
+            );
+          }
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(
@@ -727,6 +1013,18 @@ export function getFormBasedDatasource({
           return layer.indexPatternId;
         },
         getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
+          if (!layer || isTextBasedLayer(layer)) {
+            return {
+              enabled: {
+                kuery: [],
+                lucene: [],
+              },
+              disabled: {
+                kuery: [],
+                lucene: [],
+              },
+            };
+          }
           return getFiltersInLayer(
             layer,
             visibleColumnIds,
@@ -735,8 +1033,16 @@ export function getFormBasedDatasource({
             timeRange
           );
         },
-        getVisualDefaults: () => getVisualDefaultsForLayer(layer),
+        getVisualDefaults: () => {
+          if (!layer || isTextBasedLayer(layer)) {
+            return {};
+          }
+          return getVisualDefaultsForLayer(layer);
+        },
         getMaxPossibleNumValues: (columnId) => {
+          if (!layer || isTextBasedLayer(layer)) {
+            return null;
+          }
           if (layer && layer.columns[columnId]) {
             const column = layer.columns[columnId];
             return (
@@ -745,23 +1051,115 @@ export function getFormBasedDatasource({
           }
           return null;
         },
-        hasDefaultTimeField: () => Boolean(indexPatterns[layer.indexPatternId].timeFieldName),
+        hasDefaultTimeField: () =>
+          Boolean(layer.indexPatternId && indexPatterns[layer.indexPatternId].timeFieldName),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
+      const layers = Object.values(state.layers);
+      if (layers?.[0] && isTextBasedLayer(layers[0])) {
+        const query = layers[0].query;
+        const fieldList = query ? getColumnsFromCache(query) : [];
+        const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
+        if (!field) return [];
+        const suggestions = Object.entries(state.layers)?.map(([id, layer]) => {
+          if (isFormBasedLayer(layer)) {
+            return;
+          }
+          const newId = generateId();
+          const newColumn = {
+            columnId: newId,
+            fieldName: field?.name ?? '',
+            meta: field?.meta,
+          };
+          return {
+            state: {
+              ...state,
+              layers: {
+                ...state.layers,
+                [id]: {
+                  ...layer,
+                  columns: layer.columns.concat(newColumn),
+                },
+              },
+            },
+            table: {
+              changeType: 'initial' as TableChangeType,
+              isMultiRow: false,
+              layerId: id,
+              columns: [
+                ...layer.columns?.map((f) => {
+                  return {
+                    columnId: f.columnId,
+                    operation: {
+                      dataType: f?.meta?.type as DataType,
+                      label: f.fieldName,
+                      isBucketed: Boolean(isNotNumeric(f)),
+                    },
+                  };
+                }),
+                {
+                  columnId: newId,
+                  operation: {
+                    dataType: field?.meta?.type as DataType,
+                    label: field?.name ?? '',
+                    isBucketed: Boolean(isNotNumeric(field)),
+                  },
+                },
+              ],
+            },
+            keptLayerIds: [id],
+          };
+        });
+        return suggestions.filter(nonNullable);
+      }
+      if (hasTextBasedLayers(state)) {
+        return [];
+      }
+
       return isDraggedDataViewField(draggedField)
-        ? getDatasourceSuggestionsForField(
+        ? (getDatasourceSuggestionsForField(
             state,
             draggedField.indexPatternId,
             draggedField.field,
             indexPatterns,
             filterLayers
-          )
+          ) as Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>)
         : [];
     },
-    getDatasourceSuggestionsFromCurrentState,
-    getDatasourceSuggestionsForVisualizeField,
-    getDatasourceSuggestionsForVisualizeCharts,
+    getDatasourceSuggestionsFromCurrentState: (state, indexPatterns, filterFn, activeData) => {
+      if (hasTextBasedLayers(state)) {
+        return getSuggestionsForState(state);
+      }
+
+      return getDatasourceSuggestionsFromCurrentState(state, indexPatterns, filterFn);
+    },
+    getDatasourceSuggestionsForVisualizeField: (
+      state,
+      indexPatternId,
+      fieldName,
+      indexPatterns
+    ) => {
+      if (state.initialContext || hasTextBasedLayers(state)) {
+        return getSuggestionsForVisualizeField(state, indexPatternId, fieldName) as Array<
+          DatasourceSuggestion<CombinedFormBasedPrivateState>
+        >;
+      }
+      return getDatasourceSuggestionsForVisualizeField(
+        state,
+        indexPatternId,
+        fieldName,
+        indexPatterns
+      ) as Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>;
+    },
+    getDatasourceSuggestionsForVisualizeCharts: (state, context, indexPatterns) => {
+      if (hasTextBasedLayers(state)) {
+        return getSuggestionsForState(state);
+      }
+      return getDatasourceSuggestionsForVisualizeCharts(state, context, indexPatterns) as Array<
+        DatasourceSuggestion<CombinedFormBasedPrivateState>
+      >;
+    },
 
     getUserMessages(state, { frame: framePublicAPI, setState, visualizationInfo }) {
       if (!state) {
@@ -775,6 +1173,9 @@ export function getFormBasedDatasource({
         layerErrorMessages,
         (layerId, columnId) => {
           const layer = state.layers[layerId];
+          if (!layer || isTextBasedLayer(layer)) {
+            return false;
+          }
           const column = layer.columns[columnId];
           const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
           if (!column || !indexPattern) {
@@ -828,7 +1229,9 @@ export function getFormBasedDatasource({
     },
 
     checkIntegrity: (state, indexPatterns) => {
-      const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
+      const ids = Object.values(state.layers || {})
+        .filter(isFormBasedLayer)
+        .map(({ indexPatternId }) => indexPatternId);
       return ids.filter((id) => !indexPatterns[id]);
     },
     isTimeBased: (state, indexPatterns) => {
@@ -836,40 +1239,44 @@ export function getFormBasedDatasource({
       const { layers } = state;
       return (
         Boolean(layers) &&
-        Object.values(layers).some((layer) => {
-          return (
-            Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
-            layer.columnOrder
-              .filter((colId) => layer.columns[colId].isBucketed)
-              .some((colId) => {
-                const column = layer.columns[colId];
-                return (
-                  isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
-                  !column.params.ignoreTimeRange
-                );
-              })
-          );
-        })
+        Object.values(layers)
+          .filter(isFormBasedLayer)
+          .some((layer) => {
+            return (
+              Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
+              layer.columnOrder
+                .filter((colId) => layer.columns[colId].isBucketed)
+                .some((colId) => {
+                  const column = layer.columns[colId];
+                  return (
+                    isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+                    !column.params.ignoreTimeRange
+                  );
+                })
+            );
+          })
       );
     },
     isEqual: (
-      persistableState1: FormBasedPersistedState,
+      persistableState1: CombinedFormBasedPersistedState,
       references1: SavedObjectReference[],
-      persistableState2: FormBasedPersistedState,
+      persistableState2: CombinedFormBasedPersistedState,
       references2: SavedObjectReference[]
     ) =>
       isEqual(
         injectReferences(persistableState1, references1),
         injectReferences(persistableState2, references2)
       ),
-    getUsedDataView: (state: FormBasedPrivateState, layerId?: string) => {
+    getUsedDataView: (state: CombinedFormBasedPrivateState, layerId?: string) => {
       if (!layerId) {
         return state.currentIndexPatternId;
       }
-      return state.layers[layerId].indexPatternId;
+      return state.layers[layerId].indexPatternId ?? state.currentIndexPatternId;
     },
     getUsedDataViews: (state) => {
-      return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+      return Object.values(state.layers)
+        .filter(isFormBasedLayer)
+        .map(({ indexPatternId }) => indexPatternId);
     },
     injectReferencesToLayers: (state, references) => {
       const layers =
@@ -884,6 +1291,7 @@ export function getFormBasedDatasource({
       const layers = references ? injectReferences(state, references).layers : state.layers;
       const indexPatterns: DataView[] = await Promise.all(
         Object.values(layers)
+          .filter(isFormBasedLayer)
           .map(({ indexPatternId }) => dataViewsService?.get(indexPatternId))
           .filter(nonNullable)
       );
@@ -932,20 +1340,26 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
 }
 
 function getLayerErrorMessages(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   framePublicAPI: FramePublicAPI,
-  setState: StateSetter<FormBasedPrivateState, unknown> | undefined,
+  setState: StateSetter<CombinedFormBasedPrivateState, unknown> | undefined,
   core: CoreStart,
   data: DataPublicPluginStart
 ): UserMessage[] {
   const indexPatterns = framePublicAPI.dataViews.indexPatterns;
 
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
-    .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
+    .filter(([_, layer]) => layer.indexPatternId && !!indexPatterns[layer.indexPatternId])
     .map(([layerId, layer]) =>
       (
-        getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core, data) ??
-        []
+        getErrorMessages(
+          layer,
+          indexPatterns[layer.indexPatternId ?? ''],
+          state,
+          layerId,
+          core,
+          data
+        ) ?? []
       ).map((error) => {
         const message: UserMessage = {
           uniqueId: typeof error === 'string' ? error : error.uniqueId,
@@ -1025,7 +1439,7 @@ function getLayerErrorMessages(
 }
 
 function getInvalidDimensionErrorMessages(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   currentErrorMessages: UserMessage[],
   isInvalidColumn: (layerId: string, columnId: string) => boolean
 ) {

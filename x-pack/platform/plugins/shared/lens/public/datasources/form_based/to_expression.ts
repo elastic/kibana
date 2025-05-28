@@ -28,7 +28,12 @@ import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
-import { FormBasedPrivateState, FormBasedLayer } from './types';
+import {
+  FormBasedLayer,
+  CombinedFormBasedPrivateState,
+  isFormBasedLayer,
+  isTextBasedLayer,
+} from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
@@ -36,6 +41,7 @@ import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
+import { getExpressionForLayer as getESQLExpression } from './esql_layer/to_expression';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -550,7 +556,7 @@ function sortedReferences(columns: Array<readonly [string, GenericIndexPatternCo
 }
 
 export function toExpression(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
@@ -560,17 +566,22 @@ export function toExpression(
   searchSessionId?: string,
   forceDSL?: boolean
 ) {
-  if (state.layers[layerId]) {
-    return getExpressionForLayer(
-      state.layers[layerId],
-      indexPatterns[state.layers[layerId].indexPatternId],
-      uiSettings,
-      featureFlags,
-      dateRange,
-      nowInstant,
-      searchSessionId,
-      forceDSL
-    );
+  const layer = state.layers[layerId];
+  if (layer) {
+    if (isFormBasedLayer(layer)) {
+      return getExpressionForLayer(
+        layer,
+        indexPatterns[layer.indexPatternId],
+        uiSettings,
+        featureFlags,
+        dateRange,
+        nowInstant,
+        searchSessionId,
+        forceDSL
+      );
+    } else if (isTextBasedLayer(layer)) {
+      return getESQLExpression(layer, layerId, state.indexPatternRefs ?? []);
+    }
   }
 
   return null;

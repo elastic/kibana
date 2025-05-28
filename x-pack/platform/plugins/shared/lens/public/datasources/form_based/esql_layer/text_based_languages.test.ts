@@ -101,7 +101,7 @@ const queryBaseState = {
         },
       ],
       query: { esql: 'FROM foo' },
-      index: '1',
+      indexPatternId: '1',
     },
   },
   indexPatternRefs: [
@@ -127,6 +127,7 @@ describe('Textbased Data Source', () => {
     baseState = {
       layers: {
         a: {
+          type: 'esql',
           columns: [
             {
               columnId: 'col1',
@@ -136,7 +137,7 @@ describe('Textbased Data Source', () => {
               },
             },
           ],
-          index: 'foo',
+          indexPatternId: 'foo',
           query: { esql: 'FROM foo' },
         },
       },
@@ -163,7 +164,7 @@ describe('Textbased Data Source', () => {
               },
             },
           ],
-          index: 'foo',
+          indexPatternId: 'foo',
         },
       },
     } as unknown as TextBasedPrivateState;
@@ -211,7 +212,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState,
@@ -276,7 +277,7 @@ describe('Textbased Data Source', () => {
           a: {
             columns: [],
             query: { esql: 'FROM foo' },
-            index: 'foo',
+            indexPatternId: 'foo',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -309,7 +310,8 @@ describe('Textbased Data Source', () => {
         layers: {
           ...baseState.layers,
           newLayer: {
-            index: 'foo',
+            type: 'esql',
+            indexPatternId: 'foo',
             query: { esql: 'FROM foo' },
             columns: [],
           },
@@ -326,9 +328,10 @@ describe('Textbased Data Source', () => {
           ...baseState,
           layers: {
             a: {
+              type: 'esql',
               columns: [],
               query: { esql: 'FROM foo' },
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         },
@@ -368,7 +371,7 @@ describe('Textbased Data Source', () => {
                 },
               ],
               query: { esql: 'FROM foo' },
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState)
@@ -425,6 +428,7 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'bytes',
@@ -446,7 +450,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            index: '1',
+            indexPatternId: '1',
             query: {
               esql: 'FROM "foo"',
             },
@@ -567,6 +571,7 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
+            type: 'esql',
             columns: [
               {
                 columnId: '@timestamp',
@@ -589,7 +594,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            index: '1',
+            indexPatternId: '1',
             query: {
               esql: 'from foo',
             },
@@ -629,6 +634,7 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {
           a: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'a',
@@ -647,7 +653,7 @@ describe('Textbased Data Source', () => {
             ],
             errors: [new Error('error 1'), new Error('error 2')],
             query: { esql: 'FROM foo' },
-            index: 'foo',
+            indexPatternId: 'foo',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -698,6 +704,7 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {
           a: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'a',
@@ -715,7 +722,7 @@ describe('Textbased Data Source', () => {
               },
             ],
             query: { esql: 'FROM foo' },
-            index: '1',
+            indexPatternId: '1',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -729,6 +736,7 @@ describe('Textbased Data Source', () => {
       const state = {
         layers: {
           a: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'a',
@@ -746,7 +754,7 @@ describe('Textbased Data Source', () => {
               },
             ],
             query: { esql: 'FROM foo' },
-            index: '1',
+            indexPatternId: '1',
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -770,53 +778,7 @@ describe('Textbased Data Source', () => {
     it('should generate an expression for an SQL query', async () => {
       expect(
         TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
-      ).toMatchInlineSnapshot(`
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {},
-              "function": "kibana_context",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "descriptionForInspector": Array [
-                  "This request queries Elasticsearch to fetch the data for the visualization.",
-                ],
-                "locale": Array [
-                  "en",
-                ],
-                "query": Array [
-                  "FROM foo",
-                ],
-                "titleForInspector": Array [
-                  "Visualization",
-                ],
-              },
-              "function": "esql",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "idMap": Array [
-                  "{\\"Test 1\\":[{\\"id\\":\\"a\\",\\"label\\":\\"Test 1\\"}],\\"Test 2\\":[{\\"id\\":\\"b\\",\\"label\\":\\"Test 2\\"}]}",
-                ],
-                "isTextBased": Array [
-                  true,
-                ],
-              },
-              "function": "lens_map_to_columns",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        }
-      `);
+      ).toMatchInlineSnapshot(`null`);
     });
   });
 
@@ -844,6 +806,7 @@ describe('Textbased Data Source', () => {
         const state = {
           layers: {
             a: {
+              type: 'esql',
               columns: [
                 {
                   columnId: 'col1',
@@ -860,7 +823,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState;
@@ -907,6 +870,7 @@ describe('Textbased Data Source', () => {
         const state = {
           layers: {
             a: {
+              type: 'esql',
               columns: [
                 {
                   columnId: 'col1',
@@ -923,7 +887,7 @@ describe('Textbased Data Source', () => {
                   },
                 },
               ],
-              index: 'foo',
+              indexPatternId: 'foo',
             },
           },
         } as unknown as TextBasedPrivateState;

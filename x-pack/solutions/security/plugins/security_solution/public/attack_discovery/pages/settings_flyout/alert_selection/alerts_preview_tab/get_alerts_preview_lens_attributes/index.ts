@@ -32,6 +32,7 @@ export const getAlertsPreviewLensAttributes = ({
       textBased: {
         layers: {
           [LAYER_ID]: {
+            type: 'esql',
             columns: [
               {
                 columnId: 'tableStackBy0',
@@ -71,7 +72,7 @@ export const getAlertsPreviewLensAttributes = ({
                 },
               },
             ],
-            index: '31734563-1D31-4A8C-804A-CA17540A793E',
+            indexPatternId: '31734563-1D31-4A8C-804A-CA17540A793E',
             query: {
               esql: esqlQuery,
             },

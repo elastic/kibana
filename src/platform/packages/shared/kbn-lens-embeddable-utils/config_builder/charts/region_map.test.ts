@@ -109,6 +109,7 @@ test('generates region map chart config', async () => {
                   "esql": "from test | count=count() by category",
                 },
                 "timeField": undefined,
+                "type": "esql",
               },
             },
           },
