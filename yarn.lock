@@ -2183,10 +2183,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@102.1.0":
-  version "102.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.1.0.tgz#ca3ba0389779822c6081d016ebaae06e52baff9f"
-  integrity sha512-h8w4r8OKMWYAGMzz3tDyNDeayW6q+EBMwyXTw5+kQlmkenOxFyHgX7SwsOQTUf2+83aMsrdlMAvSaIfYYljgXA==
+"@elastic/eui@102.2.0":
+  version "102.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.2.0.tgz#cba90fece1afa78686fd51ba9fa5fd019fd0c6a0"
+  integrity sha512-ksFQ66kKtftvcaEuHuzI7vI6CSDeet9QU5nkBDOl18QuoA3VyeGzX4ISranWj+Gyk22SGn2K9BEudXSVkoDBWg==
   dependencies:
     "@elastic/eui-theme-common" "1.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -5904,6 +5904,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/intercepts-plugin@link:x-pack/platform/plugins/private/intercepts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
   version "0.0.0"
   uid ""
@@ -6452,6 +6456,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/onechat-browser@link:x-pack/platform/packages/shared/onechat/onechat-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-common@link:x-pack/platform/packages/shared/onechat/onechat-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-plugin@link:x-pack/platform/plugins/shared/onechat":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-server@link:x-pack/platform/packages/shared/onechat/onechat-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/open-telemetry-instrumented-plugin@link:src/platform/test/common/plugins/otel_metrics":
   version "0.0.0"
   uid ""
@@ -6561,6 +6581,10 @@
   uid ""
 
 "@kbn/product-doc-common@link:x-pack/platform/packages/shared/ai-infra/product-doc-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/product-intercept-plugin@link:x-pack/platform/plugins/private/product_intercept":
   version "0.0.0"
   uid ""
 
