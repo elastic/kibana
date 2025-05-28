@@ -73,4 +73,4 @@ export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
   showFindingFlyoutEvidence: true,
 } as const;
-export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-*';
