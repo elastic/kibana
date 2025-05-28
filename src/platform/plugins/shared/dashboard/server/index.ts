@@ -24,7 +24,12 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   },
   schema: configSchema,
   deprecations: ({ deprecate }) => {
-    return [deprecate('allowByValueEmbeddables', '9.3.0', { level: 'warning' })];
+    return [
+      deprecate('allowByValueEmbeddables', '9.1.0', {
+        level: 'warning',
+        message: `This setting is deprecated and ignored by the system. Please remove this setting.`,
+      }),
+    ];
   },
 };
 
