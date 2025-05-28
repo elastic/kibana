@@ -73,9 +73,7 @@ export class AnonymizationService {
             this.logger.error(
               `NER inference failed: ${error instanceof Error ? error.message : String(error)}`
             );
-            throw new Error(
-              `NER model inference failed. Ensure model ${NER_MODEL_ID} is deployed.`
-            );
+            return [];
           }
 
           // Process results from all documents in the batch
@@ -242,7 +240,7 @@ export class AnonymizationService {
       ...message,
       message: {
         ...message.message,
-        detected_entities: detectedEntities,
+        ...(detectedEntities.length > 0 && { detected_entities: detectedEntities }),
       },
     };
 

@@ -195,7 +195,15 @@ describe('Observability AI Assistant client', () => {
       },
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
-      anonymizationService: anonymizationServiceMock,
+      anonymizationService: new AnonymizationService({
+        esClient: {
+          asCurrentUser: currentUserEsClientMock,
+        },
+        config: {
+          enableAnonymization: true,
+        } as ObservabilityAIAssistantConfig,
+        logger: loggerMock,
+      }),
       logger: loggerMock,
       namespace: 'default',
       user: {
@@ -482,6 +490,7 @@ describe('Observability AI Assistant client', () => {
                   '@timestamp': expect.any(String),
                   message: {
                     content: 'Hello again',
+                    detected_entities: expect.any(Array),
                     role: MessageRole.Assistant,
                     function_call: {
                       name: '',
@@ -608,6 +617,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'Hello',
+                detected_entities: expect.any(Array),
                 role: MessageRole.Assistant,
                 function_call: {
                   name: '',
@@ -847,8 +857,8 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      it('sends the function response back to the llm', () => {
-        expect(inferenceClientMock.chatComplete).toHaveBeenCalledTimes(2);
+      it('sends the function response back to the llm', async () => {
+        await waitFor(() => expect(inferenceClientMock.chatComplete).toHaveBeenCalledTimes(2));
 
         expect(inferenceClientMock.chatComplete.mock.lastCall!).toEqual([
           {
@@ -872,6 +882,11 @@ describe('Observability AI Assistant client', () => {
 
       describe('and the assistant replies without a function request', () => {
         beforeEach(async () => {
+          // 1) wait for the follow-up chatComplete
+          await waitFor(() => expect(inferenceClientMock.chatComplete).toHaveBeenCalledTimes(2));
+
+          // 2) wait until llmSimulator has been initialised
+          await waitFor(() => expect(llmSimulator).toBeDefined());
           await llmSimulator.chunk({ content: 'I am done here' });
           await llmSimulator.next({ content: 'I am done here' });
           await llmSimulator.complete();
@@ -932,6 +947,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'Hello',
+                detected_entities: expect.any(Array),
                 role: MessageRole.Assistant,
                 function_call: {
                   name: 'myFunction',
@@ -954,6 +970,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'I am done here',
+                detected_entities: expect.any(Array),
                 role: MessageRole.Assistant,
                 function_call: {
                   name: '',
