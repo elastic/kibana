@@ -28,6 +28,7 @@
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
     "@kbn/task-manager-plugin",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",
