@@ -255,9 +255,9 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Automatically installs the security AI prompts package
+   * Enables the storing of gaps in the event log
    */
-  securityAIPromptsEnabled: false,
+  storeGapsInEventLogEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
