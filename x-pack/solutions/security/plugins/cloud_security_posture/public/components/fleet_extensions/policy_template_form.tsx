@@ -546,32 +546,32 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const useEnsureNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-  shouldUpdateNamespace,
-  setShouldUpdateNamespace,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-  shouldUpdateNamespace: boolean;
-  setShouldUpdateNamespace: (shouldUpdate: boolean) => void;
-}) => {
-  const hasSetNamespace = useRef(false); // Track if the namespace has already been set
+// const useEnsureNamespace = ({
+//   newPolicy,
+//   input,
+//   updatePolicy,
+//   shouldUpdateNamespace,
+//   setShouldUpdateNamespace,
+// }: {
+//   newPolicy: NewPackagePolicy;
+//   input: NewPackagePolicyPostureInput;
+//   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+//   shouldUpdateNamespace: boolean;
+//   setShouldUpdateNamespace: (shouldUpdate: boolean) => void;
+// }) => {
+//   const hasSetNamespace = useRef(false); // Track if the namespace has already been set
 
-  useEffect(() => {
-    if (!shouldUpdateNamespace || hasSetNamespace.current) return; // Skip if flag is false or namespace is already set
+//   useEffect(() => {
+//     if (!shouldUpdateNamespace || hasSetNamespace.current) return; // Skip if flag is false or namespace is already set
 
-    if (!newPolicy.namespace) {
-      const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-      updatePolicy(policy);
-      hasSetNamespace.current = true; // Mark that the namespace has been set
-      setShouldUpdateNamespace(false); // Reset the flag
-    }
-  }, [newPolicy.namespace, updatePolicy, shouldUpdateNamespace]);
-};
+//     if (!newPolicy.namespace) {
+//       const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+//       updatePolicy(policy);
+//       hasSetNamespace.current = true; // Mark that the namespace has been set
+//       setShouldUpdateNamespace(false); // Reset the flag
+//     }
+//   }, [newPolicy.namespace, updatePolicy, shouldUpdateNamespace]);
+// };
 
 const usePolicyTemplateInitialName = ({
   isEditPage,
@@ -590,18 +590,21 @@ const usePolicyTemplateInitialName = ({
   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
-  const hasSetName = useRef(false); // Track if the name has already been set
-
   useEffect(() => {
-    // Ensure the hook only runs when packagePolicyList is fully loaded
-    if (!integration || isEditPage || isLoading || hasSetName.current || !packagePolicyList) return;
+    if (!integration) return;
+    if (isEditPage) return;
+    if (isLoading) return;
 
-    const packagePolicyListByIntegration = packagePolicyList.filter(
+    const packagePolicyListByIntegration = packagePolicyList?.filter(
       (policy) => policy?.vars?.posture?.value === integration
     );
 
     const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
 
+    /*
+     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
+     * if policie were fetched its an array - the check will return true
+     */
     const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
     updatePolicy(
       {
@@ -610,10 +613,10 @@ const usePolicyTemplateInitialName = ({
       },
       isPoliciesLoaded
     );
-    hasSetName.current = true; // Mark that the name has been set
     setCanFetchIntegration(false);
-  }, [isEditPage, isLoading, integration, packagePolicyList, newPolicy, updatePolicy, isEditPage]);
-  // }, [isLoading, integration, isEditPage, packagePolicyList]);
+    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (
@@ -839,13 +842,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
-    useEnsureNamespace({
-      newPolicy,
-      input,
-      updatePolicy,
-      shouldUpdateNamespace,
-      setShouldUpdateNamespace,
-    });
+    // useEnsureNamespace({
+    //   newPolicy,
+    //   input,
+    //   updatePolicy,
+    //   shouldUpdateNamespace,
+    //   setShouldUpdateNamespace,
+    // });
 
     useCloudFormationTemplate({
       packageInfo,
@@ -1030,7 +1033,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
                   isInvalid={!!validationResults?.namespace}
                   defaultValue={POSTURE_NAMESPACE || ''}
                   onChange={(event) => {
-                    setShouldUpdateNamespace(true); // Prevents the useEffect from updating the namespace again
+                    // setShouldUpdateNamespace(true); // Prevents the useEffect from updating the namespace again
                     updatePolicy({ ...newPolicy, namespace: event.target.value });
                   }}
                 />
