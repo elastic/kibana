@@ -181,5 +181,7 @@
     "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
+    "@kbn/saved-search-plugin",
+    "@kbn/core-saved-objects-common",
   ]
 }
