@@ -67,6 +67,31 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
+    
+    // Enhance the query to support partial matches for name field
+    if (queryContainer.bool?.must) {
+      queryContainer.bool.must = queryContainer.bool.must.map((clause: any) => {
+        if (clause.simple_query_string) {
+          // Add wildcard to support partial matches
+          return {
+            bool: {
+              should: [
+                clause,
+                {
+                  wildcard: {
+                    name: {
+                      value: `*${clause.simple_query_string.query.replace(/[+]/g, '')}*`,
+                      case_insensitive: true
+                    }
+                  }
+                }
+              ]
+            }
+          };
+        }
+        return clause;
+      });
+    }
 
     const requestBody = {
       ...tableStateArgs,
