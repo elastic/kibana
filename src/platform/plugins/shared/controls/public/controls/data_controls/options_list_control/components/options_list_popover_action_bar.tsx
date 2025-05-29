@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiButtonEmpty,
+  EuiLink,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -146,15 +146,15 @@ export const OptionsListPopoverActionBar = ({
                       : undefined
                   }
                 >
-                  <EuiButtonEmpty
-                    size="xs"
+                  <EuiLink
                     disabled={isBulkSelectDisabled}
                     data-test-subj="optionsList-control-selectAll"
                     onClick={() => handleBulkAction(componentApi.selectAll)}
                   >
                     {OptionsListStrings.popover.getSelectAllButtonLabel()}
-                  </EuiButtonEmpty>
+                  </EuiLink>
                 </EuiToolTip>
+                {' | '}
                 <EuiToolTip
                   content={
                     hasTooManyOptions
@@ -162,14 +162,13 @@ export const OptionsListPopoverActionBar = ({
                       : undefined
                   }
                 >
-                  <EuiButtonEmpty
-                    size="xs"
+                  <EuiLink
                     disabled={isBulkSelectDisabled}
                     data-test-subj="optionsList-control-deselectAll"
                     onClick={() => handleBulkAction(componentApi.deselectAll)}
                   >
                     {OptionsListStrings.popover.getDeselectAllButtonLabel()}
-                  </EuiButtonEmpty>
+                  </EuiLink>
                 </EuiToolTip>
               </EuiText>
             </EuiFlexItem>
