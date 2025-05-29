@@ -41,7 +41,7 @@ const LINKS: ExampleLink[] = [
 ];
 
 export const renderApp = (
-  { notifications, savedObjects, http, application, ...startServices }: CoreStart,
+  { notifications, http, application, ...startServices }: CoreStart,
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {

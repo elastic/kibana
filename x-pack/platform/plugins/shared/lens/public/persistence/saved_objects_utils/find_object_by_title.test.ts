@@ -6,7 +6,9 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
+// @ts-expect-error for easy search
 import { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
+// @ts-expect-error for easy search
 import { simpleSavedObjectMock } from '@kbn/core/public/mocks';
 import { SavedObjectIndexStore } from '..';
 

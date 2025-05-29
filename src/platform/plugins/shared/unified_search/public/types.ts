@@ -89,6 +89,7 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   };
   appName: string;
   uiSettings: CoreStart['uiSettings'];
+  // @ts-expect-error for easy search
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   application: CoreStart['application'];

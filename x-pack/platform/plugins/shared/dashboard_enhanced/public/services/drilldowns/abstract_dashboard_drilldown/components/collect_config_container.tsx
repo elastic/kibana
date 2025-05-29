@@ -104,6 +104,7 @@ export class CollectConfigContainer extends React.Component<
       params: { start },
     } = this.props;
     if (!config.dashboardId) return;
+    // @ts-expect-error for easy search
     const savedObject = await start().core.savedObjects.client.get<{ title: string }>(
       'dashboard',
       config.dashboardId
@@ -134,6 +135,7 @@ export class CollectConfigContainer extends React.Component<
   private readonly debouncedLoadDashboards: (searchString?: string) => void;
   private async loadDashboards(searchString?: string) {
     this.setState({ searchString, isLoading: true });
+    // @ts-expect-error for easy search
     const savedObjectsClient = this.props.params.start().core.savedObjects.client;
     const { savedObjects } = await savedObjectsClient.find<{ title: string }>({
       type: 'dashboard',

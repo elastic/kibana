@@ -35,6 +35,7 @@ import type {
   CoreStart,
   Plugin,
   ApplicationStart,
+  // @ts-expect-error for easy search
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
@@ -471,6 +472,7 @@ export class VisualizationsPlugin
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
+  // @ts-expect-error for easy search
     setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
     setSearch(data.search);

@@ -40,6 +40,7 @@ export async function mountManagementSection(
     overlays,
     theme,
     userProfile,
+    // @ts-expect-error for easy search
     savedObjects,
     uiSettings,
     settings,

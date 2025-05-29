@@ -116,8 +116,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >([]);
 
           useEffect(() => {
+            // @ts-expect-error for easy search
             core.savedObjects.client
               .find<{ title: string }>({ type: 'search' })
+              // @ts-expect-error for easy search
               .then((response) => {
                 setSavedSearches(response.savedObjects);
               });
@@ -182,8 +184,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           >([]);
 
           useEffect(() => {
+            // @ts-expect-error for easy search
             core.savedObjects.client
               .find<{ title: string }>({ type: 'search' })
+              // @ts-expect-error for easy search
               .then((response) => {
                 setSavedSearches(response.savedObjects);
               });

@@ -14,6 +14,7 @@ import {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
+  // @ts-expect-error for easy search
   SavedObjectsStart,
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';

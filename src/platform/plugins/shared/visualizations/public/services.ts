@@ -16,6 +16,7 @@ import type {
   HttpStart,
   IUiSettingsClient,
   OverlayStart,
+  // @ts-expect-error for easy search
   SavedObjectsStart,
   ThemeServiceStart,
   ExecutionContextSetup,

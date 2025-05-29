@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SavedObjectsClientContract } from './src/saved_objects_client';
 export type { SimpleSavedObject } from './src/simple_saved_object';
 export type {
   SavedObjectsCreateOptions,

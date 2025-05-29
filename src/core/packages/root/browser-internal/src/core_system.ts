@@ -30,7 +30,6 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -91,7 +90,6 @@ export class CoreSystem {
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
-  private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
@@ -150,7 +148,6 @@ export class CoreSystem {
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
-    this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
     this.overlay = new OverlayService();
@@ -311,7 +308,6 @@ export class CoreSystem {
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = this.http.start();
-      const savedObjects = await this.savedObjects.start({ http });
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
@@ -395,7 +391,6 @@ export class CoreSystem {
         featureFlags,
         http,
         theme,
-        savedObjects,
         i18n,
         injectedMetadata,
         notifications,
