@@ -58,6 +58,7 @@ import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import * as KibanaHook from '../../common/hooks/use_kibana';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -71,7 +72,6 @@ jest.mock('../../common/api/use_package_policy_list');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
-jest.mock('../../common/experimental_features_service');
 
 const onChange = jest.fn();
 
@@ -1636,7 +1636,7 @@ describe('<CspPolicyTemplateForm />', () => {
           },
           uiSettings: {
             get: (key: string) => {
-              if (key === 'securitySolution:enableCloudConnector') {
+              if (key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) {
                 return true;
               }
               return false;

@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 // // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 // // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
@@ -112,7 +113,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       );
 
       const cloudConnectorsEnabled =
-        uiSettings.get('securitySolution:enableCloudConnector') || false;
+        uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
 
       const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
         input,

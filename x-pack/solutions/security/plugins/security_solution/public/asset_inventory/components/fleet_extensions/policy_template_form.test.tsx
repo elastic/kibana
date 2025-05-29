@@ -44,6 +44,7 @@ import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
 import { ExperimentalFeaturesService as SecuritySolutionFeatureService } from '../../../common/experimental_features_service';
 import { useKibana } from '../../hooks/use_kibana';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -83,9 +84,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
           isCloudEnabled: true,
         },
         uiSettings: {
-          get: (key: string) => {
-            return false;
-          },
+          get: (key: string) => false,
         },
       },
     });
@@ -685,27 +684,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     });
   });
   describe('Agentless', () => {
-    beforeEach(() => {
-      (useKibana as jest.Mock).mockReturnValue({
-        services: {
-          cloud: {
-            csp: 'aws',
-            cloudId: 'mock-cloud-id',
-            deploymentId: 'mock-deployment-id',
-            serverless: { projectId: '' },
-            isCloudEnabled: true,
-          },
-          uiSettings: {
-            get: (key: string) => {
-              if (key === 'securitySolution:enableCloudConnector') {
-                return true;
-              }
-              return false;
-            },
-          },
-        },
-      });
-    });
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
@@ -988,6 +966,14 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
             deploymentId: 'mock-deployment-id',
             serverless: { projectId: '' },
             isCloudEnabled: true,
+          },
+          uiSettings: {
+            get: (key: string) => {
+              if (key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) {
+                return true;
+              }
+              return false;
+            },
           },
         },
 
