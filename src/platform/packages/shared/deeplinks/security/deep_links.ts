@@ -91,4 +91,6 @@ export enum SecurityPageName {
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
+  configurationsIntegrations = 'configurations-integrations',
+  configurationsAiSettings = 'configurations-ai_settings',
 }
