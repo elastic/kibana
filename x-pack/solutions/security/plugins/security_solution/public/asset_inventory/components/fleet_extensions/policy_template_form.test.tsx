@@ -961,12 +961,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
             isCloudEnabled: true,
           },
           uiSettings: {
-            get: (key: string) => {
-              if (key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) {
-                return true;
-              }
-              return false;
-            },
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
           },
         },
 
