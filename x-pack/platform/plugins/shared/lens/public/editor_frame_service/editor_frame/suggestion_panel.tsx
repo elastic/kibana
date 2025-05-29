@@ -131,7 +131,7 @@ const PreviewRenderer = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon(euiThemeContext)}>
+    <div css={suggestionStyles.icon(euiThemeContext)} data-test-subj="lnsSuggestionPanel__error">
       <EuiIconTip
         size="xl"
         color="danger"
