@@ -16,6 +16,7 @@ import type {
   CoreStart,
   IContextProvider,
   CoreStatus,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
@@ -25,6 +26,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
+  DataViewsServerPluginStart,
 } from '@kbn/data-plugin/server';
 
 import type { RuleRegistryPluginConfig } from './config';
@@ -135,16 +137,20 @@ export class RuleRegistryPlugin
           RULE_SEARCH_STRATEGY_NAME,
           ruleRegistrySearchStrategy
         );
+
+        core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
+          'rac',
+          this.createRouteHandlerContext(
+            depsStart.alerting,
+            depsStart.data.indexPatterns,
+            _.savedObjects
+          )
+        );
       })
       .catch(() => {});
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();
-    core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
-      'rac',
-      this.createRouteHandlerContext()
-    );
-
     defineRoutes(router);
 
     return {
@@ -183,7 +189,11 @@ export class RuleRegistryPlugin
     };
   }
 
-  private createRouteHandlerContext = (): IContextProvider<RacRequestHandlerContext, 'rac'> => {
+  private createRouteHandlerContext = (
+    alerting: AlertingServerStart,
+    dataViews: DataViewsServerPluginStart,
+    savedObjects: SavedObjectsServiceStart
+  ): IContextProvider<RacRequestHandlerContext, 'rac'> => {
     const { alertsClientFactory } = this;
     return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
       return {
@@ -191,6 +201,9 @@ export class RuleRegistryPlugin
           const createdClient = await alertsClientFactory.create(request);
           return createdClient;
         },
+        alerting,
+        dataViews,
+        savedObjectsClient: savedObjects.getScopedClient(request),
       };
     };
   };

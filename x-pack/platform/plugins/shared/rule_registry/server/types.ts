@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -13,11 +13,13 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import type {
+  AlertingServerStart,
   RuleExecutorOptions,
   RuleExecutorServices,
   RuleType,
 } from '@kbn/alerting-plugin/server';
 import type { AlertsClient } from './alert_data_client/alerts_client';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
 type SimpleAlertType<
   TState extends RuleTypeState,
@@ -67,6 +69,9 @@ export type AlertExecutorOptionsWithExtraServices<
  */
 export interface RacApiRequestHandlerContext {
   getAlertsClient: () => Promise<AlertsClient>;
+  alerting: AlertingServerStart;
+  dataViews: DataViewsServerPluginStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
