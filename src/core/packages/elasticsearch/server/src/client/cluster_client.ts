@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from './client';
+import type { ElasticsearchClientInternal } from './client';
 import type { ScopeableRequest } from './scopeable_request';
 import type { IScopedClusterClient } from './scoped_cluster_client';
 
@@ -22,7 +22,7 @@ export interface IClusterClient {
   /**
    * A {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
    */
-  readonly asInternalUser: ElasticsearchClient;
+  readonly asInternalUser: ElasticsearchClientInternal;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
    */
