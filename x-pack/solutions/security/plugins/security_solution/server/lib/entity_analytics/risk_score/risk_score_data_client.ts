@@ -46,9 +46,9 @@ import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import {
-  createEventIngestedFromTimestamp,
+  createEventIngestedPipeline,
   getIngestPipelineName,
-} from '../utils/create_ingest_pipeline';
+} from '../utils/event_ingested_pipeline';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -174,7 +174,7 @@ export class RiskScoreDataClient {
     const esClient = this.options.esClient;
 
     try {
-      await createEventIngestedFromTimestamp(esClient, namespace);
+      await createEventIngestedPipeline(esClient, namespace);
 
       await this.createOrUpdateRiskScoreComponentTemplate();
 

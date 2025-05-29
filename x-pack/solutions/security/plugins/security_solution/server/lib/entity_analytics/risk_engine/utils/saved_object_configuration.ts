@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
@@ -111,4 +115,14 @@ export const getConfiguration = async ({
   } catch (e) {
     return null;
   }
+};
+
+export const getAllConfigurations = async ({
+  savedObjectsClient,
+}: SavedObjectsClientArg): Promise<Array<SavedObjectsFindResult<RiskEngineConfiguration>>> => {
+  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
+    type: riskEngineConfigurationTypeName,
+  });
+
+  return savedObjectsResponse.saved_objects;
 };
