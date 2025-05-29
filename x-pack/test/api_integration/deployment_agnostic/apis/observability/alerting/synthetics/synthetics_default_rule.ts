@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { SupertestWithRoleScopeType } from '../../../../services';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { statusRule, tlsRule } from './data';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestEditorWithApiKey: SupertestWithRoleScopeType;
   const server = getService('kibanaServer');
 
   const testActions = [
@@ -27,15 +28,19 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('SyntheticsDefaultRules', () => {
     before(async () => {
+      supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+        withInternalHeaders: true,
+      });
       await server.savedObjects.cleanStandardList();
     });
 
     after(async () => {
+      await supertestEditorWithApiKey.destroy();
       await server.savedObjects.cleanStandardList();
     });
 
     it('creates rule when settings are configured', async () => {
-      await supertest
+      await supertestEditorWithApiKey
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
@@ -46,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const response = await supertest
+      const response = await supertestEditorWithApiKey
         .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
         .set('kbn-xsrf', 'true')
         .send();
@@ -74,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('updates rules when settings are updated', async () => {
-      await supertest
+      await supertestEditorWithApiKey
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send({
@@ -85,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const response = await supertest
+      const response = await supertestEditorWithApiKey
         .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
         .set('kbn-xsrf', 'true')
         .send();

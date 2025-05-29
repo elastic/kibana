@@ -85,6 +85,126 @@ const enabledActionTypes = [
   'test.connector-with-hooks',
 ];
 
+export const getPreConfiguredActions = (
+  tlsWebhookServers: Awaited<ReturnType<typeof getTlsWebhookServerUrls>>
+) =>
+  JSON.stringify({
+    'my-test-email': {
+      actionTypeId: '.email',
+      name: 'TestEmail#xyz',
+      config: {
+        from: 'me@test.com',
+        service: '__json',
+      },
+      secrets: {
+        user: 'user',
+        password: 'password',
+      },
+    },
+    'notification-email': {
+      actionTypeId: '.email',
+      name: 'Notification Email Connector',
+      config: {
+        from: 'me@test.com',
+        service: '__json',
+      },
+      secrets: {
+        user: 'user',
+        password: 'password',
+      },
+    },
+    'my-slack1': {
+      actionTypeId: '.slack',
+      name: 'Slack#xyz',
+      secrets: {
+        webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+      },
+    },
+    'my-deprecated-servicenow': {
+      actionTypeId: '.servicenow',
+      name: 'ServiceNow#xyz',
+      config: {
+        apiUrl: 'https://ven04334.service-now.com',
+        usesTableApi: true,
+      },
+      secrets: {
+        username: 'elastic_integration',
+        password: 'somepassword',
+      },
+    },
+    'my-deprecated-servicenow-default': {
+      actionTypeId: '.servicenow',
+      name: 'ServiceNow#xyz',
+      config: {
+        apiUrl: 'https://ven04334.service-now.com',
+      },
+      secrets: {
+        username: 'elastic_integration',
+        password: 'somepassword',
+      },
+    },
+    'custom-system-abc-connector': {
+      actionTypeId: 'system-abc-action-type',
+      name: 'SystemABC',
+      config: {
+        xyzConfig1: 'value1',
+        xyzConfig2: 'value2',
+        listOfThings: ['a', 'b', 'c', 'd'],
+      },
+      secrets: {
+        xyzSecret1: 'credential1',
+        xyzSecret2: 'credential2',
+      },
+    },
+    'preconfigured-es-index-action': {
+      actionTypeId: '.index',
+      name: 'preconfigured_es_index_action',
+      config: {
+        index: 'functional-test-actions-index-preconfigured',
+        refresh: true,
+        executionTimeField: 'timestamp',
+      },
+    },
+    'preconfigured.test.index-record': {
+      actionTypeId: 'test.index-record',
+      name: 'Test:_Preconfigured_Index_Record',
+      config: {
+        unencrypted: 'ignored-but-required',
+      },
+      secrets: {
+        encrypted: 'this-is-also-ignored-and-also-required',
+      },
+    },
+    'custom.ssl.noCustom': {
+      actionTypeId: '.webhook',
+      name: `${tlsWebhookServers.noCustom}`,
+      config: {
+        url: tlsWebhookServers.noCustom,
+      },
+    },
+    'custom.ssl.rejectUnauthorizedFalse': {
+      actionTypeId: '.webhook',
+      name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
+      config: {
+        url: tlsWebhookServers.rejectUnauthorizedFalse,
+      },
+    },
+    'custom.ssl.rejectUnauthorizedTrue': {
+      actionTypeId: '.webhook',
+      name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
+      config: {
+        url: tlsWebhookServers.rejectUnauthorizedTrue,
+      },
+    },
+    'custom.ssl.caFile': {
+      actionTypeId: '.webhook',
+      name: `${tlsWebhookServers.caFile}`,
+      config: {
+        url: tlsWebhookServers.caFile,
+      },
+    },
+  });
+
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const {
     license = 'trial',
@@ -233,122 +353,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'actions:test.excluded',
           ])}`,
           `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
-          `--xpack.actions.preconfigured=${JSON.stringify({
-            'my-test-email': {
-              actionTypeId: '.email',
-              name: 'TestEmail#xyz',
-              config: {
-                from: 'me@test.com',
-                service: '__json',
-              },
-              secrets: {
-                user: 'user',
-                password: 'password',
-              },
-            },
-            'notification-email': {
-              actionTypeId: '.email',
-              name: 'Notification Email Connector',
-              config: {
-                from: 'me@test.com',
-                service: '__json',
-              },
-              secrets: {
-                user: 'user',
-                password: 'password',
-              },
-            },
-            'my-slack1': {
-              actionTypeId: '.slack',
-              name: 'Slack#xyz',
-              secrets: {
-                webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-              },
-            },
-            'my-deprecated-servicenow': {
-              actionTypeId: '.servicenow',
-              name: 'ServiceNow#xyz',
-              config: {
-                apiUrl: 'https://ven04334.service-now.com',
-                usesTableApi: true,
-              },
-              secrets: {
-                username: 'elastic_integration',
-                password: 'somepassword',
-              },
-            },
-            'my-deprecated-servicenow-default': {
-              actionTypeId: '.servicenow',
-              name: 'ServiceNow#xyz',
-              config: {
-                apiUrl: 'https://ven04334.service-now.com',
-              },
-              secrets: {
-                username: 'elastic_integration',
-                password: 'somepassword',
-              },
-            },
-            'custom-system-abc-connector': {
-              actionTypeId: 'system-abc-action-type',
-              name: 'SystemABC',
-              config: {
-                xyzConfig1: 'value1',
-                xyzConfig2: 'value2',
-                listOfThings: ['a', 'b', 'c', 'd'],
-              },
-              secrets: {
-                xyzSecret1: 'credential1',
-                xyzSecret2: 'credential2',
-              },
-            },
-            'preconfigured-es-index-action': {
-              actionTypeId: '.index',
-              name: 'preconfigured_es_index_action',
-              config: {
-                index: 'functional-test-actions-index-preconfigured',
-                refresh: true,
-                executionTimeField: 'timestamp',
-              },
-            },
-            'preconfigured.test.index-record': {
-              actionTypeId: 'test.index-record',
-              name: 'Test:_Preconfigured_Index_Record',
-              config: {
-                unencrypted: 'ignored-but-required',
-              },
-              secrets: {
-                encrypted: 'this-is-also-ignored-and-also-required',
-              },
-            },
-            'custom.ssl.noCustom': {
-              actionTypeId: '.webhook',
-              name: `${tlsWebhookServers.noCustom}`,
-              config: {
-                url: tlsWebhookServers.noCustom,
-              },
-            },
-            'custom.ssl.rejectUnauthorizedFalse': {
-              actionTypeId: '.webhook',
-              name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
-              config: {
-                url: tlsWebhookServers.rejectUnauthorizedFalse,
-              },
-            },
-            'custom.ssl.rejectUnauthorizedTrue': {
-              actionTypeId: '.webhook',
-              name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
-              config: {
-                url: tlsWebhookServers.rejectUnauthorizedTrue,
-              },
-            },
-            'custom.ssl.caFile': {
-              actionTypeId: '.webhook',
-              name: `${tlsWebhookServers.caFile}`,
-              config: {
-                url: tlsWebhookServers.caFile,
-              },
-            },
-          })}`,
+          `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`,
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
