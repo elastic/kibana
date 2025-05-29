@@ -138,7 +138,9 @@ export function DashboardApp({
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
     const getInitialInput = () => {
       const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
+      console.log('stateFromLocator', stateFromLocator);
       const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+      console.log('initialUrlState', initialUrlState);
 
       // Override all state with URL + Locator input
       return {

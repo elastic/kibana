@@ -17,6 +17,8 @@ export const loadDashboardHistoryLocationState = (
   getScopedHistory: () => ScopedHistory
 ): Partial<DashboardState> => {
   const state = getScopedHistory().location.state as undefined | ForwardedDashboardState;
+  console.log('state', state);
+
 
   if (!state) {
     return {};

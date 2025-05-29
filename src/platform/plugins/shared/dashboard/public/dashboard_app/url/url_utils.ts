@@ -84,6 +84,8 @@ export const loadAndRemoveDashboardState = (
     DASHBOARD_STATE_STORAGE_KEY
   );
 
+  console.log('rawAppStateInUrl', rawAppStateInUrl);
+
   if (!rawAppStateInUrl) return {};
 
   const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
