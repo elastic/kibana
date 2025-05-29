@@ -39,6 +39,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CreateAggConfigParams } from '@kbn/data-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
@@ -280,7 +281,7 @@ export const SearchExamplesApp = ({
         .setField('size', selectedFields.length ? 100 : 0)
         .setField('trackTotalHits', 100);
 
-      const aggDef = [];
+      const aggDef: CreateAggConfigParams[] = [];
       if (selectedBucketField) {
         aggDef.push({
           type: bucketAggType,
