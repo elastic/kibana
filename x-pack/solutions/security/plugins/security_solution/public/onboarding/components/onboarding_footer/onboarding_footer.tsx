@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
 import { useFooterItems } from './footer_items';
 import { trackOnboardingLinkClick } from '../lib/telemetry';
@@ -49,25 +58,36 @@ export const FooterLinkItem = React.memo<FooterLinkItemProps>(
 
     return (
       <EuiFlexItem>
-        <img src={icon} alt={title} height="64" width="64" />
-        <EuiSpacer size="m" />
-        <EuiTitle size="xxs" className="itemTitle">
-          <h3>{title}</h3>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="xs">{description}</EuiText>
-        <EuiSpacer size="m" />
-        <EuiText size="xs">
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiLink
-            data-test-subj="footerLinkItem"
-            onClick={onClickWithReport}
-            href={link.href}
-            target="_blank"
-          >
-            {link.title}
-          </EuiLink>
-        </EuiText>
+        <EuiPanel
+          color="plain"
+          grow={false}
+          borderRadius="m"
+          paddingSize="none"
+          hasBorder={true}
+          className="itemPanel"
+        >
+          <span className="itemIconWrapper">
+            <EuiIcon type={icon} className="itemIcon" />
+          </span>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs" className="itemTitle">
+            <h3>{title}</h3>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs">{description}</EuiText>
+          <EuiSpacer size="m" />
+          <EuiText size="xs">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              data-test-subj="footerLinkItem"
+              onClick={onClickWithReport}
+              href={link.href}
+              target="_blank"
+            >
+              {link.title}
+            </EuiLink>
+          </EuiText>
+        </EuiPanel>
       </EuiFlexItem>
     );
   }
