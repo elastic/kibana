@@ -65,6 +65,7 @@ import {
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
+  _normalizePackagePolicyKuery,
 } from './package_policy';
 import { appContextService } from './app_context';
 
@@ -2811,17 +2812,72 @@ describe('Package policy service', () => {
         {
           id: 'test-package-policy-1',
           type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
+          attributes: createPackagePolicyMock(),
           references: [],
         },
         {
           id: 'test-package-policy-2',
           type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
+          attributes: createPackagePolicyMock(),
           references: [],
         },
       ];
 
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [...mockPackagePolicies],
+      });
+
+      soClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
+
+      await packagePolicyService.bulkUpdate(soClient, esClient, [
+        {
+          id: 'test-package-policy-1',
+          name: 'Test Package Policy 1',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-agent-policy',
+          policy_ids: ['test-agent-policy'],
+          inputs: [],
+        },
+        {
+          id: 'test-package-policy-2',
+          name: 'Test Package Policy 2',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test-agent-policy',
+          policy_ids: ['test-agent-policy'],
+          inputs: [],
+        },
+      ]);
+    });
+
+    it('should call external callbacks', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const callbackOne = jest.fn().mockImplementation((p) => p);
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callbackOne);
+      const callbackTwo = jest.fn().mockImplementation((p) => p);
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callbackTwo);
+      const mockPackagePolicies = [
+        {
+          id: 'test-package-policy-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createPackagePolicyMock(),
+          references: [],
+        },
+        {
+          id: 'test-package-policy-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createPackagePolicyMock(),
+          references: [],
+        },
+      ];
+
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [...mockPackagePolicies],
+      });
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [...mockPackagePolicies],
       });
@@ -2850,6 +2906,9 @@ describe('Package policy service', () => {
           inputs: [],
         },
       ]);
+
+      expect(callbackOne).toBeCalledTimes(2);
+      expect(callbackTwo).toBeCalledTimes(2);
     });
 
     describe('remove protections', () => {
@@ -6140,5 +6199,71 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         pkgInfo: { ...pkgInfo, type: 'integration' },
       })
     ).not.toThrow();
+  });
+});
+
+describe('_normalizePackagePolicyKuery', () => {
+  it('should work for ingest-agent-policies.attributes with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies.attributes without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for ingest-agent-policies without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `ingest-package-policies.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies.attributes with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies.attributes without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.attributes.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies with space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.name:test`
+    );
+    expect(res).toEqual('fleet-package-policies.attributes.name:test');
+  });
+
+  it('should work for fleet-agent-policies without space awareness enabled', () => {
+    const res = _normalizePackagePolicyKuery(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      `fleet-package-policies.name:test`
+    );
+    expect(res).toEqual('ingest-package-policies.attributes.name:test');
   });
 });
