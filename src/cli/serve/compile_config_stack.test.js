@@ -104,6 +104,7 @@ describe('compileConfigStack', () => {
         'serverless.security.yml',
         'kibana.yml',
         'kibana.dev.yml',
+        'serverless.recent.dev.yml',
         'serverless.dev.yml',
         'serverless.security.dev.yml',
         `serverless.security.${productTier}.yml`,
@@ -138,6 +139,7 @@ describe('compileConfigStack', () => {
       'serverless.security.yml',
       'kibana.yml',
       'kibana.dev.yml',
+      'serverless.recent.dev.yml',
       'serverless.dev.yml',
       'serverless.security.dev.yml',
     ]);
