@@ -8,8 +8,8 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { osType, osTypeArrayOrUndefined } from '.';
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 
 describe('osType', () => {
   test('it will validate a correct osType', () => {

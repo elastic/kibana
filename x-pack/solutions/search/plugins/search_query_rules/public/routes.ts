@@ -6,3 +6,4 @@
  */
 
 export const ROOT_PATH = '/';
+export const QUERY_RULESET_DETAIL_PATH = `${ROOT_PATH}ruleset/:rulesetId`;

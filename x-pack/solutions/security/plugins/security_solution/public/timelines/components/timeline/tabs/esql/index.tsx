@@ -19,7 +19,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
@@ -62,17 +62,17 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const dispatch = useDispatch();
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.detections);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
-  // eslint-disable-next-line prefer-const
-  let [dataView, setDataView] = useState<DataViewSpec | undefined>();
+  const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 
-  if (newDataViewPickerEnabled) {
-    dataView = experimentalDataView;
-  }
+  const dataViewSpec: DataViewSpec | undefined = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldDataViewSpec]
+  );
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 
@@ -84,7 +84,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
   useEffect(() => {
     if (!dataViewId) return;
-    dataViewService.get(dataViewId).then((dv) => setDataView(dv?.toSpec?.()));
+    dataViewService.get(dataViewId).then((dv) => setDataViewSpec(dv?.toSpec?.()));
   }, [dataViewId, dataViewService]);
 
   const {
@@ -291,7 +291,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const DiscoverContainer = discover.DiscoverContainer;
 
   // TODO: (DV_PICKER) this should not work like that
-  const isLoading = !dataView;
+  const isLoading = !dataViewSpec;
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">

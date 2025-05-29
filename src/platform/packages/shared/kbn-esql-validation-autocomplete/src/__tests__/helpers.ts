@@ -8,24 +8,25 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 
-export const fields: ESQLRealField[] = [
+export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },
 ];
 
-export const enrichFields: ESQLRealField[] = [
+export const enrichFields: ESQLFieldWithMetadata[] = [
   { name: 'otherField', type: 'text' },
   { name: 'yetAnotherField', type: 'double' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const unsupported_field: ESQLRealField[] = [
+export const unsupported_field: ESQLFieldWithMetadata[] = [
   { name: 'unsupported_field', type: 'unsupported' },
 ];
 
@@ -53,7 +54,7 @@ export const policies = [
   },
 ];
 
-export const joinIndices: JoinIndexAutocompleteItem[] = [
+export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
     mode: 'lookup',
@@ -71,6 +72,24 @@ export const joinIndices: JoinIndexAutocompleteItem[] = [
   },
 ];
 
+export const timeseriesIndices: IndexAutocompleteItem[] = [
+  {
+    name: 'timeseries_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+  {
+    name: 'timeseries_index_with_alias',
+    mode: 'time_series',
+    aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
+  },
+  {
+    name: 'time_series_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+];
+
 export function getCallbackMocks(): ESQLCallbacks {
   return {
     getColumnsFor: jest.fn(async ({ query } = {}) => {
@@ -80,12 +99,8 @@ export function getCallbackMocks(): ESQLCallbacks {
       if (/unsupported_index/.test(query)) {
         return unsupported_field;
       }
-      if (/dissect|grok/.test(query)) {
-        const field: ESQLRealField = { name: 'firstWord', type: 'text' };
-        return [field];
-      }
       if (/join_index/.test(query)) {
-        const field: ESQLRealField = {
+        const field: ESQLFieldWithMetadata = {
           name: 'keywordField',
           type: 'unsupported',
           hasConflict: true,
@@ -103,5 +118,6 @@ export function getCallbackMocks(): ESQLCallbacks {
     ),
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
   };
 }

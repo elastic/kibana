@@ -20,6 +20,7 @@ export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
   OutputInvalidError as OutputInvalidError,
+  AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
 
 export class RegistryError extends FleetError {}
@@ -60,6 +61,7 @@ export class AgentlessAgentCreateError extends FleetError {
     super(`Error creating agentless agent in Fleet, ${message}`);
   }
 }
+
 export class AgentlessAgentDeleteError extends FleetError {
   constructor(message: string) {
     super(`Error deleting agentless agent in Fleet, ${message}`);
@@ -135,7 +137,8 @@ export class OutputNotFoundError extends FleetNotFoundError {}
 export class PackageNotFoundError extends FleetNotFoundError {}
 export class ArchiveNotFoundError extends FleetNotFoundError {}
 export class IndexNotFoundError extends FleetNotFoundError {}
-
+export class CustomIntegrationNotFoundError extends FleetNotFoundError {}
+export class NotACustomIntegrationError extends FleetNotFoundError {}
 export class PackagePolicyNotFoundError extends FleetNotFoundError<{
   /** The package policy ID that was not found */
   packagePolicyId: string;

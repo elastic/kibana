@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { DateMath, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export const DEFAULT_END = 'now';
@@ -49,10 +49,10 @@ export const getOpenAndAcknowledgedAlertsQuery = ({
 }: {
   alertsIndexPattern: string;
   anonymizationFields: AnonymizationFieldResponse[];
-  end?: string | null;
+  end?: DateMath | null;
   filter?: Record<string, unknown> | null;
   size: number;
-  start?: string | null;
+  start?: DateMath | null;
 }): GetOpenAndAcknowledgedAlertsQuery => ({
   allow_no_indices: true,
   fields: anonymizationFields

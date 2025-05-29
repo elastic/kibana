@@ -184,6 +184,7 @@ const Wrapper: React.FC<{
     timeWindowSize: [],
     searchConfiguration: [],
     searchType: [],
+    groupBy: [],
   };
 
   return (

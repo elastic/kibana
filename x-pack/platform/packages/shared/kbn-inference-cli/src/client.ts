@@ -9,6 +9,7 @@ import {
   BoundOutputAPI,
   ChatCompleteResponse,
   ChatCompletionEvent,
+  InferenceConnector,
   ToolOptions,
   UnboundChatCompleteOptions,
   UnboundOutputOptions,
@@ -19,17 +20,18 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { ToolingLog } from '@kbn/tooling-log';
 import { defer, from } from 'rxjs';
 import { KibanaClient } from '@kbn/kibana-api-cli';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 
 interface InferenceCliClientOptions {
   log: ToolingLog;
   kibanaClient: KibanaClient;
-  connectorId: string;
+  connector: InferenceConnector;
   signal: AbortSignal;
 }
 
 function createChatComplete(options: InferenceCliClientOptions): BoundChatCompleteAPI;
 
-function createChatComplete({ connectorId, kibanaClient, signal }: InferenceCliClientOptions) {
+function createChatComplete({ connector, kibanaClient, signal }: InferenceCliClientOptions) {
   return <TToolOptions extends ToolOptions, TStream extends boolean = false>(
     options: UnboundChatCompleteOptions<TToolOptions, TStream>
   ) => {
@@ -48,7 +50,7 @@ function createChatComplete({ connectorId, kibanaClient, signal }: InferenceCliC
     } = options;
 
     const body: ChatCompleteRequestBody = {
-      connectorId,
+      connectorId: connector.connectorId,
       messages,
       modelName,
       system,
@@ -70,7 +72,7 @@ function createChatComplete({ connectorId, kibanaClient, signal }: InferenceCliC
           kibanaClient
             .fetch(`/internal/inference/chat_complete/stream`, {
               method: 'POST',
-              body: JSON.stringify(body),
+              body,
               asRawResponse: true,
               signal: combineSignal(signal, abortSignal),
             })
@@ -83,7 +85,7 @@ function createChatComplete({ connectorId, kibanaClient, signal }: InferenceCliC
       `/internal/inference/chat_complete`,
       {
         method: 'POST',
-        body: JSON.stringify(body),
+        body,
         signal: combineSignal(signal, abortSignal),
       }
     );
@@ -109,7 +111,7 @@ function combineSignal(left: AbortSignal, right?: AbortSignal) {
 export class InferenceCliClient {
   private readonly boundChatCompleteAPI: BoundChatCompleteAPI;
   private readonly boundOutputAPI: BoundOutputAPI;
-  constructor(options: InferenceCliClientOptions) {
+  constructor(private readonly options: InferenceCliClientOptions) {
     this.boundChatCompleteAPI = createChatComplete(options);
 
     const outputAPI = createOutputApi(this.boundChatCompleteAPI);
@@ -124,7 +126,7 @@ export class InferenceCliClient {
       options.log.debug(`Running task ${outputOptions.id}`);
       return outputAPI({
         ...outputOptions,
-        connectorId: options.connectorId,
+        connectorId: options.connector.connectorId,
         abortSignal: combineSignal(options.signal, outputOptions.abortSignal),
       });
     };
@@ -136,5 +138,13 @@ export class InferenceCliClient {
 
   output: BoundOutputAPI = (options) => {
     return this.boundOutputAPI(options);
+  };
+
+  getLangChainChatModel = (): InferenceChatModel => {
+    return new InferenceChatModel({
+      connector: this.options.connector,
+      chatComplete: this.boundChatCompleteAPI,
+      signal: this.options.signal,
+    });
   };
 }

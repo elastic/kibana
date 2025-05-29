@@ -12,7 +12,7 @@ import {
   IngestDocument,
   IngestProcessorContainer,
   IngestSimulateRequest,
-  IngestPipelineSimulation,
+  IngestPipelineProcessorResult,
   IngestSimulateDocumentResult,
   SimulateIngestRequest,
   IndicesIndexState,
@@ -26,12 +26,12 @@ import {
   ProcessorDefinitionWithId,
   getProcessorType,
   ProcessorDefinition,
-  isWiredStreamDefinition,
   getInheritedFieldsFromAncestors,
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
   FieldDefinition,
+  Streams,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy, some } from 'lodash';
 import { StreamsClient } from '../../../../lib/streams/client';
@@ -728,7 +728,7 @@ const getStreamFields = async (
     streamsClient.getAncestors(streamName),
   ]);
 
-  if (isWiredStreamDefinition(stream)) {
+  if (Streams.WiredStream.Definition.is(stream)) {
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
   }
 
@@ -785,14 +785,14 @@ const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) 
  * Guard helpers
  */
 const isSuccessfulProcessor = (
-  processor: IngestPipelineSimulation
-): processor is WithRequired<IngestPipelineSimulation, 'doc' | 'tag'> =>
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'doc' | 'tag'> =>
   processor.status === 'success' && !!processor.tag;
 
 const isSkippedProcessor = (
-  processor: IngestPipelineSimulation
-  // @ts-expect-error Looks like the IngestPipelineSimulation.status is not typed correctly and misses the 'skipped' status
-): processor is WithRequired<IngestPipelineSimulation, 'tag'> => processor.status === 'skipped';
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
+  processor.status === 'skipped';
 
 const isMappingFailure = (entry: SimulateIngestSimulateIngestDocumentResult) =>
   entry.doc?.error?.type === 'document_parsing_exception';

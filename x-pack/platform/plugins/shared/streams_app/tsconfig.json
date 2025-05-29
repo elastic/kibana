@@ -9,7 +9,8 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "ui_tests/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
@@ -67,6 +68,8 @@
     "@kbn/index-management-shared-types",
     "@kbn/ingest-pipelines-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/charts-theme"
+    "@kbn/content-packs-schema",
+    "@kbn/charts-theme",
+    "@kbn/scout"
   ]
 }

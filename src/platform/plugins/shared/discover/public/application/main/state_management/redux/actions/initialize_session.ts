@@ -68,12 +68,31 @@ export const initializeSession: InternalStateThunkActionCreator<
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
+    const discoverSessionLoadTracker =
+      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+
+    /**
+     * New tab initialization or existing tab re-initialization
+     */
+
+    const wasTabInitialized = Boolean(stateContainer$.getValue());
+
+    if (wasTabInitialized) {
+      // Clear existing runtime state on re-initialization
+      // to ensure no stale state is used during loading
+      currentDataView$.next(undefined);
+      stateContainer$.next(undefined);
+      customizationService$.next(undefined);
+    }
+
     /**
      * "No data" checks
      */
 
-    const discoverSessionLoadTracker =
-      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
       defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
       services.uiSettings
@@ -124,10 +143,6 @@ export const initializeSession: InternalStateThunkActionCreator<
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      tabId
-    );
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {

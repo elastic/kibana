@@ -97,6 +97,12 @@ export {
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** The history view's end of the date range of attack discoveries */
+  HISTORY_END_LOCAL_STORAGE_KEY,
+  /** The history view's Search bar query that apply to the alerts sent as context to the LLM */
+  HISTORY_QUERY_LOCAL_STORAGE_KEY,
+  /** The history view's start date range of attack discoveries */
+  HISTORY_START_LOCAL_STORAGE_KEY,
   /** Search bar query that apply to the alerts sent as context to the LLM */
   QUERY_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies whether the settings tour should be shown */
@@ -173,9 +179,7 @@ export { SearchAILakeConfigurationsSettingsManagement } from './impl/assistant/s
 export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
 export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
 
-export {
-  AlertSummary,
-  Conversations,
-  SuggestedPrompts,
-  AttackDiscoveryWidget,
-} from './impl/alerts';
+export { getNewSelectedPromptContext } from './impl/data_anonymization/get_new_selected_prompt_context';
+export { getCombinedMessage } from './impl/assistant/prompt/helpers';
+export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
+export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';

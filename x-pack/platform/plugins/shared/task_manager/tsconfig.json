@@ -35,6 +35,8 @@
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-server-utils",
+    "@kbn/rrule",
+    "@kbn/logging-mocks"
   ],
   "exclude": ["target/**/*"]
 }

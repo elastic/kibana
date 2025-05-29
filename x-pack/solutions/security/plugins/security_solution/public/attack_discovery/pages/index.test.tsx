@@ -154,6 +154,9 @@ jest.mock('../../common/lib/kibana', () => {
             },
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
+        },
         notifications: jest.fn().mockReturnValue({
           addError: jest.fn(),
           addSuccess: jest.fn(),

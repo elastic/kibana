@@ -18,17 +18,15 @@ import {
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
-import { visit, visitWithTimeRange } from '../../../tasks/navigation';
+import { navigateUsingGlobalSearch, visit, visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
   openTimelineUsingToggle,
 } from '../../../tasks/security_main';
 import {
-  navigateToHostsUsingBreadcrumb,
-  navigateToExploreUsingBreadcrumb,
   navigateToAlertsPageInServerless,
   navigateToDiscoverPageInServerless,
-  navigateToExplorePageInServerless,
+  navigateToOnboardingPageInServerless,
 } from '../../../tasks/serverless/navigation';
 import {
   addNameToTimelineAndSave,
@@ -37,7 +35,7 @@ import {
   duplicateFirstTimeline,
   populateTimeline,
 } from '../../../tasks/timeline';
-import { EXPLORE_URL, hostsUrl, MANAGE_URL, TIMELINES_URL } from '../../../urls/navigation';
+import { GET_STARTED_URL, hostsUrl, MANAGE_URL, TIMELINES_URL } from '../../../urls/navigation';
 
 describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
@@ -156,7 +154,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
 
     navigateToAlertsPageInServerless(); // security page with timelines enabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    navigateToExplorePageInServerless(); // security page with timelines disabled
+    navigateToOnboardingPageInServerless(); // security page with timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
     navigateToDiscoverPageInServerless(); // external page
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
@@ -168,7 +166,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
 
     navigateToAlertsPageInServerless(); // security page with timelines enabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    navigateToExplorePageInServerless(); // security page with timelines disabled
+    navigateToOnboardingPageInServerless(); // security page with timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
   });
 
@@ -187,30 +185,30 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
 
     navigateToAlertsPageInServerless(); // security page with timelines enabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
-    navigateToExplorePageInServerless(); // security page with timelines disabled
+    navigateToOnboardingPageInServerless(); // security page with timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
     navigateToDiscoverPageInServerless(); // external page
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('should NOT prompt when navigating with a changed & unsaved timeline to a page with timeline using breadcrumbs', () => {
+  it('should NOT prompt when navigating with a changed & unsaved timeline to a page with timeline using global search', () => {
     populateTimeline();
-    navigateToHostsUsingBreadcrumb(); // hosts has timelines enabled
+    navigateUsingGlobalSearch('hosts'); // hosts has timelines enabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
-  it('should prompt when navigating with a changed & unsaved timeline to page without timeline using breadcrumbs', () => {
+  it('should prompt when navigating with a changed & unsaved timeline to page without timeline using global search', () => {
     populateTimeline();
-    navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
+    navigateUsingGlobalSearch('onboarding'); // onboarding has timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
     cy.get(MODAL_CONFIRMATION_BTN).click();
-    cy.url().should('contain', EXPLORE_URL);
+    cy.url().should('contain', GET_STARTED_URL);
   });
 
   it('should NOT prompt when navigating with a changed & saved timeline within security solution where timelines are disabled', () => {
     populateTimeline();
     addNameToTimelineAndSave('Test');
-    navigateToExploreUsingBreadcrumb(); // explore has timelines disabled
+    navigateUsingGlobalSearch('onboarding'); // onboarding has timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('not.exist');
   });
 
@@ -220,7 +218,7 @@ describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => 
     visit(TIMELINES_URL);
     duplicateFirstTimeline();
     closeTimeline();
-    navigateToExplorePageInServerless(); // security page with timelines disabled
+    navigateToOnboardingPageInServerless(); // security page with timelines disabled
     cy.get(APP_LEAVE_CONFIRM_MODAL).should('be.visible');
   });
 });

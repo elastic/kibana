@@ -1,21 +1,28 @@
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/action-types.html
+navigation_title: Connectors
+applies_to:
+  serverless: ga
+  stack: ga
 ---
+# Kibana connectors [action-types]
 
-# Connectors (Kibana) [action-types]
-
-Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {{kib}} server when rule conditions are met. {{kib}} provides the following types of connectors:
+Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+Actions are instantiations of a connector that are linked to rules and run as background tasks on the {{kib}} server when rule conditions are met.
+{{kib}} provides the following types of connectors:
 
 * [{{bedrock}}](/reference/connectors-kibana/bedrock-action-type.md): Send a request to {{bedrock}}.
 * [Cases](/reference/connectors-kibana/cases-action-type.md): Add alerts to cases.
 * [CrowdStrike](/reference/connectors-kibana/crowdstrike-action-type.md): Send a request to CrowdStrike.
 * [D3 Security](/reference/connectors-kibana/d3security-action-type.md): Send a request to D3 Security.
 * [{{gemini}}](/reference/connectors-kibana/gemini-action-type.md): Send a request to {{gemini}}.
+* [Elastic Managed LLM](/reference/connectors-kibana/elastic-managed-llm.md): Send a request to Elastic Managed LLM.
 * [Email](/reference/connectors-kibana/email-action-type.md): Send email from your server.
 * [{{ibm-r}}](/reference/connectors-kibana/resilient-action-type.md): Create an incident in {{ibm-r}}.
 * [Index](/reference/connectors-kibana/index-action-type.md): Index data into Elasticsearch.
 * [Jira](/reference/connectors-kibana/jira-action-type.md): Create an incident in Jira.
+* [Microsoft Defender for Endpoint](/reference/connectors-kibana/defender-action-type.md): Send requests to  Microsoft Defender-enrolled hosts.
 * [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md): Send a message to a Microsoft Teams channel.
 * [Observability AI Assistant](/reference/connectors-kibana/obs-ai-assistant-action-type.md): Add AI-driven insights and custom actions to your workflow.
 * [OpenAI](/reference/connectors-kibana/openai-action-type.md): Send a request to OpenAI.

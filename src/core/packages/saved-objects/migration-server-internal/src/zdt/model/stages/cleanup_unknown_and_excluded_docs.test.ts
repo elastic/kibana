@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import {
   createContextMock,
   createPostDocInitState,
@@ -32,7 +32,7 @@ describe('Stage: cleanupUnknownAndExcludedDocs', () => {
     context = createContextMock();
   });
 
-  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK when successful', () => {
+  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK when successful with cleanup_started', () => {
     const state = createState();
     const res: StateActionResponse<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'> = Either.right({
       type: 'cleanup_started',
@@ -47,6 +47,34 @@ describe('Stage: cleanupUnknownAndExcludedDocs', () => {
       ...state,
       controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK',
       deleteTaskId: '42',
+    });
+  });
+
+  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH when successful with cleanup_not_needed and hasDeletedDocs is true', () => {
+    const state = createState({ hasDeletedDocs: true });
+    const res: StateActionResponse<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'> = Either.right({
+      type: 'cleanup_not_needed',
+    });
+
+    const newState = cleanupUnknownAndExcludedDocs(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH',
+    });
+  });
+
+  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT when successful with cleanup_not_needed and hasDeletedDocs is false', () => {
+    const state = createState();
+    const res: StateActionResponse<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'> = Either.right({
+      type: 'cleanup_not_needed',
+    });
+
+    const newState = cleanupUnknownAndExcludedDocs(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
     });
   });
 

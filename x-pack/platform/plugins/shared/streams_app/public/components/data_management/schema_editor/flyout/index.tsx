@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useToggle from 'react-use/lib/useToggle';
 import { SamplePreviewTable } from './sample_preview_table';
@@ -30,7 +30,7 @@ export interface SchemaEditorFlyoutProps {
   isEditingByDefault?: boolean;
   onClose?: () => void;
   onSave: (field: SchemaField) => void;
-  stream: IngestStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   withFieldSimulation?: boolean;
 }
 

@@ -8,11 +8,13 @@
 import { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export * from '../common/types';
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   console?: ConsolePluginStart;
+  share?: SharePluginStart;
   searchNavigation?: SearchNavigationPluginStart;
 }
 

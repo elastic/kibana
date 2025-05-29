@@ -143,7 +143,7 @@ export const UniversalEntityFlyoutHeader = ({
             id={entity.id}
             type={entity.type}
             subType={entity.sub_type}
-            criticality={source.asset.criticality}
+            criticality={source?.asset?.criticality}
           />
         </>
       </FlyoutHeader>

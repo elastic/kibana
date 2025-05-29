@@ -10,9 +10,9 @@
 import React from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
-import { FORM_ITEM_SUBJ } from '../constants';
-import { alertsFiltersMetadata } from '../filters';
-import { AlertsFilterComponentType, AlertsFiltersFormItemType } from '../types';
+import { FILTERS_FORM_ITEM_SUBJ } from '../constants';
+import { alertsFiltersMetadata } from '../filters_metadata';
+import { AlertsFilterComponentType, AlertsFiltersType } from '../types';
 import {
   FORM_ITEM_FILTER_BY_LABEL,
   FORM_ITEM_FILTER_BY_PLACEHOLDER,
@@ -20,17 +20,18 @@ import {
 } from '../translations';
 
 export interface AlertsFiltersFormItemProps<T> {
-  type?: AlertsFiltersFormItemType;
-  onTypeChange: (newFilterType: AlertsFiltersFormItemType) => void;
+  type?: AlertsFiltersType;
+  onTypeChange: (newFilterType: AlertsFiltersType) => void;
   value?: T;
   onValueChange: (newFilterValue: T) => void;
   isDisabled?: boolean;
+  errors?: { type?: string; value?: string };
 }
 
-const options: Array<EuiSuperSelectOption<AlertsFiltersFormItemType>> = Object.values(
+const options: Array<EuiSuperSelectOption<AlertsFiltersType>> = Object.values(
   alertsFiltersMetadata
 ).map((filterMeta) => ({
-  value: filterMeta.id,
+  value: filterMeta.id as AlertsFiltersType,
   dropdownDisplay: filterMeta.displayName,
   inputDisplay: filterMeta.displayName,
 }));
@@ -41,6 +42,7 @@ export const AlertsFiltersFormItem = <T,>({
   value,
   onValueChange,
   isDisabled = false,
+  errors,
 }: AlertsFiltersFormItemProps<T>) => {
   const FilterComponent = type
     ? (alertsFiltersMetadata[type].component as AlertsFilterComponentType<T>)
@@ -57,7 +59,9 @@ export const AlertsFiltersFormItem = <T,>({
         }
         fullWidth
         isDisabled={isDisabled}
-        data-test-subj={FORM_ITEM_SUBJ}
+        data-test-subj={FILTERS_FORM_ITEM_SUBJ}
+        error={errors?.type}
+        isInvalid={Boolean(errors?.type)}
       >
         <EuiSuperSelect
           options={options}
@@ -66,6 +70,7 @@ export const AlertsFiltersFormItem = <T,>({
           disabled={isDisabled}
           placeholder={FORM_ITEM_FILTER_BY_PLACEHOLDER}
           fullWidth
+          compressed
           popoverProps={{
             repositionOnScroll: true,
             ownFocus: true,
@@ -73,7 +78,12 @@ export const AlertsFiltersFormItem = <T,>({
         />
       </EuiFormRow>
       {FilterComponent && (
-        <FilterComponent value={value} onChange={onValueChange} isDisabled={isDisabled} />
+        <FilterComponent
+          value={value}
+          onChange={onValueChange}
+          isDisabled={isDisabled}
+          error={errors?.value}
+        />
       )}
     </>
   );

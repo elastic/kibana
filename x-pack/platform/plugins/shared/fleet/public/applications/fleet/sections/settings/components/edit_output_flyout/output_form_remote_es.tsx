@@ -21,6 +21,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { snakeCase } from 'lodash';
+
 import { MultiRowInput } from '../multi_row_input';
 
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -332,7 +334,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                             followerIndex: (
                               <EuiCode>
                                 fleet-synced-integrations-ccr-
-                                {inputs.nameInput.props.value || '<output name>'}
+                                {snakeCase(inputs.nameInput.props.value) || '<output name>'}
                               </EuiCode>
                             ),
                           }}
@@ -346,6 +348,24 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                         />
                       </li>
                     </ol>
+                    <EuiSpacer size="s" />
+                    <FormattedMessage
+                      id="xpack.fleet.settings.remoteClusterConfiguration.ccsDescription"
+                      defaultMessage="To search accross remote clusters from this cluster, see the {prerequisites}. Once the remote cluster is added, CCS Data Views will be created automatically."
+                      values={{
+                        prerequisites: (
+                          <EuiLink
+                            target="_blank"
+                            href={`${docLinks.links.ccs.guide}#_prerequisites`}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.settings.remoteClusterConfiguration.ccsDocumentationLink"
+                              defaultMessage="CCS prerequisites"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </>
                 )}
               </EuiCallOut>

@@ -6,7 +6,7 @@ navigation_title: "Configuration"
 Configuration settings enable you to customize the behavior of Kibana apps and features.
 This reference provides details about each setting, such as its purpose, default behavior, and availability in Elastic Cloud environments.
 
-For information about how to update these settings, refer to the appropriate instructions for your environment. For example, [{{ecloud}} Hosted](docs-content://deploy-manage/deploy/elastic-cloud/edit-stack-settings.md), [{{ece}}](docs-content://deploy-manage/deploy/cloud-enterprise/edit-stack-settings-kibana.md), or [self-managed clusters](docs-content://deploy-manage/deploy/self-managed/configure-kibana.md).
+For information about how to update these settings, refer to the appropriate instructions for your environment. For example, [{{ech}}](docs-content://deploy-manage/deploy/elastic-cloud/edit-stack-settings.md), [{{ece}}](docs-content://deploy-manage/deploy/cloud-enterprise/edit-stack-settings-kibana.md), or [self-managed clusters](docs-content://deploy-manage/deploy/self-managed/configure-kibana.md).
 
 The settings are grouped by feature or purpose, for example:
 

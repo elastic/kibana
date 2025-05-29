@@ -5,20 +5,26 @@
  * 2.0.
  */
 
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
+  RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
+  RuleRegistryPluginStartContract as RuleRegistryPluginStart,
+} from '@kbn/rule-registry-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { StreamsConfig } from '../common/config';
+
 export interface StreamsServer {
   core: CoreStart;
   config: StreamsConfig;
@@ -37,6 +43,8 @@ export interface StreamsPluginSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
+  ruleRegistry: RuleRegistryPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -46,4 +54,5 @@ export interface StreamsPluginStartDependencies {
   taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
   inference: InferenceServerStart;
+  ruleRegistry: RuleRegistryPluginStart;
 }

@@ -73,7 +73,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         // therefore we add 9 to get the real number.
         const nestedObjectsAndMultiFields = 9;
         // Number of free slots that we want to have, so we can add dynamic fields as many
-        const numberofFreeSlots = 3;
+        const numberofFreeSlots = 2;
         const totalFields =
           numberOfExistingFields + nestedObjectsAndMultiFields + numberofFreeSlots;
 
@@ -128,7 +128,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         );
 
         // new dynamic field has been added
-        expect(dynamicField).to.eql('text');
+        expect(dynamicField).to.eql('keyword');
       });
     });
 

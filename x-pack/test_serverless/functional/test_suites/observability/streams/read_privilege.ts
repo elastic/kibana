@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WiredIngestUpsertRequest } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -20,15 +20,20 @@ import {
 } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/requests';
 
 const STREAM_NAME = 'logs.crud';
-const stream: WiredIngestUpsertRequest = {
-  ingest: {
-    lifecycle: { inherit: {} },
-    processing: [],
-    wired: {
-      routing: [],
-      fields: {
-        numberfield: {
-          type: 'long',
+const request: Streams.WiredStream.UpsertRequest = {
+  dashboards: [],
+  queries: [],
+  stream: {
+    description: '',
+    ingest: {
+      lifecycle: { inherit: {} },
+      processing: [],
+      wired: {
+        routing: [],
+        fields: {
+          numberfield: {
+            type: 'long',
+          },
         },
       },
     },
@@ -74,11 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await putStream(adminApiClient, STREAM_NAME, {
-        stream,
-        dashboards: [],
-        queries: [],
-      });
+      await putStream(adminApiClient, STREAM_NAME, request);
     });
 
     describe('Get streams', () => {

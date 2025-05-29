@@ -11,20 +11,17 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 
 export const DashboardViewport = ({
   dashboardContainerRef,
@@ -39,7 +36,7 @@ export const DashboardViewport = ({
     dashboardTitle,
     description,
     expandedPanelId,
-    panels,
+    layout,
     viewMode,
     useMargins,
     fullScreenMode,
@@ -48,7 +45,7 @@ export const DashboardViewport = ({
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
-    dashboardApi.panels$,
+    dashboardInternalApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
@@ -58,8 +55,8 @@ export const DashboardViewport = ({
   }, [dashboardApi]);
 
   const panelCount = useMemo(() => {
-    return Object.keys(panels).length;
-  }, [panels]);
+    return Object.keys(layout).length;
+  }, [layout]);
 
   const classes = classNames({
     dshDashboardViewport: true,
@@ -106,22 +103,16 @@ export const DashboardViewport = ({
     >
       {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
-          <ReactEmbeddableRenderer<
-            ControlGroupSerializedState,
-            ControlGroupRuntimeState,
-            ControlGroupApi
-          >
+          <EmbeddableRenderer<object, ControlGroupApi>
             key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
             type={CONTROL_GROUP_TYPE}
-            maybeId={'control_group'}
+            maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
             getParentApi={() => {
               return {
                 ...dashboardApi,
                 reload$: dashboardInternalApi.controlGroupReload$,
-                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
               };
             }}
             onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}

@@ -3496,14 +3496,6 @@
             "section": "def-public.SearchEmbeddableSerializedState",
             "text": "SearchEmbeddableSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.SearchEmbeddableRuntimeState",
-            "text": "SearchEmbeddableRuntimeState"
-          },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -3528,15 +3520,23 @@
             "section": "def-public.PublishesBlockingError",
             "text": "PublishesBlockingError"
           },
-          " & ",
+          " & Required<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
+            "section": "def-public.PublishesWritableTitle",
+            "text": "PublishesWritableTitle"
           },
-          " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
+          "> & Required<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDescription",
+            "text": "PublishesDescription"
+          },
+          "> & ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3817,11 +3817,11 @@
         "signature": [
           "UnifiedHistogramCustomizationId & Pick<",
           {
-            "pluginId": "unifiedHistogram",
+            "pluginId": "@kbn/unified-histogram",
             "scope": "public",
-            "docId": "kibUnifiedHistogramPluginApi",
-            "section": "def-public.UnifiedHistogramContainerProps",
-            "text": "UnifiedHistogramContainerProps"
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UseUnifiedHistogramProps",
+            "text": "UseUnifiedHistogramProps"
           },
           ", \"onBrushEnd\" | \"withDefaultActions\" | \"disabledActions\" | \"onFilter\">"
         ],
