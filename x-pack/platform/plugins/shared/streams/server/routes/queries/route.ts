@@ -229,6 +229,7 @@ const bulkQueriesRoute = createServerRoute({
     await streamsClient.ensureStream(streamName);
 
     const existingQueryLinks = await assetClient.getAssetLinks(streamName, ['query']);
+
     const deleted = existingQueryLinks.filter((link) =>
       operations.some(
         (operation) => isDeleteOperation(operation) && operation.delete.id === link.query.id

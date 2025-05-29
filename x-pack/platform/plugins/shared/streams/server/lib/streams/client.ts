@@ -16,7 +16,7 @@ import { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import { QueryLink } from '../../../common/assets';
+import { QueryLink, isQueryLink } from '../../../common/assets';
 import { EsqlRuleParams } from '../rules/esql/types';
 import { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
@@ -229,9 +229,9 @@ export class StreamsClient {
     );
 
     await this.manageQueries(name, {
-      deleted: deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
-      indexed: indexed.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
-      updated: updated.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
+      deleted: deleted.filter(isQueryLink),
+      indexed: indexed.filter(isQueryLink),
+      updated: updated.filter(isQueryLink),
     });
 
     return {
@@ -733,7 +733,7 @@ export class StreamsClient {
 
     const { deleted } = await this.dependencies.assetClient.syncAssetList(name, []);
     await this.manageQueries(name, {
-      deleted: deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
+      deleted: deleted.filter(isQueryLink),
     });
 
     return { acknowledged: true, result: 'deleted' };
