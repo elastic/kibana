@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 // // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 // // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
@@ -92,7 +91,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
-      const { cloud } = useKibana().services;
+      const { cloud, uiSettings } = useKibana().services;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
@@ -112,7 +111,8 @@ export const CloudAssetInventoryPolicyTemplateForm =
         [onChange]
       );
 
-      const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
+      const cloudConnectorsEnabled =
+        uiSettings.get('securitySolution:enableCloudConnector') || false;
 
       const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
         input,

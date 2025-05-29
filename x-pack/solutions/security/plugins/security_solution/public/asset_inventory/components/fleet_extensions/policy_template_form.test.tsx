@@ -73,10 +73,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       secretsStorage: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
-    mockedSecuritySolutionFeatureService.get.mockReturnValue({
-      cloudConnectorsEnabled: false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cloud: {
@@ -85,6 +81,11 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
           deploymentId: 'mock-deployment-id',
           serverless: { projectId: '' },
           isCloudEnabled: true,
+        },
+        uiSettings: {
+          get: (key: string) => {
+            return false;
+          },
         },
       },
     });
@@ -278,13 +279,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   // });
 
   describe('AWS Credentials input fields', () => {
-    beforeEach(() => {
-      mockedSecuritySolutionFeatureService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-    });
-
     it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Single account is enabled`, () => {
       const { getByLabelText } = render(
         <WrappedComponent
@@ -500,12 +494,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   });
 
   describe('GCP Credentials input fields', () => {
-    beforeEach(() => {
-      mockedSecuritySolutionFeatureService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-    });
     it(`documentation Hyperlink should have correct URL to redirect users to elastic page`, () => {
       let policy = getMockPolicyGCP();
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
@@ -640,12 +628,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     });
   });
   describe('Azure Credentials input fields', () => {
-    beforeEach(() => {
-      mockedSecuritySolutionFeatureService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-    });
     it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
       let policy = getMockPolicyAzure();
       policy = getAssetPolicy(policy, CLOUDBEAT_AZURE, {
@@ -703,6 +685,27 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     });
   });
   describe('Agentless', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          cloud: {
+            csp: 'aws',
+            cloudId: 'mock-cloud-id',
+            deploymentId: 'mock-deployment-id',
+            serverless: { projectId: '' },
+            isCloudEnabled: true,
+          },
+          uiSettings: {
+            get: (key: string) => {
+              if (key === 'securitySolution:enableCloudConnector') {
+                return true;
+              }
+              return false;
+            },
+          },
+        },
+      });
+    });
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
@@ -977,11 +980,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     it('should render setup technology selector for AWS and allow to select cloud connectors', async () => {
       const newPackagePolicy = getMockPolicyAWS();
-
-      mockedSecuritySolutionFeatureService.get.mockReturnValue({
-        cloudConnectorsEnabled: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {

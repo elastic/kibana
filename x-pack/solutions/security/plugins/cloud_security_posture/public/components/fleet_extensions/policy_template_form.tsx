@@ -72,7 +72,6 @@ import { SetupTechnologySelector } from './setup_technology_selector/setup_techn
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -688,7 +687,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const isParentSecurityPosture = !integrationParam;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const { cloud } = useKibana().services;
+    const { cloud, uiSettings } = useKibana().services;
+    const cloudConnectorsEnabled = uiSettings.get('securitySolution:enableCloudConnector') || false;
+
     const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
@@ -753,14 +754,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       [onChange, isValid]
     );
 
-    const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
-
     const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
       input,
       cloud,
       packageInfo,
     });
-
     const showCloudConnectors =
       cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
 
