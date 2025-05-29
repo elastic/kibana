@@ -133,6 +133,9 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
                 `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
               ]
             : []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,
