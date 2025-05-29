@@ -42,7 +42,6 @@ import {
 } from './test_subjects';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
-import { ExperimentalFeaturesService as SecuritySolutionFeatureService } from '../../../common/experimental_features_service';
 import { useKibana } from '../../hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 
