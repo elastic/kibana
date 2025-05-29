@@ -1286,15 +1286,12 @@ describe('ConfigureCases', () => {
     });
 
     it('should not render observable types section if observable feature is not enabled', async () => {
-      const newWrapper = mount(<ConfigureCases />, {
-        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-        wrappingComponentProps: { features: { observables: { enabled: false } } },
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { features: { observables: { enabled: false } } },
       });
 
-      expect(
-        newWrapper.find('[data-test-subj="observable-types-form-group"]').exists()
-      ).toBeFalsy();
-      expect(newWrapper.find('[data-test-subj="add-observable-type"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
     });
 
     it('opens fly out for when click on add observable type', async () => {

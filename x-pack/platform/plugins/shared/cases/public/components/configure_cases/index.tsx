@@ -58,6 +58,7 @@ import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -113,13 +114,14 @@ const addNewCustomFieldToTemplates = ({
 };
 
 export const ConfigureCases: React.FC = React.memo(() => {
-  const { permissions, features } = useCasesContext();
+  const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
-  const canShowObservableTypes = features.observables?.enabled;
+
+  const { isObservablesFeatureEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
@@ -713,7 +715,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </EuiFlexItem>
           </div>
 
-          {hasMinimumLicensePermissionsForObservables && canShowObservableTypes && (
+          {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
             <>
               <EuiSpacer size="xl" />
 
