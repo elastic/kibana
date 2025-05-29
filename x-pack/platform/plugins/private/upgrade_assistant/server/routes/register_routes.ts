@@ -22,7 +22,6 @@ import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
 
-// todo simplify dependencies
 export function registerRoutes(dependencies: RouteDependencies) {
   registerAppRoutes(dependencies);
 

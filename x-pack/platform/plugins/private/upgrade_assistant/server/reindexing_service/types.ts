@@ -16,7 +16,6 @@ export interface RouteDependencies {
   router: IRouter;
   credentialStore: CredentialStore;
   log: Logger;
-  // getSavedObjectsService: () => SavedObjectsServiceStart;
   getSecurityPlugin: () => SecurityPluginStart | undefined;
   licensing: LicensingPluginSetup;
   lib: {
@@ -27,6 +26,4 @@ export interface RouteDependencies {
     featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };
-  // current: SemVer;
-  // defaultTarget: number;
 }
