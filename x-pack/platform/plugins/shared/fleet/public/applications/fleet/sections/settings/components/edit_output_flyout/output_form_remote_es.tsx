@@ -27,7 +27,7 @@ import { MultiRowInput } from '../multi_row_input';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
-import { useStartServices } from '../../../../hooks';
+import { licenseService, useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
@@ -54,6 +54,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
+  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
 
@@ -208,7 +210,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
       <EuiSpacer size="m" />
-      {enableSyncIntegrationsOnRemote ? (
+      {enableSyncIntegrations ? (
         <>
           <EuiFormRow
             fullWidth
