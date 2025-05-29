@@ -34,7 +34,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
     integrationName: {
       type: 'keyword',
-      index: false,
     },
     matchers: {
       type: 'object',
