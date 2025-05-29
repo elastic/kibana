@@ -3038,7 +3038,7 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
 
-"@grpc/grpc-js@^1.13.1":
+"@grpc/grpc-js@^1.13.1", "@grpc/grpc-js@^1.7.1", "@grpc/grpc-js@^1.8.22":
   version "1.13.4"
   resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.13.4.tgz#922fbc496e229c5fa66802d2369bf181c1df1c5a"
   integrity sha512-GsFaMXCkMqkKIvwCQjCrwH+GHbPKBjhwo/8ZuUkWHqbI73Kky9I+pQltrlT0+MWpedCoosda53lgjYfyEPgxBg==
@@ -3046,26 +3046,7 @@
     "@grpc/proto-loader" "^0.7.13"
     "@js-sdsl/ordered-map" "^4.4.2"
 
-"@grpc/grpc-js@^1.7.1", "@grpc/grpc-js@^1.8.22":
-  version "1.8.22"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.8.22.tgz#847930c9af46e14df05b57fc12325db140ceff1d"
-  integrity sha512-oAjDdN7fzbUi+4hZjKG96MR6KTEubAeMpQEb+77qy+3r0Ua5xTFuie6JOLr4ZZgl5g+W5/uRTS2M1V8mVAFPuA==
-  dependencies:
-    "@grpc/proto-loader" "^0.7.0"
-    "@types/node" ">=12.12.47"
-
-"@grpc/proto-loader@^0.7.0", "@grpc/proto-loader@^0.7.3":
-  version "0.7.7"
-  resolved "https://registry.yarnpkg.com/@grpc/proto-loader/-/proto-loader-0.7.7.tgz#d33677a77eea8407f7c66e2abd97589b60eb4b21"
-  integrity sha512-1TIeXOi8TuSCQprPItwoMymZXxWT0CPxUhkrkeCUH+D8U7QDwQ6b7SUz2MaLuWM2llT+J/TVFLmQI5KtML3BhQ==
-  dependencies:
-    "@types/long" "^4.0.1"
-    lodash.camelcase "^4.3.0"
-    long "^4.0.0"
-    protobufjs "^7.0.0"
-    yargs "^17.7.2"
-
-"@grpc/proto-loader@^0.7.13":
+"@grpc/proto-loader@^0.7.0", "@grpc/proto-loader@^0.7.13", "@grpc/proto-loader@^0.7.3":
   version "0.7.15"
   resolved "https://registry.yarnpkg.com/@grpc/proto-loader/-/proto-loader-0.7.15.tgz#4cdfbf35a35461fc843abe8b9e2c0770b5095e60"
   integrity sha512-tMXdRCfYVixjuFK+Hk0Q1s38gV9zDiDJfWL3h1rv4Qc39oILCu1TRTDt7+fGUI8K4G1Fj125Hx/ru3azECWTyQ==
@@ -8280,7 +8261,7 @@
     uuid "^10.0.0"
     zod "^3.23.8"
 
-"@langchain/openai@>=0.1.0 <0.5.0", "@langchain/openai@>=0.2.0 <0.6.0":
+"@langchain/openai@>=0.1.0 <0.5.0":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.4.4.tgz#1832420495c53c28aa4e6515583bad8f0b83a637"
   integrity sha512-UZybJeMd8+UX7Kn47kuFYfqKdBCeBUWNqDtmAr6ZUIMMnlsNIb6MkrEEhGgAEjGCpdT4CU8U/DyyddTz+JayOQ==
@@ -8290,7 +8271,7 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/openai@^0.5.11":
+"@langchain/openai@>=0.2.0 <0.6.0", "@langchain/openai@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.5.11.tgz#d6f7b265343452b96f8b9b268a2d979a54cfed35"
   integrity sha512-DAp7x+NfjSqDvKVMle8yb85nzz+3ctP7zGJaeRS0vLmvkY9qf/jRkowsM0mcsIiEUKhG/AHzWqvxbhktb/jJ6Q==
@@ -19886,19 +19867,7 @@ gonzales-pe@^4.3.0:
   dependencies:
     minimist "^1.2.5"
 
-google-auth-library@^9.10.0:
-  version "9.10.0"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.10.0.tgz#c9fb940923f7ff2569d61982ee1748578c0bbfd4"
-  integrity sha512-ol+oSa5NbcGdDqA+gZ3G3mev59OHBZksBTxY/tYwjtcp1H/scAFwJfSQU9/1RALoyZ7FslNbke8j4i3ipwlyuQ==
-  dependencies:
-    base64-js "^1.3.0"
-    ecdsa-sig-formatter "^1.0.11"
-    gaxios "^6.1.1"
-    gcp-metadata "^6.1.0"
-    gtoken "^7.0.0"
-    jws "^4.0.0"
-
-google-auth-library@^9.15.1:
+google-auth-library@^9.10.0, google-auth-library@^9.15.1:
   version "9.15.1"
   resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.15.1.tgz#0c5d84ed1890b2375f1cd74f03ac7b806b392928"
   integrity sha512-Jb6Z0+nvECVz+2lzSMt9u98UsoakXxA2HGHMCxh+so3n90XgYWkq5dur19JAJV7ONiJY22yBTyJB1TSkvPq9Ng==
@@ -22708,20 +22677,7 @@ kuler@^2.0.0:
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.7:
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.7.tgz#c29362f78ea2872252a60a680d6adb8b67e18b74"
-  integrity sha512-wakN1hxGkm1JR2PpAV7fiT7oC99LKcgxiuUrYGZWPbuj7Y8EPF19F7VNr4B+hA219bfaeWTa4Lxy2YrtPSKnQA==
-  dependencies:
-    "@types/uuid" "^10.0.0"
-    chalk "^4.1.2"
-    console-table-printer "^2.12.1"
-    p-queue "^6.6.2"
-    p-retry "4"
-    semver "^7.6.3"
-    uuid "^10.0.0"
-
-langsmith@^0.3.29:
+"langsmith@>=0.2.8 <0.4.0", langsmith@^0.3.29, langsmith@^0.3.7:
   version "0.3.29"
   resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.3.29.tgz#75b8df90b8a724f320ff0cdc784768117e17a922"
   integrity sha512-JPF2B339qpYy9FyuY4Yz1aWYtgPlFc/a+VTj3L/JcFLHCiMP7+Ig8I9jO+o1QwVa+JU3iugL1RS0wwc+Glw0zA==
@@ -23241,12 +23197,7 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
-long@^5.0.0, long@^5.2.0:
-  version "5.2.3"
-  resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
-  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
-
-long@^5.2.4:
+long@^5.0.0, long@^5.2.0, long@^5.2.4:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/long/-/long-5.3.2.tgz#1d84463095999262d7d7b7f8bfd4a8cc55167f83"
   integrity sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==
@@ -25187,20 +25138,7 @@ open@^8.0.4, open@^8.4.0, open@~8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openai@^4.72.0, openai@^4.77.0:
-  version "4.85.1"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.85.1.tgz#639058653cca92bebd74939751858e7958257670"
-  integrity sha512-jkX2fntHljUvSH3MkWh4jShl10oNkb+SsCj4auKlbu2oF4KWAnmHLNR5EpnUHK1ZNW05Rp0fjbJzYwQzMsH8ZA==
-  dependencies:
-    "@types/node" "^18.11.18"
-    "@types/node-fetch" "^2.6.4"
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.2.1"
-    form-data-encoder "1.7.2"
-    formdata-node "^4.3.2"
-    node-fetch "^2.6.7"
-
-openai@^4.96.0:
+openai@^4.72.0, openai@^4.77.0, openai@^4.96.0:
   version "4.104.0"
   resolved "https://registry.yarnpkg.com/openai/-/openai-4.104.0.tgz#c489765dc051b95019845dab64b0e5207cae4d30"
   integrity sha512-p99EFNsA/yX6UhVO93f5kJsDRLAg+CTA2RBqdHK4RtK8u5IJw32Hyb2dTGKbnnFmnuoBv5r7Z2CURI9sGZpSuA==
