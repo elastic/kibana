@@ -166,7 +166,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
         );
       },
     },
-
     {
       id: 'type',
       'data-test-subj': 'aiopsChangePointType',
