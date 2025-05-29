@@ -141,7 +141,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [query],
         });
-        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+        // const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -184,7 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [query],
         });
-        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+        // const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -280,7 +280,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dashboards: [],
         queries: [firstQuery, secondQuery, thirdQuery],
       });
-      const initialRules = await alertingApi.searchRules(roleAuthc, '');
+      // const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
       const newQuery = {
         id: 'fourth',
