@@ -60,7 +60,8 @@ export function FieldWithActions({
             {hasFieldDescription && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  content={fieldMetadata.flat_name}
+                  title={fieldMetadata.flat_name}
+                  content={fieldMetadata.short}
                   color="subdued"
                   aria-label={fieldMetadata.flat_name}
                 />
