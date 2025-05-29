@@ -22,7 +22,6 @@
     "@kbn/router-utils",
     "@kbn/management-settings-ids",
     "@kbn/share-plugin",
-    "@kbn/ui-theme",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/react-hooks",
