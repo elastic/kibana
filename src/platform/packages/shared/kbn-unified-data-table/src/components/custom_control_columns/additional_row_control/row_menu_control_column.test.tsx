@@ -52,7 +52,7 @@ describe('getRowMenuControlColumn', () => {
       </UnifiedDataTableContext.Provider>
     );
     const menuButton = screen.getByTestId(
-      'unifiedDataTable_additionalRowControl_test_row_menu_control'
+      'unifiedDataTable_additionalRowControl_test_row_menu_controlMenu'
     );
     expect(menuButton).toBeInTheDocument();
 
