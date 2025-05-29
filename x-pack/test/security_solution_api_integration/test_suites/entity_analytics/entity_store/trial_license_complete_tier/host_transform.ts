@@ -195,10 +195,10 @@ function expectFieldToEqualValues(field: string[] | undefined, values: string[] 
   }
 }
 
-function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
+function buildHostTransformDocument(name: string, host: EcsHost, customISOTimestamp?: string): IndexRequest {
   host.name = name;
   // Get timestamp without the millisecond part
-  const isoTimestamp: string = new Date().toISOString().split('.')[0];
+  const isoTimestamp: string = customISOTimestamp !== undefined ? customISOTimestamp : new Date().toISOString().split('.')[0];
   const document: IndexRequest = {
     index: DATASTREAM_NAME,
     document: {
@@ -212,7 +212,8 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
   documentName: string,
-  docs: EcsHost[]
+  docs: EcsHost[],
+  customISOTimestamp?: string,
 ): Promise<void> {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
@@ -227,7 +228,7 @@ async function createDocumentsAndTriggerTransform(
   const docsProcessed: number = transform.stats.documents_processed;
 
   for (let i = 0; i < docs.length; i++) {
-    const { result } = await es.index(buildHostTransformDocument(documentName, docs[i]));
+    const { result } = await es.index(buildHostTransformDocument(documentName, docs[i], customISOTimestamp));
     expect(result).to.eql('created');
   }
 
