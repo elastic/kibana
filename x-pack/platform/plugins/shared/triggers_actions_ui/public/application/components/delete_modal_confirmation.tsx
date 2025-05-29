@@ -89,8 +89,9 @@ export const DeleteModalConfirmation = ({
             getFailedDeletionNotificationText(numErrors, singleTitle, multipleTitle)
           );
           await onErrors();
+        } else {
+          await onDeleted(successes);
         }
-        await onDeleted(successes);
       }}
       cancelButtonText={CANCEL_BUTTON_TEXT}
       confirmButtonText={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}
