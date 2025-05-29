@@ -19,9 +19,12 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { appContextService, outputService } from '../../services';
+import { outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
-import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../../services/setup/fleet_synced_integrations';
+import {
+  FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+  canEnableSyncIntegrations,
+} from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 import { getCustomAssets } from './custom_assets';
@@ -123,9 +126,7 @@ export class SyncIntegrationsTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
-    const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
-
-    if (!enableSyncIntegrationsOnRemote) {
+    if (!canEnableSyncIntegrations()) {
       return;
     }
 
