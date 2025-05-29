@@ -704,6 +704,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-man
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
+src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
