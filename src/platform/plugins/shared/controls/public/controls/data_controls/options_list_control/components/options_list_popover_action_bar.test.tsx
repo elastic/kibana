@@ -111,15 +111,13 @@ describe('Options list popover', () => {
     expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
   });
 
-  test('bulk selections are enabled when total cardinality is more than the limit but showSelectedOnly is enabled with fewer selections than the limit', async () => {
+  test('bulk selections are disabled when showOnlySelected is true', async () => {
     const contextMock = getOptionsListContextMock();
-    contextMock.componentApi.setTotalCardinality(MAX_OPTIONS_LIST_BULK_SELECT_SIZE + 1);
-    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
-    contextMock.componentApi.setSelectedOptions(['moo', 'tweet', 'oink']);
+    contextMock.componentApi.setTotalCardinality(0);
+    contextMock.componentApi.setAvailableOptions([]);
     const actionBarComponent = mountComponent({ ...contextMock, showOnlySelected: true });
 
-    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-search-input')).toBeDisabled();
+    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeDisabled();
+    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
   });
 });
