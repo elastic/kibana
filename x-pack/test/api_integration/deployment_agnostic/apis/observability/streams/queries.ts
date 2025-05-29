@@ -28,7 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       wired: {
         routing: [],
         fields: {
-          numberfield: {
+          'attributes.numberfield': {
             type: 'long',
           },
         },
