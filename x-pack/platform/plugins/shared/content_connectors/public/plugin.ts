@@ -46,30 +46,34 @@ export class SearchConnectorsPlugin
     const connectorTypes = getConnectorTypes(core.http.staticAssets);
     const kibanaVersion = this.kibanaVersion;
 
-    if (this.config.ui.enabled && this.isServerless === true) {
-      management.sections.section.data.registerApp({
-        id: PLUGIN_ID,
-        title: PLUGIN_NAME,
-        order: 8,
-        keywords: ['content connectors', 'search'],
-        async mount(params: ManagementAppMountParams) {
-          const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
-            import('./app'),
-            core.getStartServices(),
-          ]);
+    core.getStartServices().then(([coreStart, pluginsStartDeps, pluginStart]) => {
+      const hasAnyContentConnectorsSolutions = pluginsStartDeps.home.featureCatalogue
+        .getSolutions()
+        .some(({ id }) => ['securitySolution', 'observability'].includes(id));
 
-          const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
-          return renderApp(
-            coreStart,
-            pluginsStartDeps,
-            pluginStart,
-            params,
-            connectorsDefinitions,
-            kibanaVersion
-          );
-        },
-      });
-    }
+      if (this.config.ui.enabled && hasAnyContentConnectorsSolutions) {
+        management.sections.section.data.registerApp({
+          id: PLUGIN_ID,
+          title: PLUGIN_NAME,
+          order: 8,
+          keywords: ['content connectors', 'search'],
+          async mount(params: ManagementAppMountParams) {
+            const { renderApp } = await import('./app');
+
+            const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
+            return renderApp(
+              coreStart,
+              pluginsStartDeps,
+              pluginStart,
+              params,
+              connectorsDefinitions,
+              kibanaVersion
+            );
+          },
+        });
+      }
+    });
+
     return {
       getConnectorTypes: () => connectorTypes,
     };

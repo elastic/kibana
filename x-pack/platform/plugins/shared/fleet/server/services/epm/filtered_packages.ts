@@ -11,8 +11,7 @@ import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 export function getFilteredSearchPackages() {
   const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
   const shouldFilterFleetServer = appContextService.getConfig()?.internal?.fleetServerStandalone;
-  // todo, remove elastic_connectors
-  const filtered: string[] = ['profiler_collector', 'profiler_symbolizer', 'elastic_connectors'];
+  const filtered: string[] = ['profiler_collector', 'profiler_symbolizer'];
   if (!isElasticConnectorsServerlessEnabled) {
     filtered.push('elastic_connectors');
   }
@@ -43,12 +42,13 @@ export function getElasticConnectorsServerlessEnabled() {
 
   const cloud = appContextService.getCloud();
 
-  // todo, remove serverless check
   return (
-    // isCloud || (below_lines)
-    cloud?.isServerlessEnabled &&
-    ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
-      appContextService.getCloud()?.serverless.projectType ?? ''
-    )
+    // is cloud and not serverless
+    (cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) ||
+    // is serverless and project type is one of the supported
+    (cloud?.isServerlessEnabled &&
+      ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
+        appContextService.getCloud()?.serverless.projectType ?? ''
+      ))
   );
 }
