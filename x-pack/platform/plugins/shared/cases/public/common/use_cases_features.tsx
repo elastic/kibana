@@ -44,7 +44,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum && assign,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized: hasLicenseGreaterThanPlatinum,
-      isObservablesFeatureEnabled: features.observables?.enabled,
+      isObservablesFeatureEnabled: features.observables.enabled,
     }),
     [
       features.alerts.enabled,
