@@ -191,7 +191,7 @@
             "signature": [
               "({ http, savedObjects, elasticsearch, executionContext, security }: ",
               "CoreStart",
-              ", { cloud, spaces }: ",
+              ", { cloud }: ",
               "TaskManagerPluginsStart",
               ") => ",
               {
@@ -226,7 +226,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ cloud, spaces }",
+                "label": "{ cloud }",
                 "description": [],
                 "signature": [
                   "TaskManagerPluginsStart"
