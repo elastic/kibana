@@ -21,7 +21,7 @@ import { CredentialStore, credentialStoreFactory } from '../lib/reindexing/crede
 import { hiddenTypes } from '../saved_object_types';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './routes';
 import { handleEsError } from '../shared_imports';
-import { ReindexingServiceConfig } from './config'
+import { ReindexingServiceConfig } from './config';
 import { defaultExclusions } from '../lib/data_source_exclusions';
 import type { DataSourceExclusions, FeatureSet } from '../../common/types';
 
@@ -36,7 +36,10 @@ interface PluginsSetup {
   security?: SecurityPluginSetup;
 }
 
-type ReindexingServiceType = { logger: LoggerFactory, config: { get: () => ReindexingServiceConfig }  };
+interface ReindexingServiceType {
+  logger: LoggerFactory;
+  config: { get: () => ReindexingServiceConfig };
+}
 
 export class ReindexingService {
   private reindexWorker: ReindexWorker | null = null;
