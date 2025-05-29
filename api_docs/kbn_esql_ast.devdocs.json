@@ -3769,6 +3769,10 @@
           },
           {
             "plugin": "@kbn/esql-utils",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
+          },
+          {
+            "plugin": "@kbn/esql-utils",
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts"
           },
           {
@@ -3804,12 +3808,8 @@
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/correct_with_ast.ts"
           },
           {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_alert_rules.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_alert_rules.tsx"
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/escape_field_name_factory.ts"
           },
           {
             "plugin": "triggersActionsUi",
@@ -3817,7 +3817,11 @@
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/escape_field_name_factory.ts"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/rule_flyout_component.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/rule_flyout_component.tsx"
           },
           {
             "plugin": "discover",
