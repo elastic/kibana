@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -20,14 +20,26 @@ export const QueryRuleDraggableListHeader: React.FC = () => {
   return (
     <EuiFlexGroup css={DraggableListHeader(euiTheme)}>
       <EuiFlexItem grow={7}>
-        <EuiText size="xs">
-          <b>
-            <FormattedMessage
-              id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
-              defaultMessage="Rule Conditions"
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              title="Drag the rule to set the priority"
+              content="Rules will trigger based on the priority order. The first rule will take precedence
+                over any following rules"
+              position="right"
             />
-          </b>
-        </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <b>
+                <FormattedMessage
+                  id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
+                  defaultMessage="Rule Conditions"
+                />
+              </b>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
