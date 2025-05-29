@@ -683,6 +683,18 @@ describe('BedrockConnector', () => {
         };
         expect(result.usage).toBeDefined();
       });
+
+      it('should set modelId to connector.model if input.modelId is preconfigured', async () => {
+        const preconfiguredCommand = { input: { modelId: 'preconfigured' } };
+        const response = { some: 'response' };
+        mockSend.mockResolvedValue(response);
+
+        await connector.bedrockClientSend(
+          { signal: undefined, command: preconfiguredCommand },
+          connectorUsageCollector
+        );
+        expect(preconfiguredCommand.input.modelId).toBe(DEFAULT_BEDROCK_MODEL);
+      });
     });
 
     describe('getResponseErrorMessage', () => {
