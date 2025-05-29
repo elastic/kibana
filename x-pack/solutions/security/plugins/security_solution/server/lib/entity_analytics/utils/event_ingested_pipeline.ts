@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { SavedObjectsClient, type ElasticsearchClient } from '@kbn/core/server';
+import { ASSET_CRITICALITY_INDEX_BASE } from '../../../../common/entity_analytics/asset_criticality';
 import type { EntityAnalyticsMigrationsParams } from '../migrations';
 import { getAllConfigurations } from '../risk_engine/utils/saved_object_configuration';
 
@@ -63,6 +65,46 @@ const getEventIngestedPipeline = async (
   }
 };
 
+const getAllAssetCriticalitySpaces = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<string[]> => {
+  try {
+    const response = await esClient.indices.get({
+      index: `${ASSET_CRITICALITY_INDEX_BASE}-*`,
+      allow_no_indices: true,
+    });
+
+    const namespaces: string[] = [];
+
+    for (const index of Object.keys(response)) {
+      const maybeNamespace = index.split(`${ASSET_CRITICALITY_INDEX_BASE}-`).at(-1);
+      if (maybeNamespace) {
+        namespaces.push(maybeNamespace);
+      } else {
+        logger.warn(
+          `Index ${index} does not follow the expected naming convention for asset criticality indices.`
+        );
+      }
+    }
+    return namespaces;
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return [];
+    }
+    throw new Error(`Error fetching asset criticality spaces: ${e}`);
+  }
+};
+
+const getAllRiskEngineSpaces = async (
+  internalSoClient: SavedObjectsClientContract
+): Promise<string[]> => {
+  const allRiskEngineConfigurations = await getAllConfigurations({
+    savedObjectsClient: internalSoClient,
+  });
+  return allRiskEngineConfigurations.flatMap((config) => config.namespaces || []);
+};
+
 export const createEventIngestedPipelineInAllNamespaces = async ({
   getStartServices,
   logger,
@@ -72,21 +114,15 @@ export const createEventIngestedPipelineInAllNamespaces = async ({
   const savedObjectsRepo = coreStart.savedObjects.createInternalRepository();
   const internalSoClient = new SavedObjectsClient(savedObjectsRepo);
 
-  const allRiskEngineConfigurations = await getAllConfigurations({
-    savedObjectsClient: internalSoClient,
-  });
+  const assetCriticalitySpaces = await getAllAssetCriticalitySpaces(esClient, logger);
+  const riskEngineSpaces = await getAllRiskEngineSpaces(internalSoClient);
+  const uniqueNamespaces = new Set([...assetCriticalitySpaces, ...riskEngineSpaces]);
 
-  for (const { namespaces } of allRiskEngineConfigurations) {
-    if (!namespaces || namespaces.length !== 1) {
-      logger.warn(
-        `Found risk engine configuration with multiple namespaces or no namespaces, skipping ingest pipeline creation for this configuration ${namespaces}`
-      );
-    } else {
-      const pipelineExists = await getEventIngestedPipeline(esClient, namespaces[0]);
-      if (!pipelineExists) {
-        logger.info(`Creating event.ingested ingest pipeline for namespace: ${namespaces[0]}`);
-        await createEventIngestedPipeline(esClient, namespaces[0]);
-      }
+  for (const namespace of uniqueNamespaces) {
+    const pipelineExists = await getEventIngestedPipeline(esClient, namespace);
+    if (!pipelineExists) {
+      logger.info(`Creating event.ingested ingest pipeline for namespace: ${namespace}`);
+      await createEventIngestedPipeline(esClient, namespace);
     }
   }
 };
