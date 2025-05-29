@@ -18,6 +18,7 @@ export const ensureIndicesExistsForPolicies = async (
   const endpointPoliciesIds = await fleetServices.packagePolicy.listIds(soClient, {
     kuery: fleetServices.endpointPolicyKuery,
     perPage: 10000,
+    spaceIds: ['*'],
   });
 
   logger.info(

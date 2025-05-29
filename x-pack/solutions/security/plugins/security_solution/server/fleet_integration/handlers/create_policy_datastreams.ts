@@ -57,7 +57,7 @@ export const createPolicyDataStreamsIfNeeded: PolicyDataStreamsCreator = async (
   //          This can be deferred to activity around support of Spaces - team issue: 8199 (epic)
   //          We might need to do much here other than to ensure we can access all policies across all spaces in order to get the namespace value
 
-  const fleetServices = endpointServices.getInternalFleetServices();
+  const fleetServices = endpointServices.getInternalFleetServices(undefined, true);
   const policyNamespaces = await fleetServices.getPolicyNamespace({
     integrationPolicies: endpointPolicyIds,
   });
