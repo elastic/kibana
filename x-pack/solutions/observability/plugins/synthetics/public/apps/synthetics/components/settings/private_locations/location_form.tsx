@@ -20,10 +20,10 @@ import { PolicyHostsField } from './policy_hosts';
 
 export const LocationForm = ({
   privateLocations,
-  isEditingLocation,
+  privateLocationToEdit,
 }: {
   privateLocations: PrivateLocation[];
-  isEditingLocation: boolean;
+  privateLocationToEdit?: PrivateLocation;
 }) => {
   const { data } = useSelector(selectAgentPolicies);
   const { control, register } = useFormContext<PrivateLocation>();
@@ -33,6 +33,8 @@ export const LocationForm = ({
     const tags = item.tags || [];
     return [...acc, ...tags];
   }, [] as string[]);
+
+  const isEditingLocation = privateLocationToEdit !== undefined;
 
   return (
     <>
@@ -54,7 +56,8 @@ export const LocationForm = ({
                 message: NAME_REQUIRED,
               },
               validate: (val: string) => {
-                return privateLocations.some((loc) => loc.label === val)
+                return privateLocations.some((loc) => loc.label === val) &&
+                  val !== privateLocationToEdit?.label
                   ? NAME_ALREADY_EXISTS
                   : undefined;
               },

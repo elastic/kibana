@@ -12,7 +12,7 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
-import { AddOrEditLocationFlyout, NewLocation } from './add_location_flyout';
+import { AddOrEditLocationFlyout, NewLocation } from './add_or_edit_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   selectPrivateLocationFlyoutVisible,
@@ -65,7 +65,11 @@ export const ManagePrivateLocations = () => {
 
   const handleSubmit = (formData: NewLocation) => {
     if (privateLocationToEdit) {
-      onEditLocationAPI(privateLocationToEdit.id, { label: formData.label });
+      if (formData.label === privateLocationToEdit.label) {
+        onCloseFlyout();
+      } else {
+        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label });
+      }
     } else {
       onCreateLocationAPI(formData);
     }

@@ -61,8 +61,6 @@ export const AddOrEditLocationFlyout = ({
     },
   });
 
-  const isEditingLocation = privateLocationToEdit !== undefined;
-
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
   const { createLoading, editLoading } = useSelector(selectPrivateLocationsState);
@@ -83,14 +81,16 @@ export const AddOrEditLocationFlyout = ({
         <EuiFlyout onClose={onCloseFlyout} css={{ width: 540 }}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2>{isEditingLocation ? EDIT_PRIVATE_LOCATION : ADD_PRIVATE_LOCATION}</h2>
+              <h2>
+                {privateLocationToEdit !== undefined ? EDIT_PRIVATE_LOCATION : ADD_PRIVATE_LOCATION}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <ManageEmptyState privateLocations={privateLocations} showEmptyLocations={false}>
               <LocationForm
                 privateLocations={privateLocations}
-                isEditingLocation={isEditingLocation}
+                privateLocationToEdit={privateLocationToEdit}
               />
             </ManageEmptyState>
           </EuiFlyoutBody>

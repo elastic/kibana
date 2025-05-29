@@ -30,7 +30,7 @@ import { SimpleMonitorForm } from './simple_monitor_form';
 import {
   AddOrEditLocationFlyout,
   NewLocation,
-} from '../settings/private_locations/add_location_flyout';
+} from '../settings/private_locations/add_or_edit_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
 import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
