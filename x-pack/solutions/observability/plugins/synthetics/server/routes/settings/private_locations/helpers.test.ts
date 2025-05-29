@@ -123,30 +123,36 @@ describe('updatePrivateLocationMonitors', () => {
 
   const LOCATION_ID = 'test-location-id';
   const NEW_LABEL = 'New location label';
+  const FIRST_SPACE_ID = 'firstSpaceId';
+  const SECOND_SPACE_ID = 'secondSpaceId';
+  const FIRST_MONITOR_ID = 'monitor-1';
+  const SECOND_MONITOR_ID = 'monitor-2';
   const mockMonitors = [
     {
-      id: 'monitor-1',
+      id: FIRST_MONITOR_ID,
       attributes: {
         name: 'Test Monitor 1',
-        locations: [{ id: 'other-location', label: 'Other Location' }],
+        locations: [{ id: LOCATION_ID, label: 'Old Label' }],
         // Other required monitor fields
         type: 'http',
         enabled: true,
         schedule: { number: '10', unit: 'm' },
+        namespace: FIRST_SPACE_ID,
       },
     },
     {
-      id: 'monitor-2',
+      id: SECOND_MONITOR_ID,
       attributes: {
         name: 'Test Monitor 2',
         locations: [
-          { id: 'different-location', label: 'Different Location' },
           { id: LOCATION_ID, label: 'Old Label' },
+          { id: 'different-location', label: 'Different Location' },
         ],
         // Other required monitor fields
         type: 'http',
         enabled: true,
         schedule: { number: '5', unit: 'm' },
+        namespace: SECOND_SPACE_ID,
       },
     },
   ];
@@ -157,12 +163,16 @@ describe('updatePrivateLocationMonitors', () => {
       findDecryptedMonitors: jest.fn().mockResolvedValue(mockMonitors),
       bulkUpdate: jest.fn().mockResolvedValue({}),
     };
+    // Mock the syntheticsMonitorClient
+    const mockSyntheticsMonitorClient = { editMonitors: jest.fn() };
 
     // Call the function
     await updatePrivateLocationMonitors({
       locationId: LOCATION_ID,
       newLocationLabel: NEW_LABEL,
       monitorConfigRepository: mockMonitorConfigRepository as any,
+      syntheticsMonitorClient: mockSyntheticsMonitorClient as any,
+      allPrivateLocations: [],
     });
 
     // Verify findDecryptedMonitors was called correctly
@@ -171,21 +181,70 @@ describe('updatePrivateLocationMonitors', () => {
       filter: `synthetics-monitor.attributes.locations.id:("${LOCATION_ID}")`,
     });
 
+    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenCalledTimes(2);
+
     // Verify bulkUpdate was called with the updated monitors
-    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenCalledWith({
+    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenNthCalledWith(1, {
       monitors: [
-        mockMonitors[0],
+        {
+          ...mockMonitors[0],
+          attributes: {
+            ...mockMonitors[0].attributes,
+            locations: [{ ...mockMonitors[0].attributes.locations[0], label: NEW_LABEL }],
+          },
+        },
+      ],
+    });
+    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenNthCalledWith(2, {
+      monitors: [
         {
           ...mockMonitors[1],
           attributes: {
             ...mockMonitors[1].attributes,
             locations: [
-              mockMonitors[1].attributes.locations[0],
-              { ...mockMonitors[1].attributes.locations[1], label: NEW_LABEL },
+              { ...mockMonitors[1].attributes.locations[0], label: NEW_LABEL },
+              { id: 'different-location', label: 'Different Location' },
             ],
           },
         },
       ],
     });
+
+    expect(mockSyntheticsMonitorClient.editMonitors).toHaveBeenCalledTimes(2);
+
+    // Verify editMonitors was called with the updated monitors
+    expect(mockSyntheticsMonitorClient.editMonitors).toHaveBeenNthCalledWith(
+      1,
+      [
+        {
+          monitor: {
+            ...mockMonitors[0].attributes,
+            locations: [{ ...mockMonitors[0].attributes.locations[0], label: NEW_LABEL }],
+          },
+          id: FIRST_MONITOR_ID,
+          decryptedPreviousMonitor: mockMonitors[0],
+        },
+      ],
+      [],
+      FIRST_SPACE_ID
+    );
+    expect(mockSyntheticsMonitorClient.editMonitors).toHaveBeenNthCalledWith(
+      2,
+      [
+        {
+          monitor: {
+            ...mockMonitors[1].attributes,
+            locations: [
+              { ...mockMonitors[1].attributes.locations[0], label: NEW_LABEL },
+              { id: 'different-location', label: 'Different Location' },
+            ],
+          },
+          id: SECOND_MONITOR_ID,
+          decryptedPreviousMonitor: mockMonitors[1],
+        },
+      ],
+      [],
+      SECOND_SPACE_ID
+    );
   });
 });

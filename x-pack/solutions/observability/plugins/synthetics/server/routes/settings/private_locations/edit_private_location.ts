@@ -7,6 +7,7 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -47,7 +48,13 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, monitorConfigRepository } = routeContext;
+    const {
+      response,
+      request,
+      monitorConfigRepository,
+      savedObjectsClient,
+      syntheticsMonitorClient,
+    } = routeContext;
     const { locationId } = request.params;
     const newLocationLabel = request.body.label;
 
@@ -55,17 +62,18 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
     try {
       const existingLocation = await repo.getPrivateLocation(locationId);
+      const newLocation = await repo.editPrivateLocation(locationId, {
+        label: newLocationLabel,
+      });
+      const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
 
-      const [newLocation] = await Promise.all([
-        repo.editPrivateLocation(locationId, {
-          label: newLocationLabel,
-        }),
-        updatePrivateLocationMonitors({
-          locationId,
-          monitorConfigRepository,
-          newLocationLabel,
-        }),
-      ]);
+      await updatePrivateLocationMonitors({
+        locationId,
+        monitorConfigRepository,
+        newLocationLabel,
+        syntheticsMonitorClient,
+        allPrivateLocations,
+      });
 
       return toClientContract({
         ...existingLocation,
