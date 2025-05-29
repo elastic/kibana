@@ -8,6 +8,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors/constants/doc_links';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { type ClientConfigType } from '../common/types/config';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import {
@@ -28,12 +29,10 @@ export class SearchConnectorsPlugin
       SearchConnectorsPluginStartDependencies
     >
 {
-  private readonly isServerless: boolean;
   private readonly kibanaVersion: string;
   private readonly config: ClientConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get<ClientConfigType>();
   }
@@ -49,7 +48,9 @@ export class SearchConnectorsPlugin
     core.getStartServices().then(([coreStart, pluginsStartDeps, pluginStart]) => {
       const hasAnyContentConnectorsSolutions = pluginsStartDeps.home.featureCatalogue
         .getSolutions()
-        .some(({ id }) => ['securitySolution', 'observability'].includes(id));
+        .some(({ id }: FeatureCatalogueSolution) =>
+          ['securitySolution', 'observability'].includes(id)
+        );
 
       if (this.config.ui.enabled && hasAnyContentConnectorsSolutions) {
         management.sections.section.data.registerApp({
