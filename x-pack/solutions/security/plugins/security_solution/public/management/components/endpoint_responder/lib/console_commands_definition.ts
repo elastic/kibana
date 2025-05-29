@@ -557,7 +557,7 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
-          mustHaveValue: 'non-empty-string',
+          mustHaveValue: 'truthy',
           exclusiveOr: true,
           SelectorComponent: CustomScriptSelector(agentType),
         },

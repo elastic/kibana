@@ -9,10 +9,12 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
+import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
 import type { CommandArgumentValueSelectorProps } from '../console/types';
 import type { CustomScript } from '../../../../server/endpoint/services';
 
 jest.mock('../../hooks/custom_scripts/use_get_custom_scripts');
+jest.mock('../console/hooks/state_selectors/use_console_state_dispatch');
 
 // Mock setTimeout to execute immediately in tests
 jest.useFakeTimers();
@@ -21,7 +23,11 @@ describe('CustomScriptSelector', () => {
   const mockUseGetCustomScripts = useGetCustomScripts as jest.MockedFunction<
     typeof useGetCustomScripts
   >;
+  const mockUseConsoleStateDispatch = useConsoleStateDispatch as jest.MockedFunction<
+    typeof useConsoleStateDispatch
+  >;
   const mockOnChange = jest.fn();
+  const mockDispatch = jest.fn();
   const mockScripts: CustomScript[] = [
     { id: 'script1', name: 'Script 1', description: 'Test script 1' },
     { id: 'script2', name: 'Script 2', description: 'Test script 2' },
@@ -44,6 +50,9 @@ describe('CustomScriptSelector', () => {
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof useGetCustomScripts>);
+
+    // Mock the dispatch function
+    mockUseConsoleStateDispatch.mockReturnValue(mockDispatch);
   });
 
   afterEach(() => {
