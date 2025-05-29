@@ -63,7 +63,6 @@ export class ApmSourcesAccessPlugin
       core,
       logger: this.logger,
       repository: apmSourcesSettingsRouteRepository,
-      runDevModeChecks: false,
       dependencies: { sources: services },
     });
 
