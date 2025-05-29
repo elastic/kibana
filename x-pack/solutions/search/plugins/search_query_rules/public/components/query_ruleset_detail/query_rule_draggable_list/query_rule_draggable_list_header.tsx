@@ -20,14 +20,24 @@ export const QueryRuleDraggableListHeader: React.FC = () => {
   return (
     <EuiFlexGroup css={DraggableListHeader(euiTheme)}>
       <EuiFlexItem grow={7}>
-        <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
           <EuiFlexItem grow={false}>
-            <EuiIconTip
-              title="Drag the rule to set the priority"
-              content="Rules will trigger based on the priority order. The first rule will take precedence
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+              <EuiText size="xs">
+                <b>
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
+                    defaultMessage="Order"
+                  />
+                </b>
+              </EuiText>
+              <EuiIconTip
+                title="Drag the rule to set the priority"
+                content="Rules will trigger based on the priority order. The first rule will take precedence
                 over any following rules"
-              position="right"
-            />
+                position="right"
+              />
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">

@@ -19,6 +19,7 @@ import {
   EuiButtonIcon,
   useEuiTheme,
   euiDragDropReorder,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -69,7 +70,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
             >
               {(provided) => (
                 <EuiPanel paddingSize="s" hasShadow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexGroup alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false}>
                       <EuiPanel
                         color="transparent"
@@ -82,6 +83,9 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <EuiFlexGroup responsive={false} alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiNotificationBadge color="subdued">{index + 1}</EuiNotificationBadge>
+                        </EuiFlexItem>
                         <EuiFlexItem grow={7}>
                           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
                             {Array.isArray(queryRule.criteria) ? (

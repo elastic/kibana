@@ -280,7 +280,7 @@ export const QueryRulesetDetail: React.FC = () => {
                 <h6>Drag the rule to set the priority</h6>
               </EuiTitle>
             }
-            anchorPosition="rightCenter"
+            anchorPosition="downLeft"
             zIndex={1}
             footerAction={
               <EuiFlexGroup direction="row">
