@@ -28,6 +28,8 @@ import {
   apiPublishesTitle,
   apiPublishesUnsavedChanges,
   getTitle,
+  logStateDiff,
+  shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import { filter, map as lodashMap, max } from 'lodash';
@@ -347,6 +349,13 @@ export function initializePanelsManager(
           map(([, lastSavedPanels]) => {
             const panels = serializePanels().panels;
             if (!arePanelLayoutsEqual(lastSavedPanels, panels)) {
+              if (shouldLogStateDiff()) {
+                logStateDiff(
+                  'dashboard layout',
+                  deserializePanels(lastSavedPanels).layout,
+                  deserializePanels(panels).layout
+                );
+              }
               return { panels };
             }
             return {};
