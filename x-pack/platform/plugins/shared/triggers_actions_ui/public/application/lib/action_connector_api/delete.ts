@@ -25,7 +25,7 @@ export async function deleteActions({
       successes.push(...fulfilled);
     },
     function (rejected) {
-      errors.push(...rejected);
+      errors.push(...(Array.isArray(rejected) ? rejected : [rejected]));
     }
   );
   return { successes, errors };
