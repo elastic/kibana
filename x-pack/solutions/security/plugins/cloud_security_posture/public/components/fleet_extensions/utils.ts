@@ -45,6 +45,7 @@ import {
 } from './aws_credentials_form/get_aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -134,6 +135,11 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
+  ...(ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled
+    ? {
+        namespace: POSTURE_NAMESPACE,
+      }
+    : {}),
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars

@@ -55,6 +55,7 @@ import {
   type NewPackagePolicyPostureInput,
   hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
+  POSTURE_NAMESPACE,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -544,6 +545,27 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
+const useEnsureDefaultNamespace = ({
+  newPolicy,
+  input,
+  updatePolicy,
+  cloudSecurityNamespaceSupportEnabled,
+}: {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyPostureInput;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  cloudSecurityNamespaceSupportEnabled: boolean;
+}) => {
+  useEffect(() => {
+    // If the namespace support is enabled, we don't need to set the default namespace
+    if (cloudSecurityNamespaceSupportEnabled) return;
+    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
+
+    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+    updatePolicy(policy);
+  }, [newPolicy, input, updatePolicy, cloudSecurityNamespaceSupportEnabled]);
+};
+
 const usePolicyTemplateInitialName = ({
   isEditPage,
   integration,
@@ -813,6 +835,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setIntegrationToEnable?.(input.policy_template);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
+
+    useEnsureDefaultNamespace({
+      newPolicy,
+      input,
+      updatePolicy,
+      cloudSecurityNamespaceSupportEnabled,
+    });
 
     useCloudFormationTemplate({
       packageInfo,
