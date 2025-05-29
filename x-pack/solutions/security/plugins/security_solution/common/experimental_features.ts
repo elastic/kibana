@@ -263,11 +263,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Automatically installs the security AI prompts package
    */
   securityAIPromptsEnabled: false,
-
-  /**
-   * Enables the new cloud connector UI and e2e flow for Asset Inventory Integration
-   */
-  cloudConnectorsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
