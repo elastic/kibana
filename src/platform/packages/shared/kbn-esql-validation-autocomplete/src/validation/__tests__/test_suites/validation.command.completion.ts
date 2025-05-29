@@ -40,7 +40,7 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           );
         });
 
-        test('prompt is a column', async () => {
+        test('prompt is a text column', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors(
@@ -61,6 +61,12 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
                     | COMPLETION prompt WITH inferenceId`,
             []
           );
+
+          await expectErrors(
+            `FROM index | RENAME textField AS renamedField | COMPLETION renamedField WITH inferenceId`,
+            []
+          );
+
           await expectErrors(`FROM index | COMPLETION textField WITH inferenceId`, []);
           await expectErrors(`FROM index | COMPLETION keywordField WITH inferenceId`, []);
         });
@@ -71,6 +77,19 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           await expectErrors(`FROM index | COMPLETION ?named_param WITH inferenceId`, []);
           await expectErrors(`FROM index | COMPLETION ?123 WITH inferenceId`, []);
           await expectErrors(`FROM index | COMPLETION ? WITH inferenceId`, []);
+        });
+
+        test('prompt is a text parenthesized expression', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index | COMPLETION ("Write an opinion about ES|QL") WITH inferenceId`,
+            []
+          );
+          await expectErrors(
+            `FROM index | COMPLETION (CONCAT("Write an opinion about ", "ES|QL")) WITH inferenceId`,
+            []
+          );
         });
       });
 
@@ -137,6 +156,10 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           await expectErrors(`FROM index | COMPLETION geoPointField WITH inferenceId`, [
             '[COMPLETION] prompt must be of type [text] but is [geo_point]',
           ]);
+          await expectErrors(
+            `FROM index | RENAME counterIntegerField AS renamedField | COMPLETION renamedField WITH inferenceId`,
+            ['[COMPLETION] prompt must be of type [text] but is [counter_integer]']
+          );
         });
 
         test('prompt is an unknown field', async () => {
@@ -147,6 +170,14 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           ]);
           await expectErrors(`FROM index | COMPLETION \`unknownField\` WITH inferenceId`, [
             'Unknown column [unknownField]',
+          ]);
+        });
+
+        test('prompt is a parenthesized expression, but not a text one', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(`FROM index | COMPLETION (1 > 2) WITH inferenceId`, [
+            '[COMPLETION] prompt must be of type [text] but is [boolean]',
           ]);
         });
       });

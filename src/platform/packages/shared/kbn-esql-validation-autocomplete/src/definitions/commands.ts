@@ -46,6 +46,7 @@ import {
   suggest as suggestForDrop,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterDrop,
 } from '../autocomplete/commands/drop';
+import { fieldsSuggestionsAfter as fieldsSuggestionsAfterCompletion } from '../autocomplete/commands/completion';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
 import {
@@ -719,5 +720,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
     suggest: () => [],
     validate: validateCompletion,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterCompletion,
   },
 ];
