@@ -121,12 +121,6 @@ describe('Observability AI Assistant client', () => {
     getUserInstructions: jest.fn(),
   } as any;
 
-  const anonymizationServiceMock: DeeplyMockedKeys<AnonymizationService> = {
-    anonymizeText: jest.fn(),
-    deanonymizeText: jest.fn(),
-    detectNamedEntities: jest.fn(),
-  } as any;
-
   let loggerMock: DeeplyMockedKeys<Logger> = {} as any;
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {
