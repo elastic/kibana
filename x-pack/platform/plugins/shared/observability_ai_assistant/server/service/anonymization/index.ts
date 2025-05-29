@@ -62,7 +62,7 @@ export class AnonymizationService {
 
     const tasks = batches.map((batchChunks) =>
       limiter(async () =>
-        withInferenceSpan('infer_ner_batch', async () => {
+        withInferenceSpan('infer_ner', async () => {
           let response;
           try {
             response = await this.esClient.asCurrentUser.ml.inferTrainedModel({
@@ -70,9 +70,7 @@ export class AnonymizationService {
               docs: batchChunks.map((batchChunk) => ({ text_field: batchChunk.chunkText })),
             });
           } catch (error) {
-            this.logger.error(
-              `NER inference failed: ${error instanceof Error ? error.message : String(error)}`
-            );
+            this.logger.error(new Error('NER inference failed', { cause: error }));
             return [];
           }
 
