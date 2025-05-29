@@ -44,6 +44,16 @@ export const RunTestButton = ({
     }
   };
 
+  // Simple function to show validation errors when button is clicked while disabled
+  const handleButtonClick = () => {
+    if (!formState.isValid) {
+      // Just trigger validation to show all errors
+      handleSubmit(() => {})();
+      return;
+    }
+    handleSubmit(handleTestNow)();
+  };
+
   const {
     data,
     loading: isPushing,
@@ -64,16 +74,17 @@ export const RunTestButton = ({
   return (
     <>
       <EuiToolTip key={tooltipContent} content={tooltipContent}>
-        <EuiButton
-          data-test-subj="syntheticsRunTestBtn"
-          color="success"
-          disabled={isDisabled || !canUsePublicLocations || !isServiceAllowed}
-          aria-label={TEST_NOW_ARIA_LABEL}
-          iconType="play"
-          onClick={handleSubmit(handleTestNow)}
-        >
-          {RUN_TEST}
-        </EuiButton>
+        <div onClick={handleButtonClick} style={{ display: 'inline-block' }}>
+          <EuiButton
+            data-test-subj="syntheticsRunTestBtn"
+            color="success"
+            disabled={isDisabled || !canUsePublicLocations || !isServiceAllowed}
+            aria-label={TEST_NOW_ARIA_LABEL}
+            iconType="play"
+          >
+            {RUN_TEST}
+          </EuiButton>
+        </div>
       </EuiToolTip>
       {testRun && (
         <TestNowModeFlyout
