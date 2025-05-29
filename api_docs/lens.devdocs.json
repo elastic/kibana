@@ -1101,33 +1101,15 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; createAlertRule: (initialValues: Partial<",
+          "<object>[]>; mountInlineFlyout: (Component: React.ComponentType<{}>, overlayTracker?: ",
           {
-            "pluginId": "@kbn/response-ops-rule-form",
+            "pluginId": "@kbn/presentation-containers",
             "scope": "public",
-            "docId": "kibKbnResponseOpsRuleFormPluginApi",
-            "section": "def-public.RuleFormData",
-            "text": "RuleFormData"
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.TracksOverlays",
+            "text": "TracksOverlays"
           },
-          "<Partial<Readonly<{ timeField?: string | undefined; aggField?: string | undefined; termField?: string | string[] | undefined; termSize?: number | undefined; sourceFields?: Readonly<{} & { label: string; searchPath: string; }>[] | undefined; } & { index: string[]; size: number; groupBy: string; searchConfiguration: Readonly<{} & {}>; esqlQuery: Readonly<{} & { esql: string; }>; esQuery: string; searchType: \"searchSource\" | \"esqlQuery\" | \"esQuery\"; timeWindowSize: number; excludeHitsFromPreviousRun: boolean; timeWindowUnit: string; threshold: number[]; thresholdComparator: ",
-          "Comparator",
-          "; aggType: string; }>>>>, ruleTypeRegistry: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeRegistryContract",
-            "text": "RuleTypeRegistryContract"
-          },
-          ", actionTypeRegistry: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.ActionTypeRegistryContract",
-            "text": "ActionTypeRegistryContract"
-          },
-          "<unknown, unknown>) => void; }"
+          " | undefined, options?: { dataTestSubj?: string | undefined; uuid?: string | undefined; container?: HTMLElement | null | undefined; } | undefined) => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/type_guards.ts",
         "deprecated": false,
@@ -18092,33 +18074,15 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; createAlertRule: (initialValues: Partial<",
+          "<object>[]>; mountInlineFlyout: (Component: React.ComponentType<{}>, overlayTracker?: ",
           {
-            "pluginId": "@kbn/response-ops-rule-form",
+            "pluginId": "@kbn/presentation-containers",
             "scope": "public",
-            "docId": "kibKbnResponseOpsRuleFormPluginApi",
-            "section": "def-public.RuleFormData",
-            "text": "RuleFormData"
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.TracksOverlays",
+            "text": "TracksOverlays"
           },
-          "<Partial<Readonly<{ timeField?: string | undefined; aggField?: string | undefined; termField?: string | string[] | undefined; termSize?: number | undefined; sourceFields?: Readonly<{} & { label: string; searchPath: string; }>[] | undefined; } & { index: string[]; size: number; groupBy: string; searchConfiguration: Readonly<{} & {}>; esqlQuery: Readonly<{} & { esql: string; }>; esQuery: string; searchType: \"searchSource\" | \"esqlQuery\" | \"esQuery\"; timeWindowSize: number; excludeHitsFromPreviousRun: boolean; timeWindowUnit: string; threshold: number[]; thresholdComparator: ",
-          "Comparator",
-          "; aggType: string; }>>>>, ruleTypeRegistry: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeRegistryContract",
-            "text": "RuleTypeRegistryContract"
-          },
-          ", actionTypeRegistry: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.ActionTypeRegistryContract",
-            "text": "ActionTypeRegistryContract"
-          },
-          "<unknown, unknown>) => void; }"
+          " | undefined, options?: { dataTestSubj?: string | undefined; uuid?: string | undefined; container?: HTMLElement | null | undefined; } | undefined) => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -20266,33 +20230,15 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; createAlertRule: (initialValues: Partial<",
+          "<object>[]>; mountInlineFlyout: (Component: React.ComponentType<{}>, overlayTracker?: ",
           {
-            "pluginId": "@kbn/response-ops-rule-form",
+            "pluginId": "@kbn/presentation-containers",
             "scope": "public",
-            "docId": "kibKbnResponseOpsRuleFormPluginApi",
-            "section": "def-public.RuleFormData",
-            "text": "RuleFormData"
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.TracksOverlays",
+            "text": "TracksOverlays"
           },
-          "<Partial<Readonly<{ timeField?: string | undefined; aggField?: string | undefined; termField?: string | string[] | undefined; termSize?: number | undefined; sourceFields?: Readonly<{} & { label: string; searchPath: string; }>[] | undefined; } & { index: string[]; size: number; groupBy: string; searchConfiguration: Readonly<{} & {}>; esqlQuery: Readonly<{} & { esql: string; }>; esQuery: string; searchType: \"searchSource\" | \"esqlQuery\" | \"esQuery\"; timeWindowSize: number; excludeHitsFromPreviousRun: boolean; timeWindowUnit: string; threshold: number[]; thresholdComparator: ",
-          "Comparator",
-          "; aggType: string; }>>>>, ruleTypeRegistry: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeRegistryContract",
-            "text": "RuleTypeRegistryContract"
-          },
-          ", actionTypeRegistry: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.ActionTypeRegistryContract",
-            "text": "ActionTypeRegistryContract"
-          },
-          "<unknown, unknown>) => void; }"
+          " | undefined, options?: { dataTestSubj?: string | undefined; uuid?: string | undefined; container?: HTMLElement | null | undefined; } | undefined) => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
