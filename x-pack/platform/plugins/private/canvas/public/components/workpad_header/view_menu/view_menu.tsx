@@ -25,6 +25,7 @@ import {
 import { WorkpadRoutingContext } from '../../../routes/workpad';
 import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
+import { forceReload } from '../../hooks/use_canvas_api';
 
 interface StateProps {
   zoomScale: number;
@@ -61,7 +62,10 @@ const mapStateToProps = (state: State) => {
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setZoomScale: (scale: number) => dispatch(setZoomScale(scale)),
   setWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
-  doRefresh: () => dispatch(fetchAllRenderables()),
+  doRefresh: () => {
+    forceReload();
+    dispatch(fetchAllRenderables());
+  },
 });
 
 const mergeProps = (
