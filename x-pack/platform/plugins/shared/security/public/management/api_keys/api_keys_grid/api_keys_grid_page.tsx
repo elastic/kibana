@@ -67,7 +67,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
     const queryContainer = EuiSearchBar.Query.toESQuery(tableStateArgs.query);
-    
+
     // Enhance the query to support partial matches for name field
     if (queryContainer.bool?.must) {
       queryContainer.bool.must = queryContainer.bool.must.map((clause: any) => {
@@ -81,12 +81,12 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   wildcard: {
                     name: {
                       value: `*${clause.simple_query_string.query.replace(/[+]/g, '')}*`,
-                      case_insensitive: true
-                    }
-                  }
-                }
-              ]
-            }
+                      case_insensitive: true,
+                    },
+                  },
+                },
+              ],
+            },
           };
         }
         return clause;
