@@ -7,7 +7,13 @@
 import { ActorRefFrom, assign, emit, forwardTo, sendTo, setup } from 'xstate5';
 import { isEqual } from 'lodash';
 import { ProcessorDefinition, getProcessorType } from '@kbn/streams-schema';
-import { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorEmittedEvent } from './types';
+import {
+  ProcessorInput,
+  ProcessorContext,
+  ProcessorEvent,
+  ProcessorEmittedEvent,
+  ProcessorResources,
+} from './types';
 
 export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
 
@@ -19,13 +25,20 @@ export const processorMachine = setup({
     emitted: {} as ProcessorEmittedEvent,
   },
   actions: {
-    changeProcessor: assign(({ context }, params: { processor: ProcessorDefinition }) => ({
-      processor: {
-        id: context.processor.id,
-        type: getProcessorType(params.processor),
-        ...params.processor,
-      },
-    })),
+    changeProcessor: assign(
+      ({ context }, params: { processor: ProcessorDefinition; resources?: ProcessorResources }) => {
+        const type = getProcessorType(params.processor);
+
+        return {
+          processor: {
+            id: context.processor.id,
+            type,
+            ...params.processor,
+          },
+          resources: params.resources,
+        };
+      }
+    ),
     resetToPrevious: assign(({ context }) => ({
       processor: context.previousProcessor,
     })),

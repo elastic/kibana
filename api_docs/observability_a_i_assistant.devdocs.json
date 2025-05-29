@@ -807,6 +807,37 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useTypedKibana",
+        "type": "Function",
+        "tags": [],
+        "label": "useTypedKibana",
+        "description": [],
+        "signature": [
+          "<AdditionalServices extends object = {}>() => ",
+          {
+            "pluginId": "kibanaReact",
+            "scope": "public",
+            "docId": "kibKibanaReactPluginApi",
+            "section": "def-public.KibanaReactContextValue",
+            "text": "KibanaReactContextValue"
+          },
+          "<Partial<",
+          "CoreStart",
+          "> & ",
+          "CoreStart",
+          " & { plugins: { start: ",
+          "ObservabilityAIAssistantPluginStartDependencies",
+          "; }; } & AdditionalServices>"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_kibana.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2477,8 +2508,18 @@
               "<{ id: ",
               "StringC",
               "; text: ",
+              "BrandC",
+              "<",
               "StringC",
-              "; public: ",
+              ", ",
+              {
+                "pluginId": "@kbn/io-ts-utils",
+                "scope": "common",
+                "docId": "kibKbnIoTsUtilsPluginApi",
+                "section": "def-common.NonEmptyStringBrand",
+                "text": "NonEmptyStringBrand"
+              },
+              ">; public: ",
               "Type",
               "<boolean, boolean, unknown>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
@@ -2528,9 +2569,9 @@
               },
               "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; modelStats?: Partial<",
+              " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
               "> | undefined; kbState: ",
               {
@@ -2540,7 +2581,7 @@
                 "section": "def-common.KnowledgeBaseState",
                 "text": "KnowledgeBaseState"
               },
-              "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
               {
@@ -3549,8 +3590,18 @@
               "<{ id: ",
               "StringC",
               "; text: ",
+              "BrandC",
+              "<",
               "StringC",
-              "; public: ",
+              ", ",
+              {
+                "pluginId": "@kbn/io-ts-utils",
+                "scope": "common",
+                "docId": "kibKbnIoTsUtilsPluginApi",
+                "section": "def-common.NonEmptyStringBrand",
+                "text": "NonEmptyStringBrand"
+              },
+              ">; public: ",
               "Type",
               "<boolean, boolean, unknown>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
@@ -3600,9 +3651,9 @@
               },
               "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
               "ObservabilityAIAssistantRouteHandlerResources",
-              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+              ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; modelStats?: Partial<",
+              " | undefined; modelStats?: Partial<",
               "MlTrainedModelStats",
               "> | undefined; kbState: ",
               {
@@ -3612,7 +3663,7 @@
                 "section": "def-common.KnowledgeBaseState",
                 "text": "KnowledgeBaseState"
               },
-              "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
               {
@@ -5393,8 +5444,18 @@
           "<{ id: ",
           "StringC",
           "; text: ",
+          "BrandC",
+          "<",
           "StringC",
-          "; public: ",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; public: ",
           "Type",
           "<boolean, boolean, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -5444,9 +5505,9 @@
           },
           "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; modelStats?: Partial<",
+          " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
           "> | undefined; kbState: ",
           {
@@ -5456,7 +5517,7 @@
             "section": "def-common.KnowledgeBaseState",
             "text": "KnowledgeBaseState"
           },
-          "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
           {
@@ -6761,8 +6822,18 @@
           "<{ id: ",
           "StringC",
           "; text: ",
+          "BrandC",
+          "<",
           "StringC",
-          "; public: ",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; public: ",
           "Type",
           "<boolean, boolean, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -6812,9 +6883,9 @@
           },
           "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; modelStats?: Partial<",
+          " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
           "> | undefined; kbState: ",
           {
@@ -6824,7 +6895,7 @@
             "section": "def-common.KnowledgeBaseState",
             "text": "KnowledgeBaseState"
           },
-          "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
           {
@@ -9460,7 +9531,7 @@
                 "section": "def-common.KnowledgeBaseState",
                 "text": "KnowledgeBaseState"
               },
-              "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }>"
+              "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -10333,8 +10404,18 @@
           "<{ id: ",
           "StringC",
           "; text: ",
+          "BrandC",
+          "<",
           "StringC",
-          "; public: ",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">; public: ",
           "Type",
           "<boolean, boolean, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -10384,9 +10465,9 @@
           },
           "<\"GET /internal/observability_ai_assistant/kb/status\", undefined, ",
           "ObservabilityAIAssistantRouteHandlerResources",
-          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
+          ", { errorMessage?: string | undefined; enabled: boolean; endpoint?: ",
           "InferenceInferenceEndpointInfo",
-          "> | undefined; modelStats?: Partial<",
+          " | undefined; modelStats?: Partial<",
           "MlTrainedModelStats",
           "> | undefined; kbState: ",
           {
@@ -10396,7 +10477,7 @@
             "section": "def-common.KnowledgeBaseState",
             "text": "KnowledgeBaseState"
           },
-          "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
+          "; currentInferenceId?: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"POST /internal/observability_ai_assistant/kb/reindex\": ",
           {
