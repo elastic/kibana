@@ -107,7 +107,7 @@ export function registerGetConnectorInfoFunction({
         .filter((connector) => !excludedConnectorIds.has(connector.actionTypeId))
         .map((connector) => ({
           ...connector,
-          parameters: connectorParamsSchemas[connector.actionTypeId] ?? {},
+          params: connectorParamsSchemas[connector.actionTypeId] ?? {},
         }));
       return { content: filteredConnectors };
     }
