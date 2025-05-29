@@ -61,6 +61,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-updates-table-when-prebuilt-rule-isnt-customized)
     - [**Scenario: User should be able to filter by customized rules in the rule updates table**](#scenario-user-should-be-able-to-filter-by-customized-rules-in-the-rule-updates-table)
     - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
+    - [**Scenario: Customized fields should be marked with a per-field modified badge**](#scenario-customized-fields-should-be-marked-with-a-per-field-modified-badge)
+    - [**Scenario: Clicking on the modified badge should open a rule diff flyout**](#scenario-clicking-on-the-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Clicking on a per-field modified badge should open a rule diff flyout**](#scenario-clicking-on-a-per-field-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Modified badge should not be clickable if rule base version is missing**](#scenario-modified-badge-should-not-be-clickable-if-rule-base-version-is-missing)
+    - [**Scenario: Per-field modified badges should not be displayed if rule base version is missing**](#scenario-per-field-modified-badges-should-not-be-displayed-if-rule-base-version-is-missing)
   - [Licensing](#licensing)
     - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
     - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
@@ -72,7 +77,12 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**](#scenario-revert-prebuilt-rule-button-should-be-disabled-when-rules-base-version-is-missing)
     - [**Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**](#scenario-revert-prebuilt-rule-button-shouldnt-appear-if-rule-is-non-customzied)
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing)
+<<<<<<< HEAD
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing-1)
+=======
+    - [**Scenario: Revert prebuilt rule endpoint returns error if request `revision` field doesn't match the rule associated with `rule_id`**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-request-revision-field-doesnt-match-the-rule-associated-with-rule_id)
+    - [**Scenario: Revert prebuilt rule endpoint returns error if request `version` field doesn't match the rule associated with `rule_id`**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-request-version-field-doesnt-match-the-rule-associated-with-rule_id)
+>>>>>>> 7d96479a6cc (adds additional test cases)
     - [**Scenario: Revert prebuilt rule endpoint does not modify non-customized rule**](#scenario-revert-prebuilt-rule-endpoint-does-not-modify-non-customized-rule)
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule isn't prebuilt**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rule-isnt-prebuilt)
     - [**Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**](#scenario-reverting-a-prebuilt-rule-doesnt-modify-customization-adjacent-fields)
@@ -93,6 +103,12 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
 - **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
+<<<<<<< HEAD
+=======
+- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
+- **modified badge**: a badge in the UI that appears on the top of the rule details page whenever the rule's `is_customized` value is set to true.
+- **per-field modified badge**: a smaller modified badge in the UI that appears on an individual field component on the rule details page.
+>>>>>>> 7d96479a6cc (adds additional test cases)
 - **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 - **customizing bulk action**: a bulk action that updates values of customizable fields in multiple rules at once. See list below.
 
@@ -487,6 +503,79 @@ Then the table should display only non-customized prebuilt rules
 And the all shown table rows should NOT have the "Modified" badge present
 ```
 
+#### **Scenario: Customized fields should be marked with a per-field modified badge**
+
+**Automation**: 1 cypress test and 1 unit test per field.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user navigates to that rule's details page
+Then the <field_name> field should be marked with a modified rule badge
+
+Examples:
+<field_name> = all customizable rule fields
+```
+
+#### **Scenario: Clicking on the modified badge should open a rule diff flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user navigates to that rule's details page
+And the modified badge is clicked
+Then a rule diff flyout should open
+And this flyout should be read-only
+And should list all fields that are different between the current and base version
+And should not contain a button to revert the rule 
+```
+
+#### **Scenario: Clicking on a per-field modified badge should open a rule diff flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user navigates to that rule's details page
+And a per-field modified badge is clicked
+Then a rule diff flyout should open
+And this flyout should be read-only
+And should list all fields that are different between the current and base version
+And should not contain a button to revert the rule 
+```
+
+#### **Scenario: Modified badge should not be clickable if rule base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule does not have an existing base version
+When a user navigates to that rule's details page
+Then the modified badge should be displayed
+But should not be clickable
+And does not open a rule flyout
+```
+
+#### **Scenario: Per-field modified badges should not be displayed if rule base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule does not have an existing base version
+When a user navigates to that rule's details page
+Then no per-field modified badges should be displayed
+```
+
 ### Licensing
 
 #### **Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**
@@ -578,6 +667,7 @@ And clicks the revert rule button
 Then a rule diff flyout should open
 And this flyout should be read-only
 And should list all fields that are different between the current and base version
+And should contain a button to revert the rule
 ```
 
 #### **Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**
@@ -620,6 +710,32 @@ Given a space with at least one prebuilt rule
 And that rule is customized
 And that rule does not have an existing base version
 When a user reverts the rule
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule endpoint returns error if request `revision` field doesn't match the rule associated with `rule_id`**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user reverts the rule with an outdated revision field
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule endpoint returns error if request `version` field doesn't match the rule associated with `rule_id`**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user reverts the rule with an outdated version field
 Then the API should return a 500 error
 And the rule should remain the same
 ```
