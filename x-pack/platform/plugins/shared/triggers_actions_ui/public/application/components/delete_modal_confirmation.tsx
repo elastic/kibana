@@ -78,18 +78,18 @@ export const DeleteModalConfirmation = ({
 
         const numSuccesses = successes.length;
         const numErrors = errors.length;
-        if (numSuccesses > 0) {
-          toasts.addSuccess(
-            getSuccessfulDeletionNotificationText(numSuccesses, singleTitle, multipleTitle)
-          );
-        }
 
         if (numErrors > 0) {
           toasts.addDanger(
             getFailedDeletionNotificationText(numErrors, singleTitle, multipleTitle)
           );
           await onErrors();
-        } else {
+        }
+
+        if (numSuccesses > 0) {
+          toasts.addSuccess(
+            getSuccessfulDeletionNotificationText(numSuccesses, singleTitle, multipleTitle)
+          );
           await onDeleted(successes);
         }
       }}
