@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  ELASTIC_LLM_ADDITIONAL_COST,
+  ELASTIC_LLM_USAGE_COSTS,
   ELASTIC_LLM_THIRD_PARTY,
   ELASTIC_LLM_TOUR_PERFORMANCE,
 } from '@kbn/elastic-assistant/impl/tour/elastic_llm/translations';
@@ -49,10 +49,10 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
     docLinks: {
       links: {
         securitySolution: {
-          thirdPartyLlmProviders: ELASTIC_LLM_TOUR_THIRD_PARTY_LINK,
-          llmPerformanceMatrix: ELASTIC_LLM_TOUR_PERFORMANCE_LINK,
+          thirdPartyLlmProviders: THIRD_PARTY_LLM_LINK,
+          llmPerformanceMatrix: LLM_PERFORMANCE_LINK,
         },
-        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_TOUR_EXTRA_COST_LINK },
+        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
   } = useKibana().services;
@@ -63,17 +63,22 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
       defaultMessage="The Elastic Managed LLM connector is selected by default. Review its {usageCost} or {thirdParty}. Model {performance} varies by task."
       values={{
         usageCost: (
-          <EuiLink href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK} external>
-            {ELASTIC_LLM_ADDITIONAL_COST}
+          <EuiLink
+            href={ELASTIC_LLM_USAGE_COST_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            external
+          >
+            {ELASTIC_LLM_USAGE_COSTS}
           </EuiLink>
         ),
         thirdParty: (
-          <EuiLink href={ELASTIC_LLM_TOUR_THIRD_PARTY_LINK} external>
+          <EuiLink href={THIRD_PARTY_LLM_LINK} target="_blank" rel="noopener noreferrer" external>
             {ELASTIC_LLM_THIRD_PARTY}
           </EuiLink>
         ),
         performance: (
-          <EuiLink href={ELASTIC_LLM_TOUR_PERFORMANCE_LINK} external>
+          <EuiLink href={LLM_PERFORMANCE_LINK} target="_blank" rel="noopener noreferrer" external>
             {ELASTIC_LLM_TOUR_PERFORMANCE}
           </EuiLink>
         ),

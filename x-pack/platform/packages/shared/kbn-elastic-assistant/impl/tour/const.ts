@@ -9,7 +9,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   KNOWLEDGE_BASE: 'elasticAssistant.knowledgeBase.newFeaturesTour.v8.16',
   ANONYMIZED_VALUES_AND_CITATIONS:
     'elasticAssistant.anonymizedValuesAndCitationsTourCompleted.v8.18',
-  ELASTIC_LLM: 'elasticAssistant.elasticLLM.costAwarenessTour.v9.1',
+  ELASTIC_LLM: 'elasticAssistant.elasticLLM.costAwarenessTour.v8.19',
   CONVERSATION_CONNECTOR_ELASTIC_LLM:
-    'elasticAssistant.elasticLLM.conversation.costAwarenessTour.v9.1',
+    'elasticAssistant.elasticLLM.conversation.costAwarenessTour.v8.19',
 };

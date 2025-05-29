@@ -13,7 +13,6 @@ export const ASSISTANT_CARD_TITLE = i18n.translate(
     defaultMessage: 'Configure AI Provider',
   }
 );
-
 export const ASSISTANT_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.description',
   {

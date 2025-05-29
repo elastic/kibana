@@ -47,10 +47,10 @@ export const ElasticAIFeatureMessage = React.memo(() => {
     docLinks: {
       links: {
         securitySolution: {
-          elasticAiFeatures: ELASTIC_LLM_TOUR_AI_FEATURES_LINK,
-          thirdPartyLlmProviders: ELASTIC_LLM_TOUR_THIRD_PARTY_LINK,
+          elasticAiFeatures: ELASTIC_AI_FEATURES_LINK,
+          thirdPartyLlmProviders: THIRD_PARTY_LLM_LINK,
         },
-        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_TOUR_EXTRA_COST_LINK },
+        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
   } = useKibana().services;
@@ -61,17 +61,27 @@ export const ElasticAIFeatureMessage = React.memo(() => {
       defaultMessage="{elasticAiFeatures} require an LLM connector. You can use Elastic Managed LLM connector, which is available by default, or {thirdParty}. Learn more about Elastic Managed LLM connector's {usageCost}."
       values={{
         elasticAiFeatures: (
-          <EuiLink href={ELASTIC_LLM_TOUR_AI_FEATURES_LINK} external>
+          <EuiLink
+            href={ELASTIC_AI_FEATURES_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            external
+          >
             {ELASTIC_LLM_AI_FEATURES}
           </EuiLink>
         ),
         usageCost: (
-          <EuiLink href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK} external>
+          <EuiLink
+            href={ELASTIC_LLM_USAGE_COST_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            external
+          >
             {ELASTIC_LLM_USAGE_COSTS}
           </EuiLink>
         ),
         thirdParty: (
-          <EuiLink href={ELASTIC_LLM_TOUR_THIRD_PARTY_LINK} external>
+          <EuiLink href={THIRD_PARTY_LLM_LINK} target="_blank" rel="noopener noreferrer" external>
             {ELASTIC_LLM_THIRD_PARTY}
           </EuiLink>
         ),

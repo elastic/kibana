@@ -236,10 +236,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       docLinks={{
         ELASTIC_WEBSITE_URL,
         ELASTIC_LLM_LINK: elasticManagedLlm,
-        ELASTIC_LLM_TOUR_EXTRA_COST_LINK: elasticManagedLlmUsageCost,
-        ELASTIC_LLM_TOUR_THIRD_PARTY_LINK: thirdPartyLlmProviders,
-        ELASTIC_LLM_TOUR_AI_FEATURES_LINK: elasticAiFeatures,
-        ELASTIC_LLM_TOUR_PERFORMANCE_LINK: llmPerformanceMatrix,
+        ELASTIC_LLM_USAGE_COST_LINK: elasticManagedLlmUsageCost,
+        THIRD_PARTY_LLM_LINK: thirdPartyLlmProviders,
+        ELASTIC_AI_FEATURES_LINK: elasticAiFeatures,
+        LLM_PERFORMANCE_LINK: llmPerformanceMatrix,
         DOC_LINK_VERSION,
       }}
       basePath={basePath}

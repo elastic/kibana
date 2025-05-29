@@ -18,7 +18,7 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean }) => {
   const {
     getUrlForApp,
-    docLinks: { ELASTIC_LLM_TOUR_EXTRA_COST_LINK },
+    docLinks: { ELASTIC_LLM_USAGE_COST_LINK },
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { euiTheme } = useEuiTheme();
@@ -64,7 +64,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
           values={{
             costLink: (
               <EuiLink
-                href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK}
+                href={ELASTIC_LLM_USAGE_COST_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 external

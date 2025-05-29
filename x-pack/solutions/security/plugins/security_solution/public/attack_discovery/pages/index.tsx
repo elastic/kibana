@@ -292,6 +292,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             onGenerate={onGenerate}
             openFlyout={openFlyout}
             stats={stats}
+            showFlyout={showFlyout}
           />
           <EuiSpacer size={attackDiscoveryAlertsEnabled ? 's' : 'm'} />
         </HeaderPage>

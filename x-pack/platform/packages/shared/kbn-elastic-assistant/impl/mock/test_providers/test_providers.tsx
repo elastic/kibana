@@ -55,6 +55,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
+  const mockGetUrlForApp = jest.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -83,8 +84,14 @@ export const TestProvidersComponent: React.FC<Props> = ({
             docLinks={{
               ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
               DOC_LINK_VERSION: 'current',
+              ELASTIC_LLM_LINK: '',
+              ELASTIC_LLM_USAGE_COST_LINK: '',
+              THIRD_PARTY_LLM_LINK: '',
+              ELASTIC_AI_FEATURES_LINK: '',
+              LLM_PERFORMANCE_LINK: '',
             }}
             getComments={mockGetComments}
+            getUrlForApp={mockGetUrlForApp}
             http={mockHttp}
             navigateToApp={mockNavigateToApp}
             {...providerContext}

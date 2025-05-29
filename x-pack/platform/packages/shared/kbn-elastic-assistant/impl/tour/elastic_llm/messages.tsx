@@ -12,21 +12,26 @@ import { useAssistantContext } from '../../assistant_context';
 
 export const CostAwareness = () => {
   const {
-    docLinks: { ELASTIC_LLM_TOUR_EXTRA_COST_LINK, ELASTIC_LLM_LINK },
+    docLinks: { ELASTIC_LLM_USAGE_COST_LINK, ELASTIC_LLM_LINK },
   } = useAssistantContext();
 
   return (
     <FormattedMessage
       id="xpack.elasticAssistant.elasticLLM.tour.content"
-      defaultMessage="Elastic Managed LLM connector is our new default, pre-configured LLM connector. It will incur {additionalCost} You can continue to use other LLM connectors as normal. {learnMore}"
+      defaultMessage="Elastic Managed LLM connector is our default, pre-configured LLM that makes it easy to use our AI features. Learn about it's {usageCost}. You can continue to use other LLM connectors as normal. {learnMore}"
       values={{
-        additionalCost: (
-          <EuiLink href={ELASTIC_LLM_TOUR_EXTRA_COST_LINK} external>
-            {i18n.ELASTIC_LLM_ADDITIONAL_COST}
+        usageCost: (
+          <EuiLink
+            href={ELASTIC_LLM_USAGE_COST_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            external
+          >
+            {i18n.ELASTIC_LLM_USAGE_COSTS}
           </EuiLink>
         ),
         learnMore: (
-          <EuiLink href={ELASTIC_LLM_LINK} external>
+          <EuiLink href={ELASTIC_LLM_LINK} target="_blank" rel="noopener noreferrer" external>
             {i18n.ELASTIC_LLM_TOUR_LEARN_MORE}
           </EuiLink>
         ),

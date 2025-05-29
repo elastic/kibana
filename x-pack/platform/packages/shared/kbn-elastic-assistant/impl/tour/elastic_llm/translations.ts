@@ -21,13 +21,6 @@ export const ELASTIC_LLM_TOUR_SUBTITLE = i18n.translate(
   }
 );
 
-export const ELASTIC_LLM_ADDITIONAL_COST = i18n.translate(
-  'xpack.elasticAssistant.elasticLLM.tour.additionalCost',
-  {
-    defaultMessage: 'additional cost',
-  }
-);
-
 export const ELASTIC_LLM_TOUR_LEARN_MORE = i18n.translate(
   'xpack.elasticAssistant.elasticLLM.tour.learnMore',
   {

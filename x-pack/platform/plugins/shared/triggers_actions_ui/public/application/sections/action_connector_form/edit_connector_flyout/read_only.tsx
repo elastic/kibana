@@ -19,15 +19,20 @@ const ElasticLLMReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }
         defaultMessage="This Elastic-managed connector is read-only. Learn more about {elasticLLM} and its {usageCost}."
         values={{
           elasticLLM: (
-            <EuiLink href={href} external>
+            <EuiLink href={href} target="_blank" rel="noopener noreferrer" external>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.title.link"
-                defaultMessage="Elastic LLM"
+                defaultMessage="Elastic Managed LLM connector"
               />
             </EuiLink>
           ),
           usageCost: (
-            <EuiLink href={docLinks.links.alerting.elasticManagedLlmUsageCost} external>
+            <EuiLink
+              href={docLinks.links.alerting.elasticManagedLlmUsageCost}
+              target="_blank"
+              rel="noopener noreferrer"
+              external
+            >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.editConnectorForm.esLLM.usageCost.link"
                 defaultMessage="usage cost"

@@ -15,12 +15,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import { ConnectorSelectorInline, useAssistantContext } from '@kbn/elastic-assistant';
 import { type AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import type { ShowAssistantOverlayProps } from '@kbn/elastic-assistant/impl/assistant_context';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
@@ -35,6 +36,7 @@ interface Props {
   onConnectorIdSelected: (connectorId: string) => void;
   openFlyout: () => void;
   stats: AttackDiscoveryStats | null;
+  showFlyout: boolean;
 }
 
 const HeaderComponent: React.FC<Props> = ({
@@ -47,11 +49,29 @@ const HeaderComponent: React.FC<Props> = ({
   onCancel,
   openFlyout,
   stats,
+  showFlyout,
 }) => {
   const { euiTheme } = useEuiTheme();
   const disabled = connectorId == null;
   const [didCancel, setDidCancel] = useState(false);
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const { setShowAssistantOverlay } = useAssistantContext();
+
+  const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
+    !attackDiscoveryAlertsEnabled || !connectorsAreConfigured || showFlyout
+  );
+  const showAssistantOverlay = useCallback(
+    () =>
+      ({ showOverlay: so }: ShowAssistantOverlayProps) => {
+        if (so) {
+          setIsEISCostTourDisabled(true);
+        }
+      },
+    []
+  );
+  useEffect(() => {
+    setShowAssistantOverlay(showAssistantOverlay);
+  }, [setShowAssistantOverlay, showAssistantOverlay]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);
@@ -115,10 +135,9 @@ const HeaderComponent: React.FC<Props> = ({
 
                 <EuiFlexItem>
                   <ElasticLLMCostAwarenessTour
-                    isDisabled={!connectorsAreConfigured}
+                    isDisabled={isEISCostTourDisabled}
                     selectedConnectorId={connectorId}
-                    zIndex={1000} // Has to be higher than the z-index of the header toolbar but lower than the flyout
-                    anchorPosition="downLeft" // Position the tour downLeft to avoid overlapping with the header
+                    zIndex={1} // Should lower than the flyout
                   >
                     <ConnectorSelectorInline
                       onConnectorSelected={noop}

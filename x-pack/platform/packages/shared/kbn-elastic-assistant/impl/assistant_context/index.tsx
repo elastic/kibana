@@ -75,10 +75,10 @@ type GetUrlForApp = (
 interface DocLinks {
   readonly ELASTIC_WEBSITE_URL: DocLinksStart['ELASTIC_WEBSITE_URL'];
   readonly ELASTIC_LLM_LINK: string;
-  readonly ELASTIC_LLM_TOUR_EXTRA_COST_LINK: string;
-  readonly ELASTIC_LLM_TOUR_THIRD_PARTY_LINK: string;
-  readonly ELASTIC_LLM_TOUR_AI_FEATURES_LINK: string;
-  readonly ELASTIC_LLM_TOUR_PERFORMANCE_LINK: string;
+  readonly ELASTIC_LLM_USAGE_COST_LINK: string;
+  readonly THIRD_PARTY_LLM_LINK: string;
+  readonly ELASTIC_AI_FEATURES_LINK: string;
+  readonly LLM_PERFORMANCE_LINK: string;
   readonly DOC_LINK_VERSION: DocLinksStart['DOC_LINK_VERSION'];
 }
 export interface AssistantProviderProps {
