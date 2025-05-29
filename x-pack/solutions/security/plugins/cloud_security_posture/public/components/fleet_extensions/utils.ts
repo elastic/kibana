@@ -133,7 +133,6 @@ export const getPosturePolicy = (
   inputType: PostureInput,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
-  namespace: POSTURE_NAMESPACE, // Use default namespace in case namespace not set in 'newPolicy'
   ...newPolicy,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
