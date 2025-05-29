@@ -36,6 +36,7 @@ import { FormattedCount } from '../../../common/components/formatted_number';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import type { SeverityCount } from '../severity/types';
+import type { EntityAnalyticsComponentProps } from '../../hooks/use_entity_analytics_components';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${SEVERITY_COLOR.critical};
@@ -45,7 +46,9 @@ const StyledEuiTitle = styled(EuiTitle)`
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
-export const EntityAnalyticsHeader = () => {
+export const EntityAnalyticsHeader: React.FC<EntityAnalyticsComponentProps> = ({
+  isRiskAnalytics = false,
+}) => {
   const { from, to } = useGlobalTime();
   const { filterQuery } = useGlobalFilterQuery();
   const timerange = useMemo(
@@ -195,21 +198,22 @@ export const EntityAnalyticsHeader = () => {
             </EuiFlexItem>
           </>
         )}
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem className="eui-textCenter">
-              <EuiTitle data-test-subj="anomalies_quantity" size="l">
-                <span>{totalAnomalies}</span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink data-test-subj="all_anomalies_link" onClick={scrollToAnomalies}>
-                {i18n.ANOMALIES}
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {!isRiskAnalytics && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              <EuiFlexItem className="eui-textCenter">
+                <EuiTitle data-test-subj="anomalies_quantity" size="l">
+                  <span>{totalAnomalies}</span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiLink data-test-subj="all_anomalies_link" onClick={scrollToAnomalies}>
+                  {i18n.ANOMALIES}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

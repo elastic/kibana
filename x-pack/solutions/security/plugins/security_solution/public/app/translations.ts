@@ -61,10 +61,10 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_RISK_ANALYTICS = i18n.translate(
+export const RISK_ANALYTICS = i18n.translate(
   'xpack.securitySolution.navigation.entityAnalyticsRiskAnalytics',
   {
-    defaultMessage: 'Risk analytics',
+    defaultMessage: 'Risk Analytics',
   }
 );
 

@@ -37,16 +37,16 @@ const privMonLinks: LinkItem = {
 const riskAnalyticsLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsRiskAnalytics,
   title: i18n.translate('xpack.securitySolution.appLinks.riskAnalytics', {
-    defaultMessage: 'Risk analytics',
+    defaultMessage: 'Risk Analytics',
   }),
   landingImage: privilegedUserMonitoringPageImg,
   path: ENTITY_ANALYTICS_RISK_ANALYTICS_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.riskAnalytics', {
-      defaultMessage: 'Risk analytics',
+      defaultMessage: 'Risk Analytics',
     }),
   ],
-  hideTimeline: true,
+  hideTimeline: false,
   skipUrlState: true,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',

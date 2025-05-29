@@ -23,7 +23,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
-import { EntityAnalyticsRiskAnalyticsPage } from './pages/entity_analytics_risk_analytics_page';
+import { RiskAnalyticsDashboard } from './pages/risk_analytics_page';
 
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
@@ -131,7 +131,7 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
 
 const EntityAnalyticsRiskAnalyticsWrapper = () => (
   <PluginTemplateWrapper>
-    <EntityAnalyticsRiskAnalyticsPage />
+    <RiskAnalyticsDashboard />
   </PluginTemplateWrapper>
 );
 

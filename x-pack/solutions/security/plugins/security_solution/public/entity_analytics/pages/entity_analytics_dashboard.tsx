@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { ENTITY_ANALYTICS } from '../../app/translations';
+import { ENTITY_ANALYTICS, RISK_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../sourcerer/containers';
@@ -26,8 +26,11 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
+import type { EntityAnalyticsComponentProps } from '../hooks/use_entity_analytics_components';
 
-const EntityAnalyticsComponent = () => {
+const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
+  isRiskAnalytics = false,
+}) => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
   const {
@@ -69,14 +72,14 @@ const EntityAnalyticsComponent = () => {
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage title={ENTITY_ANALYTICS} />
+            <HeaderPage title={isRiskAnalytics ? RISK_ANALYTICS : ENTITY_ANALYTICS} />
 
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                 <EuiFlexItem>
-                  <EntityAnalyticsHeader />
+                  <EntityAnalyticsHeader isRiskAnalytics={isRiskAnalytics} />
                 </EuiFlexItem>
 
                 {!isEntityStoreFeatureFlagDisabled ? (
@@ -93,9 +96,7 @@ const EntityAnalyticsComponent = () => {
                   </>
                 )}
 
-                <EuiFlexItem>
-                  <EntityAnalyticsAnomalies />
-                </EuiFlexItem>
+                <EuiFlexItem>{!isRiskAnalytics && <EntityAnalyticsAnomalies />}</EuiFlexItem>
               </EuiFlexGroup>
             )}
           </SecuritySolutionPageWrapper>
