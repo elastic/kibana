@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
+  EuiButtonEmpty,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -56,6 +56,7 @@ export const OptionsListPopoverActionBar = ({
     field,
     allowExpensiveQueries,
     availableOptions = [],
+    dataLoading,
   ] = useBatchedPublishingSubjects(
     componentApi.searchTechnique$,
     componentApi.searchStringValid$,
@@ -64,7 +65,8 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.parentApi.allowExpensiveQueries$,
-    componentApi.availableOptions$
+    componentApi.availableOptions$,
+    componentApi.dataLoading$
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -83,19 +85,23 @@ export const OptionsListPopoverActionBar = ({
     return lastValueFrom(componentApi.availableOptions$.pipe(take(2)));
   }, [componentApi, totalCardinality]);
 
-  const hasNoOptions = availableOptions.length < 1 || totalCardinality < 1;
+  const hasNoOptions = availableOptions.length < 1;
   const hasTooManyOptions = showOnlySelected
     ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
     : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
 
-  const isBulkSelectDisabled = hasNoOptions || hasTooManyOptions || showOnlySelected;
+  const isBulkSelectDisabled = dataLoading || hasNoOptions || hasTooManyOptions || showOnlySelected;
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {
+      console.log('handleBulkAction called with bulkAction:', bulkAction);
       if (totalCardinality > availableOptions.length) {
+        console.log(loadMoreOptions, 'loadMoreOptions called');
+
         const newAvailableOptions = (await loadMoreOptions()) ?? [];
         bulkAction(newAvailableOptions.map(({ value }) => value as string));
       } else {
+        console.log('bulkAction called with availableOptions:', availableOptions);
         bulkAction(availableOptions.map(({ value }) => value as string));
       }
     },
@@ -140,13 +146,15 @@ export const OptionsListPopoverActionBar = ({
                       : undefined
                   }
                 >
-                  <EuiLink
+                  <EuiButtonEmpty
+                    size="xs"
                     disabled={isBulkSelectDisabled}
                     data-test-subj="optionsList-control-selectAll"
                     onClick={() => handleBulkAction(componentApi.selectAll)}
+                    css={{ padding: 0 }}
                   >
                     {OptionsListStrings.popover.getSelectAllButtonLabel()}
-                  </EuiLink>
+                  </EuiButtonEmpty>
                 </EuiToolTip>
                 {' | '}
                 <EuiToolTip
@@ -156,13 +164,15 @@ export const OptionsListPopoverActionBar = ({
                       : undefined
                   }
                 >
-                  <EuiLink
+                  <EuiButtonEmpty
+                    size="xs"
+                    css={{ padding: 0 }}
                     disabled={isBulkSelectDisabled}
                     data-test-subj="optionsList-control-deselectAll"
                     onClick={() => handleBulkAction(componentApi.deselectAll)}
                   >
                     {OptionsListStrings.popover.getDeselectAllButtonLabel()}
-                  </EuiLink>
+                  </EuiButtonEmpty>
                 </EuiToolTip>
               </EuiText>
             </EuiFlexItem>
