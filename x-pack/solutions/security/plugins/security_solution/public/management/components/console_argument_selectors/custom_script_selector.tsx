@@ -50,11 +50,7 @@ interface CustomScriptSelectorState {
 
 type SelectableOption = EuiSelectableOption<Partial<{ description: CustomScript['description'] }>>;
 
-/**
- * A Console Argument Selector component that enables the user to select a custom script
- * @param agentType The type of agent to fetch scripts for
- * @returns A component that can be used as a CommandArgumentValueSelector
- */
+export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
 export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   const CustomScriptSelectorComponent = memo<
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
@@ -88,7 +84,6 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
     // This is a workaround to ensure the popover is not shown until the input is focused
     const [isAwaitingRenderDelay, setIsAwaitingRenderDelay] = useState(true);
-    // Add a slight delay before showing the popover
     useEffect(() => {
       const timer = setTimeout(() => {
         setIsAwaitingRenderDelay(false);
@@ -134,7 +129,6 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
 
     const handleScriptSelection = useCallback(
       (options: EuiSelectableOption[]) => {
-        // Find the first option that is checked (selected)
         const selected = options.find((option: EuiSelectableOption) => option.checked === 'on');
         if (selected) {
           onChange({
