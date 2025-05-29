@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { camelCase, pick } from 'lodash';
+import { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -45,7 +45,6 @@ import {
   FramePublicAPI,
   DatasourceMap,
   VisualizationMap,
-  DatasourceLayers,
   UserMessagesGetter,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -708,30 +707,6 @@ function getPreviewExpression(
     datasourceLayers: { ...frame.datasourceLayers },
   };
   try {
-    // use current frame api and patch apis for changed datasource layers
-    if (
-      visualizableState.keptLayerIds &&
-      visualizableState.datasourceId &&
-      visualizableState.datasourceState
-    ) {
-      const datasource = datasources[visualizableState.datasourceId];
-      const datasourceState = visualizableState.datasourceState;
-      const updatedLayerApis: DatasourceLayers = pick(
-        frame.datasourceLayers,
-        visualizableState.keptLayerIds
-      );
-      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
-      changedLayers.forEach((layerId) => {
-        if (updatedLayerApis[layerId]) {
-          updatedLayerApis[layerId] = datasource.getPublicAPI({
-            layerId,
-            state: datasourceState,
-            indexPatterns: frame.dataViews.indexPatterns,
-          });
-        }
-      });
-    }
-
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,
@@ -743,7 +718,7 @@ function getPreviewExpression(
     return visualization.toPreviewExpression(
       visualizableState.visualizationState,
       suggestionFrameApi.datasourceLayers,
-      datasourceExpressionsByLayers ?? undefined
+      datasourceExpressionsByLayers
     );
   } catch (error) {
     showMemoizedErrorNotification(error);
