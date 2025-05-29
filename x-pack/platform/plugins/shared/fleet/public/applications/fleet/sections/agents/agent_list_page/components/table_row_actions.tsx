@@ -28,6 +28,7 @@ export const TableRowActions: React.FunctionComponent<{
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
   onRequestDiagnosticsClick: () => void;
+  onMigrateAgentClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -37,6 +38,7 @@ export const TableRowActions: React.FunctionComponent<{
   onUpgradeClick,
   onAddRemoveTagsClick,
   onRequestDiagnosticsClick,
+  onMigrateAgentClick,
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
@@ -52,7 +54,21 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
-
+  if (!agentPolicy?.is_protected) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="cluster"
+        onClick={onMigrateAgentClick}
+        disabled={!agent.active}
+        key="migrateAgent"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.migrateAgentActionText"
+          defaultMessage="Migrate agent"
+        />
+      </EuiContextMenuItem>
+    );
+  }
   if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
     menuItems.push(
       <EuiContextMenuItem
