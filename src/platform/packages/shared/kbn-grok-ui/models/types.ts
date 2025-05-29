@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './expression';
-export * from './sample_input';
-export * from './sample_read_only';
+// The only supported semantic conversions are int and float. By default all semantics are saved as strings.
+// https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#_grok_basics
+export enum SupportedTypeConversion {
+  int = 'int',
+  float = 'float',
+}
+
+export interface FieldDefinition {
+  name: string;
+  type: SupportedTypeConversion | null;
+  colour: string;
+  pattern: string;
+}

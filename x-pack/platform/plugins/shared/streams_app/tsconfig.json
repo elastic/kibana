@@ -70,6 +70,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/content-packs-schema",
     "@kbn/charts-theme",
+    "@kbn/grok-ui",
     "@kbn/scout"
   ]
 }
