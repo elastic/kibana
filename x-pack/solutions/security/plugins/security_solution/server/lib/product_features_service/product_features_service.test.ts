@@ -283,44 +283,6 @@ describe('ProductFeaturesService', () => {
           .isActionRegistered as jest.Mock;
       });
 
-      describe('when using access tag', () => {
-        const getReq = (tags: string[] = []) =>
-          ({
-            route: { options: { tags } },
-            url: { pathname: '', search: '' },
-          } as unknown as KibanaRequest);
-
-        it('should authorize when no tag matches', async () => {
-          await lastRegisteredFn(
-            getReq(['access:something', 'access:securitySolution']),
-            res,
-            toolkit
-          );
-
-          expect(mockIsActionRegistered).not.toHaveBeenCalled();
-          expect(res.notFound).not.toHaveBeenCalled();
-          expect(toolkit.next).toHaveBeenCalledTimes(1);
-        });
-
-        it('should check when tag matches and return not found when not action registered', async () => {
-          mockIsActionRegistered.mockReturnValueOnce(false);
-          await lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
-
-          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-foo');
-          expect(res.notFound).toHaveBeenCalledTimes(1);
-          expect(toolkit.next).not.toHaveBeenCalled();
-        });
-
-        it('should check when tag matches and continue when action registered', async () => {
-          mockIsActionRegistered.mockReturnValueOnce(true);
-          await lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
-
-          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-foo');
-          expect(res.notFound).not.toHaveBeenCalled();
-          expect(toolkit.next).toHaveBeenCalledTimes(1);
-        });
-      });
-
       describe('when using security authz', () => {
         beforeEach(() => {
           mockIsActionRegistered.mockImplementation((action: string) => action.includes('enabled'));
