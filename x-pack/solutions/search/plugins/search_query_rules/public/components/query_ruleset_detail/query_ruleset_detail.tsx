@@ -226,6 +226,7 @@ export const QueryRulesetDetail: React.FC = () => {
                     content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
                       defaultMessage: 'Test in Console',
                     })}
+                    onClick={finishTour}
                   />
                 </EuiTourStep>
               </EuiFlexItem>

@@ -81,8 +81,9 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
                         paddingSize="s"
                         {...provided.dragHandleProps}
                         aria-label="Drag Handle"
+                        id={index === rules.length - 1 ? tourInfo?.targetTourId : undefined}
                       >
-                        <EuiIcon id={tourInfo?.targetTourId} type="grab" />
+                        <EuiIcon type="grab" />
                       </EuiPanel>
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
