@@ -60,6 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dashboards: [],
         queries: [],
       });
+      await alertingApi.deleteRules({ roleAuthc });
     });
 
     it('lists empty queries when none are defined on the stream', async () => {
@@ -99,72 +100,121 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
     });
 
-    it('inserts a query when inexistant', async () => {
-      const query = { id: v4(), title: 'Significant Query', kql: { query: "message:'query'" } };
-      const upsertQueryResponse = await apiClient
-        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: {
-            path: { name: STREAM_NAME, queryId: query.id },
-            body: {
-              title: query.title,
-              kql: query.kql,
+    describe('PUT /api/streams/{name}/queries/{queryId}', () => {
+      it('inserts a query when inexistant', async () => {
+        const query = {
+          id: v4(),
+          title: 'initial title',
+          kql: { query: "message:'initial query'" },
+        };
+        const upsertQueryResponse = await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: query.kql,
+              },
             },
-          },
-        })
-        .expect(200)
-        .then((res) => res.body);
-      expect(upsertQueryResponse.acknowledged).to.be(true);
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(upsertQueryResponse.acknowledged).to.be(true);
 
-      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([query]);
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([query]);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(1);
-    });
-
-    it('updates a query when already defined', async () => {
-      const queryId = v4();
-      await putStream(apiClient, STREAM_NAME, {
-        stream,
-        dashboards: [],
-        queries: [
-          {
-            id: queryId,
-            title: 'Significant Query',
-            kql: { query: "message:'query'" },
-          },
-        ],
+        const rules = await alertingApi.searchRules(roleAuthc, '');
+        expect(rules.body.data).to.have.length(1);
+        expect(rules.body.data[0].name).to.eql(query.title);
       });
 
-      const upsertQueryResponse = await apiClient
-        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
-          params: {
-            path: { name: STREAM_NAME, queryId },
-            body: {
-              title: 'Another title',
-              kql: { query: "message:'Something else'" },
+      it('updates the query and create a new rule when updating an existing query kql', async () => {
+        const query = {
+          id: 'first',
+          title: 'initial title',
+          kql: { query: 'initial query' },
+        };
+        await putStream(apiClient, STREAM_NAME, {
+          stream,
+          dashboards: [],
+          queries: [query],
+        });
+        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+
+        const upsertQueryResponse = await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: { query: 'updated query' },
+              },
             },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(upsertQueryResponse.acknowledged).to.be(true);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([
+          {
+            id: query.id,
+            title: query.title,
+            kql: { query: 'updated query' },
           },
-        })
-        .expect(200)
-        .then((res) => res.body);
-      expect(upsertQueryResponse.acknowledged).to.be(true);
+        ]);
 
-      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([
-        {
-          id: queryId,
-          title: 'Another title',
-          kql: { query: "message:'Something else'" },
-        },
-      ]);
+        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
+        expect(updatedRules.body.data).to.have.length(1);
+        expect(updatedRules.body.data[0].name).to.eql(query.title);
+        expect(updatedRules.body.data[0].id).not.to.eql(initialRules.body.data[0].id);
+      });
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(1);
-      expect(rules.body.data[0].name).to.eql('Another title');
+      it('updates the query and the rule when updating an existing query title', async () => {
+        const query = {
+          id: 'first',
+          title: 'initial title',
+          kql: { query: 'initial query' },
+        };
+        await putStream(apiClient, STREAM_NAME, {
+          stream,
+          dashboards: [],
+          queries: [query],
+        });
+        const initialRules = await alertingApi.searchRules(roleAuthc, '');
+
+        const upsertQueryResponse = await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: 'updated title',
+                kql: { query: query.kql.query },
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(upsertQueryResponse.acknowledged).to.be(true);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([
+          {
+            id: query.id,
+            title: 'updated title',
+            kql: { query: query.kql.query },
+          },
+        ]);
+
+        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
+        expect(updatedRules.body.data).to.have.length(1);
+        expect(updatedRules.body.data[0].name).to.eql('updated title');
+        expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
+      });
     });
 
-    it('deletes an existing query successfully', async () => {
+    it('deletes an existing query and the associated rule successfully', async () => {
       const queryId = v4();
       await putStream(apiClient, STREAM_NAME, {
         stream,
@@ -206,28 +256,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('bulks insert and remove queries', async () => {
-      const existingQueryId = v4();
+      const firstQuery = {
+        id: 'first',
+        title: 'first query',
+        kql: { query: 'query 1' },
+      };
+      const secondQuery = {
+        id: 'second',
+        title: 'second query',
+        kql: { query: 'query 2' },
+      };
+      const thirdQuery = {
+        id: 'third',
+        title: 'third query',
+        kql: { query: 'query 3' },
+      };
       await putStream(apiClient, STREAM_NAME, {
         stream,
         dashboards: [],
-        queries: [
-          {
-            id: existingQueryId,
-            title: 'Significant Query',
-            kql: { query: "message:'query'" },
-          },
-        ],
+        queries: [firstQuery, secondQuery, thirdQuery],
       });
+      const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
-      const newQuery1 = {
-        id: v4(),
-        title: 'query1',
-        kql: { query: 'irrelevant1' },
+      const newQuery = {
+        id: 'fourth',
+        title: 'fourth query',
+        kql: { query: 'query 4' },
       };
-      const newQuery2 = {
-        id: v4(),
-        title: 'query2',
-        kql: { query: 'irrelevant2' },
+      const updateThirdQuery = {
+        id: 'third',
+        title: 'third query',
+        kql: { query: 'query 3 updated' },
       };
 
       const bulkResponse = await apiClient
@@ -237,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               operations: [
                 {
-                  index: newQuery1,
+                  index: newQuery,
                 },
                 {
                   delete: {
@@ -245,11 +304,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 {
-                  index: newQuery2,
+                  index: updateThirdQuery,
                 },
                 {
                   delete: {
-                    id: existingQueryId,
+                    id: 'second',
                   },
                 },
               ],
@@ -261,13 +320,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([newQuery1, newQuery2]);
+      expect(getQueriesResponse.queries).to.eql([firstQuery, newQuery, updateThirdQuery]);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(2);
-      const ruleNames = rules.body.data.map((rule: any) => rule.name);
-      expect(ruleNames.includes(newQuery1.title)).to.be(true);
-      expect(ruleNames.includes(newQuery2.title)).to.be(true);
+      const updatedRules = await alertingApi.searchRules(roleAuthc, '');
+      expect(updatedRules.body.data).to.have.length(3);
+      const ruleNames = updatedRules.body.data.map((rule: any) => rule.name);
+      expect(ruleNames.includes(firstQuery.title)).to.be(true);
+      expect(ruleNames.includes(updateThirdQuery.title)).to.be(true);
+      expect(ruleNames.includes(newQuery.title)).to.be(true);
+
+      const initialThirdRuleId = initialRules.body.data.find(
+        (rule: any) => rule.name === thirdQuery.title
+      ).id;
+      expect(initialThirdRuleId).not.to.eql(
+        updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
+      );
     });
   });
 }
