@@ -24,6 +24,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiTextArea,
+  EuiSwitch,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +45,21 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
   const [formContent, setFormContent] = React.useState({
     uri: '',
     enrollment_token: '',
+    settings: {
+      ca_sha256: '',
+      certificate_authorities: '',
+      elastic_agent_cert: '',
+      elastic_agent_cert_key: '',
+      elastic_agent_cert_key_passphrase: '',
+      headers: {},
+      insecure: false,
+      proxy_disabled: false,
+      proxy_headers: {},
+      proxy_url: '',
+      staging: false,
+      tags: [],
+      replace_token: false,
+    },
   });
 
   useEffect(() => {
@@ -136,6 +154,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                 fullWidth
               />
             </EuiFormRow>
+            <EuiSpacer size="m" />
+
+            {/* Additional Settings Section */}
             <EuiFormRow>
               <EuiAccordion
                 arrowDisplay="right"
@@ -144,14 +165,215 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                 buttonContent={
                   <EuiTextColor color="primary">
                     <FormattedMessage
-                      id="xpack.inferenceEndpointUICommon.components.additionalInfo.additionalOptionsLabel"
+                      id="xpack.fleet.agentList.migrateAgentFlyout.additionalOptionsLabel"
                       defaultMessage="Additional options"
                     />
                   </EuiTextColor>
                 }
               >
                 <EuiPanel color="subdued" hasBorder={true}>
+                  {/* TLS and Certs Section */}
+                  <EuiAccordion
+                    id="tlsCertsSection"
+                    initialIsOpen={true}
+                    buttonContent={
+                      <EuiTextColor color="primary">
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.tlsCertsLabel"
+                          defaultMessage="TLS & Certs"
+                        />
+                      </EuiTextColor>
+                    }
+                  >
+                    <EuiFormRow label="ca_sha256">
+                      <EuiFieldText />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.certAuthLabel"
+                          defaultMessage="Certificate Authorities"
+                        />
+                      }
+                    >
+                      <EuiFieldText />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.elasticAgentCertLabel"
+                          defaultMessage="Elastic Agent Certificate"
+                        />
+                      }
+                    >
+                      <EuiTextArea />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.elasticAgentCertKeyLabel"
+                          defaultMessage="Elastic Agent Certificate Key"
+                        />
+                      }
+                    >
+                      <EuiTextArea />
+                    </EuiFormRow>
+                  </EuiAccordion>
                   <EuiSpacer size="m" />
+                  {/* Headers Section */}
+                  <EuiAccordion
+                    id="headersSection"
+                    initialIsOpen={true}
+                    buttonContent={
+                      <EuiTextColor color="primary">
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.headersMainLabel"
+                          defaultMessage="Headers"
+                        />
+                      </EuiTextColor>
+                    }
+                  >
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.headersLabel"
+                          defaultMessage="Headers"
+                        />
+                      }
+                    >
+                      <EuiTextArea />
+                    </EuiFormRow>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.proxyHeadersLabel"
+                          defaultMessage="Proxy Headers"
+                        />
+                      }
+                    >
+                      <EuiTextArea />
+                    </EuiFormRow>
+                  </EuiAccordion>
+                  <EuiSpacer size="m" />
+                  {/* Networking section */}
+                  <EuiAccordion
+                    id="headersSection"
+                    initialIsOpen={true}
+                    buttonContent={
+                      <EuiTextColor color="primary">
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.networkingLabel"
+                          defaultMessage="Networking"
+                        />
+                      </EuiTextColor>
+                    }
+                  >
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.headersLabel"
+                          defaultMessage="Proxy URL"
+                        />
+                      }
+                    >
+                      <EuiFieldText />
+                    </EuiFormRow>
+                  </EuiAccordion>
+
+                  <EuiSpacer size="m" />
+                  {/* Agent Options Section */}
+                  <EuiAccordion
+                    id="headersSection"
+                    initialIsOpen={true}
+                    buttonContent={
+                      <EuiTextColor color="primary">
+                        <FormattedMessage
+                          id="xpack.fleet.agentList.migrateAgentFlyout.agentOptionsLabel"
+                          defaultMessage="Agent Options"
+                        />
+                      </EuiTextColor>
+                    }
+                  >
+                    <EuiFormRow>
+                      <EuiFlexGroup alignItems="flexStart">
+                        <EuiFlexItem>
+                          <EuiSwitch
+                            label={
+                              <FormattedMessage
+                                id="xpack.fleet.agentList.migrateAgentFlyout.insecurelabel"
+                                defaultMessage="Insecure"
+                              />
+                            }
+                            checked={formContent.settings.insecure}
+                            onChange={(e) =>
+                              setFormContent({
+                                ...formContent,
+                                settings: { ...formContent.settings, insecure: e.target.checked },
+                              })
+                            }
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiSwitch
+                            label={
+                              <FormattedMessage
+                                id="xpack.fleet.agentList.migrateAgentFlyout.stagingLabel"
+                                defaultMessage="Staging"
+                              />
+                            }
+                            checked={formContent.settings.staging}
+                            onChange={(e) =>
+                              setFormContent({
+                                ...formContent,
+                                settings: { ...formContent.settings, staging: e.target.checked },
+                              })
+                            }
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
+                    <EuiFormRow>
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem>
+                          <EuiSwitch
+                            label={
+                              <FormattedMessage
+                                id="xpack.fleet.agentList.migrateAgentFlyout.proxyLabel"
+                                defaultMessage="Proxy Disabled"
+                              />
+                            }
+                            checked={formContent.settings.insecure}
+                            onChange={(e) =>
+                              setFormContent({
+                                ...formContent,
+                                settings: { ...formContent.settings, insecure: e.target.checked },
+                              })
+                            }
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiSwitch
+                            label={
+                              <FormattedMessage
+                                id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                                defaultMessage="Replace Token"
+                              />
+                            }
+                            checked={formContent.settings.replace_token}
+                            onChange={(e) =>
+                              setFormContent({
+                                ...formContent,
+                                settings: {
+                                  ...formContent.settings,
+                                  replace_token: e.target.checked,
+                                },
+                              })
+                            }
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
+                  </EuiAccordion>
                 </EuiPanel>
               </EuiAccordion>
             </EuiFormRow>
