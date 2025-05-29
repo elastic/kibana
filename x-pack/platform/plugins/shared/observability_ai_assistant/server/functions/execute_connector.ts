@@ -13,6 +13,17 @@ import {
   SlackApiParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
+import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
+import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { SLACK_API_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/slack_api/constants';
+import {
+  EmailConnectorTypeId,
+  JiraConnectorTypeId,
+  PagerDutyConnectorTypeId,
+  WebhookConnectorTypeId,
+} from '@kbn/stack-connectors-plugin/server/connector_types';
 import { CompatibleJSONSchema } from '../../common/functions/types';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { FunctionRegistrationParameters } from '.';
@@ -56,11 +67,11 @@ export function registerExecuteConnectorFunction({
 
 export const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
   '.slack': convertSchemaToOpenApi(SlackParamsSchema),
-  '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
-  '.email': convertSchemaToOpenApi(EmailParamsSchema),
-  '.webhook': convertSchemaToOpenApi(WebhookParamsSchema),
-  '.jira': convertSchemaToOpenApi(JiraParamsSchema),
-  '.pagerduty': convertSchemaToOpenApi(PagerdutyParamsSchema),
+  [SLACK_API_CONNECTOR_ID]: convertSchemaToOpenApi(SlackApiParamsSchema),
+  [EmailConnectorTypeId]: convertSchemaToOpenApi(EmailParamsSchema),
+  [WebhookConnectorTypeId]: convertSchemaToOpenApi(WebhookParamsSchema),
+  [JiraConnectorTypeId]: convertSchemaToOpenApi(JiraParamsSchema),
+  [PagerDutyConnectorTypeId]: convertSchemaToOpenApi(PagerdutyParamsSchema),
 };
 
 export const GET_CONNECTOR_INFO_FUNCTION_NAME = 'get_connector_info';
@@ -73,26 +84,32 @@ export function registerGetConnectorInfoFunction({
     {
       name: GET_CONNECTOR_INFO_FUNCTION_NAME,
       description:
-        'Get information about a connectors. Returns the schema of the connector parameters.',
+        'Retrieves information about available connectors, including the parameter schema for each.',
       visibility: FunctionVisibility.AssistantOnly,
     },
     async () => {
       const actionsClient = await (
         await resources.plugins.actions.start()
       ).getActionsClientWithRequest(resources.request);
-      const connectorsList = await actionsClient.getAll().then((connectors) => {
-        return connectors.map((connector) => {
-          if (connector.actionTypeId in connectorParamsSchemas) {
-            return {
-              ...connector,
-              parameters: connectorParamsSchemas[connector.actionTypeId],
-            };
-          }
 
-          return connector;
-        });
-      });
-      return { content: connectorsList };
+      const allConnectors = await actionsClient.getAll();
+
+      // IDs of connectors to exclude (used for inference/AI purposes)
+      const excludedConnectorIds = new Set([
+        BEDROCK_CONNECTOR_ID,
+        GEMINI_CONNECTOR_ID,
+        INFERENCE_CONNECTOR_ID,
+        OPENAI_CONNECTOR_ID,
+      ]);
+
+      const filteredConnectors = allConnectors
+        // filter out AI connectors
+        .filter((connector) => !excludedConnectorIds.has(connector.actionTypeId))
+        .map((connector) => ({
+          ...connector,
+          parameters: connectorParamsSchemas[connector.actionTypeId] ?? {},
+        }));
+      return { content: filteredConnectors };
     }
   );
 }
