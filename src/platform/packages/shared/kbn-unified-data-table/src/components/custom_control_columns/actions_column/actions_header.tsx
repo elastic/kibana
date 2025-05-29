@@ -11,6 +11,7 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import ColumnHeaderTruncateContainer from '../../column_header_truncate_container';
 
 export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   const textRef = useRef<HTMLSpanElement>(null);
@@ -27,7 +28,7 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
   });
 
   return (
-    <div>
+    <ColumnHeaderTruncateContainer>
       <EuiScreenReaderOnly>
         <span>
           {i18n.translate('unifiedDataTable.controlColumnHeader', {
@@ -58,6 +59,6 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
       >
         {actionsText}
       </span>
-    </div>
+    </ColumnHeaderTruncateContainer>
   );
 };
