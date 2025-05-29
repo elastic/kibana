@@ -4,19 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useState } from 'react';
 
-import React from 'react';
-
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useParams } from 'react-router-dom';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
+import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
+import { DeleteRulesetModal } from '../query_rules_sets/delete_ruleset_modal';
 import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
@@ -31,6 +42,31 @@ export const QueryRulesetDetail: React.FC = () => {
   const { queryRuleset, isInitialLoading, isError, error } = useQueryRulesetDetailState({
     rulesetId,
   });
+
+  const [isPopoverOpen, setPopover] = useState(false);
+  const splitButtonPopoverId = useGeneratedHtmlId({
+    prefix: 'splitButtonPopover',
+  });
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+  const items = [
+    <EuiContextMenuItem
+      color="danger"
+      key="delete"
+      icon="trash"
+      onClick={() => setRulesetToDelete(rulesetId)}
+    >
+      Delete ruleset
+    </EuiContextMenuItem>,
+  ];
+
+  const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   return (
     <QueryRulesPageTemplate>
@@ -50,7 +86,7 @@ export const QueryRulesetDetail: React.FC = () => {
               color: 'primary',
               'aria-current': false,
               href: '#',
-              onClick: (e) =>
+              onClick: () =>
                 application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`)),
             },
           ]}
@@ -74,13 +110,54 @@ export const QueryRulesetDetail: React.FC = () => {
                     defaultMessage="Save"
                   />
                 </EuiButton>
+                <UseRunQueryRuleset
+                  rulesetId={rulesetId}
+                  type="contextMenuItem"
+                  content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
+                    defaultMessage: 'Test in Console',
+                  })}
+                />
               </EuiFlexItem>
+              <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    id={splitButtonPopoverId}
+                    button={
+                      <EuiButtonIcon
+                        data-test-subj="searchQueryRulesQueryRulesetDetailButton"
+                        display="fill"
+                        size="m"
+                        iconType="boxesVertical"
+                        aria-label="More"
+                        onClick={onButtonClick}
+                      />
+                    }
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                  >
+                    <EuiContextMenuPanel size="s" items={items} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexGroup>,
           ]}
         />
       )}
       {!isError && <QueryRuleDetailPanel rulesetId={rulesetId} />}
-      {isError && (
+      {rulesetToDelete && (
+        <DeleteRulesetModal
+          rulesetId={rulesetToDelete}
+          closeDeleteModal={() => {
+            setRulesetToDelete(null);
+          }}
+          onSuccess={() => {
+            application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`));
+          }}
+        />
+      )}
+      {isError && error && (
         <ErrorPrompt
           errorType={
             isPermissionError(error)

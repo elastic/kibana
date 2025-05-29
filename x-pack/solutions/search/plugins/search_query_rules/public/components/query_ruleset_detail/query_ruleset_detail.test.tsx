@@ -46,7 +46,6 @@ describe('Query rule detail', () => {
   const TEST_IDS = {
     DetailPage: 'queryRulesetDetailPage',
     DetailPageHeader: 'queryRulesetDetailHeader',
-    HeaderDataButton: 'queryRulesetDetailHeaderDataButton',
     HeaderSaveButton: 'queryRulesetDetailHeaderSaveButton',
     AddRuleButton: 'queryRulesetDetailAddRuleButton',
     DraggableItem: 'searchQueryRulesDraggableItem',
