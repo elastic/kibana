@@ -57,18 +57,19 @@ export function SloManagementTable() {
   const { tasks } = useBulkOperation();
 
   const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
+
   const onSelectionChange = (items: SLODefinitionResponse[]) => {
     setSelectedItems(items);
   };
 
   const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+    selected: selectedItems,
     selectable: (item: SLODefinitionResponse) => {
       return !tasks.find(
         (task) => task.status === 'in-progress' && task.items.some((i) => i.id === item.id)
       );
     },
     onSelectionChange,
-    initialSelected: [],
   };
 
   const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
@@ -266,7 +267,7 @@ export function SloManagementTable() {
           })}
         </EuiText>
       ) : (
-        <SloManagementBulkActions items={selectedItems} />
+        <SloManagementBulkActions items={selectedItems} setSelectedItems={onSelectionChange} />
       )}
 
       <EuiSpacer size="s" />

@@ -55,18 +55,32 @@ export async function fetchFieldExistence({
     includeEmptyFields: false,
   });
 
-  // take care of fields of existingFieldList, that are not yet available
-  // in the given data view. Those fields we consider as new fields,
-  // that were ingested after the data view was loaded
-  const newFields = existingFieldList.filter((field) => !dataView.getFieldByName(field.name));
-  // refresh the data view in case there are new fields
-  if (newFields.length) {
+  // Identify two categories of fields requiring a refresh:
+  // 1. New fields - fields that don't exist in the current data view
+  // 2. Fields with mapping changes - existing fields with updated mapping information
+  const newFields: typeof existingFieldList = [];
+  const fieldsWithMappingChanges: typeof existingFieldList = [];
+
+  for (const field of existingFieldList) {
+    const previousField = dataView.getFieldByName(field.name);
+    if (!previousField) {
+      newFields.push(field);
+    } else if (previousField.type !== field.type) {
+      fieldsWithMappingChanges.push(field);
+    }
+  }
+
+  // Refresh if either new fields or mapping changes are detected
+  const needsRefresh = newFields.length > 0 || fieldsWithMappingChanges.length > 0;
+
+  if (needsRefresh) {
+    // Refresh with force=true to ensure all fields are properly loaded
     await dataViewsService.refreshFields(dataView, false, true);
   }
   const allFields = buildFieldList(dataView, metaFields);
   return {
     indexPatternTitle: dataView.getIndexPattern(),
-    existingFieldNames: existingFields(existingFieldList, allFields),
+    existingFieldNames: getExistingFields(existingFieldList, allFields),
     newFields,
   };
 }
@@ -126,7 +140,7 @@ function toQuery(
 /**
  * Exported only for unit tests.
  */
-export function existingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
+export function getExistingFields(filteredFields: FieldSpec[], allFields: Field[]): string[] {
   const filteredFieldsSet = new Set(filteredFields.map((f) => f.name));
 
   return allFields
