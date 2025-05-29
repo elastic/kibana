@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  AppDeepLinkLocations,
-  ApplicationStart,
-} from '@kbn/core/public';
+import type { PluginInitializerContext, AppDeepLinkLocations } from '@kbn/core/public';
 import {
   type AppMountParameters,
   type AppUpdater,
@@ -139,10 +135,7 @@ export class Plugin implements InfraClientPluginClass {
 
     const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
       switchMap(([[{ application }]]) =>
-        combineLatest([
-          of(application),
-          getLogsExplorerAccessible$(application),
-        ])
+        combineLatest([of(application), getLogsExplorerAccessible$(application)])
       )
     );
 
@@ -187,11 +180,11 @@ export class Plugin implements InfraClientPluginClass {
                             },
                           ]
                         : []),
-                            {
-                              label: hostsTitle,
-                              app: 'metrics',
-                              path: '/hosts',
-                            },
+                      {
+                        label: hostsTitle,
+                        app: 'metrics',
+                        path: '/hosts',
+                      },
                     ],
                   },
                 ]
@@ -328,13 +321,12 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     startDep$AndAccessibleFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: getInfraDeepLinks({
-            metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
-          }),
-        }));
-      }
-    );
+      this.appUpdater$.next(() => ({
+        deepLinks: getInfraDeepLinks({
+          metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+        }),
+      }));
+    });
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
