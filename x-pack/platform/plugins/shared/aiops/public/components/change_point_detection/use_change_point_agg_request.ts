@@ -130,7 +130,7 @@ export function useChangePointResults(
   const { refreshTimestamp: refresh } = useReload();
 
   const [validChangePoints, setValidChangePoints] = useState<ChangePointAnnotation[]>([]);
-  const firstRawChangePoint = useRef<ChangePointAnnotation | null>(null);
+  const sampleChangePointResponse = useRef<ChangePointAnnotation | null>(null);
 
   /**
    * null also means the fetching has been complete
@@ -150,7 +150,7 @@ export function useChangePointResults(
   const reset = useCallback(() => {
     cancelRequest();
     setValidChangePoints([]);
-    firstRawChangePoint.current = null;
+    sampleChangePointResponse.current = null;
   }, [cancelRequest]);
 
   const fetchResults = useCallback(
@@ -271,39 +271,27 @@ export function useChangePointResults(
           } as ChangePointAnnotation;
         });
 
-        // Store first raw change point from first request
-        if (pageNumber === 1 && !firstRawChangePoint.current && currentRawChangePoints.length > 0) {
-          firstRawChangePoint.current = currentRawChangePoints[0];
+        // Store first sample change point from first request
+        if (
+          pageNumber === 1 &&
+          !sampleChangePointResponse.current &&
+          currentRawChangePoints.length > 0
+        ) {
+          sampleChangePointResponse.current = currentRawChangePoints[0];
         }
 
         // Filter for real change points
         let currentValidChangePoints = currentRawChangePoints.filter(
-          (v) => v.kind === 'changePoint' && !EXCLUDED_CHANGE_POINT_TYPES.has(v.type)
+          (v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type)
         );
 
         if (Array.isArray(requestParams.changePointType)) {
-          currentValidChangePoints = currentValidChangePoints.filter(
-            (v) => v.kind === 'changePoint' && requestParams.changePointType!.includes(v.type)
+          currentValidChangePoints = currentValidChangePoints.filter((v) =>
+            requestParams.changePointType!.includes(v.type)
           );
         }
 
         setValidChangePoints((prev) => {
-          const hasNoValidChangePoints = prev.length === 0 && currentValidChangePoints.length === 0;
-
-          // If there are no valid change points, and we have data, and the fetches are complete,
-          // return the first raw change point as no change points found
-          if (hasNoValidChangePoints && isFetchCompleted && firstRawChangePoint.current) {
-            return [
-              {
-                ...firstRawChangePoint.current,
-                kind: 'noChangePoints',
-                label: 'No change points found',
-                p_value: null,
-                timestamp: null,
-              },
-            ];
-          }
-
           return (prev ?? []).concat(currentValidChangePoints);
         });
 
@@ -384,6 +372,7 @@ export function useChangePointResults(
   return {
     results: validChangePoints,
     isLoading: progress !== null,
+    sampleChangePointResponse: sampleChangePointResponse.current,
     reset,
     progress,
   };

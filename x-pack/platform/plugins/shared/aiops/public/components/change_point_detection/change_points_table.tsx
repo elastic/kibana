@@ -22,11 +22,7 @@ import { useTableState } from '@kbn/ml-in-memory-table';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import type {
-  ChangePoint,
-  FieldConfig,
-  SelectedChangePoint,
-} from './change_point_detection_context';
+import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
 import {
   useChangePointDetectionContext,
   type ChangePointAnnotation,
@@ -34,7 +30,6 @@ import {
 import { type ChartComponentProps } from './chart_component';
 import { NoDataFoundWarning } from './no_data_warning';
 import { useCommonChartProps } from './use_common_chart_props';
-import type { ChangePointType } from './constants';
 
 export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
@@ -144,7 +139,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       sortable: true,
       truncateText: false,
       width: '230px',
-      render: (timestamp: ChangePoint['timestamp']) => dateFormatter.convert(timestamp),
+      render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
     },
     {
       id: 'preview',
@@ -181,7 +176,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       }),
       sortable: true,
       truncateText: false,
-      render: (type: ChangePointType) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
     },
     {
       id: 'pValue',
@@ -204,7 +199,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       ),
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePoint['p_value']) => (pValue ? pValue.toPrecision(3) : '-'),
+      render: (pValue: ChangePointAnnotation['p_value']) => (pValue ? pValue.toPrecision(3) : '-'),
     },
     ...(fieldConfig.splitField
       ? [

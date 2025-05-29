@@ -25,7 +25,7 @@ import { useChangePointResults } from '../../components/change_point_detection/u
 import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
 import { NoDataFoundWarning } from '../../components/change_point_detection/no_data_warning';
 import { NoChangePointsCallout } from '../../components/change_point_detection/no_change_points_callout';
-import { hasRealChangePoints } from '../../components/change_point_detection/types';
+import { useAnnotations } from '../../components/change_point_detection/use_annotations';
 
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,
@@ -97,15 +97,17 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     return { interval } as ChangePointDetectionRequestParams;
   }, [interval]);
 
-  const { results, isLoading } = useChangePointResults(
+  const { results, isLoading, sampleChangePointResponse } = useChangePointResults(
     fieldConfig,
     requestParams,
     combinedQuery,
     10000
   );
 
+  const annotations = useAnnotations(results, sampleChangePointResponse);
+
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
-    let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {
+    let resultChangePoints: ChangePointAnnotation[] = annotations.sort((a, b) => {
       if (defaultSort.direction === 'asc') {
         return (a[defaultSort.field] as number) - (b[defaultSort.field] as number);
       } else {
@@ -122,14 +124,13 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     }
 
     return resultChangePoints;
-  }, [results, maxSeriesToPlot, onChange]);
+  }, [annotations, maxSeriesToPlot, onChange]);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
   }
 
-  const containsChangePoints = hasRealChangePoints(changePoints);
-  const showCallout = changePoints.length > 0 && !containsChangePoints;
+  const showCallout = results.length === 0 && sampleChangePointResponse;
 
   return (
     <div

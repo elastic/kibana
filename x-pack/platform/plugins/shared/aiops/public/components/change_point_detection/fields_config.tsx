@@ -58,9 +58,9 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-import { hasRealChangePoints } from './types';
 import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 import { NoChangePointsCallout } from './no_change_points_callout';
+import { useAnnotations } from './use_annotations';
 
 const selectControlCss = { width: '350px' };
 
@@ -215,9 +215,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState<boolean>(false);
 
   const {
-    results: annotations,
+    results,
     isLoading: annotationsLoading,
     progress,
+    sampleChangePointResponse,
   } = useChangePointResults(fieldConfig, requestParams, combinedQuery, splitFieldCardinality);
 
   const selectedPartitions = useMemo(() => {
@@ -600,9 +601,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
         <ChangePointResults
           fieldConfig={fieldConfig}
           isLoading={annotationsLoading}
-          annotations={annotations}
+          results={results}
           splitFieldCardinality={splitFieldCardinality}
           onSelectionChange={onSelectionChange}
+          sampleChangePointResponse={sampleChangePointResponse}
         />
       ) : null}
 
@@ -721,7 +723,8 @@ interface ChangePointResultsProps {
   fieldConfig: FieldConfig;
   splitFieldCardinality: number | null;
   isLoading: boolean;
-  annotations: ChangePointAnnotation[];
+  results: ChangePointAnnotation[];
+  sampleChangePointResponse: ChangePointAnnotation | null;
   onSelectionChange: (update: SelectedChangePoint[]) => void;
 }
 
@@ -732,14 +735,16 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   fieldConfig,
   splitFieldCardinality,
   isLoading,
-  annotations,
+  results,
   onSelectionChange,
+  sampleChangePointResponse,
 }) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 
-  const containsChangePoints = hasRealChangePoints(annotations);
-  const showNoChangePointsCallout = !containsChangePoints && annotations.length > 0;
+  const showNoChangePointsCallout = results.length === 0 && sampleChangePointResponse;
+
+  const tableAnnotations = useAnnotations(results, sampleChangePointResponse);
 
   return (
     <>
@@ -772,13 +777,13 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
 
       {showNoChangePointsCallout && (
         <>
-          <NoChangePointsCallout reason={annotations[0]?.reason} />
+          <NoChangePointsCallout reason={tableAnnotations[0]?.reason} />
           <EuiSpacer size="m" />
         </>
       )}
 
       <ChangePointsTable
-        annotations={annotations}
+        annotations={tableAnnotations}
         fieldConfig={fieldConfig}
         isLoading={isLoading}
         onSelectionChange={onSelectionChange}
