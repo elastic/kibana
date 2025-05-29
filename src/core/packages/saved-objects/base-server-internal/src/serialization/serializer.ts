@@ -127,6 +127,9 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(_source.created_by && { created_by: _source.created_by }),
       ...(version && { version }),
+      ...(_source.accessControlCapabilities && {
+        accessControlCapabilities: _source.accessControlCapabilities,
+      }),
     };
   }
 
@@ -154,6 +157,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       coreMigrationVersion,
       typeMigrationVersion,
       managed,
+      accessControlCapabilities,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -170,6 +174,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(updatedBy && { updated_by: updatedBy }),
       ...(createdAt && { created_at: createdAt }),
       ...(createdBy && { created_by: createdBy }),
+      ...(accessControlCapabilities && { accessControlCapabilities }),
     };
     return {
       _id: this.generateRawId(namespace, type, id),
