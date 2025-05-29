@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
@@ -22,6 +23,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+    });
+
+    beforeEach(async () => {
+      // ensure alerts are enabled before testing the feature
+      await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(DYNAMIC_SETTINGS_DEFAULTS)
+        .expect(200);
     });
 
     after(() => kibanaServer.savedObjects.cleanStandardList());
@@ -48,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         tlsRule: { id: tlsId },
       } = responses[0].body;
       responses.forEach((response: any) => {
+        expect(response.body).to.be.ok();
         const {
           body: {
             statusRule: { id: curStatusId },
