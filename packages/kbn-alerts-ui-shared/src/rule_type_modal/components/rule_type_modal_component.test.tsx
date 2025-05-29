@@ -11,7 +11,7 @@ import React from 'react';
 import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
+import type { RuleTypeModel } from '../../..';
 import { RuleTypeModalComponent } from '.';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
