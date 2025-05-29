@@ -603,7 +603,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apmRulesAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-apm-anomaly-rule`,
       authorization: `${KIBANA_DOCS}alerting-setup.html#alerting-authorization`,
       elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
-      elasticManagedLlmUsageCost: ``,
+      elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
       emailAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
       emailActionConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
       emailExchangeClientSecretConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-secret`,
