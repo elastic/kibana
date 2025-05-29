@@ -153,7 +153,7 @@ export function createProfilingEsClient({
     },
     topNFunctions({
       query,
-      aggregationField,
+      aggregationFields,
       indices,
       stacktraceIdsField,
       co2PerKWH,
@@ -180,7 +180,7 @@ export function createProfilingEsClient({
               limit,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
-              aggregation_field: aggregationField,
+              aggregation_fields: aggregationFields,
               co2_per_kwh: co2PerKWH,
               per_core_watt_x86: pervCPUWattX86,
               per_core_watt_arm64: pervCPUWattArm64,

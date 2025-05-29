@@ -15,6 +15,7 @@ import {
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  Walker,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isNumericType } from '../shared/esql_types';
@@ -58,7 +59,6 @@ import {
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
 import {
-  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -96,7 +96,7 @@ export async function suggest(
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {
@@ -104,10 +104,7 @@ export async function suggest(
   }
 
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(ast, correctedQuery),
-    ast
-  );
+  const queryForFields = getQueryForFields(correctedQuery, root);
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
@@ -182,10 +179,38 @@ export async function suggest(
     return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
+    const getCommandAndOptionWithinFORK = (
+      command: ESQLCommand<'fork'>
+    ): {
+      command: ESQLCommand;
+      option: ESQLCommandOption | undefined;
+    } => {
+      let option;
+      let subCommand;
+      Walker.walk(command, {
+        visitCommandOption: (_node) => {
+          option = _node;
+        },
+        visitCommand: (_node) => {
+          subCommand = _node;
+        },
+      });
+
+      return {
+        option,
+        command: subCommand ?? command,
+      };
+    };
+
     const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
-      astContext,
+      {
+        ...astContext,
+        ...(astContext.command.name === 'fork'
+          ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+          : {}),
+      },
       getFieldsByType,
       getFieldsMap,
       fullText,

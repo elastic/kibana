@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
+import { faker } from '@faker-js/faker';
+
 import {
   ColorMapping,
-  EUIAmsterdamColorBlindPalette,
-  ElasticBrandPalette,
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '@kbn/coloring';
-import faker from 'faker';
+import { KbnPalette } from '@kbn/palettes';
+
+import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
 
 const exampleAssignment = (
   valuesCount = 1,
@@ -24,7 +25,7 @@ const exampleAssignment = (
     type === 'categorical'
       ? {
           type: 'categorical',
-          paletteId: ElasticBrandPalette.id,
+          paletteId: KbnPalette.ElasticClassic,
           colorIndex: 0,
         }
       : {
@@ -35,7 +36,7 @@ const exampleAssignment = (
   return {
     rule: {
       type: 'matchExactly',
-      values: Array.from({ length: valuesCount }, () => faker.random.alpha()),
+      values: Array.from({ length: valuesCount }, () => faker.string.alpha()),
     },
     color,
     touched: false,
@@ -57,13 +58,13 @@ const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       },
       color: {
         type: 'categorical',
-        paletteId: ElasticBrandPalette.id,
+        paletteId: KbnPalette.ElasticClassic,
         colorIndex: 2,
       },
       touched: true,
     },
   ],
-  paletteId: ElasticBrandPalette.id,
+  paletteId: KbnPalette.ElasticClassic,
   colorMode: {
     type: 'categorical',
   },
@@ -74,7 +75,7 @@ const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
     ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
     color: {
       type: 'categorical',
-      paletteId: EUIAmsterdamColorBlindPalette.id,
+      paletteId: KbnPalette.Kibana7,
       colorIndex: 0,
     },
   },
@@ -112,7 +113,7 @@ describe('color_telemetry_helpers', () => {
   });
   it('settings (default): unassigned terms loop, default palette returns correct events', () => {
     expect(getColorMappingTelemetryEvents(DEFAULT_COLOR_MAPPING_CONFIG)).toEqual([
-      'color_mapping_palette_eui_amsterdam_color_blind',
+      'color_mapping_palette_default',
       'color_mapping_unassigned_terms_loop',
     ]);
   });
@@ -126,7 +127,7 @@ describe('color_telemetry_helpers', () => {
             steps: [
               {
                 type: 'categorical',
-                paletteId: EUIAmsterdamColorBlindPalette.id,
+                paletteId: KbnPalette.Kibana7,
                 colorIndex: 0,
                 touched: false,
               },
