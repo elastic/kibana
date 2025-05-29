@@ -89,15 +89,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql(queries);
 
-      const rules = await alertingApi.searchRules(
-        roleAuthc,
-        'alert.attributes.name:OutOfMemoryError'
-      );
-      expect(rules.body.data).to.have.length(1);
-      expect(rules.body.data[0].rule_type_id).to.eql(STREAMS_ESQL_RULE_TYPE_ID);
-      expect(rules.body.data[0].params.query).to.eql(
-        `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("""message:'OutOfMemoryError'""")`
-      );
+      // TODO: Uncomment when significantEventsEnabled feature flag is removed
+      // const rules = await alertingApi.searchRules(
+      //   roleAuthc,
+      //   'alert.attributes.name:OutOfMemoryError'
+      // );
+      // expect(rules.body.data).to.have.length(1);
+      // expect(rules.body.data[0].rule_type_id).to.eql(STREAMS_ESQL_RULE_TYPE_ID);
+      // expect(rules.body.data[0].params.query).to.eql(
+      //   `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("""message:'OutOfMemoryError'""")`
+      // );
     });
 
     describe('PUT /api/streams/{name}/queries/{queryId}', () => {
@@ -124,9 +125,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
         expect(getQueriesResponse.queries).to.eql([query]);
 
-        const rules = await alertingApi.searchRules(roleAuthc, '');
-        expect(rules.body.data).to.have.length(1);
-        expect(rules.body.data[0].name).to.eql(query.title);
+        // TODO: Uncomment when significantEventsEnabled feature flag is removed
+        // const rules = await alertingApi.searchRules(roleAuthc, '');
+        // expect(rules.body.data).to.have.length(1);
+        // expect(rules.body.data[0].name).to.eql(query.title);
       });
 
       it('updates the query and create a new rule when updating an existing query kql', async () => {
@@ -165,10 +167,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
 
-        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-        expect(updatedRules.body.data).to.have.length(1);
-        expect(updatedRules.body.data[0].name).to.eql(query.title);
-        expect(updatedRules.body.data[0].id).not.to.eql(initialRules.body.data[0].id);
+        // TODO: Uncomment when significantEventsEnabled feature flag is removed
+        // const updatedRules = await alertingApi.searchRules(roleAuthc, '');
+        // expect(updatedRules.body.data).to.have.length(1);
+        // expect(updatedRules.body.data[0].name).to.eql(query.title);
+        // expect(updatedRules.body.data[0].id).not.to.eql(initialRules.body.data[0].id);
       });
 
       it('updates the query and the rule when updating an existing query title', async () => {
@@ -207,10 +210,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
 
-        const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-        expect(updatedRules.body.data).to.have.length(1);
-        expect(updatedRules.body.data[0].name).to.eql('updated title');
-        expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
+        // TODO: Uncomment when significantEventsEnabled feature flag is removed
+        // const updatedRules = await alertingApi.searchRules(roleAuthc, '');
+        // expect(updatedRules.body.data).to.have.length(1);
+        // expect(updatedRules.body.data[0].name).to.eql('updated title');
+        // expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
       });
     });
 
@@ -239,8 +243,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([]);
 
-      const rules = await alertingApi.searchRules(roleAuthc, '');
-      expect(rules.body.data).to.have.length(0);
+      // TODO: Uncomment when significantEventsEnabled feature flag is removed
+      // const rules = await alertingApi.searchRules(roleAuthc, '');
+      // expect(rules.body.data).to.have.length(0);
     });
 
     it('throws when deleting an inexistant query', async () => {
@@ -322,19 +327,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([firstQuery, newQuery, updateThirdQuery]);
 
-      const updatedRules = await alertingApi.searchRules(roleAuthc, '');
-      expect(updatedRules.body.data).to.have.length(3);
-      const ruleNames = updatedRules.body.data.map((rule: any) => rule.name);
-      expect(ruleNames.includes(firstQuery.title)).to.be(true);
-      expect(ruleNames.includes(updateThirdQuery.title)).to.be(true);
-      expect(ruleNames.includes(newQuery.title)).to.be(true);
+      // TODO: Uncomment when significantEventsEnabled feature flag is removed
+      // const updatedRules = await alertingApi.searchRules(roleAuthc, '');
+      // expect(updatedRules.body.data).to.have.length(3);
+      // const ruleNames = updatedRules.body.data.map((rule: any) => rule.name);
+      // expect(ruleNames.includes(firstQuery.title)).to.be(true);
+      // expect(ruleNames.includes(updateThirdQuery.title)).to.be(true);
+      // expect(ruleNames.includes(newQuery.title)).to.be(true);
 
-      const initialThirdRuleId = initialRules.body.data.find(
-        (rule: any) => rule.name === thirdQuery.title
-      ).id;
-      expect(initialThirdRuleId).not.to.eql(
-        updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
-      );
+      // const initialThirdRuleId = initialRules.body.data.find(
+      //   (rule: any) => rule.name === thirdQuery.title
+      // ).id;
+      // expect(initialThirdRuleId).not.to.eql(
+      //   updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
+      // );
     });
   });
 }
