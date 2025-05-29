@@ -218,6 +218,8 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
       metricThresholdAlertRuleEnabled: true,
       logThresholdAlertRuleEnabled: true,
       alertsAndRulesDropdownEnabled: true,
+      // to be removed in https://github.com/elastic/kibana/issues/221904
+      profilingEnabled: false,
       ruleFormV2Enabled: false,
     },
   };
