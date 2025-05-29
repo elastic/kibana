@@ -1381,6 +1381,39 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.FindDashboardsByIdResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FindDashboardsByIdResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; } & ({ status: \"success\"; attributes: ",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardAttributes",
+            "text": "DashboardAttributes"
+          },
+          "; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; } | { status: \"error\"; error: ",
+          "SavedObjectError",
+          "; })"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.RedirectToProps",
         "type": "Type",
         "tags": [],
@@ -1613,7 +1646,38 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-server.configSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "configSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ allowByValueEmbeddables: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "dashboard",
       "id": "def-server.DashboardPluginSetup",
