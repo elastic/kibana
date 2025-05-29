@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { licenseService } from '../license';
+
 import {
   createCCSIndexPatterns,
   createOrUpdateFleetSyncedIntegrationsIndex,
@@ -66,72 +68,117 @@ describe('fleet_synced_integrations', () => {
     };
   });
 
-  it('should create index if not exists', async () => {
-    mockExists.mockResolvedValue(false);
-
-    await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
-
-    expect(esClientMock.indices.create).toHaveBeenCalled();
-  });
-
-  it('should update index if older version exists', async () => {
-    mockExists.mockResolvedValue(true);
-    mockGetMapping.mockResolvedValue({
-      'fleet-synced-integrations': {
-        mappings: {
-          _meta: {
-            version: '0.0',
-          },
-        },
-      },
+  describe('with Enterprise license', () => {
+    beforeAll(() => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
     });
 
-    await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
+    it('should create index if does not exist', async () => {
+      mockExists.mockResolvedValue(false);
 
-    expect(esClientMock.indices.putMapping).toHaveBeenCalled();
-  });
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
 
-  it('should not update index if same version exists', async () => {
-    mockExists.mockResolvedValue(true);
-    mockGetMapping.mockResolvedValue({
-      'fleet-synced-integrations': {
-        mappings: {
-          _meta: {
-            version: '1.0',
+      expect(esClientMock.indices.create).toHaveBeenCalled();
+    });
+    it('should update index if older version exists', async () => {
+      mockExists.mockResolvedValue(true);
+      mockGetMapping.mockResolvedValue({
+        'fleet-synced-integrations': {
+          mappings: {
+            _meta: {
+              version: '0.0',
+            },
           },
         },
-      },
+      });
+
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
+
+      expect(esClientMock.indices.putMapping).toHaveBeenCalled();
     });
 
-    await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
+    it('should not update index if same version exists', async () => {
+      mockExists.mockResolvedValue(true);
+      mockGetMapping.mockResolvedValue({
+        'fleet-synced-integrations': {
+          mappings: {
+            _meta: {
+              version: '1.0',
+            },
+          },
+        },
+      });
 
-    expect(esClientMock.indices.putMapping).not.toHaveBeenCalled();
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
+
+      expect(esClientMock.indices.putMapping).not.toHaveBeenCalled();
+    });
+
+    it('should create index patterns for remote clusters', async () => {
+      await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
+
+      expect(soImporterMock.import).toHaveBeenCalledWith(
+        expect.objectContaining({
+          readStream: ['remote1:metrics-*', 'remote2:metrics-*'],
+        })
+      );
+
+      expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledTimes(3);
+      expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
+        [{ id: 'remote1:metrics-*', type: 'index-pattern' }],
+        ['*'],
+        []
+      );
+      expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
+        [{ id: 'remote2:logs-*', type: 'index-pattern' }],
+        ['*'],
+        []
+      );
+      expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
+        [{ id: 'remote2:metrics-*', type: 'index-pattern' }],
+        ['*'],
+        []
+      );
+    });
   });
 
-  it('should create index patterns for remote clusters', async () => {
-    await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
+  describe('with less than Enterprise license', () => {
+    beforeAll(() => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+    });
 
-    expect(soImporterMock.import).toHaveBeenCalledWith(
-      expect.objectContaining({
-        readStream: ['remote1:metrics-*', 'remote2:metrics-*'],
-      })
-    );
+    it('should not create index', async () => {
+      mockExists.mockResolvedValue(false);
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
-    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledTimes(3);
-    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
-      [{ id: 'remote1:metrics-*', type: 'index-pattern' }],
-      ['*'],
-      []
-    );
-    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
-      [{ id: 'remote2:logs-*', type: 'index-pattern' }],
-      ['*'],
-      []
-    );
-    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
-      [{ id: 'remote2:metrics-*', type: 'index-pattern' }],
-      ['*'],
-      []
-    );
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
+
+      expect(esClientMock.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('should not update index', async () => {
+      mockExists.mockResolvedValue(true);
+      mockGetMapping.mockResolvedValue({
+        'fleet-synced-integrations': {
+          mappings: {
+            _meta: {
+              version: '0.0',
+            },
+          },
+        },
+      });
+
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
+
+      expect(esClientMock.indices.putMapping).not.toHaveBeenCalled();
+    });
+
+    it('should not create index patterns for remote clusters', async () => {
+      await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
+
+      expect(soImporterMock.import).not.toHaveBeenCalled();
+
+      expect(soClientMock.updateObjectsSpaces).not.toHaveBeenCalled();
+    });
   });
 });

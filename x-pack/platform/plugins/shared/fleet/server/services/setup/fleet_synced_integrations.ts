@@ -20,6 +20,7 @@ import {
   indexPatternTypes,
 } from '../epm/kibana/index_pattern/install';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import { licenseService } from '../license';
 
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_NAME = 'fleet-synced-integrations';
 export const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
@@ -64,10 +65,13 @@ export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
   },
 };
 
-export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
+export const canEnableSyncIntegrations = () => {
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
+  return enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+};
 
-  if (!enableSyncIntegrationsOnRemote) {
+export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
+  if (!canEnableSyncIntegrations()) {
     return;
   }
 
@@ -133,9 +137,7 @@ export async function createCCSIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsImporter: ISavedObjectsImporter
 ) {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
-
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return;
   }
 
