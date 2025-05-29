@@ -1766,11 +1766,9 @@
   integrity sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==
 
 "@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.24.1", "@babel/runtime@^7.24.7", "@babel/runtime@^7.25.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
-  version "7.25.0"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.25.0.tgz#3af9a91c1b739c569d5d80cc917280919c544ecb"
-  integrity sha512-7dRy4DwXwtzBrPbZflqxnvfxLF8kdZXPkhymtDeFoFqE6ldzjQFgYTtYIFARcLEYDrqfBfYcZt1WqFxRoyC9Rw==
-  dependencies:
-    regenerator-runtime "^0.14.0"
+  version "7.27.1"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.27.1.tgz#9fce313d12c9a77507f264de74626e87fd0dc541"
+  integrity sha512-1x3D2xEk2fRo3PAhwQwu5UubzgiVWSXTBfWpVd2Mx2AzRqJuDJCsgaDVZ7HB5iGzDW1Hl1sWN2mFyKjmR9uAog==
 
 "@babel/template@^7.24.7", "@babel/template@^7.25.9", "@babel/template@^7.26.8", "@babel/template@^7.3.3":
   version "7.26.8"
@@ -2181,10 +2179,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@102.1.0":
-  version "102.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.1.0.tgz#ca3ba0389779822c6081d016ebaae06e52baff9f"
-  integrity sha512-h8w4r8OKMWYAGMzz3tDyNDeayW6q+EBMwyXTw5+kQlmkenOxFyHgX7SwsOQTUf2+83aMsrdlMAvSaIfYYljgXA==
+"@elastic/eui@102.2.0":
+  version "102.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.2.0.tgz#cba90fece1afa78686fd51ba9fa5fd019fd0c6a0"
+  integrity sha512-ksFQ66kKtftvcaEuHuzI7vI6CSDeet9QU5nkBDOl18QuoA3VyeGzX4ISranWj+Gyk22SGn2K9BEudXSVkoDBWg==
   dependencies:
     "@elastic/eui-theme-common" "1.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -16528,7 +16526,7 @@ diff@^5.0.0, diff@^5.1.0, diff@^5.2.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-5.2.0.tgz#26ded047cd1179b78b9537d5ef725503ce1ae531"
   integrity sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==
 
-diff@^8.0.0:
+diff@^8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/diff/-/diff-8.0.1.tgz#1562531dbca460fe5be98a026412996ccab1abd5"
   integrity sha512-rEaM3KmVm78zE3dFZaop3aCQa2MTm+T4kcigUFLVU/KbOYdiY6JnL2g2puOYnct3QFw9pjZadaCbCZ1O8ArMlQ==
@@ -26727,11 +26725,6 @@ regenerator-runtime@^0.13.7:
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz#f6dca3e7ceec20590d07ada785636a90cdca17f9"
   integrity sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==
 
-regenerator-runtime@^0.14.0:
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.14.0.tgz#5e19d68eb12d486f797e15a3c6a918f7cec5eb45"
-  integrity sha512-srw17NI0TUWHuGa5CFGGmhfNIeja30WMBfbslPNhf6JrqQlLN5gcrvig1oqPxiVaXb0oW0XRKtH6Nngs5lKCIA==
-
 regenerator-transform@^0.15.2:
   version "0.15.2"
   resolved "https://registry.yarnpkg.com/regenerator-transform/-/regenerator-transform-0.15.2.tgz#5bbae58b522098ebdf09bca2f83838929001c7a4"
@@ -30074,16 +30067,16 @@ undici-types@~5.26.4:
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
 undici@^5.28.3:
-  version "5.28.4"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.4.tgz#6b280408edb6a1a604a9b20340f45b422e373068"
-  integrity sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==
+  version "5.29.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.29.0.tgz#419595449ae3f2cdcba3580a2e8903399bd1f5a3"
+  integrity sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
 undici@^6.12.0, undici@^6.21.1:
-  version "6.21.1"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.1.tgz#336025a14162e6837e44ad7b819b35b6c6af0e05"
-  integrity sha512-q/1rj5D0/zayJB2FraXdaWxbhWiNKDvu8naDT2dl1yTlvJp4BLtOcp2a5BvgGNQpYYJzau7tf1WgKv3b+7mqpQ==
+  version "6.21.3"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.3.tgz#185752ad92c3d0efe7a7d1f6854a50f83b552d7a"
+  integrity sha512-gBLkYIlEnSp8pFbT64yFgGE6UIB9tAkhukC23PmMDCe5Nd+cRqKxSjw5y54MK2AZMgZfJWMaNE4nYUHgi1XEOw==
 
 unherit@^1.0.4:
   version "1.1.0"

@@ -43,10 +43,18 @@ $$$auto-complete-use-time-tange$$$`autocomplete:useTimeRange`
 :   When disabled, autocompletes the suggestions from your data set instead of the time range.
 
 $$$bfetch-disable$$$`bfetch:disable`
-:   [8.15.0] When disabled, search requests from Kibana will be made in individual HTTP requests rather than bundled together.
+:   :::{admonition} Deprecated in 8.15.0
+    This setting was deprecated in 8.15.0.
+    :::
+
+    When disabled, search requests from Kibana will be made in individual HTTP requests rather than bundled together.
 
 $$$bfetch-disable-compression$$$`bfetch:disableCompression`
-:   [8.15.0] When disabled, allows you to debug individual requests, but increases the response size.
+:   :::{admonition} Deprecated in 8.15.0
+    This setting was deprecated in 8.15.0.
+    :::
+
+    When disabled, allows you to debug individual requests, but increases the response size.
 
 $$$csv-quotevalues$$$`csv:quoteValues`
 :   Set this property to `true` to quote exported values.
@@ -157,7 +165,11 @@ $$$state-storeinsessionstorage$$$`state:storeInSessionStorage`
 :   [preview] Kibana tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets very long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
 
 $$$theme-darkmode$$$`theme:darkMode`
-:   [9.0.0] The UI theme that the {{kib}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{kib}} UI theme follow the system theme. You must refresh the page to apply the setting.
+:   :::{admonition} Deprecated in 9.0.0
+    This setting was deprecated in 9.0.0.
+    :::
+
+    The UI theme that the {{kib}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{kib}} UI theme follow the system theme. You must refresh the page to apply the setting.
 
 $$$theme-version$$$`theme:version`
 :   Kibana only ships with the v8 theme now, so this setting can no longer be edited.
@@ -217,7 +229,11 @@ $$$banners-backgroundcolor$$$`banners:backgroundColor`
 ### Dashboard [kibana-dashboard-settings]
 
 $$$xpackdashboardmode-roles$$$`xpackDashboardMode:roles`
-:   [7.7.0] Deprecated; use [feature privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md#kibana-feature-privileges) instead. The roles that belong to [dashboard only mode](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md).
+:   :::{admonition} Deprecated in 7.7.0
+    This setting was deprecated in 7.7.0.
+    :::
+
+    use [feature privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md#kibana-feature-privileges) instead. The roles that belong to [dashboard only mode](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md).
 
 
 ### Discover [kibana-discover-settings]
@@ -413,7 +429,11 @@ Rollups are deprecated and will be removed in a future version. Use [downsamplin
 
 
 $$$rollups-enableindexpatterns$$$`rollups:enableIndexPatterns`
-:   [8.15.0] Enables the creation of data views that capture rollup indices, which in turn enables visualizations based on rollup data. Refresh the page to apply the changes.
+:   :::{admonition} Deprecated in 8.15.0
+    This setting was deprecated in 8.15.0.
+    :::
+
+    Enables the creation of data views that capture rollup indices, which in turn enables visualizations based on rollup data. Refresh the page to apply the changes.
 
 
 ### Search [kibana-search-settings]
@@ -436,7 +456,11 @@ $$$courier-setrequestpreference$$$`courier:setRequestPreference`
 
 
 $$$search-includefrozen$$$`search:includeFrozen`
-:   [7.16.0] Includes [frozen indices](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-unfreeze) in results. Searching through frozen indices might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
+:   :::{admonition} Deprecated in 7.16.0
+    This setting was deprecated in 7.16.0.
+    :::
+
+    Includes [frozen indices](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-unfreeze) in results. Searching through frozen indices might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
 
 $$$search-timeout$$$`search:timeout`
 :   Change the maximum timeout, in milliseconds (ms), for search requests. To disable the timeout and allow queries to run to completion, set to 0. The default is `600000`, or 10 minutes.
@@ -499,7 +523,11 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 ### Visualization [kibana-visualization-settings]
 
 $$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis`
-:   [8.10.0] Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
+:   :::{admonition} Deprecated in 8.10.0
+    This setting was deprecated in 8.10.0.
+    :::
+
+    Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 $$$visualization-heatmap-maxbuckets$$$`visualization:heatmap:maxBuckets`
 :   The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.

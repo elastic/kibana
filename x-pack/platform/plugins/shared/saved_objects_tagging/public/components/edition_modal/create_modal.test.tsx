@@ -14,6 +14,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useGeneratedHtmlId: jest.fn(() => 'mockedId'),
+}));
+
 describe('create modal', () => {
   const getMockTagClient = (findByNameResult: Tag | null = null) =>
     ({
