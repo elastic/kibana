@@ -30,7 +30,6 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
@@ -79,7 +78,6 @@ export interface StoreOpts {
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
-  spaces?: SpacesPluginStart;
 }
 
 export interface SearchOpts {
@@ -149,7 +147,6 @@ export class TaskStore {
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
-  private spaces?: SpacesPluginStart;
   private logger: Logger;
 
   /**
@@ -183,7 +180,6 @@ export class TaskStore {
     });
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
-    this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.logger = opts.logger;
   }
@@ -224,12 +220,7 @@ export class TaskStore {
 
     let userScopeAndApiKey;
     try {
-      userScopeAndApiKey = await getApiKeyAndUserScope(
-        taskInstances,
-        request,
-        this.security,
-        this.spaces
-      );
+      userScopeAndApiKey = await getApiKeyAndUserScope(taskInstances, request, this.security);
     } catch (e) {
       this.errors$.next(e);
       throw e;
