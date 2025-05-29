@@ -129,7 +129,7 @@ export function useChangePointResults(
   const { splitFieldsOptions, metricFieldOptions } = useChangePointDetectionControlsContext();
   const { refreshTimestamp: refresh } = useReload();
 
-  const [validChangePoints, setValidChangePoints] = useState<ChangePointAnnotation[]>([]);
+  const [results, setResults] = useState<ChangePointAnnotation[]>([]);
   // Used to display a sample metric if no change points are found
   const sampleChangePointResponse = useRef<ChangePointAnnotation | null>(null);
 
@@ -150,7 +150,7 @@ export function useChangePointResults(
 
   const reset = useCallback(() => {
     cancelRequest();
-    setValidChangePoints([]);
+    setResults([]);
     sampleChangePointResponse.current = null;
   }, [cancelRequest]);
 
@@ -159,7 +159,7 @@ export function useChangePointResults(
       try {
         // For split field with no cardinality, return empty results immediately
         if (!isSingleMetric && !totalAggPages) {
-          setValidChangePoints([]);
+          setResults([]);
           setProgress(null);
           return;
         }
@@ -237,7 +237,7 @@ export function useChangePointResults(
 
         // If there are no buckets on first page, it means there is no data for the selected time range
         if (pageNumber === 1 && hasNoBuckets) {
-          setValidChangePoints([]);
+          setResults([]);
           setProgress(null);
           return;
         }
@@ -291,7 +291,7 @@ export function useChangePointResults(
           );
         }
 
-        setValidChangePoints((prev) => {
+        setResults((prev) => {
           return (prev ?? []).concat(currentValidChangePoints);
         });
 
@@ -370,7 +370,7 @@ export function useChangePointResults(
   );
 
   return {
-    results: validChangePoints,
+    results,
     isLoading: progress !== null,
     sampleChangePointResponse: sampleChangePointResponse.current,
     reset,
