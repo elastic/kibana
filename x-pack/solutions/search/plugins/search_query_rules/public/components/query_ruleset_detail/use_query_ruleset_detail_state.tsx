@@ -16,7 +16,7 @@ interface UseQueryRulesetDetailStateProps {
 }
 
 export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailStateProps) => {
-  const { data } = useFetchQueryRuleset(rulesetId);
+  const { data, isInitialLoading, isError, error } = useFetchQueryRuleset(rulesetId);
   const [queryRuleset, setQueryRuleset] = useState<QueryRulesQueryRuleset | null>(null);
   const [rules, setRules] = useState<SearchQueryRulesQueryRule[]>([]);
 
@@ -40,5 +40,8 @@ export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailS
     rules,
     setNewRules: setRules,
     updateRule,
+    isInitialLoading,
+    isError,
+    error,
   };
 };

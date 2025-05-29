@@ -13,7 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useParams } from 'react-router-dom';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
-import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
 import { useKibana } from '../../hooks/use_kibana';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
@@ -29,9 +28,9 @@ export const QueryRulesetDetail: React.FC = () => {
     rulesetId?: string;
   }>();
 
-  const { queryRuleset } = useQueryRulesetDetailState({ rulesetId });
-
-  const { isInitialLoading, isError, error } = useFetchQueryRuleset(rulesetId);
+  const { queryRuleset, isInitialLoading, isError, error } = useQueryRulesetDetailState({
+    rulesetId,
+  });
 
   return (
     <QueryRulesPageTemplate>
