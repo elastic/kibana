@@ -30,9 +30,9 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 export type { Ancestor8180 as Ancestor8190 };
 
 export interface BaseFields8190 extends BaseFields8180 {
-  [ALERT_ORIGINAL_DATA_STREAM_DATASET]: string | undefined;
-  [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]: string | undefined;
-  [ALERT_ORIGINAL_DATA_STREAM_TYPE]: string | undefined;
+  [ALERT_ORIGINAL_DATA_STREAM_DATASET]?: string;
+  [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]?: string;
+  [ALERT_ORIGINAL_DATA_STREAM_TYPE]?: string;
 }
 
 export interface WrappedFields8190<T extends BaseFields8190> {
