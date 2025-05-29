@@ -51,7 +51,7 @@ import {
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { MultiField } from './types';
+import type { MultiField } from './types';
 
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {

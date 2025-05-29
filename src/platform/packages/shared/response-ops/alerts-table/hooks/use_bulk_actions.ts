@@ -39,7 +39,7 @@ interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
-  getBulkActions?: PublicAlertsDataGridProps['getBulkActions'];
+  additionalBulkActions?: PublicAlertsDataGridProps['additionalBulkActions'];
   refresh: () => void;
   hideBulkActions?: boolean;
   application: ApplicationStart;
@@ -283,14 +283,14 @@ export const useBulkUntrackActions = ({
   ]);
 };
 
-const EMPTY_BULK_ACTIONS_CONFIG = () => [];
+const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
   alertsCount,
   casesConfig,
   query,
   refresh,
-  getBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
+  additionalBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
   ruleTypeIds,
   hideBulkActions,
   http,
@@ -301,7 +301,6 @@ export function useBulkActions({
   const {
     bulkActionsStore: [bulkActionsState, updateBulkActionsState],
   } = useAlertsTableContext();
-  const configBulkActionPanels = getBulkActions(query, refresh);
 
   const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
@@ -343,11 +342,11 @@ export function useBulkActions({
 
     return initialItems.length
       ? addItemsToInitialPanel({
-          panels: configBulkActionPanels,
+          panels: additionalBulkActions,
           items: initialItems,
         })
-      : configBulkActionPanels;
-  }, [configBulkActionPanels, initialItems, hideBulkActions]);
+      : additionalBulkActions;
+  }, [additionalBulkActions, initialItems, hideBulkActions]);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

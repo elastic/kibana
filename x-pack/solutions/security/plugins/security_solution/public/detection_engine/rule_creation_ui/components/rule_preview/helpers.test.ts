@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../common/types';
 import { isNoisy, getTimeframeOptions, getIsRulePreviewDisabled } from './helpers';
 
 describe('query_preview/helpers', () => {

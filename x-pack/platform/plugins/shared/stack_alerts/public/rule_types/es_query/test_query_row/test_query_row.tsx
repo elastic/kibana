@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
@@ -42,9 +43,9 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
     onTestQuery,
     testQueryResult,
     testQueryError,
+    testQueryWarning,
     testQueryLoading,
-    testQueryRawResults,
-    testQueryAlerts,
+    testQueryPreview,
   } = useTestQuery(fetch);
 
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
@@ -136,10 +137,15 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
           </EuiText>
         </EuiFormRow>
       )}
-      {showTable && testQueryRawResults && (
+      {testQueryWarning && (
+        <EuiFormRow fullWidth>
+          <EuiCallOut color="warning" size="s" title={testQueryWarning} iconType="warning" />
+        </EuiFormRow>
+      )}
+      {showTable && testQueryPreview && (
         <>
           <EuiSpacer size="s" />
-          <TestQueryRowTable rawResults={testQueryRawResults} alerts={testQueryAlerts} />
+          <TestQueryRowTable preview={testQueryPreview} />
         </>
       )}
     </>

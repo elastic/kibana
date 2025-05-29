@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 interface RuleSpace {
   body: any;

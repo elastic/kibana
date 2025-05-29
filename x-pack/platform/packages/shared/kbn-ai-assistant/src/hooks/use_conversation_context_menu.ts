@@ -19,6 +19,7 @@ export interface UseConversationContextMenuResult {
   deleteConversation: (id: string) => Promise<void>;
   copyConversationToClipboard: (conversation: Conversation) => void;
   copyUrl: (id: string) => void;
+  archiveConversation: (id: string, isArchived: boolean) => Promise<Conversation>;
 }
 
 export function useConversationContextMenu({
@@ -114,9 +115,60 @@ export function useConversationContextMenu({
     }
   };
 
+  const handleArchiveConversation = async (id: string, isArchived: boolean) => {
+    setIsUpdatingConversationList(true);
+
+    try {
+      const archivedConversation = await service.callApi(
+        `PATCH /internal/observability_ai_assistant/conversation/{conversationId}`,
+        {
+          signal: null,
+          params: {
+            path: {
+              conversationId: id,
+            },
+            body: {
+              archived: isArchived,
+            },
+          },
+        }
+      );
+
+      refreshConversations();
+      setIsUpdatingConversationList(false);
+
+      notifications!.toasts.addSuccess({
+        title: isArchived
+          ? i18n.translate('xpack.aiAssistant.archiveConversationSuccessToast', {
+              defaultMessage: 'Conversation archived successfully',
+            })
+          : i18n.translate('xpack.aiAssistant.unarchiveConversationSuccessToast', {
+              defaultMessage: 'Conversation unarchived successfully',
+            }),
+      });
+
+      return archivedConversation;
+    } catch (err) {
+      notifications!.toasts.addError(err, {
+        title: isArchived
+          ? i18n.translate('xpack.aiAssistant.archiveConversationErrorToast', {
+              defaultMessage: 'Could not archive conversation',
+            })
+          : i18n.translate('xpack.aiAssistant.unarchiveConversationErrorToast', {
+              defaultMessage: 'Could not unarchive conversation',
+            }),
+      });
+
+      setIsUpdatingConversationList(false);
+
+      throw err;
+    }
+  };
+
   return {
     deleteConversation: handleDeleteConversation,
     copyConversationToClipboard: handleCopyConversationToClipboard,
     copyUrl: handleCopyUrl,
+    archiveConversation: handleArchiveConversation,
   };
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { shallow } from 'enzyme';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
@@ -27,7 +27,8 @@ import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palett
 import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import faker from 'faker';
+import { PaletteOutput } from '@kbn/coloring';
+import { faker } from '@faker-js/faker';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
@@ -825,47 +826,47 @@ describe('MetricVisComponent', function () {
       // Raw values here, not formatted
       const trends: Record<string, MetricWTrend['trend']> = {
         Friday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Wednesday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Saturday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Sunday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Thursday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         __other__: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         // this one shouldn't show up!
         [DEFAULT_TRENDLINE_NAME]: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
       };
 
@@ -1004,7 +1005,7 @@ describe('MetricVisComponent', function () {
   });
 
   it('should convert null values to NaN', () => {
-    const metricId = faker.random.word();
+    const metricId = faker.lorem.word();
 
     const tableWNull: Datatable = {
       type: 'datatable',
@@ -1160,12 +1161,16 @@ describe('MetricVisComponent', function () {
                 // should be overridden
                 color: 'static-color',
                 palette: {
-                  colors: [],
-                  gradient: true,
-                  stops: [],
-                  range: 'number',
-                  rangeMin: 2,
-                  rangeMax: 10,
+                  type: 'palette',
+                  name: 'default',
+                  params: {
+                    colors: [],
+                    gradient: true,
+                    stops: [],
+                    range: 'number',
+                    rangeMin: 2,
+                    rangeMax: 10,
+                  },
                 },
               },
             }}
@@ -1200,7 +1205,7 @@ describe('MetricVisComponent', function () {
 
       describe('percent-based', () => {
         const renderWithPalette = (
-          palette: CustomPaletteState,
+          palette: PaletteOutput<CustomPaletteState>,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
           shallow(
@@ -1238,13 +1243,17 @@ describe('MetricVisComponent', function () {
 
             renderWithPalette(
               {
-                range: 'percent',
-                // the rest of these params don't matter
-                colors: [],
-                gradient: false,
-                stops: [],
-                rangeMin: 2,
-                rangeMax: 10,
+                type: 'palette',
+                name: 'default',
+                params: {
+                  range: 'percent',
+                  // the rest of these params don't matter
+                  colors: [],
+                  gradient: false,
+                  stops: [],
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
               },
               dimensions as DimensionsVisParam
             );
@@ -1363,7 +1372,10 @@ describe('MetricVisComponent', function () {
         extra,
       } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
+      return {
+        primary: valueFormatter(primaryMetric),
+        secondary: (extra as ReactElement).props.children[1],
+      };
     };
 
     it.each`
@@ -1494,6 +1506,53 @@ describe('MetricVisComponent', function () {
       const settingsComponent = component.find(Settings);
       expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
       expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
+
+  describe('ES|QL metric chart', () => {
+    it('keyword value should remain string', () => {
+      const dataFromESQL: Datatable = {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'a',
+            name: 'alpha',
+            meta: {
+              esType: 'keyword',
+              type: 'string',
+              sourceParams: {
+                indexPattern: 'index',
+              },
+            },
+          },
+        ],
+        rows: [{ a: '12h50m30s' }],
+        meta: {
+          type: 'es_ql',
+        },
+      };
+
+      const config: Props['config'] = {
+        dimensions: {
+          metric: 'a',
+        },
+        metric: {
+          color: '#FFFFFF',
+          iconAlign: 'left',
+          maxCols: 3,
+          titlesTextAlign: 'left',
+          valueFontSize: 'default',
+          valuesTextAlign: 'right',
+        },
+      };
+
+      const component = shallow(
+        <MetricVis config={config} data={dataFromESQL} {...defaultProps} />
+      );
+
+      const { data } = component.find(Metric).props();
+      const formattedMetricValue = data[0][0]!.value;
+      expect(formattedMetricValue).toEqual('string-12h50m30s');
     });
   });
 });

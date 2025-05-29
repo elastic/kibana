@@ -94,7 +94,7 @@ export const DefaultCellValue = ({
 /**
  * Extracts the value from the raw json ES field
  */
-const extractFieldValue = (rawValue: string | JsonValue[]) => {
+const extractFieldValue = (rawValue: string | number | JsonValue[]) => {
   const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
 
   if (!isEmpty(value)) {

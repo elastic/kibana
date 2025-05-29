@@ -25,7 +25,6 @@ import {
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { getCertSummary, getTLSAlertDocument, setTLSRecoveredAlertsContext } from './message_utils';
 import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
@@ -77,7 +76,7 @@ export const registerSyntheticsTLSCheckRule = (
         TLSAlert
       >
     ) => {
-      const { state: ruleState, params, services, spaceId, previousStartedAt } = options;
+      const { state: ruleState, params, services, spaceId, previousStartedAt, rule } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
@@ -90,7 +89,9 @@ export const registerSyntheticsTLSCheckRule = (
         savedObjectsClient,
         scopedClusterClient.asCurrentUser,
         server,
-        syntheticsMonitorClient
+        syntheticsMonitorClient,
+        spaceId,
+        rule.name
       );
 
       const { foundCerts, certs, absoluteExpirationThreshold, absoluteAgeThreshold, latestPings } =
@@ -134,7 +135,6 @@ export const registerSyntheticsTLSCheckRule = (
       return { state: updateState(ruleState, foundCerts) };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,
-    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

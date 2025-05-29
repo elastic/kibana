@@ -36,7 +36,7 @@ import {
   FieldFormatConvertFunction,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { CUSTOM_PALETTE, PaletteOutput } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
@@ -93,21 +93,23 @@ const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
-  const serializedFieldFormat = getFormatByAccessor(accessor, columns);
+  const type = getColumnByAccessor(accessor, columns)?.meta.type;
+  const defaultFormat = type ? { id: type } : undefined;
+  const serializedFieldFormat = getFormatByAccessor(accessor, columns, defaultFormat);
   const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
   return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
 
 const getColor = (
   value: number,
-  paletteParams: CustomPaletteState,
+  palette: PaletteOutput<CustomPaletteState>,
   accessors: { metric: string; max?: string; breakdownBy?: string },
   data: Datatable,
   rowNumber: number
 ) => {
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
 
-  return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
+  return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, palette.params, {
     min,
     max,
   });
@@ -133,7 +135,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} style={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} />;
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -236,7 +238,7 @@ export const MetricVis = ({
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
       extra: renderSecondaryMetric(data.columns, row, config),
       color:
-        config.metric.palette && value != null
+        config.metric.palette?.params && value != null
           ? getColor(
               value,
               config.metric.palette,

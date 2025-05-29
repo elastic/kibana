@@ -55,8 +55,17 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return "error" when the security data view does not exist', async () => {
         await dataView.delete('security-solution');
-        await utils.initEntityEngineForEntityType('host');
-        await utils.waitForEngineStatus('host', 'error');
+
+        const { body, status } = await api.initEntityEngine(
+          {
+            params: { entityType: 'host' },
+            body: {},
+          },
+          'default'
+        );
+
+        expect(status).toEqual(500);
+        expect(body.message).toContain('Data view not found');
       });
     });
 

@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
+  const toastsService = getService('toasts');
 
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
@@ -228,6 +229,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
       await testSubjects.existOrFail('xyVisAnnotationIcon');
+      await timeToVisualize.resetNewDashboard();
+    });
+
+    it('should allow adding a by reference annotation', async () => {
+      const ANNOTATION_GROUP_TITLE = 'My by reference annotation group';
+      await loadExistingLens();
+      await lens.save('xyVisChart Copy 2', true, false, false, 'new');
+
+      await dashboard.waitForRenderComplete();
+      await elasticChart.setNewChartUiDebugFlag(true);
+
+      await dashboardPanelActions.clickInlineEdit();
+
+      log.debug('Adds by reference annotation');
+
+      await lens.createLayer('annotations');
+
+      await lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+
+      await visualize.setSaveModalValues(ANNOTATION_GROUP_TITLE, {
+        description: 'my description',
+      });
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+
+      const toastContents = await toastsService.getContentByIndex(1);
+
+      expect(toastContents).to.be(
+        `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
+      );
+
+      // now close
+      await testSubjects.click('applyFlyoutButton');
+
+      log.debug('Edit the by reference annotation');
+      // and try to edit again the by reference annotation layer event
+      await dashboardPanelActions.clickInlineEdit();
+
+      expect((await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length).to.eql(2);
+      expect(
+        await (
+          await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+        ).getVisibleText()
+      ).to.eql('Event');
+
+      await dashboard.waitForRenderComplete();
+
       await timeToVisualize.resetNewDashboard();
     });
 

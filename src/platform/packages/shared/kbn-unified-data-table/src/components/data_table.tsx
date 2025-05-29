@@ -192,7 +192,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc?: (doc?: DataTableRecord) => void;
+  setExpandedDoc?: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -621,10 +621,11 @@ export const UnifiedDataTable = ({
         dataView,
         columnId,
         fieldFormats,
+        columnsMeta,
         options,
       });
     },
-    [displayedRows, dataView, fieldFormats]
+    [displayedRows, dataView, fieldFormats, columnsMeta]
   );
 
   /**
@@ -748,6 +749,7 @@ export const UnifiedDataTable = ({
         externalCustomRenderers,
         isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
+        columnsMeta,
       }),
     [
       dataView,
@@ -759,6 +761,7 @@ export const UnifiedDataTable = ({
       externalCustomRenderers,
       isPlainRecord,
       dataGridDensity,
+      columnsMeta,
     ]
   );
 

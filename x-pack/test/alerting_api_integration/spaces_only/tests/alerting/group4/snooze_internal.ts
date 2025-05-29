@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
@@ -408,7 +408,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       });
     });
 
-    describe('validation', () => {
+    describe('validation', function () {
+      this.tags('skipFIPS');
       it('should return 400 if the id is not in a valid format', async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

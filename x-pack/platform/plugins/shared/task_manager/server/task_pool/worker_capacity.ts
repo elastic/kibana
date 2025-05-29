@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { TaskRunner } from '../task_running';
-import { CapacityOpts, ICapacity } from './types';
-import { TaskDefinition } from '../task';
+import type { Logger } from '@kbn/core/server';
+import type { TaskRunner } from '../task_running';
+import type { CapacityOpts, ICapacity } from './types';
+import type { TaskDefinition } from '../task';
 import { getCapacityInWorkers } from './utils';
 
 export class WorkerCapacity implements ICapacity {

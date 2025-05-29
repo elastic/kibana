@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ServerSentEventError } from '@kbn/sse-utils';
 import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
 /**
@@ -17,44 +18,22 @@ export enum InferenceTaskErrorCode {
   abortedError = 'requestAborted',
 }
 
-/**
- * Base class for all inference API errors.
- */
-export class InferenceTaskError<
+const InferenceTaskError = ServerSentEventError;
+type InferenceTaskError<
   TCode extends string,
   TMeta extends Record<string, any> | undefined
-> extends Error {
-  constructor(public code: TCode, message: string, public meta: TMeta) {
-    super(message);
-  }
+> = ServerSentEventError<TCode, TMeta>;
 
-  public get status() {
-    if (typeof this.meta === 'object' && this.meta.status) {
-      return this.meta.status as number;
-    }
-    return undefined;
-  }
-
-  toJSON(): InferenceTaskErrorEvent {
-    return {
-      type: InferenceTaskEventType.error,
-      error: {
-        code: this.code,
-        message: this.message,
-        meta: this.meta,
-      },
+export type InferenceTaskErrorEvent = InferenceTaskEventBase<
+  InferenceTaskEventType.error,
+  {
+    error: {
+      code: string;
+      message: string;
+      meta?: Record<string, any>;
     };
   }
-}
-
-export type InferenceTaskErrorEvent = InferenceTaskEventBase<InferenceTaskEventType.error> & {
-  error: {
-    code: string;
-    message: string;
-    meta?: Record<string, any>;
-  };
-};
-
+>;
 /**
  * Inference error thrown when an unexpected internal error occurs while handling the request.
  */
@@ -162,3 +141,5 @@ export function isInferenceRequestAbortedError(error: unknown): error is Inferen
 export function isInferenceProviderError(error: unknown): error is InferenceTaskProviderError {
   return isInferenceError(error) && error.code === InferenceTaskErrorCode.providerError;
 }
+
+export { InferenceTaskError };

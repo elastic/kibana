@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import type { Alerts } from '../../../../common/lib/alerts';
 import {
-  Alerts,
   createCaseAttachAlertAndDeleteCase,
   createSecuritySolutionAlerts,
   getAlertById,
   getSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getFilesAttachmentReq,
@@ -62,7 +62,7 @@ import {
   OBSERVABILITY_FILE_KIND,
   SECURITY_SOLUTION_FILE_KIND,
 } from '../../../../common/lib/constants';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import {
   createAlertsIndex,
   deleteAllRules,

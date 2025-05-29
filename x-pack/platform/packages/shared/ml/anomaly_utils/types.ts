@@ -454,3 +454,5 @@ export type MlEntityFieldType = 'partition_field' | 'over_field' | 'by_field';
  */
 export type MlAnomalyResultType =
   (typeof ML_ANOMALY_RESULT_TYPE)[keyof typeof ML_ANOMALY_RESULT_TYPE];
+
+export type AnomalyDateFunction = 'time_of_day' | 'time_of_week';

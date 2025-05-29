@@ -46,7 +46,7 @@ export async function installEndpointPackage(
   });
 }
 
-async function findLatestPackageVersion(
+export async function findLatestPackageVersion(
   context: SecuritySolutionApiRequestHandlerContext,
   packageName: string
 ) {

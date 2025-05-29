@@ -25,6 +25,7 @@ import type { Logger } from '@kbn/logging';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import { getAllUnsecured } from './get_all';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -610,6 +611,85 @@ describe('getAll()', () => {
       await actionsClient.getAll();
 
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('filters out inference connectors without endpoints', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            testPreconfigured01: { doc_count: 2 },
+            testPreconfigured02: { doc_count: 2 },
+          },
+        }
+      );
+
+      scopedClusterClient.asInternalUser.inference.get.mockResolvedValueOnce({
+        endpoints: [{ inference_id: '2' } as InferenceInferenceEndpointInfo],
+      });
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        ephemeralExecutionEnqueuer,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            id: 'testPreconfigured01',
+            actionTypeId: '.inference',
+            name: 'test1',
+            config: {
+              inferenceId: '1',
+            },
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+          {
+            id: 'testPreconfigured02',
+            actionTypeId: '.inference',
+            name: 'test2',
+            config: {
+              inferenceId: '2',
+            },
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      const result = await actionsClient.getAll({ includeSystemActions: true });
+      expect(result).toEqual([
+        {
+          actionTypeId: '.inference',
+          id: 'testPreconfigured02',
+          isDeprecated: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+          name: 'test2',
+          referencedByCount: 2,
+        },
+      ]);
     });
   });
 

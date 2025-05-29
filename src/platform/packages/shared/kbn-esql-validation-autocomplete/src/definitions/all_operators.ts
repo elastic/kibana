@@ -13,6 +13,7 @@ import {
   type FunctionParameterType,
   type FunctionReturnType,
   FunctionDefinitionTypes,
+  Location,
 } from './types';
 import { operatorFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
@@ -65,8 +66,14 @@ function createComparisonDefinition(
     type: FunctionDefinitionTypes.OPERATOR,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
+    locationsAvailable: [
+      Location.EVAL,
+      Location.WHERE,
+      Location.ROW,
+      Location.SORT,
+      Location.STATS_BY,
+      Location.STATS_WHERE,
+    ],
     validate,
     signatures: [
       ...commonSignatures,
@@ -212,40 +219,20 @@ export const logicalOperators: FunctionDefinition[] = [
   type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
   signatures: [
     {
       params: [
         { name: 'left', type: 'boolean' as const },
         { name: 'right', type: 'boolean' as const },
       ],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
-const nullFunctions: FunctionDefinition[] = [
-  {
-    name: 'is null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
-    }),
-  },
-  {
-    name: 'is not null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
-    }),
-  },
-].map<FunctionDefinition>(({ name, description }) => ({
-  type: FunctionDefinitionTypes.OPERATOR,
-  name,
-  description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  signatures: [
-    {
-      params: [{ name: 'left', type: 'any' }],
       returnType: 'boolean',
     },
   ],
@@ -258,8 +245,14 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
+    locationsAvailable: [
+      Location.EVAL,
+      Location.WHERE,
+      Location.ROW,
+      Location.SORT,
+      Location.STATS_BY,
+      Location.STATS_WHERE,
+    ],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -273,17 +266,16 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: [
-      'eval',
-      'stats',
-      'inlinestats',
-      'metrics',
-      'row',
-      'dissect',
-      'where',
-      'enrich',
+    locationsAvailable: [
+      Location.EVAL,
+      Location.STATS,
+      Location.STATS_BY,
+      Location.ROW,
+      Location.WHERE,
+      Location.ENRICH,
+      Location.ENRICH_WITH,
+      Location.DISSECT,
     ],
-    supportedOptions: ['by', 'with'],
     signatures: [
       {
         params: [
@@ -300,8 +292,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.asDoc', {
       defaultMessage: 'Rename as (AS)',
     }),
-    supportedCommands: ['rename', 'join'],
-    supportedOptions: [],
+    locationsAvailable: [Location.RENAME, Location.JOIN],
     signatures: [
       {
         params: [
@@ -318,8 +309,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.whereDoc', {
       defaultMessage: 'WHERE operator',
     }),
-    supportedCommands: ['stats', 'inlinestats', 'metrics'],
-    supportedOptions: [],
+    locationsAvailable: [Location.STATS],
     signatures: [
       {
         params: [
@@ -337,7 +327,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),
-    supportedCommands: ['show'],
+    locationsAvailable: [Location.SHOW],
     signatures: [
       {
         params: [],
@@ -347,9 +337,352 @@ const otherDefinitions: FunctionDefinition[] = [
   },
 ];
 
+const isNotNullDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: 'is not null',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.is_not_null', {
+    defaultMessage: 'Use `IS NOT NULL` to filter data based on whether the field exists or not.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'boolean',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['FROM employees\n| WHERE is_rehired IS NOT NULL\n| STATS COUNT(emp_no)'],
+};
+
+const isNullDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: 'is null',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.is_null', {
+    defaultMessage: 'Use `IS NULL` to filter data based on whether the field exists or not.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'boolean',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+  ],
+  validate: undefined,
+  examples: ['FROM employees\n| WHERE birth_date IS NULL'],
+};
+
 export const operatorsDefinitions: FunctionDefinition[] = [
   ...operatorFunctionDefinitions,
+  isNullDefinition,
+  isNotNullDefinition,
   ...logicalOperators,
-  ...nullFunctions,
   ...otherDefinitions,
 ];

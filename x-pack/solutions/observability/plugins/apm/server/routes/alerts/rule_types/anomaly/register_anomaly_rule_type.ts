@@ -258,7 +258,7 @@ export function registerAnomalyRuleType({
             const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
             if (!job) {
-              logger.warn(`Could not find matching job for job id ${latest.job_id}`);
+              logger.debug(`Could not find matching job for job id ${latest.job_id}`);
               return undefined;
             }
 

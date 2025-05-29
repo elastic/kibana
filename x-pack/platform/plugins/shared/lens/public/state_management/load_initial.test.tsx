@@ -17,7 +17,7 @@ import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
 import { InitialAppState, loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { DOC_TYPE } from '../../common/constants';
 
 const history = {
@@ -118,13 +118,13 @@ describe('Initializing the store', () => {
       },
     });
 
-    const { store, deps } = makeLensStore({
+    const { store } = makeLensStore({
       storeDeps,
       preloadedState,
     });
 
     await loadInitialAppState(store, defaultProps);
-    const { datasourceMap } = deps;
+    const { datasourceMap } = storeDeps;
 
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalledWith(
       datasource1State,

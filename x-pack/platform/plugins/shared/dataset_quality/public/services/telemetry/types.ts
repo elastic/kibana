@@ -83,6 +83,8 @@ export interface DatasetNavigatedEbtProps extends DatasetEbtProps {
     namespaces: DatasetEbtFilter;
     qualities: DatasetEbtFilter;
   };
+  target: NavigationTarget;
+  source: NavigationSource;
 }
 
 export interface DatasetDetailsEbtProps extends DatasetEbtProps {

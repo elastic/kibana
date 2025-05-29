@@ -21,7 +21,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 
-const fadeInAnimation = keyframes`
+export const fadeInAnimation = keyframes`
   from {
     opacity: 0;
   }

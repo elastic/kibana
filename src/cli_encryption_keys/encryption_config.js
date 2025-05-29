@@ -11,12 +11,12 @@ import crypto from 'crypto';
 import { join } from 'path';
 import { get } from 'lodash';
 import { readFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { getConfigDirectory } from '@kbn/utils';
 
 export class EncryptionConfig {
-  #config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
+  #config = load(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
   #encryptionKeyPaths = [
     'xpack.encryptedSavedObjects.encryptionKey',
     'xpack.reporting.encryptionKey',

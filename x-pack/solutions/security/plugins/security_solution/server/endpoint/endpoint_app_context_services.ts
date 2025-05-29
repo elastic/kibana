@@ -185,7 +185,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider

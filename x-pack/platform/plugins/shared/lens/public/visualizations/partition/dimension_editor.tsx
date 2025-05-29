@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './toolbar.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,17 +13,20 @@ import {
   PaletteRegistry,
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  AVAILABLE_PALETTES,
-  getColorsFromMapping,
 } from '@kbn/coloring';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { PalettePanelContainer, PalettePicker } from '../../shared_components';
+import {
+  PalettePanelContainer,
+  PalettePicker,
+  getPaletteDisplayColors,
+} from '../../shared_components';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import {
   getDefaultColorForMultiMetricDimension,
@@ -32,9 +34,11 @@ import {
   isCollapsed,
 } from './visualization';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { getSortedAccessorsForGroup } from './to_expression';
 
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
+  palettes: KbnPalettes;
   isDarkMode: boolean;
 };
 
@@ -99,9 +103,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return null;
   }
 
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
+  const originalGroupOrder = getSortedAccessorsForGroup(
+    props.datasource,
+    currentLayer,
+    'primaryGroups'
   );
+  const firstNonCollapsedColumnId = originalGroupOrder.find((id) => !isCollapsed(id, currentLayer));
 
   const showColorPicker =
     currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
@@ -118,7 +125,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getColorsFromMapping(props.isDarkMode, currentLayer.colorMapping);
+  const colors = getPaletteDisplayColors(
+    props.paletteService,
+    props.palettes,
+    props.isDarkMode,
+    props.state.palette,
+    currentLayer.colorMapping
+  );
   const table = props.frame.activeData?.[currentLayer.layerId];
   const splitCategories = getColorCategories(table?.rows, props.accessor);
 
@@ -183,7 +196,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       isDarkMode={props.isDarkMode}
                       model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                       onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                      palettes={AVAILABLE_PALETTES}
+                      palettes={props.palettes}
                       data={{
                         type: 'categories',
                         categories: splitCategories,
@@ -209,6 +222,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {showColorPicker && (
         <ColorPicker
           {...props}
+          swatches={props.palettes.get(KbnPalette.Default).colors(10)}
           overwriteColor={currentLayer.colorsByDimension?.[props.accessor]}
           defaultColor={getDefaultColorForMultiMetricDimension({
             layer: currentLayer,

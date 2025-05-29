@@ -22,8 +22,11 @@ export class FindSLODefinitions {
   constructor(private repository: SLORepository) {}
 
   public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
+    const requestTags: string[] = params.tags?.split(',') ?? [];
+
     const result = await this.repository.search(params.search ?? '', toPagination(params), {
-      includeOutdatedOnly: params.includeOutdatedOnly === true ? true : false,
+      includeOutdatedOnly: params.includeOutdatedOnly === true,
+      tags: requestTags,
     });
     return findSloDefinitionsResponseSchema.encode(result);
   }

@@ -27,6 +27,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -34,6 +35,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
+import { unflattenObject } from '@kbn/object-utils';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -44,6 +46,7 @@ import {
 import type {
   THRESHOLD_MET_GROUP,
   ApmRuleParamsType,
+  AdditionalContext,
 } from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
@@ -78,6 +81,7 @@ export const errorCountActionVariables = [
   apmActionVariables.transactionName,
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
+  apmActionVariables.grouping,
 ];
 
 type ErrorCountRuleTypeParams = ApmRuleParamsType[ApmRuleType.ErrorCount];
@@ -106,6 +110,7 @@ export function registerErrorCountRuleType({
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: errorCountParamsSchema },
+    doesSetRecoveryContext: true,
     schemas: {
       params: {
         type: 'config-schema',
@@ -240,6 +245,7 @@ export function registerErrorCountRuleType({
           );
           const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
           const groupByActionVariables = getGroupByActionVariables(groupByFields);
+          const groupingObject = unflattenObject(groupByFields);
 
           const payload = {
             [PROCESSOR_EVENT]: ProcessorEvent.error,
@@ -263,6 +269,7 @@ export function registerErrorCountRuleType({
             errorGroupingKey: ruleParams.errorGroupingKey,
             triggerValue: errorCount,
             viewInAppUrl,
+            grouping: groupingObject,
             ...groupByActionVariables,
           };
 
@@ -273,6 +280,65 @@ export function registerErrorCountRuleType({
           });
         }
       );
+      // Handle recovered alerts context
+      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+      for (const recoveredAlert of recoveredAlerts) {
+        const alertHits = recoveredAlert.hit as AdditionalContext;
+        const recoveredAlertId = recoveredAlert.alert.getId();
+        const alertUuid = recoveredAlert.alert.getUuid();
+        const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
+
+        const ruleParamsOfRecoveredAlert = alertHits?.[
+          ALERT_RULE_PARAMETERS
+        ] as ErrorCountRuleTypeParams;
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
+          ApmRuleType.ErrorCount,
+          groupByFieldsOfRecoveredAlert
+        );
+        const groupByFields: Record<string, string> = allGroupByFieldsOfRecoveredAlert.reduce(
+          (acc, sourceField: string) => {
+            if (alertHits?.[sourceField] !== undefined) {
+              acc[sourceField] = alertHits[sourceField];
+            }
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+
+        const relativeViewInAppUrl = getAlertUrlErrorCount(
+          groupByFields[SERVICE_NAME],
+          getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[SERVICE_ENVIRONMENT]
+        );
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          relativeViewInAppUrl
+        );
+        const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
+        const recoveredContext = {
+          alertDetailsUrl,
+          interval: formatDurationFromTimeUnitChar(
+            ruleParams.windowSize,
+            ruleParams.windowUnit as TimeUnitChar
+          ),
+          reason: alertHits?.[ALERT_REASON],
+          // When group by doesn't include error.grouping_key, the context.error.grouping_key action variable will contain value of the Error Grouping Key filter
+          errorGroupingKey: ruleParams.errorGroupingKey,
+          threshold: ruleParams.threshold,
+          triggerValue: alertHits?.[ALERT_EVALUATION_VALUE],
+          viewInAppUrl,
+          grouping: groupingObject,
+          ...groupByActionVariables,
+        };
+
+        alertsClient.setAlertData({
+          id: recoveredAlertId,
+          context: recoveredContext,
+        });
+      }
 
       return { state: {} };
     },

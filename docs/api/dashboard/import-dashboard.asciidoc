@@ -27,7 +27,7 @@ Import dashboards and corresponding saved objects.
 [[dashboard-api-import-request-body]]
 ==== Request body
 
-Use the complete response body from the <<dashboard-api-export, Export dashboard API>> as the request body. Do not manually construct a payload to the endpoint. The max payload size is determined by the `savedObjects.maxImportPayloadBytes` configuration key.
+Use the complete response body from the <<dashboard-api-export, Export dashboard API>> as the request body. Do not manually construct a payload to the endpoint or change the contents of the export. The exported data should be treated as opaque: changing the export can result in unexpected errors or data loss. Note: The max payload size is determined by the `savedObjects.maxImportPayloadBytes` configuration key.
 
 [[dashboard-api-import-response-body]]
 ==== Response body

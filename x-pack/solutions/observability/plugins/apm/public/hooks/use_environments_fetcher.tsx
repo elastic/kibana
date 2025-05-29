@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
 import type { Environment } from '../../common/environment_rt';
 import type { APIReturnType } from '../services/rest/create_call_apm_api';
-
 type EnvironmentsAPIResponse = APIReturnType<'GET /internal/apm/environments'>;
 
 const INITIAL_DATA: EnvironmentsAPIResponse = { environments: [] };
@@ -27,29 +25,14 @@ export function useEnvironmentsFetcher({
       if (!start || !end) {
         return;
       }
-
-      if (serviceName) {
-        return callApmApi('GET /internal/apm/environments', {
-          params: {
-            query: {
-              start,
-              end,
-              serviceName,
-            },
-          },
-        });
-      }
-      return callApmApi('GET /internal/apm/suggestions', {
+      return callApmApi('GET /internal/apm/environments', {
         params: {
           query: {
             start,
             end,
-            fieldName: SERVICE_ENVIRONMENT,
-            fieldValue: '',
+            serviceName,
           },
         },
-      }).then((response) => {
-        return { environments: response.terms };
       });
     },
     [start, end, serviceName]

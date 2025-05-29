@@ -9,37 +9,31 @@ import { filter, take } from 'rxjs';
 import pMap from 'p-map';
 
 import { v4 as uuidv4 } from 'uuid';
-import { chunk, flatten, pick } from 'lodash';
+import { chunk, flatten, pick, omit } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { either, isErr, mapErr } from './lib/result_type';
-import {
-  ErroredTask,
-  ErrResultOf,
-  isTaskClaimEvent,
-  isTaskRunEvent,
-  isTaskRunRequestEvent,
-  OkResultOf,
-  RanTask,
-} from './task_events';
-import { Middleware } from './lib/middleware';
+import type { ErroredTask, ErrResultOf, OkResultOf, RanTask } from './task_events';
+import { isTaskClaimEvent, isTaskRunEvent, isTaskRunRequestEvent } from './task_events';
+import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import {
+import type {
   ConcreteTaskInstance,
   EphemeralTask,
   IntervalSchedule,
+  ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
-  TaskStatus,
 } from './task';
-import { TaskStore } from './task_store';
+import { TaskStatus } from './task';
+import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent } from './polling_lifecycle';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
+import type { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
-import { ErrorOutput } from './lib/bulk_operation_buffer';
+import type { ErrorOutput } from './lib/bulk_operation_buffer';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -102,10 +96,10 @@ export class TaskScheduling {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...options,
+      ...omit(options, 'apiKey', 'request'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
@@ -114,11 +108,18 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule({
-      ...modifiedTask,
-      traceparent: traceparent || '',
-      enabled: modifiedTask.enabled ?? true,
-    });
+    return await this.store.schedule(
+      {
+        ...modifiedTask,
+        traceparent: traceparent || '',
+        enabled: modifiedTask.enabled ?? true,
+      },
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   /**
@@ -129,7 +130,7 @@ export class TaskScheduling {
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
@@ -138,7 +139,7 @@ export class TaskScheduling {
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-          ...options,
+          ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
         return {
@@ -149,7 +150,14 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(modifiedTasks);
+    return await this.store.bulkSchedule(
+      modifiedTasks,
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {

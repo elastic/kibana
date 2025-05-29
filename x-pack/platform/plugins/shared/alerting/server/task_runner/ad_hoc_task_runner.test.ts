@@ -396,6 +396,16 @@ describe('Ad Hoc Task Runner', () => {
     mockValidateRuleTypeParams.mockReturnValue(mockedAdHocRunSO.attributes.rule.params);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedAdHocRunSO);
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
+
+    clusterClient.search.mockResolvedValue({
+      took: 10,
+      timed_out: false,
+      _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+      hits: {
+        total: { relation: 'eq', value: 0 },
+        hits: [],
+      },
+    });
   });
 
   afterAll(() => fakeTimer.restore());
@@ -454,6 +464,7 @@ describe('Ad Hoc Task Runner', () => {
 
     expect(call.executionId).toEqual(UUID);
     expect(call.services).toBeTruthy();
+    expect(call.services.actionsClient).toBeUndefined();
     expect(call.services.alertsClient).not.toBe(null);
     expect(call.services.alertsClient?.report).toBeTruthy();
     expect(call.services.alertsClient?.setAlertData).toBeTruthy();
@@ -1393,7 +1404,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule1.runAt,
         backfillInterval: schedule1.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(3);
+      expect(logger.debug).toHaveBeenCalledTimes(4);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
@@ -1405,6 +1416,10 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`
+      );
+      expect(logger.debug).nthCalledWith(
+        4,
+        `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1471,7 +1486,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule2.runAt,
         backfillInterval: schedule2.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(3);
+      expect(logger.debug).toHaveBeenCalledTimes(4);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
@@ -1483,6 +1498,10 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`
+      );
+      expect(logger.debug).nthCalledWith(
+        4,
+        `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });

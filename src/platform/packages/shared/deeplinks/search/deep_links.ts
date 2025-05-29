@@ -27,6 +27,7 @@ import {
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
   ES_SEARCH_SYNONYMS_ID,
+  SEARCH_QUERY_RULES_ID,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -40,6 +41,7 @@ export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
 export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
 export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
+export type SearchQueryRulesId = typeof SEARCH_QUERY_RULES_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchStart = typeof SEARCH_INDICES_START;
 export type SearchIndices = typeof SEARCH_INDICES;
@@ -72,6 +74,7 @@ export type DeepLinkId =
   | SearchPlaygroundId
   | SearchInferenceEndpointsId
   | SearchSynonymsId
+  | SearchQueryRulesId
   | SearchHomepage
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`

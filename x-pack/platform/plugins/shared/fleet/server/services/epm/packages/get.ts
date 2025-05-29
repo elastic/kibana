@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
 import type {
@@ -329,15 +329,15 @@ async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
-      // Filter for a "queryable" marker
-      buildFunctionNode(
-        'nested',
-        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-        nodeBuilder.is('type', 'index_template')
-      ),
-      // "Type" filter
       ...(dataStreamType
         ? [
+            // Filter for a "queryable" marker
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('type', 'index_template')
+            ),
+            // "Type" filter
             buildFunctionNode(
               'nested',
               `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
@@ -378,7 +378,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, safeLoad(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
       return acc;
     },
     new Map()

@@ -12,40 +12,32 @@ import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/se
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  clearConversations,
-  clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from './helpers';
-import { getConversationCreatedEvent } from '../helpers';
+import { clearKnowledgeBase } from '../utils/knowledge_base';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
 
 const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Knowledge base user instructions', function () {
+  describe('Knowledge base: user instructions', function () {
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await deployTinyElserAndSetupKb(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });
@@ -121,7 +113,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      it('"secondaryEditor" can retrieve their own private instructions and the public instruction', async () => {
+      it('"admin" can retrieve their own private instructions and the public instruction', async () => {
         await retry.try(async () => {
           const res = await observabilityAIAssistantAPIClient.admin({
             endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
@@ -258,7 +250,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when a user instruction exist and a conversation is created', () => {
       // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
-      this.tags(['failsOnMKI']);
+      this.tags(['skipCloud']);
 
       let proxy: LlmProxy;
       let connectorId: string;
@@ -282,7 +274,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(status).to.be(200);
 
         void proxy.interceptTitle('This is a conversation title');
-        void proxy.interceptConversation('I, the LLM, hear you!');
+        void proxy.interceptWithResponse('I, the LLM, hear you!');
 
         const messages: Message[] = [
           {
@@ -403,7 +395,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('Forwarding User Instructions via System Message to the LLM', () => {
       // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
-      this.tags(['failsOnMKI']);
+      this.tags(['skipCloud']);
 
       let proxy: LlmProxy;
       let connectorId: string;
@@ -448,7 +440,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('includes private KB instructions in the system message sent to the LLM', async () => {
-        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),

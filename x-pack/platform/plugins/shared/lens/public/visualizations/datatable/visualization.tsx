@@ -8,8 +8,15 @@
 import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import {
+  PaletteRegistry,
+  CUSTOM_PALETTE,
+  PaletteOutput,
+  CustomPaletteParams,
+  applyPaletteParams,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
@@ -17,6 +24,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getSortingCriteria } from '@kbn/sort-predicates';
+import { getKbnPalettes } from '@kbn/palettes';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -45,11 +53,10 @@ import {
   DEFAULT_ROW_HEIGHT_LINES,
 } from './components/constants';
 import {
-  applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
-  getColorStops,
-  shouldColorByTerms,
+  getAccessorType,
+  getPaletteDisplayColors,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
@@ -140,11 +147,11 @@ export const getDatatableVisualization = ({
 
     const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
     const columns = state.columns.map((column) => {
-      if (column.palette) {
-        const accessor = column.columnId;
+      const accessor = column.columnId;
+      const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+      if (column.palette && (isNumeric || isBucketable)) {
+        const showColorByTerms = isBucketable;
         const currentData = frame?.activeData?.[state.layerId];
-        const { dataType, isBucketed } = datasource?.getOperationForColumnId(column.columnId) ?? {};
-        const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
         const palette = paletteMap.get(column.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
@@ -156,7 +163,7 @@ export const getDatatableVisualization = ({
         if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
           const newPalette: PaletteOutput<CustomPaletteParams> = {
             type: 'palette',
-            name: showColorByTerms ? 'default' : defaultPaletteParams.name,
+            name: defaultPaletteParams.name,
           };
           return {
             ...column,
@@ -268,7 +275,9 @@ export const getDatatableVisualization = ({
   on the Metric dimension in cases where there are no numeric columns
   **/
   getConfiguration({ state, frame }) {
-    const isDarkMode = kibanaTheme.getTheme().darkMode;
+    const theme = kibanaTheme.getTheme();
+    const palettes = getKbnPalettes(theme);
+
     const { sortedColumns, datasource } = getDatasourceAndSortedColumns(
       state,
       frame.datasourceLayers
@@ -320,7 +329,13 @@ export const getDatatableVisualization = ({
                 hidden,
                 collapseFn,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const stops = getPaletteDisplayColors(
+                paletteService,
+                palettes,
+                theme.darkMode,
+                palette,
+                colorMapping
+              );
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -407,7 +422,13 @@ export const getDatatableVisualization = ({
                 colorMapping,
                 hidden,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const stops = getPaletteDisplayColors(
+                paletteService,
+                palettes,
+                theme.darkMode,
+                palette,
+                colorMapping
+              );
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -465,10 +486,16 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
+    const palettes = getKbnPalettes(theme);
 
     return (
-      <TableDimensionEditor {...props} isDarkMode={isDarkMode} paletteService={paletteService} />
+      <TableDimensionEditor
+        {...props}
+        isDarkMode={theme.darkMode}
+        palettes={palettes}
+        paletteService={paletteService}
+      />
     );
   },
 
@@ -553,21 +580,26 @@ export const getDatatableVisualization = ({
       columns: columns
         .filter((c) => !c.collapseFn)
         .map((column) => {
+          const { isNumeric, isCategory: isBucketable } = getAccessorType(
+            datasource,
+            column.columnId
+          );
+          const stops = getOverridePaletteStops(paletteService, column.palette);
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
-            colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+            colors: stops?.map(({ color }) => color),
             stops:
               column.palette?.params?.name === RowHeightMode.custom
-                ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                ? stops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
           };
-          const { dataType, isBucketed, sortingHint, inMetricDimension } =
+          const { sortingHint, inMetricDimension } =
             datasource?.getOperationForColumnId(column.columnId) ?? {};
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
-          const canColor = dataType !== 'date';
-          const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+          const canColor = isNumeric || isBucketable;
+          const colorByTerms = isBucketable;
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;

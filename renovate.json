@@ -97,6 +97,28 @@
       "enabled": true
     },
     {
+      "groupName": "chainguard-fips",
+      "matchPackageNames": [
+        "docker.elastic.co/wolfi/chainguard-base-fips"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[9].*/",
+        "8.19",
+        "8.18"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip",
+        "ci:build-docker-fips"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "operations actions",
       "matchManagers": [
         "github-actions"
@@ -922,12 +944,48 @@
       "enabled": true
     },
     {
-      "groupName": "OpenTelemetry modules",
-      "matchDepPrefixes": [
-        "@opentelemetry/"
+      "groupName": "Oniguruma to es",
+      "matchDepNames": [
+        "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:stack-monitoring"
+        "team:obs-ux-logs-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ux-logs",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "OpenTelemetry modules",
+      "matchDepNames": [
+        "@grpc/grpc-js",
+        "@opentelemetry/api",
+        "@opentelemetry/api-metrics",
+        "@opentelemetry/core",
+        "@opentelemetry/exporter-metrics-otlp-grpc",
+        "@opentelemetry/exporter-prometheus",
+        "@opentelemetry/resources",
+        "@opentelemetry/sdk-metrics-base",
+        "@opentelemetry/semantic-conventions",
+        "@arizeai/openinference-semantic-conventions",
+        "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-trace-otlp-grpc",
+        "@opentelemetry/exporter-trace-otlp-http",
+        "@opentelemetry/exporter-trace-otlp-proto",
+        "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/sdk-node",
+        "@opentelemetry/sdk-trace-node"
+      ],
+      "reviewers": [
+        "team:stack-monitoring",
+        "team:kibana-core"
       ],
       "matchBaseBranches": [
         "main"
@@ -1149,9 +1207,9 @@
       "enabled": true
     },
     {
-      "groupName": "node-libs-browser",
+      "groupName": "node-stdlib-browser",
       "matchDepNames": [
-        "node-libs-browser"
+        "node-stdlib-browser"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1166,6 +1224,25 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "chrome-remote-interface",
+      "matchDepNames": [
+        "chrome-remote-interface",
+        "@types/chrome-remote-interface"
+      ],
+      "reviewers": [
+        "team:obs-knowledge-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     }
   ],
   "customManagers": [
@@ -1177,6 +1254,17 @@
       ],
       "matchStrings": [
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update Wolfi FIPS base image",
+      "customType": "regex",
+      "fileMatch": [
+        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base-fips):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],
       "datasourceTemplate": "docker"
     },

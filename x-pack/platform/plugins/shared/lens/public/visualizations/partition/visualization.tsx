@@ -14,13 +14,14 @@ import {
   PaletteRegistry,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
+import { getKbnPalettes } from '@kbn/palettes';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -201,8 +202,10 @@ export const getPieVisualization = ({
     kibanaTheme.theme$
       .subscribe({
         next(theme) {
+          const palettes = getKbnPalettes(theme);
+
           colors = state.layers[0]?.colorMapping
-            ? getColorsFromMapping(theme.darkMode, state.layers[0].colorMapping)
+            ? getColorsFromMapping(palettes, theme.darkMode, state.layers[0].colorMapping)
             : paletteService
                 .get(state.palette?.name || 'default')
                 .getCategoricalColors(10, state.palette?.params);
@@ -212,20 +215,21 @@ export const getPieVisualization = ({
 
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedAccessorsForGroup(datasource, layer, 'primaryGroups');
+      const firstNonCollapsedColumnId = originalOrder.find((id) => !isCollapsed(id, layer));
       // When we add a column it could be empty, and therefore have no order
       const accessors = originalOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
+        ...(isCollapsed(accessor, layer)
+          ? {
+              triggerIconType: 'aggregate',
+            }
+          : firstNonCollapsedColumnId === accessor
+          ? {
+              triggerIconType: 'colorBy',
+              palette: colors,
+            }
+          : undefined),
       }));
-
-      const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
-
-      accessors.forEach((accessorConfig) => {
-        if (firstNonCollapsedColumnId === accessorConfig.columnId) {
-          accessorConfig.triggerIconType = 'colorBy';
-          accessorConfig.palette = colors;
-        }
-      });
 
       const primaryGroupConfigBaseProps = {
         groupId: 'primaryGroups',
@@ -494,8 +498,16 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
-    return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
+    const palettes = getKbnPalettes(theme);
+    return (
+      <DimensionEditor
+        {...props}
+        paletteService={paletteService}
+        palettes={palettes}
+        isDarkMode={theme.darkMode}
+      />
+    );
   },
   DimensionEditorDataExtraComponent(props) {
     return <DimensionDataExtraEditor {...props} paletteService={paletteService} />;

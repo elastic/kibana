@@ -20,10 +20,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { deterministicallyRegenerateObjectId } from '@kbn/core-saved-objects-migration-server-internal';
 import { EsVersion } from '@kbn/test';
+import { getFips } from 'crypto';
 
 const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
@@ -113,150 +115,156 @@ describe('migration v2', () => {
     }
   });
 
-  it('rewrites id deterministically for SO with namespaceType: "multiple" and "multiple-isolated"', async () => {
-    const migratedIndexAlias = `.kibana_${pkg.version}`;
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          // original SO:
-          // [
-          //   { id: 'foo:1', type: 'foo', foo: { name: 'Foo 1 default' } },
-          //   { id: 'spacex:foo:1', type: 'foo', foo: { name: 'Foo 1 spacex' }, namespace: 'spacex' },
-          //   {
-          //     id: 'bar:1',
-          //     type: 'bar',
-          //     bar: { nomnom: 1 },
-          //     references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
-          //   },
-          //   {
-          //     id: 'spacex:bar:1',
-          //     type: 'bar',
-          //     bar: { nomnom: 2 },
-          //     references: [{ type: 'foo', id: '1', name: 'Foo 1 spacex' }],
-          //     namespace: 'spacex',
-          //   },
-          // ];
-          dataArchive: Path.join(
-            __dirname,
-            '..',
-            'archives',
-            willRunESv9
-              ? '8.18.0_so_with_multiple_namespaces.zip'
-              : '7.13.2_so_with_multiple_namespaces.zip'
-          ),
-        },
-      },
-    });
-
-    root = createRoot();
-
-    esServer = await startES();
-    await root.preboot();
-    const coreSetup = await root.setup();
-
-    coreSetup.savedObjects.registerType({
-      name: 'foo',
-      hidden: false,
-      mappings: { properties: { name: { type: 'text' } } },
-      namespaceType: 'multiple',
-      convertToMultiNamespaceTypeVersion: '8.0.0',
-    });
-
-    coreSetup.savedObjects.registerType({
-      name: 'bar',
-      hidden: false,
-      mappings: { properties: { nomnom: { type: 'integer' } } },
-      namespaceType: 'multiple-isolated',
-      convertToMultiNamespaceTypeVersion: '8.0.0',
-    });
-
-    const coreStart = await root.start();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
-
-    // each newly converted multi-namespace object in a non-default space has its ID deterministically regenerated, and a legacy-url-alias
-    // object is created which links the old ID to the new ID
-    const newFooId = deterministicallyRegenerateObjectId('spacex', 'foo', '1');
-    const newBarId = deterministicallyRegenerateObjectId('spacex', 'bar', '1');
-
-    expect(migratedDocs).toEqual(
-      [
-        {
-          id: 'foo:1',
-          type: 'foo',
-          foo: { name: 'Foo 1 default' },
-          references: [],
-          namespaces: ['default'],
-          coreMigrationVersion: expect.any(String),
-          typeMigrationVersion: '8.0.0',
-          managed: false,
-        },
-        {
-          id: `foo:${newFooId}`,
-          type: 'foo',
-          foo: { name: 'Foo 1 spacex' },
-          references: [],
-          namespaces: ['spacex'],
-          originId: '1',
-          coreMigrationVersion: expect.any(String),
-          typeMigrationVersion: '8.0.0',
-          managed: false,
-        },
-        {
-          // new object for spacex:foo:1
-          id: 'legacy-url-alias:spacex:foo:1',
-          type: 'legacy-url-alias',
-          'legacy-url-alias': {
-            sourceId: '1',
-            targetId: newFooId,
-            targetNamespace: 'spacex',
-            targetType: 'foo',
-            purpose: 'savedObjectConversion',
+  if (getFips() === 0) {
+    it('rewrites id deterministically for SO with namespaceType: "multiple" and "multiple-isolated"', async () => {
+      const migratedIndexAlias = `.kibana_${pkg.version}`;
+      const { startES } = createTestServers({
+        adjustTimeout: (t: number) => jest.setTimeout(t),
+        settings: {
+          es: {
+            license: 'basic',
+            // original SO:
+            // [
+            //   { id: 'foo:1', type: 'foo', foo: { name: 'Foo 1 default' } },
+            //   { id: 'spacex:foo:1', type: 'foo', foo: { name: 'Foo 1 spacex' }, namespace: 'spacex' },
+            //   {
+            //     id: 'bar:1',
+            //     type: 'bar',
+            //     bar: { nomnom: 1 },
+            //     references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
+            //   },
+            //   {
+            //     id: 'spacex:bar:1',
+            //     type: 'bar',
+            //     bar: { nomnom: 2 },
+            //     references: [{ type: 'foo', id: '1', name: 'Foo 1 spacex' }],
+            //     namespace: 'spacex',
+            //   },
+            // ];
+            dataArchive: Path.join(
+              __dirname,
+              '..',
+              'archives',
+              willRunESv9
+                ? '8.18.0_so_with_multiple_namespaces.zip'
+                : '7.13.2_so_with_multiple_namespaces.zip'
+            ),
           },
-          references: [],
-          coreMigrationVersion: expect.any(String),
-          typeMigrationVersion: '8.2.0',
         },
-        {
-          id: 'bar:1',
-          type: 'bar',
-          bar: { nomnom: 1 },
-          references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
-          namespaces: ['default'],
-          coreMigrationVersion: expect.any(String),
-          typeMigrationVersion: '8.0.0',
-          managed: false,
-        },
-        {
-          id: `bar:${newBarId}`,
-          type: 'bar',
-          bar: { nomnom: 2 },
-          references: [{ type: 'foo', id: newFooId, name: 'Foo 1 spacex' }],
-          namespaces: ['spacex'],
-          originId: '1',
-          coreMigrationVersion: expect.any(String),
-          typeMigrationVersion: '8.0.0',
-          managed: false,
-        },
-        {
-          // new object for spacex:bar:1
-          id: 'legacy-url-alias:spacex:bar:1',
-          type: 'legacy-url-alias',
-          'legacy-url-alias': {
-            sourceId: '1',
-            targetId: newBarId,
-            targetNamespace: 'spacex',
-            targetType: 'bar',
-            purpose: 'savedObjectConversion',
+      });
+
+      root = createRoot();
+
+      esServer = await startES();
+      await root.preboot();
+      const coreSetup = await root.setup();
+
+      coreSetup.savedObjects.registerType({
+        name: 'foo',
+        hidden: false,
+        mappings: { properties: { name: { type: 'text' } } },
+        namespaceType: 'multiple',
+        convertToMultiNamespaceTypeVersion: '8.0.0',
+      });
+
+      coreSetup.savedObjects.registerType({
+        name: 'bar',
+        hidden: false,
+        mappings: { properties: { nomnom: { type: 'integer' } } },
+        namespaceType: 'multiple-isolated',
+        convertToMultiNamespaceTypeVersion: '8.0.0',
+      });
+
+      const coreStart = await root.start();
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+      const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
+
+      // each newly converted multi-namespace object in a non-default space has its ID deterministically regenerated, and a legacy-url-alias
+      // object is created which links the old ID to the new ID
+      const newFooId = deterministicallyRegenerateObjectId('spacex', 'foo', '1');
+      const newBarId = deterministicallyRegenerateObjectId('spacex', 'bar', '1');
+
+      expect(migratedDocs).toEqual(
+        [
+          {
+            id: 'foo:1',
+            type: 'foo',
+            foo: { name: 'Foo 1 default' },
+            references: [],
+            namespaces: ['default'],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '8.0.0',
+            managed: false,
           },
-          references: [],
-          coreMigrationVersion: expect.any(String),
-          typeMigrationVersion: '8.2.0',
-        },
-      ].sort(sortByTypeAndId)
-    );
-  });
+          {
+            id: `foo:${newFooId}`,
+            type: 'foo',
+            foo: { name: 'Foo 1 spacex' },
+            references: [],
+            namespaces: ['spacex'],
+            originId: '1',
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '8.0.0',
+            managed: false,
+          },
+          {
+            // new object for spacex:foo:1
+            id: 'legacy-url-alias:spacex:foo:1',
+            type: 'legacy-url-alias',
+            'legacy-url-alias': {
+              sourceId: '1',
+              targetId: newFooId,
+              targetNamespace: 'spacex',
+              targetType: 'foo',
+              purpose: 'savedObjectConversion',
+            },
+            references: [],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '8.2.0',
+          },
+          {
+            id: 'bar:1',
+            type: 'bar',
+            bar: { nomnom: 1 },
+            references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
+            namespaces: ['default'],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '8.0.0',
+            managed: false,
+          },
+          {
+            id: `bar:${newBarId}`,
+            type: 'bar',
+            bar: { nomnom: 2 },
+            references: [{ type: 'foo', id: newFooId, name: 'Foo 1 spacex' }],
+            namespaces: ['spacex'],
+            originId: '1',
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '8.0.0',
+            managed: false,
+          },
+          {
+            // new object for spacex:bar:1
+            id: 'legacy-url-alias:spacex:bar:1',
+            type: 'legacy-url-alias',
+            'legacy-url-alias': {
+              sourceId: '1',
+              targetId: newBarId,
+              targetNamespace: 'spacex',
+              targetType: 'bar',
+              purpose: 'savedObjectConversion',
+            },
+            references: [],
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '8.2.0',
+          },
+        ].sort(sortByTypeAndId)
+      );
+    });
+  } else {
+    it('cannot run tests with dataArchives that have a basic license in FIPS mode', () => {
+      expect(getFips()).toBe(1);
+    });
+  }
 });

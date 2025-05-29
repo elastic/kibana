@@ -109,7 +109,6 @@ export default ({ getService }: FtrProviderContext): void => {
         retry
       );
 
-      expect(installPreviousPackageResponse._meta.install_source).toBe('registry');
       expect(installPreviousPackageResponse.items.length).toBeGreaterThan(0);
 
       // Verify that status is updated after the installation of package "N-1"

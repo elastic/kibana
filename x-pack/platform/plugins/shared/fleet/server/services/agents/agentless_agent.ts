@@ -211,10 +211,11 @@ class AgentlessAgentService {
     return response;
   }
 
-  public async upgradeAgentlessDeployment(policyId: string, version: string) {
+  public async upgradeAgentlessDeployment(policyId: string) {
     const logger = appContextService.getLogger();
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
+    const kibanaVersion = appContextService.getKibanaVersion();
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const urlEndpoint = prependAgentlessApiBasePathToEndpoint(
       agentlessConfig,
@@ -227,7 +228,7 @@ class AgentlessAgentService {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, `/deployments/${policyId}`),
       method: 'PUT',
       data: {
-        stack_version: version,
+        stack_version: kibanaVersion,
       },
       ...this.getHeaders(tlsConfig, traceId),
     };

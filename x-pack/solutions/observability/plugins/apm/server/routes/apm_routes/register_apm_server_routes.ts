@@ -185,8 +185,6 @@ export function registerRoutes({
 
         return response.ok({ body });
       } catch (error) {
-        logger.error(error);
-
         if (!options.disableTelemetry && telemetryUsageCounter) {
           telemetryUsageCounter.incrementCounter({
             counterName: `${method.toUpperCase()} ${pathname}`,
@@ -211,6 +209,10 @@ export function registerRoutes({
         if (Boom.isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(error);
         }
 
         // capture error with APM node agent

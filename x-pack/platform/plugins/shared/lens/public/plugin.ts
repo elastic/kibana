@@ -67,13 +67,14 @@ import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
   FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './datasources/form_based';
-import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/form_based/esql_layer';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -147,7 +148,6 @@ import {
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
-import { deserializeState } from './react_embeddable/helper';
 import { ACTION_CREATE_ESQL_CHART } from './trigger_actions/open_lens_config/constants';
 
 export type { SaveProps } from './app_plugin';
@@ -193,6 +193,7 @@ export interface LensPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   licensing?: LicensingPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export interface LensPublicSetup {
@@ -398,19 +399,18 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          const services = await getStartServicesForEmbeddable();
-          // deserialize the saved object from visualize library
-          // this make sure to fit into the new embeddable model, where the following build()
-          // function expects a fully loaded runtime state
-          const state = await deserializeState(
-            services,
-            { savedObjectId: savedObject.id },
-            savedObject.references
+          container.addNewPanel(
+            {
+              panelType: LENS_EMBEDDABLE_TYPE,
+              serializedState: {
+                rawState: {
+                  savedObjectId: savedObject.id,
+                },
+                references: savedObject.references,
+              },
+            },
+            true
           );
-          container.addNewPanel({
-            panelType: LENS_EMBEDDABLE_TYPE,
-            initialState: state,
-          });
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
@@ -695,6 +695,7 @@ export class LensPlugin {
       return getAddLensPanelAction(startDependencies);
     });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
+
     if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.

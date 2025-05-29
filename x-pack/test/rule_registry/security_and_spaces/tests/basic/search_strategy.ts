@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 
+import { ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -689,6 +690,194 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.rawResponse.hits.total).to.eql(9);
 
         validateRuleTypeIds(result, apmRuleTypeIds);
+      });
+    });
+
+    describe('observability', () => {
+      const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
+
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      it('should omit alerts when score is less than min score', async () => {
+        const query = {
+          bool: {
+            filter: [],
+            should: [
+              {
+                function_score: {
+                  functions: [
+                    {
+                      exp: {
+                        [ALERT_START]: {
+                          origin: '2021-10-19T14:58:08.539Z',
+                          scale: '10m',
+                          offset: '10m',
+                          decay: 0.5,
+                        },
+                      },
+                      weight: 10,
+                    },
+                  ],
+                  boost_mode: 'sum',
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+          },
+        };
+        const resultWithoutMinScore = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(resultWithoutMinScore.rawResponse.hits.total).to.eql(9);
+
+        validateRuleTypeIds(resultWithoutMinScore, apmRuleTypeIds);
+
+        const resultWithMinScore = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            minScore: 11,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        const allScores = resultWithMinScore.rawResponse.hits.hits.map((hit) => {
+          return hit._score;
+        });
+        allScores.forEach((score) => {
+          if (score) {
+            expect(score >= 11).to.be(true);
+          } else {
+            throw new Error('Score is null');
+          }
+        });
+
+        expect(resultWithMinScore.rawResponse.hits.total).to.eql(8);
+
+        validateRuleTypeIds(resultWithMinScore, apmRuleTypeIds);
+      });
+
+      it('should track scores alerts when sorting when trackScores is true', async () => {
+        const query = {
+          bool: {
+            filter: [],
+            should: [
+              {
+                function_score: {
+                  functions: [
+                    {
+                      exp: {
+                        [ALERT_START]: {
+                          origin: '2021-10-19T14:58:08.539Z',
+                          scale: '10m',
+                          offset: '10m',
+                          decay: 0.5,
+                        },
+                      },
+                      weight: 10,
+                    },
+                  ],
+                  boost_mode: 'sum',
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+          },
+        };
+        const resultWithoutTrackScore = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            sort: [
+              {
+                'kibana.alert.start': {
+                  order: 'desc',
+                },
+              },
+            ],
+            minScore: 11,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        resultWithoutTrackScore.rawResponse.hits.hits.forEach((hit) => {
+          expect(hit._score).to.be(null);
+        });
+
+        validateRuleTypeIds(resultWithoutTrackScore, apmRuleTypeIds);
+
+        const resultWithTrackScore = await secureBsearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            sort: [
+              {
+                'kibana.alert.start': {
+                  order: 'desc',
+                },
+              },
+            ],
+            minScore: 11,
+            trackScores: true,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        resultWithTrackScore.rawResponse.hits.hits.forEach((hit) => {
+          expect(hit._score).not.to.be(null);
+          expect(hit._score).to.be(11);
+        });
+
+        validateRuleTypeIds(resultWithTrackScore, apmRuleTypeIds);
       });
     });
 

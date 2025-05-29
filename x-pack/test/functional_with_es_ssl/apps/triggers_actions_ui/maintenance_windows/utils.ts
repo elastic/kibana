@@ -24,11 +24,13 @@ export const createMaintenanceWindow = async ({
   startDate,
   notRecurring,
   getService,
+  overwrite,
 }: {
   name: string;
   startDate?: Date;
   notRecurring?: boolean;
   getService: FtrProviderContext['getService'];
+  overwrite?: Record<string, any>;
 }) => {
   const supertest = getService('supertest');
   const dtstart = startDate ? startDate : new Date();
@@ -40,6 +42,7 @@ export const createMaintenanceWindow = async ({
       tzid: 'UTC',
       ...(notRecurring ? { freq: 1, count: 1 } : { freq: 2 }),
     },
+    ...overwrite,
   };
 
   const { body } = await supertest

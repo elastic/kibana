@@ -30,7 +30,7 @@ export * from './lib/cidr_mask';
 export * from './lib/date_range';
 export * from './lib/ip_range';
 export * from './lib/time_buckets/calc_auto_interval';
-export { TimeBuckets } from './lib/time_buckets';
+export { TimeBuckets, convertDurationToNormalizedEsInterval } from './lib/time_buckets';
 export * from './migrate_include_exclude_format';
 export * from './range_fn';
 export * from './range';

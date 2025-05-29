@@ -30,7 +30,7 @@ import {
 } from '../../../../../../common/types';
 import { uiMetricService, UIM_CLUSTER_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
 import type { Status } from '../../../types';
-import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge, WarningLevels } from '../../../shared';
 
 export interface RemoveClusterSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -107,7 +107,7 @@ export const RemoveClusterSettingsFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
-          isCritical={deprecation.isCritical}
+          level={deprecation.level as WarningLevels}
           isResolved={statusType === 'complete'}
         />
         <EuiSpacer size="s" />

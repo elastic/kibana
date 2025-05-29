@@ -13,6 +13,7 @@ import {
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import qs from 'query-string';
@@ -141,6 +142,7 @@ export function UnifiedSearchBar({
 
   const { kuery, serviceName, environment, groupId, refreshPausedFromUrl, refreshIntervalFromUrl } =
     useSearchBarParams(value);
+  const { onPageRefreshStart } = usePerformanceContext();
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
@@ -204,6 +206,7 @@ export function UnifiedSearchBar({
   const onRefresh = () => {
     clearCache();
     incrementTimeRangeId();
+    onPageRefreshStart();
   };
 
   const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {

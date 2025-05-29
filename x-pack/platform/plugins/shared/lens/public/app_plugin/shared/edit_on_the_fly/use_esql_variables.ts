@@ -6,8 +6,8 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import {
   isApiESQLVariablesCompatible,
   TypedLensSerializedState,
@@ -20,15 +20,17 @@ export const useESQLVariables = ({
   closeFlyout,
 }: {
   parentApi: unknown;
-  attributes: TypedLensSerializedState['attributes'];
+  attributes?: TypedLensSerializedState['attributes'];
   panelId?: string;
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : undefined
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
   );
   const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : undefined
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.controlGroupApi$
+      : new BehaviorSubject(undefined)
   );
 
   const panel = useMemo(() => {
@@ -48,14 +50,15 @@ export const useESQLVariables = ({
       }
 
       // add a new control
-      controlGroupApi?.addNewPanel({
+      controlGroupApi?.addNewPanel?.({
         panelType: 'esqlControl',
-        initialState: {
-          ...controlState,
-          id: uuidv4(),
+        serializedState: {
+          rawState: {
+            ...controlState,
+          },
         },
       });
-      if (panel && updatedQuery) {
+      if (panel && updatedQuery && attributes) {
         panel.updateAttributes({
           ...attributes,
           state: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiSkeletonText,
@@ -26,6 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -38,7 +39,17 @@ const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
+  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel', {
+    /**
+     * This only needed for stateful deployments
+     * of the stack version >=v8.18.0 <9.0.0.
+     * On those clusters we cannot reference agent version
+     * v8.x because those versions are not GA.
+     * Instead we need to "manually" point to the GA
+     * version, which starts from v9.0.0.
+     */
+    agentVersionPattern: '9.x.x',
+  });
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
     services: { share },
@@ -46,6 +57,17 @@ export const OtelKubernetesPanel: React.FC = () => {
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const theme = useEuiTheme();
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    if (data) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [data, onPageReady]);
 
   if (error) {
     return (
@@ -53,9 +75,14 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
-  const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`
-    : '';
+  const agentVersion = data?.elasticAgentVersionInfo.agentTargetVersion ?? '';
+  /**
+   * Extracting the base version in case it has any suffix like `+build12345678`,
+   * as in this flow agent version is used to reference the git tag without any
+   * suffixes.
+   */
+  const agentBaseVersion = agentVersion.split('+')[0];
+  const otelKubeStackValuesFileUrl = `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`;
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const installStackCommand = data
@@ -64,7 +91,7 @@ kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
   --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
-helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
+helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
   --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`

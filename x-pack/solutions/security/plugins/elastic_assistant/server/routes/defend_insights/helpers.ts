@@ -23,7 +23,7 @@ import type {
   DefendInsightsResponse,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { ActionsClientLlm } from '@kbn/langchain/server';
@@ -124,7 +124,7 @@ export function getAssistantToolParams({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   latestReplacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -136,7 +136,7 @@ export function getAssistantToolParams({
   langChainTimeout: number;
   llm: ActionsClientLlm;
   logger: Logger;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   replacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;

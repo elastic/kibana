@@ -121,6 +121,20 @@ export const getRuleExecutionStatsAggregation = (
             },
           },
         },
+        frozenIndices: {
+          filter: {
+            exists: {
+              field: f.RULE_EXECUTION_FROZEN_INDICES_QUERIED_COUNT,
+            },
+          },
+          aggs: {
+            frozenIndicesQueriedCount: {
+              max: {
+                field: f.RULE_EXECUTION_FROZEN_INDICES_QUERIED_COUNT,
+              },
+            },
+          },
+        },
         searchDurationMs: {
           percentiles: {
             field: f.RULE_EXECUTION_SEARCH_DURATION_MS,
@@ -212,6 +226,7 @@ export const normalizeRuleExecutionStatsAggregationResult = (
   const gaps = executionMetricsEvents.gaps || {};
   const searchDurationMs = executionMetricsEvents.searchDurationMs || {};
   const indexingDurationMs = executionMetricsEvents.indexingDurationMs || {};
+  const frozenIndices = executionMetricsEvents.frozenIndices || {};
 
   return {
     number_of_executions: normalizeNumberOfExecutions(totalExecutions, executionsByStatus),
@@ -229,6 +244,7 @@ export const normalizeRuleExecutionStatsAggregationResult = (
       aggregationLevel === 'whole-interval'
         ? normalizeTopWarnings(messageContainingEvents)
         : undefined,
+    frozen_indices_queried_max_count: normalizeFrozenQueriedIndices(frozenIndices),
   };
 };
 
@@ -278,6 +294,10 @@ const normalizeNumberOfDetectedGaps = (gaps: RawData): NumberOfDetectedGaps => {
     total: Number(gaps.doc_count || 0),
     total_duration_s: Number(gaps.totalGapDurationS?.value || 0),
   };
+};
+
+const normalizeFrozenQueriedIndices = (frozenQueriedIndices: RawData): number => {
+  return Number(frozenQueriedIndices?.frozenIndicesQueriedCount?.value || 0);
 };
 
 const normalizeAggregatedMetric = (

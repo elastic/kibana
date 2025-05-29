@@ -16,6 +16,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { Header } from './header';
+import { EuiThemeProvider } from '@elastic/eui';
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
@@ -86,18 +87,20 @@ describe('Header', () => {
       undefined | ChromeBreadcrumbsAppendExtension
     >(undefined);
     const component = mountWithIntl(
-      <Header
-        {...mockProps()}
-        breadcrumbs$={breadcrumbs$}
-        navLinks$={navLinks$}
-        recentlyAccessed$={recentlyAccessed$}
-        isLocked$={isLocked$}
-        customNavLink$={customNavLink$}
-        breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
-        headerBanner$={headerBanner$}
-        helpMenuLinks$={of([])}
-        isServerless={false}
-      />
+      <EuiThemeProvider>
+        <Header
+          {...mockProps()}
+          breadcrumbs$={breadcrumbs$}
+          navLinks$={navLinks$}
+          recentlyAccessed$={recentlyAccessed$}
+          isLocked$={isLocked$}
+          customNavLink$={customNavLink$}
+          breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
+          headerBanner$={headerBanner$}
+          helpMenuLinks$={of([])}
+          isServerless={false}
+        />
+      </EuiThemeProvider>
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();

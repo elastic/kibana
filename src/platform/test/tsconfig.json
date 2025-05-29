@@ -79,5 +79,8 @@
     "@kbn/core-deprecations-common",
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
+    "@kbn/esql-utils",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
   ]
 }

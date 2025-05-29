@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { MutableRefObject, ReactElement } from 'react';
 import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type {
@@ -45,6 +46,7 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -480,7 +482,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     state: T,
     deps: {
       frame: FramePublicAPI;
-      setState: StateSetter<T>;
+      setState?: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
@@ -532,6 +534,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
 export interface DatasourceFixAction<T> {
   label: string;
+  isCompatible?: (frame: FramePublicAPI) => boolean;
   newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
@@ -671,6 +674,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
     | 'docLinks'
   >;
   dateRange: DateRange;
+  esqlVariables?: ESQLControlVariable[] | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
@@ -1083,6 +1087,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     ): T;
   };
 
+  convertToRuntimeState?: (state: T, datasourceStates?: Record<string, unknown>) => T;
+
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
    * Retrieve the used DataViews in the visualization
@@ -1402,11 +1408,17 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
+export interface LensAlertRulesEvent {
+  name: 'alertRule';
+  data: AlertRuleFromVisUIActionData;
+}
+
 export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
-  | LensTableRowContextMenuEvent;
+  | LensTableRowContextMenuEvent
+  | LensAlertRulesEvent;
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
@@ -1432,6 +1444,10 @@ export function isLensTableRowContextMenuClickEvent(
   event: ExpressionRendererEvent
 ): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
+}
+
+export function isLensAlertRule(event: ExpressionRendererEvent): event is LensAlertRulesEvent {
+  return event.name === 'alertRule';
 }
 
 /**

@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -1685,6 +1696,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2068,6 +2083,10 @@
         "type": "keyword"
       },
       "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "required_versions": {
         "index": false,
         "type": "flattened"
       },
@@ -3724,6 +3743,13 @@
       },
       "taskType": {
         "type": "keyword"
+      },
+      "userScope": {
+        "properties": {
+          "apiKeyId": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },

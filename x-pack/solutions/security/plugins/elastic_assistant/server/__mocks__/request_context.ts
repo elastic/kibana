@@ -7,6 +7,7 @@
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { MockedKeys } from '@kbn/utility-types-jest';
 import { AwaitedProperties } from '@kbn/utility-types';
@@ -17,6 +18,7 @@ import {
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   attackDiscoveryDataClientMock,
+  attackDiscoveryScheduleDataClientMock,
   conversationsDataClientMock,
   dataClientMock,
   knowledgeBaseDataClientMock,
@@ -31,10 +33,12 @@ import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { authenticatedUser } from './user';
+import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
   const license = licensingMock.createLicenseMock();
+  const eventLogger = eventLoggerMock.create();
 
   return {
     core,
@@ -49,6 +53,7 @@ export const createMockClients = () => {
       getAIAssistantKnowledgeBaseDataClient: knowledgeBaseDataClientMock.create(),
       getAIAssistantPromptsDataClient: dataClientMock.create(),
       getAttackDiscoveryDataClient: attackDiscoveryDataClientMock.create(),
+      getAttackDiscoverySchedulingDataClient: attackDiscoveryScheduleDataClientMock.create(),
       getDefendInsightsDataClient: dataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
@@ -57,7 +62,7 @@ export const createMockClients = () => {
       llmTasks: jest.fn(),
       savedObjectsClient: core.savedObjects.client,
     },
-
+    eventLogger,
     licensing: {
       ...licensingMock.createRequestHandlerContext({ license }),
       license,
@@ -104,6 +109,8 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    eventLogger: clients.eventLogger,
+    eventLogIndex: '.kibana-event-log-*',
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
@@ -129,6 +136,14 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAttackDiscoveryDataClient
     ) as unknown as jest.MockInstance<Promise<AttackDiscoveryDataClient | null>, [], unknown> &
       (() => Promise<AttackDiscoveryDataClient | null>),
+    getAttackDiscoverySchedulingDataClient: jest.fn(
+      () => clients.elasticAssistant.getAttackDiscoverySchedulingDataClient
+    ) as unknown as jest.MockInstance<
+      Promise<AttackDiscoveryScheduleDataClient | null>,
+      [],
+      unknown
+    > &
+      (() => Promise<AttackDiscoveryScheduleDataClient | null>),
     getDefendInsightsDataClient: jest.fn(
       () => clients.elasticAssistant.getDefendInsightsDataClient
     ) as unknown as jest.MockInstance<Promise<DefendInsightsDataClient | null>, [], unknown> &

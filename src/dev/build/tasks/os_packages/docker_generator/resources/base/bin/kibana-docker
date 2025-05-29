@@ -246,6 +246,7 @@ kibana_vars=(
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
+    xpack.alerting.disabledRuleTypes
     xpack.apm.indices.error
     xpack.apm.indices.metric
     xpack.apm.indices.onboarding

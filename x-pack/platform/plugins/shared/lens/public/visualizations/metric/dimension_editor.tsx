@@ -24,20 +24,21 @@ import {
   CustomizablePalette,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  applyPaletteParams,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { isMetricNumericType } from './helpers';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -113,15 +114,6 @@ function BreakdownByEditor({ setState, state }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-      <CollapseSetting
-        value={state.collapseFn || ''}
-        onChange={(collapseFn) => {
-          setState({
-            ...state,
-            collapseFn,
-          });
-        }}
-      />
     </>
   );
 }
@@ -216,7 +208,7 @@ function PrimaryMetricEditor(props: SubProps) {
     return null;
   }
 
-  const isMetricNumeric = isMetricNumericType(props.datasource, accessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(props.datasource, accessor);
 
   const hasDynamicColoring = Boolean(isMetricNumeric && state.palette);
 
@@ -416,7 +408,7 @@ export function DimensionEditorAdditionalSection({
 }: VisualizationDimensionEditorProps<MetricVisualizationState>) {
   const { euiTheme } = useEuiTheme();
 
-  const isMetricNumeric = isMetricNumericType(datasource, accessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
   if (accessor !== state.metricAccessor || !isMetricNumeric) {
     return null;
   }
@@ -602,5 +594,28 @@ export function DimensionEditorAdditionalSection({
         )}
       </>
     </div>
+  );
+}
+
+export function DimensionEditorDataExtraComponent({
+  groupId,
+  datasource,
+  state,
+  setState,
+}: Omit<Props, 'paletteService'>) {
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+    return null;
+  }
+  return (
+    <CollapseSetting
+      value={state.collapseFn || ''}
+      onChange={(collapseFn) => {
+        setState({
+          ...state,
+          collapseFn,
+        });
+      }}
+    />
   );
 }

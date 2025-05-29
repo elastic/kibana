@@ -9,15 +9,11 @@
 
 export {
   getLexer,
-  getParser,
   createParser,
   parse,
   parseErrors,
   type ParseOptions,
   type ParseResult,
-
-  /** @deprecated Use `parse` instead. */
-  parse as getAstAndSyntaxErrors,
 } from './parser';
 
 export { ESQLErrorListener } from './esql_error_listener';

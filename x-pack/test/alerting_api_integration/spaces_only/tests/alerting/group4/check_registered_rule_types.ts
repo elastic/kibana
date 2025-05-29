@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createRegisteredRuleTypeTests({ getService }: FtrProviderContext) {
@@ -73,6 +73,17 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
       expect(
         registeredRuleTypes.sort().filter((ruleType: string) => !ruleType.startsWith('test.'))
       ).to.eql(ruleTypes.sort());
+    });
+
+    // see x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group3/builtin_alert_types/disabled_rule_types.ts
+    it('should find rule types disabled in other configs', async () => {
+      const registeredRuleTypes = await supertest
+        .get('/api/alerts_fixture/registered_rule_types')
+        .expect(200)
+        .then((response) => response.body);
+
+      const ruleTypesSet = new Set(registeredRuleTypes);
+      expect(ruleTypesSet.has('siem.esqlRule'));
     });
   });
 }

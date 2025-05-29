@@ -23,7 +23,7 @@ export const createChangePointCommand = (
 
   command.args.push(value);
 
-  if (ctx._key) {
+  if (ctx._key && ctx._key.getText()) {
     const key = createColumn(ctx._key);
     const option = Builder.option(
       {

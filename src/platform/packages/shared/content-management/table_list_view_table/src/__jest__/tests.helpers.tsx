@@ -18,8 +18,6 @@ import { TableListViewProvider, Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services & UserProfilesServices>) => {
   const services: Services & UserProfilesServices = {
-    canEditAdvancedSettings: true,
-    getListingLimitSettingsUrl: () => 'http://elastic.co',
     notifyError: () => undefined,
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,

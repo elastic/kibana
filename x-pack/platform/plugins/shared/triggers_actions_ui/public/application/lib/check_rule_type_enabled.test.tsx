@@ -34,6 +34,7 @@ describe('checkRuleTypeEnabled', () => {
       minimumLicenseRequired: 'basic',
       enabledInLicense: true,
       category: 'my-category',
+      isExportable: true,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
           Object {
@@ -59,6 +60,7 @@ describe('checkRuleTypeEnabled', () => {
       minimumLicenseRequired: 'gold',
       enabledInLicense: false,
       category: 'my-category',
+      isExportable: true,
     };
     expect(checkRuleTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {

@@ -209,9 +209,7 @@ export class ResultsLoader {
       // set the _lastModelTimeStamp to be 5 buckets behind so we load the correct
       // section of results next time.
       this._lastModelTimeStamp = model[model.length - 5].time;
-      for (let i = 0; i < 5; i++) {
-        this._results.model[dtrIndex].pop();
-      }
+      this._results.model[dtrIndex] = this._results.model[dtrIndex].slice(0, -5);
     }
 
     // return a new array from the old and new model

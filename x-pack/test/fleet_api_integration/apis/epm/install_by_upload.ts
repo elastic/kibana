@@ -251,7 +251,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry (2:7)\\n\\n 1 | format_version: 1.0.0\\n 2 |   name: apache\\n-----------^\\n 3 | title: Apache\\n 4 | version: 0.1.4."}'
       );
     });
 

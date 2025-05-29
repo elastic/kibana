@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { ActionTaskParams } from '@kbn/actions-plugin/server/types';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ActionTaskParams } from '@kbn/actions-plugin/server/types';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {

@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDeleteSynonymRule } from '../../hooks/use_delete_synonym_rule';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface DeleteSynonymRuleModalProps {
   synonymsSetId: string;
@@ -34,9 +36,11 @@ export const DeleteSynonymRuleModal = ({
   };
 
   const { mutate: deleteEndpoint } = useDeleteSynonymRule(onSuccess, onError);
+  const usageTracker = useUsageTracker();
 
   const deleteOperation = () => {
     setIsLoading(true);
+    usageTracker?.click(AnalyticsEvents.rule_deleted);
     deleteEndpoint({ synonymsSetId, ruleId });
   };
 

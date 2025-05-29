@@ -65,6 +65,7 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 const appDependencies = {
   services,
   history,
+  url: sharePluginMock.createStartContract().url,
   core: {
     getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),

@@ -10,7 +10,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';
 import { setupSpacesAndUsers } from '../../../setup';
 

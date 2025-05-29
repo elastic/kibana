@@ -22,6 +22,15 @@ import { FeaturesRegistry } from '../../../common';
  * will be shown on the logs-overview preset tab of the UnifiedDocViewer.
  */
 
+export interface StreamsFeatureRenderDeps {
+  doc: DataTableRecord;
+}
+
+export interface StreamsFeature {
+  id: 'streams';
+  renderStreamsField: (deps: StreamsFeatureRenderDeps) => JSX.Element;
+}
+
 export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
   doc: DataTableRecord;
 }
@@ -39,7 +48,10 @@ export interface ObservabilityCreateSLOFeature {
 }
 
 // This should be a union of all the available client features.
-export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | ObservabilityCreateSLOFeature;
+export type DiscoverFeature =
+  | StreamsFeature
+  | ObservabilityLogsAIAssistantFeature
+  | ObservabilityCreateSLOFeature;
 
 /**
  * Service types

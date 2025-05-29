@@ -9,6 +9,7 @@
   },
   "include": [
     "**/*.ts",
+    "../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core-saved-objects-server",

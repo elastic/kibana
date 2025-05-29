@@ -10,7 +10,8 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   AlertUtils as RuleUtils,
   checkAAD,
@@ -18,7 +19,6 @@ import {
   getTestRuleData,
   ObjectRemover,
   getEventLog,
-  TaskManagerDoc,
 } from '../../../../common/lib';
 import { validateEvent } from './event_log';
 

@@ -32,7 +32,7 @@ Object {
                     title="Shared Exception Lists"
                   >
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ggpdms-backTextCss"
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -57,19 +57,20 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
+                        class="css-0"
                         data-test-subj="TitleText"
                       >
                         List Name
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                      class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                     >
                       <button
                         aria-label="Edit Text List Header"
@@ -95,23 +96,23 @@ Object {
                 >
                   <p>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ddvamy-descriptionContainerCss"
                     >
                       <div
-                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
-                            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                            class="css-o1lw5n-textCss"
                             data-test-subj="DescriptionText"
                           >
                             List description
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                          class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                         >
                           <button
                             aria-label="Edit Text List Header"
@@ -129,17 +130,17 @@ Object {
                         </div>
                       </div>
                       <div
-                        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                        class="css-1r3x8vi-textWithEditContainerCss"
                         data-test-subj="ListID"
                       >
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List ID
                           :
                         </div>
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List_Id
                         </div>
@@ -149,7 +150,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -159,10 +160,10 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                     >
                       <span
-                        class="emotion-EuiTextColor"
+                        class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                         data-test-subj="noLinkedRules"
                       >
                         Linked to 0 rules
@@ -413,7 +414,7 @@ Object {
                   title="Shared Exception Lists"
                 >
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ggpdms-backTextCss"
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -438,19 +439,20 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
+                      class="css-0"
                       data-test-subj="TitleText"
                     >
                       List Name
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                   >
                     <button
                       aria-label="Edit Text List Header"
@@ -476,23 +478,23 @@ Object {
               >
                 <p>
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ddvamy-descriptionContainerCss"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
-                          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                          class="css-o1lw5n-textCss"
                           data-test-subj="DescriptionText"
                         >
                           List description
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                       >
                         <button
                           aria-label="Edit Text List Header"
@@ -510,17 +512,17 @@ Object {
                       </div>
                     </div>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1r3x8vi-textWithEditContainerCss"
                       data-test-subj="ListID"
                     >
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List ID
                         :
                       </div>
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List_Id
                       </div>
@@ -530,7 +532,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+              class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -540,10 +542,10 @@ Object {
                   data-test-subj="RightSideMenuItemsContainer"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                   >
                     <span
-                      class="emotion-EuiTextColor"
+                      class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                       data-test-subj="noLinkedRules"
                     >
                       Linked to 0 rules
@@ -688,7 +690,7 @@ Object {
                     title="Shared Exception Lists"
                   >
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ggpdms-backTextCss"
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -713,19 +715,20 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
+                        class="css-0"
                         data-test-subj="TitleText"
                       >
                         List Name
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                      class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                     >
                       <button
                         aria-label="Edit Text List Header"
@@ -751,23 +754,23 @@ Object {
                 >
                   <p>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ddvamy-descriptionContainerCss"
                     >
                       <div
-                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
-                            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                            class="css-o1lw5n-textCss"
                             data-test-subj="DescriptionText"
                           >
                             Add a description
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                          class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                         >
                           <button
                             aria-label="Edit Text List Header"
@@ -785,17 +788,17 @@ Object {
                         </div>
                       </div>
                       <div
-                        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                        class="css-1r3x8vi-textWithEditContainerCss"
                         data-test-subj="ListID"
                       >
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List ID
                           :
                         </div>
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List_Id
                         </div>
@@ -805,7 +808,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -815,10 +818,10 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                     >
                       <span
-                        class="emotion-EuiTextColor"
+                        class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                         data-test-subj="noLinkedRules"
                       >
                         Linked to 0 rules
@@ -906,7 +909,7 @@ Object {
                   title="Shared Exception Lists"
                 >
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ggpdms-backTextCss"
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -931,19 +934,20 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
+                      class="css-0"
                       data-test-subj="TitleText"
                     >
                       List Name
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                   >
                     <button
                       aria-label="Edit Text List Header"
@@ -969,23 +973,23 @@ Object {
               >
                 <p>
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ddvamy-descriptionContainerCss"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
-                          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                          class="css-o1lw5n-textCss"
                           data-test-subj="DescriptionText"
                         >
                           Add a description
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                       >
                         <button
                           aria-label="Edit Text List Header"
@@ -1003,17 +1007,17 @@ Object {
                       </div>
                     </div>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1r3x8vi-textWithEditContainerCss"
                       data-test-subj="ListID"
                     >
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List ID
                         :
                       </div>
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List_Id
                       </div>
@@ -1023,7 +1027,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+              class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -1033,10 +1037,10 @@ Object {
                   data-test-subj="RightSideMenuItemsContainer"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                   >
                     <span
-                      class="emotion-EuiTextColor"
+                      class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                       data-test-subj="noLinkedRules"
                     >
                       Linked to 0 rules
@@ -1181,7 +1185,7 @@ Object {
                     title="Shared Exception Lists"
                   >
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ggpdms-backTextCss"
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -1206,19 +1210,20 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
+                        class="css-0"
                         data-test-subj="TitleText"
                       >
                         List Name
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                      class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                     />
                   </div>
                 </h1>
@@ -1230,37 +1235,37 @@ Object {
                 >
                   <p>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ddvamy-descriptionContainerCss"
                     >
                       <div
-                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
-                            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                            class="css-o1lw5n-textCss"
                             data-test-subj="DescriptionText"
                           >
                             Add a description
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                          class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                         />
                       </div>
                       <div
-                        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                        class="css-1r3x8vi-textWithEditContainerCss"
                         data-test-subj="ListID"
                       >
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List ID
                           :
                         </div>
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List_Id
                         </div>
@@ -1270,7 +1275,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -1280,10 +1285,10 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                     >
                       <span
-                        class="emotion-EuiTextColor"
+                        class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                         data-test-subj="noLinkedRules"
                       >
                         Linked to 0 rules
@@ -1372,7 +1377,7 @@ Object {
                   title="Shared Exception Lists"
                 >
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ggpdms-backTextCss"
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -1397,19 +1402,20 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
+                      class="css-0"
                       data-test-subj="TitleText"
                     >
                       List Name
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                   />
                 </div>
               </h1>
@@ -1421,37 +1427,37 @@ Object {
               >
                 <p>
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ddvamy-descriptionContainerCss"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
-                          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                          class="css-o1lw5n-textCss"
                           data-test-subj="DescriptionText"
                         >
                           Add a description
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                       />
                     </div>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1r3x8vi-textWithEditContainerCss"
                       data-test-subj="ListID"
                     >
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List ID
                         :
                       </div>
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List_Id
                       </div>
@@ -1461,7 +1467,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+              class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -1471,10 +1477,10 @@ Object {
                   data-test-subj="RightSideMenuItemsContainer"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                   >
                     <span
-                      class="emotion-EuiTextColor"
+                      class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                       data-test-subj="noLinkedRules"
                     >
                       Linked to 0 rules
@@ -1620,7 +1626,7 @@ Object {
                     title="Shared Exception Lists"
                   >
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ggpdms-backTextCss"
                       data-test-subj="Breadcrumb"
                     >
                       <span
@@ -1645,19 +1651,20 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
                     >
                       <span
+                        class="css-0"
                         data-test-subj="TitleText"
                       >
                         List Name
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                      class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                     />
                   </div>
                 </h1>
@@ -1669,37 +1676,37 @@ Object {
                 >
                   <p>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1ddvamy-descriptionContainerCss"
                     >
                       <div
-                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
                         >
                           <span
-                            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                            class="css-o1lw5n-textCss"
                             data-test-subj="DescriptionText"
                           >
                             Add a description
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-euiFlexItem-growZero"
+                          class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                         />
                       </div>
                       <div
-                        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                        class="css-1r3x8vi-textWithEditContainerCss"
                         data-test-subj="ListID"
                       >
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List ID
                           :
                         </div>
                         <div
-                          class="euiText emotion-EuiText"
+                          class="euiText emotion-euiText-m-textCss"
                         >
                           List_Id
                         </div>
@@ -1709,7 +1716,7 @@ Object {
                 </div>
               </div>
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -1719,10 +1726,10 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                     >
                       <span
-                        class="emotion-EuiTextColor"
+                        class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                         data-test-subj="noLinkedRules"
                       >
                         Linked to 0 rules
@@ -1795,7 +1802,7 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel eui-scrollBar emotion-euiContextMenuPanel-Render"
+              class="euiContextMenuPanel eui-scrollBar emotion-euiContextMenuPanel-popoverHeightStyle"
               data-test-subj="RightSideMenuItemsMenuActionsMenuPanel"
               tabindex="-1"
             >
@@ -1885,7 +1892,7 @@ Object {
                   title="Shared Exception Lists"
                 >
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ggpdms-backTextCss"
                     data-test-subj="Breadcrumb"
                   >
                     <span
@@ -1910,19 +1917,20 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
                   >
                     <span
+                      class="css-0"
                       data-test-subj="TitleText"
                     >
                       List Name
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                   />
                 </div>
               </h1>
@@ -1934,37 +1942,37 @@ Object {
               >
                 <p>
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-1ddvamy-descriptionContainerCss"
                   >
                     <div
-                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
                       >
                         <span
-                          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                          class="css-o1lw5n-textCss"
                           data-test-subj="DescriptionText"
                         >
                           Add a description
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-euiFlexItem-growZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
                       />
                     </div>
                     <div
-                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      class="css-1r3x8vi-textWithEditContainerCss"
                       data-test-subj="ListID"
                     >
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List ID
                         :
                       </div>
                       <div
-                        class="euiText emotion-EuiText"
+                        class="euiText emotion-euiText-m-textCss"
                       >
                         List_Id
                       </div>
@@ -1974,7 +1982,7 @@ Object {
               </div>
             </div>
             <div
-              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+              class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
             >
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -1984,10 +1992,10 @@ Object {
                   data-test-subj="RightSideMenuItemsContainer"
                 >
                   <div
-                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
                   >
                     <span
-                      class="emotion-EuiTextColor"
+                      class="emotion-euiTextColor-subdued-noLinkedRulesCss"
                       data-test-subj="noLinkedRules"
                     >
                       Linked to 0 rules

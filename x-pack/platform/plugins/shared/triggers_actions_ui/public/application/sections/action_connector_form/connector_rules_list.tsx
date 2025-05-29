@@ -24,10 +24,9 @@ import {
   systemConnectorActionRefPrefix,
   preconfiguredConnectorActionRefPrefix,
 } from '@kbn/alerting-plugin/common';
-
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { useKibana } from '../../../common/lib/kibana';
 import { getRuleHealthColor } from '../../../common/lib/rule_status_helpers';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../hooks/use_load_rules_query';
 import { Pagination, Rule, ActionConnector } from '../../../types';
 import { DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE } from '../../constants';
@@ -45,6 +44,8 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
 
   const {
     application: { getUrlForApp },
+    http,
+    notifications: { toasts },
   } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
@@ -66,7 +67,11 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
     authorizedRuleTypes,
     authorizedToReadAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
-  } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+  } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes: [],
+  });
 
   const ruleTypeIds = authorizedRuleTypes.map((art) => art.id);
 
@@ -116,8 +121,8 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
     enabled: isLoadRuleTypesSuccess && hasAnyAuthorizedRuleType,
   });
 
-  const showNoAuthPrompt = !ruleTypesState.initialLoad && !authorizedToReadAnyRules;
-  const isInitialLoading = ruleTypesState.initialLoad || rulesState.initialLoad;
+  const showNoAuthPrompt = !ruleTypesState.isInitialLoad && !authorizedToReadAnyRules;
+  const isInitialLoading = ruleTypesState.isInitialLoad || rulesState.initialLoad;
   const showSpinner =
     isInitialLoading && (ruleTypesState.isLoading || (!showNoAuthPrompt && rulesState.isLoading));
   const isLoading = ruleTypesState.isLoading || rulesState.isLoading;
@@ -248,7 +253,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
           pagination={{
             pageIndex: page.index,
             pageSize: page.size,
-            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.isInitialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

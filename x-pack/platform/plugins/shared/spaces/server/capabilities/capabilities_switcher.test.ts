@@ -407,8 +407,8 @@ describe('capabilitiesSwitcher', () => {
       {
         space.solution = 'security';
 
-        // It should disable enterpriseSearch and observability features
-        // which correspond to feature_1 and feature_2
+        // It should disable observability features
+        // which corresponds to feature_2
         const result = await switcher(request, capabilities, false);
 
         const expectedCapabilities = buildCapabilities();
@@ -417,8 +417,6 @@ describe('capabilitiesSwitcher', () => {
         expectedCapabilities.catalogue.feature2Entry = false;
         expectedCapabilities.navLinks.feature3 = false;
         expectedCapabilities.management.kibana.somethingElse = false;
-        expectedCapabilities.feature_1.bar = false;
-        expectedCapabilities.feature_1.foo = false;
         expectedCapabilities.feature_2.bar = false;
         expectedCapabilities.feature_2.foo = false;
 

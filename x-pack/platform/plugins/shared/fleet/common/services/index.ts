@@ -92,4 +92,4 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
-export { removeSOAttributes, getSortConfig } from './agent_utils';
+export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';

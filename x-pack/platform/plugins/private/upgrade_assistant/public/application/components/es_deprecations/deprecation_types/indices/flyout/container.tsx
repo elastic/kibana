@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
-import { DeprecationBadge } from '../../../../shared';
+import { DeprecationBadge, WarningLevels } from '../../../../shared';
 import {
   UIM_REINDEX_READONLY_CLICK,
   UIM_REINDEX_READONLY_RETRY_CLICK,
@@ -54,7 +54,12 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
 
   useEffect(() => {
     switch (reindexStatus) {
-      case ReindexStatus.failed:
+      case ReindexStatus.failed: {
+        if (updateIndexStatus === 'complete' || updateIndexStatus === 'inProgress') {
+          setFlyoutStep(correctiveAction?.type === 'unfreeze' ? 'unfreeze' : 'makeReadonly');
+          break;
+        }
+      }
       case ReindexStatus.fetchFailed:
       case ReindexStatus.cancelled:
       case ReindexStatus.inProgress:
@@ -182,6 +187,10 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             startReindex={startReindexWithWarnings}
             reindexState={reindexState}
             cancelReindex={onStopReindex}
+            startReadonly={() => {
+              setFlyoutStep('confirmReadonly');
+            }}
+            deprecation={deprecation}
           />
         );
       case 'unfreeze':
@@ -225,7 +234,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
-          isCritical={deprecation.isCritical}
+          level={deprecation.level as WarningLevels}
           isResolved={reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete'}
         />
         <EuiSpacer size="s" />

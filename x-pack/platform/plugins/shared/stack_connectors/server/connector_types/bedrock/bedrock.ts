@@ -254,7 +254,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     // set model on per request basis
-    const currentModel = reqModel ?? this.model;
+    // Application Inference Profile IDs need to be encoded when using the API
+    // Decode first to ensure an existing encoded value is not double encoded
+    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
     const path = `/model/${currentModel}/invoke`;
     const signed = this.signRequest(body, path, false);
     const requestArgs = {
@@ -299,7 +301,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<StreamingResponse> {
     // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
+    // Application Inference Profile IDs need to be encoded when using the API
+    // Decode first to ensure an existing encoded value is not double encoded
+    const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
+    const path = `/model/${currentModel}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
 
     const response = await this.request(
@@ -450,6 +455,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     { signal, command }: ConverseActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
+    if (command.input.modelId === 'preconfigured') {
+      command.input.modelId = this.model;
+    }
     connectorUsageCollector.addRequestBodyBytes(undefined, command);
     const res = await this.bedrockClient.send(command, {
       abortSignal: signal,

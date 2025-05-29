@@ -36,7 +36,7 @@ import type {
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
-import { navigateToUptime } from '../../lib/navigate_to_uptime';
+import { getUptimeUrl } from '../../lib/get_uptime_url';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -115,6 +115,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       },
     });
 
+    const uptimeMenuItemLinkUrl = showUptimeLink
+      ? getUptimeUrl({ uptimeLocator, nodeType, node })
+      : '';
+
     const nodeLogsMenuItem: SectionLinkProps = {
       label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
         defaultMessage: '{inventoryName} logs',
@@ -126,7 +130,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         time: currentTime,
       }),
       'data-test-subj': 'viewLogsContextMenuItem',
-      isDisabled: !showLogsLink,
     };
 
     const nodeDetailMenuItem: SectionLinkProps = {
@@ -135,8 +138,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
       href: nodeDetailMenuItemLinkProps.href,
-      onClick: nodeDetailMenuItemLinkProps.onClick,
-      isDisabled: !showDetail,
     };
 
     const apmTracesMenuItem: SectionLinkProps = {
@@ -146,7 +147,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       }),
       ...apmTracesMenuItemLinkProps,
       'data-test-subj': 'viewApmTracesContextMenuItem',
-      isDisabled: !showAPMTraceLink,
     };
 
     const uptimeMenuItem: SectionLinkProps = {
@@ -154,8 +154,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} in Uptime',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      onClick: () => (showUptimeLink ? navigateToUptime({ uptimeLocator, nodeType, node }) : {}),
-      isDisabled: !showUptimeLink,
+      href: uptimeMenuItemLinkUrl,
     };
 
     const createAlertMenuItem: SectionLinkProps = {
@@ -165,7 +164,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       onClick: () => {
         setFlyoutVisible(true);
       },
-      isDisabled: !showCreateAlertLink,
     };
 
     return (
@@ -191,18 +189,32 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
               </SectionSubtitle>
             )}
             <SectionLinks>
-              <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-              <SectionLink
-                data-test-subj="viewAssetDetailsContextMenuItem"
-                {...nodeDetailMenuItem}
-              />
-              <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
-              <SectionLink {...uptimeMenuItem} color={'primary'} />
+              {showLogsLink && (
+                <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
+              )}
+              {showDetail && (
+                <SectionLink
+                  data-test-subj="viewAssetDetailsContextMenuItem"
+                  {...nodeDetailMenuItem}
+                />
+              )}
+              {showAPMTraceLink && (
+                <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
+              )}
+              {showUptimeLink && (
+                <SectionLink
+                  data-test-subj="viewApmUptimeContextMenuItem"
+                  {...uptimeMenuItem}
+                  color={'primary'}
+                />
+              )}
             </SectionLinks>
             <ActionMenuDivider />
-            <SectionLinks>
-              <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
-            </SectionLinks>
+            {showCreateAlertLink && (
+              <SectionLinks>
+                <SectionLink iconType={'bell'} color={'primary'} {...createAlertMenuItem} />
+              </SectionLinks>
+            )}
           </Section>
         </div>
 

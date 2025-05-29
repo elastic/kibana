@@ -98,6 +98,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
           'siem',
           'siemV2',
           'slo',
+          'streams',
           'uptime',
         ],
       },

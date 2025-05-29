@@ -28,6 +28,25 @@ const IGNORED_PATHS = [
 export async function runCheckFtrConfigsCli() {
   run(
     async ({ log }) => {
+      const { ftrConfigEntries, manifestPaths } = getAllFtrConfigsAndManifests();
+      const duplicateEntries = Array.from(ftrConfigEntries.entries()).filter(
+        ([, paths]) => paths.length > 1
+      );
+
+      if (duplicateEntries.length > 0) {
+        const errorMessage = duplicateEntries
+          .map(
+            ([config, paths]) =>
+              `Config path: ${Path.relative(REPO_ROOT, config)}\nFound in manifests:\n${paths.join(
+                '\n'
+              )}`
+          )
+          .join('\n\n');
+        throw createFailError(
+          `Duplicate FTR config entries detected. Please remove the duplicates:\n\n${errorMessage}`
+        );
+      }
+
       const { stdout } = await execa('git', [
         'ls-tree',
         '--full-tree',
@@ -132,8 +151,7 @@ export async function runCheckFtrConfigsCli() {
         log.info(`${loadingConfigs.length} files were loaded as FTR configs for validation`);
       }
 
-      const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
-
+      const allFtrConfigs = Array.from(ftrConfigEntries.keys());
       const invalid = possibleConfigs.filter((path) => !allFtrConfigs.includes(path));
       if (invalid.length) {
         const invalidList =
@@ -151,7 +169,8 @@ Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
       }
     },
     {
-      description: 'Check that all FTR configs are listed in manifest files',
+      description:
+        'Check that all FTR configs are listed in manifest files and there are no duplicates',
     }
   );
 }

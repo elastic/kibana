@@ -6,7 +6,7 @@
  */
 import { omit } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const ES_TEST_INDEX_NAME = '.kibana-alerting-test-data';
 
@@ -156,7 +156,7 @@ export class ESTestIndexTool {
     return result;
   }
 
-  async getAll(size: number = 10) {
+  async getAll(size: number = 10, sort?: string) {
     const params = {
       index: this.index,
       size,
@@ -164,6 +164,7 @@ export class ESTestIndexTool {
         query: {
           match_all: {},
         },
+        ...(sort ? { sort: [{ [sort]: 'asc' as const }] } : {}),
       },
     };
     return await this.es.search(params, { meta: true });

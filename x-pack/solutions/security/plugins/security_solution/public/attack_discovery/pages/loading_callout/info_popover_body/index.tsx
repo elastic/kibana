@@ -18,21 +18,33 @@ import {
 } from '../countdown/last_times_popover/helpers';
 import { SECONDS_ABBREVIATION } from '../countdown/last_times_popover/translations';
 import { AVERAGE_TIME } from '../countdown/translations';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 const TEXT_COLOR = '#343741';
 
 interface Props {
+  averageSuccessfulDurationNanoseconds?: number;
   connectorIntervals: GenerationInterval[];
+  successfulGenerations?: number;
 }
 
-const InfoPopoverBodyComponent: React.FC<Props> = ({ connectorIntervals }) => {
+const InfoPopoverBodyComponent: React.FC<Props> = ({
+  averageSuccessfulDurationNanoseconds,
+  connectorIntervals,
+  successfulGenerations,
+}) => {
   const { theme } = useKibana().services;
   const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);
-
-  const averageIntervalSeconds = useMemo(
-    () => getAverageIntervalSeconds(connectorIntervals),
-    [connectorIntervals]
-  );
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const averageIntervalSeconds = useMemo(() => {
+    if (attackDiscoveryAlertsEnabled) {
+      return averageSuccessfulDurationNanoseconds != null
+        ? Math.ceil(averageSuccessfulDurationNanoseconds / 1_000_000_000)
+        : 0;
+    } else {
+      return getAverageIntervalSeconds(connectorIntervals);
+    }
+  }, [attackDiscoveryAlertsEnabled, averageSuccessfulDurationNanoseconds, connectorIntervals]);
 
   return (
     <>
@@ -70,7 +82,10 @@ const InfoPopoverBodyComponent: React.FC<Props> = ({ connectorIntervals }) => {
         </EuiFlexGroup>
       </EuiPopoverTitle>
 
-      <LastTimesPopover connectorIntervals={connectorIntervals} />
+      <LastTimesPopover
+        connectorIntervals={connectorIntervals}
+        successfulGenerations={successfulGenerations}
+      />
     </>
   );
 };

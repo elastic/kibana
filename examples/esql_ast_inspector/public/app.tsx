@@ -21,7 +21,7 @@ import { EsqlInspector } from './components/esql_inspector';
 
 export const App = () => {
   return (
-    <EuiProvider theme={EuiThemeAmsterdam}>
+    <EuiProvider theme={EuiThemeAmsterdam} highContrastMode={false}>
       <EuiPage>
         <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
           <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL AST Inspector" />

@@ -9,10 +9,13 @@
 
 import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { extractReferences, injectReferences } from '../../../common';
+import {
+  extractReferences,
+  injectReferences,
+} from '../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 import type { DashboardSavedObjectAttributes } from '../schema';
-import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from '../../content_management/latest';
+import { itemAttrsToSavedObject, savedObjectToItem } from '../../content_management/latest';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
@@ -60,7 +63,9 @@ export function createExtractPanelReferencesMigration(
       { embeddablePersistableStateService: deps.embeddable }
     );
 
-    const { attributes, error: attributesError } = itemAttrsToSavedObjectAttrs(extractedAttributes);
+    const { attributes, error: attributesError } = itemAttrsToSavedObject({
+      attributes: extractedAttributes,
+    });
     if (attributesError) throw attributesError;
 
     return {

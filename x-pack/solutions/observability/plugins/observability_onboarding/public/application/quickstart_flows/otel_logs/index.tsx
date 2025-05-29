@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiImage,
   EuiCallOut,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -29,6 +30,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ElasticAgentVersionInfo } from '../../../../common/types';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
@@ -44,22 +47,7 @@ const HOST_COMMAND = i18n.translate(
 );
 
 export const OtelLogsPanel: React.FC = () => {
-  const {
-    data: apiKeyData,
-    error,
-    refetch,
-  } = useFetcher(
-    (callApi) => {
-      return callApi('POST /internal/observability_onboarding/otel/api_key', {});
-    },
-    [],
-    { showToastOnError: false }
-  );
-
-  const { data: setup } = useFetcher((callApi) => {
-    return callApi('GET /internal/observability_onboarding/logs/setup/environment');
-  }, []);
-
+  const { onPageReady } = usePerformanceContext();
   const {
     services: {
       share,
@@ -68,9 +56,48 @@ export const OtelLogsPanel: React.FC = () => {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
+  const {
+    data: setupData,
+    error,
+    refetch,
+  } = useFetcher(
+    (callApi) => {
+      return callApi('POST /internal/observability_onboarding/otel_host/setup', {
+        params: {
+          query: {
+            /**
+             * This only needed for stateful deployments
+             * of the stack version >=v8.18.0 <9.0.0.
+             * On those clusters we cannot reference agent version
+             * v8.x because those versions are not GA.
+             * Instead we need to "manually" point to the GA
+             * version, which starts from v9.0.0.
+             */
+            agentVersionPattern: '9.x.x',
+          },
+        },
+      });
+    },
+    [],
+    { showToastOnError: false }
+  );
+
+  useEffect(() => {
+    if (setupData) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Requests to setup the flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [onPageReady, setupData]);
+
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  const agentVersion =
-    isServerless && setup ? setup.elasticAgentVersionInfo.agentVersion : stackVersion;
+  const agentVersion = selectAgentVersion(
+    isServerless,
+    stackVersion,
+    setupData?.elasticAgentVersionInfo
+  );
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
 
   const allDatasetsLocator =
@@ -91,6 +118,11 @@ export const OtelLogsPanel: React.FC = () => {
     getDeeplinks();
   }, [getDeeplinks]);
 
+  const sampleConfigurationPath = isServerless
+    ? './otel_samples/managed_otlp/platformlogs_hostmetrics.yml'
+    : './otel_samples/platformlogs_hostmetrics.yml';
+  const elasticEndpointVarName = isServerless ? 'ELASTIC_OTLP_ENDPOINT' : 'ELASTIC_ENDPOINT';
+
   const installTabContents = [
     {
       id: 'linux',
@@ -100,7 +132,7 @@ export const OtelLogsPanel: React.FC = () => {
 
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${urlEncodedAgentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch
 
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:${elasticEndpointVarName}}#${setupData?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${setupData?.apiKeyEncoded}/g' ./otel.yml`,
       start: 'sudo ./otelcol --config otel.yml',
       type: 'copy',
     },
@@ -112,7 +144,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
 
 curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${urlEncodedAgentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch
 
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:${elasticEndpointVarName}}#${setupData?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${setupData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
       type: 'copy',
     },
@@ -154,32 +186,37 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                       setSelectedTab(id);
                     }}
                   />
-                  <EuiText>
-                    <p>{selectedContent.firstStepTitle}</p>
-                  </EuiText>
-                  <EuiFlexItem>
-                    <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
-                      {selectedContent.content}
-                    </EuiCodeBlock>
-                  </EuiFlexItem>
-                  <EuiFlexItem align="left">
-                    <EuiFlexGroup>
-                      <EuiCopy textToCopy={selectedContent.content}>
-                        {(copy) => (
-                          <EuiButton
-                            data-test-subj="observabilityOnboardingOtelLogsPanelButton"
-                            iconType="copyClipboard"
-                            onClick={copy}
-                          >
-                            {i18n.translate(
-                              'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-                              { defaultMessage: 'Copy to clipboard' }
+                  {!setupData && <EuiSkeletonText lines={6} />}
+                  {setupData && (
+                    <>
+                      <EuiText>
+                        <p>{selectedContent.firstStepTitle}</p>
+                      </EuiText>
+                      <EuiFlexItem>
+                        <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
+                          {selectedContent.content}
+                        </EuiCodeBlock>
+                      </EuiFlexItem>
+                      <EuiFlexItem align="left">
+                        <EuiFlexGroup>
+                          <EuiCopy textToCopy={selectedContent.content}>
+                            {(copy) => (
+                              <EuiButton
+                                data-test-subj="observabilityOnboardingOtelLogsPanelButton"
+                                iconType="copyClipboard"
+                                onClick={copy}
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+                                  { defaultMessage: 'Copy to clipboard' }
+                                )}
+                              </EuiButton>
                             )}
-                          </EuiButton>
-                        )}
-                      </EuiCopy>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
+                          </EuiCopy>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </>
+                  )}
                 </EuiFlexGroup>
               ),
             },
@@ -370,4 +407,20 @@ function CopyableCodeBlock({ content }: { content: string }) {
       </EuiCopy>
     </>
   );
+}
+
+function selectAgentVersion(
+  isServerless: boolean,
+  stackVersion: string,
+  agentVersionInfo?: ElasticAgentVersionInfo
+): string {
+  if (!agentVersionInfo) {
+    return stackVersion;
+  }
+
+  if (isServerless) {
+    return agentVersionInfo.agentVersion;
+  }
+
+  return agentVersionInfo.agentTargetVersion ?? stackVersion;
 }

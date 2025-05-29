@@ -7,7 +7,7 @@
 import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { toExpression } from '@kbn/interpreter';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(
@@ -69,8 +69,8 @@ export function createMockVisualization(
 
 export const mockVisualizationMap = (): VisualizationMap => {
   return {
-    testVis: createMockVisualization(),
-    testVis2: createMockVisualization(),
+    testVis: createMockVisualization('testVis'),
+    testVis2: createMockVisualization('testVis2'),
   };
 };
 

@@ -38,6 +38,8 @@ node scripts/build \
   --skip-docker-wolfi \
   --skip-docker-ubi \
   --skip-docker-cloud \
+  --skip-docker-cloud-fips \
+  --skip-docker-fips \
   --skip-docker-contexts \
   --skip-cdn-assets
 

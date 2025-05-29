@@ -24,6 +24,7 @@ import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { delay } from '../test_utils';
 import { EsVersion } from '@kbn/test';
+import { getFips } from 'crypto';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;
@@ -33,6 +34,7 @@ async function removeLogFile() {
   // ignore errors if it doesn't exist
   await fs.unlink(logFilePath).catch(() => void 0);
 }
+
 function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
   return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
 }
@@ -64,88 +66,94 @@ describe('migration v2', () => {
   let startES: () => Promise<TestElasticsearchUtils>;
   let dataArchive: string;
 
-  beforeAll(async () => {
-    const willRunESv9 = EsVersion.getDefault({ integrationTest: true }).matchRange('9');
-    dataArchive = Path.join(
-      __dirname,
-      '..',
-      'archives',
-      willRunESv9
-        ? '8.18.0_xpack_sample_saved_objects.zip'
-        : '7.14.0_xpack_sample_saved_objects.zip'
-    );
-    await removeLogFile();
-  });
+  if (getFips() === 0) {
+    beforeAll(async () => {
+      const willRunESv9 = EsVersion.getDefault({ integrationTest: true }).matchRange('9');
+      dataArchive = Path.join(
+        __dirname,
+        '..',
+        'archives',
+        willRunESv9
+          ? '8.18.0_xpack_sample_saved_objects.zip'
+          : '7.14.0_xpack_sample_saved_objects.zip'
+      );
+      await removeLogFile();
+    });
 
-  beforeEach(() => {
-    ({ startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          dataArchive,
-          esArgs: ['http.max_content_length=1715329b'],
+    beforeEach(() => {
+      ({ startES } = createTestServers({
+        adjustTimeout: (t: number) => jest.setTimeout(t),
+        settings: {
+          es: {
+            license: 'basic',
+            dataArchive,
+            esArgs: ['http.max_content_length=1715329b'],
+          },
         },
-      },
-    }));
-  });
+      }));
+    });
 
-  afterEach(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-      await delay(10);
-    }
-  });
+    afterEach(async () => {
+      if (root) {
+        await root.shutdown();
+      }
+      if (esServer) {
+        await esServer.stop();
+        await delay(10);
+      }
+    });
 
-  it('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1715329 });
-    esServer = await startES();
-    await root.preboot();
-    await root.setup();
-    await expect(root.start()).resolves.toBeTruthy();
+    it('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {
+      root = createRoot({ maxBatchSizeBytes: 1715329 });
+      esServer = await startES();
+      await root.preboot();
+      await root.setup();
+      await expect(root.start()).resolves.toBeTruthy();
 
-    // After plugins start, some saved objects are deleted/recreated, so we
-    // wait a bit for the count to settle.
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+      // After plugins start, some saved objects are deleted/recreated, so we
+      // wait a bit for the count to settle.
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    const esClient: ElasticsearchClient = esServer.es.getClient();
+      const esClient: ElasticsearchClient = esServer.es.getClient();
 
-    // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
-    const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
-    const migratedDocs = await fetchDocuments(esClient, targetIndex);
-    expect(assertMigratedDocuments(migratedDocs, originalDocs));
-  });
+      // assert that the docs from the original index have been migrated rather than comparing a doc count after startup
+      const originalDocs = await fetchDocuments(esClient, '.kibana_7.14.0_001');
+      const migratedDocs = await fetchDocuments(esClient, targetIndex);
+      expect(assertMigratedDocuments(migratedDocs, originalDocs));
+    });
 
-  it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1015275 });
-    esServer = await startES();
-    await root.preboot();
-    await root.setup();
-    await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715319 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
-    );
+    it('fails with a descriptive message when a single document exceeds maxBatchSizeBytes', async () => {
+      root = createRoot({ maxBatchSizeBytes: 1015275 });
+      esServer = await startES();
+      await root.preboot();
+      await root.setup();
+      await expect(root.start()).rejects.toMatchInlineSnapshot(
+        `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715319 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.]`
+      );
 
-    await retryAsync(
-      async () => {
-        const logFileContent = await fs.readFile(logFilePath, 'utf-8');
-        const records = logFileContent
-          .split('\n')
-          .filter(Boolean)
-          .map((str) => JSON5.parse(str)) as LogRecord[];
-        expect(
-          records.find((rec) =>
-            rec.message.startsWith(
-              `Reason: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715319 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
+      await retryAsync(
+        async () => {
+          const logFileContent = await fs.readFile(logFilePath, 'utf-8');
+          const records = logFileContent
+            .split('\n')
+            .filter(Boolean)
+            .map((str) => JSON5.parse(str)) as LogRecord[];
+          expect(
+            records.find((rec) =>
+              rec.message.startsWith(
+                `Reason: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715319 bytes which exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`
+              )
             )
-          )
-        ).toBeDefined();
-      },
-      { retryAttempts: 10, retryDelayMs: 200 }
-    );
-  });
+          ).toBeDefined();
+        },
+        { retryAttempts: 10, retryDelayMs: 200 }
+      );
+    });
+  } else {
+    it('cannot run tests with dataArchives that have a basic license in FIPS mode', () => {
+      expect(getFips()).toBe(1);
+    });
+  }
 });
 
 function createRoot(options: { maxBatchSizeBytes?: number }) {

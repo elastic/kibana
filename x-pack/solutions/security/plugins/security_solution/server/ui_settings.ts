@@ -19,7 +19,6 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_MAX_UNASSOCIATED_NOTES,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
@@ -29,7 +28,6 @@ import {
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  MAX_UNASSOCIATED_NOTES,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
@@ -364,28 +362,6 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
-      solution: 'security',
-    },
-    [MAX_UNASSOCIATED_NOTES]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel', {
-        defaultMessage: 'Maximum amount of unassociated notes',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription',
-        {
-          defaultMessage:
-            'Defines the maximum amount of unassociated notes (notes that are not assigned to a timeline) that can be created.',
-        }
-      ),
-      type: 'number',
-      value: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      schema: schema.number({
-        min: 1,
-        max: 10000,
-        defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      }),
-      category: [APP_ID],
-      requiresPageReload: false,
       solution: 'security',
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {

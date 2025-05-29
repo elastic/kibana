@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { ReactWrapper } from 'enzyme';
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { EditorFrame, EditorFrameProps } from './editor_frame';
@@ -18,7 +18,6 @@ import {
   Visualization,
   VisualizationMap,
 } from '../../types';
-import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,
@@ -27,18 +26,20 @@ import {
   createExpressionRendererMock,
   mockStoreDeps,
   renderWithReduxStore,
+  mockDataPlugin,
 } from '../../mocks';
+import { mountWithProvider } from '../../mocks/enzyme';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { LensAppState, setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -143,12 +144,14 @@ describe('editor_frame', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <EditorFrame
-        {...getDefaultProps()}
-        visualizationMap={visualizationMap}
-        datasourceMap={datasourceMap}
-        {...propsOverrides}
-      />,
+      <EuiThemeProvider>
+        <EditorFrame
+          {...getDefaultProps()}
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+          {...propsOverrides}
+        />
+      </EuiThemeProvider>,
       {},
       {
         preloadedState: {
@@ -215,7 +218,10 @@ describe('editor_frame', () => {
       expect(queryDataPanel()).not.toBeInTheDocument();
       expect(queryLayerPanel()).not.toBeInTheDocument();
 
-      simulateLoadingDatasource();
+      act(() => {
+        simulateLoadingDatasource();
+      });
+
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: 'initialState' })
       );
@@ -237,14 +243,16 @@ describe('editor_frame', () => {
       const { store } = renderEditorFrame();
       const updatedState = 'updatedVisState';
 
-      store.dispatch(
-        setState({
-          visualization: {
-            activeId: mockVisualization.id,
-            state: updatedState,
-          },
-        })
-      );
+      act(() => {
+        store.dispatch(
+          setState({
+            visualization: {
+              activeId: mockVisualization.id,
+              state: updatedState,
+            },
+          })
+        );
+      });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
@@ -266,7 +274,9 @@ describe('editor_frame', () => {
         title: 'shazm',
       };
 
-      setDatasourceState(updatedState);
+      act(() => {
+        setDatasourceState(updatedState);
+      });
 
       expect(mockDatasource.DataPanelComponent).toHaveBeenCalledTimes(1);
       expect(mockDatasource.DataPanelComponent).toHaveBeenLastCalledWith(
@@ -296,7 +306,9 @@ describe('editor_frame', () => {
       const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
 
-      setDatasourceState('newState');
+      act(() => {
+        setDatasourceState('newState');
+      });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
@@ -490,18 +502,23 @@ describe('editor_frame', () => {
           },
         } as EditorFrameProps;
         instance = (
-          await mountWithProvider(<EditorFrame {...props} />, {
-            preloadedState: {
-              datasourceStates: {
-                testDatasource: {
-                  isLoading: false,
-                  state: {
-                    internalState1: '',
+          await mountWithProvider(
+            <EuiThemeProvider>
+              <EditorFrame {...props} />
+            </EuiThemeProvider>,
+            {
+              preloadedState: {
+                datasourceStates: {
+                  testDatasource: {
+                    isLoading: false,
+                    state: {
+                      internalState1: '',
+                    },
                   },
                 },
               },
-            },
-          })
+            }
+          )
         ).instance;
 
         instance.update();
@@ -587,7 +604,13 @@ describe('editor_frame', () => {
           },
         } as EditorFrameProps;
 
-        instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+        instance = (
+          await mountWithProvider(
+            <EuiThemeProvider>
+              <EditorFrame {...props} />
+            </EuiThemeProvider>
+          )
+        ).instance;
 
         instance.update();
 

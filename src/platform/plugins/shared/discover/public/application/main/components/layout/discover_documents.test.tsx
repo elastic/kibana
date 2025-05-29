@@ -82,7 +82,7 @@ async function mountComponent(
     >
       <DiscoverCustomizationProvider value={customisationService}>
         <DiscoverMainProvider value={stateContainer}>
-          <EuiProvider>
+          <EuiProvider highContrastMode={false}>
             <DiscoverDocuments {...props} />
           </EuiProvider>
         </DiscoverMainProvider>

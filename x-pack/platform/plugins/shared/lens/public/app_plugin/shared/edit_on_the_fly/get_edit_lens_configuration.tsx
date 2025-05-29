@@ -24,6 +24,7 @@ import {
   loadInitial,
   initExisting,
   initEmpty,
+  type LensStoreDeps,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -108,9 +109,10 @@ const MaybeWrapper = ({
       onClose={() => {
         closeFlyout?.();
       }}
-      aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+      aria-label={i18n.translate('xpack.lens.config.editLabel', {
         defaultMessage: 'Edit configuration',
       })}
+      role="dialog"
       size="s"
       hideCloseButton
       css={css`
@@ -162,6 +164,7 @@ export async function getEditLensConfiguration(
     }
     const [currentAttributes, setCurrentAttributes] =
       useState<TypedLensSerializedState['attributes']>(attributes);
+
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
      * When the user applies the changes we save them to the Lens SO
@@ -178,7 +181,7 @@ export async function getEditLensConfiguration(
       [savedObjectId]
     );
     const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
-    const storeDeps = {
+    const storeDeps: LensStoreDeps = {
       lensServices,
       datasourceMap,
       visualizationMap,
@@ -186,6 +189,7 @@ export async function getEditLensConfiguration(
         datasourceState && 'initialContext' in datasourceState
           ? datasourceState.initialContext
           : undefined,
+      visualizationType: attributes.visualizationType,
     };
     const lensStore: LensRootStore = makeConfigureStore(
       storeDeps,
@@ -202,7 +206,7 @@ export async function getEditLensConfiguration(
       })
     );
 
-    const configPanelProps = {
+    const configPanelProps: EditConfigPanelProps = {
       attributes: currentAttributes,
       updatePanelState,
       updateSuggestion,

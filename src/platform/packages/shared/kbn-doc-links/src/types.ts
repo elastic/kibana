@@ -17,6 +17,7 @@ export interface DocLinksMeta {
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
   searchLabsUrl: string;
+  apiDocsUrl: string;
 }
 
 /**
@@ -331,6 +332,7 @@ export interface DocLinks {
     readonly reindexWithPipeline: string;
     readonly logsDatastream: string;
     readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
@@ -444,7 +446,6 @@ export interface DocLinks {
     simulatePipeline: string;
     tasks: string;
     timeUnits: string;
-    unfreezeIndex: string;
     updateTransform: string;
   }>;
   readonly observability: Readonly<{
@@ -471,6 +472,7 @@ export interface DocLinks {
     aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
+    authorization: string;
     guide: string;
     actionTypes: string;
     apmRulesErrorCount: string;
@@ -708,6 +710,10 @@ export interface DocLinks {
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 

@@ -179,6 +179,17 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
   };
 }
 
+function buildGroupingAgg() {
+  return {
+    groupings: {
+      top_hits: {
+        size: 1,
+        _source: ['slo.groupings'],
+      },
+    },
+  };
+}
+
 export function buildQuery(
   startedAt: Date,
   slo: SLODefinition,
@@ -234,6 +245,7 @@ export function buildQuery(
         aggs: {
           ...buildWindowAggs(startedAt, slo, burnRateWindows, delayInSeconds),
           ...buildEvaluation(burnRateWindows),
+          ...buildGroupingAgg(),
         },
       },
     },

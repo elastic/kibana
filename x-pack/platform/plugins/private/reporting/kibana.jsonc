@@ -18,9 +18,11 @@
     "requiredPlugins": [
       "data",
       "discover",
+      "encryptedSavedObjects",
       "fieldFormats",
       "home",
       "management",
+      "notifications",
       "licensing",
       "uiActions",
       "taskManager",

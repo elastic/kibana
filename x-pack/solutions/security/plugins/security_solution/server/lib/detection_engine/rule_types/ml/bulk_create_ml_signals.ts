@@ -8,18 +8,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import { wrapHits, type GenericBulkCreateResponse } from '../factories';
+import { wrapHits, type GenericBulkCreateResponse, bulkCreate } from '../factories';
 import type { Anomaly } from '../../../machine_learning';
-import type { SecuritySharedParams } from '../types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import { createEnrichEventsFunction } from '../utils/enrichments';
 
 interface EcsAnomaly extends Anomaly {
   '@timestamp': string;
@@ -70,17 +64,14 @@ export const bulkCreateMlSignals = async ({
 }: {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
   anomalyHits: Array<estypes.SearchHit<Anomaly>>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
 }): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const ecsResults = transformAnomalyResultsToEcs(anomalyHits);
 
   const wrappedDocs = wrapHits(sharedParams, ecsResults, buildReasonMessageForMlAlert);
-  return sharedParams.bulkCreate(
-    wrappedDocs,
-    undefined,
-    createEnrichEventsFunction({
-      services,
-      logger: sharedParams.ruleExecutionLogger,
-    })
-  );
+  return bulkCreate({
+    wrappedAlerts: wrappedDocs,
+    sharedParams,
+    services,
+  });
 };

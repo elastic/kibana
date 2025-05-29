@@ -31,6 +31,8 @@
     "@kbn/cell-actions",
     "@kbn/react-kibana-context-render",
     "@kbn/core-rendering-browser",
+    "@kbn/ebt-tools",
+    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",

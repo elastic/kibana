@@ -54,7 +54,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await testSubjects.click('common-flyout-save');
       await svlCommonScreenshots.takeScreenshot('security-cases-settings', screenshotDirectories);
       await retry.waitFor('add-template to exist', async () => {
-        return await testSubjects.exists('add-template');
+        return await testSubjects.isEnabled('add-template');
       });
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(

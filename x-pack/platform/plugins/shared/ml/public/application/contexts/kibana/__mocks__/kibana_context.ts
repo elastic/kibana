@@ -10,11 +10,11 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { BehaviorSubject } from 'rxjs';
 import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { LIGHT_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME } from '@elastic/charts';
 
 export const chartsServiceMock = {
   theme: {
-    useChartsBaseTheme: jest.fn(() => LIGHT_THEME),
+    useChartsBaseTheme: jest.fn(() => AMSTERDAM_LIGHT_THEME),
   },
   activeCursor: {
     activeCursor$: new BehaviorSubject({

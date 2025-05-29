@@ -313,8 +313,7 @@ export const getAlertDetailsContextHandler = (
         try {
           return await dataFetcher();
         } catch (error) {
-          logger.error('Error while fetching observability alert details context');
-          logger.error(error);
+          logger.error('Error while fetching observability alert details context', { error });
           return;
         }
       })

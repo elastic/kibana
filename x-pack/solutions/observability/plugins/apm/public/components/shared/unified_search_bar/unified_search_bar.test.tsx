@@ -6,6 +6,8 @@
  */
 
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -25,7 +27,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
-function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHistory }) {
+async function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHistory }) {
   history.replace({
     pathname: '/services',
     search: fromQuery(urlParams),
@@ -73,7 +75,9 @@ function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHi
         } as unknown as ApmPluginContextValue
       }
     >
-      <UnifiedSearchBar />
+      <PerformanceContextProvider>
+        <UnifiedSearchBar />
+      </PerformanceContextProvider>
     </MockApmPluginContextWrapper>
   );
 
@@ -89,6 +93,7 @@ function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHi
 
 describe('when kuery is already present in the url, the search bar must reflect the same', () => {
   let history: MemoryHistory;
+
   beforeEach(() => {
     history = createMemoryHistory();
     jest.spyOn(history, 'push');
@@ -103,12 +108,12 @@ describe('when kuery is already present in the url, the search bar must reflect 
 
   const search = '?method=json';
   const pathname = '/services';
-  (useLocation as jest.Mock).mockImplementationOnce(() => ({
+  (useLocation as jest.Mock).mockReturnValue(() => ({
     search,
     pathname,
   }));
 
-  it('sets the searchbar value based on URL', () => {
+  it('sets the searchbar value based on URL', async () => {
     const expectedQuery = {
       query: 'service.name:"opbeans-android"',
       language: 'kuery',
@@ -137,13 +142,15 @@ describe('when kuery is already present in the url, the search bar must reflect 
     };
     jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
 
-    const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = setup({
+    const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = await setup({
       history,
       urlParams,
     });
 
-    expect(setQuerySpy).toBeCalledWith(expectedQuery);
-    expect(setTimeSpy).toBeCalledWith(expectedTimeRange);
-    expect(setRefreshIntervalSpy).toBeCalledWith(refreshInterval);
+    await waitFor(() => {
+      expect(setQuerySpy).toBeCalledWith(expectedQuery);
+      expect(setTimeSpy).toBeCalledWith(expectedTimeRange);
+      expect(setRefreshIntervalSpy).toBeCalledWith(refreshInterval);
+    });
   });
 });

@@ -7,17 +7,14 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
-import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
-import {
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
-} from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../../common/lib';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteRuleForBackfillTests({ getService }: FtrProviderContext) {
@@ -89,9 +86,9 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .send([
-          { rule_id: ruleId1, start: start1, end: end1 },
-          { rule_id: ruleId1, start: start2, end: end2 },
-          { rule_id: ruleId2, start: start1, end: end1 },
+          { rule_id: ruleId1, ranges: [{ start: start1, end: end1 }] },
+          { rule_id: ruleId1, ranges: [{ start: start2, end: end2 }] },
+          { rule_id: ruleId2, ranges: [{ start: start1, end: end1 }] },
         ])
         .expect(200);
 

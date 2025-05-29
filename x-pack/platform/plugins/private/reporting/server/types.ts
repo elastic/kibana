@@ -28,9 +28,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 /**
  * Plugin Setup Contract
@@ -52,6 +54,7 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface ReportingSetupDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -65,6 +68,7 @@ export interface ReportingStartDeps {
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
+  notifications: NotificationsPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
 }

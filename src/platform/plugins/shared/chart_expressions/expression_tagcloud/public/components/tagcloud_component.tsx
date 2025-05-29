@@ -18,24 +18,18 @@ import {
   Settings,
   Wordcloud,
   RenderChangeListener,
-  LEGACY_LIGHT_THEME,
   ElementClickListener,
   WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import {
-  PaletteRegistry,
-  PaletteOutput,
-  getColorFactory,
-  getPalette,
-  AVAILABLE_PALETTES,
-  NeutralPalette,
-} from '@kbn/coloring';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { PaletteRegistry, PaletteOutput, getColorFactory } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -56,13 +50,13 @@ const calculateWeight = (value: number, x1: number, y1: number, x2: number, y2: 
   ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
 
 const getColor = (
-  palettes: PaletteRegistry,
+  paletteService: PaletteRegistry,
   activePalette: PaletteOutput,
   text: string,
   values: string[],
   syncColors: boolean
 ) => {
-  return palettes?.get(activePalette?.name)?.getCategoricalColor(
+  return paletteService?.get(activePalette?.name)?.getCategoricalColor(
     [
       {
         name: text,
@@ -106,6 +100,8 @@ export const TagCloudChart = ({
   isDarkMode,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
+  const chartBaseTheme = useElasticChartsTheme();
+  const palettes = useKbnPalettes();
   const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {
@@ -128,6 +124,7 @@ export const TagCloudChart = ({
     const colorFromMappingFn = getColorFromMappingFactory(
       tagColumn,
       visData.rows,
+      palettes,
       isDarkMode,
       colorMapping
     );
@@ -149,15 +146,16 @@ export const TagCloudChart = ({
     });
   }, [
     bucket,
-    bucketFormatter,
-    metric,
-    palette,
-    palettesRegistry,
-    syncColors,
     visData.columns,
     visData.rows,
-    colorMapping,
+    metric,
+    palettes,
     isDarkMode,
+    colorMapping,
+    bucketFormatter,
+    palettesRegistry,
+    palette,
+    syncColors,
   ]);
 
   useEffect(() => {
@@ -243,8 +241,7 @@ export const TagCloudChart = ({
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
-              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-              baseTheme={LEGACY_LIGHT_THEME}
+              baseTheme={chartBaseTheme}
               onElementClick={handleWordClick}
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}
@@ -320,6 +317,7 @@ export { TagCloudChart as default };
 function getColorFromMappingFactory(
   tagColumn: string | undefined,
   rows: DatatableRow[],
+  palettes: KbnPalettes,
   isDarkMode: boolean,
   colorMapping?: string
 ): undefined | ((category: string | string[]) => string) {
@@ -327,13 +325,8 @@ function getColorFromMappingFactory(
     // return undefined, we will use the legacy color mapping instead
     return undefined;
   }
-  return getColorFactory(
-    JSON.parse(colorMapping),
-    getPalette(AVAILABLE_PALETTES, NeutralPalette),
-    isDarkMode,
-    {
-      type: 'categories',
-      categories: getColorCategories(rows, tagColumn),
-    }
-  );
+  return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
+    type: 'categories',
+    categories: getColorCategories(rows, tagColumn),
+  });
 }

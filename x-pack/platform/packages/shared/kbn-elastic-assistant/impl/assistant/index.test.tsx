@@ -149,7 +149,7 @@ describe('Assistant', () => {
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
     jest
       .mocked(useLocalStorage)
-      .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
+      .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
       >);
     jest

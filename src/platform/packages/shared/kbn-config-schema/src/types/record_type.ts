@@ -10,10 +10,10 @@
 import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
 
-export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>>;
+export type RecordOfOptions<K extends string, V> = TypeOptions<Record<K, V>> & UnknownOptions;
 
 export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
   private readonly keyType: Type<K>;
@@ -21,12 +21,18 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
   private readonly options: RecordOfOptions<K, V>;
 
   constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
-    const schema = internals
+    let schema = internals
       .record()
       .entries(keyType.getSchema(), valueType.getSchema())
       .meta({
         [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
       });
+
+    // Only set stripUnknown if we have an explicit value of unknowns
+    const { unknowns } = options;
+    if (unknowns) {
+      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+    }
 
     super(schema, options);
     this.keyType = keyType;

@@ -244,7 +244,7 @@ const loginViaConfig = () => {
 
   // read the login details from `kibana.dev.yaml`
   cy.readFile(KIBANA_DEV_YML_PATH).then((kibanaDevYml) => {
-    const config = yaml.safeLoad(kibanaDevYml);
+    const config = yaml.load(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
     request({
@@ -278,7 +278,7 @@ export const getEnvAuth = (): User => {
   } else {
     let user: User = { username: '', password: '' };
     cy.readFile(KIBANA_DEV_YML_PATH).then((devYml) => {
-      const config = yaml.safeLoad(devYml);
+      const config = yaml.load(devYml);
       user = { username: config.elasticsearch.username, password: config.elasticsearch.password };
     });
 

@@ -10,7 +10,6 @@
 import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -112,8 +111,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument()],
         });
 
-        expect(response.body.success_rate).to.be(1);
-        expect(response.body.failure_rate).to.be(0);
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, errors, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
@@ -162,8 +161,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
-        expect(response.body.success_rate).to.be(1);
-        expect(response.body.failure_rate).to.be(0);
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
@@ -195,8 +194,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
-        expect(response.body.success_rate).to.be(0);
-        expect(response.body.failure_rate).to.be(1);
+        expect(response.body.documents_metrics.parsed_rate).to.be(0);
+        expect(response.body.documents_metrics.partially_parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('partially_parsed');
@@ -236,8 +236,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'parsed_timestamp',
         ]);
         expect(dissectMetrics.errors).to.eql([]);
-        expect(dissectMetrics.failure_rate).to.be(0);
-        expect(dissectMetrics.success_rate).to.be(1);
+        expect(dissectMetrics.failed_rate).to.be(0);
+        expect(dissectMetrics.parsed_rate).to.be(1);
 
         expect(grokMetrics.detected_fields).to.eql([]);
         expect(grokMetrics.errors).to.eql([
@@ -247,11 +247,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'Provided Grok expressions do not match field value: [test 127.0.0.1]',
           },
         ]);
-        expect(grokMetrics.failure_rate).to.be(1);
-        expect(grokMetrics.success_rate).to.be(0);
+        expect(grokMetrics.failed_rate).to.be(1);
+        expect(grokMetrics.parsed_rate).to.be(0);
+        expect(grokMetrics.skipped_rate).to.be(0);
       });
 
-      it('should return accurate success/failure rates', async () => {
+      it('should return accurate rates', async () => {
         const response = await simulateProcessingForStream(apiClient, 'logs.test', {
           processing: [
             basicDissectProcessor,
@@ -272,8 +273,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ],
         });
 
-        expect(response.body.success_rate).to.be(0.25);
-        expect(response.body.failure_rate).to.be(0.75);
+        expect(response.body.documents_metrics.parsed_rate).to.be(0.25);
+        expect(response.body.documents_metrics.partially_parsed_rate).to.be(0.5);
+        expect(response.body.documents_metrics.failed_rate).to.be(0.25);
         expect(response.body.documents).to.have.length(4);
         expect(response.body.documents[0].status).to.be('parsed');
         expect(response.body.documents[1].status).to.be('partially_parsed');
@@ -284,10 +286,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
 
-        expect(dissectMetrics.failure_rate).to.be(0.25);
-        expect(dissectMetrics.success_rate).to.be(0.75);
-        expect(grokMetrics.failure_rate).to.be(0.75);
-        expect(grokMetrics.success_rate).to.be(0.25);
+        expect(dissectMetrics.failed_rate).to.be(0.25);
+        expect(dissectMetrics.parsed_rate).to.be(0.75);
+        expect(grokMetrics.failed_rate).to.be(0.75);
+        expect(grokMetrics.parsed_rate).to.be(0.25);
+      });
+
+      it('should return metrics for skipped documents due to non-hit condition', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              ...basicDissectProcessor,
+              dissect: {
+                ...basicDissectProcessor.dissect,
+                if: { field: 'message', operator: 'contains', value: 'test' },
+              },
+            },
+          ],
+          documents: [
+            createTestDocument(`${TEST_TIMESTAMP} info test`),
+            createTestDocument('invalid format'),
+            createTestDocument('invalid format'),
+            createTestDocument('invalid format'),
+          ],
+        });
+
+        expect(response.body.documents_metrics.skipped_rate).to.be(0.75);
+        expect(response.body.documents).to.have.length(4);
+        expect(response.body.documents[0].status).to.be('parsed');
+        expect(response.body.documents[1].status).to.be('skipped');
+        expect(response.body.documents[2].status).to.be('skipped');
+        expect(response.body.documents[3].status).to.be('skipped');
+
+        const processorsMetrics = response.body.processors_metrics;
+        const dissectMetrics = processorsMetrics['dissect-uuid'];
+
+        expect(dissectMetrics.failed_rate).to.be(0);
+        expect(dissectMetrics.parsed_rate).to.be(0.25);
+        expect(dissectMetrics.skipped_rate).to.be(0.75);
       });
 
       it('should allow overriding fields detected by previous simulation processors (skip non-additive check)', async () => {
@@ -306,8 +342,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1 greedy data message`)],
         });
 
-        expect(response.body.success_rate).to.be(1);
-        expect(response.body.failure_rate).to.be(0);
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
@@ -407,8 +443,60 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
         // Non-additive changes are not counted as error
-        expect(grokMetrics.success_rate).to.be(1);
-        expect(grokMetrics.failure_rate).to.be(0);
+        expect(grokMetrics.parsed_rate).to.be(1);
+        expect(grokMetrics.failed_rate).to.be(0);
+      });
+
+      it('should gracefully return mappings simulation errors', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              id: 'draft',
+              grok: {
+                field: 'message',
+                patterns: ['%{TIMESTAMP_ISO8601:@timestamp}'],
+                if: { always: {} },
+              },
+            },
+          ],
+          documents: [createTestDocument('2025-04-04 00:00:00,000')], // This date doesn't exactly match the mapping for @timestamp
+        });
+
+        expect(response.body.documents[0].errors).to.eql([
+          {
+            message:
+              'The processor is not additive to the documents. It might update fields [@timestamp]',
+            processor_id: 'draft',
+            type: 'non_additive_processor_failure',
+          },
+          {
+            message:
+              "Some field types might not be compatible with this document: [1:15] failed to parse field [@timestamp] of type [date] in document with id '0'. Preview of field's value: '2025-04-04 00:00:00,000'",
+            type: 'field_mapping_failure',
+          },
+        ]);
+        expect(response.body.documents[0].status).to.be('failed');
+
+        // Simulate detected fields mapping issue
+        const detectedFieldsFailureResponse = await simulateProcessingForStream(
+          apiClient,
+          'logs.test',
+          {
+            processing: [basicGrokProcessor],
+            documents: [createTestDocument()],
+            detected_fields: [
+              { name: 'parsed_timestamp', type: 'boolean' }, // Incompatible type
+            ],
+          }
+        );
+
+        expect(detectedFieldsFailureResponse.body.documents[0].errors).to.eql([
+          {
+            type: 'field_mapping_failure',
+            message: `Some field types might not be compatible with this document: [1:44] failed to parse field [parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
+          },
+        ]);
+        expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
       });
 
       it('should return the is_non_additive_simulation simulation flag', async () => {
@@ -437,27 +525,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(additiveParsingResponse.body.is_non_additive_simulation).to.be(false);
         expect(nonAdditiveParsingResponse.body.is_non_additive_simulation).to.be(true);
-      });
-    });
-
-    describe('Failed simulations', () => {
-      it('should fail with incompatible detected field mappings', async () => {
-        const response = await simulateProcessingForStream(
-          apiClient,
-          'logs.test',
-          {
-            processing: [basicGrokProcessor],
-            documents: [createTestDocument()],
-            detected_fields: [
-              { name: 'parsed_timestamp', type: 'boolean' }, // Incompatible type
-            ],
-          },
-          400
-        );
-
-        expect((response.body as esErrors.ResponseError['body']).message).to.contain(
-          'The detected field types might not be compatible with these documents.'
-        );
       });
     });
   });

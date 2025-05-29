@@ -23,7 +23,7 @@ module.exports = {
   // An array of regexp pattern strings that are matched against, matched files will skip transformation:
   transformIgnorePatterns: [
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|gpt-tokenizer|flat|@langchain))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|gpt-tokenizer|flat|@langchain|eventsource-parser))[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/util/[/\\\\].+\\.js$',
   ],
@@ -46,6 +46,14 @@ module.exports = {
         testGroupType: 'Jest Integration Tests',
       },
     ],
+    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED)
+      ? [
+          [
+            '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+            { name: 'Jest tests (integration, node)', configCategory: 'unit-integration-test' },
+          ],
+        ]
+      : []),
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]

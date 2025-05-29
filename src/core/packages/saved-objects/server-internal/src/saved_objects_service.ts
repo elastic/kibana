@@ -66,7 +66,7 @@ import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
 
 /**
  * @internal
@@ -124,7 +124,7 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry();
+  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {

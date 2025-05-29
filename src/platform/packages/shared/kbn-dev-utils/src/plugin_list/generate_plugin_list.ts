@@ -16,6 +16,10 @@ import { Plugins } from './discover_plugins';
 
 const sortPlugins = (plugins: Plugins) => plugins.sort((a, b) => a.id.localeCompare(b.id));
 
+function markdownEscape(snippet: string): string {
+  return snippet.replaceAll('|', '\\|');
+}
+
 function* printPlugins(plugins: Plugins, includes: string[]) {
   for (const plugin of sortPlugins(plugins)) {
     const path = normalizePath(plugin.relativeReadmePath || plugin.relativeDir);
@@ -29,9 +33,9 @@ function* printPlugins(plugins: Plugins, includes: string[]) {
       yield `|{kib-repo}blob/{branch}/${path}[${plugin.id}]`;
     }
 
-    yield plugin.relativeReadmePath === undefined
-      ? '|WARNING: Missing README.'
-      : `|${plugin.readmeSnippet}`;
+    yield plugin.relativeReadmePath && plugin.readmeSnippet
+      ? `|${markdownEscape(plugin.readmeSnippet)}`
+      : '|WARNING: Missing or empty README.';
 
     yield '';
   }

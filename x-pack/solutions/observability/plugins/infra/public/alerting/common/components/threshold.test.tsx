@@ -6,7 +6,7 @@
  */
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Metric, LIGHT_THEME } from '@elastic/charts';
+import { Metric, AMSTERDAM_LIGHT_THEME } from '@elastic/charts';
 import { render } from '@testing-library/react';
 import React from 'react';
 import type { Props } from './threshold';
@@ -23,7 +23,7 @@ jest.mock('@elastic/charts', () => {
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {
     const defaultProps: Props = {
-      chartProps: { baseTheme: LIGHT_THEME },
+      chartProps: { baseTheme: AMSTERDAM_LIGHT_THEME },
       comparator: COMPARATORS.GREATER_THAN,
       id: 'componentId',
       thresholds: [90],

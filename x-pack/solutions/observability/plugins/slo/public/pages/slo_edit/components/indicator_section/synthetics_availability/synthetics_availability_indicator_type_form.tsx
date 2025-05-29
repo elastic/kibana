@@ -13,16 +13,15 @@ import {
   QuerySchema,
   SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { GroupByCardinality } from '../../common/group_by_cardinality';
 import { QueryBuilder } from '../../common/query_builder';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { FieldSelector } from '../synthetics_common/field_selector';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
@@ -41,11 +40,6 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { dataView } = useCreateDataView({
     indexPatternString: index,
     dataViewId,
-  });
-
-  const [range, _] = useState({
-    from: moment().subtract(1, 'day').toDate(),
-    to: new Date(),
   });
 
   const filters = {
@@ -164,14 +158,10 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         })}
         customFilters={allFilters as QuerySchema}
       />
-      <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }
-
-const LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.syntheticsAvailability.xTitle', {
-  defaultMessage: 'Last 24 hours',
-});
 
 export const getGroupByCardinalityFilters = (
   monitorIds: string[],

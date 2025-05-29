@@ -12,20 +12,12 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThreatRuleParams } from '../../rule_schema';
 import { indicatorMatchExecutor } from './indicator_match';
-import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
+import type { SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
-export const createIndicatorMatchAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const {
-    eventsTelemetry,
-    licensing,
-    experimentalFeatures,
-    scheduleNotificationResponseActionsService,
-  } = createOptions;
+export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRuleParams, {}> => {
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -82,11 +74,11 @@ export const createIndicatorMatchAlertType = (
       const result = await indicatorMatchExecutor({
         sharedParams,
         services,
-        eventsTelemetry,
+        eventsTelemetry: sharedParams.eventsTelemetry,
         wrapSuppressedHits,
-        licensing,
-        experimentalFeatures,
-        scheduleNotificationResponseActionsService,
+        licensing: sharedParams.licensing,
+        scheduleNotificationResponseActionsService:
+          sharedParams.scheduleNotificationResponseActionsService,
       });
       return { ...result, state };
     },

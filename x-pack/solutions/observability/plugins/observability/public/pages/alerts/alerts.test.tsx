@@ -40,6 +40,11 @@ mockUseKibanaReturnValue.services.application.capabilities = {
     show: true,
   },
 };
+mockUseKibanaReturnValue.services.spaces.getActiveSpace = jest
+  .fn()
+  .mockImplementation(() =>
+    Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
+  );
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
@@ -65,7 +70,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+  useBreadcrumbs: jest.fn(),
+  TagsList: jest.fn(),
+}));
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},

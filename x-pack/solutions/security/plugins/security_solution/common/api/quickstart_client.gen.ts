@@ -379,11 +379,11 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
-  CreateRuleMigrationRequestParamsInput,
-  CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
+  CreateRuleMigrationRulesRequestParamsInput,
+  CreateRuleMigrationRulesRequestBodyInput,
+  DeleteRuleMigrationRequestParamsInput,
   GetAllStatsRuleMigrationResponse,
-  GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
@@ -395,6 +395,9 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationResourcesMissingRequestParamsInput,
   GetRuleMigrationResourcesMissingResponse,
+  GetRuleMigrationRulesRequestQueryInput,
+  GetRuleMigrationRulesRequestParamsInput,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   GetRuleMigrationTranslationStatsRequestParamsInput,
@@ -408,8 +411,10 @@ import type {
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
-  UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRulesRequestParamsInput,
+  UpdateRuleMigrationRulesRequestBodyInput,
+  UpdateRuleMigrationRulesResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
   UpsertRuleMigrationResourcesResponse,
@@ -736,8 +741,62 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Create a new detection rule.
-   */
+    * Create a new detection rule.
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+You can create the following types of rules:
+
+* **Custom query**: Searches the defined indices and creates an alert when a document matches the rule's KQL query.
+* **Event correlation**: Searches the defined indices and creates an alert when results match an [Event Query Language (EQL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/eql.html) query.
+* **Threshold**: Searches the defined indices and creates an alert when the number of times the specified field's value meets the threshold during a single execution. When there are multiple values that meet the threshold, an alert is generated for each value.
+  For example, if the threshold `field` is `source.ip` and its `value` is `10`, an alert is generated for every source IP address that appears in at least 10 of the rule's search results. If you're interested, see [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) for more information.
+* **Indicator match**: Creates an alert when fields match values defined in the specified [Elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). For example, you can create an index for IP addresses and use this index to create an alert whenever an event's `destination.ip` equals a value in the index. The index's field mappings should be [ECS-compliant](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html).
+* **New terms**: Generates an alert for each new term detected in source documents within a specified time range.
+* **ES|QL**: Uses [Elasticsearch Query Language (ES|QL)](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html) to find events and aggregate search results.
+* **Machine learning rules**: Creates an alert when a machine learning job discovers an anomaly above the defined threshold.
+> info
+> To create machine learning rules, you must have the [appropriate license](https://www.elastic.co/subscriptions) or use a [cloud deployment](https://cloud.elastic.co/registration). Additionally, for the machine learning rule to function correctly, the associated machine learning job must be running.
+
+To retrieve machine learning job IDs, which are required to create machine learning jobs, call the [Elasticsearch Get jobs API](https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-job.html). Machine learning jobs that contain `siem` in the `groups` field can be used to create rules:
+
+```json
+...
+"job_id": "linux_anomalous_network_activity_ecs",
+"job_type": "anomaly_detector",
+"job_version": "7.7.0",
+"groups": [
+  "auditbeat",
+  "process",
+  "siem"
+],
+...
+```
+
+Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
+
+* Slack
+* Email
+* PagerDuty
+* Webhook
+* Microsoft Teams
+* IBM Resilient
+* Jira
+* ServiceNow ITSM
+> info
+> For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
+
+To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html) with `"type": "action"` in the request payload.
+
+For detailed information on Kibana actions and alerting, and additional API calls, see:
+
+* [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+* [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+* [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
+
+    */
   async createRule(props: CreateRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRule`);
     return this.kbnClient
@@ -752,13 +811,28 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Creates a new SIEM rules migration using the original vendor rules provided
+   * Creates a new rule migration and returns the corresponding migration_id
    */
-  async createRuleMigration(props: CreateRuleMigrationProps) {
+  async createRuleMigration() {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
-        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
+   */
+  async createRuleMigrationRules(props: CreateRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -859,8 +933,16 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete a detection rule using the `rule_id` or `id` field.
-   */
+    * Delete a detection rule using the `rule_id` or `id` field.
+
+The URL query must include one of the following:
+
+* `id` - `DELETE /api/detection_engine/rules?id=<id>`
+* `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+
+    */
   async deleteRule(props: DeleteRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteRule`);
     return this.kbnClient
@@ -872,6 +954,21 @@ If a record already exists for the specified entity, that record is overwritten 
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Deletes a rule migration document stored in the system given the rule migration id
+   */
+  async deleteRuleMigration(props: DeleteRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteRuleMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1227,7 +1324,11 @@ If a record already exists for the specified entity, that record is overwritten 
 - Actions
 - Exception lists
 > info
-> You cannot export prebuilt rules.
+> Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async exportRules(props: ExportRulesProps) {
@@ -1538,7 +1639,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieves the rule documents stored in the system given the rule migration id
+   * Retrieves the rule migration document stored in the system given the rule migration id
    */
   async getRuleMigration(props: GetRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetRuleMigration`);
@@ -1549,8 +1650,6 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1641,6 +1740,23 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the the list of rules included in a migration given the migration id
+   */
+  async getRuleMigrationRules(props: GetRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the stats of a SIEM rules migration using the migration id provided
    */
   async getRuleMigrationStats(props: GetRuleMigrationStatsProps) {
@@ -1725,6 +1841,19 @@ finalize it.
     * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+> info
+> To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
+
+> info
+> Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+> Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
     */
   async importRules(props: ImportRulesProps) {
@@ -1815,8 +1944,19 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Install and update all Elastic prebuilt detection rules and Timelines.
-   */
+    * Install and update all Elastic prebuilt detection rules and Timelines.
+
+This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+When you call this endpoint, it will:
+- Install any new prebuilt detection rules that are not currently installed in your system.
+- Update any existing prebuilt detection rules that have been modified or improved by Elastic.
+- Install any new prebuilt Timelines that are not currently installed in your system.
+- Update any existing prebuilt Timelines that have been modified or improved by Elastic.
+
+This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+providing you with the most current and effective threat detection capabilities.
+
+    */
   async installPrebuiltRulesAndTimelines() {
     this.log.info(`${new Date().toISOString()} Calling API InstallPrebuiltRulesAndTimelines`);
     return this.kbnClient
@@ -1888,8 +2028,15 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
-   */
+    * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async patchRule(props: PatchRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API PatchRule`);
     return this.kbnClient
@@ -1920,8 +2067,16 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
-   */
+    * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
+> warn
+> When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async performRulesBulkAction(props: PerformRulesBulkActionProps) {
     this.log.info(`${new Date().toISOString()} Calling API PerformRulesBulkAction`);
     return this.kbnClient
@@ -2030,8 +2185,11 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
-   */
+    * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+
+This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
+
+    */
   async readPrebuiltRulesAndTimelinesStatus() {
     this.log.info(`${new Date().toISOString()} Calling API ReadPrebuiltRulesAndTimelinesStatus`);
     return this.kbnClient
@@ -2076,8 +2234,16 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve a detection rule using the `rule_id` or `id` field.
-   */
+    * Retrieve a detection rule using the `rule_id` or `id` field.
+
+The URL query must include one of the following:
+
+* `id` - `GET /api/detection_engine/rules?id=<id>`
+* `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+
+    */
   async readRule(props: ReadRuleProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadRule`);
     return this.kbnClient
@@ -2271,7 +2437,7 @@ detection engine rules.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'PUT',
+        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -2299,7 +2465,7 @@ detection engine rules.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'PUT',
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2338,8 +2504,12 @@ detection engine rules.
   }
   /**
     * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
-> info
-> You cannot modify the `id` or `rule_id` values.
+
+The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
     */
   async updateRule(props: UpdateRuleProps) {
@@ -2356,7 +2526,7 @@ detection engine rules.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates rules migrations attributes
+   * Updates rules migrations data
    */
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
@@ -2366,7 +2536,22 @@ detection engine rules.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'PUT',
+        method: 'PATCH',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates rules migrations attributes
+   */
+  async updateRuleMigrationRules(props: UpdateRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigrationRules`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PATCH',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -2457,9 +2642,9 @@ export interface CreateAssetCriticalityRecordProps {
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
-export interface CreateRuleMigrationProps {
-  params: CreateRuleMigrationRequestParamsInput;
-  body: CreateRuleMigrationRequestBodyInput;
+export interface CreateRuleMigrationRulesProps {
+  params: CreateRuleMigrationRulesRequestParamsInput;
+  body: CreateRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
@@ -2480,6 +2665,9 @@ export interface DeleteNoteProps {
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteRuleMigrationProps {
+  params: DeleteRuleMigrationRequestParamsInput;
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
@@ -2592,7 +2780,6 @@ export interface GetRuleExecutionResultsProps {
   params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
-  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
 export interface GetRuleMigrationPrebuiltRulesProps {
@@ -2604,6 +2791,10 @@ export interface GetRuleMigrationResourcesProps {
 }
 export interface GetRuleMigrationResourcesMissingProps {
   params: GetRuleMigrationResourcesMissingRequestParamsInput;
+}
+export interface GetRuleMigrationRulesProps {
+  query: GetRuleMigrationRulesRequestQueryInput;
+  params: GetRuleMigrationRulesRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
@@ -2721,7 +2912,10 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
-  body: UpdateRuleMigrationRequestBodyInput;
+}
+export interface UpdateRuleMigrationRulesProps {
+  params: UpdateRuleMigrationRulesRequestParamsInput;
+  body: UpdateRuleMigrationRulesRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

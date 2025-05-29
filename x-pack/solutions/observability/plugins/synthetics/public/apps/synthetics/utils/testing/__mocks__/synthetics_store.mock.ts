@@ -104,6 +104,7 @@ export const mockState: SyntheticsAppState = {
       field: 'none',
       order: 'asc',
     },
+    view: 'cardView',
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -120,16 +121,12 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: [],
   },
-  settings: {
-    loading: false,
-    error: null,
-    success: null,
-  },
   dynamicSettings: {
     loading: false,
     locationMonitors: [],
   },
   defaultAlerting: {
+    inspectLoading: false,
     loading: false,
     error: null,
     success: null,

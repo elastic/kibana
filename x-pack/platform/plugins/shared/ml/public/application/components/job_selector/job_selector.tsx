@@ -10,7 +10,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './_index.scss';
 
 import { ML_PAGES } from '../../../locator';
 import type { Dictionary } from '../../../../common/types/common';

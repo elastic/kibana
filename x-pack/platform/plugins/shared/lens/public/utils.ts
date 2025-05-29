@@ -48,7 +48,7 @@ export function getVisualizeGeoFieldMessage(fieldType: string) {
   });
 }
 
-export const isLensRange = (range: unknown = {}): range is RangeTypeLens => {
+export function isLensRange(range: unknown = {}): range is RangeTypeLens {
   if (!range || typeof range !== 'object') return false;
   const { from, to, label } = range as RangeTypeLens;
 
@@ -57,23 +57,23 @@ export const isLensRange = (range: unknown = {}): range is RangeTypeLens => {
     (typeof from === 'number' || from === null) &&
     (typeof to === 'number' || to === null)
   );
-};
+}
 
-export const getResolvedDateRange = function (timefilter: TimefilterContract) {
+export function getResolvedDateRange(timefilter: TimefilterContract) {
   const { from, to } = timefilter.getTime();
   return { fromDate: from, toDate: to };
-};
+}
 
-export const getAbsoluteDateRange = function (timefilter: TimefilterContract) {
+export function getAbsoluteDateRange(timefilter: TimefilterContract) {
   const { from, to } = timefilter.getTime();
   const { min, max } = timefilter.calculateBounds({
     from,
     to,
   });
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
-};
+}
 
-export const convertToAbsoluteDateRange = function (dateRange: DateRange, now: Date) {
+export function convertToAbsoluteDateRange(dateRange: DateRange, now: Date) {
   const absRange = getAbsoluteTimeRange(
     {
       from: dateRange.fromDate as string,
@@ -86,7 +86,7 @@ export const convertToAbsoluteDateRange = function (dateRange: DateRange, now: D
     fromDate: absRange.from,
     toDate: absRange.to,
   };
-};
+}
 
 export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
@@ -116,9 +116,9 @@ export function getActiveVisualizationIdFromDoc(doc?: LensDocument) {
   return doc.visualizationType || null;
 }
 
-export const getInitialDatasourceId = (datasourceMap: DatasourceMap, doc?: LensDocument) => {
+export function getInitialDatasourceId(datasourceMap: DatasourceMap, doc?: LensDocument) {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
-};
+}
 
 export function getInitialDataViewsObject(
   indexPatterns: IndexPatternMap,

@@ -38,7 +38,7 @@ jest.mock('../../customizations', () => {
 
 jest.mock('./discover_main_app', () => {
   return {
-    DiscoverMainApp: jest.fn().mockReturnValue(<></>),
+    DiscoverMainApp: jest.fn(() => <></>),
   };
 });
 

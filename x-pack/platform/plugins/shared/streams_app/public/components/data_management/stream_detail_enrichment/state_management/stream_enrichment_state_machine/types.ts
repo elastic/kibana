@@ -7,25 +7,27 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Streams } from '@kbn/streams-schema';
+import { TimeState } from '@kbn/es-query';
+import { BehaviorSubject } from 'rxjs';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
+import { MappedSchemaField } from '../../../schema_editor/types';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   core: CoreStart;
-  data: DataPublicPluginStart;
+  timeState$: BehaviorSubject<TimeState>;
 }
 
 export interface StreamEnrichmentInput {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
-export interface StreamEnrichmentContext {
-  definition: IngestStreamGetResponse;
+export interface StreamEnrichmentContextType {
+  definition: Streams.ingest.all.GetResponse;
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
   simulatorRef?: SimulationActorRef;
@@ -33,11 +35,13 @@ export interface StreamEnrichmentContext {
 
 export type StreamEnrichmentEvent =
   | ProcessorToParentEvent
-  | { type: 'stream.received'; definition: IngestStreamGetResponse }
+  | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'simulation.fields.map'; field: MappedSchemaField }
+  | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] };

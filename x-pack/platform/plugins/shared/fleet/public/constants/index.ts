@@ -55,6 +55,7 @@ export const TOUR_STORAGE_KEYS = {
   INACTIVE_AGENTS: 'fleet.inactiveAgentsTour',
   GRANULAR_PRIVILEGES: 'fleet.granularPrivileges',
   AGENT_EXPORT_CSV: 'fleet.agentExportCSVTour',
+  AUTO_UPGRADE_AGENTS: 'fleet.autoUpgradeAgentsTour',
 };
 
 export interface TourConfig {

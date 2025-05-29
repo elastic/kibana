@@ -22,13 +22,15 @@ export const clickInspectButton = (container: string) => {
 };
 
 const LOADER_ARIA = '[aria-label="Loading"]';
-const TABLE_LOADER = `[data-test-subj="initialLoadingPanelPaginatedTable"],${LOADER_ARIA}`;
+const TABLE_LOADER = '[data-test-subj="initialLoadingPanelPaginatedTable"]';
 
 export const openTableInspectModal = (table: InspectTableMetadata) => {
   // wait for table to load
   cy.get(table.id).then(($table) => {
-    if ($table.find(TABLE_LOADER).length > 0) {
-      cy.get(TABLE_LOADER).should('not.exist');
+    const $loaders = $table.find(TABLE_LOADER);
+    if ($loaders.length > 0) {
+      cy.wrap($loaders).should('be.visible');
+      cy.wrap($loaders).should('not.exist');
     }
   });
 
@@ -42,10 +44,13 @@ export const openLensVisualizationsInspectModal = (
   cy.get(panelSelector)
     .get(`[data-test-embeddable-id="${embeddableId}"]`)
     .each(($el) => {
-      // wait for visualization to load
-      if ($el.find(LOADER_ARIA).length > 0) {
-        cy.get(LOADER_ARIA).should('not.exist');
-      }
+      cy.wrap($el).then(() => {
+        const $loaders = $el.find(LOADER_ARIA);
+        if ($loaders.length > 0) {
+          cy.wrap($loaders).should('be.visible');
+          cy.wrap($loaders).should('not.exist');
+        }
+      });
 
       cy.wrap($el).realHover();
       cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();

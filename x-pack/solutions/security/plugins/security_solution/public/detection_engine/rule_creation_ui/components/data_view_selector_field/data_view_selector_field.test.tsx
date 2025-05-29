@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render } from '@testing-library/react';
+import { screen, render, fireEvent } from '@testing-library/react';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { DataViewSelectorField } from './data_view_selector_field';
 import { useDataViewListItems } from './use_data_view_list_items';
@@ -43,6 +43,35 @@ describe('data_view_selector', () => {
     );
 
     expect(screen.getByRole('combobox')).toBeDisabled();
+  });
+
+  it('displays the selected dataview by name, if specified', () => {
+    const dataViews = [
+      {
+        id: 'security-solution-default',
+        title:
+          '-*elastic-cloud-logs-*,.alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*',
+      },
+      {
+        id: '1234',
+        title: 'logs-*',
+        name: 'dataview-name',
+      },
+    ];
+    (useDataViewListItems as jest.Mock).mockReturnValue({ data: dataViews, isFetching: false });
+
+    render(
+      <DataViewSelectorField
+        field={useFormFieldMock<string | undefined>({
+          value: 'security-solution-default',
+        })}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.queryByText('dataview-name')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'dataview-name' } });
+    expect(screen.getByText('dataview-name')).toBeInTheDocument();
   });
 
   it('displays alerts on alerts warning when default security view selected', () => {

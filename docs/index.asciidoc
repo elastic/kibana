@@ -9,6 +9,8 @@ include::landing-page.asciidoc[]
 
 include::user/index.asciidoc[]
 
+include::user/dark-mode.asciidoc[]
+
 include::accessibility.asciidoc[]
 
 include::CHANGELOG.asciidoc[]

@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -169,6 +170,153 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.item.attributes.panels).to.be.an('array');
+    });
+
+    describe('create a dashboard with tags', () => {
+      it('with tags specified as an array of names', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}`;
+
+        const response = await supertest
+          .post(PUBLIC_API_PATH)
+          .set('kbn-xsrf', 'true')
+          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .send({
+            attributes: {
+              title,
+              tags: ['foo'],
+            },
+            references: [
+              {
+                name: 'bizz:panel_bizz',
+                type: 'visualization',
+                id: 'my-saved-object',
+              },
+            ],
+          });
+
+        expect(response.status).to.be(200);
+        expect(response.body.item.attributes.tags).to.contain('foo');
+        expect(response.body.item.attributes.tags).to.have.length(1);
+        // adds tag reference to existing references
+        const referenceIds = response.body.item.references.map(
+          (ref: SavedObjectReference) => ref.id
+        );
+        expect(referenceIds).to.contain('tag-1');
+        expect(referenceIds).to.contain('my-saved-object');
+        expect(response.body.item.references).to.have.length(2);
+      });
+
+      it('creates tags if a saved object matching a tag name is not found', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}`;
+        const response = await supertest
+          .post(PUBLIC_API_PATH)
+          .set('kbn-xsrf', 'true')
+          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .send({
+            attributes: {
+              title,
+              tags: ['foo', 'not-found-tag'],
+            },
+          });
+        expect(response.status).to.be(200);
+        expect(response.body.item.attributes.tags).to.contain('foo', 'not-found-tag');
+        expect(response.body.item.attributes.tags).to.have.length(2);
+        const referenceIds = response.body.item.references.map(
+          (ref: SavedObjectReference) => ref.id
+        );
+        expect(referenceIds).to.contain('tag-1');
+        expect(response.body.item.references).to.have.length(2);
+      });
+
+      it('with tags specified as references', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}`;
+        const response = await supertest
+          .post(PUBLIC_API_PATH)
+          .set('kbn-xsrf', 'true')
+          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .send({
+            attributes: {
+              title,
+            },
+            references: [
+              {
+                type: 'tag',
+                id: 'tag-3',
+                name: 'tag-ref-tag-3',
+              },
+            ],
+          });
+        expect(response.status).to.be(200);
+        expect(response.body.item.attributes.tags).to.contain('buzz');
+        expect(response.body.item.attributes.tags).to.have.length(1);
+        const referenceIds = response.body.item.references.map(
+          (ref: SavedObjectReference) => ref.id
+        );
+        expect(referenceIds).to.contain('tag-3');
+        expect(response.body.item.references).to.have.length(1);
+      });
+
+      it('with tags specified using both tags array and references', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}`;
+        const response = await supertest
+          .post(PUBLIC_API_PATH)
+          .set('kbn-xsrf', 'true')
+          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .send({
+            attributes: {
+              title,
+              tags: ['foo'],
+            },
+            references: [
+              {
+                type: 'tag',
+                id: 'tag-2',
+                name: 'tag-ref-tag-2',
+              },
+            ],
+          });
+        expect(response.status).to.be(200);
+        expect(response.body.item.attributes.tags).to.contain('foo');
+        expect(response.body.item.attributes.tags).to.contain('bar');
+        expect(response.body.item.attributes.tags).to.have.length(2);
+        const referenceIds = response.body.item.references.map(
+          (ref: SavedObjectReference) => ref.id
+        );
+        expect(referenceIds).to.contain('tag-1');
+        expect(referenceIds).to.contain('tag-2');
+        expect(response.body.item.references).to.have.length(2);
+      });
+
+      it('with the same tag specified as a reference and a tag name', async () => {
+        const title = `foo-${Date.now()}-${Math.random()}`;
+        const response = await supertest
+          .post(PUBLIC_API_PATH)
+          .set('kbn-xsrf', 'true')
+          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .send({
+            attributes: {
+              title,
+              tags: ['foo', 'buzz'],
+            },
+            references: [
+              {
+                type: 'tag',
+                id: 'tag-1',
+                name: 'tag-ref-tag-1',
+              },
+            ],
+          });
+        expect(response.status).to.be(200);
+        expect(response.body.item.attributes.tags).to.contain('foo');
+        expect(response.body.item.attributes.tags).to.contain('buzz');
+        expect(response.body.item.attributes.tags).to.have.length(2);
+        const referenceIds = response.body.item.references.map(
+          (ref: SavedObjectReference) => ref.id
+        );
+        expect(referenceIds).to.contain('tag-1');
+        expect(referenceIds).to.contain('tag-3');
+        expect(response.body.item.references).to.have.length(2);
+      });
     });
 
     // TODO Maybe move this test to x-pack/test/api_integration/dashboards

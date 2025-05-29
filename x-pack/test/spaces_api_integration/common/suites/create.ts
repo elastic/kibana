@@ -94,6 +94,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         'siem',
         'siemV2',
         'slo',
+        'streams',
         'uptime',
       ],
       solution: 'es',

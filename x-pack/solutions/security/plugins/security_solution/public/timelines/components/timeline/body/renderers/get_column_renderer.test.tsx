@@ -31,7 +31,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-describe('get_column_renderer', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/214977
+describe.skip('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
   const mount = useMountAppended();

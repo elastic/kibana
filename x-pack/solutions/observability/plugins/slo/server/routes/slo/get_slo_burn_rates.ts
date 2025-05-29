@@ -6,11 +6,9 @@
  */
 
 import { getSLOBurnRatesParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { getSpaceId } from './utils/get_space_id';
 
 export const getSloBurnRates = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
@@ -21,28 +19,26 @@ export const getSloBurnRates = createSloServerRoute({
     },
   },
   params: getSLOBurnRatesParamsSchema,
-  handler: async ({ request, context, params, logger, plugins }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
+    const { scopedClusterClient, soClient, spaceId } = await getScopedClients({
+      request,
+      logger,
+    });
 
-    const spaceId = await getSpaceId(plugins, request);
-
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
 
-    return await executeWithErrorHandler(() =>
-      getBurnRates({
-        instanceId,
-        spaceId,
-        windows,
-        remoteName,
-        sloId: params.path.id,
-        services: {
-          soClient,
-          esClient,
-          logger,
-        },
-      })
-    );
+    return await getBurnRates({
+      instanceId,
+      spaceId,
+      windows,
+      remoteName,
+      sloId: params.path.id,
+      services: {
+        soClient,
+        esClient: scopedClusterClient.asCurrentUser,
+        logger,
+      },
+    });
   },
 });

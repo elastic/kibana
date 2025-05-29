@@ -14,6 +14,9 @@ const selectTableById = (state: DataTableState): TableById => state.dataTable.ta
 
 export const tableByIdSelector = createSelector(selectTableById, (tableById) => tableById);
 
+export const createTableSelector = (tableId: string) =>
+  createSelector(tableByIdSelector, (tableById: TableById) => tableById[tableId]);
+
 const selectTable = (state: DataTableState, tableId: string): DataTableModel =>
   state.dataTable.tableById[tableId];
 

@@ -51,8 +51,11 @@
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/security-authorization-core-common",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/sse-utils",
+    "@kbn/core-security-server",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/lock-manager"
   ],
   "exclude": ["target/**/*"]
 }

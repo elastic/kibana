@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
+import {
+  CustomPaletteParams,
+  CUSTOM_PALETTE,
+  PaletteRegistry,
+  PaletteOutput,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
@@ -21,15 +27,20 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import { MetricVisualizationState } from './types';
 import { metricStateDefaults } from './constants';
-import { isMetricNumericType } from './helpers';
+import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
-function computePaletteParams(params: CustomPaletteParams) {
+function computePaletteParams(
+  paletteService: PaletteRegistry,
+  palette: PaletteOutput<CustomPaletteParams>
+) {
+  const stops = getOverridePaletteStops(paletteService, palette);
+
   return {
-    ...params,
+    ...palette.params,
     // rewrite colors and stops as two distinct arguments
-    colors: (params?.stops || []).map(({ color }) => color),
-    stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
+    colors: stops?.map(({ color }) => color),
+    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }
@@ -94,7 +105,7 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const isMetricNumeric = isMetricNumericType(datasource, state.metricAccessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
@@ -128,7 +139,9 @@ export const toExpression = (
     };
   };
 
-  const collapseExpressionFunction = state.collapseFn
+  const canCollapseBy = state.collapseFn && isMetricNumeric;
+
+  const collapseExpressionFunction = canCollapseBy
     ? buildExpressionFunction<CollapseExpressionFunction>(
         'lens_collapse',
         getCollapseFnArguments()
@@ -143,7 +156,7 @@ export const toExpression = (
     secondaryPrefix: state.secondaryPrefix,
     max: state.maxAccessor,
     breakdownBy:
-      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+      state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
     progressDirection: showingBar(state)
@@ -160,7 +173,7 @@ export const toExpression = (
         ? [
             paletteService
               .get(CUSTOM_PALETTE)
-              .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
+              .toExpression(computePaletteParams(paletteService, state.palette)),
           ]
         : [],
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,

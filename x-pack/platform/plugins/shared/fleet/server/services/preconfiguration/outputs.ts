@@ -10,7 +10,7 @@ import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 const pbkdf2Async = utils.promisify(crypto.pbkdf2);
 
@@ -85,7 +85,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
       const { id, config, ...outputData } = output;
 
-      const configYaml = config ? safeDump(config) : undefined;
+      const configYaml = config ? dump(config) : undefined;
 
       const data: NewOutput = {
         ...outputData,

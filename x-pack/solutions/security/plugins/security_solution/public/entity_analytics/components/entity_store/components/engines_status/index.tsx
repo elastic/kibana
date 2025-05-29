@@ -25,6 +25,7 @@ import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
+import { EntityStoreErrorCallout } from '../entity_store_error_callout';
 
 const FILE_NAME = 'engines_status.json';
 
@@ -93,6 +94,7 @@ export const EngineStatus: React.FC = () => {
                 entityType={type}
                 actionButton={<EngineStatusHeaderAction engine={engine} type={type} />}
               />
+              <EntityStoreErrorCallout engine={engine} size="s" />
               <EuiSpacer size="s" />
               <EuiPanel hasShadow={false} hasBorder={false}>
                 {engine && !isEngineLoading(engine.status) && engine.components && (

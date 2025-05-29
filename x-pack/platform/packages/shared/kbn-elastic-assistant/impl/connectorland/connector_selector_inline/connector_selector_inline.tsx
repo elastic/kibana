@@ -20,6 +20,7 @@ import { getGenAiConfig } from '../helpers';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
+  fullWidth?: boolean;
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
@@ -44,6 +45,20 @@ const inputContainerClassName = css`
   }
 `;
 
+const fullWidthContainerClassName = css`
+  .euiSuperSelect {
+    max-inline-size: 100% !important;
+  }
+
+  .euiSuperSelectControl {
+    max-inline-size: 100%;
+  }
+
+  .euiFormControlLayout {
+    max-inline-size: 100%;
+  }
+`;
+
 const inputDisplayClassName = css`
   margin-right: 8px;
   overflow: hidden;
@@ -55,6 +70,7 @@ const inputDisplayClassName = css`
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
   ({
+    fullWidth = false,
     isDisabled = false,
     selectedConnectorId,
     selectedConversation,
@@ -118,7 +134,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     return (
       <EuiFlexGroup
         alignItems="center"
-        className={inputContainerClassName}
+        className={fullWidth ? fullWidthContainerClassName : inputContainerClassName}
         direction="row"
         gutterSize="xs"
         justifyContent={'flexStart'}

@@ -8,6 +8,7 @@
 import type { GenericBuckets } from '@kbn/grouping/src';
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed
 type NumberOrNull = number | null;
+
 export interface AlertsGroupingAggregation {
   unitsCount?: {
     value?: NumberOrNull;
@@ -18,16 +19,10 @@ export interface AlertsGroupingAggregation {
   severitiesSubAggregation?: {
     buckets?: GenericBuckets[];
   };
-  countSeveritySubAggregation?: {
-    value?: NumberOrNull;
-  };
   usersCountAggregation?: {
     value?: NumberOrNull;
   };
   hostsCountAggregation?: {
-    value?: NumberOrNull;
-  };
-  ipsCountAggregation?: {
     value?: NumberOrNull;
   };
   rulesCountAggregation?: {
@@ -37,10 +32,5 @@ export interface AlertsGroupingAggregation {
     doc_count_error_upper_bound?: number;
     sum_other_doc_count?: number;
     buckets?: GenericBuckets[];
-  };
-  stackByMultipleFields1?: {
-    buckets?: GenericBuckets[];
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
   };
 }
