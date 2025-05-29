@@ -68,7 +68,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const { featureSet, dataSourceExclusions } = config.get();
     this.initialFeatureSet = featureSet;
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
-    this.reindexingService = new ReindexingService({ logger: this.logger });
+    this.reindexingService = new ReindexingService({ logger: this.logger, config });
   }
 
   setup(coreSetup: CoreSetup, pluginSetup: PluginsSetup) {
@@ -149,9 +149,8 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   start({ savedObjects, elasticsearch }: CoreStart, { security }: PluginsStart) {
-    // this might be for routes
-    // this.savedObjectsServiceStart = savedObjects;
-    // this.securityPluginStart = security;
+    this.savedObjectsServiceStart = savedObjects;
+    this.securityPluginStart = security;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
@@ -161,7 +160,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // a paused state if no Kibana nodes have the required credentials.
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
-
     this.reindexingService?.start({ savedObjects, elasticsearch }, { security });
   }
 

@@ -19,9 +19,11 @@ import { ReindexWorker } from '../lib/reindexing';
 import { createReindexWorker } from './create_reindex_worker';
 import { CredentialStore, credentialStoreFactory } from '../lib/reindexing/credential_store';
 import { hiddenTypes } from '../saved_object_types';
-// import { defaultExclusions } from './lib/data_source_exclusions';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './routes';
 import { handleEsError } from '../shared_imports';
+import { ReindexingServiceConfig } from './config'
+import { defaultExclusions } from '../lib/data_source_exclusions';
+import type { DataSourceExclusions, FeatureSet } from '../../common/types';
 
 import { RouteDependencies } from './types';
 
@@ -30,12 +32,11 @@ interface PluginsStart {
 }
 
 interface PluginsSetup {
-  // usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
-  // features: FeaturesPluginSetup;
-  // logsShared: LogsSharedPluginSetup;
   security?: SecurityPluginSetup;
 }
+
+type ReindexingServiceType = { logger: LoggerFactory, config: { get: () => ReindexingServiceConfig }  };
 
 export class ReindexingService {
   private reindexWorker: ReindexWorker | null = null;
@@ -46,23 +47,22 @@ export class ReindexingService {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
   private securityPluginStart?: SecurityPluginStart;
-  // private readonly kibanaVersion: string;
+  private readonly initialFeatureSet: FeatureSet;
+  private readonly initialDataSourceExclusions: DataSourceExclusions;
 
-  constructor({ logger }: { logger: LoggerFactory }) {
+  constructor({ logger, config }: ReindexingServiceType) {
     this.logger = logger.get();
     // used by worker and passed to routes
     this.credentialStore = credentialStoreFactory(this.logger);
-    // this.kibanaVersion = env.packageInfo.version;
 
-    // const { featureSet, dataSourceExclusions } = config.get();
-    // this.initialFeatureSet = featureSet;
-    // this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
+    const { featureSet, dataSourceExclusions } = config.get();
+    this.initialFeatureSet = featureSet;
+    this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
   }
 
-  public setup({ http }: CoreSetup, { licensing }: PluginsSetup) {
+  public setup({ http }: CoreSetup, { licensing, security }: PluginsSetup) {
     this.licensing = licensing;
     // todo routing
-
     const router = http.createRouter();
 
     const dependencies: RouteDependencies = {
@@ -70,10 +70,14 @@ export class ReindexingService {
       credentialStore: this.credentialStore,
       log: this.logger,
       licensing,
-      // todo probably a better way to do this
       getSecurityPlugin: () => this.securityPluginStart,
       lib: {
         handleEsError,
+      },
+      config: {
+        featureSet: this.initialFeatureSet,
+        dataSourceExclusions: this.initialDataSourceExclusions,
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
     };
 
@@ -96,12 +100,12 @@ export class ReindexingService {
       elasticsearchService: elasticsearch,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(savedObjects.createInternalRepository(hiddenTypes)),
-      // security: this.securityPluginStart,
-      security,
+      security: this.securityPluginStart,
     });
 
     this.reindexWorker.start();
   }
+
   public stop() {
     if (this.reindexWorker) {
       this.reindexWorker.stop();
