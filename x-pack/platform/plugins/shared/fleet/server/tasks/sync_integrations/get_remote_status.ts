@@ -17,15 +17,15 @@ import { outputService } from '../../services';
 import { FleetError, FleetNotFoundError } from '../../errors';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
+import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
 
 export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   soClient: SavedObjectsClientContract,
   outputId: string
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return { integrations: [] };
   }
   try {
@@ -82,7 +82,10 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
     };
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
-      throw new FleetNotFoundError(`No output found with id ${outputId}`);
+      return {
+        integrations: [],
+        error: `No output found with id ${outputId}`,
+      };
     } else if (error.type === 'system' && error.code === 'ECONNREFUSED') {
       throw new FleetError(`${error.message}${error.code}`);
     }
