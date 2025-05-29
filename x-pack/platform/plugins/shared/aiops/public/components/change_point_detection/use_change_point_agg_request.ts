@@ -130,6 +130,7 @@ export function useChangePointResults(
   const { refreshTimestamp: refresh } = useReload();
 
   const [validChangePoints, setValidChangePoints] = useState<ChangePointAnnotation[]>([]);
+  // Used to display a sample metric if no change points are found
   const sampleChangePointResponse = useRef<ChangePointAnnotation | null>(null);
 
   /**
@@ -259,7 +260,6 @@ export function useChangePointResults(
                     value: v.key.splitFieldTerm,
                   },
                 }),
-            kind: 'changePoint',
             type: changePointType,
             p_value: rawPValue,
             timestamp: timeAsString,
