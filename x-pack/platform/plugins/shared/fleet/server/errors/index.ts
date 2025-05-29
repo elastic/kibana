@@ -36,7 +36,10 @@ export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta>
     } else if (isObjectLike(meta)) {
       const metaStatusCode = (meta as { statusCode?: unknown }).statusCode;
 
-      // If the original error had a status code, and it is not a `401`, then set that status code here
+      // If the original error had a status code, and it is not a `401`, then set that status code here.
+      // We don't set it for `401` because the error is likely due to internal processing or lack
+      // of access to specific SO/Indexes, and we don't want Kibana/UI logout a user out due to this
+      // `401`
       if (typeof metaStatusCode === 'number' && metaStatusCode !== 401) {
         this.statusCode = metaStatusCode;
       }
