@@ -216,14 +216,10 @@ export class AssetClient {
     const newAssetLinks = links.map((link) => {
       return toAssetLink(name, link);
     });
-    const nextIds = newAssetLinks.map((link) => link[ASSET_UUID]);
+    const nextIds = new Set(newAssetLinks.map((link) => link[ASSET_UUID]));
 
-    const assetLinksDeleted = existingAssetLinks.filter(
-      (link) => !nextIds.includes(link[ASSET_UUID])
-    );
-    const assetLinksUpdated = existingAssetLinks.filter((link) =>
-      nextIds.includes(link[ASSET_UUID])
-    );
+    const assetLinksDeleted = existingAssetLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
+    const assetLinksUpdated = existingAssetLinks.filter((link) => nextIds.has(link[ASSET_UUID]));
 
     const operations: AssetBulkOperation[] = [
       ...assetLinksDeleted.map((asset) => ({ delete: { asset } })),

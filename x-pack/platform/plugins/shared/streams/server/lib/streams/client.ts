@@ -259,10 +259,35 @@ export class StreamsClient {
     { indexed = [], updated = [] }: { indexed: QueryLink[]; updated: QueryLink[] }
   ) {
     const { rulesClient } = this.dependencies;
-    await this.uninstallQueries(name, updated);
 
-    await Promise.all(
-      indexed.map((query) => {
+    const indexedIds = new Set(indexed.map(getRuleIdFromQueryLink));
+    const updatedIds = new Set(updated.map(getRuleIdFromQueryLink));
+
+    const toUninstall = updated.filter((query) => !indexedIds.has(getRuleIdFromQueryLink(query)));
+    const toUpdate = indexed.filter((query) => updatedIds.has(getRuleIdFromQueryLink(query)));
+    const toCreate = indexed.filter((query) => !updatedIds.has(getRuleIdFromQueryLink(query)));
+
+    await Promise.all([
+      this.uninstallQueries(name, toUninstall),
+      ...toUpdate.map((query) => {
+        const ruleId = getRuleIdFromQueryLink(query);
+        return rulesClient.update<EsqlRuleParams>({
+          id: ruleId,
+          data: {
+            name: query.query.title,
+            actions: [],
+            params: {
+              timestampField: '@timestamp',
+              query: `FROM ${name},${name}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+            },
+            tags: ['streams'],
+            schedule: {
+              interval: '1m',
+            },
+          },
+        });
+      }),
+      ...toCreate.map((query) => {
         const ruleId = getRuleIdFromQueryLink(query);
         return rulesClient.create<EsqlRuleParams>({
           data: {
@@ -284,8 +309,8 @@ export class StreamsClient {
             id: ruleId,
           },
         });
-      })
-    );
+      }),
+    ]);
   }
 
   private async uninstallQueries(name: string, queries: QueryLink[]) {
