@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { bookAttributesSchema } from './schema';
+import type {
+  ContentManagementServicesDefinition as ServicesDefinition,
+  Version,
+} from '@kbn/object-versioning';
 
-export type BookAttributes = TypeOf<typeof bookAttributesSchema>;
+import { serviceDefinition as v1 } from './v1';
+
+export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
+  1: v1,
+};

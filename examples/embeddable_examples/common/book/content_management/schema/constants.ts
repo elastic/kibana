@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
-import type { SavedBookAttributes } from '../../../../server/types';
-import type { BookAttributes } from '../../../../server/book/content_management/v1';
-import { itemToSavedObject, savedObjectToItem } from './transforms';
+export const BOOK_LATEST_VERSION = 1;
 
-export const bookAttributesDefinition: VersionableEmbeddableObject<
-  SavedBookAttributes,
-  BookAttributes
-> = {
-  itemToSavedObject,
-  savedObjectToItem,
-};
+export const BOOK_CONTENT_ID = 'book';

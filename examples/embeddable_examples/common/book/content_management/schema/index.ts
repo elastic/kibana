@@ -8,3 +8,5 @@
  */
 
 export { bookAttributesDefinition } from './schema';
+export { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from './constants';
+export { itemToSavedObject, savedObjectToItem } from './transforms';

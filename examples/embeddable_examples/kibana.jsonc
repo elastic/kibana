@@ -8,6 +8,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "contentManagement",
       "dataViews",
       "embeddable",
       "uiActions",

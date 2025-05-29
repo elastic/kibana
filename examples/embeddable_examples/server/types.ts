@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 
-export type { SavedBookAttributes } from './book/saved_object/schema';
+export type { SavedBookAttributes } from './book/saved_object';
 
 export type { SavedFieldListAttributes } from './field_list/saved_object/schema';
 
 export interface SetupDeps {
+  contentManagement: ContentManagementServerSetup;
   embeddable: EmbeddableSetup;
 }
 

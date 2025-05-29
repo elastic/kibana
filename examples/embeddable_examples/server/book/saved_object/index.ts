@@ -9,3 +9,4 @@
 
 export type { SavedBookAttributes } from './types';
 export { savedBookAttributesSchema } from './schema';
+export { BOOK_SAVED_OBJECT_TYPE, createBookSavedObjectType } from './book_saved_object';
