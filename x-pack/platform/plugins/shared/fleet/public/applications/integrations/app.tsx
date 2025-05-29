@@ -79,7 +79,10 @@ export const IntegrationsAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const isDarkMode = useObservable(startServices.theme.theme$)?.darkMode;
+    const isDarkMode = useObservable(
+      startServices.theme.theme$,
+      startServices.theme.getTheme()
+    ).darkMode;
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
