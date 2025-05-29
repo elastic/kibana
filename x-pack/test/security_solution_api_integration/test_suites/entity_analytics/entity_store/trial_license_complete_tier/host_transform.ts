@@ -57,6 +57,85 @@ export default function (providerContext: FtrProviderContext) {
         const HOST_NAME: string = 'host-transform-test-backfill';
 
         // Create documents first:
+        const { result } = await es.index(buildHostTransformDocument(HOST_NAME, [{ ip: '1.1.1.1' }, { ip: '1.1.1.2' }], new Date().toISOString()));
+        expect(result).to.eql('created');
+
+        // This document should be ingested and transformed as well.
+        const fourHoursAgo: string = new Date(Date.now() - 4 * 60 * 60 * 1000);
+        await es.index(buildHostTransformDocument(HOST_NAME, [{ ip: '1.1.1.4' }], fourHoursAgo));
+
+        const twentyFiveHoursAgo: string = new Date(Date.now() - 25 * 60 * 60 * 1000);
+        // We expect this document to be skipped, since 25h ago is outside of lookback window
+        await es.index(buildHostTransformDocument(HOST_NAME, [{ ip: '1.1.1.8' }], twentyFiveHoursAgo));
+
+        // Now enable the Entity Store...
+        const response = await supertest
+          .post('/api/entity_store/enable')
+          .set('kbn-xsrf', 'xxxx')
+          .send({});
+        expect(response.statusCode).to.eql(200);
+        expect(response.body.succeeded).to.eql(true);
+
+        // and wait for it to start up
+        await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
+          const { body } = await supertest
+            .get('/api/entity_store/status')
+            .query({ include_components: true })
+            .expect(200);
+          expect(body.status).to.eql('running');
+          return true;
+        });
+
+        await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, [{ ip: '1.1.1.1' }], new Date().toISOString());
+
+        await retry.waitForWithTimeout(
+          'Document to be processed and transformed',
+          TIMEOUT_MS,
+          async () => {
+            const result = await es.search({
+              index: INDEX_NAME,
+              query: {
+                term: {
+                  'host.name': HOST_NAME,
+                },
+              },
+            });
+            const total = result.hits.total as SearchTotalHits;
+            expect(total.value).to.eql(1);
+            const hit = result.hits.hits[0] as SearchHit<Ecs>;
+            expect(hit._source).ok();
+            console.log(hit._source.host);
+            // KUBA DEBUG
+            // WHY AM I ONLY GETTING 1.1.1.1 there? Is the index wiped on entity store start?
+            expect(hit._source?.host?.name).to.eql(HOST_NAME);
+            expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '1.1.1.2', '1.1.1.4']);
+
+            return true;
+          }
+        );
+      });
+    })
+
+    describe('Install Entity Store and test Host transform', () => {
+      before(async () => {
+        await utils.cleanEngines();
+        // Initialize security solution by creating a prerequisite index pattern.
+        // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
+        await dataView.create('security-solution');
+        // Create a test index matching transform's pattern to store test documents
+        await es.indices.createDataStream({ name: DATASTREAM_NAME });
+      });
+
+      after(async () => {
+        await utils.cleanEngines();
+        await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
+        await dataView.delete('security-solution');
+      });
+
+      it('Should backfill using pre-existing documents', async () => {
+        const HOST_NAME: string = 'host-transform-test-backfill';
+
+        // Create documents first:
         await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.1' }, new Date().toISOString()));
 
         // This document should be ingested and transformed as well.
