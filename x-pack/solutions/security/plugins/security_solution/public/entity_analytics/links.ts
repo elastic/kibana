@@ -16,6 +16,7 @@ import {
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
 import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
+import riskAnalyticsPageImg from '../common/images/risk_analytics_page.png';
 
 const privMonLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
@@ -39,7 +40,7 @@ const riskAnalyticsLinks: LinkItem = {
   title: i18n.translate('xpack.securitySolution.appLinks.riskAnalytics', {
     defaultMessage: 'Risk Analytics',
   }),
-  landingImage: privilegedUserMonitoringPageImg,
+  landingImage: riskAnalyticsPageImg,
   path: ENTITY_ANALYTICS_RISK_ANALYTICS_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.riskAnalytics', {
@@ -47,7 +48,7 @@ const riskAnalyticsLinks: LinkItem = {
     }),
   ],
   hideTimeline: false,
-  skipUrlState: true,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };
