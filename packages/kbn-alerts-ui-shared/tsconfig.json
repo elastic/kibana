@@ -51,6 +51,5 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-table-persist",
-    "@kbn/alerts-ui-shared",
   ]
 }
