@@ -10,7 +10,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText, EuiLoadingSpinner, EuiSkipLink } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ReactWrapper } from 'enzyme';
@@ -466,6 +466,60 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     );
   });
 
+  describe('Skip Link Functionality', () => {
+    it('renders the skip link when there is a next section', async () => {
+      const wrapper = await mountGroupedList({
+        listProps: {
+          ...defaultProps,
+          fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        },
+        hookParams: {
+          dataViewId: dataView.id!,
+          allFields,
+        },
+      });
+
+      // Find all skip links
+      const skipLinks = wrapper.find(EuiSkipLink);
+
+      // Since we have multiple sections, we should have skip links
+      expect(skipLinks.length).toBeGreaterThan(0);
+
+      // The Available Fields accordion should have a skip link to Meta Fields
+      const availableFieldsAccordion = wrapper.find(
+        '[data-test-subj="fieldListGroupedAvailableFields"]'
+      );
+      expect(availableFieldsAccordion.find(EuiSkipLink).length).toBe(1);
+    });
+
+    it('does not render a skip link in the last section', async () => {
+      const wrapper = await mountGroupedList({
+        listProps: {
+          ...defaultProps,
+          fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        },
+        hookParams: {
+          dataViewId: dataView.id!,
+          allFields,
+        },
+      });
+
+      // Open all accordions to ensure we can check the last one
+      await act(async () => {
+        wrapper.find(FieldsAccordion).forEach((accordion) => {
+          if (!accordion.prop('initialIsOpen')) {
+            accordion.find('button').first().simulate('click');
+          }
+        });
+        await wrapper.update();
+      });
+
+      // The last accordion should not have a skip link
+      const accordions = wrapper.find(FieldsAccordion);
+      const lastAccordion = accordions.at(accordions.length - 1);
+      expect(lastAccordion.find(EuiSkipLink).length).toBe(0);
+    });
+  });
   it('persists sections state in local storage', async () => {
     const wrapper = await mountGroupedList({
       listProps: {
