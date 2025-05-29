@@ -848,6 +848,6 @@ const componentStyles = {
       fontStyle: 'italic',
     }),
   tabbedContentContainer: css({
-    width: '70%',
+    width: '60%',
   }),
 };
