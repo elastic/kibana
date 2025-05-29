@@ -35,7 +35,7 @@ describe('Detections Rule Gaps API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
         expect.objectContaining({
-          body: `[{"rule_id":"rule-1","start":"${timeRange.startDate.toISOString()}","end":"${timeRange.endDate.toISOString()}"}]`,
+          body: `[{"rule_id":"rule-1","ranges":[{"start":"${timeRange.startDate.toISOString()}","end":"${timeRange.endDate.toISOString()}"}]}]`,
           method: 'POST',
         })
       );

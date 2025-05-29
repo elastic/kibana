@@ -67,7 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(false);
         });
-
+        // Small delay to allow the overlay to open fully
+        await new Promise((resolve) => setTimeout(resolve, 500));
         await browser.pressKeys(browser.keys.ESCAPE);
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(true);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
 import type { ContentRef } from '@kbn/wci-common';
 import type { ToolResultEvent } from '../../../../../common/chat_events';
@@ -54,16 +54,21 @@ export const getSimpleGraphConverter = ({ graphName }: { graphName: string }): E
     }
 
     // emit tool result events
-    if (event.event === 'on_tool_end') {
-      return [
-        {
+    if (event.event === 'on_chain_end' && event.name === 'tools') {
+      const toolMessages: ToolMessage[] = event.data.output.addedMessages ?? [];
+
+      const toolResultEvents: ToolResultEvent[] = [];
+      for (const toolMessage of toolMessages) {
+        toolResultEvents.push({
           type: 'tool_result',
           toolResult: {
-            callId: event.data.output.tool_call_id,
-            result: event.data.output.content,
+            callId: toolMessage.tool_call_id,
+            result: extractTextContent(toolMessage),
           },
-        } as ToolResultEvent,
-      ];
+        });
+      }
+
+      return toolResultEvents;
     }
 
     return [];

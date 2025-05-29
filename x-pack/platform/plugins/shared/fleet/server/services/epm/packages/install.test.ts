@@ -59,6 +59,7 @@ jest.mock('../../app_context', () => {
       getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
+      getCloud: jest.fn(),
     },
   };
 });
@@ -580,7 +581,12 @@ describe('installAssetsForInputPackagePolicy', () => {
         force: false,
         logger: mockedLogger,
         packagePolicy: {
-          inputs: [{ type: 'log', streams: [{ type: 'log', vars: { dataset: 'test.tata' } }] }],
+          inputs: [
+            {
+              type: 'log',
+              streams: [{ data_stream: { type: 'log' }, vars: { dataset: 'test.tata' } }],
+            },
+          ],
         } as any,
       })
     ).rejects.toThrowError(PackageNotFoundError);
@@ -612,7 +618,12 @@ describe('installAssetsForInputPackagePolicy', () => {
           {
             name: 'log',
             type: 'log',
-            streams: [{ type: 'log', vars: { 'data_stream.dataset': { value: 'test.tata' } } }],
+            streams: [
+              {
+                data_stream: { type: 'log' },
+                vars: { 'data_stream.dataset': { value: 'test.tata' } },
+              },
+            ],
           },
         ],
       } as any,

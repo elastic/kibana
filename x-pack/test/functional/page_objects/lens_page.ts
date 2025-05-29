@@ -1957,6 +1957,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openCSVDownloadShare() {
       await this.ensureShareMenuIsOpen('export');
       await testSubjects.click('export');
+      await testSubjects.click('lens_csv-radioOption');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -2062,6 +2063,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async toggleDebug(enable: boolean = true) {
       await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
+    },
+
+    async setDataTableDensity(value: string) {
+      const settings = await testSubjects.find('lnsDensitySettings');
+      const option = await settings.findByTestSubject(value);
+      await option.click();
+    },
+
+    async checkDataTableDensity(size: 'l' | 'm' | 's') {
+      return find.existsByCssSelector(
+        `[data-test-subj="lnsDataTable"][class*="cellPadding-${size}-fontSize-${size}"]`
+      );
     },
   });
 }

@@ -131,4 +131,5 @@ export interface MetricsArgs {
   enrichmentDurations?: string[];
   executionGap?: Duration;
   gapRange?: { gte: string; lte: string };
+  frozenIndicesQueriedCount?: number;
 }

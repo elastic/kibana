@@ -10,23 +10,21 @@ import { ToolContentResult } from '@kbn/wci-server';
 import { stepDoneToolName } from './workflow_tools';
 
 const baseSystemMessage = `
-    ## Base instructions
+    ## Base Instructions
 
-    You are an helpful AI assistant specialized in retrieving content and summarizing them.
+    You are an AI assistant tasked with retrieving and summarizing content relevant to a user query.
+    Your role is to plan the retrieval by mapping query elements to the appropriate search tools,
+    then executing those plans in subsequent phases.
 
-    You will receive a natural language query from the user. Based on that query and using the tools
-    at your disposal, you will execute tasks to retrieve the most relevant documents and
+    ### Workflow Overview
 
-    ### Workflow
+    1. **Planning:** Decide which retrieval tools to use and how to parameterize them.
+    2. **Retrieval:** Execute tool calls based on your plan.
+    3. **Relevance Analysis:** Evaluate and score the documents retrieved.
+    4. **Content Extraction:** Extract relevant content from the most relevant documents.
+    5. **Response:** Return the summary with proper document citations.
 
-    To fulfill your goal, you will go through a well defined workflow composed of multiple steps:
-
-    1. planning - You will plan which tools you should call and how. Use that step to brainstorm about the execution of the next step
-    2. retrieval - You will call the tools according to what was planned in the previous step
-    3. relevance analysis - You will analyze the documents retrieved in the previous step, to score them depending on their relevance.
-    4. summarization - You will generate a summary of the most relevant documents that could be used to answer the natural language query from the user
-    5. response - The summary from step 4 will be returned to the user, with references to the cited documents
-    `;
+    **Note:** In the planning phase, do not execute any tool calls. Focus entirely on outlining the tool calls and the corresponding parameters to be used.`;
 
 export const getPlanningPrompt = ({ query }: { query: string }): BaseMessageLike[] => {
   return [
@@ -34,17 +32,20 @@ export const getPlanningPrompt = ({ query }: { query: string }): BaseMessageLike
       'system',
       `${baseSystemMessage}
 
-      ## Current task
+      ## Current task: Planning
 
-      Your current task is the first task of the workflow - planning
+      Your task is to develop a detailed plan for retrieving the content needed to answer the query.
 
-      Based on the query from the user, and the tools at your disposal, write down a plan of which tools you
-      think you should be calling, with which parameters
+      **Instructions:**
+      - Analyze the given query to extract key identifiers or tokens.
+      - Identify only retrieval/search tools from the tools available.
+      - Outline your planned tool calls with clear parameter mappings.
+      - If the query is ambiguous or could use multiple tools, list alternative or complementary tool calls.
+      - Do not call any tool; only plan the usage.
 
       ### Additional information
 
-      - Only list tools that can be used to retrieve or search for content. Refer to each tool's description.
-      - Don't call any tool, your current task is to plan how to call them later
+      - Ensure the plan logically justifies the selection of each tool.
 
       ## Input
 
@@ -52,36 +53,24 @@ export const getPlanningPrompt = ({ query }: { query: string }): BaseMessageLike
 
       ## Example
 
-      ### Example 1
+      **Given Context:**
 
-      Given this context:
+      - User query: "Issue 97"
+      - Available tools:
+          - { name: 'search_GH_foo', description: 'search GitHub issues' }
+          - { name: 'search_SF_bar', description: 'search Salesforce tickets' }
+          - { name: 'search_financial_docs', description: 'search for financial documents' }
+          - { name: 'create_SF_issue', description: 'create a Salesforce issue' }
 
-      '''
-      - search query from the user: "Issue 97"
+      **Expected Planning Output:**
 
-      - tools at your disposal:
-          - { name: 'search_GH_foo', description: 'use this tool to search for github issues in the foo repository' }
-          - { name: 'search_SF_bar', description: 'use this tool to search for salesforce tickets' }
-          - { name: 'search_financial_docs', description: 'use this tool to search for financial documents about the org' }
-          - { name: 'create_SF_issue', description: 'use this tool to create a salesforce issue' }
-      '''
+      - The query "Issue 97" suggests looking for an issue with identifier "97".
+      - Identify that only retrieval tools should be used.
+      - Planned tool calls:
+        - Call \`search_GH_foo\` with parameters \`{ id: "97" }\`
+        - Call \`search_SF_bar\` with parameters \`{ issueNumber: "97" }\`
 
-      The expected output from the planning phase would be:
-
-      '''
-      I need to search for an issue with ID matching 97.
-      I have 3 search tools at my disposal:
-      - one to search for GH issues
-      - one to search for salesforce tickets
-      - one to search for human resource documents
-
-      I'm looking for an issue, so I'm going to call the 'search_GH_foo' and the 'search_SF_bar' tools.
-      - I will call search_GH_foo with parameters { id: '97' }
-      - I will call search_GH_foo with parameters { id: '97' }
-      '''
-
-      *Important*: these are only examples, please reason on the tools that you really have at your disposal, not the
-      ones from the examples
+      *Remember: Do not include tools meant for content creation or other non-retrieval tasks.*
   `,
     ],
     [
@@ -107,24 +96,28 @@ export const getRetrievalPrompt = ({
       'system',
       `${baseSystemMessage}
 
-      ## Current task
+      ## Current task: Retrieval
 
-      Your current task is the second task of the workflow - retrieval
+      Your task for this phase is to execute the tool calls as defined in the plan from the previous step.
+      Use the plan to call the appropriate search tools with the specified parameters to retrieve the necessary documents.
 
-      Based on the plan that was defined in the previous step, please call the tools accordingly to retrieve the content.
+      **Key Instructions:**
+      - **Follow the Plan:** Execute the tool calls exactly as detailed in the plan.
+      - **Parallel Execution:** If possible, call search tools in parallel to optimize speed. If parallel calls are not supported, call them sequentially.
+      - **Tool Usage:** Only call retrieval/search tools. Do not include non-retrieval tools.
+      - **Step Completion:** Once you have executed all necessary search tool calls, call the \`${stepDoneToolName}\` tool as the only tool in your final message to signal that you are done with the retrieval phase.
+      - **At Least One Call:** Ensure that you call at least one search tool unless the plan dictates that no further searches are necessary.
 
-      When you are done searching, call the "${stepDoneToolName}" tool to transition to the next step.
-
-      ### Additional information
-
-      - Please call search tools in parallel if possible.
-      - When calling the ${stepDoneToolName} tool, only call this single tool, without including any other search tool call.
-      - You should always call at least one tool. Either search tools according to the plan, or the ${stepDoneToolName} tool when
-        you are done.
+      **Additional Information:**
+      - Use the parameters as specified in the plan.
+      - The retrieval phase is solely for executing the plan. Do not perform relevance analysis or summarization here.
+      - If any tool returns unexpected results, they can be handled in later phases.
 
       ## Input
 
-      The plan from previous step will be provided in the next user message.
+      The following input includes:
+      1. The plan from the previous step.
+      2. The history of previous tool calls and their results (if any).
   `,
     ],
     [
@@ -138,7 +131,7 @@ export const getRetrievalPrompt = ({
     ${plan}
     """
 
-    The following messages is the history of what you already searched for and the results
+    Below is the history of previous search results and tool calls:
     `,
     ],
     ...messages,
@@ -154,9 +147,14 @@ export const getAnalysisPrompt = ({
 }): BaseMessageLike[] => {
   const resultEntry = (result: ToolContentResult, index: number): string => {
     return `
-    ### Document ID ${index}
+    ### Document (ID: ${index})
 
-    ${JSON.stringify(result.content)}
+    **Document ID:** "${index}"
+
+    **Content:**
+    \`\`\`
+    ${JSON.stringify(result.content, null, 2)}
+    \`\`\`
     `;
   };
 
@@ -165,25 +163,28 @@ export const getAnalysisPrompt = ({
       'system',
       `${baseSystemMessage}
 
-      ## Current task
+      ## Current task: Relevance Analysis
 
-      Your current task is the third task of the workflow - relevance analysis
+      Your task is to evaluate each document retrieved during the previous phase in relation to the user’s query,
+      and assign a relevance rating from 0 to 10 using the following criteria:
+      - **0:** The document is completely irrelevant.
+      - **5:** The document is somewhat related and might be useful.
+      - **8:** The document is very relevant and contains useful information.
+      - **10:** The document is absolutely crucial for answering the query.
 
-      You will be provided the search query from the user and the documents that were retrieved during the previous step.
-
-      Based on this, please rate each document from 0 to 10,
-      - 0 being a document totally irrelevant or out of context to the search query
-      - 5 being a document that could be useful to answer the user query, or somewhat related to it
-      - 8 being a document containing very relevant or useful information to answer the query
-      - 10 being a document containing info absolutely mandatory to answer the question
-
-      ### Additional information
-
-      - Please each document independently to each other
+      **Instructions:**
+      - **Independent Ratings:** Rate each document independently based solely on its relevance to the provided query.
+      - **Format:** Return your ratings as a JSON object with a "ratings" array, where each element follows the \`"{id}|{grade}"\` format. Example: \`{"ratings": ["0|7", "1|5", "2|10"]}\`.
+      - **Document IDs:** Use the document IDs provided in this prompt, not any IDs contained in the document content.
+      - **Optional Comments:** You may include an optional \`"comment"\` field with additional remarks on your ratings.
 
       ## Input
 
-      The search query from the user, and the documents, will be provided in the next user message
+      ## Input
+
+      You will receive:
+      1. The search query from the user.
+      2. A list of documents, each with an assigned document ID, that were retrieved in the previous step.
   `,
     ],
     [
@@ -191,15 +192,11 @@ export const getAnalysisPrompt = ({
       `
     ## Input
 
-    The search query is: "${query}"
-
-    """
-    ${query}
-    """
+    **Search Query:**: "${query}"
 
     ## Documents
 
-    ${results.map(resultEntry).join('\n\n')}
+    ${results.map(resultEntry).join('\n')}
     `,
     ],
   ];
@@ -216,9 +213,11 @@ export const getSummarizerPrompt = ({
 }): BaseMessageLike[] => {
   const resultEntry = (result: ToolContentResult, index: number): string => {
     return `
-    ### Document
+    ### Document ${index}
 
-    ${JSON.stringify(result.content)}
+    \`\`\`
+    ${JSON.stringify(result.content, null, 2)}
+    \`\`\`
     `;
   };
 
@@ -227,21 +226,19 @@ export const getSummarizerPrompt = ({
       'system',
       `${baseSystemMessage}
 
-      ## Current task
+      ## Current task: Content Extraction
 
-      Your current task is the fourth task of the workflow - relevant content extraction
-
-      You will be provided the search query from the user and the documents that were selected as relevant to the query.
-
-      Based on this, please extract the parts of the content and information of the documents that is relevant to answer the query.
-
-      ### Additional information
-
-      - N/A
+      Your task is to extract all parts of the provided documents that are directly relevant to answering the user's search query.
+      You must:
+      - **Extract only relevant content:** Include every piece of information that could help answer the query.
+      - **Avoid extraneous commentary:** Do not add explanations, conclusions, or commentary beyond the extraction.
+      - **Be concise and efficient:** Optimize your response for brevity and token usage.
+      - **Direct Output:** Your final output must consist solely of the extracted content, with no additional framing or summary remarks.
 
       ## Input
 
-      The search query from the user, and the documents, will be provided in the next user message
+      In the next message, you will receive the search query, any additional context, and a list of documents.
+      Please extract from these documents the relevant content only.
   `,
     ],
     [
@@ -249,10 +246,11 @@ export const getSummarizerPrompt = ({
       `
     ## Input
 
-    The search query is: "${query}"
+    **Search Query:** "${query}"
 
+    **Additional Context:**
     """
-    ${query}
+    ${context ?? 'N/A'}
     """
 
     ## Documents

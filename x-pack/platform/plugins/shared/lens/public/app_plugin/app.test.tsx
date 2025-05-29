@@ -419,12 +419,14 @@ describe('Lens App', () => {
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       });
 
-      await lensStore.dispatch(
-        setState({
-          query,
-          persistedDoc: document,
-        })
-      );
+      await act(async () => {
+        await lensStore.dispatch(
+          setState({
+            query,
+            persistedDoc: document,
+          })
+        );
+      });
 
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({

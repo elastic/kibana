@@ -8,15 +8,7 @@
 import { useMemo } from 'react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
-
-// We hardcode these here for now as we currently do not have any other way to filter out all the unwanted integrations.
-const AI_FOR_SOC_INTEGRATIONS = [
-  'splunk', // doesnt yet exist
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'crowdstrike',
-];
+import { AI_FOR_SOC_INTEGRATIONS } from '../../../../common/constants';
 
 export interface UseFetchIntegrationsResult {
   /**

@@ -65,15 +65,11 @@ describe('SharePlugin', () => {
         await service.setup(coreSetup);
         const start = await service.start({} as CoreStart);
         expect(registryMock.start).toHaveBeenCalled();
-        expect(managerMock.start).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            getShareMenuItems: expect.any(Function),
-          }),
-          true, // disableEmbed - true because buildFlavor === 'serverless'
-          undefined
-        );
+        expect(managerMock.start).toHaveBeenCalledWith({
+          resolveShareItemsForShareContext: expect.any(Function),
+          core: expect.objectContaining({}),
+          isServerless: expect.any(Boolean),
+        });
         expect(start.toggleShareContextMenu).toBeDefined();
       });
 
@@ -91,15 +87,11 @@ describe('SharePlugin', () => {
         setup.setAnonymousAccessServiceProvider(anonymousAccessServiceProvider);
         const start = await service.start({} as CoreStart);
         expect(registryMock.start).toHaveBeenCalled();
-        expect(managerMock.start).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            getShareMenuItems: expect.any(Function),
-          }),
-          true, // disableEmbed - true because buildFlavor === 'serverless'
-          anonymousAccessServiceProvider
-        );
+        expect(managerMock.start).toHaveBeenCalledWith({
+          resolveShareItemsForShareContext: expect.any(Function),
+          core: expect.objectContaining({}),
+          isServerless: expect.any(Boolean),
+        });
         expect(start.toggleShareContextMenu).toBeDefined();
       });
     });

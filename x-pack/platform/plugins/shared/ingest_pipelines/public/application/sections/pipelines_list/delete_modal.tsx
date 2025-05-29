@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiSpacer, EuiBadge } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiBadge, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -82,10 +82,14 @@ export const PipelineDeleteModal = ({
     callback();
   };
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       buttonColor="danger"
       data-test-subj="deletePipelinesConfirmation"
+      titleProps={{ id: modalTitleId }}
       title={
         <FormattedMessage
           id="xpack.ingestPipelines.deleteModal.modalTitleText"

@@ -28,7 +28,6 @@ export const getTranslateRuleNode = ({
     const indexPatterns =
       state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
       'logs-*';
-    const integrationId = state.integration?.id || '';
 
     const splunkRule = {
       title: state.original_rule.title,
@@ -43,16 +42,25 @@ export const getTranslateRuleNode = ({
     const response = await esqlKnowledgeBase.translate(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
+    if (!esqlQuery) {
+      logger.warn('Failed to extract ESQL query from translation response');
+      const comment =
+        '## Translation Summary\n\nFailed to extract ESQL query from translation response';
+      return {
+        comments: [generateAssistantComment(comment)],
+      };
+    }
+
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
+
     return {
-      response,
       comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
       elastic_rule: {
-        integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
         risk_score: getElasticRiskScoreFromOriginalRule(state.original_rule),
         severity: getElasticSeverityFromOriginalRule(state.original_rule),
+        ...(state.integration?.id && { integration_ids: [state.integration.id] }),
       },
     };
   };

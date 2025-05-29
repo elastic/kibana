@@ -127,6 +127,20 @@ export const useGetLimitedPackages = () => {
     version: API_VERSIONS.public.v1,
   });
 };
+export const useUpdateCustomIntegration = async (
+  id: string,
+  fields: { readMeData: string | undefined; categories: string[] }
+) => {
+  return sendRequest({
+    path: epmRouteService.getUpdateCustomIntegrationsPath(id),
+    method: 'put',
+    version: API_VERSIONS.public.v1,
+    body: {
+      readMeData: fields.readMeData,
+      categories: fields.categories,
+    },
+  });
+};
 
 export const useGetPackageInfoByKeyQuery = (
   pkgName: string,
@@ -141,6 +155,7 @@ export const useGetPackageInfoByKeyQuery = (
   queryOptions: {
     // If enabled is false, the query will not be fetched
     enabled?: boolean;
+    suspense?: boolean;
     refetchOnMount?: boolean | 'always';
   } = {
     enabled: true,
@@ -164,6 +179,7 @@ export const useGetPackageInfoByKeyQuery = (
         },
       }),
     {
+      suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
       retry: (_, error) => !isRegistryConnectionError(error),

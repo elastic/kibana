@@ -185,7 +185,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider
@@ -354,7 +353,9 @@ export class EndpointAppContextService {
     username = 'elastic',
     taskId,
     taskType,
+    spaceId,
   }: {
+    spaceId: string;
     agentType?: ResponseActionAgentType;
     username?: string;
     /** Used with background task and needed for `UnsecuredActionsClient`  */
@@ -370,11 +371,13 @@ export class EndpointAppContextService {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
+      spaceId,
       isAutomated: true,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
         this.createLogger('responseActions'),
         {
+          spaceId,
           relatedSavedObjects:
             taskId && taskType
               ? [

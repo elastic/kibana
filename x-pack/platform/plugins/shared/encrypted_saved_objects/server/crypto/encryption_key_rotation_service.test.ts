@@ -63,8 +63,11 @@ beforeEach(() => {
     { name: 'type-id-4', namespaceType: 'multiple', mappings: { properties: {} }, hidden: true },
     { name: 'type-id-5', namespaceType: 'single', mappings: { properties: {} }, hidden: false },
     { name: 'type-id-6', namespaceType: 'single', mappings: { properties: {} }, hidden: true },
+    { name: 'type-id-7', namespaceType: 'multiple', mappings: { properties: {} }, hidden: false },
   ]);
-  typeRegistryMock.isSingleNamespace.mockImplementation((type) => type !== 'type-id-4');
+  typeRegistryMock.isSingleNamespace.mockImplementation(
+    (type) => type !== 'type-id-4' && type !== 'type-id-7'
+  );
   mockSavedObjects.getTypeRegistry.mockReturnValue(typeRegistryMock);
 
   mockRetrieveClient = savedObjectsClientMock.create();
@@ -125,7 +128,7 @@ it('does not perform rotation if there are no Saved Objects to process', async (
 
   expect(mockRetrieveClient.find).toHaveBeenCalledTimes(1);
   expect(mockRetrieveClient.find).toHaveBeenCalledWith({
-    type: ['type-id-1', 'type-id-2', 'type-id-4', 'type-id-5'],
+    type: ['type-id-1', 'type-id-2', 'type-id-4', 'type-id-5', 'type-id-7'],
     perPage: 12345,
     namespaces: ['*'],
     sortField: 'updated_at',
@@ -200,11 +203,12 @@ it('properly rotates encryption key', async () => {
     getMockSavedObject({ id: 'id-1' }),
     getMockSavedObject({ id: 'id-2', namespaces: ['ns-1'] }),
     getMockSavedObject({ id: 'id-4', namespaces: ['ns-2', 'ns-3'] }),
+    getMockSavedObject({ id: 'id-7', namespaces: ['*'] }),
   ];
   mockRetrieveClient.find.mockResolvedValue({
-    total: 3,
+    total: 4,
     saved_objects: savedObjects,
-    per_page: 3,
+    per_page: 4,
     page: 0,
   });
   mockUpdateClient.bulkUpdate.mockResolvedValue({
@@ -214,12 +218,12 @@ it('properly rotates encryption key', async () => {
   await expect(
     service.rotate(httpServerMock.createKibanaRequest(), { batchSize: 12345 })
   ).resolves.toEqual({
-    total: 3,
-    successful: 3,
+    total: 4,
+    successful: 4,
     failed: 0,
   });
 
-  expect(mockEncryptionService.decryptAttributes).toHaveBeenCalledTimes(3);
+  expect(mockEncryptionService.decryptAttributes).toHaveBeenCalledTimes(4);
   expect(mockEncryptionService.decryptAttributes).toHaveBeenCalledWith(
     { type: 'type-id-1', id: 'id-1' },
     { attr: 'attr-id-1' },
@@ -235,12 +239,18 @@ it('properly rotates encryption key', async () => {
     { attr: 'attr-id-4' },
     { omitPrimaryEncryptionKey: true }
   );
+  expect(mockEncryptionService.decryptAttributes).toHaveBeenCalledWith(
+    { type: 'type-id-7', id: 'id-7' },
+    { attr: 'attr-id-7' },
+    { omitPrimaryEncryptionKey: true }
+  );
 
   expect(mockUpdateClient.bulkUpdate).toHaveBeenCalledTimes(1);
   expect(mockUpdateClient.bulkUpdate).toHaveBeenCalledWith([
     { ...savedObjects[0], attributes: { attr: 'decrypted-attr-id-1' } },
     { ...savedObjects[1], namespace: 'ns-1', attributes: { attr: 'decrypted-attr-id-2' } },
     { ...savedObjects[2], namespace: 'ns-2', attributes: { attr: 'decrypted-attr-id-4' } },
+    { ...savedObjects[3], attributes: { attr: 'decrypted-attr-id-7' } },
   ]);
 });
 

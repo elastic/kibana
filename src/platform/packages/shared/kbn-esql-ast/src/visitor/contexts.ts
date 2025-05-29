@@ -21,6 +21,7 @@ import type {
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRenameExpression,
+  ESQLAstRerankCommand,
   ESQLColumn,
   ESQLCommandOption,
   ESQLDecimalLiteral,
@@ -30,9 +31,12 @@ import type {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLOrderExpression,
   ESQLProperNode,
   ESQLSource,
+  ESQLStringLiteral,
   ESQLTimeInterval,
 } from '../types';
 import type {
@@ -192,11 +196,6 @@ export class CommandVisitorContext<
     return this.node.name.toUpperCase();
   }
 
-  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
-    this.ctx.assertMethodExists('visitQuery');
-    return this.ctx.visitQuery(this, queryNode, undefined as any);
-  }
-
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
       if (!arg || Array.isArray(arg)) {
@@ -281,6 +280,25 @@ export class CommandVisitorContext<
         const sourceContext = new SourceExpressionVisitorContext(this.ctx, arg, this);
         const result = this.ctx.methods.visitSourceExpression!(sourceContext, input);
 
+        yield result;
+      }
+    }
+  }
+
+  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
+    this.ctx.assertMethodExists('visitQuery');
+    return this.ctx.visitQuery(this, queryNode, undefined as any);
+  }
+
+  public *visitSubQueries() {
+    this.ctx.assertMethodExists('visitQuery');
+    for (const arg of this.node.args) {
+      if (!arg || Array.isArray(arg)) {
+        continue;
+      }
+
+      if (arg.type === 'query') {
+        const result = this.visitSubQuery(arg);
         yield result;
       }
     }
@@ -484,6 +502,12 @@ export class JoinCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
 
+// RERANK <query> ON field [, field ...] WITH <inference-id>
+export class RerankCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstRerankCommand> {}
+
 // CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
 export class ChangePointCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -601,3 +625,57 @@ export class IdentifierExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLIdentifier> {}
+
+export class MapExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLMap> {
+  public *visitEntries(
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
+  ): Iterable<ExpressionVisitorOutput<Methods>> {
+    this.ctx.assertMethodExists(['visitExpression', 'visitMapEntryExpression']);
+
+    for (const value of this.node.entries) {
+      yield this.visitExpression(value, typeof input === 'function' ? (input as any)() : input);
+    }
+  }
+
+  public *visitArguments(
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
+  ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
+    return yield* this.visitEntries(input);
+  }
+}
+
+export class MapEntryExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLMapEntry> {
+  public key(): ESQLStringLiteral {
+    return this.node.key;
+  }
+
+  public value(): ESQLAstExpression {
+    return this.node.value;
+  }
+
+  public visitKey(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.key(), input as any);
+  }
+
+  public visitValue(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.value(), input as any);
+  }
+}

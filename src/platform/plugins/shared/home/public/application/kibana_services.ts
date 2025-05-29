@@ -13,7 +13,6 @@ import {
   HttpStart,
   NotificationsSetup,
   OverlayStart,
-  SavedObjectsClientContract,
   IUiSettingsClient,
   ApplicationStart,
   ThemeServiceStart,
@@ -44,7 +43,6 @@ export interface HomeKibanaServices {
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;
-  savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
   trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;

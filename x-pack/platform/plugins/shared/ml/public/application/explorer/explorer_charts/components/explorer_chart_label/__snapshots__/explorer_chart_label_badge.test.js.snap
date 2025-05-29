@@ -4,15 +4,7 @@ exports[`ExplorerChartLabelBadge Render entity label badge. 1`] = `
 <span>
   <EuiBadge
     color="hollow"
-    css={
-      Object {
-        "map": undefined,
-        "name": "1l7mgse",
-        "next": undefined,
-        "styles": "font-weight:normal;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     nginx.access.remote_ip
      

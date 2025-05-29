@@ -33,7 +33,6 @@ describe('get draft timelines', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    jest.resetAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();

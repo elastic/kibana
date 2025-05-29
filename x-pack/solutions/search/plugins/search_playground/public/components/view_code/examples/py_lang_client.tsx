@@ -7,12 +7,12 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-import { ChatForm } from '../../../types';
+import { PlaygroundForm } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';
 
-export const PY_LANG_CLIENT = (formValues: ChatForm, clientDetails: string) => (
+export const PY_LANG_CLIENT = (formValues: PlaygroundForm, clientDetails: string) => (
   <EuiCodeBlock language="py" isCopyable overflowHeight="100%">
     {`## Install the required packages
 ## pip install -qU elasticsearch openai

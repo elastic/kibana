@@ -9,6 +9,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { $Values } from 'utility-types';
 import type { MainHistoryLocationState } from '../../common/locator/locator';
 import type { LensDocument } from '../persistence';
 
@@ -24,6 +25,7 @@ import type {
   IndexPatternRef,
   AnnotationGroups,
 } from '../types';
+import { StructuredDatasourceStates } from '../react_embeddable/types';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
@@ -34,12 +36,29 @@ export interface DataViewsState {
   indexPatterns: Record<string, IndexPattern>;
 }
 
-export interface DatasourceState {
+export interface DatasourceState<S = unknown> {
   isLoading: boolean;
-  state: unknown;
+  state: S;
 }
-
 export type DatasourceStates = Record<string, DatasourceState>;
+
+/**
+ * A type to encompass all variants of DatasourceState types
+ *
+ * TODO: cleanup types/structure of datasources
+ */
+export type GeneralDatasourceState =
+  | unknown
+  | $Values<StructuredDatasourceStates>
+  | DatasourceState<unknown>
+  | DatasourceState<$Values<StructuredDatasourceStates>>;
+/**
+ * A type to encompass all variants of DatasourceStates types
+ */
+export type GeneralDatasourceStates =
+  | Record<string, GeneralDatasourceState>
+  | StructuredDatasourceStates;
+
 export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
@@ -86,4 +105,5 @@ export interface LensStoreDeps {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   initialStateFromLocator?: MainHistoryLocationState['payload'];
   embeddableEditorIncomingState?: EmbeddableEditorState;
+  visualizationType?: string;
 }

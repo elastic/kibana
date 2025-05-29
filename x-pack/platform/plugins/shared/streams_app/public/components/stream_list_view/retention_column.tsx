@@ -26,7 +26,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   if (isErrorLifecycle(lifecycle)) {
-    return null;
+    return <EuiBadge color="hollow">{lifecycle.error.message}</EuiBadge>;
   }
 
   if (isIlmLifecycle(lifecycle)) {

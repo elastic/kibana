@@ -57,8 +57,6 @@ export interface TagListProps {
  * Abstract external services for this component.
  */
 export interface Services {
-  canEditAdvancedSettings: boolean;
-  getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
@@ -276,12 +274,6 @@ export const TableListViewKibanaProvider: FC<
                 }}
               >
                 <TableListViewProvider
-                  canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-                  getListingLimitSettingsUrl={() =>
-                    application.getUrlForApp('management', {
-                      path: `/kibana/settings?query=savedObjects:listingLimit`,
-                    })
-                  }
                   notifyError={(title, text) => {
                     notifications.toasts.addDanger({
                       title: toMountPoint(title, startServices),

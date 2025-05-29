@@ -6,9 +6,12 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
 import { getRemoteSyncedIntegrationsStatus } from '../../tasks/sync_integrations/compare_synced_integrations';
+import type { GetRemoteSyncedIntegrationsInfoRequestSchema } from '../../types';
+import { getRemoteSyncedIntegrationsInfoByOutputId } from '../../tasks/sync_integrations/get_remote_status';
 
 export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<undefined> = async (
   context,
@@ -25,6 +28,20 @@ export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<undefined>
       soClient
     );
 
+    return response.ok({ body: res });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getRemoteSyncedIntegrationsInfoHandler: RequestHandler<
+  TypeOf<typeof GetRemoteSyncedIntegrationsInfoRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  try {
+    const res: GetRemoteSyncedIntegrationsStatusResponse =
+      await getRemoteSyncedIntegrationsInfoByOutputId(soClient, request.params.outputId);
     return response.ok({ body: res });
   } catch (error) {
     throw error;

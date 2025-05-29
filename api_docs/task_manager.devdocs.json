@@ -189,9 +189,9 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, security }: ",
+              "({ http, savedObjects, elasticsearch, executionContext, security }: ",
               "CoreStart",
-              ", { cloud, spaces }: ",
+              ", { cloud }: ",
               "TaskManagerPluginsStart",
               ") => ",
               {
@@ -211,7 +211,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjects, elasticsearch, executionContext, security }",
+                "label": "{ http, savedObjects, elasticsearch, executionContext, security }",
                 "description": [],
                 "signature": [
                   "CoreStart"
@@ -226,7 +226,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ cloud, spaces }",
+                "label": "{ cloud }",
                 "description": [],
                 "signature": [
                   "TaskManagerPluginsStart"
@@ -925,6 +925,20 @@
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.IntervalSchedule.rrule",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "rrule",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -959,6 +973,23 @@
                 "section": "def-server.ConcreteTaskInstance",
                 "text": "ConcreteTaskInstance"
               }
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunContext.fakeRequest",
+            "type": "Object",
+            "tags": [],
+            "label": "fakeRequest",
+            "description": [
+              "\nIf an API key is associated with the task, a fake KibanaRequest object\nis generated using the API key and passed as part of the run context."
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,
@@ -1113,7 +1144,7 @@
           {
             "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.schedule",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "schedule",
             "description": [
@@ -1127,6 +1158,8 @@
                 "section": "def-server.IntervalSchedule",
                 "text": "IntervalSchedule"
               },
+              " | ",
+              "RruleSchedule",
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
@@ -1590,6 +1623,18 @@
     "enums": [
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.Frequency",
+        "type": "Enum",
+        "tags": [],
+        "label": "Frequency",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.TaskCost",
         "type": "Enum",
         "tags": [],
@@ -1632,6 +1677,18 @@
         "label": "TaskStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.Weekday",
+        "type": "Enum",
+        "tags": [],
+        "label": "Weekday",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

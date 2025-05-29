@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { either, isRight } from 'fp-ts/lib/Either';
+import { either, isRight } from 'fp-ts/Either';
 import * as t from 'io-ts';
 import { sloWithDataResponseSchema } from '../slo';
 

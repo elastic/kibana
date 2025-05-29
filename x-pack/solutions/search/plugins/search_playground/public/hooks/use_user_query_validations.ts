@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form/dist/types';
 import { useDebounceFn } from '@kbn/react-hooks';
 
-import { ChatForm, ChatFormFields } from '../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../types';
 import { validateUserElasticSearchQuery } from '../utils/user_query';
 
 const DEBOUNCE_OPTIONS = { wait: 500 };
@@ -17,17 +17,17 @@ export const useUserQueryValidations = ({
   watch,
   setValue,
   getValues,
-}: Pick<UseFormReturn<ChatForm>, 'watch' | 'getValues' | 'setValue'>) => {
-  const userElasticsearchQuery = watch(ChatFormFields.userElasticsearchQuery);
-  const elasticsearchQuery = watch(ChatFormFields.elasticsearchQuery);
+}: Pick<UseFormReturn<PlaygroundForm>, 'watch' | 'getValues' | 'setValue'>) => {
+  const userElasticsearchQuery = watch(PlaygroundFormFields.userElasticsearchQuery);
+  const elasticsearchQuery = watch(PlaygroundFormFields.elasticsearchQuery);
 
   const userQueryValidation = useDebounceFn(() => {
     const [esQuery, userInputQuery] = getValues([
-      ChatFormFields.elasticsearchQuery,
-      ChatFormFields.userElasticsearchQuery,
+      PlaygroundFormFields.elasticsearchQuery,
+      PlaygroundFormFields.userElasticsearchQuery,
     ]);
     const validations = validateUserElasticSearchQuery(userInputQuery, esQuery);
-    setValue(ChatFormFields.userElasticsearchQueryValidations, validations);
+    setValue(PlaygroundFormFields.userElasticsearchQueryValidations, validations);
   }, DEBOUNCE_OPTIONS);
   useEffect(() => {
     userQueryValidation.run();

@@ -40,7 +40,12 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
+import {
+  DEFAULT_LENS_LAYOUT_DIMENSIONS,
+  ShareableConfiguration,
+  getLocatorParams,
+  getShareURL,
+} from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({
@@ -340,7 +345,8 @@ export const LensTopNavMenu = ({
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
-  const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
+  const isOnTextBasedMode =
+    query != null && typeof query === 'object' && isOfAggregateQueryType(query);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(
@@ -385,6 +391,7 @@ export const LensTopNavMenu = ({
     }
     const indexPatternIds = new Set(
       getIndexPatternsIds({
+        activeDatasourceId,
         activeDatasources: Object.keys(datasourceStates).reduce(
           (acc, datasourceId) => ({
             ...acc,
@@ -410,9 +417,10 @@ export const LensTopNavMenu = ({
       indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.size ||
       [...indexPatternIds].some(
         (id) =>
-          ![...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns].find(
-            (loadedId) => loadedId === id
-          )
+          !indexPatterns
+            .map((ip) => ip.id)
+            .concat(rejectedIndexPatterns)
+            .some((loadedId) => loadedId === id)
       );
 
     // Update the cached index patterns if the user made a change to any of them
@@ -456,12 +464,6 @@ export const LensTopNavMenu = ({
     data.dataViews,
     isOnTextBasedMode,
   ]);
-
-  useEffect(() => {
-    if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
-      setIsOnTextBasedMode(true);
-    }
-  }, [query]);
 
   useEffect(() => {
     return () => {
@@ -601,27 +603,20 @@ export const LensTopNavMenu = ({
 
             const activeVisualization = visualizationMap[visualization.activeId];
 
-            const {
-              shareableUrl,
-              savedObjectURL,
-              reportingLocatorParams: locatorParams,
-            } = await getShareURL(
-              shortUrlService,
-              { application, data },
-              {
-                filters,
-                query,
-                activeDatasourceId,
-                datasourceStates,
-                datasourceMap,
-                visualizationMap,
-                visualization,
-                currentDoc,
-                adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
-              },
-              shareUrlEnabled,
-              isCurrentStateDirty
-            );
+            const configuration: ShareableConfiguration = {
+              filters,
+              query,
+              activeDatasourceId,
+              datasourceStates,
+              datasourceMap,
+              visualizationMap,
+              visualization,
+              currentDoc,
+              adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
+            };
+
+            const { shareURL: shareLocatorParams, reporting: reportingLocatorParams } =
+              getLocatorParams(data, configuration, isCurrentStateDirty);
 
             const datasourceLayers = getDatasourceLayers(
               datasourceStates,
@@ -644,7 +639,7 @@ export const LensTopNavMenu = ({
               title: title || defaultLensTitle,
               locatorParams: {
                 id: LENS_APP_LOCATOR,
-                params: locatorParams,
+                params: reportingLocatorParams,
               },
               layout: {
                 dimensions:
@@ -655,13 +650,7 @@ export const LensTopNavMenu = ({
 
             share.toggleShareContextMenu({
               anchorElement,
-              allowEmbed: false,
               allowShortUrl: false,
-              delegatedShareUrlHandler: () => {
-                return isCurrentStateDirty || !currentDoc?.savedObjectId
-                  ? shareableUrl!
-                  : savedObjectURL.href;
-              },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
               objectTypeMeta: {
@@ -686,16 +675,33 @@ export const LensTopNavMenu = ({
                         />
                       </EuiCallOut>
                     ),
+                    delegatedShareUrlHandler: async () => {
+                      const { shareableUrl, savedObjectURL } = getShareURL(
+                        shortUrlService,
+                        shareLocatorParams,
+                        { application, data },
+                        configuration,
+                        shareUrlEnabled,
+                        isCurrentStateDirty
+                      );
+
+                      return !currentDoc?.savedObjectId
+                        ? (await shareableUrl)!
+                        : savedObjectURL.href;
+                    },
+                    // disable the menu if both shortURL permission and the visualization has not been saved
+                    // TODO: improve here the disabling state with more specific checks
+                    disabled: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
+                  },
+                  embed: {
+                    disabled: true,
+                    showPublicUrlSwitch: () => false,
                   },
                 },
               },
               sharingData,
               // only want to know about changes when savedObjectURL.href
               isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
-              // disable the menu if both shortURL permission and the visualization has not been saved
-              // TODO: improve here the disabling state with more specific checks
-              disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
-              showPublicUrlSwitch: () => false,
               onClose: () => {
                 anchorElement?.focus();
               },
@@ -876,7 +882,6 @@ export const LensTopNavMenu = ({
           dispatchSetState({ query: newQuery as Query });
           // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
-            setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
                 newDatasourceId: 'textBased',
@@ -1076,7 +1081,6 @@ export const LensTopNavMenu = ({
             currentIndexPatternId: newIndexPatternId,
           })
         );
-        setIsOnTextBasedMode(false);
       }
     },
     onEditDataView: async (updatedDataViewStub) => {

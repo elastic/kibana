@@ -1251,6 +1251,98 @@ describe('Agent policy', () => {
         );
       }
     });
+
+    it('should link shared package policies', async () => {
+      agentPolicyService.requireUniqueName = async () => {};
+      soClient = savedObjectsClientMock.create();
+      const mockPolicy = {
+        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { revision: 1, package_policies: ['package-1'] } as any,
+      };
+      soClient.get.mockImplementation(async (type: string, id: string) => {
+        return {
+          id,
+          ...mockPolicy,
+        };
+      });
+      soClient.find
+        .mockImplementationOnce(async () => ({
+          saved_objects: [
+            {
+              id: 'agent-policy-id',
+              score: 1,
+              ...{ ...mockPolicy, name: 'mocked-policy' },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        }))
+        .mockImplementationOnce(async () => ({
+          saved_objects: [
+            {
+              id: 'agent-policy-id-copy',
+              score: 1,
+              ...{ ...mockPolicy, name: 'mocked-policy' },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        }));
+      soClient.create.mockImplementation(async (type, attributes) => {
+        return {
+          attributes: attributes as unknown as NewAgentPolicy,
+          id: 'mocked',
+          type: 'mocked',
+          references: [],
+        };
+      });
+      const packagePolicies = [
+        {
+          id: 'package-1',
+          name: 'package-1',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1', 'policy_2'],
+        },
+        {
+          id: 'package-2',
+          name: 'package-2',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1'],
+        },
+      ] as any;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
+      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        name: 'copy mocked',
+      });
+      expect(mockedPackagePolicyService.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            name: 'package-2 (copy)',
+            policy_id: 'policy_1',
+            policy_ids: ['mocked'],
+          },
+        ],
+        expect.anything()
+      );
+      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            id: 'package-1',
+            name: 'package-1',
+            policy_id: 'policy_1',
+            policy_ids: ['policy_1', 'policy_2', 'mocked'],
+          },
+        ]
+      );
+    });
   });
 
   describe('deployPolicy', () => {

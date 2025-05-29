@@ -852,6 +852,18 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should not populate agent.protection and signed properties for standalone policies', async () => {
+    appContextService.start(createAppContextStartContractMock());
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy', {
+      standalone: true,
+    });
+
+    expect(agentPolicy!.agent!.protection).toBeUndefined();
+    expect(agentPolicy!.signed).toBeUndefined();
+  });
+
   it('should compile full policy with correct namespaces', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
@@ -1420,6 +1432,40 @@ ssl.test: 123
         "hosts": Array [
           "host.fr:3332",
         ],
+        "type": "logstash",
+      }
+    `);
+  });
+
+  it('should not override advanced yaml ssl fields for logstash output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['host.fr:3332'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'logstash',
+        config_yaml: 'ssl:\n  verification_mode: "none" ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "host.fr:3332",
+        ],
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+          "verification_mode": "none",
+        },
         "type": "logstash",
       }
     `);

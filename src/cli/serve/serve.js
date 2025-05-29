@@ -272,6 +272,10 @@ export default function (program) {
       .option(
         '--no-dev-credentials',
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
+      )
+      .option(
+        '--extended-stack-trace',
+        'Collect more complete stack traces. See src/cli/dev.js for explanation.'
       );
   }
 

@@ -10,6 +10,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import type { Observable } from 'rxjs';
+import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
@@ -52,17 +53,25 @@ import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
 
-import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
-import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
-import { updateMaintenanceWindowRoute } from './maintenance_window/apis/update/update_maintenance_window_route';
-import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/delete/delete_maintenance_window_route';
-import { findMaintenanceWindowsRoute } from './maintenance_window/apis/find/find_maintenance_windows_route';
-import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/archive/archive_maintenance_window_route';
-import { finishMaintenanceWindowRoute } from './maintenance_window/apis/finish/finish_maintenance_window_route';
-import { getActiveMaintenanceWindowsRoute } from './maintenance_window/apis/get_active/get_active_maintenance_windows_route';
+import { createMaintenanceWindowRoute as createMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/create/create_maintenance_window_route';
+import { getMaintenanceWindowRoute as getMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/get/get_maintenance_window_route';
+import { updateMaintenanceWindowRoute as updateMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/update/update_maintenance_window_route';
+import { deleteMaintenanceWindowRoute as deleteMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/delete/delete_maintenance_window_route';
+import { findMaintenanceWindowsRoute as findMaintenanceWindowsRouteInternal } from './maintenance_window/apis/internal/find/find_maintenance_windows_route';
+import { archiveMaintenanceWindowRoute as archiveMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/archive/archive_maintenance_window_route';
+import { finishMaintenanceWindowRoute as finishMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/finish/finish_maintenance_window_route';
+import { getActiveMaintenanceWindowsRoute as getActiveMaintenanceWindowsRouteInternal } from './maintenance_window/apis/internal/get_active/get_active_maintenance_windows_route';
+import { bulkGetMaintenanceWindowRoute as bulkGetMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/bulk_get/bulk_get_maintenance_windows_route';
+
+import { getMaintenanceWindowRoute } from './maintenance_window/apis/external/get/get_maintenance_window_route';
+import { createMaintenanceWindowRoute } from './maintenance_window/apis/external/create/create_maintenance_window_route';
+import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/external/delete/delete_maintenance_window_route';
+import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/external/archive/archive_maintenance_window_route';
+import { unarchiveMaintenanceWindowRoute } from './maintenance_window/apis/external/unarchive/unarchive_maintenance_window_route';
+import { updateMaintenanceWindowRoute } from './maintenance_window/apis/external/update/update_maintenance_window_route';
+
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
-import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
@@ -78,7 +87,7 @@ import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
 import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
-
+import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -88,6 +97,7 @@ export interface RouteOptions {
   config$?: Observable<ConfigSchema>;
   isServerless?: boolean;
   docLinks: DocLinksServiceSetup;
+  alertingConfig: AlertingConfig;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -98,6 +108,7 @@ export function defineRoutes(opts: RouteOptions) {
     usageCounter,
     config$,
     getAlertIndicesAlias,
+    alertingConfig,
   } = opts;
 
   createRuleRoute(opts);
@@ -139,17 +150,26 @@ export function defineRoutes(opts: RouteOptions) {
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
 
-  // Maintenance Window APIs
-  createMaintenanceWindowRoute(router, licenseState);
-  getMaintenanceWindowRoute(router, licenseState);
-  updateMaintenanceWindowRoute(router, licenseState);
-  deleteMaintenanceWindowRoute(router, licenseState);
-  findMaintenanceWindowsRoute(router, licenseState);
-  archiveMaintenanceWindowRoute(router, licenseState);
-  finishMaintenanceWindowRoute(router, licenseState);
-  getActiveMaintenanceWindowsRoute(router, licenseState);
-  bulkGetMaintenanceWindowRoute(router, licenseState);
+  if (alertingConfig.maintenanceWindow.enabled) {
+    // Maintenance Window - Internal APIs
+    createMaintenanceWindowRouteInternal(router, licenseState);
+    getMaintenanceWindowRouteInternal(router, licenseState);
+    updateMaintenanceWindowRouteInternal(router, licenseState);
+    deleteMaintenanceWindowRouteInternal(router, licenseState);
+    findMaintenanceWindowsRouteInternal(router, licenseState);
+    archiveMaintenanceWindowRouteInternal(router, licenseState);
+    finishMaintenanceWindowRouteInternal(router, licenseState);
+    getActiveMaintenanceWindowsRouteInternal(router, licenseState);
+    bulkGetMaintenanceWindowRouteInternal(router, licenseState);
 
+    // Maintenance Window - External APIs
+    getMaintenanceWindowRoute(router, licenseState);
+    createMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
+    unarchiveMaintenanceWindowRoute(router, licenseState);
+    updateMaintenanceWindowRoute(router, licenseState);
+  }
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);
@@ -162,16 +182,20 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
 
+  // Rules Settings APIs
+  if (alertingConfig.rulesSettings.enabled) {
+    getQueryDelaySettingsRoute(router, licenseState);
+    updateQueryDelaySettingsRoute(router, licenseState);
+    getFlappingSettingsRoute(router, licenseState);
+    updateFlappingSettingsRoute(router, licenseState);
+  }
   // Other APIs
   registerFieldsRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
-  getQueryDelaySettingsRoute(router, licenseState);
-  updateQueryDelaySettingsRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getActionErrorLogRoute(router, licenseState);
-  getFlappingSettingsRoute(router, licenseState);
-  updateFlappingSettingsRoute(router, licenseState);
   runSoonRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
+  getGlobalExecutionSummaryRoute(router, licenseState);
 }

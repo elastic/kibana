@@ -369,11 +369,13 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
+    const spaceId = (await context.securitySolution).getSpaceId();
     const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
       req.body.agent_type || 'endpoint',
       {
         esClient,
         casesClient,
+        spaceId,
         endpointService: endpointContext.service,
         username: user?.username || 'unknown',
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),

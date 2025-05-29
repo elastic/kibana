@@ -1,16 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PointToolTipContent renders correctly against snapshot 1`] = `
-<PointToolTipContentComponent
-  contextId="contextId"
-  featureProps={
-    Array [
-      TooltipProperty {
-        "_propertyKey": "host.name",
-        "_propertyName": "host.name",
-        "_rawValue": "testPropValue",
-      },
-    ]
-  }
-/>
+.c0 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+<dl
+  class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+  data-type="row"
+>
+  <dt
+    class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+  >
+    Host
+  </dt>
+  <dd
+    class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+  >
+    <span
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+      data-test-subj="DefaultFieldRendererComponent"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            data-test-subj="cellActions-renderContent-host.name"
+          >
+            <div>
+              <div
+                class="euiPopover emotion-euiPopover-inline-block"
+              >
+                <div>
+                  <div
+                    data-provider-id="draggableId.content.default-field-renderer-default-draggable-map-point-tooltip-contextId-host_name-testPropValue-host_name-testPropValue"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c0"
+                      data-test-subj="render-content-host.name"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        <button
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="host-details-button"
+                          type="button"
+                        >
+                          testPropValue
+                        </button>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+         
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
+    </span>
+  </dd>
+</dl>
 `;

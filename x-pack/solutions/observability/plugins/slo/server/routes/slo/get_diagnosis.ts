@@ -20,13 +20,12 @@ export const getDiagnosisRoute = createSloServerRoute({
     },
   },
   params: undefined,
-  handler: async ({ context, plugins }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  handler: async ({ request, logger, plugins, getScopedClients }) => {
+    const { scopedClusterClient } = await getScopedClients({ request, logger });
     const licensing = await plugins.licensing.start();
 
     try {
-      const response = await getGlobalDiagnosis(esClient, licensing);
-      return response;
+      return await getGlobalDiagnosis(scopedClusterClient.asCurrentUser, licensing);
     } catch (error) {
       if (error instanceof errors.ResponseError && error.statusCode === 403) {
         throw forbidden('Insufficient Elasticsearch cluster permissions to access feature.');

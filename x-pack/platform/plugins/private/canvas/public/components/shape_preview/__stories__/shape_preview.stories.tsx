@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Shape } from '@kbn/expression-shape-plugin/public';
+import { Shape } from '../../../../canvas_plugin_src/renderers/shape';
 import { ShapePreview } from '../shape_preview';
 
 export default {

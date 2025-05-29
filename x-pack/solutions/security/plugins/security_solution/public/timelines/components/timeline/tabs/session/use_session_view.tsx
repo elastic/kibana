@@ -282,12 +282,14 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
   );
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  let { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
-  if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openFlyout } = useExpandableFlyoutApi();

@@ -32,7 +32,15 @@ describe('initAPIAuthorization', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
       path: '/foo/bar',
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
@@ -61,6 +69,16 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       routeTags: ['not-access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Used in test suite',
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
@@ -90,12 +108,25 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       headers,
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
+    const mockCheckPrivileges = jest.fn().mockReturnValue({
+      privileges: {
+        kibana: [{ privilege: 'api:foo', authorized: true }],
+      },
+      hasAllRequested: true,
+    });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -105,10 +136,22 @@ describe('initAPIAuthorization', () => {
       return mockCheckPrivileges;
     });
 
+    mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+      expect(request.headers).toMatchObject(headers);
+
+      return {
+        globally: () => ({
+          privileges: {
+            kibana: [{ privilege: 'api:foo', authorized: true }],
+          },
+        }),
+      };
+    });
+
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
-    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockPostAuthToolkit.authzResultNext).toHaveBeenCalledTimes(1);
     expect(mockCheckPrivileges).toHaveBeenCalledWith({
       kibana: [mockAuthz.actions.api.get('foo')],
     });
@@ -131,12 +174,25 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       headers,
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
+    const mockCheckPrivileges = jest.fn().mockReturnValue({
+      privileges: {
+        kibana: [{ privilege: 'api:foo', authorized: false }],
+      },
+      hasAllRequested: false,
+    });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -144,6 +200,18 @@ describe('initAPIAuthorization', () => {
       expect(request.headers).toMatchObject(headers);
 
       return mockCheckPrivileges;
+    });
+
+    mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+      expect(request.headers).toMatchObject(headers);
+
+      return {
+        globally: () => ({
+          privileges: {
+            kibana: [{ privilege: 'api:foo', authorized: false }],
+          },
+        }),
+      };
     });
 
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);

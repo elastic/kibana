@@ -18,15 +18,36 @@ import { render } from '@testing-library/react';
 import { defaultGroupTitleRenderers } from '../../alerts_table/grouping_settings';
 import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
 import React from 'react';
+import { useTableSectionContext } from './table_section_context';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
+import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 
 jest.mock('../../../hooks/alert_summary/use_get_integration_from_rule_id');
+jest.mock('./table_section_context');
+jest.mock('@kbn/fleet-plugin/public/hooks');
+
+const integration: PackageListItem = {
+  id: 'splunk',
+  icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+  name: 'splunk',
+  status: installationStatuses.NotInstalled,
+  title: 'Splunk',
+  version: '0.1.0',
+};
 
 describe('groupTitleRenderers', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+  });
+
   it('should render correctly for signal.rule.id field', () => {
-    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
-      integration: { title: 'rule_name' },
-      isLoading: false,
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: { isLoading: false },
     });
+    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({ integration });
 
     const { getByTestId } = render(
       groupTitleRenderers(
@@ -117,10 +138,18 @@ describe('groupTitleRenderers', () => {
 });
 
 describe('IntegrationNameGroupContent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+  });
+
   it('should render the integration name and icon when a matching rule is found', () => {
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: { isLoading: false },
+    });
     (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
       integration: { title: 'rule_name', icons: 'icon' },
-      isLoading: false,
     });
 
     const { getByTestId, queryByTestId } = render(<IntegrationNameGroupContent title="rule.id" />);
@@ -134,9 +163,12 @@ describe('IntegrationNameGroupContent', () => {
   });
 
   it('should render rule id when no matching rule is found', () => {
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: { isLoading: false },
+    });
     (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
       integration: undefined,
-      isLoading: false,
     });
 
     const { getByTestId, queryByTestId } = render(<IntegrationNameGroupContent title="rule.id" />);
@@ -152,9 +184,12 @@ describe('IntegrationNameGroupContent', () => {
   });
 
   it('should render loading for signal.rule.id field when rule and packages are loading', () => {
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: { isLoading: true },
+    });
     (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
       integration: undefined,
-      isLoading: true,
     });
 
     const { getByTestId, queryByTestId } = render(<IntegrationNameGroupContent title="rule.id" />);

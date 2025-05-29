@@ -23,7 +23,6 @@ import type {
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -95,7 +94,6 @@ export type TaskManagerStartContract = Pick<
 export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  spaces?: SpacesPluginStart;
 }
 
 export interface TaskManagerPluginsSetup {
@@ -287,8 +285,8 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, security }: CoreStart,
-    { cloud, spaces }: TaskManagerPluginsStart
+    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    { cloud }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -322,7 +320,6 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
-      spaces,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -367,6 +364,7 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
+        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,

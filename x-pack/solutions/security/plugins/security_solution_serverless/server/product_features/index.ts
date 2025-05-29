@@ -61,15 +61,26 @@ export const registerProductFeatures = (
 };
 
 /**
- * Get the security product tier from the security product type in the config
+ * Get the product tier from the security/ai_soc product type in the config. This is used to determine if AI features
+ * are available in the given configuration.
  */
-export const getSecurityProductTier = (config: ServerlessSecurityConfig, logger: Logger): Tier => {
+export const getSecurityAiSocProductTier = (
+  config: ServerlessSecurityConfig,
+  logger: Logger
+): Tier => {
   const securityProductType = config.productTypes.find(
     (productType) => productType.product_line === ProductLine.security
   );
-  const tier = securityProductType ? securityProductType.product_tier : 'none';
+  const ai4SocProductType = config.productTypes.find(
+    (productType) => productType.product_line === ProductLine.aiSoc
+  );
+  const tier = securityProductType
+    ? securityProductType.product_tier
+    : ai4SocProductType
+    ? ai4SocProductType.product_tier
+    : 'none';
   if (tier === 'none') {
-    logger.error(`Failed to fetch security product tier, config: ${JSON.stringify(config)}`);
+    logger.error(`Failed to fetch security/aiSoc product tier, config: ${JSON.stringify(config)}`);
   }
 
   return tier;

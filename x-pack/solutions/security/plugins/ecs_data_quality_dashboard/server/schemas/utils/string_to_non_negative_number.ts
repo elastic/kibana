@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { either } from 'fp-ts/lib/Either';
-import type { Either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 
 export type StringToNonNegativeNumber = t.Type<number, string, unknown>;
 
