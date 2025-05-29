@@ -26,7 +26,7 @@ export const AlertDetailsRedirect = () => {
   const timestamp = searchParams.get('timestamp');
   // Although we use the 'default' space here when an index isn't provided or accidentally deleted
   // It's a safe catch all as we reset the '.internal.alerts-*` indices with the correct space in the flyout
-  // Here: x-pack/solutions/security/plugins/security_solution/public/common/components/event_details/helpers.tsx
+  // Here: x-pack/solutions/security/plugins/security_solution/public/timelines/components/side_panel/event_details/helpers.tsx
   const index = searchParams.get('index') ?? `.internal${DEFAULT_ALERTS_INDEX}-default`;
 
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
