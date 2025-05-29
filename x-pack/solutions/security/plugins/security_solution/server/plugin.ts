@@ -441,7 +441,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAgentRoutes(router, this.endpointContext);
-    // registerCustomScriptsRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
