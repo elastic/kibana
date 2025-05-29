@@ -19,8 +19,6 @@ jest.mock('../../../../../../hooks', () => ({
   sendGetAgents: jest.fn(),
 }));
 
-jest.mock('../package_policies');
-
 describe('AgentlessPackagePoliciesTable', () => {
   const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
 

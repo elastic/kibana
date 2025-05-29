@@ -54,7 +54,6 @@ const mockPagination = {
   setPagination: jest.fn(),
   pageSizeOptions: [10, 20, 50],
 };
-jest.mock('../package_policies');
 
 // FLAKY: https://github.com/elastic/kibana/issues/201837
 describe.skip('AgentBasedPackagePoliciesTable', () => {

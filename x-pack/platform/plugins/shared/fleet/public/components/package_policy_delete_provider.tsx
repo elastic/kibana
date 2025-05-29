@@ -193,10 +193,10 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       if (onSuccessCallback.current) {
         onSuccessCallback.current(successfulResults.map((result) => result.id));
       }
-    } catch (error) {
+    } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
-          defaultMessage: `${Error}`,
+          defaultMessage: `Error deleting integration`,
         })
       );
     }
