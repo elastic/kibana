@@ -58,12 +58,35 @@ export const QueryRulesetDetail: React.FC = () => {
 
   const [rules, setRules] = useState<QueryRulesQueryRule[]>(queryRulesetData?.rules ?? []);
   const TOUR_QUERY_RULES_STORAGE_KEY = 'queryRules.tour';
-  const targetTourId = 'targetTourId';
+
   const tourConfig = {
     currentTourStep: 1,
     isTourActive: true,
     tourPopoverWidth: 360,
   };
+
+  const tourStepsInfo = [
+    {
+      step: 1,
+      title: i18n.translate('xpack.queryRules.queryRulesetDetail.tourStep1Title', {
+        defaultMessage: 'Test your ruleset',
+      }),
+      content: i18n.translate('xpack.queryRules.queryRulesetDetail.tourStep1Content', {
+        defaultMessage: 'Now you can try out the query rule results in the console',
+      }),
+    },
+    {
+      step: 2,
+      title: i18n.translate('xpack.queryRules.queryRulesetDetail.tourStep2Title', {
+        defaultMessage: 'Drag the rule to set the priority',
+      }),
+      content: i18n.translate('xpack.queryRules.queryRulesetDetail.tourStep2Content', {
+        defaultMessage:
+          'Rules will trigger based on the priority order. The first rule will take precedence over any following rules',
+      }),
+      targetTourId: 'targetTourId',
+    },
+  ];
 
   const [tourState, setTourState] = useState(() => {
     let initialState: any = localStorage.getItem(TOUR_QUERY_RULES_STORAGE_KEY);
@@ -146,7 +169,7 @@ export const QueryRulesetDetail: React.FC = () => {
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
               <EuiFlexItem grow={false}>
                 <EuiTourStep
-                  content={<p>Now you can try out the query rule results in the console</p>}
+                  content={<p>{tourStepsInfo[0].content}</p>}
                   isStepOpen={tourState.isTourActive && tourState.currentTourStep === 1}
                   minWidth={tourState.tourPopoverWidth}
                   onFinish={finishTour}
@@ -154,7 +177,7 @@ export const QueryRulesetDetail: React.FC = () => {
                   stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
                   title={
                     <EuiTitle size="xs">
-                      <h6>Test your ruleset</h6>
+                      <h6>{tourStepsInfo[0].title}</h6>
                     </EuiTitle>
                   }
                   anchorPosition="rightUp"
@@ -264,12 +287,7 @@ export const QueryRulesetDetail: React.FC = () => {
         <>
           <EuiTourStep
             anchor="#targetTourId"
-            content={
-              <p>
-                Rules will trigger based on the priority order. The fist rule will take precedence
-                over any following rules.
-              </p>
-            }
+            content={<p>{tourStepsInfo[1].content}</p>}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === 2}
             maxWidth={tourState.tourPopoverWidth}
             onFinish={finishTour}
@@ -277,7 +295,7 @@ export const QueryRulesetDetail: React.FC = () => {
             stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
             title={
               <EuiTitle size="xs">
-                <h6>Drag the rule to set the priority</h6>
+                <h6>{tourStepsInfo[1].title}</h6>
               </EuiTitle>
             }
             anchorPosition="downLeft"
@@ -307,7 +325,11 @@ export const QueryRulesetDetail: React.FC = () => {
               </EuiFlexGroup>
             }
           />
-          <QueryRuleDetailPanel targetTour={targetTourId} rules={rules} setRules={setRules} />
+          <QueryRuleDetailPanel
+            tourInfo={tourStepsInfo[1].targetTourId ? tourStepsInfo[1] : undefined}
+            rules={rules}
+            setRules={setRules}
+          />
         </>
       )}
       {isError && (

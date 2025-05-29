@@ -15,7 +15,17 @@ import {
   DocumentCountLabelContainer,
 } from '../styles';
 
-export const QueryRuleDraggableListHeader: React.FC = () => {
+interface QueryRuleDraggableListHeaderProps {
+  tourInfo?: {
+    title: string;
+    content: string;
+    targetTourId: string;
+  };
+}
+
+export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeaderProps> = ({
+  tourInfo,
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup css={DraggableListHeader(euiTheme)}>
@@ -31,12 +41,7 @@ export const QueryRuleDraggableListHeader: React.FC = () => {
                   />
                 </b>
               </EuiText>
-              <EuiIconTip
-                title="Drag the rule to set the priority"
-                content="Rules will trigger based on the priority order. The first rule will take precedence
-                over any following rules"
-                position="right"
-              />
+              <EuiIconTip title={tourInfo?.title} content={tourInfo?.content} position="right" />
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
