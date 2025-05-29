@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  AppDeepLinkLocations,
-} from '@kbn/core/public';
+import type { PluginInitializerContext, AppDeepLinkLocations } from '@kbn/core/public';
 import {
   type AppMountParameters,
   type AppUpdater,
