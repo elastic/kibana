@@ -9,35 +9,41 @@ import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import type { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import moment from 'moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Agent as SuperTestAgent } from 'supertest';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { PrivateLocationTestService } from '@kbn/test-suites-xpack-observability/api_integration/apis/synthetics/services/private_location_test_service';
-import { waitForAlertInIndex } from '../helpers/alerting_wait_for_helpers';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
+import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { AlertingApiProvider } from '../../../../services/alerting_api';
 
 export const SYNTHETICS_ALERT_ACTION_INDEX = 'alert-action-synthetics';
+export const SYNTHETICS_DOCS_INDEX = 'synthetics-http-default';
+
 export class SyntheticsRuleHelper {
-  supertest: SuperTestAgent;
+  supertestEditorWithApiKey: SupertestWithRoleScope;
+  adminRoleAuthc: RoleCredentials;
   logger: ToolingLog;
   esClient: Client;
   retryService: RetryService;
-  locService: PrivateLocationTestService;
   alertActionIndex: string;
   actionId: string | null = null;
+  alertingApi: ReturnType<typeof AlertingApiProvider>;
 
-  constructor(getService: FtrProviderContext['getService']) {
+  constructor(
+    getService: DeploymentAgnosticFtrProviderContext['getService'],
+    supertestEditorWithApiKey: SupertestWithRoleScope,
+    adminRoleAuthc: RoleCredentials
+  ) {
     this.esClient = getService('es');
-    this.supertest = getService('supertest');
+    this.supertestEditorWithApiKey = supertestEditorWithApiKey;
+    this.adminRoleAuthc = adminRoleAuthc;
     this.logger = getService('log');
     this.retryService = getService('retry');
-    this.locService = new PrivateLocationTestService(getService);
     this.alertActionIndex = SYNTHETICS_ALERT_ACTION_INDEX;
+    this.alertingApi = getService('alertingApi');
   }
 
   async createIndexAction() {
@@ -51,11 +57,10 @@ export class SyntheticsRuleHelper {
         },
       },
     });
-    const actionId = await createIndexConnector({
-      supertest: this.supertest,
+    const actionId = await this.alertingApi.createIndexConnector({
+      roleAuthc: this.adminRoleAuthc,
       name: 'Index Connector: Synthetics API test',
       indexName: this.alertActionIndex,
-      logger: this.logger,
     });
     this.actionId = actionId;
   }
@@ -71,15 +76,13 @@ export class SyntheticsRuleHelper {
     if (this.actionId === null) {
       throw new Error('Index action not created. Call createIndexAction() first');
     }
-    return await createRule<StatusRuleParams>({
+    return this.alertingApi.createRule({
+      roleAuthc: this.adminRoleAuthc,
       params,
       name: name ?? 'Custom status rule',
       ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
       consumer: 'alerts',
-      supertest: this.supertest,
-      esClient: this.esClient,
-      logger: this.logger,
-      schedule: { interval: '15s' },
+      schedule: { interval: '5s' },
       actions: [
         {
           group: 'recovered',
@@ -140,9 +143,8 @@ export class SyntheticsRuleHelper {
       url: 'http://www.google.com',
       schedule: 1,
     };
-    const res = await this.supertest
+    const res = await this.supertestEditorWithApiKey
       .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true')
-      .set('kbn-xsrf', 'true')
       .send(testData);
 
     expect(res.status).to.eql(200, JSON.stringify(res.body));
@@ -151,18 +153,16 @@ export class SyntheticsRuleHelper {
   }
 
   async deleteMonitor(monitorId: string) {
-    const res = await this.supertest
+    const res = await this.supertestEditorWithApiKey
       .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-      .set('kbn-xsrf', 'true')
       .send();
 
     expect(res.status).to.eql(200);
   }
 
   async updateTestMonitor(monitorId: string, updates: Record<string, any>) {
-    const result = await this.supertest
+    const result = await this.supertestEditorWithApiKey
       .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`)
-      .set('kbn-xsrf', 'true')
       .send(updates);
 
     expect(result.status).to.eql(200, JSON.stringify(result.body));
@@ -177,14 +177,10 @@ export class SyntheticsRuleHelper {
     ruleId: string;
     filters?: QueryDslQueryContainer[];
   }) {
-    return await waitForAlertInIndex({
+    return this.alertingApi.waitForAlertInIndex({
       ruleId,
       filters,
-      esClient: this.esClient,
-      retryService: this.retryService,
-      logger: this.logger,
-      indexName: '.internal.alerts-observability.uptime.alerts-default*',
-      retryDelay: 1000,
+      indexName: '.alerts-observability.uptime.alerts-default*',
     });
   }
 
@@ -249,8 +245,6 @@ export class SyntheticsRuleHelper {
       '@timestamp': timestamp,
     };
 
-    const index = 'synthetics-http-default';
-
     const commonData = {
       timestamp,
       location,
@@ -275,7 +269,7 @@ export class SyntheticsRuleHelper {
       `created synthetics summary, status: ${status}, monitor: "${monitor.name}", location: "${location?.label}"`
     );
     await this.esClient.index({
-      index,
+      index: SYNTHETICS_DOCS_INDEX,
       document,
       refresh: true,
     });
