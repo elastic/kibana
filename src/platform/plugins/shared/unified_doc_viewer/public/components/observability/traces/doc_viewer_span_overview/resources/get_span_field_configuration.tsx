@@ -66,6 +66,12 @@ export const getSpanFieldConfiguration = ({
       formattedValue: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       fieldMetadata: {
         flat_name: 'span.destination.service.resource',
+        short: i18n.translate(
+          'unifiedDocViewer.observability.traces.details.spanDestinationServiceResource.description',
+          {
+            defaultMessage: 'Used to identify the service this span depends on.',
+          }
+        ),
       },
     },
     [SPAN_TYPE_FIELD]: {
