@@ -18,6 +18,7 @@ import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import {
   installAssetsForInputPackagePolicy,
   removeAssetsForInputPackagePolicy,
+  isInputPackageDatasetUsedByMultiplePolicies,
 } from './input_type_packages';
 import { cleanupAssets } from './remove';
 
@@ -352,5 +353,76 @@ describe('removeAssetsForInputPackagePolicy', () => {
       logger: mockedLogger,
     });
     expect(mockedLogger.error).toBeCalled();
+  });
+
+  describe('isInputPackageDatasetUsedByMultiplePolicies', () => {
+    const policy1 = {
+      id: 'policy1',
+      name: 'Policy',
+      policy_ids: ['agent-policy'],
+      description: 'Policy description',
+      namespace: 'default',
+      inputs: [],
+      package: {
+        name: 'logs',
+        title: 'Test',
+        version: '1.0.0',
+        type: 'input',
+      },
+    };
+    const policy2 = {
+      id: 'test-package-policy',
+      name: 'Test policy',
+      policy_ids: ['agent-policy'],
+      description: 'Test policy description',
+      namespace: 'default',
+      inputs: [],
+      package: {
+        name: 'logs',
+        title: 'Test',
+        version: '1.0.0',
+        type: 'input',
+      },
+    };
+
+    it('should return false if there are no other policies using the dataset', async () => {
+      const res = await isInputPackageDatasetUsedByMultiplePolicies(
+        [policy1, policy2] as any,
+        'generic',
+        'logs'
+      );
+      expect(res).toEqual(false);
+    });
+
+    it('should return true if there other policies using the same dataset ', async () => {
+      const res = await isInputPackageDatasetUsedByMultiplePolicies(
+        [
+          {
+            ...policy1,
+            inputs: [
+              {
+                streams: [
+                  { vars: { 'data_stream.dataset': { value: 'udp.generic', type: 'text' } } },
+                ],
+              },
+            ],
+            namespace: 'another',
+          },
+          {
+            ...policy2,
+            inputs: [
+              {
+                streams: [
+                  { vars: { 'data_stream.dataset': { value: 'udp.generic', type: 'text' } } },
+                ],
+              },
+            ],
+          },
+        ] as any,
+        'udp.generic',
+        'logs'
+      );
+      expect(res).toEqual(true);
+    });
   });
 });

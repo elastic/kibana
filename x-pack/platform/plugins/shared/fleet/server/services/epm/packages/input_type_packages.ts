@@ -71,11 +71,12 @@ export const isInputPackageDatasetUsedByMultiplePolicies = (
         packagePolicy?.package?.name === pkgName || packagePolicy?.package?.type === 'input'
     )
     .flatMap((packagePolicy) => {
-      return packagePolicy.inputs[0].streams;
+      return packagePolicy?.inputs[0]?.streams ?? [];
     });
   const filtered = allStreams.filter(
     (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
   );
+
   return filtered.length > 1;
 };
 
