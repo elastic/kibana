@@ -14,13 +14,14 @@ import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import {
   FunctionDefinition,
+  FunctionDefinitionTypes,
   FunctionParameterType,
   FunctionReturnType,
-  Signature,
-  FunctionDefinitionTypes,
   Location,
+  Signature,
 } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
+
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
   to_unsigned_long: ['to_ul', 'to_ulong'],
@@ -93,6 +94,7 @@ const defaultScalarFunctionLocations: Location[] = [
   Location.STATS,
   Location.STATS_BY,
   Location.STATS_WHERE,
+  Location.COMPLETION,
 ];
 
 const defaultAggFunctionLocations: Location[] = [Location.STATS];
@@ -740,6 +742,7 @@ const enrichOperators = (
         Location.SORT,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.COMPLETION,
       ]);
     }
     if (isMathOperator) {
@@ -752,6 +755,7 @@ const enrichOperators = (
         Location.STATS,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.COMPLETION,
       ]);
     }
     if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
@@ -761,6 +765,7 @@ const enrichOperators = (
         Location.SORT,
         Location.ROW,
         Location.STATS_WHERE,
+        Location.COMPLETION,
       ];
     }
     if (isInOperator) {

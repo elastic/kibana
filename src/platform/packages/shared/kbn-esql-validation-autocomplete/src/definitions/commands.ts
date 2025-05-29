@@ -54,6 +54,7 @@ import {
 } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
+import { validate as validateCompletion } from '../validation/commands/completion';
 import {
   suggest as suggestForGrok,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
@@ -705,5 +706,18 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
 
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
+  },
+  {
+    hidden: false, // //HD
+    name: 'completion',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionDoc', {
+      defaultMessage: 'Executes a completion through an LLM.',
+    }),
+    declaration: `COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)`,
+    examples: [],
+
+    suggest: () => [],
+    validate: validateCompletion,
   },
 ];

@@ -251,6 +251,11 @@ export enum Location {
    * In the SHOW command
    */
   SHOW = 'show',
+
+  /**
+   * In the COMPLETION command
+   */
+  COMPLETION = 'completion',
 }
 
 const commandOptionNameToLocation: Record<string, Location> = {
@@ -266,6 +271,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
+  completion: Location.COMPLETION,
 };
 
 /**
