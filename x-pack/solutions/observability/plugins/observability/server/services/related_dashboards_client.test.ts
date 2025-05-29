@@ -55,7 +55,7 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       alertsClient.getAlertById.mockResolvedValue(null);
 
-      expect(client.fetchSuggestedDashboards()).rejects.toThrow(
+      await expect(client.fetchSuggestedDashboards()).rejects.toThrow(
         `Alert with id ${alertId} not found. Could not fetch related dashboards.`
       );
     });
