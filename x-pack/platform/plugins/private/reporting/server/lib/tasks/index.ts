@@ -34,6 +34,8 @@ export interface ScheduledReportTaskParams {
   schedule: RruleSchedule;
 }
 
+export type ScheduledReportTaskParamsWithoutSpaceId = Omit<ScheduledReportTaskParams, 'spaceId'>;
+
 export enum ReportingTaskStatus {
   UNINITIALIZED = 'uninitialized',
   INITIALIZED = 'initialized',

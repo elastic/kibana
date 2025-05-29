@@ -10,7 +10,11 @@ import { numberToDuration } from '@kbn/reporting-common';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import { SCHEDULED_REPORTING_EXECUTE_TYPE, ScheduledReportTaskParams } from '.';
+import {
+  SCHEDULED_REPORTING_EXECUTE_TYPE,
+  ScheduledReportTaskParams,
+  ScheduledReportTaskParamsWithoutSpaceId,
+} from '.';
 import type { SavedReport } from '../store';
 import { errorLogger } from './error_logger';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -93,7 +97,10 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     };
   }
 
-  public async scheduleTask(request: KibanaRequest, params: ScheduledReportTaskParams) {
+  public async scheduleTask(
+    request: KibanaRequest,
+    params: ScheduledReportTaskParamsWithoutSpaceId
+  ) {
     const spaceId = this.opts.reporting.getSpaceId(request, this.logger);
     const taskInstance: ScheduledReportTaskInstance = {
       id: params.id,

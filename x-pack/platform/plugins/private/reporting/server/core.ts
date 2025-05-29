@@ -58,7 +58,7 @@ import {
   RunSingleReportTask,
   ReportTaskParams,
   RunScheduledReportTask,
-  ScheduledReportTaskParams,
+  ScheduledReportTaskParamsWithoutSpaceId,
 } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
@@ -348,7 +348,10 @@ export class ReportingCore {
     return await this.runSingleReportTask.scheduleTask(request, report);
   }
 
-  public async scheduleRecurringTask(request: KibanaRequest, report: ScheduledReportTaskParams) {
+  public async scheduleRecurringTask(
+    request: KibanaRequest,
+    report: ScheduledReportTaskParamsWithoutSpaceId
+  ) {
     return await this.runScheduledReportTask.scheduleTask(request, report);
   }
 

@@ -235,7 +235,6 @@ describe('Run Scheduled Report Task', () => {
     await task.scheduleTask(fakeRawRequest as unknown as KibanaRequest, {
       id: 'report-so-id',
       jobtype: 'test1',
-      spaceId: 'default',
       schedule: {
         rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
       } as never,
