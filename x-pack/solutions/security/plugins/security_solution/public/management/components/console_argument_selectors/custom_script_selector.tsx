@@ -51,7 +51,6 @@ interface CustomScriptSelectorState {
 type SelectableOption = EuiSelectableOption<Partial<{ description: CustomScript['description'] }>>;
 
 export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
-export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   const CustomScriptSelectorComponent = memo<
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
   >(({ value, valueText, onChange, store: _store }) => {
