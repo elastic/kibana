@@ -35,8 +35,9 @@ export type SearchQueryRulesQueryRuleset = Omit<QueryRulesQueryRuleset, 'rules'>
 
 export type QueryRuleEditorForm = Pick<
   SearchQueryRulesQueryRule,
-  'rule_id' | 'criteria' | 'type' | 'actions'
-> &
-  Pick<QueryRulesQueryRuleset, 'ruleset_id'> & {
-    mode: 'create' | 'edit';
-  };
+  'criteria' | 'type' | 'actions'
+> & {
+  mode: 'create' | 'edit';
+  rulesetId: string;
+  ruleId: string;
+};
