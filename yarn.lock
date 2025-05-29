@@ -3028,11 +3028,6 @@
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.21.0.tgz#a5011aab9e6082e706937b26ef23445933fa0d15"
   integrity sha512-7XhUbtnlkSEZK15kN3t+tzIMxsbKm/dSkKBFalj+20NvPKe1kBY7mR2P7vuijEn+f06z5+A8bVGKO0v39cr6Wg==
 
-"@google/generative-ai@^0.24.0":
-  version "0.24.1"
-  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
-  integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
-
 "@graphql-typed-document-node/core@^3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
@@ -8174,7 +8169,7 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/aws@^0.1.10":
+"@langchain/aws@^0.1.3":
   version "0.1.10"
   resolved "https://registry.yarnpkg.com/@langchain/aws/-/aws-0.1.10.tgz#3460e1a6d5ae19ed597a1b6984ea4c9f1e119410"
   integrity sha512-PWA68aPBdLgmOvzsVgVpBec3sfwyCgsx/fpaTsf75k6TfHp4KBzqGGLGzgYo5/QBrInRkxVawJL1eKu4APy2nw==
@@ -8186,7 +8181,7 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/community@^0.3.45":
+"@langchain/community@^0.3.29":
   version "0.3.45"
   resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.3.45.tgz#7af0cfd67ee662bf4f88a655babbf808918262fd"
   integrity sha512-KkAGmnP+w5tozLYsj/kGKwyfuPnCcA6MyDXfNF7oDo7L1TxhUgdEKhvNsY7ooLXz6Xh/LV5Kqp2B8U0jfYCQKQ==
@@ -8221,37 +8216,36 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/google-common@^0.2.10":
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/@langchain/google-common/-/google-common-0.2.10.tgz#a6126c9b1825fb70fc23d295037b4c7b832ec470"
-  integrity sha512-3QcKnpLZBO1rYyeb/iOnL46r5N5iubNK/EZg2gdvO8SAcB+6lDaJY5mMBdA9Cbs8HwwhGDIvuw/R/zI7AMuXPw==
+"@langchain/google-common@^0.1.8", "@langchain/google-common@~0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@langchain/google-common/-/google-common-0.1.8.tgz#a8d0fb8946334675aa32f1e8501d43b3c7e4e870"
+  integrity sha512-8auqWw2PMPhcHQHS+nMN3tVZrUPgSLckUaFeOHDOeSBiDvBd4KCybPwyl2oCwMDGvmyIxvOOckkMdeGaJ92vpQ==
   dependencies:
     uuid "^10.0.0"
     zod-to-json-schema "^3.22.4"
 
-"@langchain/google-gauth@^0.2.10":
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/@langchain/google-gauth/-/google-gauth-0.2.10.tgz#e9e732e2ff4ff0f5c141f7ac9dec8b26c8bbffdc"
-  integrity sha512-3AUxjZUKvk9Z009yfJq1dm8adgTn8tYgDkxN/NIobQtCtSCvYyeAhO7XsNGcFuczym9UBXzx1gfCq9+SZ4P+BQ==
+"@langchain/google-gauth@~0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@langchain/google-gauth/-/google-gauth-0.1.8.tgz#7210cb72b42502ed744028cff09bc4690e4e2342"
+  integrity sha512-2QK7d5SQMrnSv7X4j05BGfO74hiA8FJuNwSsQKZvzlGoVnNXil3x2aqD5V+zsYOPpxhkDCpNlmh2Pue2Wzy1rQ==
   dependencies:
-    "@langchain/google-common" "^0.2.10"
-    google-auth-library "^9.15.1"
+    "@langchain/google-common" "~0.1.8"
+    google-auth-library "^8.9.0"
 
-"@langchain/google-genai@^0.2.10":
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-0.2.10.tgz#e2666acd80c25bac7e923ef73755eb505c81bdb6"
-  integrity sha512-kIy0qhu7FAsShNTvuOx8uV+hf7mWk8OzJP5W9mjs1ovAIT1C9WqG1epkhexBfj4DAQfQ6E+m/oGtJ+CVsalspw==
+"@langchain/google-genai@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-0.1.8.tgz#9dd702f2e38a58cc4e5d53fef97aa66a03bdb526"
+  integrity sha512-aBz8IzEJfihOVz2GpqFrdLWjDlpscZUYIA7LZ2iazU7edO03etPaqxdexiYKr/Q+Be2D0BT7uaFJsouvQApIZA==
   dependencies:
-    "@google/generative-ai" "^0.24.0"
-    uuid "^11.1.0"
+    "@google/generative-ai" "^0.21.0"
     zod-to-json-schema "^3.22.4"
 
-"@langchain/google-vertexai@^0.2.10":
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/@langchain/google-vertexai/-/google-vertexai-0.2.10.tgz#3d4e167355b06690a182af32a2c016d609935bdf"
-  integrity sha512-XOPUxmsC0vlrtXBrCc3kplb/HbP6D4oj6gR74/vSKqWpgnsm7oDpbyzNg9zYpB9B1Ctps93wQYQzF74JRbOq1g==
+"@langchain/google-vertexai@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@langchain/google-vertexai/-/google-vertexai-0.1.8.tgz#a9b1eeb52aba3b61c0812198921dc947f7979f75"
+  integrity sha512-n06ohihopz38agOm7BTASHMmFLz+XAZlzEvqtPC4Qa1fhYhzETQg2gCzEapIJ1yVk5MhrWqwKnVOQ+tIsFE88Q==
   dependencies:
-    "@langchain/google-gauth" "^0.2.10"
+    "@langchain/google-gauth" "~0.1.8"
 
 "@langchain/langgraph-checkpoint@~0.0.17":
   version "0.0.17"
@@ -8270,7 +8264,7 @@
     p-retry "4"
     uuid "^9.0.0"
 
-"@langchain/langgraph@^0.2.74":
+"@langchain/langgraph@^0.2.45":
   version "0.2.74"
   resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.2.74.tgz#37367a1e8bafda3548037a91449a69a84f285def"
   integrity sha512-oHpEi5sTZTPaeZX1UnzfM2OAJ21QGQrwReTV6+QnX7h8nDCBzhtipAw1cK616S+X8zpcVOjgOtJuaJhXa4mN8w==
@@ -8280,23 +8274,13 @@
     uuid "^10.0.0"
     zod "^3.23.8"
 
-"@langchain/openai@>=0.1.0 <0.5.0", "@langchain/openai@>=0.2.0 <0.6.0":
+"@langchain/openai@>=0.1.0 <0.5.0", "@langchain/openai@>=0.2.0 <0.6.0", "@langchain/openai@^0.4.4":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.4.4.tgz#1832420495c53c28aa4e6515583bad8f0b83a637"
   integrity sha512-UZybJeMd8+UX7Kn47kuFYfqKdBCeBUWNqDtmAr6ZUIMMnlsNIb6MkrEEhGgAEjGCpdT4CU8U/DyyddTz+JayOQ==
   dependencies:
     js-tiktoken "^1.0.12"
     openai "^4.77.0"
-    zod "^3.22.4"
-    zod-to-json-schema "^3.22.3"
-
-"@langchain/openai@^0.5.11":
-  version "0.5.11"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.5.11.tgz#d6f7b265343452b96f8b9b268a2d979a54cfed35"
-  integrity sha512-DAp7x+NfjSqDvKVMle8yb85nzz+3ctP7zGJaeRS0vLmvkY9qf/jRkowsM0mcsIiEUKhG/AHzWqvxbhktb/jJ6Q==
-  dependencies:
-    js-tiktoken "^1.0.12"
-    openai "^4.96.0"
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
@@ -13743,7 +13727,7 @@ arrify@^1.0.1:
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
   integrity sha1-iYUI2iIm84DfkEcoRWhJwVAaSw0=
 
-arrify@^2.0.1:
+arrify@^2.0.0, arrify@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-2.0.1.tgz#c9655e9331e0abcd588d2a7cad7e9956f66701fa"
   integrity sha512-3duEwti880xqi4eAMN8AyR4a0ByT90zoYdLlevfrvU43vb0YZwZVfxOgxWrLXXXpyugL0hNZc9G6BiB5B3nUug==
@@ -18828,6 +18812,11 @@ fast-stream-to-buffer@^1.0.0:
   dependencies:
     end-of-stream "^1.4.1"
 
+fast-text-encoding@^1.0.0:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/fast-text-encoding/-/fast-text-encoding-1.0.6.tgz#0aa25f7f638222e3396d72bf936afcf1d42d6867"
+  integrity sha512-VhXlQgj9ioXCqGstD37E/HBeqEGV/qOD/kmbVG8h5xKBYvM1L3lR1Zn4555cQ8GkYbJa8aJSipLPndE1k6zK2w==
+
 fast-uri@^3.0.1:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.0.3.tgz#892a1c91802d5d7860de728f18608a0573142241"
@@ -19445,6 +19434,16 @@ fuse.js@^7.0.0:
   resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.0.0.tgz#6573c9fcd4c8268e403b4fc7d7131ffcf99a9eb2"
   integrity sha512-14F4hBIxqKvD4Zz/XjDc3y94mNZN6pRv3U13Udo0lNLCWRBUsrMv2xwcF/y/Z5sV6+FQW+/ow68cHpm4sunt8Q==
 
+gaxios@^5.0.0, gaxios@^5.0.1:
+  version "5.1.3"
+  resolved "https://registry.yarnpkg.com/gaxios/-/gaxios-5.1.3.tgz#f7fa92da0fe197c846441e5ead2573d4979e9013"
+  integrity sha512-95hVgBRgEIRQQQHIbnxBXeHbW4TqFk4ZDJW7wmVtvYar72FdhRIo1UGOLS2eRAKCPEdPBWu+M7+A33D9CdX9rA==
+  dependencies:
+    extend "^3.0.2"
+    https-proxy-agent "^5.0.0"
+    is-stream "^2.0.0"
+    node-fetch "^2.6.9"
+
 gaxios@^6.0.0, gaxios@^6.1.1:
   version "6.6.0"
   resolved "https://registry.yarnpkg.com/gaxios/-/gaxios-6.6.0.tgz#af8242fff0bbb82a682840d5feaa91b6a1c58be4"
@@ -19455,6 +19454,14 @@ gaxios@^6.0.0, gaxios@^6.1.1:
     is-stream "^2.0.0"
     node-fetch "^2.6.9"
     uuid "^9.0.1"
+
+gcp-metadata@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/gcp-metadata/-/gcp-metadata-5.3.0.tgz#6f45eb473d0cb47d15001476b48b663744d25408"
+  integrity sha512-FNTkdNEnBdlqF2oatizolQqNANMrcqJt6AAYt99B3y1aLLC8Hc5IOBb+ZnnzllodEEf6xMBp6wRcBbc16fa65w==
+  dependencies:
+    gaxios "^5.0.0"
+    json-bigint "^1.0.0"
 
 gcp-metadata@^6.1.0:
   version "6.1.0"
@@ -19886,6 +19893,21 @@ gonzales-pe@^4.3.0:
   dependencies:
     minimist "^1.2.5"
 
+google-auth-library@^8.9.0:
+  version "8.9.0"
+  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-8.9.0.tgz#15a271eb2ec35d43b81deb72211bd61b1ef14dd0"
+  integrity sha512-f7aQCJODJFmYWN6PeNKzgvy9LI2tYmXnzpNDHEjG5sDNPgGb2FXQyTBnXeSH+PAtpKESFD+LmHw3Ox3mN7e1Fg==
+  dependencies:
+    arrify "^2.0.0"
+    base64-js "^1.3.0"
+    ecdsa-sig-formatter "^1.0.11"
+    fast-text-encoding "^1.0.0"
+    gaxios "^5.0.0"
+    gcp-metadata "^5.3.0"
+    gtoken "^6.1.0"
+    jws "^4.0.0"
+    lru-cache "^6.0.0"
+
 google-auth-library@^9.10.0:
   version "9.10.0"
   resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.10.0.tgz#c9fb940923f7ff2569d61982ee1748578c0bbfd4"
@@ -19898,17 +19920,12 @@ google-auth-library@^9.10.0:
     gtoken "^7.0.0"
     jws "^4.0.0"
 
-google-auth-library@^9.15.1:
-  version "9.15.1"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-9.15.1.tgz#0c5d84ed1890b2375f1cd74f03ac7b806b392928"
-  integrity sha512-Jb6Z0+nvECVz+2lzSMt9u98UsoakXxA2HGHMCxh+so3n90XgYWkq5dur19JAJV7ONiJY22yBTyJB1TSkvPq9Ng==
+google-p12-pem@^4.0.0:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/google-p12-pem/-/google-p12-pem-4.0.1.tgz#82841798253c65b7dc2a4e5fe9df141db670172a"
+  integrity sha512-WPkN4yGtz05WZ5EhtlxNDWPhC4JIic6G8ePitwUWy4l+XPVYec+a0j0Ts47PDtW59y3RwAhUd9/h9ZZ63px6RQ==
   dependencies:
-    base64-js "^1.3.0"
-    ecdsa-sig-formatter "^1.0.11"
-    gaxios "^6.1.1"
-    gcp-metadata "^6.1.0"
-    gtoken "^7.0.0"
-    jws "^4.0.0"
+    node-forge "^1.3.1"
 
 google-protobuf@^3.6.1:
   version "3.19.4"
@@ -19978,6 +19995,15 @@ graphql@^16.10.0, graphql@^16.11.0, graphql@^16.8.1:
   version "16.11.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.11.0.tgz#96d17f66370678027fdf59b2d4c20b4efaa8a633"
   integrity sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==
+
+gtoken@^6.1.0:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/gtoken/-/gtoken-6.1.2.tgz#aeb7bdb019ff4c3ba3ac100bbe7b6e74dce0e8bc"
+  integrity sha512-4ccGpzz7YAr7lxrT2neugmXQ3hP9ho2gcaityLVkiUecAiwiy60Ii8gRbZeOsXV19fYaRjgBSshs8kXw+NKCPQ==
+  dependencies:
+    gaxios "^5.0.1"
+    google-p12-pem "^4.0.0"
+    jws "^4.0.0"
 
 gtoken@^7.0.0:
   version "7.1.0"
@@ -20636,7 +20662,7 @@ https-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
   integrity sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM=
 
-https-proxy-agent@^5.0.1:
+https-proxy-agent@^5.0.0, https-proxy-agent@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz#c59ef224a04fe8b754f3db0063a25ea30d0005d6"
   integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
@@ -25191,19 +25217,6 @@ openai@^4.72.0, openai@^4.77.0:
   version "4.85.1"
   resolved "https://registry.yarnpkg.com/openai/-/openai-4.85.1.tgz#639058653cca92bebd74939751858e7958257670"
   integrity sha512-jkX2fntHljUvSH3MkWh4jShl10oNkb+SsCj4auKlbu2oF4KWAnmHLNR5EpnUHK1ZNW05Rp0fjbJzYwQzMsH8ZA==
-  dependencies:
-    "@types/node" "^18.11.18"
-    "@types/node-fetch" "^2.6.4"
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.2.1"
-    form-data-encoder "1.7.2"
-    formdata-node "^4.3.2"
-    node-fetch "^2.6.7"
-
-openai@^4.96.0:
-  version "4.104.0"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.104.0.tgz#c489765dc051b95019845dab64b0e5207cae4d30"
-  integrity sha512-p99EFNsA/yX6UhVO93f5kJsDRLAg+CTA2RBqdHK4RtK8u5IJw32Hyb2dTGKbnnFmnuoBv5r7Z2CURI9sGZpSuA==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -31481,7 +31494,7 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@11.1.0, uuid@^11.1.0:
+uuid@11.1.0:
   version "11.1.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
   integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
