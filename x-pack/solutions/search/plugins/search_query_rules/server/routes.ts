@@ -18,6 +18,7 @@ import { isQueryRulesetExist } from './lib/is_query_ruleset_exist';
 import { putRuleset } from './lib/put_query_rules_ruleset_set';
 import { fetchQueryRulesQueryRule } from './lib/fetch_query_rules_query_rule';
 import { deleteRuleset } from './lib/delete_query_rules_ruleset';
+import { fetchIndices } from './lib/fetch_indices';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -268,6 +269,185 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           'content-type': 'application/json',
         },
         body: ruleData,
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: APIRoutes.FETCH_INDICES,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_search_query_rules'],
+        },
+      },
+      validate: {
+        body: schema.object({
+          searchQuery: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { searchQuery } = request.body;
+      const core = await context.core;
+      const {
+        client: { asCurrentUser },
+      } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
+      if (!user) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Could not retrieve current user, security plugin is not ready',
+        });
+      }
+      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_search_query_rules'],
+      });
+      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
+        return response.forbidden({
+          body: "Your user doesn't have manage_search_query_rules privileges",
+        });
+      }
+      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
+      return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: indexNames,
+      });
+    })
+  );
+  router.get(
+    {
+      path: APIRoutes.FETCH_DOCUMENT,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_search_query_rules'],
+        },
+      },
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          documentId: schema.string(),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { indexName, documentId } = request.params;
+      const core = await context.core;
+      const {
+        client: { asCurrentUser },
+      } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
+      if (!user) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Could not retrieve current user, security plugin is not ready',
+        });
+      }
+      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_search_query_rules'],
+      });
+      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
+        return response.forbidden({
+          body: "Your user doesn't have manage_search_query_rules privileges",
+        });
+      }
+      try {
+        const document = await asCurrentUser.get({
+          index: indexName,
+          id: documentId,
+        });
+        const mappings = await asCurrentUser.indices.getMapping({
+          index: indexName,
+        });
+        return response.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: {
+            document,
+            mappings,
+          },
+        });
+      } catch (error) {
+        return response.notFound({
+          body: `Document with ID ${documentId} not found in index ${indexName}`,
+        });
+      }
+    })
+  );
+  router.post(
+    {
+      path: APIRoutes.GENERATE_RULE_ID,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_search_query_rules'],
+        },
+      },
+      validate: {
+        params: schema.object({
+          rulesetId: schema.string(),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { rulesetId } = request.params;
+      const core = await context.core;
+      const {
+        client: { asCurrentUser },
+      } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
+
+      if (!user) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Could not retrieve current user, security plugin is not ready',
+        });
+      }
+      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_search_query_rules'],
+      });
+      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
+        return response.forbidden({
+          body: "Your user doesn't have manage_search_query_rules privileges",
+        });
+      }
+
+      for (let i = 0; i < 100; i++) {
+        const ruleId = `rule-${Math.floor(Math.random() * 10000)
+          .toString()
+          .slice(-4)}`;
+        // check if it is existing by fetching the rule
+        try {
+          await asCurrentUser.queryRules.getRule({ ruleset_id: rulesetId, rule_id: ruleId });
+        } catch (error) {
+          // if the rule does not exist return the ruleId
+          if (error.statusCode === 404) {
+            return response.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: { ruleId },
+            });
+          }
+          throw error;
+        }
+      }
+      return response.customError({
+        statusCode: 500,
+        body: i18n.translate('xpack.search.rules.api.routes.generateRuleIdErrorMessage', {
+          defaultMessage: 'Failed to generate a unique rule ID after 100 attempts.',
+        }),
       });
     })
   );

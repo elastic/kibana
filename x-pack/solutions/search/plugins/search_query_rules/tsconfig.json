@@ -27,6 +27,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/try-in-console",
     "@kbn/share-plugin",
+    "@kbn/search-index-documents",
   ],
   "exclude": [
     "target/**/*",

@@ -14,7 +14,6 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -27,13 +26,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  euiDragDropReorder,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
 import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../types';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
+import { DocumentSelector } from './document_selector/document_selector';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
 
 export interface QueryRuleFlyoutProps {
@@ -51,18 +54,40 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   ruleId,
   rulesetId,
 }) => {
-  const { control, getValues, reset } = useFormContext<QueryRuleEditorForm>();
+  const { control, getValues, reset, setValue } = useFormContext<QueryRuleEditorForm>();
   const { fields, remove, replace, update, append } = useFieldArray({
     control,
     name: 'criteria',
   });
+  const {
+    fields: actionFields,
+    remove: removeAction,
+    replace: replaceAction,
+    append: appendAction,
+  } = useFieldArray({
+    control,
+    name: 'actions.docs',
+  });
+
+  const pinType = useWatch({
+    control,
+    name: 'type',
+  });
+  const actionIdsFields = useWatch({
+    control,
+    name: 'actions.ids',
+  });
 
   const { euiTheme } = useEuiTheme();
+
+  const { data: indexNames } = useFetchIndexNames('');
 
   const ruleFromRuleset = rules.find((rule) => rule.rule_id === ruleId);
   const [isAlways, setIsAlways] = useState<boolean>(
     (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
   );
+  const isIdRule = Boolean(actionFields.length === 0 && actionIdsFields?.length);
+  const isDocRule = Boolean(actionFields.length > 0 && !actionIdsFields?.length);
 
   useEffect(() => {
     if (ruleFromRuleset) {
@@ -80,8 +105,56 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     }
   }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
 
+  const handleAddCriteria = () => {
+    append({
+      type: 'exact',
+      metadata: '',
+      values: [],
+    });
+  };
+
+  const appendNewAction = () => {
+    if (isIdRule) {
+      setValue('actions.ids', [...(getValues('actions.ids') || []), '']);
+    } else {
+      appendAction({
+        _id: '',
+        _index: '',
+      });
+    }
+  };
+
+  const handleSave = () => {
+    const index = rules.findIndex((rule) => rule.rule_id === ruleId);
+    if (index !== -1) {
+      if (isAlways) {
+        replace([
+          {
+            metadata: 'always',
+            type: 'always',
+            values: ['always'],
+          },
+        ]);
+      }
+      onSave({
+        rule_id: ruleId,
+        criteria: getValues('criteria'),
+        type: getValues('type'),
+        actions: getValues('actions'),
+      });
+    }
+  };
+
   return (
-    <EuiFlyout onClose={onClose} ownFocus={false} size="l" aria-labelledby="flyoutTitle">
+    <EuiFlyout
+      onClose={onClose}
+      ownFocus={false}
+      size="l"
+      aria-labelledby="flyoutTitle"
+      css={css({
+        overflowY: 'hidden',
+      })}
+    >
       <EuiFlyoutHeader hasBorder data-test-subj="queryRulesFlyoutHeader">
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
@@ -110,7 +183,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       <EuiFlyoutBody css={QueryRuleFlyoutBody}>
         <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel(euiTheme)}>
           <EuiFlexItem grow>
-            <EuiPanel hasBorder paddingSize="l" borderRadius="none">
+            <EuiPanel hasBorder paddingSize="l" borderRadius="none" className="eui-yScroll">
               <EuiText size="s">
                 <b>
                   <FormattedMessage
@@ -201,52 +274,124 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   />
                 </b>
               </EuiText>
-              <EuiDragDropContext onDragEnd={() => {}}>
+              <EuiDragDropContext
+                onDragEnd={({ source, destination }) => {
+                  if (source && destination && ruleFromRuleset) {
+                    if (isDocRule) {
+                      const newActions = euiDragDropReorder(
+                        actionFields,
+                        source.index,
+                        destination.index
+                      );
+                      replaceAction(newActions);
+                    } else if (isIdRule && actionIdsFields) {
+                      const newActions = euiDragDropReorder(
+                        actionIdsFields,
+                        source.index,
+                        destination.index
+                      );
+                      setValue('actions.ids', newActions);
+                    }
+                  }
+                }}
+              >
                 <EuiDroppable droppableId="queryRuleDroppable" spacing="m">
-                  {ruleFromRuleset?.actions?.ids?.map((value, index) => (
-                    <EuiDraggable
-                      usePortal
-                      spacing="m"
-                      index={index}
-                      hasInteractiveChildren={true}
-                      draggableId={'queryRuleDocumentDraggable'}
-                      key={value + '-' + index}
-                    >
-                      {() => (
-                        <EuiPanel paddingSize="s" hasShadow={false}>
-                          <EuiFlexGroup alignItems="center" gutterSize="s">
-                            <EuiFlexItem grow={false}>
-                              <EuiPanel
-                                color="transparent"
-                                paddingSize="s"
-                                aria-label="Drag Handle"
-                              >
-                                <EuiIcon type="grab" />
-                              </EuiPanel>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={true}>
-                              <EuiFlexGroup responsive={false} alignItems="center">
-                                <EuiFlexItem>
-                                  <EuiFieldText
-                                    data-test-subj="searchQueryRulesQueryRuleDocumentId"
-                                    value={value}
-                                    readOnly
-                                    fullWidth
-                                  />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
-                      )}
-                    </EuiDraggable>
-                  )) || <></>}
+                  {isIdRule && actionIdsFields
+                    ? actionIdsFields.map((doc, index) => (
+                        <EuiDraggable
+                          usePortal
+                          spacing="m"
+                          index={index}
+                          hasInteractiveChildren={true}
+                          draggableId={'queryRuleDocumentDraggable-' + doc + '-' + index}
+                          key={doc + '-' + index}
+                        >
+                          {() => (
+                            <DocumentSelector
+                              initialDocId={doc}
+                              hasIndexSelector={false}
+                              onDeleteDocument={() => {
+                                if (ruleFromRuleset) {
+                                  const updatedActions = actionIdsFields.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setValue('actions.ids', updatedActions);
+                                }
+                              }}
+                              onIdSelectorChange={(id) => {
+                                if (ruleFromRuleset) {
+                                  const updatedActions = actionIdsFields.map((value, i) =>
+                                    i === index ? id : value
+                                  );
+                                  setValue('actions.ids', updatedActions);
+                                }
+                              }}
+                            />
+                          )}
+                        </EuiDraggable>
+                      ))
+                    : actionFields.map((doc, index) => (
+                        <EuiDraggable
+                          usePortal
+                          spacing="m"
+                          index={index}
+                          hasInteractiveChildren={true}
+                          draggableId={'queryRuleDocumentDraggable-' + doc._id + '-' + index}
+                          key={doc._id}
+                        >
+                          {() => (
+                            <DocumentSelector
+                              initialDocId={doc._id}
+                              index={doc._index}
+                              onDeleteDocument={() => {
+                                removeAction(index);
+                              }}
+                              onIndexSelectorChange={(indexName) => {
+                                if (ruleFromRuleset) {
+                                  const updatedActions = actionFields.map((action, i) =>
+                                    i === index ? { ...action, _index: indexName } : action
+                                  );
+                                  replaceAction(updatedActions);
+                                }
+                              }}
+                              onIdSelectorChange={(id) => {
+                                if (ruleFromRuleset) {
+                                  const updatedActions = actionFields.map((action, i) =>
+                                    i === index ? { ...action, _id: id } : action
+                                  );
+                                  replaceAction(updatedActions);
+                                }
+                              }}
+                              indices={indexNames}
+                            />
+                          )}
+                        </EuiDraggable>
+                      )) || <></>}
                 </EuiDroppable>
               </EuiDragDropContext>
+              <EuiButton
+                data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
+                iconType="plusInCircle"
+                color="text"
+                size="s"
+                onClick={appendNewAction}
+              >
+                {pinType === 'pinned' ? (
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButton"
+                    defaultMessage="Pin 1 more document"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButton"
+                    defaultMessage="Exclude 1 more document"
+                  />
+                )}
+              </EuiButton>
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiPanel hasBorder paddingSize="l" borderRadius="none">
+            <EuiPanel hasBorder paddingSize="l" borderRadius="none" className="eui-yScroll">
               <EuiText size="s">
                 <b>
                   <FormattedMessage
@@ -328,13 +473,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {ruleFromRuleset && !isAlways && (
                 <EuiButton
                   data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
-                  onClick={() => {
-                    append({
-                      type: 'exact',
-                      metadata: '',
-                      values: [],
-                    });
-                  }}
+                  onClick={handleAddCriteria}
                   iconType="plusInCircle"
                   iconSide="left"
                   size="s"
@@ -367,26 +506,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
             <EuiButton
               data-test-subj="searchQueryRulesQueryRuleFlyoutUpdateButton"
               fill
-              onClick={() => {
-                const index = rules.findIndex((rule) => rule.rule_id === ruleId);
-                if (index !== -1) {
-                  if (isAlways) {
-                    replace([
-                      {
-                        metadata: 'always',
-                        type: 'always',
-                        values: ['always'],
-                      },
-                    ]);
-                  }
-                  onSave({
-                    rule_id: ruleId,
-                    criteria: getValues('criteria'),
-                    type: getValues('type'),
-                    actions: getValues('actions'),
-                  });
-                }
-              }}
+              onClick={handleSave}
             >
               <FormattedMessage
                 id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"

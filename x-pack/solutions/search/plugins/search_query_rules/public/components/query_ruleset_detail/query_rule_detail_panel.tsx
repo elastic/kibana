@@ -14,6 +14,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
 import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
+import { useGenerateRuleId } from '../../hooks/use_generate_rule_id';
 
 interface QueryRuleDetailPanelProps {
   rulesetId: QueryRulesQueryRuleset['ruleset_id'];
@@ -27,8 +28,10 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   rulesetId,
   tourInfo,
 }) => {
-  const { rules, setNewRules, updateRule } = useQueryRulesetDetailState({ rulesetId });
+  const { rules, setNewRules, updateRule, addNewRule } = useQueryRulesetDetailState({ rulesetId });
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
+
+  const { mutate: generateRuleId } = useGenerateRuleId(rulesetId);
 
   return (
     <KibanaPageTemplate.Section restrictWidth>
@@ -58,9 +61,12 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                     color="primary"
                     data-test-subj="queryRulesetDetailAddRuleButton"
                     onClick={() => {
-                      // TODO: Logic to add a new rule
-                      // This opens the query rule flyout in create mode.
-                      // ruleid cannot be null or empty when creating a new rule. Add logic to generate a rule id.
+                      generateRuleId(undefined, {
+                        onSuccess: (newRuleId) => {
+                          addNewRule(newRuleId);
+                          setRuleIdToEdit(newRuleId);
+                        },
+                      });
                     }}
                   >
                     <FormattedMessage
