@@ -6,7 +6,6 @@
  */
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -14,9 +13,8 @@ import { useLogicalAndFields } from '../../common/constants';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { legacyMonitorAttributes } from '../../common/types/saved_objects';
+import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -74,36 +72,6 @@ export const SEARCH_FIELDS = [
   'hosts',
   'project_id.text',
 ];
-
-export const getMonitors = async (
-  context: RouteContext<MonitorsQuery>,
-  { fields }: { fields?: string[] } = {}
-): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitorAttributes>> => {
-  const {
-    perPage = 50,
-    page,
-    sortField,
-    sortOrder,
-    query,
-    searchAfter,
-    showFromAllSpaces,
-  } = context.request.query;
-
-  const { filtersStr } = await getMonitorFilters(context);
-
-  return context.monitorConfigRepository.find({
-    perPage,
-    page,
-    sortField: parseMappingKey(sortField),
-    sortOrder,
-    searchFields: SEARCH_FIELDS,
-    search: query,
-    filter: filtersStr,
-    searchAfter,
-    fields,
-    ...(showFromAllSpaces && { namespaces: ['*'] }),
-  });
-};
 
 interface Filters {
   filter?: string;
@@ -204,7 +172,7 @@ export const getSavedObjectKqlFilter = ({
   if (searchAtRoot) {
     fieldKey = `${field}`;
   } else {
-    fieldKey = `${legacyMonitorAttributes}.${field}`;
+    fieldKey = `${syntheticsMonitorAttributes}.${field}`;
   }
 
   if (Array.isArray(values)) {

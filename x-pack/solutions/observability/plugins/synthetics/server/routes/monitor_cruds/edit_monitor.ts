@@ -237,20 +237,22 @@ export const syncEditedMonitor = async ({
   routeContext: RouteContext;
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+  const { server, savedObjectsClient, syntheticsMonitorClient, monitorConfigRepository } =
+    routeContext;
   try {
     const monitorWithId = {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
         normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
       [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+      [ConfigKey.KIBANA_SPACES]:
+        normalizedMonitor[ConfigKey.KIBANA_SPACES] || decryptedPreviousMonitor.namespaces,
     };
     const formattedMonitor = formatSecrets(monitorWithId);
-
-    const editedSOPromise = savedObjectsClient.update<MonitorFields>(
-      syntheticsMonitorSavedObjectType,
+    const editedSOPromise = monitorConfigRepository.update(
       decryptedPreviousMonitor.id,
-      formattedMonitor
+      formattedMonitor,
+      decryptedPreviousMonitor
     );
 
     const allPrivateLocations = await getPrivateLocations(savedObjectsClient);

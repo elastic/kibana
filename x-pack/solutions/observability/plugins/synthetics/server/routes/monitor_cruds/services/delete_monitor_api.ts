@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { validatePermissions } from '../edit_monitor';
 import {
   ConfigKey,
@@ -16,7 +17,6 @@ import {
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
 import {
   formatTelemetryDeleteEvent,
@@ -56,7 +56,7 @@ export class DeleteMonitorAPI {
 
       const monitor =
         await encryptedSOClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          syntheticsMonitorType,
+          syntheticsMonitorSavedObjectType,
           monitorId,
           {
             namespace: spaceId,
@@ -81,7 +81,7 @@ export class DeleteMonitorAPI {
           stackVersion: server.stackVersion,
         });
         return await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-          syntheticsMonitorType,
+          syntheticsMonitorSavedObjectType,
           monitorId
         );
       }

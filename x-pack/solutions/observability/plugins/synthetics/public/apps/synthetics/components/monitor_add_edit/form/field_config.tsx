@@ -30,6 +30,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import { MonitorSpacesProps } from '../fields/monitor_spaces';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import {
   PROFILE_OPTIONS,
@@ -60,6 +61,7 @@ import {
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
+  KibanaSpacesWrapper,
 } from './field_wrappers';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
@@ -1674,6 +1676,26 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         await trigger(ConfigKey.MAX_ATTEMPTS);
       },
       'data-test-subj': 'syntheticsEnableAttemptSwitch',
+    }),
+  },
+  [ConfigKey.KIBANA_SPACES]: {
+    fieldKey: ConfigKey.KIBANA_SPACES,
+    component: KibanaSpacesWrapper,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.label', {
+      defaultMessage: 'Kibana spaces',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.helpText', {
+      defaultMessage:
+        'Select the Kibana spaces where this monitor should be available. If no spaces are selected, the monitor will be available in current space.',
+    }),
+    controlled: true,
+    props: ({ field, setValue, trigger }): MonitorSpacesProps => ({
+      readOnly,
+      value: field?.value || [],
+      onChange: async (spaces?: string[]) => {
+        setValue(ConfigKey.KIBANA_SPACES, spaces);
+        await trigger(ConfigKey.KIBANA_SPACES);
+      },
     }),
   },
 });

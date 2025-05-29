@@ -22,6 +22,7 @@ import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
   syntheticsParamType,
 } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
@@ -298,7 +299,7 @@ export class SyntheticsService {
 
     return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       {
-        type: legacySyntheticsMonitorTypeSingle,
+        type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
         perPage: pageSize,
         namespaces: [ALL_SPACES_ID],
       }

@@ -9,11 +9,11 @@ import { v4 as uuidV4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { monitorAttributes } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
@@ -212,7 +212,9 @@ export class AddEditMonitorAPI {
     const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
     const { total } = await monitorConfigRepository.find({
       perPage: 0,
-      filter: id ? `${kqlFilter} and not (${monitorAttributes}.config_id: ${id})` : kqlFilter,
+      filter: id
+        ? `${kqlFilter} and not (${syntheticsMonitorAttributes}.config_id: ${id})`
+        : kqlFilter,
     });
 
     if (total > 0) {

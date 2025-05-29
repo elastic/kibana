@@ -154,6 +154,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.PARAMS]: '',
   [ConfigKey.LABELS]: {},
   [ConfigKey.MAX_ATTEMPTS]: 2,
+  [ConfigKey.KIBANA_SPACES]: [],
   revision: 1,
 };
 

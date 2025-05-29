@@ -9,7 +9,7 @@ export const legacySyntheticsMonitorTypeSingle = 'synthetics-monitor';
 export const legacyMonitorAttributes = `${legacySyntheticsMonitorTypeSingle}.attributes`;
 
 export const syntheticsMonitorSavedObjectType = 'synthetics-monitor-multiple';
-export const monitorAttributesMultiple = `${legacySyntheticsMonitorTypeSingle}.attributes`;
+export const syntheticsMonitorAttributes = `${syntheticsMonitorSavedObjectType}.attributes`;
 
 export const syntheticsParamType = 'synthetics-param';
 

@@ -7,12 +7,12 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
-import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import { ConfigKey, SyntheticsMonitor } from '../../common/runtime_types';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { syntheticsMonitorSavedObjectType } from '../../common/types/saved_objects';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -47,7 +47,7 @@ describe('MonitorConfigRepository', () => {
       const mockMonitor = {
         id,
         attributes: { name: 'Test Monitor' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
 
@@ -55,7 +55,7 @@ describe('MonitorConfigRepository', () => {
 
       const result = await repository.get(id);
 
-      expect(soClient.get).toHaveBeenCalledWith(syntheticsMonitorType, id);
+      expect(soClient.get).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id);
       expect(result).toBe(mockMonitor);
     });
 
@@ -76,7 +76,7 @@ describe('MonitorConfigRepository', () => {
       const mockDecryptedMonitor = {
         id,
         attributes: { name: 'Test Monitor', secrets: 'decrypted' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
 
@@ -91,7 +91,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.getDecrypted(id, spaceId);
 
       expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         id,
         { namespace: spaceId }
       );
@@ -111,7 +111,7 @@ describe('MonitorConfigRepository', () => {
       const mockCreatedMonitor = {
         id,
         attributes: { name: 'Test Monitor' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
       soClient.create.mockResolvedValue(mockCreatedMonitor);
@@ -129,7 +129,7 @@ describe('MonitorConfigRepository', () => {
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         {
           ...normalizedMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: 'custom-id',
@@ -151,7 +151,7 @@ describe('MonitorConfigRepository', () => {
       const mockCreatedMonitor = {
         id: 'generated-id',
         attributes: { name: 'Test Monitor' },
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         references: [],
       };
       soClient.create.mockResolvedValue(mockCreatedMonitor);
@@ -169,7 +169,7 @@ describe('MonitorConfigRepository', () => {
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
-        syntheticsMonitorType,
+        syntheticsMonitorSavedObjectType,
         {
           ...normalizedMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: '',
@@ -207,13 +207,13 @@ describe('MonitorConfigRepository', () => {
           {
             id: 'test-id-1',
             attributes: { name: 'Test Monitor 1' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
           {
             id: 'test-id-2',
             attributes: { name: 'Test Monitor 2' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
         ],
@@ -226,7 +226,7 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.bulkCreate).toHaveBeenCalledWith([
         {
           id: 'test-id-1',
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           attributes: {
             name: 'Test Monitor 1',
             [ConfigKey.CUSTOM_HEARTBEAT_ID]: 'custom-id-1',
@@ -238,7 +238,7 @@ describe('MonitorConfigRepository', () => {
         },
         {
           id: 'test-id-2',
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           attributes: {
             name: 'Test Monitor 2',
             [ConfigKey.MONITOR_QUERY_ID]: 'test-id-2',
@@ -275,13 +275,13 @@ describe('MonitorConfigRepository', () => {
           {
             id: 'test-id-1',
             attributes: { name: 'Updated Monitor 1' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
           {
             id: 'test-id-2',
             attributes: { name: 'Updated Monitor 2' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
         ],
@@ -293,12 +293,12 @@ describe('MonitorConfigRepository', () => {
 
       expect(soClient.bulkUpdate).toHaveBeenCalledWith([
         {
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           id: 'test-id-1',
           attributes: { name: 'Updated Monitor 1' },
         },
         {
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2' },
         },
@@ -323,13 +323,13 @@ describe('MonitorConfigRepository', () => {
           {
             id: 'test-id-1',
             attributes: { name: 'Test Monitor 1' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
           {
             id: 'test-id-2',
             attributes: { name: 'Test Monitor 2' },
-            type: syntheticsMonitorType,
+            type: syntheticsMonitorSavedObjectType,
             references: [],
           },
         ],
@@ -343,7 +343,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.find(options);
 
       expect(soClient.find).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         ...options,
       });
 
@@ -367,7 +367,7 @@ describe('MonitorConfigRepository', () => {
       await repository.find(options);
 
       expect(soClient.find).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         search: 'test',
         perPage: 5000,
       });
@@ -383,13 +383,13 @@ describe('MonitorConfigRepository', () => {
         {
           id: 'test-id-1',
           attributes: { name: 'Test Monitor 1', secrets: 'decrypted' },
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           references: [],
         },
         {
           id: 'test-id-2',
           attributes: { name: 'Test Monitor 2', secrets: 'decrypted' },
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           references: [],
         },
       ];
@@ -411,7 +411,7 @@ describe('MonitorConfigRepository', () => {
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser
       ).toHaveBeenCalledWith({
         filter,
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 500,
         namespaces: [spaceId],
       });
@@ -428,7 +428,7 @@ describe('MonitorConfigRepository', () => {
         {
           id: 'test-id-1',
           attributes: { name: 'Test Monitor 1', secrets: 'decrypted' },
-          type: syntheticsMonitorType,
+          type: syntheticsMonitorSavedObjectType,
           references: [],
         },
       ];
@@ -461,7 +461,7 @@ describe('MonitorConfigRepository', () => {
 
       const result = await repository.delete(id);
 
-      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorType, id);
+      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id);
       expect(result).toBe(mockDeleteResult);
     });
   });
@@ -476,8 +476,8 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.bulkDelete(ids);
 
       expect(soClient.bulkDelete).toHaveBeenCalledWith([
-        { type: syntheticsMonitorType, id: 'test-id-1' },
-        { type: syntheticsMonitorType, id: 'test-id-2' },
+        { type: syntheticsMonitorSavedObjectType, id: 'test-id-1' },
+        { type: syntheticsMonitorSavedObjectType, id: 'test-id-2' },
       ]);
 
       expect(result).toBe(mockBulkDeleteResult);
@@ -513,7 +513,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.getAll(options);
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 5000,
         search: 'test',
         fields: ['name'],
@@ -547,7 +547,7 @@ describe('MonitorConfigRepository', () => {
       await repository.getAll(options);
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 5000,
         search: 'test',
         sortField: 'name.keyword',
@@ -574,7 +574,7 @@ describe('MonitorConfigRepository', () => {
       await repository.getAll(options);
 
       expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
-        type: syntheticsMonitorType,
+        type: syntheticsMonitorSavedObjectType,
         perPage: 5000,
         search: 'test',
         sortField: 'name.keyword',

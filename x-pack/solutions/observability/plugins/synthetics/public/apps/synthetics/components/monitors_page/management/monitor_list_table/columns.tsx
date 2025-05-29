@@ -11,6 +11,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../../../plugin';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -49,7 +50,7 @@ export function useMonitorListColumns({
   setMonitorPendingDeletion: (configs: string[]) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
-  const { http } = useKibana().services;
+  const { http, spaces } = useKibana<ClientPluginsStart>().services;
   const canEditSynthetics = useCanEditSynthetics();
 
   const { isServiceAllowed } = useEnablement();
@@ -69,6 +70,7 @@ export function useMonitorListColumns({
 
     return publicLocations ? Boolean(canUsePublicLocations) : true;
   };
+  const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
 
   const columns: Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> = [
     {
@@ -170,6 +172,21 @@ export function useMonitorListColumns({
           isSwitchable={!loading}
         />
       ),
+    },
+    {
+      name: i18n.translate('xpack.synthetics.management.monitorList.spacesColumnTitle', {
+        defaultMessage: 'Spaces',
+      }),
+      field: 'spaces',
+      sortable: true,
+      render: (monSpaces: string[]) => {
+        return (
+          <LazySpaceList
+            namespaces={monSpaces ?? (space ? [space?.id] : [])}
+            behaviorContext="outside-space"
+          />
+        );
+      },
     },
     {
       align: 'right' as const,

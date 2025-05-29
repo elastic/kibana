@@ -8,13 +8,17 @@
 import {
   SavedObject,
   SavedObjectsClientContract,
+  type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
+import { isEqual } from 'lodash';
 import {
+  legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
@@ -26,6 +30,18 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+
+const getSuccessfulResult = <T>(
+  results: Array<PromiseSettledResult<T>>
+): PromiseFulfilledResult<T>['value'] => {
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      return result.value;
+    }
+  }
+  const firstError = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+  throw new Error(firstError?.reason || 'Unknown error');
+};
 
 export class MonitorConfigRepository {
   constructor(
@@ -42,14 +58,7 @@ export class MonitorConfigRepository {
       ),
     ]);
 
-    for (const result of results) {
-      if (result.status === 'fulfilled') {
-        return result.value;
-      }
-    }
-    const firstError = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
-
-    throw new Error(firstError?.reason || 'Unknown error');
+    return getSuccessfulResult(results);
   }
 
   async getDecrypted(
@@ -59,18 +68,38 @@ export class MonitorConfigRepository {
     normalizedMonitor: SavedObject<SyntheticsMonitor>;
     decryptedMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
   }> {
-    const decryptedMonitor =
-      await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        syntheticsMonitorSavedObjectType,
+    const namespace = { namespace: spaceId };
+
+    // Helper to attempt decryption and catch 404
+    const tryGetDecrypted = async (soType: string) => {
+      return await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+        soType,
         id,
-        {
-          namespace: spaceId,
-        }
+        namespace
       );
-    return { normalizedMonitor: normalizeSecrets(decryptedMonitor), decryptedMonitor };
+    };
+
+    const results = await Promise.allSettled([
+      tryGetDecrypted(syntheticsMonitorSavedObjectType),
+      tryGetDecrypted(legacySyntheticsMonitorTypeSingle),
+    ]);
+
+    const decryptedMonitor = getSuccessfulResult(results);
+
+    return {
+      normalizedMonitor: normalizeSecrets(decryptedMonitor),
+      decryptedMonitor,
+    };
   }
 
   async create({ id, normalizedMonitor }: { id: string; normalizedMonitor: SyntheticsMonitor }) {
+    const { spaces } = normalizedMonitor;
+    const opts: SavedObjectsCreateOptions = {
+      id,
+      ...(id && { overwrite: true }),
+      ...(spaces && { initialNamespaces: spaces }),
+    };
+
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
       syntheticsMonitorSavedObjectType,
       formatSecrets({
@@ -79,12 +108,7 @@ export class MonitorConfigRepository {
         [ConfigKey.CONFIG_ID]: id,
         revision: 1,
       }),
-      id
-        ? {
-            id,
-            overwrite: true,
-          }
-        : undefined
+      opts
     );
   }
 
@@ -103,6 +127,27 @@ export class MonitorConfigRepository {
       newMonitors
     );
     return result.saved_objects;
+  }
+
+  update(
+    id: string,
+    data: SyntheticsMonitorWithSecretsAttributes,
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
+  ) {
+    const soType = decryptedPreviousMonitor.type;
+    const prevSpaces = (decryptedPreviousMonitor.namespaces || []).sort();
+    const spaces = (data.spaces || []).sort();
+    // If the spaces have changed, we need to delete the saved object and recreate it
+    if (isEqual(prevSpaces, spaces)) {
+      return this.soClient.update<MonitorFields>(soType, id, data);
+    } else {
+      return this.soClient.delete(soType, id).then(() => {
+        return this.soClient.create(syntheticsMonitorSavedObjectType, data, {
+          id,
+          initialNamespaces: spaces,
+        });
+      });
+    }
   }
 
   async bulkUpdate({
@@ -128,10 +173,18 @@ export class MonitorConfigRepository {
       ...options,
       perPage: options.perPage ?? 5000,
     });
+    const legacyOptions = { ...options };
+    if (legacyOptions.filter) {
+      // replace all instances of syntheticsMonitorAttributes with legacyMonitorAttributes
+      legacyOptions.filter = legacyOptions.filter.replace(
+        new RegExp(syntheticsMonitorAttributes, 'g'),
+        legacyMonitorAttributes
+      );
+    }
     const legacyFindResult = this.soClient.find<T>({
       type: legacySyntheticsMonitorTypeSingle,
-      ...options,
-      perPage: options.perPage ?? 5000,
+      ...legacyOptions,
+      perPage: legacyOptions.perPage ?? 5000,
     });
     const [result, legacyResult] = await Promise.all([findResult, legacyFindResult]);
     return {
@@ -189,7 +242,7 @@ export class MonitorConfigRepository {
     showFromAllSpaces?: boolean;
   } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) {
     const getConfigs = async (syntheticsMonitorType: string) => {
-      const findOptions = {
+      const finder = this.soClient.createPointInTimeFinder<T>({
         type: syntheticsMonitorType,
         perPage: 5000,
         search,
@@ -199,9 +252,7 @@ export class MonitorConfigRepository {
         filter,
         searchFields,
         ...(showFromAllSpaces && { namespaces: ['*'] }),
-      };
-      const finder =
-        this.soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>(findOptions);
+      });
 
       const hits: Array<SavedObjectsFindResult<T>> = [];
       for await (const result of finder.find()) {

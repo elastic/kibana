@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { monitorAttributes, syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
   ConfigKey,
   MonitorFiltersResult,
@@ -41,7 +44,7 @@ interface AggsResponse {
         hits: {
           hits: Array<{
             _source: {
-              [syntheticsMonitorType]: {
+              [syntheticsMonitorSavedObjectType]: {
                 [ConfigKey.NAME]: string;
               };
             };
@@ -84,7 +87,9 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
 
       return {
         monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
-          label: name?.hits?.hits[0]?._source?.[syntheticsMonitorType]?.[ConfigKey.NAME] || key,
+          label:
+            name?.hits?.hits[0]?._source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] ||
+            key,
           value: key,
           count,
         })),
@@ -122,49 +127,49 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
 const aggs = {
   tagsAggs: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.TAGS}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.TAGS}`,
       size: 10000,
       exclude: [''],
     },
   },
   monitorTypeAggs: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
   },
   locationsAggs: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.LOCATIONS}.id`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.LOCATIONS}.id`,
       size: 10000,
       exclude: [''],
     },
   },
   projectsAggs: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.PROJECT_ID}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.PROJECT_ID}`,
       size: 10000,
       exclude: [''],
     },
   },
   monitorTypesAggs: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
       exclude: [''],
     },
   },
   monitorIdsAggs: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.MONITOR_QUERY_ID}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_QUERY_ID}`,
       size: 10000,
       exclude: [''],
     },
     aggs: {
       name: {
         top_hits: {
-          _source: [`${syntheticsMonitorType}.${ConfigKey.NAME}`],
+          _source: [`${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}`],
           size: 1,
         },
       },
