@@ -158,7 +158,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     caseId: caseData.id,
     perPage: 0,
     page: 0,
-    enabled: canShowObservableTabs,
+    enabled: canShowObservableTabs && isObservablesFeatureEnabled,
   });
 
   const tabs = useMemo(
