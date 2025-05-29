@@ -41,7 +41,6 @@ export const AgentBasedPackagePoliciesTable = ({
   pagination,
   addAgentToPolicyIdFromParams,
   showAddAgentHelpForPolicyId,
-  isInputPackageDatasetUsedByMultiplePolicies,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -54,7 +53,6 @@ export const AgentBasedPackagePoliciesTable = ({
   pagination: ReturnType<typeof usePagination>;
   addAgentToPolicyIdFromParams?: string | null;
   showAddAgentHelpForPolicyId?: string | null;
-  isInputPackageDatasetUsedByMultiplePolicies: (datasetName: string) => boolean;
 }) => {
   const { getHref } = useLink();
   const { search } = useLocation();
@@ -285,9 +283,6 @@ export const AgentBasedPackagePoliciesTable = ({
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
                   packagePolicy={packagePolicy}
-                  isInputPackageDatasetUsedByMultiplePolicies={
-                    isInputPackageDatasetUsedByMultiplePolicies
-                  }
                   showAddAgent={true}
                   upgradePackagePolicyHref={
                     agentPolicy

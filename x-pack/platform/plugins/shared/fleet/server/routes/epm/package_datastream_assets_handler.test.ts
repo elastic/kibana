@@ -20,6 +20,7 @@ import {
   findDataStreamsFromDifferentPackages,
   getDatasetName,
   removeAssetsForInputPackagePolicy,
+  isInputPackageDatasetUsedByMultiplePolicies,
 } from '../../services/epm/packages/input_type_packages';
 
 import { appContextService } from '../../services';
@@ -34,7 +35,7 @@ jest.mock('../../services/epm/packages/input_type_packages');
 jest.mock('../../services/package_policy', () => {
   return {
     packagePolicyService: {
-      get: jest.fn(),
+      list: jest.fn(),
     },
   };
 });
@@ -53,14 +54,20 @@ const mockedCheckExistingDataStreamsAreFromDifferentPackage =
 const mockedRemoveAssetsForInputPackagePolicy = removeAssetsForInputPackagePolicy as jest.Mock<
   ReturnType<typeof removeAssetsForInputPackagePolicy>
 >;
+const mockedIsInputPackageDatasetUsedByMultiplePolicies =
+  isInputPackageDatasetUsedByMultiplePolicies as jest.Mock<
+    ReturnType<typeof isInputPackageDatasetUsedByMultiplePolicies>
+  >;
 
 describe('deletePackageDatastreamAssetsHandler', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let logger: MockedLogger;
+
   beforeAll(async () => {
     logger = loggerMock.create();
     appContextService.getLogger = () => logger;
+    appContextService.getInternalUserSOClientWithoutSpaceExtension = jest.fn();
   });
 
   beforeEach(() => {
@@ -73,6 +80,19 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     name: 'Test policy',
     policy_ids: ['agent-policy'],
     description: 'Test policy description',
+    namespace: 'default',
+    inputs: [],
+    package: {
+      name: 'logs',
+      title: 'Test',
+      version: '1.0.0',
+    },
+  } as any;
+  const packagePolicy1 = {
+    id: 'policy1',
+    name: 'Policy',
+    policy_ids: ['agent-policy'],
+    description: 'Policy description',
     namespace: 'default',
     inputs: [],
     package: {
@@ -98,7 +118,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         packagePolicyId: 'policy1',
       },
     });
-    packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
+    packagePolicyServiceMock.list.mockResolvedValue({
+      items: [packagePolicy1, testPackagePolicy],
+    } as any);
 
     mockedGetDatasetName.mockReturnValue('custom');
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
@@ -202,7 +224,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         packagePolicyId: 'idontexist',
       },
     });
-    packagePolicyServiceMock.get.mockRejectedValueOnce(
+    packagePolicyServiceMock.list.mockRejectedValueOnce(
       new Error('Saved object [ingest-package-policies/idontexist] not found')
     );
     await expect(
@@ -227,7 +249,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         packagePolicyId: 'policy1',
       },
     });
-    packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
+    packagePolicyServiceMock.list.mockResolvedValue({
+      items: [testPackagePolicy, packagePolicy1],
+    } as any);
 
     mockedGetDatasetName.mockReturnValue('custom');
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
@@ -241,7 +265,51 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
     ).rejects.toThrowError(
-      `Datastreams matching custom exist on other packages and won't be removed`
+      `Datastreams matching custom exist on other packages and cannot be removed`
+    );
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw error if the datastreams exist on other package policies on different namespaces', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy1',
+      },
+    });
+    packagePolicyServiceMock.list.mockResolvedValue({
+      items: [
+        packagePolicy1,
+        testPackagePolicy,
+        {
+          ...testPackagePolicy,
+          id: 'namespace-new',
+          namespace: 'new',
+          inputs: [{ streams: { vars: { 'datastream.dataset': { value: 'custom' } } } }],
+        },
+      ],
+    } as any);
+
+    mockedGetDatasetName.mockReturnValue('custom');
+    mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
+      existingDataStreams: [],
+      dataStream: {},
+    } as any);
+    mockedIsInputPackageDatasetUsedByMultiplePolicies.mockReturnValue(true);
+
+    await expect(
+      deletePackageDatastreamAssetsHandler(context, request, response)
+    ).rejects.toThrowError(
+      `Datastreams matching custom are in use by other package policies and cannot be removed`
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });

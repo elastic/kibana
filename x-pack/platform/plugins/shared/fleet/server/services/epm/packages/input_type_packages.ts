@@ -9,7 +9,12 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 
 import type { IndicesDataStream } from 'elasticsearch-8.x/lib/api/types';
 
-import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../types';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+  PackagePolicy,
+} from '../../../types';
 import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
@@ -53,6 +58,25 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
   existingDataStreams: IndicesDataStream[]
 ) => {
   return (existingDataStreams || []).some((ds) => ds._meta?.package?.name !== pkgInfo.name);
+};
+
+export const isInputPackageDatasetUsedByMultiplePolicies = (
+  packagePolicies: PackagePolicy[],
+  datasetName: string,
+  pkgName: string
+) => {
+  const allStreams = packagePolicies
+    .filter(
+      (packagePolicy) =>
+        packagePolicy?.package?.name === pkgName || packagePolicy?.package?.type === 'input'
+    )
+    .flatMap((packagePolicy) => {
+      return packagePolicy.inputs[0].streams;
+    });
+  const filtered = allStreams.filter(
+    (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
+  );
+  return filtered.length > 1;
 };
 
 // install the assets needed for inputs type packages

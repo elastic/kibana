@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import semverValid from 'semver/functions/valid';
 
 import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { appContextService, packagePolicyService } from '../../services';
@@ -15,8 +16,10 @@ import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
   getDatasetName,
+  isInputPackageDatasetUsedByMultiplePolicies,
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.params>,
@@ -36,6 +39,9 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
     });
+    if (pkgVersion && !semverValid(pkgVersion)) {
+      throw new PackagePolicyRequestError('Package version is not a valid semver');
+    }
 
     if (!packageInfo || packageInfo.version !== pkgVersion) {
       throw new FleetNotFoundError('Version is not installed');
@@ -46,12 +52,30 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
       );
     }
 
-    const packagePolicy = await packagePolicyService.get(savedObjectsClient, packagePolicyId);
+    const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const { items: allPackagePolicies } = await packagePolicyService.list(allSpacesSoClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      spaceId: '*',
+    });
+
+    const packagePolicy = allPackagePolicies.find((policy) => policy.id === packagePolicyId);
     if (!packagePolicy) {
       throw new FleetNotFoundError(`Package policy with id ${packagePolicyId} not found`);
     }
 
-    const datasetName = getDatasetName(packagePolicy.inputs);
+    const datasetName = getDatasetName(packagePolicy?.inputs);
+    const datasetNameUsedByMultiplePolicies = isInputPackageDatasetUsedByMultiplePolicies(
+      allPackagePolicies,
+      datasetName,
+      pkgName
+    );
+
+    if (datasetNameUsedByMultiplePolicies) {
+      throw new FleetError(
+        `Datastreams matching ${datasetName} are in use by other package policies and cannot be removed`
+      );
+    }
+
     const { existingDataStreams } = await findDataStreamsFromDifferentPackages(
       datasetName,
       packageInfo,
@@ -62,11 +86,8 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
       checkExistingDataStreamsAreFromDifferentPackage(packageInfo, existingDataStreams);
 
     if (existingDataStreamsAreFromDifferentPackage) {
-      logger.warn(
-        `Datastreams matching ${datasetName} exist on other packages and won't be removed`
-      );
       throw new FleetError(
-        `Datastreams matching ${datasetName} exist on other packages and won't be removed`
+        `Datastreams matching ${datasetName} exist on other packages and cannot be removed`
       );
     }
 

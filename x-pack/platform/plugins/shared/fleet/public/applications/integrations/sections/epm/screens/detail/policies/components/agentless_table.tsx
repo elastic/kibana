@@ -38,7 +38,6 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal,
   refreshPackagePolicies,
   pagination,
-  isInputPackageDatasetUsedByMultiplePolicies,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -49,7 +48,6 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal: number;
   refreshPackagePolicies: () => void;
   pagination: ReturnType<typeof usePagination>;
-  isInputPackageDatasetUsedByMultiplePolicies: (datasetName: string) => boolean;
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -269,9 +267,6 @@ export const AgentlessPackagePoliciesTable = ({
                           packagePolicyId: packagePolicy.id,
                         })}?from=integrations-policy-list`
                       : undefined
-                  }
-                  isInputPackageDatasetUsedByMultiplePolicies={
-                    isInputPackageDatasetUsedByMultiplePolicies
                   }
                 />
               );

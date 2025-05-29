@@ -25,7 +25,6 @@ import type {
   InMemoryPackagePolicy,
   PackageInfo,
   PackagePolicy,
-  NewPackagePolicyInput,
   PackagePolicyPackage,
 } from '../../../../../types';
 import {
@@ -40,14 +39,9 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 
-import { DATASET_VAR_NAME } from '../../../../../../../../common/constants';
-
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { AgentBasedPackagePoliciesTable } from './components/agent_based_table';
 import { AgentlessPackagePoliciesTable } from './components/agentless_table';
-
-export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
-  packagePolicyInput[0].streams[0]?.vars?.[DATASET_VAR_NAME]?.value;
 
 export const PackagePoliciesPage = ({
   packageInfo,
@@ -139,21 +133,6 @@ export const PackagePoliciesPage = ({
     setAgentBasedPackageAndAgentPolicies(mappedPoliciesData);
   }, [agentBasedData, mapPoliciesData]);
 
-  const isInputPackageDatasetUsedByMultiplePolicies = useCallback(
-    (datasetName: string) => {
-      const allStreams = agentBasedPackageAndAgentPolicies
-        .filter((item) => item.packagePolicy?.package?.type === 'input')
-        .flatMap((item) => {
-          return item.packagePolicy.inputs[0].streams;
-        });
-      const filtered = allStreams.filter(
-        (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
-      );
-      return filtered.length > 1;
-    },
-    [agentBasedPackageAndAgentPolicies]
-  );
-
   // States and data for agentless policies table
   // If agentless is not supported or not an agentless integration, this block and
   // initial request is unnessary but reduces code complexity
@@ -222,9 +201,6 @@ export const PackagePoliciesPage = ({
               }}
               addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
               showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
-              isInputPackageDatasetUsedByMultiplePolicies={
-                isInputPackageDatasetUsedByMultiplePolicies
-              }
             />
           ) : (
             <>
@@ -268,9 +244,6 @@ export const PackagePoliciesPage = ({
                       pageSizeOptions: agentlessPageSizeOptions,
                       setPagination: agentlessSetPagination,
                     }}
-                    isInputPackageDatasetUsedByMultiplePolicies={
-                      isInputPackageDatasetUsedByMultiplePolicies
-                    }
                   />
                 </EuiPanel>
               </EuiAccordion>
@@ -317,9 +290,6 @@ export const PackagePoliciesPage = ({
                     }}
                     addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
                     showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
-                    isInputPackageDatasetUsedByMultiplePolicies={
-                      isInputPackageDatasetUsedByMultiplePolicies
-                    }
                   />
                 </EuiPanel>
               </EuiAccordion>

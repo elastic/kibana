@@ -27,7 +27,6 @@ import type { AgentPolicy, PackagePolicyPackage } from '../types';
 interface Props {
   agentPolicies?: AgentPolicy[];
   from?: 'fleet-policy-list' | undefined;
-  shouldDeleteDatastreamAssets?: boolean;
   packagePolicyPackage?: PackagePolicyPackage;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
@@ -44,7 +43,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   from,
   children,
   packagePolicyPackage,
-  shouldDeleteDatastreamAssets,
 }) => {
   const { notifications } = useStartServices();
   const {
@@ -123,18 +121,20 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     () => agentPolicies?.map((p) => p.name).join(', '),
     [agentPolicies]
   );
-
   const deletePackagePolicies = useCallback(async () => {
     setIsLoading(true);
     try {
       /**
-       * If there are assets to delete, delete them first
+       * Try to delete assets if there are any
        */
-      if (shouldDeleteDatastreamAssets && packagePolicyPackage) {
-        await sendDeletePackageDatastreamAssets(
+      if (packagePolicyPackage?.type === 'input') {
+        const assetsData = await sendDeletePackageDatastreamAssets(
           { pkgName: packagePolicyPackage?.name, pkgVersion: packagePolicyPackage?.version },
           { packagePolicyId: packagePolicies[0] }
         );
+        if (assetsData?.error?.message) {
+          notifications.toasts.addDanger(`Error: ${assetsData.error.message}`);
+        }
       }
 
       const data = await deletePackagePolicyMutationAsync({ packagePolicyIds: packagePolicies });
@@ -193,10 +193,10 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       if (onSuccessCallback.current) {
         onSuccessCallback.current(successfulResults.map((result) => result.id));
       }
-    } catch (e) {
+    } catch (error) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error deleting integration',
+          defaultMessage: `${Error}`,
         })
       );
     }
@@ -205,7 +205,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     packagePolicies,
     closeModal,
     deletePackagePolicyMutationAsync,
-    shouldDeleteDatastreamAssets,
     packagePolicyPackage,
     agentPolicies,
     notifications.toasts,
@@ -266,7 +265,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
-        {shouldDeleteDatastreamAssets && (
+        {packagePolicyPackage?.type === 'input' && (
           <>
             <EuiCallOut
               color="warning"

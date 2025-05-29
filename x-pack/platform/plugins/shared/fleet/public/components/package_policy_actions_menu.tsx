@@ -13,8 +13,6 @@ import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
 import { policyHasFleetServer } from '../services';
 
-import { getDatasetName } from '../applications/integrations/sections/epm/screens/detail/policies/package_policies';
-
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
@@ -27,11 +25,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
   from?: 'fleet-policy-list' | undefined;
-  isInputPackageDatasetUsedByMultiplePolicies?: (datasetName: string) => boolean;
 }> = ({
   agentPolicies,
   packagePolicy,
-  isInputPackageDatasetUsedByMultiplePolicies,
   showAddAgent,
   upgradePackagePolicyHref,
   defaultIsOpen = false,
@@ -55,8 +51,6 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 
   const isAddAgentVisible =
     showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
-
-  const datasetName = useMemo(() => getDatasetName(packagePolicy?.inputs), [packagePolicy.inputs]);
 
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
@@ -154,11 +148,6 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         agentPolicies={agentPolicies}
         key="packagePolicyDelete"
         packagePolicyPackage={packagePolicy.package}
-        shouldDeleteDatastreamAssets={
-          packagePolicy.package?.type === 'input' &&
-          isInputPackageDatasetUsedByMultiplePolicies &&
-          !isInputPackageDatasetUsedByMultiplePolicies(datasetName)
-        }
       >
         {(deletePackagePoliciesPrompt) => {
           return (
