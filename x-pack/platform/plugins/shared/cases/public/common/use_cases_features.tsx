@@ -17,7 +17,7 @@ export interface UseCasesFeatures {
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
-  isObservablesFeatureEnabled?: boolean;
+  isObservablesFeatureEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
