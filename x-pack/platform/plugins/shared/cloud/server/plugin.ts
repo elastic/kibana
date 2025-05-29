@@ -267,7 +267,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         },
       },
       async (context, request, response) => {
-        const { uiSettings, savedObjects } = await context.core;
+        const { uiSettings } = await context.core;
         const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
         const nextCandidateRoute = parseNextURL(request.url.href);
 
