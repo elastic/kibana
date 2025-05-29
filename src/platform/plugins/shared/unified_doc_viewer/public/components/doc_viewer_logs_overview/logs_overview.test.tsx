@@ -16,6 +16,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
+import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -246,6 +247,89 @@ describe('LogsOverview', () => {
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable')
       ).toBeInTheDocument();
+    });
+
+    it('should render the dataset quality link for local indices', () => {
+      const sourceFields = {
+        'data_stream.type': ['logs'],
+        'data_stream.dataset': [DATASET_NAME],
+        'data_stream.namespace': [NAMESPACE],
+      };
+
+      const hitWithDataStream = buildHit({});
+
+      hitWithDataStream.raw.fields = sourceFields;
+
+      const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
+      mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
+        if (id === DATA_QUALITY_DETAILS_LOCATOR_ID) {
+          return {
+            getRedirectUrl: jest.fn().mockReturnValue('/data-quality'),
+            navigate: jest.fn(),
+          };
+        }
+        return originalGet(id);
+      });
+
+      renderLogsOverview({ hit: hitWithDataStream });
+
+      const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = accordions[accordions.length - 1];
+      const button = accordion.querySelector('button');
+
+      if (button) {
+        act(() => {
+          button.click();
+        });
+      }
+
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
+      ).toBeInTheDocument();
+
+      mockUnifiedDocViewerServices.share.url.locators.get = originalGet;
+    });
+
+    it('should not render the dataset quality link for CCS remote indices', () => {
+      const sourceFields = {
+        'data_stream.type': ['logs'],
+        'data_stream.dataset': [DATASET_NAME],
+        'data_stream.namespace': [NAMESPACE],
+      };
+
+      const remoteHit = buildHit({});
+
+      remoteHit.raw.fields = sourceFields;
+      remoteHit.raw._index = `remoteCluster:${DATA_STREAM_NAME}`;
+
+      const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
+      mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
+        if (id === DATA_QUALITY_DETAILS_LOCATOR_ID) {
+          return {
+            getRedirectUrl: jest.fn().mockReturnValue('/data-quality'),
+            navigate: jest.fn(),
+          };
+        }
+        return originalGet(id);
+      });
+
+      renderLogsOverview({ hit: remoteHit });
+
+      const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = accordions[accordions.length - 1];
+      const button = accordion.querySelector('button');
+
+      if (button) {
+        act(() => {
+          button.click();
+        });
+      }
+
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
+      ).not.toBeInTheDocument();
+
+      mockUnifiedDocViewerServices.share.url.locators.get = originalGet;
     });
   });
 });
