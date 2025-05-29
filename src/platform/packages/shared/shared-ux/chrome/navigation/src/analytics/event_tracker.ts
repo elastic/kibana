@@ -9,6 +9,13 @@
 
 import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 
+interface ClickNavLinkEvent {
+  id: string;
+  path: string;
+  href?: string;
+  hrefPrev?: string;
+}
+
 export enum EventType {
   CLICK_NAVLINK = 'solutionNav_click_navlink',
 }
@@ -35,17 +42,7 @@ export class EventTracker {
   /*
    * Track whenever a user clicks on a navigation link in the side nav
    */
-  public clickNavLink({
-    id,
-    path,
-    href,
-    hrefPrev,
-  }: {
-    id: string;
-    path: string;
-    href?: string;
-    hrefPrev?: string;
-  }) {
+  public clickNavLink({ id, path, href, hrefPrev }: ClickNavLinkEvent): void {
     this.track(EventType.CLICK_NAVLINK, {
       [FieldType.ID]: id,
       [FieldType.PATH]: path,

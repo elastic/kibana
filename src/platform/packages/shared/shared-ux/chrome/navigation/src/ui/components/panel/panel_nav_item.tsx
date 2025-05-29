@@ -64,7 +64,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
 
   const href = deepLink?.url ?? item.href;
 
-  const onClick = useCallback<React.MouseEventHandler<HTMLButtonElement | HTMLElement>>(
+  const onClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(
     (e) => {
       if (href) {
         eventTracker.clickNavLink({

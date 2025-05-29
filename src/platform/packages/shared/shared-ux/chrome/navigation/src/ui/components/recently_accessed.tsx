@@ -52,7 +52,7 @@ export const RecentlyAccessed: FC<Props> = ({
           title: label,
           href,
           'data-test-subj': `nav-recentlyAccessed-item nav-recentlyAccessed-item-${id}`,
-          onClick: (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+          onClick: (e: React.MouseEvent<HTMLElement>) => {
             if (isSpecialClick(e)) {
               return;
             }
