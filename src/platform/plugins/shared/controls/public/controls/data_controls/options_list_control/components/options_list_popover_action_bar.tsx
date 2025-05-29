@@ -88,15 +88,10 @@ export const OptionsListPopoverActionBar = ({
     ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
     : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
 
-  const isBulkSelectDisabled = hasNoOptions || hasTooManyOptions;
+  const isBulkSelectDisabled = hasNoOptions || hasTooManyOptions || showOnlySelected;
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {
-      if (showOnlySelected) {
-        bulkAction(selectedOptions as string[]);
-        return;
-      }
-
       if (totalCardinality > availableOptions.length) {
         const newAvailableOptions = (await loadMoreOptions()) ?? [];
         bulkAction(newAvailableOptions.map(({ value }) => value as string));
@@ -105,7 +100,7 @@ export const OptionsListPopoverActionBar = ({
 
       bulkAction(availableOptions.map(({ value }) => value as string));
     },
-    [availableOptions, loadMoreOptions, selectedOptions, showOnlySelected, totalCardinality]
+    [availableOptions, loadMoreOptions, totalCardinality]
   );
 
   return (
