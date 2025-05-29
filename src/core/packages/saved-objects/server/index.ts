@@ -152,6 +152,7 @@ export type {
 // We re-export the SavedObject types here for convenience.
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
