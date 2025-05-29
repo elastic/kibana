@@ -286,7 +286,7 @@ groups:
       - setting: xpack.actions.email.services.ses.host 
         id: action-config-email-services-ses-host
         description: |
-          A string that specifies the host name of the Amazon SES service provider. Email connectors utilize this hostname to send emails via Amazon SES.
+          The hostname for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
@@ -308,7 +308,7 @@ groups:
       - setting: xpack.actions.email.services.ses.port
         id: action-config-email-services-ses-port
         description: |
-          A string that specifies the port name of the Amazon SES service provider. Email connectors utilize this port to send emails via Amazon SES.
+          The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
         # note: ""
