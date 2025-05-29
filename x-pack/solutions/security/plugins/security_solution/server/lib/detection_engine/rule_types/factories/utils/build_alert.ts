@@ -91,9 +91,6 @@ import {
   ALERT_SERVICE_CRITICALITY,
   ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM,
-  ALERT_ORIGINAL_DATA_STREAM_DATASET,
-  ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
-  ALERT_ORIGINAL_DATA_STREAM_TYPE,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
@@ -282,10 +279,6 @@ export const buildAlertFields = ({
     [ALERT_RULE_VERSION]: params.version,
     [ALERT_URL]: alertUrl,
     [ALERT_UUID]: alertUuid,
-    // TODO this satisfies the types, but we always generate these fields in `transformAndMutateDoc`, as opposed to here
-    [ALERT_ORIGINAL_DATA_STREAM_DATASET]: undefined,
-    [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]: undefined,
-    [ALERT_ORIGINAL_DATA_STREAM_TYPE]: undefined,
     [ALERT_WORKFLOW_TAGS]: [],
     [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
