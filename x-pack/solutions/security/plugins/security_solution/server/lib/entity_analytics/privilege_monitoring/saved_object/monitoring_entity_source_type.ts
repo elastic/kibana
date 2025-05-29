@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
 
@@ -56,10 +56,24 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
   },
 };
 
+const version1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        integrationName: {
+          type: 'keyword',
+        },
+      },
+    },
+  ],
+};
+
 export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: monitoringEntitySourceTypeNameMappings,
+  modelVersions: { 1: version1 },
 };
