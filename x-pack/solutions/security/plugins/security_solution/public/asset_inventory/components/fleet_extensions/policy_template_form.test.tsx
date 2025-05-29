@@ -62,7 +62,6 @@ jest.mock('../../hooks/use_kibana', () => ({
 
 const onChange = jest.fn();
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-const mockedSecuritySolutionFeatureService = jest.mocked(SecuritySolutionFeatureService);
 
 describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
   beforeEach(() => {
@@ -698,11 +697,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).not.toBeInTheDocument();
     });
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
-      mockedSecuritySolutionFeatureService.get.mockReturnValue({
-        cloudConnectorsEnabled: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getAssetPolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
