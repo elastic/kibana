@@ -37,6 +37,7 @@
     "@kbn/field-types",
     "@kbn/expressions-plugin",
     "@kbn/inference-langchain",
-    "@kbn/sse-utils-server"
+    "@kbn/sse-utils-server",
+    "@kbn/ml-is-populated-object"
   ]
 }

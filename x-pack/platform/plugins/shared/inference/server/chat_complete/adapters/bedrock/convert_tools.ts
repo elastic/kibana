@@ -12,11 +12,11 @@ import {
   ToolSchemaType,
   type ToolOptions,
 } from '@kbn/inference-common';
-import type { BedrockToolChoice } from './types';
+import type { ToolChoice as ConverseBedRockToolChoice } from '@aws-sdk/client-bedrock-runtime';
 
-export const toolChoiceToBedrock = (
+export const toolChoiceToConverse = (
   toolChoice: ToolOptions['toolChoice']
-): BedrockToolChoice | undefined => {
+): ConverseBedRockToolChoice | undefined => {
   if (toolChoice === ToolChoiceType.required) {
     return { any: {} };
   } else if (toolChoice === ToolChoiceType.auto) {

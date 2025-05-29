@@ -12,8 +12,17 @@ import {
   ChatCompletionChunkToolCall,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
-import type { CompletionChunk, MessageStopChunk } from './types';
+import type {
+  ContentBlockDeltaEvent,
+  ContentBlockStartEvent,
+  ContentBlockStopEvent,
+  ConverseStreamMetadataEvent,
+  MessageStartEvent,
+  MessageStopEvent,
+} from '@aws-sdk/client-bedrock-runtime';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { isMessageStopChunk, type CompletionChunk, type MessageStopChunk } from './types';
 export function processCompletionChunks() {
   return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
@@ -91,55 +100,84 @@ export function processCompletionChunks() {
       });
     });
 }
+
+type ConverseResponse =
+  | ContentBlockDeltaEvent
+  | ContentBlockStartEvent
+  | ContentBlockStopEvent
+  | MessageStartEvent
+  | MessageStopEvent
+  | ConverseStreamMetadataEvent;
+
+export interface ConverseCompletionChunk {
+  type:
+    | 'contentBlockStart'
+    | 'contentBlockDelta'
+    | 'messageDelta'
+    | 'metadata'
+    | 'messageStart'
+    | 'messageStop';
+  body: ConverseResponse;
+}
+
+function isOfType<T extends ConverseCompletionChunk['body']>(
+  chunkBody: ConverseCompletionChunk['body'],
+  type: string,
+  expectedType: string
+): chunkBody is T {
+  return type === expectedType;
+}
+
 export function processConverseCompletionChunks() {
-  return (source: Observable<CompletionChunk>) =>
+  return (source: Observable<ConverseCompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
-      function handleNext({ type, body: chunkBody }: CompletionChunk) {
-        if (type === 'metadata' && 'metrics' in chunkBody) {
+      function handleNext({ type, body: chunkBody }: ConverseCompletionChunk) {
+        if (type === 'metadata' && isConverseStreamMetadataEvent(chunkBody)) {
           return emitTokenCountEvent(subscriber, chunkBody);
         }
 
         let completionChunk = '';
         let toolCallChunk: ChatCompletionChunkToolCall | undefined;
 
-        switch (type) {
-          case 'contentBlockStart':
-            if (chunkBody.text) {
-              completionChunk = chunkBody.text || '';
-            } else if (chunkBody.start.toolUse) {
-              toolCallChunk = {
-                index: chunkBody.contentBlockIndex,
-                toolCallId: chunkBody.start.toolUse.toolUseId,
-                function: {
-                  name: chunkBody.start.toolUse.name,
-                  // the API returns '{}' here, which can't be merged with the deltas...
-                  arguments: '',
-                },
-              };
-            }
-            break;
-
-          case 'contentBlockDelta':
-            if (chunkBody.delta.text) {
-              completionChunk = chunkBody.delta.text || '';
-            } else if (chunkBody.delta.toolUse) {
-              toolCallChunk = {
-                index: chunkBody.contentBlockIndex,
-                toolCallId: '',
-                function: {
-                  name: '',
-                  arguments: chunkBody.delta.toolUse.input,
-                },
-              };
-            }
-            break;
-          case 'messageDelta':
-            completionChunk = chunkBody.delta.stop_sequence || '';
-            break;
-
-          default:
-            break;
+        if (isOfType<ContentBlockStartEvent>(chunkBody, type, 'contentBlockStart')) {
+          if (
+            chunkBody.start?.toolUse &&
+            chunkBody.start.toolUse.toolUseId &&
+            chunkBody.start.toolUse.name &&
+            chunkBody.contentBlockIndex !== undefined
+          ) {
+            toolCallChunk = {
+              index: chunkBody.contentBlockIndex,
+              toolCallId: chunkBody.start.toolUse.toolUseId,
+              function: {
+                name: chunkBody.start.toolUse.name,
+                // the API returns '{}' here, which can't be merged with the deltas...
+                arguments: '',
+              },
+            };
+          }
         }
+        if (isOfType<ContentBlockDeltaEvent>(chunkBody, type, 'contentBlockDelta')) {
+          if (chunkBody.delta?.text) {
+            completionChunk = chunkBody.delta.text || '';
+          } else if (
+            chunkBody.delta?.toolUse &&
+            chunkBody.delta.toolUse.input &&
+            chunkBody.contentBlockIndex !== undefined
+          ) {
+            toolCallChunk = {
+              index: chunkBody.contentBlockIndex,
+              toolCallId: '',
+              function: {
+                name: '',
+                arguments: chunkBody.delta.toolUse.input,
+              },
+            };
+          }
+        }
+        // if (isOfType<MessageDeltaEvent>(chunkBody, type, 'messageDelta')) {
+        //   completionChunk = chunkBody.delta.stop_sequence || '';
+        // }
 
         if (completionChunk || toolCallChunk) {
           subscriber.next({
@@ -168,16 +206,47 @@ export function processConverseCompletionChunks() {
     });
 }
 
+/**
+ *
+ * @param value For BedRock Invoke
+ * @returns
+ */
 function isTokenCountCompletionChunk(value: CompletionChunk): value is MessageStopChunk {
-  // value.type === 'metadata' && 'metrics' in value
   return value.type === 'message_stop' && 'amazon-bedrock-invocationMetrics' in value;
 }
 
+/**
+ * Check if the object is a ConverseStreamMetadataEvent from BedRock Converse API
+ * @param arg response from BedRock Converse API
+ * @returns
+ */
+const isConverseStreamMetadataEvent = (
+  arg: unknown
+): arg is ConverseStreamMetadataEvent & {
+  usage: NonNullable<ConverseStreamMetadataEvent['usage']>;
+} => {
+  return (
+    isPopulatedObject(arg, ['usage', 'metrics']) &&
+    isPopulatedObject((arg as ConverseStreamMetadataEvent).usage, ['inputTokens', 'outputTokens'])
+  );
+};
+
 function emitTokenCountEvent(
   subscriber: Subscriber<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>,
-  chunk: MessageStopChunk
+  chunk: MessageStopChunk | ConverseStreamMetadataEvent
 ) {
-  const { inputTokens: inputTokenCount, outputTokens: outputTokenCount } = chunk.usage;
+  let inputTokenCount = 0;
+  let outputTokenCount = 0;
+  // Response from BedRock Invoke API
+  if (isMessageStopChunk(chunk)) {
+    inputTokenCount = chunk['amazon-bedrock-invocationMetrics'].inputTokenCount;
+    outputTokenCount = chunk['amazon-bedrock-invocationMetrics'].outputTokenCount;
+  }
+  // Response from BedRock Converse API
+  if (isConverseStreamMetadataEvent(chunk)) {
+    inputTokenCount = chunk.usage.inputTokens ?? 0;
+    outputTokenCount = chunk.usage.outputTokens ?? 0;
+  }
 
   subscriber.next({
     type: ChatCompletionEventType.ChatCompletionTokenCount,

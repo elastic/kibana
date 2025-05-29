@@ -15,6 +15,7 @@ import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ConverseRequest, ConverseStreamRequest } from '@aws-sdk/client-bedrock-runtime';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
@@ -511,7 +512,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
     const path = `/model/${currentModel}/converse`;
 
-    const requestBody = JSON.stringify({
+    const request: ConverseRequest = {
       messages,
       inferenceConfig: {
         temperature,
@@ -523,7 +524,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         toolChoice: { auto: toolChoice },
       },
       system,
-    });
+    };
+    const requestBody = JSON.stringify(request);
 
     const signed = this.signRequest(requestBody, path, true);
     const requestArgs = {
@@ -533,6 +535,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       data: requestBody,
       signal,
       timeout,
+      responseSchema: RunApiLatestResponseSchema,
     };
     const response = await this.runApiLatest(requestArgs, connectorUsageCollector);
 
@@ -554,7 +557,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
     const path = `/model/${currentModel}/converse-stream`;
 
-    const requestBody = JSON.stringify({
+    const request: ConverseStreamRequest = {
       messages,
       inferenceConfig: {
         temperature,
@@ -566,7 +569,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         toolChoice,
       },
       system,
-    });
+    };
+    const requestBody = JSON.stringify(request);
 
     const signed = this.signRequest(requestBody, path, true);
 

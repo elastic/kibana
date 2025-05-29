@@ -13,21 +13,26 @@ import {
   ToolChoiceType,
 } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
+import type {
+  ConverseRequest,
+  Message as BedRockConverseMessage,
+  ModelStreamErrorException,
+} from '@aws-sdk/client-bedrock-runtime';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import type { BedRockMessage, BedRockTextPart } from './types';
+import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import {
-  BedrockChunkMember,
-  serdeEventstreamIntoObservable,
-} from './serde_eventstream_into_observable';
-import { processConverseCompletionChunks } from './process_completion_chunks';
+  ConverseCompletionChunk,
+  processConverseCompletionChunks,
+} from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
-import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
-
+import { toolChoiceToConverse, toolsToBedrock } from './convert_tools';
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
     executor,
-    system = 'You are a helpful assistant.',
+    system = 'You are a helpful assistant for Elastic.',
     messages,
     toolChoice,
     tools,
@@ -38,33 +43,34 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
-    const converseMessages = messagesToBedrock(messages).map((message) => ({
-      role: message.role,
-      content: message.rawContent,
-    })) as BedrockMessage[];
+    const converseMessages = messagesToBedrock(messages).map(
+      (message) =>
+        ({
+          role: message.role,
+          content: message.rawContent,
+        } as BedRockConverseMessage)
+    );
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
     const _tools = noToolUsage ? [] : toolsToBedrock(tools, messages);
-    const bedRockTools = _tools.map((toolSpec) => {
-      return {
-        toolSpec: {
-          name: toolSpec.name,
-          description: toolSpec.description,
-          inputSchema: { json: toolSpec.input_schema },
-        },
-      };
-    });
+    const bedRockTools: NonNullable<ConverseRequest['toolConfig']>['tools'] = (_tools ?? []).map(
+      (toolSpec) => {
+        return {
+          toolSpec: {
+            name: toolSpec.name,
+            description: toolSpec.description,
+            inputSchema: { json: toolSpec.input_schema },
+          },
+        };
+      }
+    );
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools,
-      // --@@ For invokeStream
-      // system: noToolUsage ? addNoToolUsageDirective(system) : system,
-      // messages: messagesToBedrock(messages),
-      // tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
-      toolChoice: toolChoiceToBedrock(toolChoice),
+      toolChoice: toolChoiceToConverse(toolChoice),
       temperature,
       model: modelName,
       stopSequences: ['\n\nHuman:'],
@@ -73,31 +79,33 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
 
     return defer(() => {
       return executor.invoke({
-        // subAction: 'invokeStream',
         subAction: 'converseStream',
         subActionParams,
       });
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
-        if ('modelStreamErrorException' in eventData) {
+        if (
+          isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
+            'modelStreamErrorException',
+          ])
+        ) {
           throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
         }
       }),
-      filter((value): value is BedrockChunkMember => {
-        return value !== undefined;
-        // return value.messageStart?.body !== undefined;
-        // return (
-        //   'messageStart' in value &&
-        //   value.messageStart?.headers?.[':event-type']?.value === 'messageStart'
-        // );
+      filter((value) => {
+        return typeof value === 'object' && !!value;
       }),
       map((message) => {
         const key = Object.keys(message)[0];
-        return { type: key, body: JSON.parse(toUtf8(message[key].body)) };
-        // return JSON.parse(toUtf8(message.messageStart?.body));
-        // return parseSerdeChunkMessage(message.messageStart);
+        if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
+          return {
+            type: key,
+            body: JSON.parse(toUtf8(message[key].body)),
+          } as ConverseCompletionChunk;
+        }
       }),
+      filter((value): value is ConverseCompletionChunk => !!value),
       processConverseCompletionChunks()
     );
   },
@@ -154,7 +162,6 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
         return {
           role: 'user' as const,
           rawContent: [
-            // @TODO: do proper conversion for content: document | image | text | json
             {
               toolResult: {
                 toolUseId: message.toolCallId,

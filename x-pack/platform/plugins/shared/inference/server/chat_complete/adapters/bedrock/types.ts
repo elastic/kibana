@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 /**
  * BedRock message as expected by the bedrock connector
  */
@@ -111,6 +113,14 @@ export interface MessageStopChunk extends CompletionChunkBase {
     firstByteLatency: number;
   };
 }
+
+export const isMessageStopChunk = (chunk: unknown): chunk is MessageStopChunk => {
+  return (
+    typeof chunk === 'object' &&
+    isPopulatedObject(chunk, ['type', 'amazon-bedrock-invocationMetrics']) &&
+    chunk.type === 'message_stop'
+  );
+};
 
 export type CompletionChunk =
   | MessageStartChunk
