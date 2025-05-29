@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 const dashboardsPermission = {
-  dashboard_v2: ['all'],
+  dashboard: ['all'],
 };
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
