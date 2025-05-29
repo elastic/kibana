@@ -47,9 +47,12 @@ x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_ser
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
@@ -389,8 +392,6 @@ src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 packages/kbn-dependency-usage @elastic/kibana-security
-src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
@@ -1080,7 +1081,6 @@ src/platform/packages/shared/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
-x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
