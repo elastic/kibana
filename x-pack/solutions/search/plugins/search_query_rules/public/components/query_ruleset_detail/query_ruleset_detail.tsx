@@ -96,20 +96,6 @@ export const QueryRulesetDetail: React.FC = () => {
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="save"
-                  fill
-                  color="primary"
-                  data-test-subj="queryRulesetDetailHeaderSaveButton"
-                  onClick={() => {
-                    // Logic to save the query ruleset
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.queryRules.queryRulesetDetail.saveButton"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
                 <UseRunQueryRuleset
                   rulesetId={rulesetId}
                   type="contextMenuItem"
@@ -119,6 +105,22 @@ export const QueryRulesetDetail: React.FC = () => {
                 />
               </EuiFlexItem>
               <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    iconType="save"
+                    fill
+                    color="primary"
+                    data-test-subj="queryRulesetDetailHeaderSaveButton"
+                    onClick={() => {
+                      // Logic to save the query ruleset
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.queryRules.queryRulesetDetail.saveButton"
+                      defaultMessage="Save"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     id={splitButtonPopoverId}
