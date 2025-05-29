@@ -225,6 +225,7 @@ export class SyncIntegrationsTask {
           name: remoteOutput.name,
           hosts: remoteOutput.hosts ?? [],
           sync_integrations: remoteOutput.sync_integrations ?? false,
+          sync_uninstalled_integrations: remoteOutput.sync_uninstalled_integrations ?? false,
         };
       }),
       integrations: [],
