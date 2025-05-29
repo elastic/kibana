@@ -33,10 +33,14 @@ import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { DraftGrokExpression } from '@kbn/grok-ui';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
-import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
+import {
+  useSimulatorSelector,
+  useStreamsEnrichmentSelector,
+} from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 
 const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
@@ -174,6 +178,10 @@ function InnerGrokAiSuggestions({
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
+  const grokCollection = useStreamsEnrichmentSelector(
+    (machineState) => machineState.context.grokCollection
+  );
+
   const { definition } = useStreamDetail();
   const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
   const form = useFormContext<GrokFormState>();
@@ -260,7 +268,9 @@ function InnerGrokAiSuggestions({
     .filter(
       (suggestion) =>
         !blocklist.has(suggestion.pattern) &&
-        !currentPatterns.some(({ value }) => value === suggestion.pattern)
+        !currentPatterns.some(
+          (draftGrokExpression) => draftGrokExpression.getExpression() === suggestion.pattern
+        )
     );
 
   if (suggestions && !suggestions.patterns.length) {
@@ -323,14 +333,19 @@ function InnerGrokAiSuggestions({
                     onClick={() => {
                       const currentState = form.getValues();
                       const hasNoPatterns =
-                        !currentState.patterns || !currentState.patterns.some(({ value }) => value);
+                        !currentState.patterns ||
+                        !currentState.patterns.some((draftGrokExpression) =>
+                          draftGrokExpression.getExpression()
+                        );
                       form.clearErrors('patterns');
                       if (hasNoPatterns) {
-                        form.setValue('patterns', [{ value: suggestion.pattern }]);
+                        form.setValue('patterns', [
+                          new DraftGrokExpression(grokCollection, suggestion.pattern),
+                        ]);
                       } else {
                         form.setValue('patterns', [
                           ...currentState.patterns,
-                          { value: suggestion.pattern },
+                          new DraftGrokExpression(grokCollection, suggestion.pattern),
                         ]);
                       }
                       telemetryClient.trackAIGrokSuggestionAccepted({
