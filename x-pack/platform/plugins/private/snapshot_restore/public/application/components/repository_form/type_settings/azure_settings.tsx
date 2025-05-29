@@ -96,15 +96,16 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.clientLabel"
-              defaultMessage="Client"
-            />
+            <span id={clientId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.clientLabel"
+                defaultMessage="Client"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
-          id={clientId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -120,7 +121,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
-                id={clientId}
+                aria-labelledby={clientId}
               />
             }
           />
@@ -149,15 +150,16 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.containerLabel"
-              defaultMessage="Container"
-            />
+            <span id={containerId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.containerLabel"
+                defaultMessage="Container"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.container)}
           error={settingErrors.container}
-          id={containerId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -173,7 +175,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="containerInput"
                 disabled={isManagedRepository}
-                id={containerId}
+                aria-labelledby={containerId}
               />
             }
           />
@@ -202,15 +204,16 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathLabel"
-              defaultMessage="Base path"
-            />
+            <span id={basePathId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathLabel"
+                defaultMessage="Base path"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
-          id={basePathId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -226,7 +229,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
-                id={basePathId}
+                aria-labelledby={basePathId}
               />
             }
           />

@@ -84,15 +84,16 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.clientLabel"
-              defaultMessage="Client"
-            />
+            <span id={clientId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.clientLabel"
+                defaultMessage="Client"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
           error={settingErrors.client}
-          id={clientId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -108,7 +109,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
-                id={clientId}
+                aria-labelledby={clientId}
               />
             }
           />
@@ -137,15 +138,16 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketLabel"
-              defaultMessage="Bucket (required)"
-            />
+            <span id={bucketId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketLabel"
+                defaultMessage="Bucket (required)"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
           error={settingErrors.bucket}
-          id={bucketId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -161,7 +163,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="bucketInput"
                 disabled={isManagedRepository}
-                id={bucketId}
+                aria-labelledby={bucketId}
               />
             }
           />
@@ -190,15 +192,16 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.basePathLabel"
-              defaultMessage="Base path"
-            />
+            <span id={basePathId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.basePathLabel"
+                defaultMessage="Base path"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
           error={settingErrors.basePath}
-          id={basePathId}
         >
           <DisableToolTip
             isManaged={isManagedRepository}
@@ -214,7 +217,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
-                id={basePathId}
+                aria-labelledby={basePathId}
               />
             }
           />
