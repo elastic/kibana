@@ -694,7 +694,7 @@ describe('LayerPanel', () => {
       );
     });
 
-    it('should determine if the datasource supports dropping of a field onto a pre-filled dimension', async () => {
+    it('should determine if the datasource supports dropping of a field onto a existing dimension', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -713,13 +713,11 @@ describe('LayerPanel', () => {
           : undefined
       );
 
-      renderWithReduxStore(<LayerPanel {...getDefaultProps()} />, {
-        wrapper: ({ children }) => (
-          <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
-            {children}
-          </ChildDragDropProvider>
-        ),
-      });
+      renderLayerPanel(
+        undefined,
+        undefined,
+        createMockedDragDropContext({ dragging: draggingField })
+      );
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -823,32 +821,37 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const holder = document.createElement('div');
-      document.body.appendChild(holder);
-
-      const { instance } = mountWithReduxStore(
-        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
-          <LayerPanel {...getDefaultProps()} />
-        </ChildDragDropProvider>,
-        undefined,
-        { attachTo: holder }
-      );
-      act(() => {
-        instance.find(Droppable).at(1).prop('onDrop')!(draggingOperation, 'reorder');
+      mockDatasource.getDropProps.mockReturnValue({
+        dropTypes: ['reorder'],
+        nextLabel: '',
       });
+
+      renderLayerPanel(
+        undefined,
+        undefined,
+        createMockedDragDropContext({ dragging: { ...draggingOperation, columnId: 'a' } })
+      );
+
+      const reorderableGroup = screen.getByTestId('lnsDragDrop-reorderableGroup');
+      const reorderableDrags = within(reorderableGroup).getAllByTestId(
+        'lnsDragDrop-reorderableDropLayer'
+      );
+      const reorderableDragSecond = reorderableDrags[1];
+
+      fireEvent.dragOver(reorderableDragSecond);
+      fireEvent.drop(reorderableDragSecond);
+
       expect(onDropToDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'reorder',
           source: draggingOperation,
         })
       );
-      const secondButton = instance
-        .find(Draggable)
-        .at(1)
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-        .at(1)
-        .instance();
-      jest.runAllTimers();
+
+      act(() => jest.runAllTimers());
+      const secondButton = within(reorderableGroup).getAllByTestId(
+        'lnsDragDrop-keyboardHandler'
+      )[1];
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondButton);
     });
