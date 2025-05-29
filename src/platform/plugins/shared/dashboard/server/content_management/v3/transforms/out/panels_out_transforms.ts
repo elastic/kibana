@@ -16,17 +16,15 @@ export function transformPanelsOut(panelsJSON: string): DashboardAttributes['pan
 }
 
 function transformPanelsProperties(panels: SavedDashboardPanel[]) {
-  return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, title, type, version }) => ({
-      gridData,
-      panelConfig: {
-        ...embeddableConfig,
-        ...(id ? { savedObjectId:  id } : {}),
-        ...(title ? { title } : {}),
-      },
-      panelIndex,
-      type,
-      version,
-    })
-  );
+  return panels.map(({ embeddableConfig, gridData, id, panelIndex, title, type, version }) => ({
+    gridData,
+    panelConfig: {
+      ...embeddableConfig,
+      ...(id ? { savedObjectId: id } : {}),
+      ...(title ? { title } : {}),
+    },
+    panelIndex,
+    type,
+    version,
+  }));
 }

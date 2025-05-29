@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from "@kbn/core/server";
+import { SavedObjectReference } from '@kbn/core/server';
 
 export function transformReferencesOut(references: SavedObjectReference[]): SavedObjectReference[] {
-  return references.map(ref => {
+  return references.map((ref) => {
     return isPanelRef(ref) ? transformPanelRef(ref) : ref;
-  })
+  });
 }
 
 const PANEL_REF_NAME_PREFIX = 'panel_';
@@ -26,6 +26,6 @@ function transformPanelRef(ref: SavedObjectReference) {
   const panelId = split.length >= 2 ? split[1] : undefined;
   return {
     ...ref,
-    name: panelId ? `${panelId}:savedObjectRef` : 'savedObjectRef'
-  }
+    name: panelId ? `${panelId}:savedObjectRef` : 'savedObjectRef',
+  };
 }

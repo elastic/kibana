@@ -231,7 +231,9 @@ export function savedObjectToItem(
     const filteredReferences = allowedReferences
       ? references?.filter((reference) => allowedReferences.includes(reference.type))
       : references;
-    const referencesOut = filteredReferences ? transformReferencesOut(filteredReferences) : undefined;
+    const referencesOut = filteredReferences
+      ? transformReferencesOut(filteredReferences)
+      : undefined;
 
     return {
       item: {

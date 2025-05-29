@@ -136,11 +136,13 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       const { savedObjectId, ...byRefState } = getByReferenceState(rawState, libraryId);
       return {
         rawState: byRefState,
-        references: [{
-          name: SAVED_OBJECT_REF_NAME,
-          type: MAP_SAVED_OBJECT_TYPE,
-          id: libraryId,
-        }],
+        references: [
+          {
+            name: SAVED_OBJECT_REF_NAME,
+            type: MAP_SAVED_OBJECT_TYPE,
+            id: libraryId,
+          },
+        ],
       };
     }
 

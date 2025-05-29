@@ -78,9 +78,7 @@ export async function deserializeState(
 ) {
   const fallbackAttributes = createEmptyLensState().attributes;
   const savedObjectRef = findSavedObjectRef(DOC_TYPE, references);
-  const savedObjectId = savedObjectRef
-    ? savedObjectRef.id
-    : rawState.savedObjectId;
+  const savedObjectId = savedObjectRef ? savedObjectRef.id : rawState.savedObjectId;
   if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =

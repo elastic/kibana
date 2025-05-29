@@ -22,7 +22,6 @@ export interface SavedDashboardPanel {
   type: string; // the embeddable type
   gridData: GridData;
   panelIndex: string;
-  
 
   /**
    * This version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.

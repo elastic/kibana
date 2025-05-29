@@ -64,11 +64,13 @@ export function initializeIntegrations(
           const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
           return {
             rawState: byRefState,
-            references: [{
-              name: SAVED_OBJECT_REF_NAME,
-              type: DOC_TYPE,
-              id: savedObjectId
-            }]
+            references: [
+              {
+                name: SAVED_OBJECT_REF_NAME,
+                type: DOC_TYPE,
+                id: savedObjectId,
+              },
+            ],
           };
         }
         return cleanedState;

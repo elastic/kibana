@@ -11,37 +11,47 @@ import { transformReferencesOut } from './references_out_transforms';
 
 describe('transformReferencesOut', () => {
   test('should not transform non-panelRef references', () => {
-    const references = [{
-      name: 'someRef',
-      type: 'someType',
-      id: '1'
-    }];
+    const references = [
+      {
+        name: 'someRef',
+        type: 'someType',
+        id: '1',
+      },
+    ];
     expect(transformReferencesOut(references)).toEqual(references);
   });
 
-  test('should transform legacy panelRef',  () => {
-    const references = [{
-      name: 'panel_4',
-      type: 'someType',
-      id: '1'
-    }];
-    expect(transformReferencesOut(references)).toEqual([{
-      name: '4:savedObjectRef',
-      type: 'someType',
-      id: '1'
-    }]);
+  test('should transform legacy panelRef', () => {
+    const references = [
+      {
+        name: 'panel_4',
+        type: 'someType',
+        id: '1',
+      },
+    ];
+    expect(transformReferencesOut(references)).toEqual([
+      {
+        name: '4:savedObjectRef',
+        type: 'someType',
+        id: '1',
+      },
+    ]);
   });
 
-  test('should transform panelRef',  () => {
-    const references = [{
-      name: '4:panel_4',
-      type: 'someType',
-      id: '1'
-    }];
-    expect(transformReferencesOut(references)).toEqual([{
-      name: '4:savedObjectRef',
-      type: 'someType',
-      id: '1'
-    }]);
+  test('should transform panelRef', () => {
+    const references = [
+      {
+        name: '4:panel_4',
+        type: 'someType',
+        id: '1',
+      },
+    ];
+    expect(transformReferencesOut(references)).toEqual([
+      {
+        name: '4:savedObjectRef',
+        type: 'someType',
+        id: '1',
+      },
+    ]);
   });
 });
