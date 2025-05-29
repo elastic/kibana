@@ -137,7 +137,7 @@ describe('V2 algorithm', () => {
         },
         mappingVersions: {
           'another-type': '10.1.0',
-          'no-mv-type': '0.0.0',
+          'no-mv-type': '10.0.0',
           'some-type': '10.1.0',
         },
       });
