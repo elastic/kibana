@@ -235,6 +235,7 @@ describe('Run Scheduled Report Task', () => {
     await task.scheduleTask(fakeRawRequest as unknown as KibanaRequest, {
       id: 'report-so-id',
       jobtype: 'test1',
+      spaceId: 'default',
       schedule: {
         rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
       } as never,
@@ -247,6 +248,7 @@ describe('Run Scheduled Report Task', () => {
         state: {},
         params: {
           id: 'report-so-id',
+          spaceId: 'default',
           jobtype: 'test1',
         },
         schedule: {
@@ -290,7 +292,9 @@ describe('Run Scheduled Report Task', () => {
 
     await taskRunner.run();
 
-    expect(soClient.get).toHaveBeenCalledWith('scheduled_report', 'report-so-id');
+    expect(soClient.get).toHaveBeenCalledWith('scheduled_report', 'report-so-id', {
+      namespace: 'default',
+    });
     expect(reportStore.addReport).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: expect.any(String),
