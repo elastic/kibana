@@ -477,6 +477,7 @@ describe('Observability AI Assistant client', () => {
                   '@timestamp': expect.any(String),
                   message: {
                     content: 'How many alerts do I have?',
+                    detected_entities: expect.any(Array),
                     role: MessageRole.User,
                   },
                 },
@@ -604,6 +605,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'How many alerts do I have?',
+                detected_entities: expect.any(Array),
                 role: MessageRole.User,
               },
             },
@@ -934,6 +936,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'How many alerts do I have?',
+                detected_entities: expect.any(Array),
                 role: MessageRole.User,
               },
             },
@@ -958,6 +961,7 @@ describe('Observability AI Assistant client', () => {
                 }),
                 name: 'myFunction',
                 role: MessageRole.User,
+                detected_entities: expect.any(Array),
               },
             },
             {

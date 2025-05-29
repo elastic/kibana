@@ -238,7 +238,7 @@ export class AnonymizationService {
       ...message,
       message: {
         ...message.message,
-        ...(detectedEntities.length > 0 && { detected_entities: detectedEntities }),
+        detected_entities: detectedEntities,
       },
     };
 
