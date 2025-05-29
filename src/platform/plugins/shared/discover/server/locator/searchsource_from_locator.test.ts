@@ -19,33 +19,56 @@ import type { LocatorServicesDeps as Services } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects/schema';
 
 const mockSavedSearchId = 'abc-test-123';
-// object returned by savedObjectsClient.get in testing
-const defaultSavedSearch: SavedObject<SavedSearchAttributes> = {
-  type: 'search',
-  id: mockSavedSearchId,
-  references: [
-    { id: '90943e30-9a47-11e8-b64d-95841ca0b247', name: 'testIndexRefName', type: 'index-pattern' },
-  ],
-  attributes: {
-    title: '[Logs] Visits',
-    description: '',
-    columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
-    sort: [['test', '134']] as unknown as [],
-    kibanaSavedObjectMeta: {
-      searchSourceJSON:
-        '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
-    },
-  } as unknown as SavedSearchAttributes,
+const mockSavedSearchAttributes: Omit<SavedSearchAttributes, 'title' | 'description'> = {
+  columns: ['response', 'url', 'clientip', 'machine.os', 'tags'],
+  sort: [['test', '134']],
+  kibanaSavedObjectMeta: {
+    searchSourceJSON:
+      '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"testIndexRefName"}',
+  },
+  grid: {},
+  hideChart: false,
+  isTextBasedQuery: false,
 };
+// object returned by savedObjectsClient.get in testing
+function getMockSavedSearch(
+  attributes?: Partial<SavedSearchAttributes>
+): SavedObject<DiscoverSessionAttributes> {
+  return {
+    type: 'search',
+    id: mockSavedSearchId,
+    attributes: {
+      title: '[Logs] Visits',
+      description: '',
+      tabs: [
+        {
+          id: 'tab_0',
+          label: 'label_0',
+          attributes: {
+            ...mockSavedSearchAttributes,
+            ...attributes,
+          },
+        },
+      ],
+    },
+    references: [
+      {
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        name: 'testIndexRefName',
+        type: 'index-pattern',
+      },
+    ],
+  };
+}
 
 const coreStart = coreMock.createStart();
 let uiSettingsClient: IUiSettingsClient;
 let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
-let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
 
 // mock search source belonging to the saved search
@@ -66,17 +89,10 @@ beforeAll(async () => {
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
   };
-
-  const soClientGet = soClient.get;
-  soClient.get = jest.fn().mockImplementation((type, id) => {
-    if (id === mockSavedSearchId) return mockSavedSearch;
-    return soClientGet(type, id);
-  });
 });
 
 beforeEach(() => {
   mockPayload = [{ params: { savedSearchId: mockSavedSearchId } }];
-  mockSavedSearch = { ...defaultSavedSearch, attributes: { ...defaultSavedSearch.attributes } };
 
   mockDataView = createStubDataView({
     spec: {
@@ -97,6 +113,8 @@ beforeEach(() => {
     }
     return uiSettingsGet(key);
   });
+
+  soClient.get = jest.fn().mockResolvedValue(getMockSavedSearch());
 });
 
 test('with saved search containing a filter', async () => {
@@ -172,7 +190,7 @@ test('with locator params containing a timeRange', async () => {
 });
 
 test('with saved search containing ["_source"]', async () => {
-  mockSavedSearch.attributes.columns = ['_source'];
+  soClient.get = jest.fn().mockResolvedValue(getMockSavedSearch({ columns: ['_source'] }));
 
   const provider = searchSourceFromLocatorFactory(mockServices);
   const searchSource = await provider(mockPayload[0].params);
