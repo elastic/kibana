@@ -704,6 +704,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-man
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
+src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
@@ -2175,6 +2176,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+
+# AI4DSOC in Security Solution
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
