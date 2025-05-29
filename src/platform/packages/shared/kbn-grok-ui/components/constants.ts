@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
-export const configSchema = schema.object({
-  allowByValueEmbeddables: schema.boolean({ defaultValue: true }),
+export const semanticNameLabel = i18n.translate('kbn.grokUi.semanticNameLabel', {
+  defaultMessage: 'Semantic name:',
 });
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export const patternNameLabel = i18n.translate('kbn.grokUi.patternNameLabel', {
+  defaultMessage: 'Pattern:',
+});
+
+export const typeNameLabel = i18n.translate('kbn.grokUi.typeNameLabel', {
+  defaultMessage: 'Type:',
+});

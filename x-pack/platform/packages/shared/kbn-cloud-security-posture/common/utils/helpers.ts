@@ -90,7 +90,10 @@ export const buildGenericEntityFlyoutPreviewQuery = (
                 should: [
                   {
                     term: {
-                      [queryField]: status,
+                      [queryField]: {
+                        value: status,
+                        case_insensitive: true,
+                      },
                     },
                   },
                 ],
@@ -188,6 +191,12 @@ export const buildEntityAlertsQuery = ({
             },
           },
         ].filter(Boolean),
+      },
+    },
+    // TODO: Asset Inventory - remove temp runtime mappings
+    runtime_mappings: {
+      'related.entity': {
+        type: 'keyword',
       },
     },
   };
