@@ -12,6 +12,7 @@ import type { StreamsPluginStartDependencies } from '../../types';
 import { AssetClient } from './assets/asset_client';
 import { StreamsClient } from './client';
 import { createFakeRequestBoundToDefaultSpace } from './helpers/fake_request_factory';
+import type { StreamsConfig } from '../../../common/config';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -32,7 +33,8 @@ export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger,
-    private readonly isDev: boolean
+    private readonly isDev: boolean,
+    private readonly config: StreamsConfig
   ) {}
 
   async getClientWithRequest({
@@ -67,6 +69,7 @@ export class StreamsService {
       request,
       isServerless,
       isDev: this.isDev,
+      config: this.config,
     });
   }
 }

@@ -94,7 +94,7 @@ export class StreamsPlugin
     }
 
     const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const streamsService = new StreamsService(core, this.logger, this.isDev, this.config);
     const contentService = new ContentService(core, this.logger);
 
     plugins.features.registerKibanaFeature({

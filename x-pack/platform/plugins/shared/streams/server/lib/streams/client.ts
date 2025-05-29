@@ -32,6 +32,7 @@ import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_defin
 import { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
+import type { StreamsConfig } from '../../../common/config';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -71,6 +72,7 @@ export class StreamsClient {
       isServerless: boolean;
       isDev: boolean;
       rulesClient: RulesClient;
+      config: StreamsConfig;
     }
   ) {}
 
@@ -248,6 +250,10 @@ export class StreamsClient {
       updated = [],
     }: { deleted?: QueryLink[]; indexed?: QueryLink[]; updated?: QueryLink[] }
   ) {
+    if (this.dependencies.config.experimental?.significantEventsEnabled !== true) {
+      return;
+    }
+
     await Promise.all([
       this.installQueries(name, { indexed, updated }),
       this.uninstallQueries(name, deleted),
