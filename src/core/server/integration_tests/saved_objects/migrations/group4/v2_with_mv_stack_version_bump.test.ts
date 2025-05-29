@@ -141,7 +141,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams({
         migrationAlgorithm: 'v2',
-        kibanaVersion: '8.8.0',
+        kibanaVersion: '8.18.0',
       }),
       types: [
         getTestSwitchType({ beforeUpgrade: true }),
@@ -189,9 +189,9 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
     await runMigrations();
 
     const indices = await client.indices.get({ index: '.kibana*' });
-    expect(Object.keys(indices)).toEqual(['.kibana_8.8.0_001']);
+    expect(Object.keys(indices)).toEqual(['.kibana_8.18.0_001']);
 
-    const index = indices['.kibana_8.8.0_001'];
+    const index = indices['.kibana_8.18.0_001'];
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 
