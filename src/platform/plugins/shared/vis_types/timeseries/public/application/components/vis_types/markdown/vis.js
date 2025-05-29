@@ -18,6 +18,7 @@ import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
+import { visStyles } from '../_vis_types';
 
 import './_markdown.scss';
 
@@ -93,7 +94,7 @@ function MarkdownVisualization(props) {
     );
   }
   return (
-    <div className="tvbVis" style={style}>
+    <div className="tvbVis" css={visStyles} style={style}>
       {markdown}
     </div>
   );
