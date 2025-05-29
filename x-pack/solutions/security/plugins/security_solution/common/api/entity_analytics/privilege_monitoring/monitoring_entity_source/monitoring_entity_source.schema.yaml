@@ -87,8 +87,6 @@ components:
           type: boolean
         indexPattern:
           type: string
-        detectRemovals:
-          type: boolean
         enabled:
           type: boolean
         error:

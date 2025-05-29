@@ -22,7 +22,6 @@ export const MonitoringEntitySourceDescriptor = z.object({
   name: z.string(),
   managed: z.boolean().optional(),
   indexPattern: z.string().optional(),
-  detectRemovals: z.boolean().optional(),
   enabled: z.boolean().optional(),
   error: z.string().optional(),
   integrationName: z.string().optional(),
