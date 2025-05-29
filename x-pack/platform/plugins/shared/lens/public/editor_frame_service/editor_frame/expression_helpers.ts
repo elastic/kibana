@@ -17,7 +17,7 @@ export function getDatasourceExpressionsByLayers(
   nowInstant: Date,
   searchSessionId?: string,
   forceDSL?: boolean
-): null | Record<string, Ast> {
+): undefined | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
@@ -45,7 +45,7 @@ export function getDatasourceExpressionsByLayers(
   });
 
   if (datasourceExpressions.length === 0) {
-    return null;
+    return undefined;
   }
 
   return datasourceExpressions.reduce(
@@ -107,10 +107,10 @@ export function buildExpression({
       title,
       description,
     },
-    datasourceExpressionsByLayers ?? undefined
+    datasourceExpressionsByLayers
   );
 
-  if (datasourceExpressionsByLayers === null || visualizationExpression === null) {
+  if (!datasourceExpressionsByLayers || visualizationExpression === null) {
     return null;
   }
 
