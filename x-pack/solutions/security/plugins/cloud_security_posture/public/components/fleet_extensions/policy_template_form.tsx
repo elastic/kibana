@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
@@ -52,9 +53,8 @@ import {
   isPostureInput,
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
-  POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
-  POSTURE_NAMESPACE,
+  POLICY_TEMPLATE_FORM_DTS,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -74,8 +74,6 @@ import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentia
 import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-
-const { clousSecurityNamespaceSupportEnabled } = ExperimentalFeaturesService.get();
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -546,36 +544,8 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-// const useEnsureNamespace = ({
-//   newPolicy,
-//   input,
-//   updatePolicy,
-//   shouldUpdateNamespace,
-//   setShouldUpdateNamespace,
-// }: {
-//   newPolicy: NewPackagePolicy;
-//   input: NewPackagePolicyPostureInput;
-//   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-//   shouldUpdateNamespace: boolean;
-//   setShouldUpdateNamespace: (shouldUpdate: boolean) => void;
-// }) => {
-//   const hasSetNamespace = useRef(false); // Track if the namespace has already been set
-
-//   useEffect(() => {
-//     if (!shouldUpdateNamespace || hasSetNamespace.current) return; // Skip if flag is false or namespace is already set
-
-//     if (!newPolicy.namespace) {
-//       const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-//       updatePolicy(policy);
-//       hasSetNamespace.current = true; // Mark that the namespace has been set
-//       setShouldUpdateNamespace(false); // Reset the flag
-//     }
-//   }, [newPolicy.namespace, updatePolicy, shouldUpdateNamespace]);
-// };
-
 const usePolicyTemplateInitialName = ({
   isEditPage,
-  isLoading,
   integration,
   newPolicy,
   packagePolicyList,
@@ -583,7 +553,6 @@ const usePolicyTemplateInitialName = ({
   setCanFetchIntegration,
 }: {
   isEditPage: boolean;
-  isLoading: boolean;
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
@@ -593,7 +562,6 @@ const usePolicyTemplateInitialName = ({
   useEffect(() => {
     if (!integration) return;
     if (isEditPage) return;
-    if (isLoading) return;
 
     const packagePolicyListByIntegration = packagePolicyList?.filter(
       (policy) => policy?.vars?.posture?.value === integration
@@ -616,7 +584,7 @@ const usePolicyTemplateInitialName = ({
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage, packagePolicyList]);
+  }, [integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (
@@ -700,8 +668,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         : undefined;
     const isParentSecurityPosture = !integrationParam;
 
-    const [shouldUpdateNamespace, setShouldUpdateNamespace] = useState(true);
-
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud } = useKibana().services;
@@ -716,6 +682,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isEditPage,
       defaultSetupTechnology,
     });
+
+    const { euiTheme } = useEuiTheme();
+
+    const cloudSecurityNamespaceSupportEnabled = useMemo(() => {
+      return ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled;
+    }, []);
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
@@ -842,14 +814,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
-    // useEnsureNamespace({
-    //   newPolicy,
-    //   input,
-    //   updatePolicy,
-    //   shouldUpdateNamespace,
-    //   setShouldUpdateNamespace,
-    // });
-
     useCloudFormationTemplate({
       packageInfo,
       updatePolicy,
@@ -859,7 +823,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     usePolicyTemplateInitialName({
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
-      isLoading,
       integration: integration as CloudSecurityPolicyTemplate,
       newPolicy,
       updatePolicy,
@@ -1002,20 +965,26 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {/* Namespace selector */}
-        {clousSecurityNamespaceSupportEnabled && (
+        {cloudSecurityNamespaceSupportEnabled && (
           <>
             <EuiSpacer size="m" />
-
             <EuiAccordion
               id="advancedOptions"
               buttonContent={
-                <FormattedMessage
-                  id="xpack.csp.fleetIntegration.advancedOptionsLabel"
-                  defaultMessage="Advanced options"
-                />
+                <EuiText
+                  size="xs"
+                  color={euiTheme.colors.textPrimary}
+                  css={{
+                    fontWeight: euiTheme.font.weight.medium,
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                    defaultMessage="Advanced options"
+                  />
+                </EuiText>
               }
               paddingSize="m"
-              buttonClassName="advancedOptionsButton" // Add a custom class for styling
             >
               <EuiFormRow
                 fullWidth
@@ -1027,35 +996,34 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
                 }
                 isInvalid={!!validationResults?.namespace}
                 error={validationResults?.namespace || null}
+                helpText={
+                  <FormattedMessage
+                    id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                    defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMoreLink}"
+                    values={{
+                      learnMoreLink: (
+                        <a
+                          href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Learn more{' '}
+                          <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
+                        </a>
+                      ),
+                    }}
+                  />
+                }
               >
                 <EuiFieldText
                   fullWidth
+                  placeholder="default"
                   isInvalid={!!validationResults?.namespace}
-                  defaultValue={POSTURE_NAMESPACE || ''}
                   onChange={(event) => {
-                    // setShouldUpdateNamespace(true); // Prevents the useEffect from updating the namespace again
                     updatePolicy({ ...newPolicy, namespace: event.target.value });
                   }}
                 />
               </EuiFormRow>
-              <EuiText color="subdued" size="s">
-                <FormattedMessage
-                  id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
-                  defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <a
-                        href="https://www.elastic.co/docs/reference/fleet/data-streams#data-streams-naming-scheme"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Learn more{' '}
-                        <EuiIcon type="popout" size="s" aria-label="Opens in a new tab" />
-                      </a>
-                    ),
-                  }}
-                />
-              </EuiText>
             </EuiAccordion>
           </>
         )}
