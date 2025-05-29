@@ -11,7 +11,7 @@ import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
-import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
+import { isColumnItem, isFunctionItem, getExpressionType, isOptionItem } from './helpers';
 
 function addToUserDefinedColumnOccurrences(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
@@ -107,6 +107,30 @@ function addUserDefinedColumnFromExpression(
   }
 }
 
+/**
+ * Adds user defined column from the completion command.
+ * The completion command defines a new column based on the result of the completion.
+ * It can be defined by the user using the `AS` keyword, or if not specified, defaults to `completion`.
+ * COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)
+ *
+ * @param command - The ESQLCommand representing the completion command.
+ * @param userDefinedColumns - The map of user defined columns to be updated.
+ */
+function addUserDefinedColumnFromCompletionCommand(
+  command: ESQLCommand,
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
+) {
+  const asOption = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
+  const targetArgument = asOption && isOptionItem(asOption) ? asOption.args[0] : undefined;
+  const target = targetArgument && isColumnItem(targetArgument) ? targetArgument : undefined;
+
+  addToUserDefinedColumnOccurrences(userDefinedColumns, {
+    name: target?.name || 'completion',
+    type: 'keyword',
+    location: target?.location || { min: 0, max: 0 },
+  });
+}
+
 export function collectUserDefinedColumns(
   ast: ESQLAst,
   fields: Map<string, ESQLFieldWithMetadata>,
@@ -166,7 +190,10 @@ export function collectUserDefinedColumns(
       }
       return ret;
     })
-    .on('visitQuery', (ctx) => [...ctx.visitCommands()]);
+    .on('visitQuery', (ctx) => [...ctx.visitCommands()])
+    .on('visitCompletionCommand', (ctx) =>
+      addUserDefinedColumnFromCompletionCommand(ctx.node, userDefinedColumns)
+    );
 
   visitor.visitQuery(ast);
 

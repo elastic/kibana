@@ -9,7 +9,7 @@
 
 import { ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { getExpressionType, isColumnItem, isOptionItem } from '../../../shared/helpers';
+import { getExpressionType } from '../../../shared/helpers';
 import { ReferenceMaps } from '../../types';
 
 const supportedPromptTypes = ['text', 'keyword', 'unknown'];
@@ -44,21 +44,6 @@ export const validate = (command: ESQLCommand, references: ReferenceMaps): ESQLM
       type: 'error',
       code: 'completionUnsupportedFieldType',
     });
-  }
-
-  // populate userDefinedColumns references to prevent the common check from failing with unknown column
-  const asOption = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
-  const targetArgument = asOption && isOptionItem(asOption) ? asOption.args[0] : undefined;
-  const target = targetArgument && isColumnItem(targetArgument) ? targetArgument : undefined;
-
-  if (target) {
-    references.userDefinedColumns.set(target.name, [
-      { name: target.name, location: target.location, type: 'keyword' },
-    ]);
-  } else {
-    references.userDefinedColumns.set('completion', [
-      { name: 'completion', location: { min: 0, max: 0 }, type: 'keyword' },
-    ]);
   }
 
   return messages;
