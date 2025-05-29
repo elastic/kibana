@@ -13,6 +13,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { isAgentlessEnabled } from '@kbn/fleet-plugin/server/services/utils/agentless';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup,
@@ -114,8 +115,7 @@ export class SearchConnectorsPlugin
   }
 
   public start(core: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
-    if (true) {
-      // isAgentlessEnabled()) {
+    if (isAgentlessEnabled()) {
       this.logger
         .get()
         .info(
