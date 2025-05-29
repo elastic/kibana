@@ -8488,7 +8488,7 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@moonrepo/cli@^1.36.2":
+"@moonrepo/cli@^1.35.7":
   version "1.36.2"
   resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.36.2.tgz#b77ce7e7e4caf6c4368ede3465106c940392a2b3"
   integrity sha512-skKLw3c0Sxg5nsKQInbzs4nLjl8px4VA0KKeUq6Q+NhghGrzMq7mflfjM2yrIHuKAH982WJQv4Y3OxbSFeQqqQ==
