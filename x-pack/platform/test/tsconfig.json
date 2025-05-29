@@ -47,6 +47,7 @@
     "@kbn/maps-vector-tile-utils",
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-common",
     "@kbn/security-plugin-types-common",
     "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/telemetry-tools",
@@ -72,5 +73,6 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
+    "@kbn/saved-search-plugin",
   ]
 }

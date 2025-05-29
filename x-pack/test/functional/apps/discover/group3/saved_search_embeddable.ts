@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects/schema';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -80,19 +81,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow removing the dashboard panel after the underlying saved search has been deleted', async () => {
       const searchTitle = 'TempSearch';
       const searchId = '90943e30-9a47-11e8-b64d-95841ca0b247';
-      await kibanaServer.savedObjects.create({
+      await kibanaServer.savedObjects.create<DiscoverSessionAttributes>({
         type: 'search',
         id: searchId,
         overwrite: false,
         attributes: {
           title: searchTitle,
           description: '',
-          columns: ['agent', 'bytes', 'clientip'],
-          sort: [['@timestamp', 'desc']],
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
+          tabs: [
+            {
+              id: 'tab_0',
+              label: 'label_0',
+              attributes: {
+                columns: ['agent', 'bytes', 'clientip'],
+                sort: [['@timestamp', 'desc']],
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                grid: {},
+                hideChart: false,
+                isTextBasedQuery: false,
+              },
+            },
+          ],
         },
         references: [
           {
