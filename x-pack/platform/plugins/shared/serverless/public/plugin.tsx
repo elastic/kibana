@@ -10,7 +10,6 @@ import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
@@ -83,21 +82,19 @@ export class ServerlessPlugin
     core.chrome.navControls.registerRight({
       order: 1,
       mount: toMountPoint(
-        <KibanaRenderContextProvider {...core}>
-          <EuiButton
-            href="https://ela.st/serverless-feedback"
-            size={'s'}
-            color={'warning'}
-            iconType={'popout'}
-            iconSide={'right'}
-            target={'_blank'}
-          >
-            {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
-              defaultMessage: 'Give feedback',
-            })}
-          </EuiButton>
-        </KibanaRenderContextProvider>,
-        { ...core }
+        <EuiButton
+          href="https://ela.st/serverless-feedback"
+          size={'s'}
+          color={'warning'}
+          iconType={'popout'}
+          iconSide={'right'}
+          target={'_blank'}
+        >
+          {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
+            defaultMessage: 'Give feedback',
+          })}
+        </EuiButton>,
+        core.rendering
       ),
     });
 
@@ -136,11 +133,12 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <KibanaRenderContextProvider {...coreStart}>
+      coreStart.rendering.addContext(
         <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
           <ProjectSwitcher {...{ currentProjectType }} />
         </ProjectSwitcherKibanaProvider>
-      </KibanaRenderContextProvider>,
+      ),
+
       targetDomElement
     );
 
