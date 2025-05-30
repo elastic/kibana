@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
+import { omit, partition, isEqual, cloneDeep, without, chunk } from 'lodash';
 import { indexBy } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
@@ -115,7 +115,7 @@ import { agentPolicyService } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
-import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
@@ -132,7 +132,7 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import { installAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
@@ -197,21 +197,21 @@ export async function getPackagePolicySavedObjectType() {
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 }
 
-function normalizeKuery(savedObjectType: string, kuery: string) {
+export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
-    return _normalizeKuery(
+    return normalizeKuery(
       savedObjectType,
       kuery.replace(
         new RegExp(`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}\\.`, 'g'),
-        `${savedObjectType}.attributes.`
+        `${savedObjectType}.`
       )
     );
   } else {
-    return _normalizeKuery(
+    return normalizeKuery(
       savedObjectType,
       kuery.replace(
         new RegExp(`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}\\.`, 'g'),
-        `${savedObjectType}.attributes.`
+        `${savedObjectType}.`
       )
     );
   }
@@ -877,7 +877,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       fields,
-      filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+      filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
       namespaces: options.spaceId ? [options.spaceId] : undefined,
     });
 
@@ -913,7 +913,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       fields: ['name'],
-      filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+      filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
     });
 
     for (const packagePolicy of packagePolicies.saved_objects) {
@@ -1217,10 +1217,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const packageInfos = await getPackageInfoForPackagePolicies(
-      [...packagePolicyUpdates, ...oldPackagePolicies],
+      packagePolicyUpdates,
       soClient,
       true
     );
+
+    const oldPackageInfos = await getPackageInfoForPackagePolicies(
+      oldPackagePolicies,
+      soClient,
+      true
+    );
+
+    const allPackageInfos = [...packageInfos.entries(), ...oldPackageInfos.entries()].reduce(
+      (acc, [pkgKey, pkgInfo]) => {
+        acc.set(pkgKey, pkgInfo);
+
+        return acc;
+      },
+      new Map<string, PackageInfo>()
+    );
+
     const allSecretsToDelete: PolicySecretReference[] = [];
 
     const packageInfosandAssetsMap = await getPkgInfoAssetsMap({
@@ -1329,10 +1345,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               oldPackagePolicy.package &&
               oldPackagePolicy.package.version !== pkgInfo.version
             ) {
-              const oldPkgInfoAndAsset = packageInfosandAssetsMap.get(
+              const oldPackageInfo = allPackageInfos.get(
                 `${oldPackagePolicy.package.name}-${oldPackagePolicy.package.version}`
               );
-              if (oldPkgInfoAndAsset?.pkgInfo.type === 'integration') {
+              if (oldPackageInfo?.type === 'integration') {
                 assetsToInstallFn.push(async () => {
                   const updatedPackagePolicy = await this.get(soClient, id);
 
@@ -1473,13 +1489,34 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const updatedPoliciesSuccess = updatedPolicies
+    let updatedPoliciesSuccess = updatedPolicies
       .filter((policy) => !policy.error && policy.attributes)
       .map((soPolicy) =>
         mapPackagePolicySavedObjectToPackagePolicy(
           soPolicy as SavedObject<PackagePolicySOAttributes>
         )
       );
+
+    updatedPoliciesSuccess = (
+      await pMap(
+        chunk(updatedPoliciesSuccess, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS),
+        async (updatedPoliciesChunk) => {
+          const updatedPoliciesComplete = await this.getByIDs(
+            soClient,
+            updatedPoliciesChunk.map((p) => p.id)
+          );
+          return pMap(updatedPoliciesComplete, (packagePolicy) =>
+            packagePolicyService.runExternalCallbacks(
+              'packagePolicyPostUpdate',
+              packagePolicy,
+              soClient,
+              esClient
+            )
+          );
+        },
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+      )
+    ).flat();
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
@@ -2121,7 +2158,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField: 'created_at',
         sortOrder: 'asc',
         fields: [],
-        filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
       },
       resultsMapper: (data) => {
         return data.saved_objects.map((packagePolicySO) => packagePolicySO.id);
@@ -2147,7 +2184,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField,
         sortOrder,
         perPage,
-        filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
       },
       resultsMapper(data) {
         return data.saved_objects.map((packagePolicySO) => {
