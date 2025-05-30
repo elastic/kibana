@@ -79,7 +79,7 @@ export class RuleMigrationsTaskClient {
 
     this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
-    this.data.migrations.saveAsStarted({
+    await this.data.migrations.saveAsStarted({
       id: migrationId,
       connectorId,
     });

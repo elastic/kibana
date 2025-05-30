@@ -104,7 +104,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
    */
   async saveAsAborted({ id }: { id: string }): Promise<void> {
     this.logger.info(`Saving migration ${id} as aborted`);
-    const index = await this.getIndexName();
 
     await this.updateLastExecution({
       id,
@@ -136,6 +135,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         doc: {
           last_execution: lastExecutionParams,
         },
+        retry_on_conflict: 1,
       })
       .catch((error) => {
         this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
