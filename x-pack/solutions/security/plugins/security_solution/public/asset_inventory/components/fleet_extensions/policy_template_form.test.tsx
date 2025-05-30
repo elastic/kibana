@@ -53,7 +53,6 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
-jest.mock('../../../common/experimental_features_service');
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
