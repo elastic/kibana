@@ -39,7 +39,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should handle multiple simultaneous requests for default alerting', async () => {
       // make many simultaneous requests to the default alerting API
-      const requests = Array.from({ length: 10 }, () =>
+      const REQUEST_COUNT = 20;
+      const requests = Array.from({ length: REQUEST_COUNT }, () =>
         supertest
           .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
           .set(editorUser.apiKeyHeader)
@@ -51,7 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // let all requests finish
       const responses = await Promise.all(requests);
 
-      expect(responses).to.have.length(10);
+      expect(responses).to.have.length(REQUEST_COUNT);
 
       // All the alerting responses should match
       const {

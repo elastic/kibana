@@ -284,16 +284,19 @@ describe('DefaultAlertService', () => {
         });
       });
 
-      it('blocks on subsequent calls to avoid multiple default alert creations', async () => {
+      it('handles simultaneous calls for default alert creations', async () => {
         const sampleAction = { alertsFilter: { query: { kql: 'some kql', filters: [] } } };
         const monitorStatusRule: unknown[] = [];
         const tlsRule: unknown[] = [];
+        const expectedMonitorStatusRuleId =
+          'SNTHETICS_DEFAULT_ALERT_xpack.synthetics.alerts.monitorStatus';
+        const expectedTlsRuleId = 'SNTHETICS_DEFAULT_ALERT_xpack.synthetics.alerts.tls';
 
         // The purpose of this test is to simulate a race condition where we have multiple calls from
         // the client as the user initiates their Synthetics setup.
         // These mocks for find and create are a naive simulation of the default alert service
         // interacting with the alerting framework.
-        // The test will succeed if the create mock gets called exactly once for each rule type,
+        // The test will succeed if the create mock simulates rule creation exactly once for each rule type,
         // and for each create mock we place a sample rule object into a list. The find api will
         // pick up the rule type and return the data from the proper list.
         const find = jest.fn().mockImplementation((args) => {
@@ -311,17 +314,24 @@ describe('DefaultAlertService', () => {
         const create = jest.fn().mockImplementation(async (args) => {
           const {
             data: { alertTypeId },
+            options: { id },
           } = args;
           const createdRule = {
             actions: [sampleAction],
             systemActions: [],
-            id: '123',
+            id,
             alertTypeId,
           };
           if (alertTypeId === 'xpack.synthetics.alerts.monitorStatus') {
+            if (monitorStatusRule.find((rule) => rule.id === id)) {
+              throw new Error('document already exists');
+            }
             monitorStatusRule.push(createdRule);
           }
           if (alertTypeId === 'xpack.synthetics.alerts.tls') {
+            if (tlsRule.find((rule) => rule.id === id)) {
+              throw new Error('document already exists');
+            }
             tlsRule.push(createdRule);
           }
           await new Promise((resolve) => setTimeout(resolve, 200));
@@ -365,19 +375,19 @@ describe('DefaultAlertService', () => {
         expect(monitorStatusResults).toEqual([
           {
             actions: [sampleAction],
-            id: '123',
+            id: expectedMonitorStatusRuleId,
             alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
             ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
           },
           {
             actions: [sampleAction],
-            id: '123',
+            id: expectedMonitorStatusRuleId,
             alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
             ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
           },
           {
             actions: [sampleAction],
-            id: '123',
+            id: expectedMonitorStatusRuleId,
             alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
             ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
           },
@@ -385,26 +395,55 @@ describe('DefaultAlertService', () => {
         expect(tlsResults).toEqual([
           {
             actions: [sampleAction],
-            id: '123',
+            id: expectedTlsRuleId,
             alertTypeId: 'xpack.synthetics.alerts.tls',
             ruleTypeId: 'xpack.synthetics.alerts.tls',
           },
           {
             actions: [sampleAction],
-            id: '123',
+            id: expectedTlsRuleId,
             alertTypeId: 'xpack.synthetics.alerts.tls',
             ruleTypeId: 'xpack.synthetics.alerts.tls',
           },
           {
             actions: [sampleAction],
-            id: '123',
+            id: expectedTlsRuleId,
             alertTypeId: 'xpack.synthetics.alerts.tls',
             ruleTypeId: 'xpack.synthetics.alerts.tls',
           },
         ]);
-        expect(create).toHaveBeenCalledTimes(2);
+        expect(create).toHaveBeenCalledTimes(6);
         expect(monitorStatusRule).toHaveLength(1);
         expect(tlsRule).toHaveLength(1);
+      });
+
+      it('throws error if rule creation fails for non-duplicate reasons', async () => {
+        const find = jest.fn().mockResolvedValue({ data: [] });
+        const create = jest.fn().mockRejectedValue(new Error('some error'));
+        const getActionsClient = jest.fn();
+        getActionsClient.mockReturnValue({
+          getAll: jest
+            .fn()
+            .mockResolvedValue([{ id: 'id', actionTypeId: 'actionTypeId', name: 'action name' }]),
+        });
+        const getRulesClient = jest.fn();
+        getRulesClient.mockReturnValue({ find, create });
+        const context = { actions: { getActionsClient }, alerting: { getRulesClient } };
+        const error = jest.fn();
+        const service = new DefaultAlertService(
+          context as any,
+          { logger: { error } } as any,
+          {} as any
+        );
+        service.settings = { defaultConnectors: ['slack', 'email'] } as any;
+        await expect(
+          service.createDefaultRuleIfNotExist(
+            'xpack.synthetics.alerts.monitorStatus',
+            'name',
+            '1m'
+          )
+        ).rejects.toThrow('some error');
+        expect(error).toHaveBeenCalled();
       });
     });
 

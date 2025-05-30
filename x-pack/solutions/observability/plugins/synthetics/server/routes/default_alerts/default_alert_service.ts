@@ -24,14 +24,6 @@ import {
 import { DefaultRuleType } from '../../../common/types/default_alerts';
 
 export class DefaultAlertService {
-  /**
-   * These static vars are used to ensure that only one default alert create procedure is running
-   * at a time for a given rule type.
-   * If multiple requests come in at the same time, they will wait for the first one to complete.
-   * Without this mechanism, we could end up creating multiple default alerts at the same time.
-   */
-  private static _defaultMonitorStatusAlertProcess: Promise<unknown> | null = null;
-  private static _defaultTlsAlertProcess: Promise<unknown> | null = null;
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -125,89 +117,62 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  private static setCreateDefaultAlertProcess(ruleType: string, process: Promise<unknown> | null) {
-    if (ruleType === SYNTHETICS_STATUS_RULE) {
-      DefaultAlertService._defaultMonitorStatusAlertProcess = process;
-    } else if (ruleType === SYNTHETICS_TLS_RULE) {
-      DefaultAlertService._defaultTlsAlertProcess = process;
-    }
-  }
-
-  private static inProgress(ruleType: DefaultRuleType) {
-    switch (ruleType) {
-      case SYNTHETICS_STATUS_RULE:
-        return !!DefaultAlertService._defaultMonitorStatusAlertProcess;
-      case SYNTHETICS_TLS_RULE:
-        return !!DefaultAlertService._defaultTlsAlertProcess;
-      default:
-        return false;
-    }
-  }
-
-  private static getDefaultAlertProcess(ruleType: DefaultRuleType) {
-    if (ruleType === SYNTHETICS_STATUS_RULE) {
-      return DefaultAlertService._defaultMonitorStatusAlertProcess;
-    } else if (ruleType === SYNTHETICS_TLS_RULE) {
-      return DefaultAlertService._defaultTlsAlertProcess;
-    }
-    return null;
-  }
-
   async createDefaultRuleIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
-    const alert = await this.getExistingAlert(ruleType);
-    if (alert) {
-      return alert;
-    }
-    if (DefaultAlertService.inProgress(ruleType)) {
-      await DefaultAlertService.getDefaultAlertProcess(ruleType);
+    // short circuit if the rule already exists
+    let defaultRule = await this.getExistingAlert(ruleType);
+    if (defaultRule) {
+      return defaultRule;
     }
 
-    const ruleCreationPromise = this.createDefaultRules(ruleType, name, interval);
-    DefaultAlertService.setCreateDefaultAlertProcess(ruleType, ruleCreationPromise);
-
-    try {
-      const defaultAlertCheckResult = await ruleCreationPromise;
-      // free the var for the next request
-      DefaultAlertService.setCreateDefaultAlertProcess(ruleType, null);
-      return defaultAlertCheckResult;
-    } catch (e) {
-      // when there is an error, reset the var for the next request
-      DefaultAlertService.setCreateDefaultAlertProcess(ruleType, null);
-      throw e;
-    }
-  }
-
-  private async createDefaultRules(ruleType: DefaultRuleType, name: string, interval: string) {
-    const alert = await this.getExistingAlert(ruleType);
-    if (alert) {
-      return alert;
-    }
-
-    const actions = await this.getAlertActions(ruleType);
+    const actions = await this.getRuleActions(ruleType);
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
-    const {
-      actions: actionsFromRules = [],
-      systemActions = [],
-      ...newAlert
-    } = await rulesClient.create<{}>({
-      data: {
-        actions,
-        params: {},
-        consumer: 'uptime',
-        alertTypeId: ruleType,
-        schedule: { interval },
-        tags: ['SYNTHETICS_DEFAULT_ALERT'],
-        name,
-        enabled: true,
-        throttle: null,
-      },
-    });
+    try {
+      // create the rule with hardcoded ID (we only ever want one of these)
+      // the request will fail if the rule already exists
+      const {
+        actions: actionsFromRules = [],
+        systemActions = [],
+        ...newAlert
+      } = await rulesClient.create<{}>({
+        data: {
+          actions,
+          params: {},
+          consumer: 'uptime',
+          alertTypeId: ruleType,
+          schedule: { interval },
 
-    return {
-      ...newAlert,
-      actions: [...actionsFromRules, ...systemActions],
-      ruleTypeId: newAlert.alertTypeId,
-    };
+          tags: ['SYNTHETICS_DEFAULT_ALERT'],
+          name,
+          enabled: true,
+          throttle: null,
+        },
+        options: {
+          id: `SNTHETICS_DEFAULT_ALERT_${ruleType}`,
+        },
+      });
+      defaultRule = {
+        ...newAlert,
+        actions: [...actionsFromRules, ...systemActions],
+        ruleTypeId: newAlert.alertTypeId,
+      };
+    } catch (error) {
+      if (error.message && !error.message.includes('document already exists')) {
+        this.server.logger.error(`Error creating default alert for ${ruleType}: ${error.message}`);
+        throw error;
+      }
+    }
+
+    if (defaultRule) return defaultRule;
+
+    /**
+     * If `defaultRule` is falsy, it means the rule already exists and the
+     * alerting API rejected the create request.
+     *
+     * In this case, we just query again for the rule. This can return `undefined`
+     * if there was an exception in the create request unrelated to the rule already existing,
+     * but we assume that the rule exists if we reach this point.
+     */
+    return this.getExistingAlert(ruleType);
   }
 
   async updateStatusRule(enabled?: boolean) {
@@ -249,7 +214,7 @@ export class DefaultAlertService {
     if (alert) {
       const currentIntervalInMs = parseDuration(alert.schedule.interval);
       const minimumIntervalInMs = parseDuration(interval);
-      const actions = await this.getAlertActions(ruleType);
+      const actions = await this.getRuleActions(ruleType);
       const {
         actions: actionsFromRules = [],
         systemActions = [],
@@ -277,7 +242,7 @@ export class DefaultAlertService {
     return await this.createDefaultRuleIfNotExist(ruleType, name, interval);
   }
 
-  async getAlertActions(ruleType: DefaultRuleType) {
+  async getRuleActions(ruleType: DefaultRuleType) {
     const { actionConnectors, settings } = await this.getActionConnectors();
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>
