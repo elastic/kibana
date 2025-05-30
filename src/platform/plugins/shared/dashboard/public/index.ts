@@ -20,7 +20,7 @@ export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/typ
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_container/external_api/lazy_dashboard_renderer';
 export type { DashboardLocatorParams } from './dashboard_container/types';
-export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
+export type { DashboardSetup, DashboardStart } from './plugin';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
