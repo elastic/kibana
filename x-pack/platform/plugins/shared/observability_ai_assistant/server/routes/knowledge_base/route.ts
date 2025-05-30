@@ -29,20 +29,19 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async ({
-    service,
-    request,
-  }): Promise<{
+  handler: async (
+    resources
+  ): Promise<{
     errorMessage?: string;
     enabled: boolean;
-    endpoint?: Partial<InferenceInferenceEndpointInfo>;
+    endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
     kbState: KnowledgeBaseState;
-    currentInferenceId: string | undefined;
+    currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
   }> => {
-    const client = await service.getClient({ request });
+    const client = await resources.service.getClient({ request: resources.request });
     return client.getKnowledgeBaseStatus();
   },
 });
@@ -165,7 +164,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
   params: t.type({
     body: t.type({
       id: t.string,
-      text: t.string,
+      text: nonEmptyStringRt,
       public: toBooleanRt,
     }),
   }),
