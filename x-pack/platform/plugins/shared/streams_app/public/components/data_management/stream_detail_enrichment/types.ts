@@ -52,3 +52,18 @@ export type ExtractBooleanFields<TInput> = NonNullable<
 export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
   id: string;
 };
+
+export type RandomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'random-samples' }
+>;
+
+export type KqlSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'kql-samples' }
+>;
+
+export type CustomSamplesDataSourceWithUIAttributes = Extract<
+  EnrichmentDataSourceWithUIAttributes,
+  { type: 'custom-samples' }
+>;

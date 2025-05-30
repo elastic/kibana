@@ -95,7 +95,10 @@ export const dataSourceMachine = setup({
   }),
   initial: 'unresolved',
   on: {
-    'dataSource.delete': '.deleted',
+    'dataSource.delete': {
+      guard: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
+      target: '.deleted',
+    },
   },
   states: {
     unresolved: {

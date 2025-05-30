@@ -20,10 +20,6 @@ export const defaultEnrichmentUrlState: EnrichmentUrlState = {
     {
       type: 'random-samples',
       enabled: true,
-      time: {
-        from: 'now-15m',
-        to: 'now',
-      },
     },
   ],
 };

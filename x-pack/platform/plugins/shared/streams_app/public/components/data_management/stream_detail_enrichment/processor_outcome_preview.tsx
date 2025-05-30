@@ -50,45 +50,6 @@ export const ProcessorOutcomePreview = () => {
   );
 };
 
-// const PreviedDocumentsSearchBar = () => {
-//   const {
-//     dependencies: {
-//       start: { data },
-//     },
-//   } = useKibana();
-//   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-//   const search = useSimulatorSelector((state) => state.context.search);
-//   const { changeSearchParams } = useStreamEnrichmentEvents();
-
-//   const { value: streamDataView } = useAsync(() =>
-//     data.dataViews.create({
-//       title: definition.stream.name,
-//       timeFieldName: '@timestamp',
-//     })
-//   );
-
-//   return (
-//     streamDataView && (
-//       <StreamsAppSearchBar
-//         showDatePicker
-//         showFilterBar
-//         showQueryInput
-//         filters={search.filters}
-//         query={search.query}
-//         isRefreshPaused={search.refreshInterval.pause}
-//         refreshInterval={search.refreshInterval.value}
-//         onFiltersUpdated={(filters) => changeSearchParams({ filters })}
-//         onQuerySubmit={({ query, dateRange }) => changeSearchParams({ query, time: dateRange })}
-//         onRefresh={() => changeSearchParams({})}
-//         onRefreshChange={({ isPaused, refreshInterval }) => {
-//           changeSearchParams({ refreshInterval: { pause: isPaused, value: refreshInterval } });
-//         }}
-//         indexPatterns={[streamDataView]}
-//       />
-//     )
-//   );
-// };
-
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',
   maximumFractionDigits: 0,

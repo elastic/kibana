@@ -29,14 +29,18 @@ import {
   EuiPopover,
   EuiListGroup,
   EuiListGroupItem,
+  EuiLoadingLogo,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
-import { EnrichmentDataSource } from '../../../../../common/url_schema';
+import useAsync from 'react-use/lib/useAsync';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { EnrichmentDataSource, KqlSamplesDataSource } from '../../../../../common/url_schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import {
+  useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from '../state_management/stream_enrichment_state_machine';
@@ -46,6 +50,11 @@ import {
 } from '../state_management/data_source_state_machine';
 import { AssetImage } from '../../../asset_image';
 import { PreviewTable } from '../../preview_table';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import {
+  EnrichmentDataSourceWithUIAttributes,
+  KqlSamplesDataSourceWithUIAttributes,
+} from '../types';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -160,7 +169,10 @@ const DataSourcesContextMenu = ({
                       from: 'now-15m',
                       to: 'now',
                     },
-                    query: '',
+                    query: {
+                      language: 'kuery',
+                      query: '',
+                    },
                   });
                   closeMenu();
                 },
@@ -176,7 +188,6 @@ const DataSourcesContextMenu = ({
                     type: 'custom-samples',
                     name: '',
                     enabled: true,
-                    docs: [],
                   });
                   closeMenu();
                 },
@@ -221,9 +232,32 @@ const RandomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
 };
 
 const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  const { data } = useKibana().dependencies.start;
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
+  const dataSource = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => snapshot.context.dataSource as KqlSamplesDataSourceWithUIAttributes
+  );
+
+  const isDisabled = useDataSourceSelector(dataSourceRef, (snapshot) =>
+    snapshot.matches('disabled')
+  );
+
+  const { value: streamDataView } = useAsync(() =>
+    data.dataViews.create({
+      title: definition.stream.name,
+      timeFieldName: '@timestamp',
+    })
+  );
+
+  const handleChange = (params: Partial<KqlSamplesDataSourceWithUIAttributes>) => {
+    dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
+  };
+
   return (
     <DataSourceCard
       dataSourceRef={dataSourceRef}
+      dataPreviewIsOpen
       title={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.defaultName',
         { defaultMessage: 'KQL search samples' }
@@ -232,7 +266,27 @@ const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSource
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.subtitle',
         { defaultMessage: 'Sample data using KQL query syntax.' }
       )}
-    />
+    >
+      {streamDataView && (
+        <StreamsAppSearchBar
+          showDatePicker
+          showFilterBar
+          showQueryInput
+          filters={dataSource.filters}
+          query={dataSource.query}
+          onFiltersUpdated={(filters) => handleChange({ filters })}
+          onQueryChange={({ query, dateRange }) =>
+            handleChange({
+              query: query as KqlSamplesDataSourceWithUIAttributes['query'],
+              time: dateRange,
+            })
+          }
+          indexPatterns={[streamDataView]}
+          isDisabled={isDisabled}
+        />
+      )}
+      <EuiSpacer size="s" />
+    </DataSourceCard>
   );
 };
 
@@ -253,22 +307,26 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
 };
 
 const DataSourceCard = ({
-  dataSourceRef,
   children,
+  dataSourceRef,
+  dataPreviewIsOpen = false,
   title,
   subtitle,
 }: PropsWithChildren<{
   dataSourceRef: DataSourceActorRef;
+  dataPreviewIsOpen?: boolean;
   title?: string;
   subtitle?: string;
 }>) => {
-  const dataSource = useDataSourceSelector(
-    dataSourceRef,
-    (snapshot) => snapshot.context.dataSource
-  );
-  const previewDocs = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot.context.data);
+  const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
 
-  const isEnabled = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot.matches('enabled'));
+  const { data: previewDocs, dataSource } = dataSourceState.context;
+
+  const canDeleteDataSource = dataSourceState.can({ type: 'dataSource.delete' });
+  const isEnabled = dataSourceState.matches('enabled');
+  const isLoading =
+    dataSourceState.matches({ enabled: 'loadingData' }) ||
+    dataSourceState.matches({ enabled: 'debouncingChanges' });
 
   const toggleActivity = () => {
     dataSourceRef.send({ type: 'dataSource.toggleActivity' });
@@ -321,7 +379,7 @@ const DataSourceCard = ({
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow />
-            <EuiButtonIcon iconType="trash" onClick={deleteDataSource} />
+            {canDeleteDataSource && <EuiButtonIcon iconType="trash" onClick={deleteDataSource} />}
           </EuiFlexGroup>
           <EuiText component="p" color="subdued" size="xs">
             {subtitle}
@@ -339,6 +397,7 @@ const DataSourceCard = ({
           'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.label',
           { defaultMessage: 'Data preview' }
         )}
+        initialIsOpen={dataPreviewIsOpen}
       >
         <EuiSpacer size="s" />
         {isEmpty(previewDocs) ? (
@@ -350,6 +409,19 @@ const DataSourceCard = ({
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.noData',
                   { defaultMessage: 'No documents to preview available' }
+                )}
+              </h4>
+            }
+          />
+        ) : isLoading ? (
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
+            titleSize="xxs"
+            title={
+              <h4>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.loadingSamples',
+                  { defaultMessage: 'Loading samples preview' }
                 )}
               </h4>
             }

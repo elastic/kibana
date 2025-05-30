@@ -37,10 +37,7 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
         data,
         condition: input.condition,
         time: input.dataSource.time,
-        query: {
-          language: 'kuery',
-          query: input.dataSource.query,
-        },
+        query: input.dataSource.query,
         streamName: input.streamName,
       });
     }

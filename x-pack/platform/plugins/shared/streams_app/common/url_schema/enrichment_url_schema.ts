@@ -14,17 +14,17 @@ const dataSourceBaseSchema = z.object({
 
 const randomSamplesDataSourceSchema = dataSourceBaseSchema.extend({
   type: z.literal('random-samples'),
-  time: z.object({
-    from: z.string(),
-    to: z.string(),
-  }),
 });
 
 export type RandomSamplesDataSource = z.TypeOf<typeof randomSamplesDataSourceSchema>;
 
 const kqlSamplesDataSourceSchema = dataSourceBaseSchema.extend({
   type: z.literal('kql-samples'),
-  query: z.string(),
+  query: z.object({
+    language: z.string(),
+    query: z.string(),
+  }),
+  filters: z.record(z.unknown()), // No strict typing on filters as it can easily fail for de-synced structures
   time: z.object({
     from: z.string(),
     to: z.string(),
