@@ -838,8 +838,8 @@ And all customizable rule fields should be equal to the target version
 Given a Kibana instance running under an insufficient license
 And multiple outdated prebuilt rules (new versions are available for them)
 When user is on the Rule Updates table
-And selects multiple rules
-And clicks a button to upgrade selected rules
+And selects multiple prebuilt rules
+And clicks a button to upgrade selected prebuilt rules
 Then success message should be displayed after upgrade
 And all customizable fields of each upgraded rule should be equal to their respective target versions
 ```
