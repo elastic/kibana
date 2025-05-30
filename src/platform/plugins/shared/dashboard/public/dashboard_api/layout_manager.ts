@@ -93,12 +93,9 @@ export function initializeLayoutManager(
     sections: DashboardSectionMap;
   } => {
     const references: Reference[] = [];
-    const panels: DashboardPanelMap = {};
-    const sections: DashboardSectionMap = {};
     const layout = layout$.value;
-    for (const sectionId of Object.keys(layout.sections)) {
-      sections[sectionId] = { ...layout.sections[sectionId], id: sectionId };
-    }
+    const panels: DashboardPanelMap = {};
+
     for (const panelId of Object.keys(layout.panels)) {
       references.push(
         ...prefixReferencesFromPanel(panelId, currentChildState[panelId]?.references ?? [])
@@ -108,7 +105,7 @@ export function initializeLayoutManager(
         explicitInput: currentChildState[panelId]?.rawState ?? {},
       };
     }
-    return { panels, sections, references };
+    return { panels, sections: layout.sections, references };
   };
 
   const resetLayout = ({
