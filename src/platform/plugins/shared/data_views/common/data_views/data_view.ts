@@ -26,7 +26,6 @@ import type {
 } from '../types';
 import { removeFieldAttrs } from './utils';
 import { AbstractDataView } from './abstract_data_views';
-import { flattenHitWrapper } from './flatten_hit';
 
 interface DataViewDeps {
   spec?: DataViewSpec;
@@ -57,10 +56,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * Field list, in extended array format
    */
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
-  /**
-   * @deprecated Use `flattenHit` utility method exported from data plugin instead.
-   */
-  public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
 
   private etag: string | undefined;
 
@@ -71,10 +66,9 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
   constructor(config: DataViewDeps) {
     super(config);
-    const { spec = {}, metaFields } = config;
+    const { spec = {} } = config;
 
     this.fields = fieldList([], this.shortDotsEnable);
-    this.flattenHit = flattenHitWrapper(this, metaFields);
 
     // set values
     this.fields.replaceAll(Object.values(spec.fields || {}));
@@ -308,7 +302,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     if (runtimeField.type === 'composite') {
       return Object.entries(runtimeField.fields!).reduce<Record<string, DataViewField>>(
-        (acc, [subFieldName, subField]) => {
+        (acc, [subFieldName]) => {
           const fieldFullName = `${name}.${subFieldName}`;
           const dataViewField = this.getFieldByName(fieldFullName);
 
