@@ -133,6 +133,15 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await selectIndex();
         await testSubjects.existOrFail('chatPage');
       },
+      async expectSelectingIndicesWithNoFieldtoShowError() {
+        await selectIndex();
+        await testSubjects.existOrFail('addDataSourcesButton');
+        await testSubjects.click('addDataSourcesButton');
+        await testSubjects.existOrFail('selectIndicesFlyout');
+        await testSubjects.click('sourceIndex-0');
+        await testSubjects.existOrFail('NoIndicesFieldsMessage');
+        expect(await testSubjects.isEnabled('saveButton')).to.be(true);
+      },
 
       async expectAddConnectorButtonExists() {
         await testSubjects.existOrFail('connectLLMButton');
@@ -142,7 +151,38 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('connectLLMButton');
         await testSubjects.existOrFail('create-connector-flyout');
       },
+      async expectAIConnectorFlyoutToOpen() {
+        await testSubjects.existOrFail('create-connector-flyout');
+        await testSubjects.existOrFail('.gen-ai-card"');
+      },
+      async createConnectorFromAIConnectorFlyout() {
+        await testSubjects.existOrFail('.gen-ai-card');
+        await testSubjects.click('.gen-ai-card');
+        await testSubjects.existOrFail('create-connector-flyout-header');
+        const headerValue = await testSubjects.getVisibleText('create-connector-flyout-header');
+        expect(headerValue).to.contain('OpenAI connector');
+        await testSubjects.existOrFail('nameInput');
+        await testSubjects.setValue('nameInput', 'myOpenaiConnector');
+        const openaiProvider = await testSubjects.getVisibleText('config.apiProvider-select');
+        expect(openaiProvider).to.contain('OpenAI');
+        await testSubjects.existOrFail('secrets.apiKey-input');
+        await testSubjects.setValue('secrets.apiKey-input', 'apiKey');
+        await testSubjects.existOrFail('create-connector-flyout-save-btn');
+        await testSubjects.click('create-connector-flyout-save-btn');
+      },
 
+      // async removeOpenAIConnector(connectorName) {
+      //   const searchBox = await testSubjects.find. byCssSelector(
+      //     '[data-test-subj="actionsList"] .euiFieldSearch'
+      //   );
+      //   await searchBox.click();
+      //   await searchBox.clearValue();
+      //   await searchBox.type(connectorName);
+      //   await searchBox.pressKeys(ENTER_KEY);
+      //   await find.byCssSelector(
+      //     '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
+      //   );
+      // },
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();

@@ -21,7 +21,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonNavigation',
     'searchPlayground',
     'embeddedConsole',
+    'svlTriggersActionsUI',
+    'solutionNavigation',
   ]);
+  const testSubjects = getService('testSubjects');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
@@ -30,6 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
+  const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
   let roleAuthc: RoleCredentials;
 
@@ -99,15 +105,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectAddConnectorButtonExists();
         });
 
-        it('creates a connector successfully', async () => {
+        it('creates a connector successfully from Flyout', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
-            createConnector
-          );
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFromAIConnectorFlyout();
         });
 
         after(async () => {
-          await removeOpenAIConnector?.();
+          await svlSearchNavigation.navigateToLandingPage();
+          await pageObjects.svlCommonNavigation.sidenav.openSection(
+            'search_project_nav_footer.project_settings_project_nav'
+          );
+
+          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'management' });
+          await pageObjects.solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+          await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
+            'management:triggersActionsConnectors'
+          );
+          // confirm if we can use svlTriggersActionsUI page Object
+          await pageObjects.svlTriggersActionsUI.searchConnectors('myOpenaiConnector');
+          await testSubjects.click('deleteConnector');
+          await testSubjects.existOrFail('deleteIdsConfirmation');
+          await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+          await testSubjects.missingOrFail('deleteIdsConfirmation');
           await browser.refresh();
         });
       });
@@ -150,6 +169,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await esArchiver.unload(esArchiveIndex);
           await browser.refresh();
+        });
+      });
+
+      describe('when selecting indices with no fields should show error in add data flyout', () => {
+        before(async () => {
+          await es.indices.create({ index: 'my-test-index' });
+        });
+        it('selecting index show error', () => {
+          pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectingIndicesWithNoFieldtoShowError();
+        });
+        after(async () => {
+          await esDeleteAllIndices('my-test-index');
         });
       });
     });
