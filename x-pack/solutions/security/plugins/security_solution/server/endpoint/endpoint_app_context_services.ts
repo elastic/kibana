@@ -160,10 +160,8 @@ export class EndpointAppContextService {
       alerting,
       licenseService,
       telemetryConfigProvider,
-      exceptionListsClient,
       productFeaturesService,
     } = this.startDependencies;
-    const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
     registerFleetCallback(
@@ -200,10 +198,7 @@ export class EndpointAppContextService {
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
 
-    registerFleetCallback(
-      'packagePolicyPostDelete',
-      getPackagePolicyDeleteCallback(exceptionListsClient, soClient)
-    );
+    registerFleetCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(this));
   }
 
   /**
