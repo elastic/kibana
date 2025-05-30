@@ -408,7 +408,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           }
 
           const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
-          const newSelections = keys.filter((value) => !selectedOptions.includes(value as string));
+          const newSelections = keys.filter((key) => !selectedOptions.includes(key as string));
           selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
         },
         deselectAll: (keys: string[]) => {

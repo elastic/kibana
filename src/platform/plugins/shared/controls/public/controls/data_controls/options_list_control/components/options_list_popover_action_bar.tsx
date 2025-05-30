@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -41,6 +42,7 @@ export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
+  const { euiTheme } = useEuiTheme();
   const { componentApi, displaySettings } = useOptionsListContext();
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
@@ -94,14 +96,10 @@ export const OptionsListPopoverActionBar = ({
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {
-      console.log('handleBulkAction called with bulkAction:', bulkAction);
       if (totalCardinality > availableOptions.length) {
-        console.log(loadMoreOptions, 'loadMoreOptions called');
-
         const newAvailableOptions = (await loadMoreOptions()) ?? [];
         bulkAction(newAvailableOptions.map(({ value }) => value as string));
       } else {
-        console.log('bulkAction called with availableOptions:', availableOptions);
         bulkAction(availableOptions.map(({ value }) => value as string));
       }
     },
@@ -138,59 +136,57 @@ export const OptionsListPopoverActionBar = ({
           {allowExpensiveQueries && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
-                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)} |{' '}
-                <EuiToolTip
-                  content={
-                    hasTooManyOptions
-                      ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
-                      : undefined
-                  }
-                >
-                  <EuiButtonEmpty
-                    size="xs"
-                    disabled={isBulkSelectDisabled}
-                    data-test-subj="optionsList-control-selectAll"
-                    onClick={() => handleBulkAction(componentApi.selectAll)}
-                    css={{ padding: 0 }}
-                  >
-                    {OptionsListStrings.popover.getSelectAllButtonLabel()}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-                {' | '}
-                <EuiToolTip
-                  content={
-                    hasTooManyOptions
-                      ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
-                      : undefined
-                  }
-                >
-                  <EuiButtonEmpty
-                    size="xs"
-                    css={{ padding: 0 }}
-                    disabled={isBulkSelectDisabled}
-                    data-test-subj="optionsList-control-deselectAll"
-                    onClick={() => handleBulkAction(componentApi.deselectAll)}
-                  >
-                    {OptionsListStrings.popover.getDeselectAllButtonLabel()}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiText>
+                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
+              </EuiText>{' '}
+              |{' '}
             </EuiFlexItem>
           )}
           {invalidSelections && invalidSelections.size > 0 && (
             <>
-              {allowExpensiveQueries && (
-                <EuiFlexItem grow={false}>
-                  <div className="optionsList__actionBarDivider" />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.size)}
                 </EuiText>
-              </EuiFlexItem>
+              </EuiFlexItem>{' '}
+              |{' '}
             </>
           )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                hasTooManyOptions
+                  ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
+                  : undefined
+              }
+            >
+              <EuiButtonEmpty
+                size="xs"
+                disabled={isBulkSelectDisabled}
+                data-test-subj="optionsList-control-selectAll"
+                onClick={() => handleBulkAction(componentApi.selectAll)}
+                css={{ padding: 0 }}
+              >
+                {OptionsListStrings.popover.getSelectAllButtonLabel()}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+            <EuiToolTip
+              content={
+                hasTooManyOptions
+                  ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
+                  : undefined
+              }
+            >
+              <EuiButtonEmpty
+                size="xs"
+                css={{ padding: 0, paddingLeft: euiTheme.size.s }}
+                disabled={isBulkSelectDisabled || selectedOptions.length < 1}
+                data-test-subj="optionsList-control-deselectAll"
+                onClick={() => handleBulkAction(componentApi.deselectAll)}
+              >
+                {OptionsListStrings.popover.getDeselectAllButtonLabel()}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiFlexGroup
               gutterSize="xs"
