@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { inspect } from 'util';
 import { SavedObject, SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 import type { DashboardSavedObjectAttributes } from '../schema';
 import { itemToSavedObject, savedObjectToItem } from '../../content_management/latest';
+import { getEmbeddableService } from '../../kibana_server_services';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
@@ -22,20 +22,20 @@ import { itemToSavedObject, savedObjectToItem } from '../../content_management/l
  * 1. In addition to regular `panel_` we will get new references which are extracted by `embeddablePersistableStateService` (dashboard drilldown references)
  * 2. `panel_` references will be regenerated
  * All other references like index-patterns are forwarded non touched
- * @param deps
+ *
+ * This migration uses the deferred flag on {@link SavedObjectMigrationParams | SavedObjectMigrationParams} which means the
+ * migration only runs when the saved object is accessed. This ensures that the embeddable service is available and can be
+ * used to extract the references correctly.
  */
-export function createExtractPanelReferencesMigration(
-  deps: DashboardSavedObjectTypeMigrationsDeps
-): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
-  let embeddableStart: EmbeddableStart;
-  void deps.core.getStartServices().then(([_, { embeddable }]) => {
-    embeddableStart = embeddable;
-  });
+export function createExtractPanelReferencesMigration(): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
   return {
     deferred: true,
-    transform: (doc) => {
+    transform: (doc, { log }) => {
       const references = doc.references ?? [];
-
+      const getExceptionMessage = (error: Error) =>
+        `Exception @ createExtractPanelReferencesMigration while trying to extract dashboard panels!\n` +
+        `${error.stack}\n` +
+        `dashboard: ${inspect(doc, false, null)}`;
       /**
        * Remembering this because dashboard's extractReferences won't return those
        * All other references like `panel_` will be overwritten
@@ -46,18 +46,24 @@ export function createExtractPanelReferencesMigration(
       // will run embeddable inject and extract functions for each panel
       const { item, error: itemError } = savedObjectToItem(
         doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
-        embeddableStart,
+        getEmbeddableService(),
         false
       );
 
-      if (itemError) throw itemError;
+      if (itemError) {
+        log.warn(getExceptionMessage(itemError));
+        return doc;
+      }
 
       const {
         attributes,
         error: attributesError,
         references: newPanelReferences,
-      } = itemToSavedObject({ attributes: item.attributes, embeddable: embeddableStart });
-      if (attributesError) throw attributesError;
+      } = itemToSavedObject({ attributes: item.attributes, embeddable: getEmbeddableService() });
+      if (attributesError) {
+        log.warn(getExceptionMessage(attributesError));
+        return doc;
+      }
 
       return {
         ...doc,
