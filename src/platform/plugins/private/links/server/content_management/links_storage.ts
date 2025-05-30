@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { CONTENT_ID as LINKS_SAVED_OBJECT_TYPE } from '../../common';
@@ -311,4 +311,41 @@ export class LinksStorage {
 
     return value;
   }
+
+  mSearch = {
+    savedObjectType: LINKS_SAVED_OBJECT_TYPE,
+    toItemResult: (
+      ctx: StorageContext,
+      savedObject: SavedObject<LinksSavedObjectAttributes>
+    ): LinksItem => {
+      const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+
+      const contentItem = savedObjectToItem(savedObject, false);
+
+      const validationError = transforms.mSearch.out.result.validate(contentItem);
+      if (validationError) {
+        if (this.throwOnResultValidationError) {
+          throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+        } else {
+          this.logger.warn(`Invalid response. ${validationError.message}`);
+        }
+      }
+
+      // Validate DB response and DOWN transform to the request version
+      const { value, error: resultError } = transforms.mSearch.out.result.down<
+        LinksItem,
+        LinksItem
+      >(
+        contentItem,
+        undefined, // do not override version
+        { validate: false } // validation is done above
+      );
+
+      if (resultError) {
+        throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+      }
+
+      return value;
+    },
+  };
 }
