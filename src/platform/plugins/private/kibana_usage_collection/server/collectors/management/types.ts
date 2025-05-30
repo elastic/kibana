@@ -46,8 +46,6 @@ export interface UsageStats {
   'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
-  'observability:enableInfrastructureHostsView': boolean;
-  'observability:enableInfrastructureContainerAssetView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
@@ -182,7 +180,6 @@ export interface UsageStats {
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
-  'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];

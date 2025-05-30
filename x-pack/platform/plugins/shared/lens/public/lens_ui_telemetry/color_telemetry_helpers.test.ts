@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 import {
   ColorMapping,
@@ -36,7 +36,7 @@ const exampleAssignment = (
   return {
     rule: {
       type: 'matchExactly',
-      values: Array.from({ length: valuesCount }, () => faker.random.alpha()),
+      values: Array.from({ length: valuesCount }, () => faker.string.alpha()),
     },
     color,
     touched: false,

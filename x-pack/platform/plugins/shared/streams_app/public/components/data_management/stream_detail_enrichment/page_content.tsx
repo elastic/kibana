@@ -98,6 +98,10 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
+  const isInitializing = useStreamsEnrichmentSelector((state) => {
+    return !state.matches('ready');
+  });
+
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
     history: appParams.history,
@@ -105,6 +109,10 @@ export function StreamDetailEnrichmentContentImpl() {
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
+
+  if (isInitializing) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
