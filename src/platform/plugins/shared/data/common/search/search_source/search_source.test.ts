@@ -1645,6 +1645,11 @@ describe('SearchSource', () => {
         description: 'index names with double quotes',
       },
       {
+        indexPattern: '_index: "logs-2024-06-27\'',
+        expectedResult: [],
+        description: 'index pattern with mixed quotes',
+      },
+      {
         indexPattern: 'foo: bar',
         expectedResult: [],
         description: 'no index pattern when _index is not present',

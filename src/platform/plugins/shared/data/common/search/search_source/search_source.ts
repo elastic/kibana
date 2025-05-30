@@ -1225,10 +1225,10 @@ export class SearchSource {
   parseActiveIndexPatternFromQueryString(queryString: string): string[] {
     const indexPatternSet: Set<string> = new Set();
     //  Regex to capture full index names including dashes, numbers, and periods
-    const indexNameRegExp = /\s?(_index)\s*:\s*['"]?([^\s'"]+)['"]?/g;
+    const indexNameRegExp = /\s?(_index)\s*:\s*(['"]?)([^\s'"]+)\2/g;
 
     for (const match of queryString.matchAll(indexNameRegExp)) {
-      const indexName = match[2];
+      const indexName = match[3];
       if (indexName) {
         indexPatternSet.add(indexName);
       }
