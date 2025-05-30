@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { aiAssistantAnonymizationRules } from '@kbn/observability-ai-assistant-plugin/common';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { uiSettings } from '../common/ui_settings';
-import { ObservabilityAIAssistantManagementConfig } from './config';
 
 export type ObservabilityPluginSetup = ReturnType<AiAssistantManagementPlugin['setup']>;
 
@@ -19,19 +17,10 @@ interface PluginSetup {}
 interface PluginStart {}
 
 export class AiAssistantManagementPlugin implements Plugin<ObservabilityPluginSetup> {
-  private readonly config: ObservabilityAIAssistantManagementConfig;
-
-  constructor(context: PluginInitializerContext<ObservabilityAIAssistantManagementConfig>) {
-    this.config = context.config.get<ObservabilityAIAssistantManagementConfig>();
-  }
+  constructor() {}
 
   public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
-    // Check if anonymization rules are enabled from our own plugin config
-    const enableAnonymizationRules = this.config.enableAnonymizationRules;
-
-    const { [aiAssistantAnonymizationRules]: _, ...restSettings } = uiSettings;
-    core.uiSettings.register(enableAnonymizationRules ? uiSettings : restSettings);
-
+    core.uiSettings.register(uiSettings);
     return {};
   }
 

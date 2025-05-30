@@ -73,7 +73,6 @@ export const render = (
       logSourcesEnabled: true,
       spacesEnabled: true,
       visibilityEnabled: true,
-      enableAnonymizationRules: true,
     },
   };
 

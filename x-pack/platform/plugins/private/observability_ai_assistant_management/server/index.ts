@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { ObservabilityAIAssistantManagementConfig } from './config';
-
 export { config } from './config';
 
-export const plugin = async (
-  initializerContext: PluginInitializerContext<ObservabilityAIAssistantManagementConfig>
-) => {
+export const plugin = async () => {
   const { AiAssistantManagementPlugin } = await import('./plugin');
-  return new AiAssistantManagementPlugin(initializerContext);
+  return new AiAssistantManagementPlugin();
 };

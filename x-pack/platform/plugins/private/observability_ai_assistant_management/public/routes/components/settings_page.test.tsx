@@ -20,7 +20,6 @@ describe('Settings Page', () => {
       spacesEnabled: true,
       visibilityEnabled: true,
       logSourcesEnabled: true,
-      enableAnonymizationRules: true,
     },
     setBreadcrumbs: () => {},
   };
