@@ -90,6 +90,8 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
   ) {}
 
   asInternalUser(spaceId?: string): EndpointInternalFleetServicesInterface {
+    this.logger.debug(`creating set of fleet services bound to space [${spaceId}]`);
+
     const {
       agentPolicyService: agentPolicy,
       packagePolicyService: packagePolicy,
@@ -104,7 +106,8 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     let _soClient: SavedObjectsClientContract;
     const getSoClient = (): SavedObjectsClientContract => {
       if (!_soClient) {
-        _soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
+        this.logger.debug(`getSoClient(): initializing SO client for space [${spaceId}]`);
+        _soClient = this.savedObjects.createInternalScopedSoClient({ spaceId, readonly: false });
       }
 
       return _soClient;
