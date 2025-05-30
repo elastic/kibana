@@ -107,7 +107,7 @@ describe('Run Scheduled Report Task', () => {
     configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
 
-    soClient = await mockReporting.getSoClient();
+    soClient = await mockReporting.getInternalSoClient();
     soClient.get = jest.fn().mockImplementation(async () => {
       return reportSO;
     });

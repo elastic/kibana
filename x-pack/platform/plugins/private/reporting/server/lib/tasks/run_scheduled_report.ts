@@ -46,7 +46,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         );
       }
 
-      const internalSoClient = await this.opts.reporting.getSoClient();
+      const internalSoClient = await this.opts.reporting.getInternalSoClient();
       const reportSO = await internalSoClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         reportSoId,
