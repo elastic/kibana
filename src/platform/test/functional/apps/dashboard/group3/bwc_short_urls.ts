@@ -12,7 +12,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, header, home } = getPageObjects(['common', 'dashboard', 'header', 'home']);
+  const { common, dashboard, header, home } = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'home',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const deployment = getService('deployment');
@@ -45,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // 8.14 pre-embeddable rebuild, URL state is runtime state with injected references 
+    // 8.14 pre-embeddable rebuild, URL state is runtime state with injected references
     it('should load dashboard from short url (8.14)', async () => {
       await browser.navigateTo(baseUrl + '/app/r/s/Jh1lq');
       await header.waitUntilLoadingHasFinished();
