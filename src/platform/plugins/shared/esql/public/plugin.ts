@@ -18,7 +18,8 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { SolutionId } from '@kbn/core-chrome-browser';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+
 import {
   esqlControlTrigger,
   ESQL_CONTROL_TRIGGER,

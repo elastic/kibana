@@ -8,13 +8,9 @@
  */
 import { uniqBy } from 'lodash';
 import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
-import type { KibanaProject } from '@kbn/projects-solutions-groups';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
-
-// Type alias for the solution ID, which is a Kibana project identifier.
-// I find it more readable to use `SolutionId` instead of `KibanaProject` directly.
-type SolutionId = KibanaProject;
 
 /**
  * `ESQLExtensionsRegistry` serves as a central hub for managing and retrieving extrensions of the ES|QL editor.

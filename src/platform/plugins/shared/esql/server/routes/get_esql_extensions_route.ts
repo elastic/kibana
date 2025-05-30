@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import { type KibanaProject, KIBANA_PROJECTS } from '@kbn/projects-solutions-groups';
+import {
+  type KibanaProject as SolutionId,
+  KIBANA_PROJECTS as VALID_SOLUTION_IDS,
+} from '@kbn/projects-solutions-groups';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { ResolveIndexResponse } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
-
-type SolutionId = KibanaProject;
 
 /**
  * Type guard to check if a string is a valid SolutionId.
  * @param str The string to check.
  * @returns True if the string is a valid SolutionId, false otherwise.
  */
-const VALID_SOLUTION_IDS = KIBANA_PROJECTS;
-
 function isSolutionId(str: string): str is SolutionId {
   return VALID_SOLUTION_IDS.includes(str as SolutionId);
 }
