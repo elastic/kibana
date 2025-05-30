@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  DashboardSavedObjectAttributes,
-  GridData,
-  SavedDashboardPanel,
-  SavedDashboardSection,
-} from './latest';
-export { dashboardSavedObjectSchema } from './latest';
+export interface CanAddNewSection {
+  addNewSection: () => void;
+}
+
+export const apiCanAddNewSection = (api: unknown): api is CanAddNewSection => {
+  return typeof (api as CanAddNewSection)?.addNewSection === 'function';
+};

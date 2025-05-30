@@ -982,6 +982,10 @@
           }
         }
       },
+      "sections": {
+        "dynamic": false,
+        "properties": {}
+      },
       "timeFrom": {
         "doc_values": false,
         "index": false,
