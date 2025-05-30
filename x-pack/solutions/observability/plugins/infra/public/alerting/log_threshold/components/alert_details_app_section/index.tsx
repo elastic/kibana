@@ -33,7 +33,6 @@ import type { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
-import { useLicense } from '../../../../hooks/use_license';
 
 const formatThreshold = (threshold: number) => String(threshold);
 
@@ -66,8 +65,6 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
     logViews: logsShared.logViews.client,
   });
 
-  const { hasAtLeast } = useLicense();
-  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
   const aiopsEnabled = application?.capabilities.aiops?.enabled ?? false;
 
   const getLogRatioChart = () => {
@@ -196,9 +193,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   };
 
   const getLogRateAnalysisSection = () => {
-    return hasLicenseForLogRateAnalysis && aiopsEnabled ? (
-      <LogRateAnalysis rule={rule} alert={alert} />
-    ) : null;
+    return aiopsEnabled ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (

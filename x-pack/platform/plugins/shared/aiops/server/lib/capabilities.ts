@@ -6,12 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { firstValueFrom } from 'rxjs';
 import type { AiopsPluginStartDeps } from '../types';
 
-export const setupCapabilities = (
-  core: Pick<CoreSetup<AiopsPluginStartDeps>, 'capabilities' | 'getStartServices'>,
-  enabled: boolean
-) => {
+export const setupCapabilities = (core: CoreSetup<AiopsPluginStartDeps>, enabled: boolean) => {
   core.capabilities.registerProvider(() => {
     return {
       aiops: {
@@ -22,6 +20,16 @@ export const setupCapabilities = (
 
   core.capabilities.registerSwitcher(
     async (request, capabilities, useDefaultCapabilities) => {
+      const [, { licensing }] = await core.getStartServices();
+      const lic = await firstValueFrom(licensing.license$);
+      if (lic.hasAtLeast('platinum') === false) {
+        return {
+          aiops: {
+            enabled: false,
+          },
+        };
+      }
+
       return {};
     },
     {

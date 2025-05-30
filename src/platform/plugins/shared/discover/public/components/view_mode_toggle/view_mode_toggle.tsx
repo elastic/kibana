@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
+import React, { useMemo, useEffect, type ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import useMountedState from 'react-use/lib/useMountedState';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
@@ -37,13 +36,9 @@ export const DocumentViewModeToggle = ({
   dataView: DataView;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    uiSettings,
-    dataVisualizer: dataVisualizerService,
-    aiops: aiopsService,
-  } = useDiscoverServices();
+  const { uiSettings, dataVisualizer: dataVisualizerService, application } = useDiscoverServices();
 
-  const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
+  const showPatternAnalysisTab = application.capabilities.aiops?.enabled ?? false;
   const showFieldStatisticsTab = useMemo(
     () =>
       // If user opens saved search with field stats in ES|QL,
@@ -52,34 +47,6 @@ export const DocumentViewModeToggle = ({
       (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) ||
       (!isEsqlMode && uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined),
     [dataVisualizerService, uiSettings, isEsqlMode, viewMode]
-  );
-  const isMounted = useMountedState();
-
-  const setShowPatternAnalysisTabWrapper = useCallback(
-    (value: boolean) => {
-      if (isMounted()) {
-        setShowPatternAnalysisTab(value);
-      }
-    },
-    [isMounted]
-  );
-
-  useEffect(
-    function checkForPatternAnalysis() {
-      if (!aiopsService || isEsqlMode) {
-        setShowPatternAnalysisTab(false);
-        return;
-      }
-      aiopsService
-        .getPatternAnalysisAvailable()
-        .then((patternAnalysisAvailable) => {
-          patternAnalysisAvailable(dataView)
-            .then(setShowPatternAnalysisTabWrapper)
-            .catch(() => setShowPatternAnalysisTabWrapper(false));
-        })
-        .catch(() => setShowPatternAnalysisTabWrapper(false));
-    },
-    [aiopsService, dataView, isEsqlMode, setShowPatternAnalysisTabWrapper]
   );
 
   useEffect(() => {
