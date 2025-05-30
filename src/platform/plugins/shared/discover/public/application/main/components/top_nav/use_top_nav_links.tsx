@@ -80,7 +80,9 @@ export const useTopNavLinks = ({
       isEsqlMode,
       dataView,
       adHocDataViews,
-      authorizedRuleTypeIds: authorizedRuleTypes.map((ruleType) => ruleType.id),
+      authorizedRuleTypeIds: authorizedRuleTypes
+        .filter((ruleType) => ruleType.authorizedConsumers?.alerts?.all)
+        .map((ruleType) => ruleType.id),
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
         await dispatch(internalStateActions.loadDataViewList());
         dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
