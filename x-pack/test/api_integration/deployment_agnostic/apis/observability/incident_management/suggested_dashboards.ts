@@ -141,7 +141,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   name: 'B',
                 },
               ],
-              threshold: [0.05],
+              threshold: [0.0005],
               timeSize: 1,
               timeUnit: 'm',
             },
