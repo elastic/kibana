@@ -54,7 +54,7 @@ import {
   collectAllColumnIdentifiers,
   getEnrichClauses,
   getMatchField,
-  getPolicyName,
+  visitPolicyName,
   visitByOption,
   visitRenameClauses,
 } from './walkers';
@@ -284,8 +284,14 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitEnrichCommand(ctx: EnrichCommandContext) {
     const command = createCommand('enrich', ctx);
+    const policy = visitPolicyName(ctx);
+
+    if (policy) {
+      command.args.push(policy);
+    }
+
+    command.args.push(...getMatchField(ctx), ...getEnrichClauses(ctx));
     this.ast.push(command);
-    command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
   }
 
   /**

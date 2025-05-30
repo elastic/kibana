@@ -451,24 +451,6 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
-/**
- * In https://github.com/elastic/elasticsearch/pull/103949 the ENRICH policy name
- * changed from rule to token type so we need to handle this specifically
- */
-export function createPolicy(token: Token, policy: string): ESQLSource {
-  return {
-    type: 'source',
-    name: policy,
-    text: policy,
-    sourceType: 'policy',
-    location: getPosition({
-      start: token.stop - policy.length + 1,
-      stop: token.stop,
-    }), // take into account ccq modes
-    incomplete: false,
-  };
-}
-
 const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
   const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
