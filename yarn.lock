@@ -2169,12 +2169,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.2.0.tgz#0f32724e394f3bfa35d18ef8fa2e79da47191779"
   integrity sha512-EDp5FP8nbzGXwAMWM2xo6SL2LdsUwEVrt6idE8AoW45KybuJZ9Dr8IB8z6+wCr7Jxrg+nwdst039LpaslDur+g==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@102.2.0-amsterdam.0":
-  version "102.2.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.2.0-amsterdam.0.tgz#f520caecd95e1054de6b8e21d67f76768ae0b345"
-  integrity sha512-VqZAac9KHMaPS8yFaibSvD/j2+5/F2/smXrVXIOoTZb7EfK7Fg0UVJOzRdlLon+4W0gHaHvijbe2q8lmym7q6A==
+"@elastic/eui-amsterdam@npm:@elastic/eui@102.2.0-snapshot.1748601905883", "@elastic/eui@102.2.0-snapshot.1748601905883":
+  version "102.2.0-snapshot.1748601905883"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.2.0-snapshot.1748601905883.tgz#a8d591e130a644c268d8a9979fa53ffddbf9eca9"
+  integrity sha512-XLcwn3yWDr1etL6ViqRWksvqyKBVet9YU/R5CWqWRpCTK1k2Dn/FsPjqAPnNp8uFkOjA8FD3AuuOYZzpvwWWBQ==
   dependencies:
-    "@elastic/eui-theme-common" "1.0.0"
+    "@elastic/eui-theme-common" "1.0.0-snapshot.1748601905883"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2210,68 +2210,19 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@1.0.0-snapshot.1746441787383":
-  version "1.0.0-snapshot.1746441787383"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-1.0.0-snapshot.1746441787383.tgz#9767eac23cda1af568e36bb5d40705b1851566d7"
-  integrity sha512-VEXp1aWUfCDxc43o6X+SsvSAx4uiLg/yqpx4BHj30w+2BkOEDkad9DN1b2DsTt7xbB9ShzQuQ2hmbN3GdJIk8Q==
+"@elastic/eui-theme-borealis@1.0.0-snapshot.1748601905883":
+  version "1.0.0-snapshot.1748601905883"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-1.0.0-snapshot.1748601905883.tgz#3c01a3b26c263390cbba7fe0661f67d55d1defbb"
+  integrity sha512-GbHOmzFt/f8WIG2sDiSWekqkaSRAI4hPEZtgmT1dzEEWngQ903xmNMCyNVdpXoIJ1tLv5Z8/YO66NzPXFZDNkg==
 
-"@elastic/eui-theme-common@1.0.0":
-  version "1.0.0"
-  resolved "file:./elastic-eui-theme-common-1.0.0.tgz#fc342e761041625e4bf1dcdde1456b4e29a03632"
+"@elastic/eui-theme-common@1.0.0-snapshot.1748601905883":
+  version "1.0.0-snapshot.1748601905883"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.0.0-snapshot.1748601905883.tgz#14df5feda7f6f8fbffb9837967b2d5a8ee7126a2"
+  integrity sha512-udZ6/6p2cKkJP5vguXPWWs/m0hgl8/GWjcHIyx1mBkmvPyct6cfOyWKHOvOPm4gB9TcihDGUxCwgE1v3I9YDUg==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
-
-"@elastic/eui-theme-common@1.0.0-snapshot.1746441787383":
-  version "1.0.0-snapshot.1746441787383"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.0.0-snapshot.1746441787383.tgz#ec3787a5aa902c36d83bbbd7d931377237e02ad5"
-  integrity sha512-McSkt9+4Ih8lbEwJU0ktHEiWZMK/YvUylTfon/jl//2g5x31YlJu3tGCYXJyvlUeMDvkGGQxIjjbidnECNHqdg==
-  dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
-
-"@elastic/eui@102.1.0-snapshot.1746441787383":
-  version "102.1.0-snapshot.1746441787383"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.1.0-snapshot.1746441787383.tgz#c997b09508fa3e914ae345c8e4872b9d47e3b8b3"
-  integrity sha512-xp98M3MBxzyvaMIZuYWH8qILE19VmJplAgBNHKQtYms/XdlnpNjKar87c44Rpb2gyYBxbwWv+d2PB3Fo/Wa2Sg==
-  dependencies:
-    "@elastic/eui-theme-common" "1.0.0-snapshot.1746441787383"
-    "@elastic/prismjs-esql" "^1.1.0"
-    "@hello-pangea/dnd" "^16.6.0"
-    "@types/lodash" "^4.14.202"
-    "@types/numeral" "^2.0.5"
-    "@types/react-window" "^1.8.8"
-    "@types/refractor" "^3.4.0"
-    chroma-js "^2.4.2"
-    classnames "^2.5.1"
-    lodash "^4.17.21"
-    mdast-util-to-hast "^10.2.0"
-    numeral "^2.0.6"
-    prop-types "^15.8.1"
-    react-dropzone "^11.7.1"
-    react-element-to-jsx-string "^15.0.0"
-    react-focus-on "^3.9.1"
-    react-is "^17.0.2"
-    react-remove-scroll-bar "^2.3.4"
-    react-virtualized-auto-sizer "^1.0.24"
-    react-window "^1.8.10"
-    refractor "^3.6.0"
-    rehype-raw "^5.1.0"
-    rehype-react "^6.2.1"
-    rehype-stringify "^8.0.0"
-    remark-breaks "^2.0.2"
-    remark-emoji "^2.1.0"
-    remark-parse-no-trim "^8.0.4"
-    remark-rehype "^8.1.0"
-    tabbable "^5.3.3"
-    text-diff "^1.0.1"
-    unified "^9.2.2"
-    unist-util-visit "^2.0.3"
-    url-parse "^1.5.10"
-    uuid "^8.3.0"
-    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
