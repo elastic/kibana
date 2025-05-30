@@ -181,7 +181,31 @@ export interface DeleteAgentRequest {
     agentId: string;
   };
 }
-
+export interface MigrateSingleAgentRequest {
+  body: {
+    id: string;
+    enrollment_token: string;
+    uri: string;
+    settings: {
+      ca_sha256: string | null;
+      certificate_authorities: string | null;
+      elastic_agent_cert: string | null;
+      elastic_agent_cert_key: string | null;
+      elastic_agent_cert_key_passphrase: string | null;
+      headers: string | null;
+      insecure: boolean;
+      proxy_disabled: boolean;
+      proxy_headers: string | null;
+      proxy_url: string | null;
+      staging: boolean;
+      tags: string | null;
+      replace_token: boolean;
+    };
+  };
+}
+export interface MigrateSingleAgentResponse {
+  actionId: string;
+}
 export interface UpdateAgentRequest {
   params: {
     agentId: string;

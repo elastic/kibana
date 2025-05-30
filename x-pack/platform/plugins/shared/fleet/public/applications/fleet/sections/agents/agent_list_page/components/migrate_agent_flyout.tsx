@@ -31,7 +31,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { MigrateSingleAgentRequest } from '../../../../../../../common/types';
+
 import type { Agent } from '../../../../types';
+
 import { useMigrateSingleAgent, useStartServices } from '../../../../hooks';
 
 interface Props {
@@ -45,22 +48,23 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
   const migrateAgent = useMigrateSingleAgent;
   const [formValid, setFormValid] = React.useState(false);
   const [validClusterURL, setValidClusterURL] = React.useState(false);
-  const [formContent, setFormContent] = React.useState({
+  const [formContent, setFormContent] = React.useState<MigrateSingleAgentRequest['body']>({
+    id: agents[0]?.id!,
     uri: '',
     enrollment_token: '',
     settings: {
-      ca_sha256: '',
-      certificate_authorities: '',
-      elastic_agent_cert: '',
-      elastic_agent_cert_key: '',
-      elastic_agent_cert_key_passphrase: '',
-      headers: {},
+      ca_sha256: null,
+      certificate_authorities: null,
+      elastic_agent_cert: null,
+      elastic_agent_cert_key: null,
+      elastic_agent_cert_key_passphrase: null,
+      headers: null,
       insecure: false,
       proxy_disabled: false,
-      proxy_headers: {},
-      proxy_url: '',
+      proxy_headers: null,
+      proxy_url: null,
       staging: false,
-      tags: [],
+      tags: null,
       replace_token: false,
     },
   });
@@ -92,7 +96,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
 
   const submitForm = () => {
     try {
-      migrateAgent({ ...formContent, id: agents[0]?.id! });
+      migrateAgent(formContent);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.successNotificationTitle', {
           defaultMessage: 'Agent migration initiated',

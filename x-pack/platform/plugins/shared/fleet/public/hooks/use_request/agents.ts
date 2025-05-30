@@ -19,6 +19,8 @@ import type {
   PostRequestDiagnosticsResponse,
   DeleteAgentUploadResponse,
   UpdateAgentRequest,
+  MigrateSingleAgentRequest,
+  MigrateSingleAgentResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -379,15 +381,17 @@ export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: b
     enabled: options.enabled,
   });
 }
-export function useMigrateSingleAgent(options: any) {
-  return sendRequest({
+export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
+  return sendRequest<MigrateSingleAgentResponse>({
     path: agentRouteService.postMigrateSingleAgent(options.id),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
-      settings: options.settings,
+      settings: Object.fromEntries(
+        Object.entries(options.settings).filter(([_, value]) => value !== null)
+      ),
     },
   });
 }
