@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { convertPanelsArrayToPanelMap } from '../../../../common/lib/dashboard_panel_converters';
+import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardState } from '../../../../common';
 
-type PanelState = Pick<DashboardState, 'panels'>;
+type PanelState = Pick<DashboardState, 'panels', 'sections'>;
 
 export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
   const panels = Array.isArray(state.panels) ? state.panels : [];
@@ -31,7 +31,5 @@ export function extractPanelsState(state: { [key: string]: unknown }): Partial<P
     return panel;
   });
 
-  return {
-    panels: convertPanelsArrayToPanelMap(standardizedPanels),
-  };
+  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
 }

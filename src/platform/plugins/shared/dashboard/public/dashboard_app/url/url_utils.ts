@@ -13,8 +13,6 @@ import { History } from 'history';
 import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 import type { DashboardState } from '../../../common/types';
-import type { DashboardPanel } from '../../../server/content_management';
-import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import { DashboardApi } from '../../dashboard_api/types';
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
@@ -25,12 +23,22 @@ import { extractDashboardState } from './bwc/extract_dashboard_state';
  * We no longer support loading panels from a version older than 7.3 in the URL.
  * @returns whether or not there is a panel in the URL state saved with a version before 7.3
  */
-export const isPanelVersionTooOld = (panels: DashboardPanel[] | SavedDashboardPanel[]) => {
+export const isPanelVersionTooOld = (panels: unknown[]) => {
   for (const panel of panels) {
+    if (!panel || typeof panel !== 'object') {
+      continue;
+    }
+
+    const panelAsObject = panel as { [key: string]: unknown };
+
+    if ('panels' in panel) {
+      continue; // ignore sections
+    }
+
     if (
-      !panel.gridData ||
-      !((panel as DashboardPanel).panelConfig || (panel as SavedDashboardPanel).embeddableConfig) ||
-      (panel.version && semverSatisfies(panel.version, '<7.3'))
+      !panelAsObject.gridData ||
+      !(panelAsObject.panelConfig || panelAsObject.embeddableConfig) ||
+      (panelAsObject.version && semverSatisfies(panelAsObject.version as string, '<7.3'))
     )
       return true;
   }
