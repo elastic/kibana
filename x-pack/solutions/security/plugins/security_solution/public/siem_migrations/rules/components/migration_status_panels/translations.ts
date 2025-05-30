@@ -41,7 +41,7 @@ export const RULE_MIGRATION_START_TRANSLATION_BUTTON = i18n.translate(
 
 export const RULE_MIGRATION_RESTART_TRANSLATION_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.translate.restartButton',
-  { defaultMessage: 'Restart translation' }
+  { defaultMessage: 'Resume translation' }
 );
 
 export const RULE_MIGRATION_TITLE = (number: number) =>

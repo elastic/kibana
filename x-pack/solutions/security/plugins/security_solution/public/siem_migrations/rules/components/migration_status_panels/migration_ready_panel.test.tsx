@@ -126,13 +126,13 @@ describe('MigrationReadyPanel', () => {
     it('should render aborted migration message', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsAborted} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        'Migration of 6 rules was manually stopped. You can restart it any time.'
+        'Migration of 6 rules was stopped. You can resume it any time.'
       );
     });
 
     it('should render correct start migration button for aborted migration', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsAborted} />);
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Restart translation');
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume translation');
     });
   });
 
