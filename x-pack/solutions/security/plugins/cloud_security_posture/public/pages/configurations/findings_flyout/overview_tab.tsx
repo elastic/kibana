@@ -145,7 +145,9 @@ const getDetailsList = (
       <>
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem>
-            <b>Rule Description</b>
+            {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleDescription', {
+              defaultMessage: 'Rule Description',
+            })}
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLink href={ruleFlyoutLink} target="_blank" css={{ textAlign: 'right' }}>
