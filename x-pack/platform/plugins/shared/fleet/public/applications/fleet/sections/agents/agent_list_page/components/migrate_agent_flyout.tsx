@@ -32,16 +32,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { Agent } from '../../../../types';
-import { useMigrateSingleAgent } from '../../../../hooks';
+import { useMigrateSingleAgent, useStartServices } from '../../../../hooks';
 
 interface Props {
   agents: Array<Agent | undefined>;
   onClose: () => void;
+  onSave: () => void;
 }
 
-export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
+export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave }) => {
+  const { notifications } = useStartServices();
   const migrateAgent = useMigrateSingleAgent;
   const [formValid, setFormValid] = React.useState(false);
+  const [validClusterURL, setValidClusterURL] = React.useState(false);
   const [formContent, setFormContent] = React.useState({
     uri: '',
     enrollment_token: '',
@@ -64,18 +67,57 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
 
   useEffect(() => {
     const validateForm = () => {
-      if (formContent.uri && formContent.enrollment_token) {
+      if (formContent.uri && formContent.enrollment_token && validClusterURL) {
         setFormValid(true);
       } else {
         setFormValid(false);
       }
     };
+
+    const validateClusterURL = () => {
+      if (formContent.uri) {
+        // check that the uri matches a valid URI schema
+        const uriRegex = new RegExp(
+          /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$/i
+        );
+        setValidClusterURL(uriRegex.test(formContent.uri));
+      } else {
+        setValidClusterURL(false);
+      }
+    };
+
+    validateClusterURL();
     validateForm();
-  }, [formContent]);
+  }, [formContent, validClusterURL]);
 
   const submitForm = () => {
-    migrateAgent({ ...formContent, id: agents[0]?.id! });
-    onClose();
+    try {
+      migrateAgent({ ...formContent, id: agents[0]?.id! });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.successNotificationTitle', {
+          defaultMessage: 'Agent migration initiated',
+        }),
+        text: i18n.translate(
+          'xpack.fleet.agentList.migrateAgentFlyout.successNotificationDescription',
+          {
+            defaultMessage: 'The agent migration process has been successfully initiated.',
+          }
+        ),
+      });
+      onSave();
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.errorNotificationTitle', {
+          defaultMessage: 'Failed to migrate agent',
+        }),
+        toastMessage: i18n.translate(
+          'xpack.fleet.agentList.migrateAgentFlyout.errorNotificationDescription',
+          {
+            defaultMessage: 'The agent migration process has failed.',
+          }
+        ),
+      });
+    }
   };
 
   return (
@@ -114,12 +156,19 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                   defaultMessage="Enter the URL of the Fleet server in the target cluster you want the agent to migrate to"
                 />
               }
+              isInvalid={!validClusterURL && formContent.uri !== ''}
+              error={
+                <FormattedMessage
+                  id="xpack.fleet.agentList.migrateAgentFlyout.clusterUrlError"
+                  defaultMessage="Invalid cluster URL"
+                />
+              }
             >
               <EuiFieldText
                 placeholder={i18n.translate(
                   'xpack.fleet.agentList.migrateAgentFlyout.clusterUrlPlaceholder',
                   {
-                    defaultMessage: 'Paste your cluster URL',
+                    defaultMessage: 'Enter a valid cluster URL',
                   }
                 )}
                 fullWidth
@@ -137,7 +186,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.agentList.migrateAgentFlyout.enrollmentTokenHelpText"
-                  defaultMessage="Paste a valid enrollment token generated in the target cluster"
+                  defaultMessage="Enter a valid enrollment token generated in the target cluster"
                 />
               }
             >
@@ -148,7 +197,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                 placeholder={i18n.translate(
                   'xpack.fleet.agentList.migrateAgentFlyout.enrollmentTokenPlaceholder',
                   {
-                    defaultMessage: 'Paste/enter your enrollment token',
+                    defaultMessage: 'Enter a valid enrollment token',
                   }
                 )}
                 fullWidth
@@ -161,14 +210,14 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
               <EuiAccordion
                 arrowDisplay="right"
                 id="migrateAgentFlyoutAdditionalOptions"
-                initialIsOpen={true}
+                initialIsOpen={false}
                 buttonContent={
-                  <EuiTextColor color="primary">
+                  <EuiButtonEmpty>
                     <FormattedMessage
                       id="xpack.fleet.agentList.migrateAgentFlyout.additionalOptionsLabel"
-                      defaultMessage="Additional options"
+                      defaultMessage="Advanced options"
                     />
-                  </EuiTextColor>
+                  </EuiButtonEmpty>
                 }
               >
                 <EuiPanel color="subdued" hasBorder={true}>
@@ -185,8 +234,23 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                       </EuiTextColor>
                     }
                   >
+                    <EuiText color="subdued" size="s">
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.migrateAgentFlyout.tlsCertsDescriptionLabel"
+                        defaultMessage="Provide optional TLS settings if your target Fleet server uses custom certificates."
+                      />
+                    </EuiText>
+
+                    <EuiSpacer size="m" />
                     <EuiFormRow label="ca_sha256">
-                      <EuiFieldText />
+                      <EuiFieldText
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, ca_sha256: e.target.value },
+                          })
+                        }
+                      />
                     </EuiFormRow>
                     <EuiFormRow
                       label={
@@ -196,7 +260,17 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                         />
                       }
                     >
-                      <EuiFieldText />
+                      <EuiFieldText
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: {
+                              ...formContent.settings,
+                              certificate_authorities: e.target.value,
+                            },
+                          })
+                        }
+                      />
                     </EuiFormRow>
                     <EuiFormRow
                       label={
@@ -206,7 +280,18 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                         />
                       }
                     >
-                      <EuiTextArea />
+                      <EuiTextArea
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: {
+                              ...formContent.settings,
+                              elastic_agent_cert: e.target.value,
+                            },
+                          })
+                        }
+                        fullWidth
+                      />
                     </EuiFormRow>
                     <EuiFormRow
                       label={
@@ -216,7 +301,18 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                         />
                       }
                     >
-                      <EuiTextArea />
+                      <EuiTextArea
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: {
+                              ...formContent.settings,
+                              elastic_agent_cert_key: e.target.value,
+                            },
+                          })
+                        }
+                        fullWidth
+                      />
                     </EuiFormRow>
                   </EuiAccordion>
                   <EuiSpacer size="m" />
@@ -233,6 +329,13 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                       </EuiTextColor>
                     }
                   >
+                    <EuiText color="subdued" size="s">
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.migrateAgentFlyout.headersDescriptionLabel"
+                        defaultMessage="Custom HTTP headers sent during agent enrollment."
+                      />
+                    </EuiText>
+                    <EuiSpacer size="m" />
                     <EuiFormRow
                       label={
                         <FormattedMessage
@@ -241,7 +344,15 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                         />
                       }
                     >
-                      <EuiTextArea />
+                      <EuiTextArea
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, headers: e.target.value },
+                          })
+                        }
+                        fullWidth
+                      />
                     </EuiFormRow>
                     <EuiFormRow
                       label={
@@ -251,13 +362,21 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                         />
                       }
                     >
-                      <EuiTextArea />
+                      <EuiTextArea
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, proxy_headers: e.target.value },
+                          })
+                        }
+                        fullWidth
+                      />
                     </EuiFormRow>
                   </EuiAccordion>
                   <EuiSpacer size="m" />
                   {/* Networking section */}
                   <EuiAccordion
-                    id="headersSection"
+                    id="networkingSection"
                     initialIsOpen={true}
                     buttonContent={
                       <EuiTextColor color="primary">
@@ -268,6 +387,13 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                       </EuiTextColor>
                     }
                   >
+                    <EuiText color="subdued" size="s">
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.migrateAgentFlyout.networkingDescriptionLabel"
+                        defaultMessage="Configure proxy settings if your network requires routing traffic through a proxy server."
+                      />
+                    </EuiText>
+                    <EuiSpacer size="m" />
                     <EuiFormRow
                       label={
                         <FormattedMessage
@@ -276,7 +402,15 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                         />
                       }
                     >
-                      <EuiFieldText />
+                      <EuiFieldText
+                        onChange={(e) =>
+                          setFormContent({
+                            ...formContent,
+                            settings: { ...formContent.settings, proxy_url: e.target.value },
+                          })
+                        }
+                        fullWidth
+                      />
                     </EuiFormRow>
                   </EuiAccordion>
 
@@ -294,6 +428,13 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                       </EuiTextColor>
                     }
                   >
+                    <EuiText color="subdued" size="s">
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.migrateAgentFlyout.agentOptionsDescriptionLabel"
+                        defaultMessage="Customize behavior during migration. Control connection handling, staging environments, and token replacement logic."
+                      />
+                    </EuiText>
+                    <EuiSpacer size="m" />
                     <EuiFormRow>
                       <EuiFlexGroup alignItems="flexStart">
                         <EuiFlexItem>
@@ -342,11 +483,14 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose }) => {
                                 defaultMessage="Proxy Disabled"
                               />
                             }
-                            checked={formContent.settings.insecure}
+                            checked={formContent.settings.proxy_disabled}
                             onChange={(e) =>
                               setFormContent({
                                 ...formContent,
-                                settings: { ...formContent.settings, insecure: e.target.checked },
+                                settings: {
+                                  ...formContent.settings,
+                                  proxy_disabled: e.target.checked,
+                                },
                               })
                             }
                           />

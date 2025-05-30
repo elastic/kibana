@@ -414,6 +414,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => {
               setAgentToMigrate(undefined);
               setMigrateFlyoutOpen(false);
+            }}
+            onSave={() => {
+              setAgentToMigrate(undefined);
+              setMigrateFlyoutOpen(false);
               refreshAgents();
             }}
           />

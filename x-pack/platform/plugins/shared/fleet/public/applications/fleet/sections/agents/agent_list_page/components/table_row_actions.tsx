@@ -42,7 +42,7 @@ export const TableRowActions: React.FunctionComponent<{
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
-
+  const isFleetServerAgent = agent.local_metadata?.elastic?.agent?.type === 'fleet-server';
   const isUnenrolling = agent.status === 'unenrolling';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
@@ -54,11 +54,14 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
-  if (!agentPolicy?.is_protected) {
+  if (!agentPolicy?.is_protected && !isFleetServerAgent) {
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"
-        onClick={onMigrateAgentClick}
+        onClick={(e) => {
+          onMigrateAgentClick();
+          setIsMenuOpen(false);
+        }}
         disabled={!agent.active}
         key="migrateAgent"
       >
