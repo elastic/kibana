@@ -32,9 +32,10 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
           selectDataViewAsync({
             id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
             scope: [
+              // NOTE: DataViewManagerScopeName.timeline is omitted here because timelines do their own init
+              // that sets the data view. If it was there, a race condition would occur
               DataViewManagerScopeName.default,
               DataViewManagerScopeName.detections,
-              DataViewManagerScopeName.timeline,
               DataViewManagerScopeName.analyzer,
             ],
           })
