@@ -197,6 +197,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitForkCommand) break;
         return this.visitForkCommand(parent, commandNode, input as any);
       }
+      case 'rrf': {
+        if (!this.methods.visitRrfCommand) break;
+        return this.visitRrfCommand(parent, commandNode, input as any);
+      }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
   }
@@ -415,6 +419,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitForkCommand'> {
     const context = new contexts.ForkCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitForkCommand', context, input);
+  }
+
+  public visitRrfCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitRrfCommand'>
+  ): types.VisitorOutput<Methods, 'visitRrfCommand'> {
+    const context = new contexts.RrfCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitRrfCommand', context, input);
   }
 
   // #endregion

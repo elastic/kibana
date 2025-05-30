@@ -216,7 +216,7 @@ function validateCommand(
   }
 
   if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
+    messages.push(...commandDef.validate(command, references, ast));
   }
 
   switch (commandDef.name) {

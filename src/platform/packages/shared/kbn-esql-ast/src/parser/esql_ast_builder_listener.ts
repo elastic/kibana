@@ -32,6 +32,7 @@ import {
   type TimeSeriesCommandContext,
   type WhereCommandContext,
   RerankCommandContext,
+  RrfCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import type { ESQLAst } from '../types';
@@ -348,6 +349,20 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   exitRerankCommand(ctx: RerankCommandContext): void {
     const command = createRerankCommand(ctx);
 
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rrfCommand`.
+   *
+   * Parse the RRF (Reciprocal Rank Fusion) command:
+   *
+   * RRF
+   *
+   * @param ctx the parse tree
+   */
+  exitRrfCommand(ctx: RrfCommandContext): void {
+    const command = createCommand('rrf', ctx);
     this.ast.push(command);
   }
 

@@ -118,8 +118,9 @@ export async function suggest(
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
+    // resolve particular commands suggestions after
     // filter source commands if already defined
-    const suggestions = getCommandAutocompleteDefinitions(getAllCommands());
+    let suggestions = getCommandAutocompleteDefinitions(getAllCommands());
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
@@ -142,6 +143,12 @@ export async function suggest(
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
+    }
+
+    // If the last command is not a FORK, RRF should not be suggested.
+    const lastCommand = root.commands[root.commands.length - 1];
+    if (lastCommand.name !== 'fork') {
+      suggestions = suggestions.filter((def) => def.label !== 'RRF');
     }
 
     return suggestions.filter((def) => !isSourceCommand(def));
