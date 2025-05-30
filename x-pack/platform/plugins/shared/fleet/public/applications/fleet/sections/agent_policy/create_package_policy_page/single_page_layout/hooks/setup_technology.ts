@@ -166,7 +166,6 @@ export function useSetupTechnology({
     },
     [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
   );
-
   if (
     isEditPage &&
     agentPolicies &&

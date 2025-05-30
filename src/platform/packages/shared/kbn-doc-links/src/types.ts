@@ -486,6 +486,7 @@ export interface DocLinks {
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
+    fingerprint: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
@@ -528,6 +529,7 @@ export interface DocLinks {
     unprivilegedMode: string;
     httpMonitoring: string;
     agentLevelLogging: string;
+    remoteESOoutputTroubleshooting: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

@@ -4248,6 +4248,24 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getLegacyTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getLegacyTypes",
+            "description": [
+              "Return legacy types, this types can't be registered"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.ISavedObjectTypeRegistry.getType",
             "type": "Function",
             "tags": [],

@@ -53,6 +53,7 @@ import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
 } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
 import {
   suggest as suggestForGrok,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
@@ -68,6 +69,8 @@ import {
   suggest as suggestForRename,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterRename,
 } from '../autocomplete/commands/rename';
+import { suggest as suggestForRrf } from '../autocomplete/commands/rrf';
+import { validate as validateRrf } from '../validation/commands/rrf';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
@@ -242,7 +245,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: '',
     examples: ['TS index', 'TS index, index2'],
-    suggest: () => [],
+    suggest: suggestForTimeseries,
   },
   {
     name: 'stats',
@@ -704,5 +707,18 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
 
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
+  },
+  {
+    hidden: true,
+    preview: true,
+    name: 'rrf',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
+      defaultMessage:
+        'Combines multiple result sets with different scoring functions into a single result set.',
+    }),
+    declaration: `RRF`,
+    examples: ['… FORK (LIMIT 1) (LIMIT 2) | RRF'],
+    suggest: suggestForRrf,
+    validate: validateRrf,
   },
 ];

@@ -19,6 +19,7 @@ import {
   EuiSelect,
   EuiConfirmModal,
   EuiButtonEmpty,
+  EuiTextArea,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
@@ -32,7 +33,7 @@ import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
 import { appPaths } from '../../../app_paths';
 import { toolLabels } from '../i18n';
-import { integrationTypeToLabel } from '../utils';
+import { integrationTypeToLabel, isIntegrationDisabled } from '../utils';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -86,10 +87,12 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const integrationTypes = [
     { value: '', text: 'Pick a type' },
-    ...Object.values(IntegrationType).map((type) => ({
-      value: type,
-      text: integrationTypeToLabel(type),
-    })),
+    ...Object.values(IntegrationType)
+      .filter((type) => !isIntegrationDisabled(type))
+      .map((type) => ({
+        value: type,
+        text: integrationTypeToLabel(type),
+      })),
   ];
 
   const onDeleteSuccess = useCallback(() => {
@@ -196,8 +199,9 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                     name="description"
                     control={control}
                     render={({ field }) => (
-                      <EuiFieldText
+                      <EuiTextArea
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        rows={3}
                         isInvalid={!!formMethods.formState.errors.description}
                         {...field}
                       />

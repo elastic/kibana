@@ -6,13 +6,14 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -27,7 +28,7 @@ import { useSavedQueryServices } from '../../../../common/utils/saved_query_serv
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
 import type { DataProvider } from '../data_providers/data_provider';
-import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery, getNonDropAreaFilters } from '../helpers';
+import { buildGlobalQuery, getNonDropAreaFilters, TIMELINE_FILTER_DROP_AREA } from '../helpers';
 import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
@@ -76,6 +77,7 @@ const SearchBarContainer = styled.div`
   *   -----------------------------------------------------------
   *
   * */
+
   .uniSearchBar .filter-items-group {
     display: none;
   }
@@ -113,17 +115,21 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
       useSourcererDataView(SourcererScopeName.timeline);
 
     const { newDataViewPickerEnabled } = useEnableExperimental();
-    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
 
-    const sourcererDataView = newDataViewPickerEnabled
-      ? experimentalDataView
-      : oldSourcererDataView;
-    const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+    const dataViewSpec: DataViewSpec = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    );
+    const browserFields = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
+      [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
+    );
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
@@ -132,10 +138,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     });
     const queryBarFilters = useMemo(() => getNonDropAreaFilters(filters), [filters]);
 
-    const indexPattern = useMemo(
-      () => dataViewSpecToViewBase(sourcererDataView),
-      [sourcererDataView]
-    );
+    const indexPattern = useMemo(() => dataViewSpecToViewBase(dataViewSpec), [dataViewSpec]);
 
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
@@ -187,6 +190,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
 
     useEffect(() => {
       let isSubscribed = true;
+
       async function setSavedQueryByServices() {
         if (savedQueryId != null && savedQueryServices != null) {
           try {
@@ -212,6 +216,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           setSavedQuery(undefined);
         }
       }
+
       setSavedQueryByServices();
       return () => {
         isSubscribed = false;

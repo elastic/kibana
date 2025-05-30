@@ -364,7 +364,7 @@ export const extractLensReferencesFromCommentString = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   comment: string
 ): SavedObjectReference[] => {
-  const extract = lensEmbeddableFactory && lensEmbeddableFactory().extract;
+  const extract = lensEmbeddableFactory()?.extract;
 
   if (extract) {
     const parsedComment = parseCommentString(comment);
