@@ -203,11 +203,7 @@ class VisEditorVisualizationUI extends Component {
       );
     }
     const applyButton = (
-      <EuiFlexGroup
-        className="tvbEditorVisualization__apply"
-        css={applyStyle}
-        alignItems="center"
-      >
+      <EuiFlexGroup className="tvbEditorVisualization__apply" css={applyStyle} alignItems="center">
         <EuiFlexItem grow={true}>
           <EuiSwitch
             id="tsvbAutoApplyInput"
