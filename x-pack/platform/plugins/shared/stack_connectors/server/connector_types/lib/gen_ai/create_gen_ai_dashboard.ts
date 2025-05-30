@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { getDashboard } from './gen_ai_dashboard';
 
 export interface OutputError {

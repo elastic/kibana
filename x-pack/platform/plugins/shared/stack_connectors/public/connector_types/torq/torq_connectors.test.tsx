@@ -93,6 +93,41 @@ describe('TorqActionConnectorFields renders', () => {
       });
     });
 
+    it('connector validation succeeds when using a EU torq webhook URL', async () => {
+      const connector = {
+        ...actionConnector,
+        config: { webhookIntegrationUrl: 'https://hooks.eu.torq.io/v1/webhooks/fjdksla' },
+      };
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <TorqActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={EMPTY_FUNC}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.torq',
+          name: 'torq',
+          config: {
+            webhookIntegrationUrl: 'https://hooks.eu.torq.io/v1/webhooks/fjdksla',
+          },
+          secrets: {
+            token: 'testtoken',
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
     it('connector validation fails when there is no token', async () => {
       const connector = {
         ...actionConnector,
@@ -153,7 +188,7 @@ describe('TorqActionConnectorFields renders', () => {
       const connector = {
         ...actionConnector,
         config: {
-          webhookIntegrationUrl: 'https://test.com',
+          webhookIntegrationUrl: 'https://hooks.not-torq.io/v1/webhooks/fjdksla',
         },
       };
 

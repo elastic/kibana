@@ -8,8 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  apiHasAppContext,
+import type {
   FetchContext,
   HasAppContext,
   HasEditCapabilities,
@@ -17,8 +16,9 @@ import {
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { DiscoverServices } from '../build_services';
-import { PublishesSavedSearch } from './types';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
+import type { DiscoverServices } from '../build_services';
+import type { PublishesSavedSearch } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 
 type SavedSearchPartialApi = PublishesSavedSearch &

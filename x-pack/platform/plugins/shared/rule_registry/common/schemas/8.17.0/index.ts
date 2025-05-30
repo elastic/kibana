@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ALERT_SUPPRESSION_TERMS } from '@kbn/rule-data-utils';
-import { SearchTypes } from '@kbn/data-plugin/common';
-import { AlertWithCommonFields880 } from '../8.8.0';
+import type { ALERT_SUPPRESSION_TERMS } from '@kbn/rule-data-utils';
+import type { SearchTypes } from '@kbn/data-plugin/common';
+import type { AlertWithCommonFields880 } from '../8.8.0';
 
-import { SuppressionFields8130 } from '../8.13.0';
+import type { SuppressionFields8130 } from '../8.13.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.13.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.13.0.

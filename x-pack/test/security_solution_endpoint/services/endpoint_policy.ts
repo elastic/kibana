@@ -25,6 +25,7 @@ import { Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public/services/pkg_key_from_package_info';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 const FLEET_API_ROOT = '/api/fleet';
@@ -157,9 +158,11 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     async createPolicy({
       agentPolicyOverrides = {},
       integrationPolicyOverrides = {},
+      options = {},
     }: Partial<{
       agentPolicyOverrides: Partial<CreateAgentPolicyRequest['body']>;
       integrationPolicyOverrides: Partial<CreatePackagePolicyRequest['body']>;
+      options: Partial<{ spaceId: string }>;
     }> = {}): Promise<PolicyTestResourceInfo> {
       // create Agent Policy
       let agentPolicy: CreateAgentPolicyResponse['item'];
@@ -171,7 +174,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           ...agentPolicyOverrides,
         };
         const { body: createResponse }: { body: CreateAgentPolicyResponse } = await supertest
-          .post(FLEET_API_AGENT_POLICIES)
+          .post(addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_AGENT_POLICIES))
           .set('kbn-xsrf', 'xxx')
           .send(newAgentPolicyData)
           .expect(200);
@@ -220,7 +223,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           ...integrationPolicyOverrides,
         };
         const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
-          .post(FLEET_API_PACKAGE_POLICIES)
+          .post(addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_PACKAGE_POLICIES))
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
           .expect(200);
@@ -245,7 +248,9 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               packagePolicyIds: [packagePolicy.id],
             };
             await supertest
-              .post(FLEET_API_PACKAGE_POLICIES_DELETE)
+              .post(
+                addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_PACKAGE_POLICIES_DELETE)
+              )
               .set('kbn-xsrf', 'xxx')
               .send(deletePackagePolicyData)
               .expect(200);
@@ -263,7 +268,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               agentPolicyId: agentPolicy.id,
             };
             await supertest
-              .post(FLEET_API_AGENT_POLICIES_DELETE)
+              .post(addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_AGENT_POLICIES_DELETE))
               .set('kbn-xsrf', 'xxx')
               .send(deleteAgentPolicyData)
               .expect(200);

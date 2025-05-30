@@ -261,7 +261,6 @@ export class CoreSystem {
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
-
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
       const featureFlags = this.featureFlags.setup({ injectedMetadata });
@@ -332,14 +331,7 @@ export class CoreSystem {
         userProfile,
         targetDomElement: overlayTargetDomElement,
       });
-      const notifications = this.notifications.start({
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        userProfile,
-        targetDomElement: notificationsTargetDomElement,
-      });
+
       const customBranding = this.customBranding.start();
       const application = await this.application.start({
         http,
@@ -348,9 +340,22 @@ export class CoreSystem {
         customBranding,
         analytics,
       });
-
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
+      });
+      const rendering = this.rendering.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+      });
+
+      const notifications = this.notifications.start({
+        analytics,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+        rendering,
       });
 
       const chrome = await this.chrome.start({
@@ -402,6 +407,7 @@ export class CoreSystem {
         customBranding,
         security,
         userProfile,
+        rendering,
       };
 
       await this.plugins.start(core);
@@ -419,16 +425,7 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
-      this.rendering.start({
-        application,
-        chrome,
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        targetDomElement: coreUiTargetDomElement,
-        userProfile,
-      });
+      this.rendering.renderCore({ chrome, application, overlays }, coreUiTargetDomElement);
 
       performance.mark(KBN_LOAD_MARKS, {
         detail: LOAD_START_DONE,

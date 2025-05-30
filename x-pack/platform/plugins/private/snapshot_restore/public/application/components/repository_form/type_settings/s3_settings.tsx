@@ -60,7 +60,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     'public-read',
     'public-read-write',
     'authenticated-read',
-    'log-delivery-write',
     'bucket-owner-read',
     'bucket-owner-full-control',
   ].map((option) => ({

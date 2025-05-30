@@ -1,0 +1,1292 @@
+openapi: 3.0.3
+info:
+  title: Task manager health APIs
+  description: Kibana APIs for the task manager feature
+  version: "1.0.0"
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: task manager
+    # description:
+    x-displayName: Task manager
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
+      description: Task manager
+servers:
+  - url: /
+paths:
+  /api/task_manager/_health:
+    get:
+      summary: Get the task manager health
+      description: >
+        Get the health status of the Kibana task manager.
+      operationId: task-manager-health
+      tags:
+        - task manager
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    # description:
+                  last_update:
+                    type: string
+                    # description: 
+                  stats:
+                    type: object
+                    properties:
+                      capacity_estimation:
+                        type: object
+                        description: >
+                          This object provides a rough estimate about the sufficiency of its capacity.
+                          These are estimates based on historical data and should not be used as predictions.
+                      configuration:
+                        type: object
+                        description: >
+                          This object summarizes the current configuration of Task Manager.
+                          This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
+                      runtime:
+                        type: object
+                        description: >
+                          This object tracks runtime performance of Task Manager, tracking task drift, worker load, and stats broken down by type, including duration and run results.
+                      workload:
+                        type: object
+                        description: >
+                          This object summarizes the work load across the cluster, including the tasks in the system, their types, and current status.
+                  status:
+                    type: string
+                    # description: 
+                  timestamp:
+                    type: string
+                    # description: 
+              examples:
+                taskManagerHealthResponse1:
+                  # summary:
+                  value: |-
+                    {
+                      "id": "fbed0dcc-3014-4b06-a2f4-1944b7b6df00",
+                      "timestamp": "2025-03-21T21:14:50.535Z",
+                      "status": "OK",
+                      "last_update": "2025-03-21T21:14:50.240Z",
+                      "stats": {
+                        "configuration": {
+                          "timestamp": "2025-03-21T21:11:01.073Z",
+                          "value": {
+                            "request_capacity": 1000,
+                            "monitored_aggregated_stats_refresh_rate": 60000,
+                            "monitored_stats_running_average_window": 50,
+                            "monitored_task_execution_thresholds": {
+                              "custom": {},
+                              "default": {
+                                "error_threshold": 90,
+                                "warn_threshold": 80
+                              }
+                            },
+                            "claim_strategy": "mget",
+                            "poll_interval": 500,
+                            "capacity": {
+                              "config": 10,
+                              "as_workers": 10,
+                              "as_cost": 20
+                            }
+                          },
+                          "status": "OK"
+                        },
+                        "runtime": {
+                          "timestamp": "2025-03-21T21:14:50.240Z",
+                          "value": {
+                            "polling": {
+                              "last_successful_poll": "2025-03-21T21:14:50.240Z",
+                              "last_polling_delay": "2025-03-21T21:11:01.072Z",
+                              "claim_duration": {
+                                "p50": 4,
+                                "p90": 4,
+                                "p95": 5,
+                                "p99": 8
+                              },
+                              "duration": {
+                                "p50": 4,
+                                "p90": 5,
+                                "p95": 7,
+                                "p99": 8
+                              },
+                              "claim_conflicts": {
+                                "p50": 0,
+                                "p90": 0,
+                                "p95": 0,
+                                "p99": 0
+                              },
+                              "claim_mismatches": {
+                                "p50": 0,
+                                "p90": 0,
+                                "p95": 0,
+                                "p99": 0
+                              },
+                              "claim_stale_tasks": {
+                                "p50": 0,
+                                "p90": 0,
+                                "p95": 0,
+                                "p99": 0
+                              },
+                              "result_frequency_percent_as_number": {
+                                "Failed": 0,
+                                "NoAvailableWorkers": 0,
+                                "NoTasksClaimed": 100,
+                                "RanOutOfCapacity": 0,
+                                "RunningAtCapacity": 0,
+                                "PoolFilled": 0
+                              },
+                              "persistence": {
+                                "recurring": 90,
+                                "non_recurring": 10
+                              }
+                            },
+                            "drift": {
+                              "p50": 846187459,
+                              "p90": 910992736,
+                              "p95": 911234119,
+                              "p99": 911237991
+                            },
+                            "drift_by_type": {
+                              "endpoint:user-artifact-packager": {
+                                "p50": 518.5,
+                                "p90": 911234116,
+                                "p95": 911234116,
+                                "p99": 911234116
+                              },
+                              "security:endpoint-diagnostics": {
+                                "p50": 910998502,
+                                "p90": 910998502,
+                                "p95": 910998502,
+                                "p99": 910998502
+                              },
+                              "alerts_invalidate_api_keys": {
+                                "p50": 910998502,
+                                "p90": 910998502,
+                                "p95": 910998502,
+                                "p99": 910998502
+                              },
+                              "fleet:delete-unenrolled-agents-task": {
+                                "p50": 910986835,
+                                "p90": 910986835,
+                                "p95": 910986835,
+                                "p99": 910986835
+                              },
+                              "task_manager:mark_removed_tasks_as_unrecognized": {
+                                "p50": 910986835,
+                                "p90": 910986835,
+                                "p95": 910986835,
+                                "p99": 910986835
+                              },
+                              "SLO:ORPHAN_SUMMARIES-CLEANUP-TASK": {
+                                "p50": 910986836,
+                                "p90": 910986836,
+                                "p95": 910986836,
+                                "p99": 910986836
+                              },
+                              "Fleet-Metrics-Task": {
+                                "p50": 324.5,
+                                "p90": 911237991,
+                                "p95": 911237991,
+                                "p99": 911237991
+                              },
+                              "endpoint:complete-external-response-actions": {
+                                "p50": 522,
+                                "p90": 911234119,
+                                "p95": 911234119,
+                                "p99": 911234119
+                              },
+                              "alerting_health_check": {
+                                "p50": 910986836,
+                                "p90": 910986836,
+                                "p95": 910986836,
+                                "p99": 910986836
+                              },
+                              "task_manager:delete_inactive_background_task_nodes": {
+                                "p50": 324.5,
+                                "p90": 911237991,
+                                "p95": 911237991,
+                                "p99": 911237991
+                              },
+                              "endpoint:metadata-check-transforms-task": {
+                                "p50": 910967470,
+                                "p90": 910967470,
+                                "p95": 910967470,
+                                "p99": 910967470
+                              },
+                              "security:telemetry-timelines": {
+                                "p50": 910986969,
+                                "p90": 910986969,
+                                "p95": 910986969,
+                                "p99": 910986969
+                              },
+                              "security:telemetry-diagnostic-timelines": {
+                                "p50": 910986415,
+                                "p90": 910986415,
+                                "p95": 910986415,
+                                "p99": 910986415
+                              },
+                              "security:telemetry-prebuilt-rule-alerts": {
+                                "p50": 910986415,
+                                "p90": 910986415,
+                                "p95": 910986415,
+                                "p99": 910986415
+                              },
+                              "security:telemetry-configuration": {
+                                "p50": 910986415,
+                                "p90": 910986415,
+                                "p95": 910986415,
+                                "p99": 910986415
+                              },
+                              "security:telemetry-filterlist-artifact": {
+                                "p50": 910986415,
+                                "p90": 910986415,
+                                "p95": 910986415,
+                                "p99": 910986415
+                              },
+                              "session_cleanup": {
+                                "p50": 910985983,
+                                "p90": 910985983,
+                                "p95": 910985983,
+                                "p99": 910985983
+                              },
+                              "fleet:unenroll-inactive-agents-task": {
+                                "p50": 910699084,
+                                "p90": 910699084,
+                                "p95": 910699084,
+                                "p99": 910699084
+                              },
+                              "Fleet-Usage-Logger": {
+                                "p50": 910986416,
+                                "p90": 910986416,
+                                "p95": 910986416,
+                                "p99": 910986416
+                              },
+                              "Fleet-Usage-Sender": {
+                                "p50": 910986970,
+                                "p90": 910986970,
+                                "p95": 910986970,
+                                "p99": 910986970
+                              },
+                              "logs-data-telemetry": {
+                                "p50": 846187459,
+                                "p90": 846187459,
+                                "p95": 846187459,
+                                "p99": 846187459
+                              },
+                              "security:telemetry-lists": {
+                                "p50": 846187459,
+                                "p90": 846187459,
+                                "p95": 846187459,
+                                "p99": 846187459
+                              },
+                              "security:telemetry-detection-rules": {
+                                "p50": 846187459,
+                                "p90": 846187459,
+                                "p95": 846187459,
+                                "p99": 846187459
+                              },
+                              "security:endpoint-meta-telemetry": {
+                                "p50": 846186905,
+                                "p90": 846186905,
+                                "p95": 846186905,
+                                "p99": 846186905
+                              },
+                              "fleet:check-deleted-files-task": {
+                                "p50": 846187905,
+                                "p90": 846187905,
+                                "p95": 846187905,
+                                "p99": 846187905
+                              },
+                              "osquery:telemetry-configs": {
+                                "p50": 846187460,
+                                "p90": 846187460,
+                                "p95": 846187460,
+                                "p99": 846187460
+                              },
+                              "osquery:telemetry-saved-queries": {
+                                "p50": 846187459,
+                                "p90": 846187459,
+                                "p95": 846187459,
+                                "p99": 846187459
+                              },
+                              "osquery:telemetry-packs": {
+                                "p50": 846187905,
+                                "p90": 846187905,
+                                "p95": 846187905,
+                                "p99": 846187905
+                              },
+                              "apm-telemetry-task": {
+                                "p50": 889386904,
+                                "p90": 889386904,
+                                "p95": 889386904,
+                                "p99": 889386904
+                              },
+                              "obs-ai-assistant:knowledge-base-migration": {
+                                "p50": 1733,
+                                "p90": 1733,
+                                "p95": 1733,
+                                "p99": 1733
+                              },
+                              "apm-source-map-migration-task": {
+                                "p50": 2650,
+                                "p90": 2650,
+                                "p95": 2650,
+                                "p99": 2650
+                              },
+                              "security:indices-metadata-telemetry": {
+                                "p50": 846187402,
+                                "p90": 846187402,
+                                "p95": 846187402,
+                                "p99": 846187402
+                              },
+                              "dashboard_telemetry": {
+                                "p50": 1741,
+                                "p90": 1741,
+                                "p95": 1741,
+                                "p99": 1741
+                              },
+                              "ML:saved-objects-sync": {
+                                "p50": 1745,
+                                "p90": 1745,
+                                "p95": 1745,
+                                "p99": 1745
+                              },
+                              "actions_telemetry": {
+                                "p50": 846169458,
+                                "p90": 846169458,
+                                "p95": 846169458,
+                                "p99": 846169458
+                              },
+                              "alerting_telemetry": {
+                                "p50": 846169459,
+                                "p90": 846169459,
+                                "p95": 846169459,
+                                "p99": 846169459
+                              },
+                              "ProductDocBase:EnsureUpToDate": {
+                                "p50": 1728,
+                                "p90": 1728,
+                                "p95": 1728,
+                                "p99": 1728
+                              },
+                              "cases-telemetry-task": {
+                                "p50": 889387905,
+                                "p90": 889387905,
+                                "p95": 889387905,
+                                "p99": 889387905
+                              },
+                              "fleet:bump_agent_policies": {
+                                "p50": 421,
+                                "p90": 421,
+                                "p95": 421,
+                                "p99": 421
+                              }
+                            },
+                            "load": {
+                              "p50": 40,
+                              "p90": 100,
+                              "p95": 100,
+                              "p99": 100
+                            },
+                            "execution": {
+                              "duration": {
+                                "endpoint:user-artifact-packager": {
+                                  "p50": 11.5,
+                                  "p90": 13,
+                                  "p95": 13,
+                                  "p99": 13
+                                },
+                                "security:endpoint-diagnostics": {
+                                  "p50": 9,
+                                  "p90": 9,
+                                  "p95": 9,
+                                  "p99": 9
+                                },
+                                "alerts_invalidate_api_keys": {
+                                  "p50": 34,
+                                  "p90": 34,
+                                  "p95": 34,
+                                  "p99": 34
+                                },
+                                "fleet:delete-unenrolled-agents-task": {
+                                  "p50": 35,
+                                  "p90": 35,
+                                  "p95": 35,
+                                  "p99": 35
+                                },
+                                "task_manager:mark_removed_tasks_as_unrecognized": {
+                                  "p50": 35,
+                                  "p90": 35,
+                                  "p95": 35,
+                                  "p99": 35
+                                },
+                                "SLO:ORPHAN_SUMMARIES-CLEANUP-TASK": {
+                                  "p50": 36,
+                                  "p90": 36,
+                                  "p95": 36,
+                                  "p99": 36
+                                },
+                                "Fleet-Metrics-Task": {
+                                  "p50": 5.5,
+                                  "p90": 40,
+                                  "p95": 40,
+                                  "p99": 40
+                                },
+                                "endpoint:complete-external-response-actions": {
+                                  "p50": 9,
+                                  "p90": 52,
+                                  "p95": 52,
+                                  "p99": 52
+                                },
+                                "alerting_health_check": {
+                                  "p50": 78,
+                                  "p90": 78,
+                                  "p95": 78,
+                                  "p99": 78
+                                },
+                                "task_manager:delete_inactive_background_task_nodes": {
+                                  "p50": 6,
+                                  "p90": 84,
+                                  "p95": 84,
+                                  "p99": 84
+                                },
+                                "endpoint:metadata-check-transforms-task": {
+                                  "p50": 4,
+                                  "p90": 4,
+                                  "p95": 4,
+                                  "p99": 4
+                                },
+                                "security:telemetry-timelines": {
+                                  "p50": 6,
+                                  "p90": 6,
+                                  "p95": 6,
+                                  "p99": 6
+                                },
+                                "security:telemetry-diagnostic-timelines": {
+                                  "p50": 5,
+                                  "p90": 5,
+                                  "p95": 5,
+                                  "p99": 5
+                                },
+                                "security:telemetry-prebuilt-rule-alerts": {
+                                  "p50": 5,
+                                  "p90": 5,
+                                  "p95": 5,
+                                  "p99": 5
+                                },
+                                "security:telemetry-configuration": {
+                                  "p50": 5,
+                                  "p90": 5,
+                                  "p95": 5,
+                                  "p99": 5
+                                },
+                                "security:telemetry-filterlist-artifact": {
+                                  "p50": 5,
+                                  "p90": 5,
+                                  "p95": 5,
+                                  "p99": 5
+                                },
+                                "session_cleanup": {
+                                  "p50": 17,
+                                  "p90": 17,
+                                  "p95": 17,
+                                  "p99": 17
+                                },
+                                "fleet:unenroll-inactive-agents-task": {
+                                  "p50": 18,
+                                  "p90": 18,
+                                  "p95": 18,
+                                  "p99": 18
+                                },
+                                "Fleet-Usage-Logger": {
+                                  "p50": 22,
+                                  "p90": 22,
+                                  "p95": 22,
+                                  "p99": 22
+                                },
+                                "Fleet-Usage-Sender": {
+                                  "p50": 56,
+                                  "p90": 56,
+                                  "p95": 56,
+                                  "p99": 56
+                                },
+                                "logs-data-telemetry": {
+                                  "p50": 14,
+                                  "p90": 14,
+                                  "p95": 14,
+                                  "p99": 14
+                                },
+                                "security:telemetry-lists": {
+                                  "p50": 14,
+                                  "p90": 14,
+                                  "p95": 14,
+                                  "p99": 14
+                                },
+                                "security:telemetry-detection-rules": {
+                                  "p50": 14,
+                                  "p90": 14,
+                                  "p95": 14,
+                                  "p99": 14
+                                },
+                                "security:endpoint-meta-telemetry": {
+                                  "p50": 13,
+                                  "p90": 13,
+                                  "p95": 13,
+                                  "p99": 13
+                                },
+                                "fleet:check-deleted-files-task": {
+                                  "p50": 21,
+                                  "p90": 21,
+                                  "p95": 21,
+                                  "p99": 21
+                                },
+                                "osquery:telemetry-configs": {
+                                  "p50": 20,
+                                  "p90": 20,
+                                  "p95": 20,
+                                  "p99": 20
+                                },
+                                "osquery:telemetry-saved-queries": {
+                                  "p50": 24,
+                                  "p90": 24,
+                                  "p95": 24,
+                                  "p99": 24
+                                },
+                                "osquery:telemetry-packs": {
+                                  "p50": 24,
+                                  "p90": 24,
+                                  "p95": 24,
+                                  "p99": 24
+                                },
+                                "apm-telemetry-task": {
+                                  "p50": 361,
+                                  "p90": 361,
+                                  "p95": 361,
+                                  "p99": 361
+                                },
+                                "obs-ai-assistant:knowledge-base-migration": {
+                                  "p50": 9,
+                                  "p90": 9,
+                                  "p95": 9,
+                                  "p99": 9
+                                },
+                                "apm-source-map-migration-task": {
+                                  "p50": 23,
+                                  "p90": 23,
+                                  "p95": 23,
+                                  "p99": 23
+                                },
+                                "security:indices-metadata-telemetry": {
+                                  "p50": 11,
+                                  "p90": 11,
+                                  "p95": 11,
+                                  "p99": 11
+                                },
+                                "dashboard_telemetry": {
+                                  "p50": 15,
+                                  "p90": 15,
+                                  "p95": 15,
+                                  "p99": 15
+                                },
+                                "ML:saved-objects-sync": {
+                                  "p50": 23,
+                                  "p90": 23,
+                                  "p95": 23,
+                                  "p99": 23
+                                },
+                                "actions_telemetry": {
+                                  "p50": 31,
+                                  "p90": 31,
+                                  "p95": 31,
+                                  "p99": 31
+                                },
+                                "alerting_telemetry": {
+                                  "p50": 39,
+                                  "p90": 39,
+                                  "p95": 39,
+                                  "p99": 39
+                                },
+                                "ProductDocBase:EnsureUpToDate": {
+                                  "p50": 139,
+                                  "p90": 139,
+                                  "p95": 139,
+                                  "p99": 139
+                                },
+                                "cases-telemetry-task": {
+                                  "p50": 1005,
+                                  "p90": 1005,
+                                  "p95": 1005,
+                                  "p99": 1005
+                                },
+                                "fleet:bump_agent_policies": {
+                                  "p50": 5,
+                                  "p90": 5,
+                                  "p95": 5,
+                                  "p99": 5
+                                }
+                              },
+                              "duration_by_persistence": {
+                                "recurring": {
+                                  "p50": 14,
+                                  "p90": 55.599999999999994,
+                                  "p95": 139.3999999999988,
+                                  "p99": 1005
+                                },
+                                "non_recurring": {
+                                  "p50": 15,
+                                  "p90": 139,
+                                  "p95": 139,
+                                  "p99": 139
+                                }
+                              },
+                              "persistence": {
+                                "recurring": 90,
+                                "non_recurring": 10
+                              },
+                              "result_frequency_percent_as_number": {
+                                "endpoint:user-artifact-packager": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:endpoint-diagnostics": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "alerts_invalidate_api_keys": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "fleet:delete-unenrolled-agents-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "task_manager:mark_removed_tasks_as_unrecognized": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "SLO:ORPHAN_SUMMARIES-CLEANUP-TASK": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "Fleet-Metrics-Task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "endpoint:complete-external-response-actions": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "alerting_health_check": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "task_manager:delete_inactive_background_task_nodes": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "endpoint:metadata-check-transforms-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-timelines": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-diagnostic-timelines": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-prebuilt-rule-alerts": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-configuration": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-filterlist-artifact": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "session_cleanup": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "fleet:unenroll-inactive-agents-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "Fleet-Usage-Logger": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "Fleet-Usage-Sender": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "logs-data-telemetry": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-lists": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:telemetry-detection-rules": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:endpoint-meta-telemetry": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "fleet:check-deleted-files-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "osquery:telemetry-configs": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "osquery:telemetry-saved-queries": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "osquery:telemetry-packs": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "apm-telemetry-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "obs-ai-assistant:knowledge-base-migration": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "apm-source-map-migration-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "security:indices-metadata-telemetry": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "dashboard_telemetry": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "ML:saved-objects-sync": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "actions_telemetry": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "alerting_telemetry": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "ProductDocBase:EnsureUpToDate": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "cases-telemetry-task": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                },
+                                "fleet:bump_agent_policies": {
+                                  "Success": 100,
+                                  "RetryScheduled": 0,
+                                  "Failed": 0,
+                                  "status": "OK"
+                                }
+                              }
+                            }
+                          },
+                          "status": "OK"
+                        },
+                        "workload": {
+                          "timestamp": "2025-03-21T21:14:01.489Z",
+                          "value": {
+                            "count": 35,
+                            "cost": 70,
+                            "task_types": {
+                              "Fleet-Metrics-Task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "Fleet-Usage-Logger": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "Fleet-Usage-Sender": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "ML:saved-objects-sync": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "SLO:ORPHAN_SUMMARIES-CLEANUP-TASK": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "actions_telemetry": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "alerting_health_check": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "alerting_telemetry": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "alerts_invalidate_api_keys": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "apm-telemetry-task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "cases-telemetry-task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "dashboard_telemetry": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "endpoint:complete-external-response-actions": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "endpoint:metadata-check-transforms-task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "endpoint:user-artifact-packager": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "fleet:check-deleted-files-task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "fleet:delete-unenrolled-agents-task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "fleet:unenroll-inactive-agents-task": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "logs-data-telemetry": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "osquery:telemetry-configs": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "osquery:telemetry-packs": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "osquery:telemetry-saved-queries": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:endpoint-diagnostics": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:endpoint-meta-telemetry": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:indices-metadata-telemetry": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-configuration": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-detection-rules": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-diagnostic-timelines": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-filterlist-artifact": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-lists": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-prebuilt-rule-alerts": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "security:telemetry-timelines": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "session_cleanup": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "task_manager:delete_inactive_background_task_nodes": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              },
+                              "task_manager:mark_removed_tasks_as_unrecognized": {
+                                "count": 1,
+                                "cost": 2,
+                                "status": {
+                                  "idle": 1
+                                }
+                              }
+                            },
+                            "non_recurring": 1,
+                            "non_recurring_cost": 2,
+                            "schedule": [
+                              [
+                                "1m",
+                                2
+                              ],
+                              [
+                                "60s",
+                                2
+                              ],
+                              [
+                                "5m",
+                                2
+                              ],
+                              [
+                                "10m",
+                                1
+                              ],
+                              [
+                                "15m",
+                                1
+                              ],
+                              [
+                                "45m",
+                                1
+                              ],
+                              [
+                                "1h",
+                                9
+                              ],
+                              [
+                                "3600s",
+                                1
+                              ],
+                              [
+                                "60m",
+                                1
+                              ],
+                              [
+                                "2h",
+                                1
+                              ],
+                              [
+                                "720m",
+                                2
+                              ],
+                              [
+                                "24h",
+                                7
+                              ],
+                              [
+                                "1d",
+                                3
+                              ],
+                              [
+                                "1440m",
+                                1
+                              ]
+                            ],
+                            "overdue": 0,
+                            "overdue_cost": 0,
+                            "overdue_non_recurring": 0,
+                            "estimated_schedule_density": [
+                              0,
+                              2,
+                              0,
+                              2,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0
+                            ],
+                            "capacity_requirements": {
+                              "per_minute": 4,
+                              "per_hour": 46,
+                              "per_day": 27
+                            }
+                          },
+                          "status": "OK"
+                        },
+                        "capacity_estimation": {
+                          "status": "OK",
+                          "reason": "Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (124.78541666666666) < capacityPerMinutePerKibana (1200)",
+                          "timestamp": "2025-03-21T21:14:50.535Z",
+                          "value": {
+                            "observed": {
+                              "observed_kibana_instances": 1,
+                              "max_throughput_per_minute_per_kibana": 1200,
+                              "max_throughput_per_minute": 1200,
+                              "minutes_to_drain_overdue": 0,
+                              "avg_recurring_required_throughput_per_minute": 5,
+                              "avg_recurring_required_throughput_per_minute_per_kibana": 5,
+                              "avg_required_throughput_per_minute": 125,
+                              "avg_required_throughput_per_minute_per_kibana": 125
+                            },
+                            "proposed": {
+                              "provisioned_kibana": 2,
+                              "min_required_kibana": 1,
+                              "avg_recurring_required_throughput_per_minute_per_kibana": 3,
+                              "avg_required_throughput_per_minute_per_kibana": 63
+                            }
+                          }
+                        }
+                      }
+                    }

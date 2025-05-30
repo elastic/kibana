@@ -10,7 +10,7 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { EditContextPanel } from './edit_context_panel';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ChatFormFields } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 jest.mock('../../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({
@@ -44,9 +44,9 @@ jest.mock('../../hooks/use_usage_tracker', () => ({
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
-      [ChatFormFields.indices]: ['index1'],
-      [ChatFormFields.docSize]: 1,
-      [ChatFormFields.sourceFields]: {
+      [PlaygroundFormFields.indices]: ['index1'],
+      [PlaygroundFormFields.docSize]: 1,
+      [PlaygroundFormFields.sourceFields]: {
         index1: ['title'],
         index2: ['body'],
       },
@@ -64,6 +64,18 @@ describe('EditContextFlyout component tests', () => {
         </MockFormProvider>
       </IntlProvider>
     );
+  });
+
+  it('should render the documentSizeButtonGroup with all options', () => {
+    // Check if the EuiButtonGroup is rendered
+    const buttonGroup = screen.getByTestId('documentSizeButtonGroup');
+    expect(buttonGroup).toBeInTheDocument();
+
+    // Check if all options are rendered within the button group
+    expect(screen.getByTestId('playground_context_doc_number-1')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-3')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-5')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-10')).toBeInTheDocument();
   });
 
   it('should see the context fields', async () => {

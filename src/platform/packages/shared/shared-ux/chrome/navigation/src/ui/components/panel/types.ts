@@ -23,5 +23,3 @@ export interface PanelContent {
   title?: ReactNode | string;
   content?: ComponentType<PanelComponentProps>;
 }
-
-export type ContentProvider = (nodeId: string) => PanelContent | void;

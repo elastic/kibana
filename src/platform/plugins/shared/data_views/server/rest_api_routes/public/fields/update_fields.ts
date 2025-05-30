@@ -128,80 +128,86 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object(
-              {
-                id: schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-              },
-              { unknowns: 'allow' }
-            ),
-            body: schema.object({
-              fields: schema.recordOf(
-                schema.string({
-                  minLength: 1,
-                  maxLength: 1_000,
-                }),
-                fieldUpdateSchema
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object(
+                {
+                  id: schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  }),
+                },
+                { unknowns: 'allow' }
               ),
-            }),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
+              body: schema.object({
+                fields: schema.recordOf(
+                  schema.string({
+                    minLength: 1,
+                    maxLength: 1_000,
+                  }),
+                  fieldUpdateSchema
+                ),
+              }),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
+              },
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
-          const { fields } = req.body;
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const id = req.params.id;
+            const { fields } = req.body;
 
-          const dataView = await updateFields({
-            dataViewsService,
-            usageCollection,
-            id,
-            fields,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataView = await updateFields({
+              dataViewsService,
+              usageCollection,
+              id,
+              fields,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
-          };
+            const body: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          })
+        )
+      );
   };
 };
 

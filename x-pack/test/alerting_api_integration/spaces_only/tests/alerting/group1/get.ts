@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',
@@ -51,6 +51,14 @@ const getTestUtils = (
           scheduled_task_id: response.body.scheduled_task_id,
           updated_by: null,
           api_key_owner: null,
+          ...(describeType === 'internal'
+            ? {
+                artifacts: {
+                  dashboards: [],
+                  investigation_guide: { blob: '' },
+                },
+              }
+            : {}),
           api_key_created_by_user: null,
           throttle: '1m',
           notify_when: 'onThrottleInterval',
@@ -110,6 +118,63 @@ const getTestUtils = (
           error: 'Not Found',
           message: 'Saved object [alert/1] not found',
         });
+    });
+  });
+
+  describe('Artifacts', () => {
+    it('should return the artifacts correctly', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            ...(describeType === 'internal'
+              ? {
+                  artifacts: {
+                    dashboards: [
+                      {
+                        id: 'dashboard-1',
+                      },
+                      {
+                        id: 'dashboard-2',
+                      },
+                    ],
+                    investigation_guide: {
+                      blob: '# Summary',
+                    },
+                  },
+                }
+              : {}),
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/${
+          describeType === 'public' ? 'api' : 'internal'
+        }/alerting/rule/${createdAlert.id}`
+      );
+
+      if (describeType === 'public') {
+        expect(response.body.artifacts).to.be(undefined);
+      } else if (describeType === 'internal') {
+        expect(response.body.artifacts).to.eql({
+          dashboards: [
+            {
+              id: 'dashboard-1',
+            },
+            {
+              id: 'dashboard-2',
+            },
+          ],
+          investigation_guide: {
+            blob: '# Summary',
+          },
+        });
+      }
     });
   });
 };

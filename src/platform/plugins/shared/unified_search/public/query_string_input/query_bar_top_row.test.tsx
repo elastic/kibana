@@ -14,7 +14,7 @@ import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
-import QueryBarTopRow, { SharingMetaFields } from './query_bar_top_row';
+import { QueryBarTopRow, SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -112,7 +112,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 }
 
 describe('QueryBarTopRowTopRow', () => {
-  const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
+  const QUERY_INPUT_SELECTOR = 'QueryStringInput';
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
   const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
   const CANCEL_BUTTON_SELECTOR = '[data-test-subj="queryCancelButton"]';

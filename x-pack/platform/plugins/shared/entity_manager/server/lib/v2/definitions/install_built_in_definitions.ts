@@ -12,7 +12,7 @@ import { builtInDefinitions } from './built_in';
 import { EntitySourceDefinition, EntityTypeDefinition } from '../types';
 
 export async function installBuiltInDefinitions(clusterClient: IClusterClient, logger: Logger) {
-  logger.info('Installing built in entity definitions');
+  logger.debug('Installing built in entity definitions');
 
   const types: EntityTypeDefinition[] = [];
   const sources: EntitySourceDefinition[] = [];

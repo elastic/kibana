@@ -16,6 +16,9 @@ export function MonitoringElasticsearchIndexDetailProvider({ getService }) {
   const SUBJ_SUMMARY_UNASSIGNED_SHARDS = `${SUBJ_SUMMARY} > unassignedShards`;
   const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
+  const SUBJ_SUMMARY_LOGS = 'monitoringLogs';
+  const SUBJ_SUMMARY_LOGS_LINK = `${SUBJ_SUMMARY_LOGS} > monitoringLogsLink`;
+
   return new (class ElasticsearchIndexDetail {
     async getSummary() {
       return {
@@ -26,6 +29,10 @@ export function MonitoringElasticsearchIndexDetailProvider({ getService }) {
         unassignedShards: await testSubjects.getVisibleText(SUBJ_SUMMARY_UNASSIGNED_SHARDS),
         health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
+    }
+
+    viewLogsLinkIsShowing() {
+      return testSubjects.exists(SUBJ_SUMMARY_LOGS_LINK);
     }
   })();
 }

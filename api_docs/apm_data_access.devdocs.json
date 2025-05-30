@@ -496,12 +496,31 @@
             "label": "getApmIndices",
             "description": [],
             "signature": [
-              "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "apmDataAccess",
+                "id": "def-server.ApmDataAccessPrivilegesCheck.getApmIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -1070,27 +1089,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "; knnSearch: { (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "KnnSearchResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; }; license: ",
+              "TODO",
+              ">; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -1682,28 +1701,6 @@
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.DocumentSourcesRequest.enableServiceTransactionMetrics",
-            "type": "boolean",
-            "tags": [],
-            "label": "enableServiceTransactionMetrics",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.DocumentSourcesRequest.enableContinuousRollups",
-            "type": "boolean",
-            "tags": [],
-            "label": "enableContinuousRollups",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1907,28 +1904,13 @@
     "misc": [
       {
         "parentPluginId": "apmDataAccess",
-        "id": "def-server.APMDataAccessConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "APMDataAccessConfig",
-        "description": [],
-        "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
-        ],
-        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apmDataAccess",
         "id": "def-server.ApmDataAccessServices",
         "type": "Type",
         "tags": [],
         "label": "ApmDataAccessServices",
         "description": [],
         "signature": [
-          "{ getDocumentSources: ({ enableContinuousRollups, enableServiceTransactionMetrics, end, kuery, start, }: Omit<",
+          "{ getDocumentSources: ({ end, kuery, start }: Omit<",
           {
             "pluginId": "apmDataAccess",
             "scope": "server",
@@ -2006,21 +1988,6 @@
           "<AnyApmDocumentType>[]; }); size: number; track_total_hits: number | boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apmDataAccess",
-        "id": "def-server.APMIndices",
-        "type": "Type",
-        "tags": [],
-        "label": "APMIndices",
-        "description": [],
-        "signature": [
-          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
-        ],
-        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2119,7 +2086,7 @@
               "section": "def-server.ApmDataAccessServicesParams",
               "text": "ApmDataAccessServicesParams"
             },
-            ") => { getDocumentSources: ({ enableContinuousRollups, enableServiceTransactionMetrics, end, kuery, start, }: Omit<",
+            ") => { getDocumentSources: ({ end, kuery, start }: Omit<",
             {
               "pluginId": "apmDataAccess",
               "scope": "server",

@@ -20,13 +20,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens'
       );
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
       );
 
       // open canvas home

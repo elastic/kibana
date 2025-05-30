@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 
 export const configMock = {

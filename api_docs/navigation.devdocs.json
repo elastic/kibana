@@ -332,7 +332,7 @@
         "label": "TopNavMenuItems",
         "description": [],
         "signature": [
-          "({ config, className, popoverBreakpoints, }: TopNavMenuItemsProps) => React.JSX.Element | null"
+          "({ config, className, popoverBreakpoints, gutterSize, }: TopNavMenuItemsProps) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_items.tsx",
         "deprecated": false,
@@ -343,7 +343,7 @@
             "id": "def-public.TopNavMenuItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  config,\n  className,\n  popoverBreakpoints = POPOVER_BREAKPOINTS,\n}",
+            "label": "{\n  config,\n  className,\n  popoverBreakpoints = POPOVER_BREAKPOINTS,\n  gutterSize = 'xs',\n}",
             "description": [],
             "signature": [
               "TopNavMenuItemsProps"
@@ -817,15 +817,7 @@
         "signature": [
           "Omit<",
           "SolutionNavigation",
-          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; panelContentProvider?: ",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.ContentProvider",
-            "text": "ContentProvider"
-          },
-          " | undefined; }"
+          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
@@ -905,7 +897,7 @@
             "section": "def-public.UnifiedSearchPublicPluginStart",
             "text": "UnifiedSearchPublicPluginStart"
           },
-          " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
+          " | undefined; className?: string | undefined; visible?: boolean | undefined; gutterSize?: \"m\" | \"s\" | \"l\" | \"xs\" | \"xxs\" | undefined; setMenuMountPoint?: ((menuMount: ",
           "MountPoint",
           "<HTMLElement> | undefined) => void) | undefined; popoverBreakpoints?: string[] | undefined; }"
         ],
@@ -1214,6 +1206,17 @@
             "type": "string",
             "tags": [],
             "label": "security",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.chat",
+            "type": "string",
+            "tags": [],
+            "label": "chat",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,

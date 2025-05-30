@@ -10,10 +10,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import moment from 'moment';
 import useKey from 'react-use/lib/useKey';
 import { clone } from 'lodash';
-import {
-  defaultRangeAnnotationLabel,
-  defaultAnnotationRangeColor,
-} from '@kbn/event-annotation-common';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getDefaultAnnotation } from './default_annotation';
 import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
@@ -160,20 +156,16 @@ export const useAnnotations = ({
     },
     createAnnotation: (start: string | number, end?: string | null) => {
       if (isCreateOpen) return;
-      reset(getDefaultAnnotation({ slo }));
+      const timestampStart = isNaN(Number(start)) ? moment(start) : moment(new Date(Number(start)));
 
-      if (isNaN(Number(start))) {
-        setValue('@timestamp', moment(start));
-      } else {
-        setValue('@timestamp', moment(new Date(Number(start))));
-      }
-      if (end) {
-        setValue('event.end', moment(new Date(Number(end))));
-      }
-      if (end) {
-        setValue('message', defaultRangeAnnotationLabel);
-        setValue('annotation.style.color', defaultAnnotationRangeColor);
-      }
+      reset(
+        getDefaultAnnotation({
+          slo,
+          timestamp: timestampStart,
+          eventEnd: end ? moment(new Date(Number(end))) : undefined,
+        })
+      );
+
       setIsCreateOpen(true);
     },
     AddAnnotationButton: () => {

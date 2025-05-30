@@ -6,8 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { QueryEventsBySavedObjectResult, IValidatedEvent } from '@kbn/event-log-plugin/server';
-import { IExecutionErrors, IExecutionErrorsResult } from '../../common';
+import type { QueryEventsBySavedObjectResult, IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IExecutionErrors, IExecutionErrorsResult } from '../../common';
 
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 const TIMESTAMP_FIELD = '@timestamp';

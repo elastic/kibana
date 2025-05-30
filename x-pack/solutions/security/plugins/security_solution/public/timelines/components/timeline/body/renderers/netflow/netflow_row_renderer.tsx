@@ -93,6 +93,7 @@ export const netflowRowRenderer: RowRenderer = {
     <RowRendererContainer>
       <Details>
         <Netflow
+          scopeId={scopeId}
           contextId={`netflow-row-renderer-render-row-${scopeId}-${data._id}`}
           destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
           destinationGeoContinentName={asArrayIfExists(

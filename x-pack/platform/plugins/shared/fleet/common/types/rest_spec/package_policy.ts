@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
+
+import type {
+  BulkGetPackagePoliciesRequestSchema,
+  GetPackagePoliciesRequestSchema,
+} from '../../../server/types';
+
 import type {
   PackagePolicy,
   NewPackagePolicy,
@@ -15,13 +22,16 @@ import type {
 } from '../models';
 import type { inputsFormat } from '../../constants';
 
-import type { BulkGetResult, ListResult, ListWithKuery } from './common';
+import type { BulkGetResult, ListResult } from './common';
 
 export interface GetPackagePoliciesRequest {
-  query: ListWithKuery;
+  query: TypeOf<typeof GetPackagePoliciesRequestSchema.query>;
 }
 
 export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
+export type BulkGetPackagePoliciesRequestBody = TypeOf<
+  typeof BulkGetPackagePoliciesRequestSchema.body
+>;
 export type BulkGetPackagePoliciesResponse = BulkGetResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {

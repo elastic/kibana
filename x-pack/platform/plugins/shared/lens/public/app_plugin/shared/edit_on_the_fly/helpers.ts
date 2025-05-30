@@ -26,7 +26,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
@@ -54,7 +53,7 @@ const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldNam
 export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
-  deps: LensPluginStartDependencies,
+  data: DataPublicPluginStart,
   abortController?: AbortController,
   esqlVariables: ESQLControlVariable[] = []
 ): Promise<ESQLDataGridAttrs> => {
@@ -64,22 +63,29 @@ export const getGridAttrs = async (
   });
 
   const dataView = dataViewSpec
-    ? await deps.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview(query.esql, deps.dataViews);
+    ? await data.dataViews.create(dataViewSpec)
+    : await getESQLAdHocDataview(query.esql, data.dataViews);
 
-  const filter = getDSLFilter(deps.data.query, dataView.timeFieldName);
+  const filter = getDSLFilter(data.query, dataView.timeFieldName);
 
   const results = await getESQLResults({
     esqlQuery: query.esql,
-    search: deps.data.search.search,
+    search: data.search.search,
     signal: abortController?.signal,
     filter,
     dropNullColumns: true,
-    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
   });
 
-  const columns = formatESQLColumns(results.response.columns);
+  let queryColumns = results.response.columns;
+  // if the query columns are empty, we need to use the all_columns property
+  // which has all columns regardless if they have data or not
+  if (queryColumns.length === 0 && results.response.all_columns) {
+    queryColumns = results.response.all_columns;
+  }
+
+  const columns = formatESQLColumns(queryColumns);
 
   return {
     rows: results.response.values,
@@ -90,7 +96,7 @@ export const getGridAttrs = async (
 
 export const getSuggestions = async (
   query: AggregateQuery,
-  deps: LensPluginStartDependencies,
+  data: DataPublicPluginStart,
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
@@ -105,7 +111,7 @@ export const getSuggestions = async (
     const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
-      deps,
+      data,
       abortController,
       esqlVariables
     );

@@ -31,7 +31,7 @@ import {
   MlSnapshotsTableRow,
   DefaultTableRow,
   IndexSettingsTableRow,
-  ReindexTableRow,
+  IndexTableRow,
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
   DataStreamTableRow,
@@ -55,10 +55,10 @@ const i18nTexts = {
   typeFilterLabel: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.typeFilterLabel', {
     defaultMessage: 'Type',
   }),
-  criticalFilterLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.table.criticalFilterLabel',
+  statusFilterLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.table.statusFilterLabel',
     {
-      defaultMessage: 'Critical',
+      defaultMessage: 'Status',
     }
   ),
   searchPlaceholderLabel: i18n.translate(
@@ -70,7 +70,7 @@ const i18nTexts = {
 };
 
 const cellToLabelMap = {
-  isCritical: {
+  level: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
@@ -105,9 +105,10 @@ const cellToLabelMap = {
 const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
 const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
-const renderTableRowCells = (
+const renderTableRow = (
   deprecation: EnrichedDeprecationInfo,
-  mlUpgradeModeEnabled: boolean
+  mlUpgradeModeEnabled: boolean,
+  index: number
 ) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
@@ -116,26 +117,44 @@ const renderTableRowCells = (
           deprecation={deprecation}
           rowFieldNames={cellTypes}
           mlUpgradeModeEnabled={mlUpgradeModeEnabled}
+          index={index}
         />
       );
 
     case 'indexSetting':
-      return <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />
+      );
 
     case 'clusterSetting':
-      return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <ClusterSettingsTableRow
+          deprecation={deprecation}
+          rowFieldNames={cellTypes}
+          index={index}
+        />
+      );
 
     case 'reindex':
-      return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+    case 'unfreeze':
+      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />;
 
     case 'healthIndicator':
-      return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <HealthIndicatorTableRow
+          deprecation={deprecation}
+          rowFieldNames={cellTypes}
+          index={index}
+        />
+      );
 
     case 'dataStream':
-      return <DataStreamTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <DataStreamTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />
+      );
 
     default:
-      return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} index={index} />;
   }
 };
 
@@ -153,9 +172,9 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
   const { isSortAscending, sortField } = sortConfig;
   const sorted = sortBy(deprecations, [
     (deprecation) => {
-      if (sortField === 'isCritical') {
-        // Critical deprecations should take precendence in ascending order
-        return deprecation.isCritical !== true;
+      if (sortField === 'level') {
+        // Critical deprecations should take precedence in ascending order
+        return deprecation.level === 'critical' ? 0 : 1;
       }
       return deprecation[sortField];
     },
@@ -163,6 +182,21 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
 
   return isSortAscending ? sorted : sorted.reverse();
 };
+
+const statusFilterOptions = [
+  {
+    value: 'critical',
+    name: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.filter.critical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  {
+    value: 'warning',
+    name: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.filter.warning', {
+      defaultMessage: 'Warning',
+    }),
+  },
+];
 
 export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations = [],
@@ -176,7 +210,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
-    sortField: 'isCritical',
+    sortField: 'level',
   });
 
   const [itemsPerPage, setItemsPerPage] = useState(PAGINATION_CONFIG.initialPageSize);
@@ -243,9 +277,11 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             }}
             filters={[
               {
-                type: 'is',
-                field: 'isCritical',
-                name: i18nTexts.criticalFilterLabel,
+                type: 'field_value_selection',
+                field: 'level',
+                name: i18nTexts.statusFilterLabel,
+                multiSelect: false,
+                options: statusFilterOptions,
               },
               {
                 type: 'field_value_selection',
@@ -320,13 +356,9 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
           </EuiTableBody>
         ) : (
           <EuiTableBody>
-            {visibleDeprecations.map((deprecation, index) => {
-              return (
-                <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
-                </EuiTableRow>
-              );
-            })}
+            {visibleDeprecations.map((deprecation, index) =>
+              renderTableRow(deprecation, mlUpgradeModeEnabled, index)
+            )}
           </EuiTableBody>
         )}
       </EuiTable>

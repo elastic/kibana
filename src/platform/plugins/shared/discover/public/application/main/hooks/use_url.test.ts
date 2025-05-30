@@ -14,7 +14,7 @@ import {
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();

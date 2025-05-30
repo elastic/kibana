@@ -7,8 +7,15 @@
 import { invert, mapValues } from 'lodash';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import * as i18n from './translations';
 import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
+
+export const VALID_CATEGORIES = [
+  DEFAULT_APP_CATEGORIES.observability.id,
+  DEFAULT_APP_CATEGORIES.security.id,
+  DEFAULT_APP_CATEGORIES.management.id,
+];
 
 export type MaintenanceWindowFrequency = Extract<
   Frequency,
@@ -77,7 +84,7 @@ export const RECURRENCE_END_OPTIONS = [
   },
 ];
 
-export const CREATE_FORM_CUSTOM_FREQUENCY = (interval: number = 1) => [
+export const CREATE_FORM_CUSTOM_FREQUENCY = (interval = 1) => [
   {
     text: i18n.CREATE_FORM_CUSTOM_FREQUENCY_DAILY(interval),
     value: Frequency.DAILY,

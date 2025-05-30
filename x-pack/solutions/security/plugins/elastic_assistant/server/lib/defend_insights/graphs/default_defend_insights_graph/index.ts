@@ -10,18 +10,24 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import type { GraphState } from './types';
-import { getRetrieveAnonymizedEventsOrGenerateEdge } from './edges/retrieve_anonymized_events_or_generate';
-import { getGenerateNode } from './nodes/generate';
-import { getGenerateOrEndEdge } from './edges/generate_or_end';
-import { getGenerateOrRefineOrEndEdge } from './edges/generate_or_refine_or_end';
-import { getRefineNode } from './nodes/refine';
-import { getRefineOrEndEdge } from './edges/refine_or_end';
+import type { DefendInsightsGraphState } from '../../../langchain/graphs';
+import {
+  getGenerateNode,
+  getGenerateOrEndEdge,
+  getGenerateOrRefineOrEndEdge,
+  getRefineNode,
+  getRefineOrEndEdge,
+  getRetrieveAnonymizedDocsOrGenerateEdge,
+} from '../../../langchain/output_chunking';
+import { NodeType } from '../../../langchain/graphs/constants';
+import { DefendInsightsCombinedPrompts } from './prompts/incompatible_antivirus';
+import { getCombinedDefendInsightsPrompt } from './prompts/get_combined_prompt';
+import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedEventsNode } from './nodes/retriever';
+import { getDefendInsightsSchema } from './schemas';
 import { getDefaultGraphState } from './state';
-import { NodeType } from './constants';
 
 export interface GetDefaultDefendInsightsGraphParams {
   insightType: DefendInsightType;
@@ -31,6 +37,7 @@ export interface GetDefaultDefendInsightsGraphParams {
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
+  prompts: DefendInsightsCombinedPrompts;
   replacements?: Replacements;
   size?: number;
   start?: string;
@@ -51,17 +58,18 @@ export const getDefaultDefendInsightsGraph = ({
   llm,
   logger,
   onNewReplacements,
+  prompts,
   replacements,
   size,
   start,
   end,
 }: GetDefaultDefendInsightsGraphParams): CompiledStateGraph<
-  GraphState,
-  Partial<GraphState>,
-  'generate' | 'refine' | 'retrieve_anonymized_events' | '__start__'
+  DefendInsightsGraphState,
+  Partial<DefendInsightsGraphState>,
+  'generate' | 'refine' | 'retrieve_anonymized_docs' | '__start__'
 > => {
   try {
-    const graphState = getDefaultGraphState({ insightType, start, end });
+    const graphState = getDefaultGraphState({ prompts, start, end });
 
     // get nodes:
     const retrieveAnonymizedEventsNode = getRetrieveAnonymizedEventsNode({
@@ -75,42 +83,43 @@ export const getDefaultDefendInsightsGraph = ({
       size,
     });
 
+    const generationSchema = getDefendInsightsSchema({ type: insightType, prompts });
+
     const generateNode = getGenerateNode({
-      insightType,
       llm,
       logger,
+      getCombinedPromptFn: getCombinedDefendInsightsPrompt,
+      responseIsHallucinated,
+      generationSchema,
     });
 
     const refineNode = getRefineNode({
-      insightType,
       llm,
       logger,
+      responseIsHallucinated,
+      generationSchema,
     });
 
     // get edges:
     const generateOrEndEdge = getGenerateOrEndEdge(logger);
-
-    const generatOrRefineOrEndEdge = getGenerateOrRefineOrEndEdge(logger);
-
+    const generateOrRefineOrEndEdge = getGenerateOrRefineOrEndEdge(logger);
     const refineOrEndEdge = getRefineOrEndEdge(logger);
-
-    const retrieveAnonymizedEventsOrGenerateEdge =
-      getRetrieveAnonymizedEventsOrGenerateEdge(logger);
+    const retrieveAnonymizedEventsOrGenerateEdge = getRetrieveAnonymizedDocsOrGenerateEdge(logger);
 
     // create the graph:
-    const graph = new StateGraph<GraphState>({ channels: graphState })
-      .addNode(NodeType.RETRIEVE_ANONYMIZED_EVENTS_NODE, retrieveAnonymizedEventsNode)
+    const graph = new StateGraph<DefendInsightsGraphState>({ channels: graphState })
+      .addNode(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, retrieveAnonymizedEventsNode)
       .addNode(NodeType.GENERATE_NODE, generateNode)
       .addNode(NodeType.REFINE_NODE, refineNode)
       .addConditionalEdges(START, retrieveAnonymizedEventsOrGenerateEdge, {
         generate: NodeType.GENERATE_NODE,
-        retrieve_anonymized_events: NodeType.RETRIEVE_ANONYMIZED_EVENTS_NODE,
+        retrieve_anonymized_docs: NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE,
       })
-      .addConditionalEdges(NodeType.RETRIEVE_ANONYMIZED_EVENTS_NODE, generateOrEndEdge, {
+      .addConditionalEdges(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, generateOrEndEdge, {
         end: END,
         generate: NodeType.GENERATE_NODE,
       })
-      .addConditionalEdges(NodeType.GENERATE_NODE, generatOrRefineOrEndEdge, {
+      .addConditionalEdges(NodeType.GENERATE_NODE, generateOrRefineOrEndEdge, {
         end: END,
         generate: NodeType.GENERATE_NODE,
         refine: NodeType.REFINE_NODE,

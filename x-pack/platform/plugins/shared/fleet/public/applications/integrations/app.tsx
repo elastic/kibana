@@ -9,15 +9,16 @@ import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import useObservable from 'react-use/lib/useObservable';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -27,17 +28,21 @@ import {
   type FleetStatusProviderProps,
   KibanaVersionContext,
   useFleetStatus,
+  useAuthz,
 } from '../../hooks';
 import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
 
 import { FleetServerFlyout } from '../fleet/components';
 
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
+
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
-import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
+import { FLEET_ROUTING_PATHS, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
+
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
@@ -75,8 +80,7 @@ export const IntegrationsAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const isDarkMode = useKibanaIsDarkMode();
 
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
@@ -141,6 +145,19 @@ export const IntegrationsAppContext: React.FC<{
 export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
+  const authz = useAuthz();
+  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const allowedToAccess =
+    authz.integrations.readIntegrationPolicies || authz.integrations.all || authz.fleet.all;
+  const missingPrivilegesString = 'MISSING_PRIVILEGES';
+
+  if (!allowedToAccess) {
+    return (
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
+        <PermissionsError callingApplication="Integrations" error={missingPrivilegesString} />
+      </ErrorLayout>
+    );
+  }
 
   return (
     <>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract } from '@kbn/actions-types';
+import type { AsApiContract } from '@kbn/actions-types';
 import type { KibanaServices, MaintenanceWindow } from './types';
 
 const rewriteMaintenanceWindowRes = ({

@@ -10,21 +10,12 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174682
-describe.skip('ColumnsPopover', () => {
-  let appMockRenderer: AppMockRenderer;
-
+describe('ColumnsPopover', () => {
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
-  });
-
-  afterEach(async () => {
-    await appMockRenderer.clearQueryCache();
   });
 
   const selectedColumns = [
@@ -34,7 +25,7 @@ describe.skip('ColumnsPopover', () => {
   ];
 
   it('renders correctly a list of selected columns', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
@@ -56,7 +47,7 @@ describe.skip('ColumnsPopover', () => {
   it('clicking a switch calls onSelectedColumnsChange with the right params', async () => {
     const onSelectedColumnsChange = jest.fn();
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover
         selectedColumns={selectedColumns}
         onSelectedColumnsChange={onSelectedColumnsChange}
@@ -81,7 +72,7 @@ describe.skip('ColumnsPopover', () => {
   it('clicking Show All calls onSelectedColumnsChange with the right params', async () => {
     const onSelectedColumnsChange = jest.fn();
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover
         selectedColumns={selectedColumns}
         onSelectedColumnsChange={onSelectedColumnsChange}
@@ -106,7 +97,7 @@ describe.skip('ColumnsPopover', () => {
   it('clicking Hide All calls onSelectedColumnsChange with the right params', async () => {
     const onSelectedColumnsChange = jest.fn();
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover
         selectedColumns={selectedColumns}
         onSelectedColumnsChange={onSelectedColumnsChange}
@@ -126,7 +117,7 @@ describe.skip('ColumnsPopover', () => {
   });
 
   it('searching for text changes the column list correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
@@ -143,7 +134,7 @@ describe.skip('ColumnsPopover', () => {
   it('searching for text does not change the list of selected columns', async () => {
     const onSelectedColumnsChange = jest.fn();
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover
         selectedColumns={selectedColumns}
         onSelectedColumnsChange={onSelectedColumnsChange}
@@ -161,7 +152,7 @@ describe.skip('ColumnsPopover', () => {
   });
 
   it('searching for text hides the drag and drop icons', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 
@@ -172,13 +163,11 @@ describe.skip('ColumnsPopover', () => {
     await userEvent.click(await screen.findByTestId('column-selection-popover-search'));
     await userEvent.paste('Foobar');
 
-    expect(
-      await screen.queryByTestId('column-selection-popover-draggable-icon')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('column-selection-popover-draggable-icon')).not.toBeInTheDocument();
   });
 
   it('searching for text disables hideAll and showAll buttons', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
     );
 

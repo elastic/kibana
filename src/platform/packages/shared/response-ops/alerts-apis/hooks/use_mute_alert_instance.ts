@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { mutationKeys } from '../constants';
+import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { muteAlertInstance } from '../apis/mute_alert_instance';
 
@@ -25,6 +25,8 @@ export interface UseMuteAlertInstanceParams {
   notifications: NotificationsStart;
 }
 
+export const getKey = mutationKeys.muteAlertInstance;
+
 export const useMuteAlertInstance = ({
   http,
   notifications: { toasts },
@@ -33,7 +35,7 @@ export const useMuteAlertInstance = ({
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
-      mutationKey: mutationKeys.muteAlertInstance(),
+      mutationKey: getKey(),
       context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(

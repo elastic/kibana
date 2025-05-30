@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
-import { AlertingRulesConfig } from '@kbn/alerting-plugin/server';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { Logger } from '@kbn/core/server';
+import type { AlertingRulesConfig } from '@kbn/alerting-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export interface ConfigRouteOpts {
   logger: Logger;

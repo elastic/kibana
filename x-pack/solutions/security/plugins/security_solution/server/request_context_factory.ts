@@ -37,6 +37,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -109,6 +110,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
+    const getEntityStoreApiKeyManager = () =>
+      getApiKeyManager({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
@@ -129,6 +140,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         return endpointAuthz;
       },
 
+      getEndpointService: () => endpointAppContextService,
+
       getConfig: () => config,
 
       getFrameworkRequest: () => frameworkRequest,
@@ -145,6 +158,10 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getDataViewsService: () => dataViewsService,
 
+      getEntityStoreApiKeyManager,
+
+      getProductFeatureService: () => productFeaturesService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -158,7 +175,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
-          experimentalFeatures: config.experimentalFeatures,
           productFeaturesService,
           license: licensing.license,
         });
@@ -238,7 +254,22 @@ export class RequestContextFactory implements IRequestContextFactory {
             auditLogger: getAuditLogger(),
           })
       ),
+      getPrivilegeMonitoringDataClient: memoize(() => {
+        // TODO:add soClient with ApiKeyType as with getEntityStoreDataClient
+        return new PrivilegeMonitoringDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient: coreContext.savedObjects.client,
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
+          telemetry: core.analytics,
+          // TODO: add apiKeyManager
+        });
+      }),
       getEntityStoreDataClient: memoize(() => {
+        // why are we defining this here, but other places we do it inline?
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
 
@@ -259,25 +290,20 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
-          apiKeyManager: getApiKeyManager({
-            core: coreStart,
-            logger,
-            security: startPlugins.security,
-            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
-            request,
-            namespace: getSpaceId(),
-          }),
+          apiKeyManager: getEntityStoreApiKeyManager(),
+          security: startPlugins.security,
+          request,
+          uiSettingsClient: coreContext.uiSettings.client,
         });
       }),
-      getAssetInventoryClient: memoize(() => {
-        const clusterClient = coreContext.elasticsearch.client;
-        const logger = options.logger;
-        return new AssetInventoryDataClient({
-          clusterClient,
-          logger,
-          experimentalFeatures: config.experimentalFeatures,
-        });
-      }),
+      getAssetInventoryClient: memoize(
+        () =>
+          new AssetInventoryDataClient({
+            logger: options.logger,
+            clusterClient: coreContext.elasticsearch.client,
+            uiSettingsClient: coreContext.uiSettings.client,
+          })
+      ),
     };
   }
 }

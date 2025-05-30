@@ -209,7 +209,7 @@ export const exploreLinks: LinkItem = {
   title: EXPLORE,
   path: EXPLORE_PATH,
   globalNavPosition: 9,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {
       defaultMessage: 'Explore',

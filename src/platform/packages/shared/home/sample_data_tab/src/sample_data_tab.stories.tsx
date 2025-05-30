@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 
 import { SampleDataTab } from './sample_data_tab';
 
@@ -25,12 +25,14 @@ export default {
     },
   },
   decorators: [(Story) => <div style={{ width: 1200 }}>{Story()}</div>],
-} as ComponentMeta<typeof SampleDataTab>;
+} as Meta<typeof SampleDataTab>;
 
-export const TabContent = (params: Params) => (
-  <SampleDataTabProvider {...getStoryServices(params)}>
-    <SampleDataTab />
-  </SampleDataTabProvider>
-);
+export const TabContent = {
+  render: (params: Params) => (
+    <SampleDataTabProvider {...getStoryServices(params)}>
+      <SampleDataTab />
+    </SampleDataTabProvider>
+  ),
 
-TabContent.argTypes = getStoryArgTypes();
+  argTypes: getStoryArgTypes(),
+};

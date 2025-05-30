@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import { screen } from '@testing-library/react';
+import { renderWithTestingProviders } from '../../common/mock';
 import { SimilarCasesTable, type SimilarCasesTableProps } from './table';
 import { mockCase, mockSimilarObservables } from '../../containers/mock';
 
 describe('SimilarCasesTable', () => {
-  let appMock: AppMockRenderer;
   const props: SimilarCasesTableProps = {
     cases: [{ ...mockCase, similarities: { observables: mockSimilarObservables } }],
     isLoading: false,
@@ -20,25 +20,24 @@ describe('SimilarCasesTable', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<SimilarCasesTable {...props} />);
+    renderWithTestingProviders(<SimilarCasesTable {...props} />);
 
-    expect(result.getByTestId('similar-cases-table')).toBeInTheDocument();
+    expect(screen.getByTestId('similar-cases-table')).toBeInTheDocument();
   });
 
   it('renders similarities correctly', async () => {
-    const result = appMock.render(<SimilarCasesTable {...props} />);
+    renderWithTestingProviders(<SimilarCasesTable {...props} />);
 
-    expect(await result.findByTestId('similar-cases-table-column-similarities')).toBeTruthy();
+    expect(await screen.findByTestId('similar-cases-table-column-similarities')).toBeTruthy();
   });
 
   it('renders loading indicator when loading', async () => {
-    const result = appMock.render(<SimilarCasesTable {...props} isLoading={true} />);
-    expect(result.queryByTestId('similar-cases-table')).not.toBeInTheDocument();
-    expect(result.getByTestId('similar-cases-table-loading')).toBeInTheDocument();
+    renderWithTestingProviders(<SimilarCasesTable {...props} isLoading={true} />);
+    expect(screen.queryByTestId('similar-cases-table')).not.toBeInTheDocument();
+    expect(screen.getByTestId('similar-cases-table-loading')).toBeInTheDocument();
   });
 });

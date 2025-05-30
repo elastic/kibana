@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
+import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { getInitialMultiConsumer } from './get_initial_multi_consumer';
 
 describe('getInitialMultiConsumer', () => {
@@ -43,6 +43,7 @@ describe('getInitialMultiConsumer', () => {
     },
     enabledInLicense: true,
     category: 'test',
+    isExportable: true,
   } as RuleTypeWithDescription;
 
   const ruleTypes = [
@@ -100,6 +101,7 @@ describe('getInitialMultiConsumer', () => {
       name: 'Index threshold',
       category: 'management',
       producer: 'stackAlerts',
+      isExportable: true,
     },
   ] as RuleTypeWithDescription[];
 

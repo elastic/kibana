@@ -41,6 +41,8 @@ export const SeverityCell: FC<SeverityCellProps> = memo(({ score, isMultiBucketA
       <EuiFlexItem grow={false}>{severity}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <EuiHealth color={color}>{severity}</EuiHealth>
+    <EuiHealth textSize="inherit" color={color}>
+      {severity}
+    </EuiHealth>
   );
 });

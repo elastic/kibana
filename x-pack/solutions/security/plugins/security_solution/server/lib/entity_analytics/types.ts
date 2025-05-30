@@ -81,6 +81,8 @@ export interface RiskEngineConfiguration {
   _meta: {
     mappingsVersion: number;
   };
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
 }
 
 export interface CalculateScoresParams {

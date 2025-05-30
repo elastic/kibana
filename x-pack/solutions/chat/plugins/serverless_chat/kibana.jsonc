@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-chat",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+   ],
+  "group": "chat",
+  "visibility": "private",
+  "description": "Serverless customizations for chat.",
+  "plugin": {
+    "id": "serverlessChat",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "chat"
+    ],
+    "requiredPlugins": [
+      "serverless",
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

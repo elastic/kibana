@@ -6,13 +6,13 @@
  */
 
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
+import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get, isString } from 'lodash';
 import { RULE_TAGS_TEMPLATE } from '../../../common/opsgenie';
 import { OpsgenieSubActions } from '../../../common';
-import { CreateAlertSubActionParams } from './types';
+import type { CreateAlertSubActionParams } from './types';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   logger,

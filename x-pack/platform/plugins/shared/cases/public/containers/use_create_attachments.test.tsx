@@ -13,8 +13,7 @@ import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -48,10 +47,7 @@ describe('useCreateAttachments', () => {
     attachments: attachmentsWithoutOwner,
   };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -59,7 +55,7 @@ describe('useCreateAttachments', () => {
     const spy = jest.spyOn(api, 'createAttachments');
 
     const { result } = renderHook(() => useCreateAttachments(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -76,7 +72,7 @@ describe('useCreateAttachments', () => {
 
   it('does not show a success toaster', async () => {
     const { result } = renderHook(() => useCreateAttachments(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -92,7 +88,7 @@ describe('useCreateAttachments', () => {
       .mockRejectedValue(new Error('useCreateAttachments: Test error'));
 
     const { result } = renderHook(() => useCreateAttachments(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

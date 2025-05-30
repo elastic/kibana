@@ -77,7 +77,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
   const dataGridProps: TestAlertsDataGridProps = {
     ...mockDataGridProps,
-    getBulkActions: undefined,
+    additionalBulkActions: undefined,
   };
 
   const baseRenderContext = {
@@ -92,7 +92,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
   const dataGridPropsWithBulkActions: AlertsTableWithBulkActionsContextProps = {
     ...dataGridProps,
-    getBulkActions: () => [
+    additionalBulkActions: [
       {
         id: 0,
         items: [
@@ -173,7 +173,7 @@ describe('AlertsDataGrid bulk actions', () => {
     );
   };
 
-  describe('when the getBulkActions option is not set', () => {
+  describe('when the additionalBulkActions option is not set', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -249,7 +249,7 @@ describe('AlertsDataGrid bulk actions', () => {
           rowCount: 1,
           rowSelection: new Map([[0, { isLoading: false }]]),
         },
-        getBulkActions: () => [
+        additionalBulkActions: [
           {
             id: 0,
             items: [
@@ -310,7 +310,7 @@ describe('AlertsDataGrid bulk actions', () => {
     });
   });
 
-  describe('when the getBulkActions option is set', () => {
+  describe('when the additionalBulkActions option is set', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -498,7 +498,7 @@ describe('AlertsDataGrid bulk actions', () => {
               ...createDefaultBulkActionsState(),
               rowSelection: new Map([[1, { isLoading: false }]]),
             },
-            getBulkActions: () => [
+            additionalBulkActions: [
               {
                 id: 0,
                 items: [
@@ -560,7 +560,7 @@ describe('AlertsDataGrid bulk actions', () => {
           const mockOnClick = jest.fn();
           const props: TestAlertsDataGridProps = {
             ...dataGridPropsWithBulkActions,
-            getBulkActions: () => [
+            additionalBulkActions: [
               {
                 id: 0,
                 items: [
@@ -617,7 +617,9 @@ describe('AlertsDataGrid bulk actions', () => {
             await userEvent.click(await screen.findByText('Fake Bulk Action'));
 
             // the callback given to our clients to run when they want to update the loading state
-            mockOnClick.mock.calls[0][2](false);
+            act(() => {
+              mockOnClick.mock.calls[0][2](false);
+            });
 
             expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
           });
@@ -710,7 +712,7 @@ describe('AlertsDataGrid bulk actions', () => {
                   [1, { isLoading: false }],
                 ]),
               },
-              getBulkActions: () => [
+              additionalBulkActions: [
                 {
                   id: 0,
                   items: [

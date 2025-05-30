@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsBuckets,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -16,7 +16,7 @@ export function parseSimpleRuleTypeBucket(
 ) {
   const buckets = ruleTypeBuckets as AggregationsStringTermsBucketKeys[];
   return (buckets ?? []).reduce((acc, bucket: AggregationsStringTermsBucketKeys) => {
-    const ruleType: string = replaceDotSymbols(bucket.key);
+    const ruleType: string = replaceDotSymbols(`${bucket.key}`);
     acc[ruleType] = bucket.doc_count ?? 0;
     return acc;
   }, {} as Record<string, number>);

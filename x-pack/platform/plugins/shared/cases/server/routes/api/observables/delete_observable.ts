@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_CASE_OBSERVABLES_DELETE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const deleteObservableRoute = createCasesRoute({
   method: 'delete',
   path: INTERNAL_CASE_OBSERVABLES_DELETE_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

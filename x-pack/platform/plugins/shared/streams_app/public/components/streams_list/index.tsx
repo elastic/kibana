@@ -20,13 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import {
-  StreamDefinition,
-  getSegments,
-  isDescendantOf,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { Streams, getSegments, isDescendantOf, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
@@ -35,30 +29,35 @@ import { getIndexPatterns } from '../../util/hierarchy_helpers';
 export interface StreamTree {
   name: string;
   type: 'wired' | 'root' | 'classic';
-  stream: StreamDefinition;
+  stream: Streams.all.Definition;
   children: StreamTree[];
 }
 
-function asTrees(streams: StreamDefinition[]) {
+export function asTrees(streams: Streams.all.Definition[]) {
   const trees: StreamTree[] = [];
-  const wiredStreams = streams.filter(isWiredStreamDefinition);
-  wiredStreams.sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
+  const sortedStreams = streams
+    .slice()
+    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
 
-  wiredStreams.forEach((stream) => {
+  sortedStreams.forEach((stream) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
-    const segments = getSegments(stream.name);
     // traverse the tree following the prefix of the current name.
     // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
     while ((existingNode = currentTree.find((node) => isDescendantOf(node.name, stream.name)))) {
       currentTree = existingNode.children;
     }
+
     if (!existingNode) {
       const newNode: StreamTree = {
         name: stream.name,
         children: [],
         stream,
-        type: segments.length === 1 ? 'root' : 'wired',
+        type: Streams.UnwiredStream.Definition.is(stream)
+          ? 'classic'
+          : isRootStreamDefinition(stream)
+          ? 'root'
+          : 'wired',
       };
       currentTree.push(newNode);
     }
@@ -72,7 +71,7 @@ export function StreamsList({
   query,
   showControls,
 }: {
-  streams: StreamDefinition[] | undefined;
+  streams: Streams.all.Definition[] | undefined;
   query?: string;
   showControls: boolean;
 }) {
@@ -84,24 +83,11 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || isWiredStreamDefinition(item))
+      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item))
       .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
-  const classicStreams = useMemo(() => {
-    return filteredItems.filter((item) => isUnwiredStreamDefinition(item));
-  }, [filteredItems]);
-
-  const treeView = useMemo(() => {
-    const trees = asTrees(filteredItems);
-    const classicList = classicStreams.map((stream) => ({
-      name: stream.name,
-      type: 'classic' as const,
-      stream,
-      children: [],
-    }));
-    return [...trees, ...classicList];
-  }, [filteredItems, classicStreams]);
+  const treeView = useMemo(() => asTrees(filteredItems), [filteredItems]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -305,7 +291,9 @@ function StreamNode({
               aria-label={i18n.translate('xpack.streams.streamsTable.management', {
                 defaultMessage: 'Management',
               })}
-              href={router.link('/{key}/management', { path: { key: node.name } })}
+              href={router.link('/{key}/management/{tab}', {
+                path: { key: node.name, tab: 'route' },
+              })}
             />
           </EuiToolTip>
         </EuiFlexGroup>

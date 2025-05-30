@@ -6,7 +6,7 @@
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   SPACE_IDS,
   ALERT_ACTION_GROUP,

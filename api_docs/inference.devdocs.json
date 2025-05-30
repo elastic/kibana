@@ -133,6 +133,14 @@
                   "section": "def-common.ChatCompleteMetadata",
                   "text": "ChatCompleteMetadata"
                 },
+                " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+                {
+                  "pluginId": "@kbn/inference-common",
+                  "scope": "common",
+                  "docId": "kibKbnInferenceCommonPluginApi",
+                  "section": "def-common.ChatCompleteRetryConfiguration",
+                  "text": "ChatCompleteRetryConfiguration"
+                },
                 " | undefined; } & TToolOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
@@ -239,7 +247,7 @@
         "label": "naturalLanguageToEsql",
         "description": [],
         "signature": [
-          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  system,\n  metadata,\n  ...rest\n}: ",
+          "({\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}: ",
           "NlToEsqlTaskParams",
           "<TToolOptions>) => ",
           "Observable",
@@ -256,13 +264,327 @@
             "id": "def-server.naturalLanguageToEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  system,\n  metadata,\n  ...rest\n}",
+            "label": "{\n  client,\n  connectorId,\n  tools,\n  toolChoice,\n  logger,\n  functionCalling,\n  maxRetries,\n  retryConfiguration,\n  system,\n  metadata,\n  ...rest\n}",
             "description": [],
             "signature": [
               "NlToEsqlTaskParams",
               "<TToolOptions>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withChatCompleteSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withChatCompleteSpan",
+        "description": [
+          "\nWrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span."
+        ],
+        "signature": [
+          "(options: InferenceGenerationOptions, cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_chat_complete_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withChatCompleteSpan.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "InferenceGenerationOptions"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withChatCompleteSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withChatCompleteSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withChatCompleteSpan",
+        "description": [],
+        "signature": [
+          "(options: InferenceGenerationOptions, cb: (span?: ",
+          "Span",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteResponse",
+            "text": "ChatCompleteResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>> | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteStreamResponse",
+            "text": "ChatCompleteStreamResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>) => Promise<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteResponse",
+            "text": "ChatCompleteResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>> | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteStreamResponse",
+            "text": "ChatCompleteStreamResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_chat_complete_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withChatCompleteSpan.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "InferenceGenerationOptions"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withChatCompleteSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteResponse",
+                "text": "ChatCompleteResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>> | ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteStreamResponse",
+                "text": "ChatCompleteStreamResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withExecuteToolSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withExecuteToolSpan",
+        "description": [
+          "\nWrapper around {@link withInferenceSpan} that sets the right attributes for a execute_tool operation span."
+        ],
+        "signature": [
+          "(options: string | { name: string; description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }, cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_execute_tool_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withExecuteToolSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "string | { name: string; description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_execute_tool_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withExecuteToolSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_execute_tool_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inference",
+        "id": "def-server.withInferenceSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withInferenceSpan",
+        "description": [
+          "\nWraps a callback in an active span. If the callback returns an Observable\nor Promise, it will set the span status to the appropriate value when the\nasync operation completes."
+        ],
+        "signature": [
+          "(options: string | ({ name: string; } & ",
+          "GenAISemConvAttributes",
+          "), cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_inference_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withInferenceSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "string | ({ name: string; } & ",
+              "GenAISemConvAttributes",
+              ")"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_inference_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.withInferenceSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tracing/with_inference_span.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -343,7 +665,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+                  "{ [P in \"abortSignal\" | \"metadata\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | \"maxRetries\" | \"retryConfiguration\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -412,7 +734,15 @@
                     "section": "def-common.ChatCompleteMetadata",
                     "text": "ChatCompleteMetadata"
                   },
-                  " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
+                  " | undefined; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteRetryConfiguration",
+                    "text": "ChatCompleteRetryConfiguration"
+                  },
+                  " | undefined; previousMessages?: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -566,6 +896,14 @@
                     "docId": "kibKbnInferenceCommonPluginApi",
                     "section": "def-common.ChatCompleteMetadata",
                     "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteRetryConfiguration",
+                    "text": "ChatCompleteRetryConfiguration"
                   },
                   " | undefined; } & TToolOptions"
                 ],
@@ -923,7 +1261,7 @@
             "section": "def-common.ChatCompleteAPI",
             "text": "ChatCompleteAPI"
           },
-          ") => ({ id, connectorId, input, schema, system, previousMessages, modelName, functionCalling, stream, abortSignal, metadata, retry, }: DefaultOutputOptions) => Promise<",
+          ") => ({ id, connectorId, input, schema, system, previousMessages, modelName, functionCalling, stream, abortSignal, maxRetries, retryConfiguration, metadata, retry, }: DefaultOutputOptions) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1074,7 +1412,7 @@
         "label": "ChatCompleteRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; stream?: boolean | undefined; system?: string | undefined; temperature?: number | undefined; modelName?: string | undefined; messages: ",
+          "{ connectorId: string; system?: string | undefined; temperature?: number | undefined; modelName?: string | undefined; messages: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1090,7 +1428,7 @@
             "section": "def-common.FunctionCallingMode",
             "text": "FunctionCallingMode"
           },
-          " | undefined; } & ",
+          " | undefined; maxRetries?: number | undefined; retryConfiguration?: { retryOn?: \"all\" | \"auto\" | undefined; } | undefined; } & ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

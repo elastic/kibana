@@ -67,9 +67,9 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   },
 };
 
-function enrichDocument(contentReferencesStore: ContentReferencesStore | undefined) {
+function enrichDocument(contentReferencesStore: ContentReferencesStore) {
   return (document: Document<Record<string, string>>) => {
-    if (document.id == null || contentReferencesStore == null) {
+    if (document.id == null) {
       return document;
     }
     const documentId = document.id;

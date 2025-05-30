@@ -6,18 +6,19 @@
  */
 
 import { TaskRunnerFactory } from './task_runner';
-import { RuleTypeRegistry, ConstructorOptions } from './rule_type_registry';
-import { ActionGroup, RuleType } from './types';
+import type { ConstructorOptions } from './rule_type_registry';
+import { RuleTypeRegistry } from './rule_type_registry';
+import type { ActionGroup, RuleType } from './types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ILicenseState } from './lib/license_state';
+import type { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
-import { RecoveredActionGroupId } from '../common';
-import { AlertingConfig } from './config';
+import type { RecoveredActionGroupId } from '../common';
+import type { AlertingConfig } from './config';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -67,6 +68,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -92,6 +94,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -131,6 +134,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -159,6 +163,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -189,6 +194,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         defaultScheduleInterval: 'foobar',
         validate: {
           params: { validate: (params) => params },
@@ -219,6 +225,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         defaultScheduleInterval: '10s',
         validate: {
           params: { validate: (params) => params },
@@ -249,6 +256,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         defaultScheduleInterval: '10s',
         validate: {
           params: { validate: (params) => params },
@@ -299,6 +307,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -352,6 +361,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -384,6 +394,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           minimumLicenseRequired: 'basic',
           isExportable: true,
           validate: {
@@ -422,6 +433,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           minimumLicenseRequired: 'basic',
           isExportable: true,
           validate: {
@@ -474,6 +486,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -519,6 +532,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -548,6 +562,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -580,6 +595,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -613,6 +629,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -640,6 +657,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -660,6 +678,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           validate: {
             params: { validate: (params) => params },
           },
@@ -684,6 +703,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         alerts: {
           context: 'test',
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
@@ -716,6 +736,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -740,6 +761,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -748,6 +770,121 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(registry.get('test').producer).toEqual('alerts');
+    });
+
+    test('should throw an error if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts: true', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      expect(() =>
+        registry.register({
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          executor: jest.fn(),
+          category: 'test',
+          producer: 'alerts',
+          solution: 'stack',
+          validate: {
+            params: { validate: (params) => params },
+          },
+          cancelAlertsOnRuleTimeout: false,
+          autoRecoverAlerts: true,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Rule type \\"test\\" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true."`
+      );
+    });
+
+    test('should throw an error if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts is not set (defaults to true)', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      expect(() =>
+        registry.register({
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          executor: jest.fn(),
+          category: 'test',
+          producer: 'alerts',
+          solution: 'stack',
+          validate: {
+            params: { validate: (params) => params },
+          },
+          cancelAlertsOnRuleTimeout: false,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Rule type \\"test\\" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true."`
+      );
+    });
+
+    test('registers rule if cancelAlertsOnRuleTimeout: true and autoRecoverAlerts: true', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+
+        cancelAlertsOnRuleTimeout: true,
+        autoRecoverAlerts: true,
+      });
+      expect(registry.has('foo')).toEqual(true);
+    });
+
+    test('registers rule if cancelAlertsOnRuleTimeout: false and autoRecoverAlerts: false', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+
+        cancelAlertsOnRuleTimeout: false,
+        autoRecoverAlerts: false,
+      });
+      expect(registry.has('foo')).toEqual(true);
     });
   });
 
@@ -768,6 +905,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -800,6 +938,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -834,6 +973,7 @@ describe('Create Lifecycle', () => {
             "id": "recovered",
             "name": "Recovered",
           },
+          "solution": "stack",
           "validLegacyConsumers": Array [],
           "validate": Object {
             "params": Object {
@@ -878,6 +1018,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -921,9 +1062,7 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
-            "fieldsForAAD": undefined,
             "hasAlertsMappings": true,
-            "hasFieldsForAAD": false,
             "id": "test",
             "isExportable": true,
             "minimumLicenseRequired": "basic",
@@ -934,6 +1073,7 @@ describe('Create Lifecycle', () => {
               "name": "Recovered",
             },
             "ruleTaskTimeout": "20m",
+            "solution": "stack",
             "validLegacyConsumers": Array [],
           },
         }
@@ -1001,6 +1141,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -1028,6 +1169,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         isExportable: true,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -1079,6 +1221,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },

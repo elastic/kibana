@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 export enum IN_MEMORY_METRICS {
   ACTION_EXECUTIONS = 'actionExecutions',

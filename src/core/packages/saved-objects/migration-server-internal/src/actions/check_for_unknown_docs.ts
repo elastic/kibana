@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
 import { flatten } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -20,6 +20,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
+  catchRetryableSearchPhaseExecutionException,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { addExcludedTypesToBoolQuery } from '../model/helpers';
@@ -127,5 +128,6 @@ export const checkForUnknownDocs =
 
         return Either.right({});
       })
+      .catch(catchRetryableSearchPhaseExecutionException)
       .catch(catchRetryableEsClientErrors);
   };

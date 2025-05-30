@@ -19,5 +19,6 @@
     "@kbn/config-schema",
     "@kbn/zod",
     "@kbn/zod-helpers",
+    "@kbn/utility-types",
   ]
 }

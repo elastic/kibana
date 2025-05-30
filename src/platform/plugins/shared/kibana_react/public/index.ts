@@ -31,8 +31,6 @@ export {
   useGlobalUiSetting$,
 } from './ui_settings';
 
-export { useDarkMode } from './dark_mode';
-
 export { useExecutionContext } from './use_execution_context';
 
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';

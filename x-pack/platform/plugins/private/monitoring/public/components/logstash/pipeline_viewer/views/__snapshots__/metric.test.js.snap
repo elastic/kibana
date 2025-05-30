@@ -2,12 +2,12 @@
 
 exports[`Metric component does not render warning badge when no warning present 1`] = `
 <EuiFlexItem
-  css={[Function]}
+  css="unknown styles"
   grow={false}
 >
   <EuiText
     color="subdued"
-    css={[Function]}
+    css="unknown styles"
     size="s"
   >
     <span>
@@ -19,7 +19,7 @@ exports[`Metric component does not render warning badge when no warning present 
 
 exports[`Metric component renders warning badge 1`] = `
 <EuiFlexItem
-  css={[Function]}
+  css="unknown styles"
   grow={false}
 >
   <EuiBadge

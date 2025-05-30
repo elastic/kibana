@@ -89,6 +89,7 @@ const ruleType: RuleType = {
   authorizedConsumers,
   enabledInLicense: true,
   category: 'my-category',
+  isExportable: true,
 };
 
 describe('rule_details', () => {
@@ -140,6 +141,32 @@ describe('rule_details', () => {
           .find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
           .exists()
       ).toBeFalsy();
+    });
+
+    it('does not render actions button if the user has only read permissions', async () => {
+      const rule = mockRule();
+      const mockedRuleType: RuleType = {
+        id: '.noop',
+        name: 'No Op',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup,
+        actionVariables: { context: [], state: [], params: [] },
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        producer: ALERTING_FEATURE_ID,
+        authorizedConsumers: {
+          ALERTING_FEATURE_ID: { read: true, all: false },
+        },
+        enabledInLicense: true,
+        category: 'my-category',
+        isExportable: true,
+      };
+
+      const wrapper = shallowWithIntl(
+        <RuleDetails rule={rule} ruleType={mockedRuleType} actionTypes={[]} {...mockRuleApis} />
+      );
+
+      expect(wrapper.find('[data-test-subj="ruleActionsButton"]').exists()).toBeFalsy();
     });
 
     it('renders the rule error banner with error message, when rule has a license error', () => {

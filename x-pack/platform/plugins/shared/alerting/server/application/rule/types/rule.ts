@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import type {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
 } from '../constants';
-import {
+import type {
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
@@ -85,6 +85,7 @@ export interface Rule<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
+  artifacts?: RuleSchemaType['artifacts'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -124,4 +125,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
+  artifacts?: RuleDomainSchemaType['artifacts'];
 }

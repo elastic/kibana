@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import * as http from 'http';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('Serverless - Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
@@ -39,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await supertest
         .delete(
-          `/api/fleet/epm/packages/cloud_security_posture/${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`
+          `/api/fleet/epm/packages/cloud_security_posture/${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`
         )
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
@@ -48,9 +49,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {
-      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
+      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -72,9 +73,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation', () => {
-      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
+      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -110,16 +111,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/191017
-    describe.skip('Serverless - Agentless CIS_AWS Create flow', () => {
+
+    // turned back on after the fix for fleet form bug https://github.com/elastic/kibana/pull/211563 - need to monitor
+    describe('Serverless - Agentless CIS_AWS Create flow', () => {
       it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {
         await cisIntegration.createAgentlessIntegration({
           cloudProvider: 'aws',
         });
-
-        expect(await cisIntegration.showSuccessfulToast('packagePolicyCreateSuccessToast')).to.be(
-          true
-        );
+        await retry.try(async () => {
+          expect(await cisIntegration.showSuccessfulToast('packagePolicyCreateSuccessToast')).to.be(
+            true
+          );
+        });
       });
     });
   });

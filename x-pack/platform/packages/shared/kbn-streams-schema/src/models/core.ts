@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { createIsNarrowSchema } from '../helpers';
-import { IngestStreamDefinition, ingestStreamDefinitionSchema } from './ingest';
-import { GroupStreamDefinition, groupStreamDefinitionSchema } from './group';
+export type ModelRepresentation = 'Definition' | 'Source' | 'GetResponse' | 'UpsertRequest';
 
-export type StreamDefinition = IngestStreamDefinition | GroupStreamDefinition;
+export type OmitName<T extends { name?: string }> = Omit<T, 'name'> & { name?: never };
 
-export const streamDefinitionSchema: z.Schema<StreamDefinition> = z.union([
-  ingestStreamDefinitionSchema,
-  groupStreamDefinitionSchema,
-]);
+export type StrictOmit<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]?: never;
+};
 
-export const isStreamDefinition = createIsNarrowSchema(z.unknown(), streamDefinitionSchema);
+export interface IModel {
+  Definition: Record<string, any>;
+  Source: Record<string, any>;
+  GetResponse: Record<string, any>;
+  UpsertRequest: Record<string, any>;
+}

@@ -6,8 +6,8 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { getChoices, getAppInfo } from './api';
-import { ServiceNowActionConnector } from './types';
+import { getChoices, getAppInfo, getOAuthToken } from './api';
+import type { ServiceNowActionConnector } from './types';
 
 const choicesResponse = {
   status: 'ok',
@@ -123,6 +123,7 @@ describe('ServiceNow API', () => {
       expect(res).toEqual(applicationInfoData.result);
 
       expect(http.post).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
+        signal: abortCtrl.signal,
         body: JSON.stringify({
           type: 'jwt',
           options: {
@@ -160,6 +161,7 @@ describe('ServiceNow API', () => {
 
       expect(res).toEqual(applicationInfoData.result);
       expect(http.post).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
+        signal: abortCtrl.signal,
         body: JSON.stringify({
           type: 'jwt',
           options: {
@@ -245,6 +247,71 @@ describe('ServiceNow API', () => {
           http,
         })
       ).rejects.toThrow('bad');
+    });
+  });
+
+  describe('getOAuthToken', () => {
+    it('should call the API correctly', async () => {
+      const abortCtrl = new AbortController();
+      http.post.mockResolvedValueOnce(oAuthResponse);
+
+      const res = await getOAuthToken({
+        signal: abortCtrl.signal,
+        connector: oAuthConnector,
+        http,
+      });
+
+      expect(res).toEqual(oAuthResponse);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/actions/connector/_oauth_access_token', {
+        signal: abortCtrl.signal,
+        body: JSON.stringify({
+          type: 'jwt',
+          options: {
+            tokenUrl: 'https://example.com/oauth_token.do',
+            config: {
+              clientId: 'clientId',
+              userIdentifierValue: 'userIdentifierValue',
+              jwtKeyId: 'jwtKeyId',
+            },
+            secrets: { clientSecret: 'test', privateKey: 'test' },
+          },
+        }),
+      });
+    });
+
+    it('should construct the error correctly when body is defined', async () => {
+      expect.assertions(1);
+      const abortCtrl = new AbortController();
+      const error = new Error('my error message');
+      // @ts-expect-error
+      error.body = { statusCode: 400, error: 'body error', message: 'body error message' };
+
+      http.post.mockRejectedValueOnce(error);
+
+      await expect(() =>
+        getOAuthToken({
+          signal: abortCtrl.signal,
+          connector: basicAuthConnector,
+          http,
+        })
+      ).rejects.toThrow('400 body error: body error message');
+    });
+
+    it('should construct the error correctly when body is undefined', async () => {
+      expect.assertions(1);
+      const abortCtrl = new AbortController();
+      const error = new Error('my error message');
+
+      http.post.mockRejectedValueOnce(error);
+
+      await expect(() =>
+        getOAuthToken({
+          signal: abortCtrl.signal,
+          connector: basicAuthConnector,
+          http,
+        })
+      ).rejects.toThrow('my error message');
     });
   });
 });

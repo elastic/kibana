@@ -8,7 +8,7 @@
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import { encode } from '@kbn/presentation-util-plugin/common';
+import { encode } from '../../lib';
 // @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';

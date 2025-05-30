@@ -8,7 +8,7 @@
 import { useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
-import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
   InfiniteData,
   QueryObserverResult,

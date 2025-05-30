@@ -9,14 +9,9 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { Spaces, Superuser } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getEventLog,
-  getTestRuleData,
-  TaskManagerDoc,
-  ObjectRemover,
-} from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../common/lib';
+import { getUrlPrefix, getEventLog, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
@@ -242,28 +237,48 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             actions: [],
           },
         });
-        // ES query rule
-        esQueryRuleId[space.id] = await createRule({
+
+        // rule with artifacts
+        await createRule({
           space: space.id,
           ruleOverwrites: {
-            rule_type_id: '.es-query',
+            rule_type_id: 'test.artifacts',
             schedule: { interval: '1h' },
             throttle: null,
             params: {
-              size: 100,
-              timeWindowSize: 5,
-              timeWindowUnit: 'm',
-              thresholdComparator: '>',
-              threshold: [0],
-              searchType: 'esqlQuery',
-              esqlQuery: {
-                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-              },
-              timeField: 'date_epoch_millis',
+              pattern: { instance: [true] },
             },
-            actions: [],
+            artifacts: {
+              dashboards: [{ id: 'dashboard-0' }, { id: 'dashboard-1' }],
+              investigation_guide: { blob: 'investigation guide' },
+            },
           },
         });
+
+        // rule with artifacts and actions
+        await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: 'test.artifactsAndActions',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              pattern: { instance: [true] },
+            },
+            artifacts: {
+              dashboards: [{ id: 'dashboard-0' }],
+              investigation_guide: { blob: 'investigation guide' },
+            },
+            actions: [
+              {
+                id: noopConnectorId,
+                group: 'default',
+                params: {},
+              },
+            ],
+          },
+        });
+
         // MW with both toggles off
         await createMaintenanceWindow({ spaceId: space.id });
         // MW with 'Repeat' toggle on and 'Filter alerts' toggle on
@@ -286,7 +301,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             notify_when: 'onActiveAlert',
             throttle: null,
             params: {
-              index: '.kibana-alerting-test-data',
+              index: 'kibana-alerting-test-data',
               reference: 'test',
             },
             actions: [
@@ -300,6 +315,29 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         });
 
         rulesWithAAD.push(ruleWithAadId);
+
+        // ES query rule
+        esQueryRuleId[space.id] = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: '.es-query',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              size: 100,
+              timeWindowSize: 5,
+              timeWindowUnit: 'm',
+              thresholdComparator: '>',
+              threshold: [0],
+              searchType: 'esqlQuery',
+              esqlQuery: {
+                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              },
+              timeField: 'date_epoch_millis',
+            },
+            actions: [],
+          },
+        });
       }
     }
 
@@ -364,7 +402,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     function verifyAlertingTelemetry(telemetry: any) {
       logger.info(`alerting telemetry - ${JSON.stringify(telemetry)}`);
       // total number of enabled rules
-      expect(telemetry.count_active_total).to.equal(15);
+      expect(telemetry.count_active_total).to.equal(21);
 
       // total number of disabled rules
       expect(telemetry.count_disabled_total).to.equal(3);
@@ -374,6 +412,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_by_type.test__throw).to.equal(3);
+      expect(telemetry.count_by_type.test__artifacts).to.equal(3);
+      expect(telemetry.count_by_type.test__artifactsAndActions).to.equal(3);
       expect(telemetry.count_by_type['__es-query']).to.equal(3);
       expect(telemetry.count_by_type['__es-query_es_query']).to.equal(0);
       expect(telemetry.count_by_type['__es-query_search_source']).to.equal(0);
@@ -383,6 +423,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_active_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_active_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_active_by_type.test__throw).to.equal(3);
+      expect(telemetry.count_by_type.test__artifacts).to.equal(3);
+      expect(telemetry.count_by_type.test__artifactsAndActions).to.equal(3);
       expect(telemetry.count_active_by_type['__es-query']).to.equal(3);
       expect(telemetry.count_active_by_type['__es-query_es_query']).to.equal(0);
       expect(telemetry.count_active_by_type['__es-query_search_source']).to.equal(0);
@@ -390,10 +432,10 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
-      expect(telemetry.throttle_time.avg).to.equal('0.2857142857142857s');
+      expect(telemetry.throttle_time.avg).to.equal('0.2222222222222222s');
       expect(telemetry.throttle_time.max).to.equal('1s');
       expect(telemetry.throttle_time_number_s.min).to.equal(0);
-      expect(telemetry.throttle_time_number_s.avg).to.equal(0.2857142857142857);
+      expect(telemetry.throttle_time_number_s.avg).to.equal(0.2222222222222222);
       expect(telemetry.throttle_time_number_s.max).to.equal(1);
 
       // schedule interval stats
@@ -406,7 +448,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // attached connectors stats
       expect(telemetry.connectors_per_alert.min).to.equal(0);
-      expect(telemetry.connectors_per_alert.avg).to.equal(1);
+      expect(telemetry.connectors_per_alert.avg).to.equal(0.875);
       expect(telemetry.connectors_per_alert.max).to.equal(4);
 
       // number of spaces with rules
@@ -421,6 +463,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_by_type.test__noop >= 3).to.be(true);
       expect(telemetry.count_by_type.test__multipleSearches >= 3).to.be(true);
       expect(telemetry.count_by_type.test__throw >= 3).to.be(true);
+      expect(telemetry.count_by_type.test__artifacts >= 3).to.be(true);
+      expect(telemetry.count_by_type.test__artifactsAndActions >= 3).to.be(true);
       expect(telemetry.count_by_type['__es-query'] >= 3).to.be(true);
 
       // average execution time - just checking for non-zero as we can't set an exact number
@@ -566,11 +610,18 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_rules_by_execution_status.warning).to.equal(0);
 
       // number of rules that has tags
-      expect(telemetry.count_rules_with_tags).to.equal(18);
+      expect(telemetry.count_rules_with_tags).to.equal(24);
+
+      // number of rules that has linked dashboards
+      expect(telemetry.count_rules_with_linked_dashboards).to.equal(6);
+
+      // number of rules that has investigation guide
+      expect(telemetry.count_rules_with_investigation_guide).to.equal(6);
+
       // rules grouped by notify when
       expect(telemetry.count_rules_by_notify_when.on_action_group_change).to.equal(0);
       expect(telemetry.count_rules_by_notify_when.on_active_alert).to.equal(3);
-      expect(telemetry.count_rules_by_notify_when.on_throttle_interval).to.equal(15);
+      expect(telemetry.count_rules_by_notify_when.on_throttle_interval).to.equal(21);
       // rules snoozed
       expect(telemetry.count_rules_snoozed).to.equal(0);
       // rules muted
@@ -578,7 +629,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       // rules with muted alerts
       expect(telemetry.count_rules_with_muted_alerts).to.equal(0);
       // Connector types grouped by consumers
-      expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__noop).to.equal(9);
+      expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__noop).to.equal(12);
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__throw).to.equal(3);
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.__slack).to.equal(3);
 
@@ -591,8 +642,14 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_mw_with_repeat_toggle_on).to.equal(3);
 
       // AAD alert counts
-      expect(telemetry.count_alerts_total).to.be(6);
-      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(6);
+      const numAADexecutions =
+        telemetry.count_rules_executions_by_type_per_day['test__always-firing-alert-as-data'];
+
+      // each rule execution reports 2 active alerts
+      expect(telemetry.count_alerts_total).to.be(numAADexecutions * 2);
+      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(
+        numAADexecutions * 2
+      );
     }
 
     it('should retrieve telemetry data in the expected format', async () => {
@@ -651,7 +708,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         alertingTelemetry = JSON.parse(taskState!);
         expect(alertingTelemetry.runs > 0).to.be(true);
-        expect(alertingTelemetry.count_total).to.equal(18);
+        expect(alertingTelemetry.count_total).to.equal(24);
       });
 
       verifyAlertingTelemetry(alertingTelemetry);

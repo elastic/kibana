@@ -14,7 +14,7 @@ import {
   removeServerGeneratedPropertiesFromCase,
   updateCase,
 } from '../../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 // eslint-disable-next-line import/no-default-export

@@ -136,8 +136,15 @@ describe('CoreApp', () => {
         {
           path: '/status',
           validate: false,
-          options: {
-            authRequired: false,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+            authc: {
+              enabled: false,
+              reason: expect.any(String),
+            },
           },
         },
         expect.any(Function)
@@ -152,8 +159,14 @@ describe('CoreApp', () => {
         {
           path: '/status',
           validate: false,
-          options: {
-            authRequired: true,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+            authc: {
+              enabled: true,
+            },
           },
         },
         expect.any(Function)
@@ -200,6 +213,12 @@ describe('CoreApp', () => {
         {
           path: '/{path*}',
           validate: expect.any(Object),
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+          },
         },
         expect.any(Function)
       );
@@ -331,8 +350,15 @@ describe('CoreApp', () => {
         {
           path: '/app/{id}/{any*}',
           validate: false,
-          options: {
-            authRequired: true,
+          security: {
+            authz: {
+              enabled: false,
+              reason:
+                'The route is opted out of the authorization since it is a wrapper around core app view',
+            },
+            authc: {
+              enabled: true,
+            },
           },
         },
         expect.any(Function)

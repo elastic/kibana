@@ -27,7 +27,7 @@ import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { CoreRequestHandlerContext } from '@kbn/core/server';
 import { ResponseBody } from '../types';
-import type { AssistantTool } from '../../../types';
+import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../../types';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
@@ -46,6 +46,7 @@ export interface AssistantDataClients {
 
 export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
+  assistantContext: ElasticAssistantApiRequestHandlerContext;
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
   assistantTools?: AssistantTool[];
@@ -75,6 +76,7 @@ export interface AgentExecutorParams<T extends boolean> {
   telemetryParams?: TelemetryParams;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
+  timeout?: number;
 }
 
 export interface StaticReturnType {

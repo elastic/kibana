@@ -5,52 +5,59 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiBasicTable,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   type CriteriaWithPagination,
-  EuiToolTip,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
+import { useViewPolicies } from '../hooks/use_url_filters';
+import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
-import { InstallationStatus } from './installation_status';
+import { InstallationVersionStatus } from './installation_version_status';
+import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { DashboardsCell } from './dashboards_cell';
 
-/**
- * Wrapper to display a tooltip if element is disabled (i.e. due to insufficient permissions)
- */
-const DisabledWrapperTooltip: React.FunctionComponent<{
-  children: React.ReactElement;
-  disabled: boolean;
-  tooltipContent: React.ReactNode;
-}> = ({ children, disabled, tooltipContent }) => {
-  if (disabled) {
-    return <EuiToolTip content={tooltipContent}>{children}</EuiToolTip>;
-  } else {
-    return <>{children}</>;
-  }
-};
+function wrapActionWithDisabledTooltip(
+  action: Action<InstalledPackageUIPackageListItem>,
+  disabled: boolean,
+  tooltip: string
+): Action<InstalledPackageUIPackageListItem> {
+  return {
+    ...action,
+    ...(disabled ? { enabled: () => false, description: tooltip } : {}),
+  };
+}
 
 export const InstalledIntegrationsTable: React.FunctionComponent<{
   installedPackages: InstalledPackageUIPackageListItem[];
   total: number;
   isLoading: boolean;
   pagination: UrlPagination;
-}> = ({ installedPackages, total, isLoading, pagination }) => {
+  selection: {
+    selectedItems: InstalledPackageUIPackageListItem[];
+    setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
+  };
+}> = ({ installedPackages, total, isLoading, pagination, selection }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
-
-  const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
+  const { selectedItems, setSelectedItems } = selection;
+  const { addViewPolicies } = useViewPolicies();
+  const {
+    actions: { bulkUninstallIntegrationsWithConfirmModal, bulkUpgradeIntegrationsWithConfirmModal },
+  } = useInstalledIntegrationsActions();
 
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
@@ -79,6 +86,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
         loading={isLoading}
         items={installedPackages}
         itemId="name"
+        rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           totalItemCount: total,
@@ -104,7 +112,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             ),
             render: (item: PackageListItem) => {
               const url = getHref('integration_details_overview', {
-                pkgkey: `${item.name}-${item.version}`,
+                pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
 
               return (
@@ -125,19 +133,18 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             },
           },
           {
-            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.statusColumnTitle', {
-              defaultMessage: 'Status',
-            }),
-            render: (item: InstalledPackageUIPackageListItem) => (
-              <InstallationStatus status={item.ui.installation_status} />
-            ),
-          },
-          {
-            field: 'version',
-            width: '126px',
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.versionColumnTitle', {
               defaultMessage: 'Version',
             }),
+            render: (item: InstalledPackageUIPackageListItem) => (
+              <InstallationVersionStatus item={item} />
+            ),
+          },
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.dashboardsColumnTitle', {
+              defaultMessage: 'Dashboards',
+            }),
+            render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
           },
           {
             name: i18n.translate(
@@ -167,7 +174,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   }
                   disabled={isDisabled}
                 >
-                  <EuiLink onClick={() => {}} disabled={isDisabled}>
+                  <EuiLink onClick={() => addViewPolicies(item.name)} disabled={isDisabled}>
                     <FormattedMessage
                       id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
                       defaultMessage={
@@ -182,23 +189,108 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               );
             },
           },
+          // TODO Actions are not yet implemented to be done in https://github.com/elastic/kibana/issues/209867
           {
             actions: [
-              {
-                render: () => {
-                  return <p>test</p>;
+              wrapActionWithDisabledTooltip(
+                {
+                  name: i18n.translate('xpack.fleet.epmInstalledIntegrations.upgradeActionLabel', {
+                    defaultMessage: 'Upgrade',
+                  }),
+                  description: (item) =>
+                    i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.upgradeActionDescription',
+                      {
+                        defaultMessage: 'Upgrade to {version}.',
+                        values: { version: item.version },
+                      }
+                    ),
+                  icon: 'refresh',
+                  type: 'icon',
+                  onClick: (item) => bulkUpgradeIntegrationsWithConfirmModal([item]),
+                  enabled: (item) =>
+                    item.ui.installation_status === 'upgrade_available' ||
+                    item.ui.installation_status === 'upgrade_failed' ||
+                    item.ui.installation_status === 'install_failed',
                 },
-              },
+                !authz.integrations.upgradePackages,
+                i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.upgradeIntegrationsRequiredPermissionTooltip',
+                  {
+                    defaultMessage:
+                      "You don't have permissions to upgrade integrations. Contact your administrator.",
+                  }
+                )
+              ),
+              wrapActionWithDisabledTooltip(
+                {
+                  name: i18n.translate('xpack.fleet.epmInstalledIntegrations.viewPoliciesLabel', {
+                    defaultMessage: 'View policies',
+                  }),
+                  icon: 'search',
+                  type: 'icon',
+                  description: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.viewPoliciesLabel',
+                    {
+                      defaultMessage: 'View policies',
+                    }
+                  ),
+                  onClick: (item) => addViewPolicies(item.name),
+                  enabled: (item) => (item?.packagePoliciesInfo?.count ?? 0) > 0,
+                },
+                !authz.fleet.readAgentPolicies,
+                i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.agentPoliciesRequiredPermissionTooltip',
+                  {
+                    defaultMessage:
+                      "You don't have permissions to view these policies. Contact your administrator.",
+                  }
+                )
+              ),
               {
-                name: 'test2',
-                description: 'test2',
-                onClick: () => {},
+                name: i18n.translate('xpack.fleet.epmInstalledIntegrations.editIntegrationLabel', {
+                  defaultMessage: 'Edit integration',
+                }),
+                icon: 'pencil',
+                type: 'icon',
+                description: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.editIntegrationLabel',
+                  {
+                    defaultMessage: 'Edit integration',
+                  }
+                ),
+                href: (item) =>
+                  getHref('integration_details_overview', {
+                    pkgkey: `${item.name}-${item.installationInfo!.version}`,
+                  }),
               },
-              {
-                name: 'test3',
-                description: 'test3',
-                onClick: () => {},
-              },
+              wrapActionWithDisabledTooltip(
+                {
+                  name: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
+                    {
+                      defaultMessage: 'Uninstall integration',
+                    }
+                  ),
+                  icon: 'trash',
+                  type: 'icon',
+                  description: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
+                    {
+                      defaultMessage: 'Uninstall integration',
+                    }
+                  ),
+                  onClick: (item) => bulkUninstallIntegrationsWithConfirmModal([item]),
+                },
+                !authz.integrations.removePackages,
+                i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.removeIntegrationsRequiredPermissionTooltip',
+                  {
+                    defaultMessage:
+                      "You don't have permissions to remove integrations. Contact your administrator.",
+                  }
+                )
+              ),
             ],
           },
         ]}

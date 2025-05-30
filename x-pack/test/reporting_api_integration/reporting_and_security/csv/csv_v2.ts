@@ -14,7 +14,8 @@ import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';
+const LOGSTASH_DATA_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/logstash_functional';
 const LOGSTASH_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
 const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
 const TIMELESS_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/timeless';

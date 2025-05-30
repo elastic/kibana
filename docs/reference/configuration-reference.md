@@ -6,7 +6,7 @@ navigation_title: "Configuration"
 Configuration settings enable you to customize the behavior of Kibana apps and features.
 This reference provides details about each setting, such as its purpose, default behavior, and availability in Elastic Cloud environments.
 
-% TO-DO: For information about how to update these settings, refer to "Configure Kibana" (link to appropriate deployment pages) %
+For information about how to update these settings, refer to the appropriate instructions for your environment. For example, [{{ech}}](docs-content://deploy-manage/deploy/elastic-cloud/edit-stack-settings.md), [{{ece}}](docs-content://deploy-manage/deploy/cloud-enterprise/edit-stack-settings-kibana.md), or [self-managed clusters](docs-content://deploy-manage/deploy/self-managed/configure-kibana.md).
 
 The settings are grouped by feature or purpose, for example:
 
@@ -16,9 +16,11 @@ The settings are grouped by feature or purpose, for example:
 - [Banners](/reference/configuration-reference/banner-settings.md)
 - [Cases](/reference/configuration-reference/cases-settings.md)
 - [Fleet](/reference/configuration-reference/fleet-settings.md)
+- [General](/reference/configuration-reference/general-settings.md)
 - [Internationalization](/reference/configuration-reference/internationalization-settings.md)
 - [Logging](/reference/configuration-reference/logging-settings.md)
 - [Logs](/reference/configuration-reference/logs-settings.md)
+- [Maps](/reference/configuration-reference/map-settings.md)
 - [Metrics](/reference/configuration-reference/metrics-settings.md)
 - [Monitoring](/reference/configuration-reference/monitoring-settings.md)
 - [Reporting](/reference/configuration-reference/reporting-settings.md)

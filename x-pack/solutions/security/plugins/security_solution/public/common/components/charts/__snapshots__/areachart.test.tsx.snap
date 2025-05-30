@@ -1,5 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AreaChartBaseComponent render with customized configs should 2 render AreaSeries 1`] = `[Function]`;
+exports[`AreaChartBaseComponent render with default configs if no customized configs given should 2 render AreaSeries 1`] = `
+<div
+  data-test-subj="areaChartBaseComponent"
+  style="height: 100px; width: 120px; position: relative;"
+>
+  <div
+    data-test-subj="chart-mock"
+  >
+    <div
+      data-test-subj="settings-mock"
+    />
+    <div
+      data-test-subj="area-series-mock"
+    />
+    <div
+      data-test-subj="area-series-mock"
+    />
+    <div
+      data-test-subj="axis-mock"
+    />
+    <div
+      data-test-subj="axis-mock"
+    />
+  </div>
+</div>
+`;
 
-exports[`AreaChartBaseComponent render with default configs if no customized configs given should 2 render AreaSeries 1`] = `[Function]`;
+exports[`AreaChartBaseComponent should render with customized configs should render 2 AreaSeries 1`] = `
+<div
+  data-test-subj="areaChartBaseComponent"
+  style="height: 100px; width: 120px; position: relative;"
+>
+  <div
+    data-test-subj="chart-mock"
+  >
+    <div
+      data-test-subj="settings-mock"
+    />
+    <div
+      data-test-subj="area-series-mock"
+    />
+    <div
+      data-test-subj="area-series-mock"
+    />
+    <div
+      data-test-subj="axis-mock"
+    />
+    <div
+      data-test-subj="axis-mock"
+    />
+  </div>
+</div>
+`;

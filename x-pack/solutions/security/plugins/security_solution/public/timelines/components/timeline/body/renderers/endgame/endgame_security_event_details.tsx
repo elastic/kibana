@@ -53,6 +53,7 @@ export const EndgameSecurityEventDetails = React.memo<Props>(({ data, contextId,
   return (
     <Details>
       <EndgameSecurityEventDetailsLine
+        scopeId={timelineId}
         contextId={contextId}
         endgameLogonType={endgameLogonType}
         endgameSubjectDomainName={endgameSubjectDomainName}

@@ -60,8 +60,19 @@ export interface ExpressionFunctionDefinition<
 
   /**
    * Opt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.
+   *
+   * It is possible to collect side effects produced by the function
+   * (e.g. logging, sending events to the server, etc.) and return a
+   * handler to reproduce such side effects when the function cache is used
+   * instead of the original function implementation.
+   * @param args Parameters set for this function in expression.
+   * @param context Object with functions to perform side effects. This object
+   *     is created for the duration of the execution of expression and is the
+   *     same for all functions in expression chain.
+   * @returns A handler to be called to reproduce side effects when the function cache is used.
+   *
    */
-  allowCache?: boolean;
+  allowCache?: boolean | { withSideEffects(args: Arguments, context: Context): () => void };
 
   /**
    * List of allowed type names for input value of this function. If this

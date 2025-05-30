@@ -12,7 +12,7 @@ import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsFieldBrowser } from './field_browser';
 
 jest.mock('@kbn/response-ops-alerts-fields-browser', () => ({
-  FieldBrowser: jest.fn().mockReturnValue(<div data-test-subj="fieldBrowser" />),
+  FieldBrowser: jest.fn(() => <div data-test-subj="fieldBrowser" />),
 }));
 
 const stub = jest.fn();

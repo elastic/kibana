@@ -16,15 +16,19 @@ import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_clie
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type {
+  RuleMigrationTaskEvaluateParams,
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
+import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 
 export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
 export class RuleMigrationsTaskClient {
+  private static migrationsLastError = new Map<string, Error>();
+
   constructor(
     private migrationsRunning: MigrationsRunning,
     private logger: Logger,
@@ -72,16 +76,19 @@ export class RuleMigrationsTaskClient {
       // Just to prevent a race condition in the setup
       throw new Error('Task already running for this migration');
     }
-    this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
     migrationLogger.info('Starting migration');
+
+    this.migrationsRunning.set(migrationId, migrationTaskRunner);
+    RuleMigrationsTaskClient.migrationsLastError.delete(migrationId);
 
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
       .run(invocationConfig)
       .catch((error) => {
-        // no need to throw, the `start` promise is long gone. Just log the error
-        migrationLogger.error('Error executing migration', error);
+        // no use in throwing the error, the `start` promise is long gone. Just store and log the error
+        RuleMigrationsTaskClient.migrationsLastError.set(migrationId, error);
+        migrationLogger.error(`Error executing migration: ${error}`);
       })
       .finally(() => {
         this.migrationsRunning.delete(migrationId);
@@ -109,17 +116,28 @@ export class RuleMigrationsTaskClient {
   /** Returns the stats of a migration */
   public async getStats(migrationId: string): Promise<RuleMigrationTaskStats> {
     const dataStats = await this.data.rules.getStats(migrationId);
-    const status = this.getTaskStatus(migrationId, dataStats.rules);
-    return { status, ...dataStats };
+    const taskStats = this.getTaskStats(migrationId, dataStats.rules);
+    return { ...taskStats, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
   async getAllStats(): Promise<RuleMigrationTaskStats[]> {
     const allDataStats = await this.data.rules.getAllStats();
     return allDataStats.map((dataStats) => {
-      const status = this.getTaskStatus(dataStats.id, dataStats.rules);
-      return { status, ...dataStats };
+      const taskStats = this.getTaskStats(dataStats.id, dataStats.rules);
+      return { ...taskStats, ...dataStats };
     });
+  }
+
+  private getTaskStats(
+    migrationId: string,
+    dataStats: RuleMigrationDataStats['rules']
+  ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
+    const lastError = RuleMigrationsTaskClient.migrationsLastError.get(migrationId);
+    return {
+      status: this.getTaskStatus(migrationId, dataStats),
+      ...(lastError && { last_error: lastError.message }),
+    };
   }
 
   private getTaskStatus(
@@ -156,5 +174,33 @@ export class RuleMigrationsTaskClient {
       this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };
     }
+  }
+
+  /** Creates a new evaluator for the rule migration task */
+  async evaluate(params: RuleMigrationTaskEvaluateParams): Promise<void> {
+    const { evaluationId, langsmithSettings, connectorId, invocationConfig, abortController } =
+      params;
+
+    const migrationLogger = this.logger.get('evaluate');
+
+    const migrationTaskEvaluator = new RuleMigrationTaskEvaluator(
+      evaluationId,
+      this.currentUser,
+      abortController,
+      this.data,
+      migrationLogger,
+      this.dependencies
+    );
+
+    await migrationTaskEvaluator.evaluate({
+      connectorId,
+      langsmithSettings,
+      invocationConfig,
+    });
+  }
+
+  /** Returns if a migration is running or not */
+  isMigrationRunning(migrationId: string): boolean {
+    return this.migrationsRunning.has(migrationId);
   }
 }

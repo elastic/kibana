@@ -8,7 +8,7 @@
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
   getAuthWithSuperUser,

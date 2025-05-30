@@ -182,9 +182,7 @@ const KEY_CODES = {
   END: 35,
 };
 
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default class QueryStringInputUI extends PureComponent<QueryStringInputProps, State> {
+export class QueryStringInput extends PureComponent<QueryStringInputProps, State> {
   static defaultProps = {
     storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
     iconType: 'search',

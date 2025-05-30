@@ -59,6 +59,9 @@ export const DimensionTrigger = ({
           <span
             className="dimensionTrigger__textLabel"
             css={css`
+              .domDroppable--replacing & {
+                text-decoration: line-through;
+              }
               transition: background-color ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
 
               &:hover {

@@ -23,9 +23,11 @@ import {
   EuiTitle,
   EuiLink,
   EuiBetaBadge,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Trigger } from '@kbn/ui-actions-plugin/public';
+import { css } from '@emotion/react';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
@@ -34,7 +36,6 @@ import {
   txtTriggerPickerLabel,
   txtTriggerPickerHelpTooltip,
 } from './i18n';
-import './action_wizard.scss';
 import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 
 export interface ActionWizardProps<
@@ -359,7 +360,13 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
             }
           >
             <EuiKeyPadMenuItem
-              className="auaActionWizard__actionFactoryItem"
+              css={({ euiTheme }: UseEuiTheme) =>
+                css({
+                  '.euiKeyPadMenuItem__label': {
+                    height: euiTheme.size.xl,
+                  },
+                })
+              }
               label={actionFactory.getDisplayName(context)}
               data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}

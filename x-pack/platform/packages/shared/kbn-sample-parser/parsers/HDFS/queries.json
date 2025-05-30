@@ -1,0 +1,232 @@
+{
+  "queries": [
+    {
+      "id": "starting_thread_transfer_block",
+      "title": "Starting thread to transfer block",
+      "description": "Matches log messages that indicate the start of a thread to transfer a block.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Starting thread to transfer block",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "exception_serving_block",
+      "title": "Got exception while serving block",
+      "description": "Matches log messages that indicate an exception occurred while serving a block.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Got exception while serving",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ask_delete_block",
+      "title": "Ask to delete block",
+      "description": "Matches log messages that indicate a request to delete a block.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ask to delete blk",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ask_replicate_block",
+      "title": "Ask to replicate block",
+      "description": "Matches log messages that indicate a request to replicate a block.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ask to replicate blk",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "blockmap_updated",
+      "title": "BlockMap updated",
+      "description": "Matches log messages that indicate the blockMap has been updated.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "blockMap updated",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "allocate_block",
+      "title": "Allocate block",
+      "description": "Matches log messages that indicate a block allocation.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "allocateBlock",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "block_added_invalidset",
+      "title": "Block is added to invalidSet",
+      "description": "Matches log messages that indicate a block has been added to the invalid set.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "is added to invalidSet",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "deleting_block",
+      "title": "Deleting block",
+      "description": "Matches log messages that indicate a block is being deleted.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Deleting block",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "packetresponder_terminating",
+      "title": "PacketResponder terminating",
+      "description": "Matches log messages that indicate a PacketResponder is terminating.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PacketResponder terminating",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "received_block",
+      "title": "Received block",
+      "description": "Matches log messages that indicate a block has been received.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Received block",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "receiving_block",
+      "title": "Receiving block",
+      "description": "Matches log messages that indicate a block is being received.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Receiving block",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "verification_succeeded_block",
+      "title": "Verification succeeded for block",
+      "description": "Matches log messages that indicate a block verification succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Verification succeeded for blk",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

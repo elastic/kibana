@@ -3,8 +3,9 @@
 }
 
 .loginWelcome__header {
+  margin-top: calc($euiSizeXXL * 3);
   position: relative;
-  padding: $euiSizeXL;
+  padding: $euiSize;
   z-index: 10;
 }
 
@@ -12,7 +13,6 @@
   margin-bottom: $euiSizeXL;
 
   @include kibanaCircleLogo;
-  @include euiBottomShadowMedium;
 }
 
 .loginWelcome__content {

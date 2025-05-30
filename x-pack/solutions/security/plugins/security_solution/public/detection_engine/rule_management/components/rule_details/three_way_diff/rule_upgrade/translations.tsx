@@ -14,7 +14,7 @@ import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 export const TOTAL_NUM_OF_FIELDS = (count: number) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.totalNumOfFieldsWithUpdates"
-    defaultMessage="{countValue} {count, plural, one {field} other {fields}} require review"
+    defaultMessage="{countValue} {count, plural, one {field} other {fields}} {count, plural, one {requires} other {require}} review"
     values={{ countValue: <strong>{count}</strong>, count }}
   />
 );

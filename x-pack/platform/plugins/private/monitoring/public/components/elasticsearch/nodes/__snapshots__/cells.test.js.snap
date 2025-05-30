@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Node Listing Metric Cell should format N/A as the metric for an offline node 1`] = `
-<div>
+<div
+  class="css-m7x7w3-offlineStyle"
+>
   N/A
 </div>
 `;

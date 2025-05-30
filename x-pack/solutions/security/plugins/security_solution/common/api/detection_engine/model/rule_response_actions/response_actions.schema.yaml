@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Response Actions Schema
   version: 'not applicable'
-paths: { }
+paths: {}
 components:
   x-codegen-enabled: true
   schemas:
@@ -14,6 +14,7 @@ components:
 
     EcsMapping:
       type: object
+      description: 'Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}'
       additionalProperties:
         type: object
         properties:
@@ -55,6 +56,7 @@ components:
       properties:
         query:
           type: string
+          description: 'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
         ecs_mapping:
           $ref: '#/components/schemas/EcsMapping'
         queries:
@@ -63,10 +65,13 @@ components:
             $ref: '#/components/schemas/OsqueryQuery'
         pack_id:
           type: string
+          description: 'To specify a query pack, use the packId field. Example: "packId": "processes_elastic"'
         saved_query_id:
           type: string
+          description: 'To run a saved query, use the saved_query_id field and specify the saved query ID. Example: "saved_query_id": "processes_elastic"'
         timeout:
           type: number
+          description: 'A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: "timeout": 120.'
 
     OsqueryParamsCamelCase:
       type: object
@@ -133,8 +138,10 @@ components:
           enum:
             - kill-process
             - suspend-process
+          description: 'To run an endpoint response action, specify a value for the command field. Example: "command": "isolate"'
         comment:
           type: string
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
         config:
           required:
             - field

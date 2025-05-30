@@ -1,5 +1,5 @@
 # -----
-# Source: project-controller/blob/main/internal/project/security/config/roles.yml
+# Copy from internal roles config in elasticsearch-controller
 # -----
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:

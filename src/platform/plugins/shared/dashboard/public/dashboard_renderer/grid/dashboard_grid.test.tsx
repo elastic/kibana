@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelMap } from '../../../common';
@@ -85,11 +86,13 @@ const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) =
     },
   });
   const component = render(
-    <DashboardContext.Provider value={api}>
-      <DashboardInternalContext.Provider value={internalApi}>
-        <DashboardGrid />
-      </DashboardInternalContext.Provider>
-    </DashboardContext.Provider>
+    <EuiThemeProvider>
+      <DashboardContext.Provider value={api}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <DashboardGrid />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    </EuiThemeProvider>
   );
 
   // wait for first render
@@ -113,9 +116,7 @@ test('DashboardGrid removes panel when removed from container', async () => {
 
   // remove panel
   await act(async () => {
-    dashboardApi.setPanels({
-      '2': PANELS['2'],
-    });
+    dashboardApi.removePanel('1');
     await new Promise((resolve) => setTimeout(resolve, 1));
   });
 

@@ -15,5 +15,6 @@
   "kbn_references": [
     "@kbn/datemath",
     "@kbn/safer-lodash-set",
+    "@kbn/tooling-log",
   ]
 }

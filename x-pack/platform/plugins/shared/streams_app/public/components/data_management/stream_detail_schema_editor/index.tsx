@@ -5,26 +5,19 @@
  * 2.0.
  */
 import React from 'react';
-import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 
 interface SchemaEditorProps {
-  definition?: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
-  isLoadingDefinition: boolean;
 }
 
-export function StreamDetailSchemaEditor(props: SchemaEditorProps) {
-  if (!props.definition) return null;
-  return <Content definition={props.definition} {...props} />;
-}
+export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
+  const { loading } = useStreamDetail();
 
-const Content = ({
-  definition,
-  refreshDefinition,
-  isLoadingDefinition,
-}: Required<SchemaEditorProps>) => {
   const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
     useSchemaFields({
       definition,
@@ -34,14 +27,14 @@ const Content = ({
   return (
     <SchemaEditor
       fields={fields}
-      isLoading={isLoadingDefinition || isLoadingUnmappedFields}
+      isLoading={loading || isLoadingUnmappedFields}
       stream={definition.stream}
       onFieldUnmap={unmapField}
       onFieldUpdate={updateField}
       onRefreshData={refreshFields}
       withControls
       withFieldSimulation
-      withTableActions={!isRootStreamDefinition(definition.stream)}
+      withTableActions={!isRootStreamDefinition(definition.stream) && definition.privileges.manage}
     />
   );
 };

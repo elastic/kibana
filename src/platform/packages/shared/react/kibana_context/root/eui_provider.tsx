@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as Rx from 'rxjs';
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
@@ -22,12 +23,16 @@ import {
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
+interface UserSettings {
+  contrastMode: 'system' | 'standard' | 'high';
+}
+
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
-  userProfile?: Pick<UserProfileService, 'getUserProfile$'>; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
   globalStyles?: boolean;
 }
 
@@ -66,6 +71,7 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  */
 export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = ({
   theme,
+  userProfile,
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
@@ -89,6 +95,19 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // colorMode provided by the `theme`.
   const colorMode = colorModeProp || themeColorMode;
 
+  const getUserProfile$ = useMemo(
+    () => userProfile?.getUserProfile$ ?? Rx.of,
+    [userProfile?.getUserProfile$]
+  );
+  const userProfileData = useObservable(getUserProfile$(), null);
+
+  // If the high contrast mode value is undefined, EUI will use the OS level setting.
+  const userSettings = userProfileData?.userSettings as UserSettings | undefined;
+  let highContrastMode: boolean | undefined;
+  if (userSettings?.contrastMode && userSettings?.contrastMode !== 'system') {
+    highContrastMode = userSettings.contrastMode === 'high';
+  }
+
   // This logic was drawn from the Core theme provider, and wasn't present (or even used)
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
@@ -101,6 +120,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         colorMode,
         globalStyles,
         utilityClasses: globalStyles,
+        highContrastMode,
         theme: _theme,
       }}
     >

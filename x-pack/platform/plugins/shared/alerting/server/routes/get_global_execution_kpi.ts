@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { RewriteRequestCase, verifyAccessAndContext, rewriteNamespaces } from './lib';
-import { GetGlobalExecutionKPIParams } from '../rules_client';
-import { ILicenseState } from '../lib';
+import type { AlertingRequestHandlerContext } from '../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import type { RewriteRequestCase } from './lib';
+import { verifyAccessAndContext, rewriteNamespaces } from './lib';
+import type { GetGlobalExecutionKPIParams } from '../rules_client';
+import type { ILicenseState } from '../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const querySchema = schema.object({

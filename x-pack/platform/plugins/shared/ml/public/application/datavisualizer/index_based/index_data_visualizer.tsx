@@ -27,6 +27,7 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
+import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -44,6 +45,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
+  const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount(mlApi);
 
@@ -85,13 +87,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         icon: 'createAdvancedJob',
         type: 'file',
         getUrl: async () => {
-          return await mlLocator.getUrl({
-            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
-            pageState: {
-              index: dataViewId,
-              globalState,
-            },
-          });
+          return (
+            (await mlManagementLocator?.getRedirectUrl({
+              sectionId: 'ml',
+              appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED}?index=${dataViewId}`,
+            })) ?? ''
+          );
         },
         canDisplay: async () => {
           try {
@@ -122,13 +123,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         icon: 'classificationJob',
         type: 'file',
         getUrl: async () => {
-          return await mlLocator.getUrl({
-            page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
-            pageState: {
-              index: dataViewId,
-              globalState,
-            },
-          });
+          if (!mlManagementLocator) return '';
+          return (
+            (await mlManagementLocator?.getRedirectUrl({
+              sectionId: 'ml',
+              appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB}?index=${dataViewId}`,
+            })) ?? ''
+          );
         },
         canDisplay: async () => {
           return (
@@ -153,13 +154,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
           icon: m.logo?.icon ?? '',
           type: 'index',
           getUrl: async () => {
-            return await mlLocator.getUrl({
-              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
-              pageState: {
-                id: m.id,
-                index: dataViewId,
-              },
-            });
+            return (
+              (await mlManagementLocator?.getRedirectUrl({
+                sectionId: 'ml',
+                appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${m.id}&index=${dataViewId}`,
+              })) ?? ''
+            );
           },
           canDisplay: async () => {
             try {

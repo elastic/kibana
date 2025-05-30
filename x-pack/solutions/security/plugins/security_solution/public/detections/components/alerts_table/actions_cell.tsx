@@ -8,17 +8,18 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { TableId, getTableByIdSelector } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash';
 import type { SetEventsLoading } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { useLicense } from '../../../common/hooks/use_license';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import { getAlertsDefaultModel } from './default_config';
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
+
+const onRowSelected = () => {};
 
 export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell'> = ({
   tableType = TableId.alertsOnAlertsPage,
@@ -36,14 +37,14 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   leadingControlColumn,
 }) => {
   const license = useLicense();
+  const defaults = useMemo(() => getAlertsDefaultModel(license), [license]);
+  const selectTableById = useMemo(() => getTableByIdSelector(), []);
   const {
-    dataTable: {
-      columns: columnHeaders,
-      showCheckboxes,
-      selectedEventIds,
-      loadingEventIds,
-    } = getAlertsDefaultModel(license),
-  } = useSelector((state: State) => eventsViewerSelector(state, tableType));
+    columns: columnHeaders,
+    showCheckboxes,
+    selectedEventIds,
+    loadingEventIds,
+  } = useSelector((state: State) => selectTableById(state, tableType) ?? defaults);
   const eventContext = useContext(StatefulEventContext);
 
   const timelineItem = useMemo<TimelineItem>(
@@ -80,7 +81,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       isEventViewer={false}
       isExpandable={isExpandable}
       loadingEventIds={loadingEventIds}
-      onRowSelected={() => {}}
+      onRowSelected={onRowSelected}
       rowIndex={rowIndex}
       colIndex={colIndex}
       pageRowIndex={rowIndex}

@@ -118,7 +118,7 @@ describe('processRouter', () => {
               'manage_spaces',
               {
                 allRequired: ['taskmanager'],
-                anyRequired: ['console'],
+                anyRequired: ['console', 'devtools'],
               },
             ],
           },
@@ -139,7 +139,7 @@ describe('processRouter', () => {
               'manage_spaces',
               {
                 allRequired: ['taskmanager'],
-                anyRequired: ['console'],
+                anyRequired: ['console', 'devtools'],
               },
             ],
           },
@@ -148,23 +148,23 @@ describe('processRouter', () => {
     ],
   } as unknown as Router;
 
-  it('only provides routes for version 2023-10-31', () => {
-    const result1 = processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
+  it('only provides routes for version 2023-10-31', async () => {
+    const result1 = await processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
       version: '2023-10-31',
       access: 'public',
     });
 
     expect(Object.keys(result1.paths!)).toHaveLength(5);
 
-    const result2 = processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
+    const result2 = await processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
       version: '2024-10-31',
       access: 'public',
     });
     expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 
-  it('updates description with privileges required', () => {
-    const result = processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
+  it('updates description with privileges required', async () => {
+    const result = await processRouter(testRouter, new OasConverter(), createOpIdGenerator(), {
       version: '2023-10-31',
       access: 'public',
     });
@@ -172,11 +172,11 @@ describe('processRouter', () => {
     expect(result.paths['/qux']?.post).toBeDefined();
 
     expect(result.paths['/qux']?.post?.description).toEqual(
-      '[Required authorization] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+      '[Required authorization] Route required privileges: (manage_spaces AND taskmanager) AND (console OR devtools).'
     );
 
     expect(result.paths['/quux']?.post?.description).toEqual(
-      'This a test route description.<br/><br/>[Required authorization] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+      'This a test route description.<br/><br/>[Required authorization] Route required privileges: (manage_spaces AND taskmanager) AND (console OR devtools).'
     );
   });
 });

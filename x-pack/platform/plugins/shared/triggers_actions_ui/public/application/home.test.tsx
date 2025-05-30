@@ -33,13 +33,15 @@ jest.mock('./context/health_context', () => ({
   HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('./hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn().mockReturnValue({
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
+  useGetRuleTypesPermissions: jest.fn().mockReturnValue({
     authorizedToReadAnyRules: true,
   }),
 }));
 
-const { useLoadRuleTypesQuery } = jest.requireMock('./hooks/use_load_rule_types_query');
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const queryClient = new QueryClient();
 
@@ -47,7 +49,7 @@ describe('home', () => {
   beforeEach(() => {
     (hasShowActionsCapability as jest.Mock).mockClear();
     (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
-    useLoadRuleTypesQuery.mockClear();
+    useGetRuleTypesPermissions.mockClear();
   });
 
   it('renders rule list components', async () => {
@@ -111,7 +113,7 @@ describe('home', () => {
   });
 
   it('hides the logs tab if the read rules privilege is missing', async () => {
-    useLoadRuleTypesQuery.mockReturnValue({
+    useGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadAnyRules: false,
     });
     const props: RouteComponentProps<MatchParams> = {

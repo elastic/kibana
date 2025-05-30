@@ -988,6 +988,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           version: { type: 'keyword' },
@@ -1075,6 +1076,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
       },
       migrations: {
         '7.14.0': migrateInstallationToV7140,
@@ -1129,12 +1138,23 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           source_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
           host: { type: 'keyword' },
           proxy_id: { type: 'keyword' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
         },
       },
     },
@@ -1266,6 +1286,7 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+  { key: 'kibana_api_key', dangerouslyExposeValue: true },
 ]);
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
@@ -1294,6 +1315,12 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
+  });
+  encryptedSavedObjects.registerType({
+    type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });

@@ -7,21 +7,21 @@
 
 import { adHocRunStatus } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
-import { RuleDomain } from '../application/rule/types';
+import type { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
+import type { RuleDomain } from '../application/rule/types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { BackfillClient } from './backfill_client';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from '../application/backfill/transforms';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 
@@ -29,7 +29,7 @@ jest.mock('../lib/rule_gaps/update/update_gaps', () => ({
   updateGaps: jest.fn(),
 }));
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { RawRule, RawRuleAction } from '../types';
+import type { RawRule, RawRuleAction } from '../types';
 
 const logger = loggingSystemMock.create().get();
 const taskManagerSetup = taskManagerMock.createSetup();
@@ -45,7 +45,12 @@ const actionsClient = actionsClientMock.create();
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
-    start: '2023-11-16T08:00:00.000Z',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T20:00:00.000Z',
+      },
+    ],
     runActions: true,
     ...overwrites,
   };
@@ -65,6 +70,7 @@ const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: { validate: (params) => params },
   },
@@ -257,7 +263,10 @@ describe('BackfillClient', () => {
     test('should successfully create backfill saved objects and queue backfill tasks', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule();
       const rule2 = getMockRule({ id: '2' });
@@ -401,7 +410,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -620,7 +632,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         notifyWhen: 'onActiveAlert',
@@ -819,7 +834,11 @@ describe('BackfillClient', () => {
     test('should ignore actions for rule with actions when runActions=false', async () => {
       const mockData = [
         getMockData({ runActions: false }),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z', runActions: false }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+          runActions: false,
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -1148,7 +1167,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -1366,7 +1388,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         notifyWhen: 'onThrottleInterval',
@@ -1546,7 +1571,12 @@ describe('BackfillClient', () => {
     });
 
     test('should successfully create multiple backfill saved objects for a single rule', async () => {
-      const mockData = [getMockData(), getMockData({ end: '2023-11-17T08:00:00.000Z' })];
+      const mockData = [
+        getMockData(),
+        getMockData({
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
+      ];
       const rule1 = getMockRule();
       const mockRules = [rule1];
 
@@ -1666,7 +1696,10 @@ describe('BackfillClient', () => {
     test('should log warning if no rule found for backfill job', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule();
       const mockRules = [rule1];
@@ -1724,7 +1757,7 @@ describe('BackfillClient', () => {
         message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"start\":\"2023-11-16T08:00:00.000Z\",\"runActions\":true,\"end\":\"2023-11-17T08:00:00.000Z\"}`
+        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"ranges\":[{\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}],\"runActions\":true}`
       );
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
         {
@@ -1768,6 +1801,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -2039,6 +2073,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },

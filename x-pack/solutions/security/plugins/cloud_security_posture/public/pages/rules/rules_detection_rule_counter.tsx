@@ -8,9 +8,9 @@
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
+import { getFindingsDetectionRuleSearchTags } from '@kbn/cloud-security-posture-common';
+import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import { DetectionRuleCounter } from '../../components/detection_rule_counter';
-import { createDetectionRuleFromBenchmarkRule } from '../configurations/utils/create_detection_rule_from_benchmark';
 
 export const RulesDetectionRuleCounter = ({
   benchmarkRule,

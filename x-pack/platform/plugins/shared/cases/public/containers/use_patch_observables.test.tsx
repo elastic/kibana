@@ -11,8 +11,7 @@ import { patchObservable } from './api';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import * as i18n from './translations';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('../common/use_cases_toast');
 jest.mock('../components/case_view/use_on_refresh_case_view_page');
@@ -29,20 +28,16 @@ describe('usePatchObservable', () => {
 
   const mockRequest = { observable: { value: 'value', typeKey: 'test', description: null } };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('should call patchObservable and show success toast on success', async () => {
     (patchObservable as jest.Mock).mockResolvedValue({});
 
     const { result } = renderHook(() => usePatchObservable(caseId, observableId), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -61,7 +56,7 @@ describe('usePatchObservable', () => {
     (patchObservable as jest.Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => usePatchObservable(caseId, observableId), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

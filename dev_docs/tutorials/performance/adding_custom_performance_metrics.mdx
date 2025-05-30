@@ -330,8 +330,9 @@ This will be indexed as:
     "duration": 736,                                                    // Event duration as specified when reporting it
     "meta": {
       "target": '/home',
-      "query_range_secs": 900
-      "query_offset_secs": 0 // now
+      "query_range_secs": 900, // 15 minutes
+      "query_from_offset_secs": -900 // From 15 minutes ago
+      "query_to_offset_secs": 0 // To now
     },
     "context": {                                                        // Context holds information identifying the deployment, version, application and page that generated the event
       "version": "8.16.0-SNAPSHOT",
@@ -402,6 +403,38 @@ An event using custom metrics will be indexed with the following structure:
     ...
   },
 }
+```
+
+#### Add inline documentation
+
+The description metadata field is allowing teams to document how a page is instrumentented
+
+```typescript
+...
+  onPageReady({
+    meta: {
+      rangeFrom,
+      rangeTo,
+      description: '[ttfmp_dependencies] Dependencies table is  ready after fetching top_dependencies.'
+    }
+  });
+...
+```
+
+#### Track TTFMP on refresh load
+
+TTFMP supports a new dimension: isInitialLoad, distinguishing between an initial page load and a refresh triggered by actions like the time picker.
+This requires instrumenting `onPageRefreshStart()` when refreshing the page.
+
+```typescript
+...
+  const { onPageRefreshStart } = usePerformanceContext();
+
+   const handleRefresh = () => {
+    onPageRefreshStart()
+   }
+
+...
 ```
 
 ### Development environment

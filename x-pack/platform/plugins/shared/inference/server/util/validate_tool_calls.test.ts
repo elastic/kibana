@@ -53,7 +53,9 @@ describe('validateToolCalls', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Tool my_unknown_function called but was not available"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Tool \\"my_unknown_function\\" called but was not available"`
+    );
   });
 
   it('throws an error if invalid JSON was generated', () => {

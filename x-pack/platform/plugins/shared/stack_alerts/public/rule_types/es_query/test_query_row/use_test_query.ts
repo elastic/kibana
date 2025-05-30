@@ -8,36 +8,43 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+
+interface TestQueryPreview {
+  cols: EuiDataGridColumn[];
+  rows: Array<Record<string, string | null>>;
+}
+
+interface TestQueryFetchResponse {
+  testResults: ParsedAggregationResults;
+  isGrouped: boolean;
+  timeWindow: string;
+  isGroupedByRow?: boolean;
+  preview?: TestQueryPreview;
+  warning?: string;
+}
 
 interface TestQueryResponse {
   result: string | null;
   error: string | null;
+  warning: string | null;
   isLoading: boolean;
-  rawResults: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null>> } | null;
-  alerts: string[] | null;
+  preview: TestQueryPreview | null;
 }
 
 const TEST_QUERY_INITIAL_RESPONSE: TestQueryResponse = {
   result: null,
   error: null,
+  warning: null,
   isLoading: false,
-  rawResults: null,
-  alerts: null,
+  preview: null,
 };
 
 /**
  * Hook used to test the data fetching execution by returning a number of found documents
  * Or in error in case it's failing
  */
-export function useTestQuery(
-  fetch: () => Promise<{
-    testResults: ParsedAggregationResults;
-    isGrouped: boolean;
-    timeWindow: string;
-    rawResults?: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null>> };
-  }>
-) {
+export function useTestQuery(fetch: () => Promise<TestQueryFetchResponse>) {
   const [testQueryResponse, setTestQueryResponse] = useState<TestQueryResponse>(
     TEST_QUERY_INITIAL_RESPONSE
   );
@@ -51,30 +58,44 @@ export function useTestQuery(
     setTestQueryResponse({
       result: null,
       error: null,
+      warning: null,
       isLoading: true,
-      rawResults: null,
-      alerts: null,
+      preview: null,
     });
 
     try {
-      const { testResults, isGrouped, timeWindow, rawResults } = await fetch();
-
+      const { testResults, isGrouped, isGroupedByRow, timeWindow, preview, warning } =
+        await fetch();
+      let trimmedPreview = null;
+      if (preview) {
+        trimmedPreview = {
+          cols: preview.cols,
+          rows: preview.rows.slice(0, 5),
+        };
+      }
       if (isGrouped) {
+        const count = testResults.results.length;
+        const result = isGroupedByRow
+          ? i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedByRowResponse', {
+              defaultMessage: 'Query returned {rows} rows in the last {window}.',
+              values: {
+                rows: count,
+                window: timeWindow,
+              },
+            })
+          : i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
+              defaultMessage: 'Grouped query matched {groups} groups in the last {window}.',
+              values: {
+                groups: testResults.results.length,
+                window: timeWindow,
+              },
+            });
         setTestQueryResponse({
-          result: i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse', {
-            defaultMessage: 'Grouped query matched {groups} groups in the last {window}.',
-            values: {
-              groups: testResults.results.length,
-              window: timeWindow,
-            },
-          }),
+          result,
           error: null,
+          warning: warning ?? null,
           isLoading: false,
-          rawResults: rawResults ?? null,
-          alerts:
-            testResults.results.length > 0
-              ? testResults.results.map((result) => result.group)
-              : null,
+          preview: trimmedPreview,
         });
       } else {
         const ungroupedQueryResponse =
@@ -85,23 +106,22 @@ export function useTestQuery(
             values: { count: ungroupedQueryResponse?.count ?? 0, window: timeWindow },
           }),
           error: null,
+          warning: null,
           isLoading: false,
-          rawResults: rawResults ?? null,
-          alerts: ungroupedQueryResponse.count > 0 ? ['query matched'] : null,
+          preview: trimmedPreview,
         });
       }
     } catch (err) {
       const message = err?.body?.attributes?.error?.root_cause[0]?.reason || err?.body?.message;
-
       setTestQueryResponse({
         result: null,
         error: i18n.translate('xpack.stackAlerts.esQuery.ui.queryError', {
           defaultMessage: 'Error testing query: {message}',
           values: { message: message ? `${err.message}: ${message}` : err.message },
         }),
+        warning: null,
         isLoading: false,
-        rawResults: null,
-        alerts: null,
+        preview: null,
       });
     }
   }, [fetch]);
@@ -110,8 +130,8 @@ export function useTestQuery(
     onTestQuery,
     testQueryResult: testQueryResponse.result,
     testQueryError: testQueryResponse.error,
+    testQueryWarning: testQueryResponse.warning,
     testQueryLoading: testQueryResponse.isLoading,
-    testQueryRawResults: testQueryResponse.rawResults,
-    testQueryAlerts: testQueryResponse.alerts,
+    testQueryPreview: testQueryResponse.preview,
   };
 }

@@ -6,7 +6,6 @@
  */
 
 import type { UpsellingMessageId } from '@kbn/security-solution-upselling/service';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 /**
@@ -17,9 +16,5 @@ import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 export const usePrebuiltRuleCustomizationUpsellingMessage = (messageId: UpsellingMessageId) => {
   // Upselling message is returned when the license level is insufficient,
   // otherwise it's undefined
-  const upsellingMessage = useUpsellingMessage(messageId);
-
-  // We show the upselling message only if the feature flag is enabled
-  const isFeatureFlagEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesCustomizationEnabled');
-  return isFeatureFlagEnabled ? upsellingMessage : undefined;
+  return useUpsellingMessage(messageId);
 };

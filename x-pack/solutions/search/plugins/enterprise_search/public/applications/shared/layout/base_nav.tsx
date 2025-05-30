@@ -40,15 +40,15 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
     ),
   });
 
-  // Content
+  // Data
   navItems.push({
-    'data-test-subj': 'searchSideNav-Content',
-    id: 'content',
+    'data-test-subj': 'searchSideNav-Data',
+    id: 'data',
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
         deepLink: {
-          link: 'management:index_management',
+          link: 'elasticsearchIndexManagement',
         },
         id: 'search_indices',
       },
@@ -69,8 +69,8 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'crawlers',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
-      defaultMessage: 'Content',
+    name: i18n.translate('xpack.enterpriseSearch.nav.dataTitle', {
+      defaultMessage: 'Data',
     }),
   });
 
@@ -119,6 +119,14 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
           shouldShowActiveForSubroutes: true,
         },
         id: 'synonyms',
+      },
+      {
+        'data-test-subj': 'searchSideNav-QueryRules',
+        deepLink: {
+          link: 'searchQueryRules',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'searchQueryRules',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {

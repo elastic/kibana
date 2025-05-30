@@ -13,7 +13,6 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
-import './rule_form.scss';
 import { RuleFormScreenContextProvider } from './rule_form_screen_context';
 import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
@@ -86,6 +85,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     ruleTypeRegistry,
     actionTypeRegistry,
     fieldsMetadata,
+    contentManagement,
   } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
@@ -105,6 +105,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
       ruleTypeRegistry,
       actionTypeRegistry,
       fieldsMetadata,
+      contentManagement,
     };
 
     // Passing the MetaData type all the way down the component hierarchy is unnecessary, this type is
@@ -177,6 +178,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
     isServerless,
     id,
     ruleTypeId,

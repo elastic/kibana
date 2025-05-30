@@ -6,15 +6,20 @@
  */
 
 import { actions } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';
+import { DecorateWithKibanaContext } from '../../../asset_details/__stories__/decorator';
 
-storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
-  .addDecorator((renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>)
-  .addDecorator(decorateWithGlobalStorybookThemeProviders)
-  .add('Reconfiguration with partitioned warnings', () => {
+export default {
+  title: 'infra/logAnalysis/SetupInitialConfigurationStep',
+
+  decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
+} as Meta;
+
+export const ReconfigurationWithPartitionedWarnings = {
+  render: () => {
     return (
       <InitialConfigurationStep
         {...storyActions}
@@ -55,8 +60,13 @@ storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
         ]}
       />
     );
-  })
-  .add('Reconfiguration with unpartitioned warnings', () => {
+  },
+
+  name: 'Reconfiguration with partitioned warnings',
+};
+
+export const ReconfigurationWithUnpartitionedWarnings = {
+  render: () => {
     return (
       <InitialConfigurationStep
         {...storyActions}
@@ -74,29 +84,17 @@ storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
           },
           {
             name: 'index-2-*',
-            validity: 'invalid',
-            errors: [{ index: 'index-2-*', error: 'INDEX_NOT_FOUND' }],
-          },
-        ]}
-        previousQualityWarnings={[
-          {
-            type: 'categoryQualityWarning',
-            jobId: 'job-1',
-            dataset: '',
-            reasons: [
-              { type: 'noFrequentCategories' },
-              { type: 'manyDeadCategories', deadCategoriesRatio: 0.9 },
-            ],
-          },
-          {
-            type: 'categoryQualityWarning',
-            jobId: 'job-1',
-            dataset: '',
-            reasons: [{ type: 'singleCategory' }],
+            validity: 'valid',
+            isSelected: false,
+            datasetFilter: { type: 'includeAll' },
+            availableDatasets: ['first', 'second', 'third'],
           },
         ]}
       />
     );
-  });
+  },
+
+  name: 'Reconfiguration with unpartitioned warnings',
+};
 
 const storyActions = actions('setStartTime', 'setEndTime', 'setValidatedIndices');

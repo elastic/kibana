@@ -36,6 +36,9 @@ const solutionMap: Record<SolutionId, string> = {
   oblt: i18n.translate('xpack.spaces.navControl.tour.obltSolution', {
     defaultMessage: 'Observability',
   }),
+  chat: i18n.translate('xpack.spaces.navControl.tour.chatSolution', {
+    defaultMessage: 'Workchat',
+  }),
 };
 
 interface Props extends PropsWithChildren<{}> {

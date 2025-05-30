@@ -10,17 +10,6 @@ import { suspendedComponentWithProps } from '../lib/suspended_component_with_pro
 import type { CreateConnectorFlyoutProps } from './action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './action_connector_form/edit_connector_flyout';
 
-export type {
-  ActionGroupWithCondition,
-  RuleConditionsProps as AlertConditionsProps,
-} from './rule_form/rule_conditions';
-
-export const AlertConditions = lazy(() => import('./rule_form/rule_conditions'));
-export const AlertConditionsGroup = lazy(() => import('./rule_form/rule_conditions_group'));
-
-export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_add')));
-export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_edit')));
-
 export const ConnectorAddFlyout = suspendedComponentWithProps<CreateConnectorFlyoutProps>(
   lazy(() => import('./action_connector_form/create_connector_flyout'))
 );
@@ -61,6 +50,15 @@ export const RuleTagBadge = suspendedComponentWithProps(
 export const RuleStatusPanel = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/rule_status_panel'))
 );
+
+export const UntrackAlertsModal = suspendedComponentWithProps(
+  lazy(() =>
+    import('./common/components/untrack_alerts_modal').then((module) => ({
+      default: module.UntrackAlertsModal,
+    }))
+  )
+);
+
 export const GlobalRuleEventLogList = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/global_rule_event_log_list'))
 );

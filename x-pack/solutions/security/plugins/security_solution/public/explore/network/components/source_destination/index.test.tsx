@@ -45,6 +45,17 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+import { CellActionsWrapper } from '../../../../common/components/drag_and_drop/cell_actions_wrapper';
+
+jest.mock('../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -58,6 +69,7 @@ jest.mock('@elastic/eui', () => {
 
 const getSourceDestinationInstance = () => (
   <SourceDestination
+    scopeId="some_scope"
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
     destinationGeoContinentName={asArrayIfExists(
@@ -118,6 +130,10 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('SourceDestination', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
+
   test('renders correctly against snapshot', () => {
     const { asFragment } = render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     expect(asFragment).toMatchSnapshot();
@@ -316,5 +332,16 @@ describe('SourceDestination', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(screen.getByText('tcp')).toBeInTheDocument();
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

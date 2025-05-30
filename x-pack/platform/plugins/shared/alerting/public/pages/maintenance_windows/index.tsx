@@ -26,12 +26,12 @@ import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_wind
 import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
+import type { MaintenanceWindowStatus } from '../../../common';
 import {
   MAINTENANCE_WINDOW_FEATURE_ID,
   MAINTENANCE_WINDOW_DEEP_LINK_IDS,
   MAINTENANCE_WINDOW_DEFAULT_PER_PAGE,
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
-  MaintenanceWindowStatus,
 } from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
@@ -68,8 +68,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
   }, [navigateToCreateMaintenanceWindow]);
 
   const refreshData = useCallback(() => refetch(), [refetch]);
-  const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
-  const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+  const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.show;
+  const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.save;
   const isNotFiltered = search === '' && selectedStatus.length === 0;
 
   const showEmptyPrompt =

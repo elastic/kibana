@@ -7,7 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
   type CategorizationType,
@@ -21,9 +21,9 @@ import { getDefaultDatafeedQuery, getRisonValue } from '../utils/new_job_utils';
 interface Dependencies {
   kibanaConfig: IUiSettingsClient;
   timeFilter: TimefilterContract;
-  dashboardService: DashboardStart;
   data: DataPublicPluginStart;
   mlApi: MlApi;
+  share: SharePluginStart;
 }
 export async function resolver(
   deps: Dependencies,
@@ -36,7 +36,7 @@ export async function resolver(
   toRisonString: string,
   queryRisonString: string
 ) {
-  const { mlApi, timeFilter, kibanaConfig, dashboardService, data } = deps;
+  const { mlApi, timeFilter, kibanaConfig, share, data } = deps;
 
   const query = getRisonValue<QueryDslQueryContainer>(queryRisonString, getDefaultDatafeedQuery());
   const from = getRisonValue<string>(fromRisonString, '');
@@ -55,7 +55,7 @@ export async function resolver(
     data.dataViews,
     kibanaConfig,
     timeFilter,
-    dashboardService,
+    share,
     data,
     mlApi
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { parseDuration } from '../../common';
 import { DEFAULT_EXECUTION_TIMEOUT } from './get_rule_task_timeout';
 

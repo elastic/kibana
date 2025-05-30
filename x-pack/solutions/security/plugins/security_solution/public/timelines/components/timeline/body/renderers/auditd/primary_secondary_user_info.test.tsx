@@ -29,6 +29,7 @@ describe('UserPrimarySecondary', () => {
     test('it renders the default PrimarySecondaryUserInfo', () => {
       const wrapper = shallow(
         <PrimarySecondaryUserInfo
+          scopeId="some_scope"
           contextId="context-123"
           eventId="event-123"
           userName="user-name-1"
@@ -43,6 +44,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             userName="user-name-1"
@@ -58,6 +60,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             userName="user-name-1"
@@ -73,6 +76,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             primary="primary-1"
@@ -88,6 +92,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             primary="primary-1"
@@ -103,6 +108,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             userName={undefined}
@@ -118,6 +124,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             secondary="secondary-1"
@@ -133,6 +140,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             userName="username-1"
@@ -148,6 +156,7 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             userName="[username]"

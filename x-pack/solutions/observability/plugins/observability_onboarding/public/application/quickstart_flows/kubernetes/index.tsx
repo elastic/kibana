@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiPanel,
   EuiSkeletonRectangle,
@@ -15,6 +15,7 @@ import {
   EuiStepStatus,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CommandSnippet } from './command_snippet';
@@ -22,15 +23,32 @@ import { DataIngestStatus } from './data_ingest_status';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 export const KubernetesPanel: React.FC = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
+      defaultMessage: 'Kubernetes: Logs & Metrics',
+    }),
+  });
   const { data, status, error, refetch } = useKubernetesFlow();
+  const { onPageReady } = usePerformanceContext();
 
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes',
     onboardingId: data?.onboardingId,
   });
+
+  useEffect(() => {
+    if (data) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [data, onPageReady]);
 
   if (error !== undefined) {
     return <EmptyPrompt onboardingFlowType="kubernetes" error={error} onRetryClick={refetch} />;

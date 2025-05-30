@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionType } from '@kbn/actions-types';
-import { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
-import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import type { ActionType } from '@kbn/actions-types';
+import type { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -21,10 +20,12 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import {
+import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type {
   MinimumScheduleInterval,
   Rule,
   RuleFormActionsErrors,
@@ -52,6 +53,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   throttle?: Rule<Params>['throttle'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
   flapping?: Rule<Params>['flapping'];
+  artifacts?: Rule<Params>['artifacts'];
 }
 
 export interface RuleFormPlugins {
@@ -70,6 +72,7 @@ export interface RuleFormPlugins {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
+  contentManagement?: ContentManagementPublicStart;
 }
 
 export interface RuleFormState<
@@ -81,7 +84,7 @@ export interface RuleFormState<
   plugins: RuleFormPlugins;
   connectors: ActionConnector[];
   connectorTypes: ActionType[];
-  aadTemplateFields: ActionVariable[];
+  alertFields: ActionVariable[];
   availableRuleTypes: RuleTypeWithDescription[];
   baseErrors?: RuleFormBaseErrors;
   paramsErrors?: RuleFormParamsErrors;
@@ -107,3 +110,5 @@ export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
 export interface ValidationResult {
   errors: Record<string, any>;
 }
+
+export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'contentManagement'>;

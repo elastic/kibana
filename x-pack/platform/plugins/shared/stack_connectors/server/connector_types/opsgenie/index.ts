@@ -11,14 +11,12 @@ import {
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { OpsgenieConnectorTypeId } from '../../../common';
 import { OpsgenieConnector } from './connector';
 import { ConfigSchema, SecretsSchema } from './schema';
-import { Config, Secrets } from './types';
+import type { Config, Secrets } from './types';
 import * as i18n from './translations';
 import { renderParameterTemplates } from './render_template_variables';
 

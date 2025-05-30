@@ -11,17 +11,19 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
+import { systemMessageSorted } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/conversation';
 import {
   createLlmProxy,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
+import { deleteConnectors } from '../../common/connectors';
+import { deleteConversations } from '../../common/conversations';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -30,13 +32,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const retry = getService('retry');
   const log = getService('log');
   const telemetry = getService('kibana_ebt_ui');
-
-  const driver = getService('__webdriver__');
-
   const toasts = getService('toasts');
-
   const { header } = getPageObjects(['header', 'security']);
-
   const flyoutService = getService('flyout');
 
   async function login(username: string, password: string | undefined) {
@@ -51,36 +48,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       })
       .expect(200);
     return parseCookie(response.headers['set-cookie'][0])!;
-  }
-
-  async function deleteConversations() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/conversations',
-    });
-
-    for (const conversation of response.body.conversations) {
-      await observabilityAIAssistantAPIClient.editor({
-        endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
-        params: {
-          path: {
-            conversationId: conversation.conversation.id,
-          },
-        },
-      });
-    }
-  }
-
-  async function deleteConnectors() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'GET /internal/observability_ai_assistant/connectors',
-    });
-
-    for (const connector of response.body) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    }
   }
 
   async function createOldConversation() {
@@ -154,8 +121,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Conversations', () => {
     let proxy: LlmProxy;
     before(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await createOldConversation();
 
@@ -193,18 +160,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
             await testSubjects.setValue(ui.pages.createConnectorFlyout.apiKeyInput, 'myApiKey');
 
-            // intercept the request to set up the knowledge base,
-            // so we don't have to wait until it's fully downloaded
-            await interceptRequest(
-              driver.driver,
-              '*kb\\/setup*',
-              (responseFactory) => {
-                return responseFactory.fail();
-              },
-              async () => {
-                await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
-              }
-            );
+            await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
 
             await retry.waitFor('Connector created toast', async () => {
               const count = await toasts.getCount();
@@ -228,7 +184,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             });
 
             it('shows a setup kb button', async () => {
-              await testSubjects.existOrFail(ui.pages.conversations.retryButton);
+              await testSubjects.existOrFail(ui.pages.conversations.installKnowledgeBaseButton);
             });
 
             it('has an input field enabled', async () => {
@@ -242,7 +198,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               before(async () => {
                 void proxy.interceptTitle(expectedTitle);
-                void proxy.interceptConversation(expectedResponse);
+                void proxy.interceptWithResponse(expectedResponse);
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
@@ -282,8 +238,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   'You are a helpful assistant for Elastic Observability. Your goal is '
                 );
 
-                expect(sortSystemMessage(systemMessage!)).to.eql(
-                  sortSystemMessage(primarySystemMessage)
+                expect(systemMessageSorted(systemMessage!)).to.eql(
+                  systemMessageSorted(primarySystemMessage)
                 );
 
                 expect(firstUserMessage.content).to.eql('hello');
@@ -314,7 +270,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and adding another prompt', () => {
                 before(async () => {
-                  void proxy.interceptConversation('My second response');
+                  void proxy.interceptWithResponse('My second response');
 
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
@@ -389,7 +345,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
             describe('and opening an old conversation', () => {
               before(async () => {
-                log.info('SQREN: Opening the old conversation');
                 const conversations = await testSubjects.findAll(
                   ui.pages.conversations.conversationLink
                 );
@@ -399,7 +354,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and sending another prompt', () => {
                 before(async () => {
-                  void proxy.interceptConversation(
+                  void proxy.interceptWithResponse(
                     'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
                   );
 
@@ -408,7 +363,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     'And what are SLIs?'
                   );
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
-                  log.info('SQREN: Waiting for the message to be displayed');
 
                   await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
@@ -418,7 +372,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   before(async () => {
                     await telemetry.setOptIn(true);
 
-                    log.info('SQREN: Clicking on the positive feedback button');
                     const feedbackButtons = await testSubjects.findAll(
                       ui.pages.conversations.positiveFeedbackButton
                     );
@@ -457,19 +410,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     after(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await ui.auth.logout();
       proxy.close();
     });
   });
-}
-
-// order of instructions can vary, so we sort to compare them
-function sortSystemMessage(message: string) {
-  return message
-    .split('\n\n')
-    .map((line) => line.trim())
-    .sort();
 }

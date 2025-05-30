@@ -29,12 +29,14 @@ export default {
   },
 };
 
-export const NoDataPage = (params: NoDataPageStorybookParams) => {
-  return (
-    <NoDataPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps(params)} />
-    </NoDataPageProvider>
-  );
-};
+export const NoDataPage = {
+  render: (params: NoDataPageStorybookParams) => {
+    return (
+      <NoDataPageProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps(params)} />
+      </NoDataPageProvider>
+    );
+  },
 
-NoDataPage.argTypes = mock.getArgumentTypes();
+  argTypes: mock.getArgumentTypes(),
+};

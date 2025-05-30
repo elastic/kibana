@@ -11,23 +11,28 @@ import {
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
-  WiredStreamDefinition,
+  Streams,
   getAdvancedParameters,
   isDslLifecycle,
   isIlmLifecycle,
   isRoot,
+  namespacePrefixes,
 } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
+import { baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,
-  definition: WiredStreamDefinition,
+  definition: Streams.WiredStream.Definition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
+    if (props.type === 'system') {
+      return;
+    }
     const property: MappingProperty = {
       type: props.type,
     };
@@ -47,6 +52,14 @@ export function generateLayer(
     }
 
     properties[field] = property;
+    const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
+    if (matchingPrefix) {
+      const aliasName = field.substring(matchingPrefix.length);
+      properties[aliasName] = {
+        type: 'alias',
+        path: field,
+      };
+    }
   });
 
   return {
@@ -55,9 +68,13 @@ export function generateLayer(
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
-        subobjects: false,
         dynamic: false,
-        properties,
+        properties: isRoot(name)
+          ? {
+              ...baseMappings,
+              ...properties,
+            }
+          : properties,
       },
     },
     version: ASSET_VERSION,
@@ -68,7 +85,7 @@ export function generateLayer(
   };
 }
 
-function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+function getTemplateLifecycle(definition: Streams.WiredStream.Definition, isServerless: boolean) {
   const lifecycle = definition.ingest.lifecycle;
   if (isServerless) {
     // dlm cannot be disabled in serverless
@@ -91,7 +108,7 @@ function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: b
   return undefined;
 }
 
-function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
+function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
   const baseSettings = isRoot(definition.name) ? logsSettings : {};
   const lifecycle = definition.ingest.lifecycle;
 

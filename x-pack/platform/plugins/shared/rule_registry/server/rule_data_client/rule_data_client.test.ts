@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { left, right } from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/Either';
 import { errors } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { RuleDataClient, RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
+import type { RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
+import { RuleDataClient } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
-import { Dataset, RuleDataWriterInitializationError } from '..';
+import type { Dataset } from '..';
+import { RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { createNoMatchingIndicesError } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;

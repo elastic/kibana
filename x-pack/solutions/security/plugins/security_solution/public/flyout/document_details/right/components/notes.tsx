@@ -40,7 +40,7 @@ import {
   selectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { AlertHeaderBlock } from './alert_header_block';
+import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 import { LeftPanelNotesTab } from '../../left';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
@@ -154,6 +154,7 @@ export const Notes = memo(() => {
 
   return (
     <AlertHeaderBlock
+      hasBorder
       title={
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.notesTitle"

@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FieldItemButton, type FieldItemButtonProps } from './field_item_button';
+export {
+  FieldItemButton,
+  type FieldItemButtonProps,
+  type GenericFieldItemButtonType,
+} from './field_item_button';

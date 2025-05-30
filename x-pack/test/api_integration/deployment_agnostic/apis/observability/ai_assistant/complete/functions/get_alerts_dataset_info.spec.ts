@@ -8,20 +8,21 @@
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { ApmAlertFields } from '../../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
+  RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { getMessageAddedEvents } from './helpers';
+import { createSyntheticApmData } from '../../synthtrace_scenarios/create_synthetic_apm_data';
+import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
+import { createRule } from '../../utils/alerts';
 
 const USER_MESSAGE = 'How many alerts do I have for the past 10 days?';
 
@@ -31,21 +32,38 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
 
-  describe('function: get_alerts_dataset_info', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+  describe('get_alerts_dataset_info', function () {
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let internalReqHeader: InternalRequestHeader;
     let roleAuthc: RoleCredentials;
     let createdRuleId: string;
-    let expectedRelevantFieldNames: string[];
-    let primarySystemMessage: string;
+    let getRelevantFields: () => Promise<RelevantField[]>;
 
     before(async () => {
-      ({ apmSynthtraceEsClient } = await createSyntheticApmData(getService));
-      ({ roleAuthc, createdRuleId } = await createApmErrorCountRule(getService));
+      internalReqHeader = samlAuth.getInternalRequestHeader();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+
+      ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
+
+      createdRuleId = await createRule({
+        getService,
+        roleAuthc,
+        internalReqHeader,
+        data: {
+          ruleTypeId: ApmRuleType.ErrorCount,
+          indexName: APM_ALERTS_INDEX,
+          consumer: 'apm',
+          environment: 'production',
+          threshold: 1,
+          windowSize: 1,
+          windowUnit: 'h',
+          ruleName: 'APM error threshold',
+        },
+      });
 
       llmProxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
@@ -55,78 +73,26 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       void llmProxy.interceptWithFunctionRequest({
         name: 'get_alerts_dataset_info',
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
-        when: () => true,
       });
 
-      void llmProxy.interceptWithFunctionRequest({
-        name: 'select_relevant_fields',
-        // @ts-expect-error
-        when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
-        arguments: (requestBody) => {
-          const userMessage = last(requestBody.messages);
-          const topFields = (userMessage?.content as string)
-            .slice(204) // remove the prefix message and only get the JSON
-            .trim()
-            .split('\n')
-            .map((line) => JSON.parse(line))
-            .slice(0, 5);
-
-          expectedRelevantFieldNames = topFields.map(({ field }) => field);
-
-          const fieldIds = topFields.map(({ id }) => id);
-
-          return JSON.stringify({ fieldIds });
-        },
-      });
+      ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
 
       void llmProxy.interceptWithFunctionRequest({
         name: 'alerts',
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
-        when: () => true,
       });
 
-      void llmProxy.interceptConversation(
+      void llmProxy.interceptWithResponse(
         `You have active alerts for the past 10 days. Back to work!`
       );
 
-      const { status, body } = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-        params: {
-          body: {
-            messages: [
-              {
-                '@timestamp': new Date().toISOString(),
-                message: {
-                  role: MessageRole.User,
-                  content: USER_MESSAGE,
-                },
-              },
-            ],
-            connectorId,
-            persist: false,
-            screenContexts: [],
-            scopes: ['observability' as const],
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      ({ messageAddedEvents } = await chatComplete({
+        userPrompt: USER_MESSAGE,
+        connectorId,
+        observabilityAIAssistantAPIClient,
+      }));
 
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-      messageAddedEvents = getMessageAddedEvents(body);
-
-      const {
-        body: { systemMessage },
-      } = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/functions',
-        params: {
-          query: {
-            scopes: ['observability'],
-          },
-        },
-      });
-
-      primarySystemMessage = systemMessage;
     });
 
     after(async () => {
@@ -146,7 +112,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    describe('LLM requests', () => {
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
+    describe('POST /internal/observability_ai_assistant/chat/complete', () => {
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
       let thirdRequestBody: ChatCompletionStreamParams;
@@ -161,6 +131,51 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('makes 4 requests to the LLM', () => {
         expect(llmProxy.interceptedRequests.length).to.be(4);
+      });
+
+      it('emits 7 messageAdded events', () => {
+        expect(messageAddedEvents.length).to.be(7);
+      });
+
+      it('emits messageAdded events in the correct order', async () => {
+        const formattedMessageAddedEvents = messageAddedEvents.map(({ message }) => {
+          const { role, name, function_call: functionCall } = message.message;
+          if (functionCall) {
+            return { function_call: functionCall, role };
+          }
+
+          return { name, role };
+        });
+
+        expect(formattedMessageAddedEvents).to.eql([
+          {
+            role: 'assistant',
+            function_call: { name: 'context', trigger: 'assistant' },
+          },
+          { name: 'context', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: {
+              name: 'get_alerts_dataset_info',
+              arguments: '{"start":"now-10d","end":"now"}',
+              trigger: 'assistant',
+            },
+          },
+          { name: 'get_alerts_dataset_info', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: {
+              name: 'alerts',
+              arguments: '{"start":"now-10d","end":"now"}',
+              trigger: 'assistant',
+            },
+          },
+          { name: 'alerts', role: 'user' },
+          {
+            role: 'assistant',
+            function_call: { name: '', arguments: '', trigger: 'assistant' },
+          },
+        ]);
       });
 
       describe('every request to the LLM', () => {
@@ -228,9 +243,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('The system message', () => {
-          it('has the primary system message', () => {
-            expect(sortSystemMessage(firstRequestBody.messages[0].content as string)).to.eql(
-              sortSystemMessage(primarySystemMessage)
+          it('has the primary system message', async () => {
+            const primarySystemMessage = await getSystemMessage(getService);
+            expect(systemMessageSorted(firstRequestBody.messages[0].content as string)).to.eql(
+              systemMessageSorted(primarySystemMessage)
             );
           });
 
@@ -254,14 +270,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('contains a system generated user message with a list of field candidates', () => {
-          const hasList = secondRequestBody.messages.some(
-            (message) =>
-              message.role === 'user' &&
-              (message.content as string).includes('Below is a list of fields.') &&
-              (message.content as string).includes('@timestamp')
-          );
+          const lastMessage = last(secondRequestBody.messages);
 
-          expect(hasList).to.be(true);
+          expect(lastMessage?.role).to.be('user');
+          expect(lastMessage?.content).to.contain('Below is a list of fields');
+          expect(lastMessage?.content).to.contain('@timestamp');
         });
 
         it('instructs the LLM to call the `select_relevant_fields` tool via `tool_choice`', () => {
@@ -294,7 +307,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(hasFunctionRequest).to.be(true);
         });
 
-        it('contains the `get_alerts_dataset_info` response', () => {
+        it('contains the `get_alerts_dataset_info` response', async () => {
           const functionResponse = last(thirdRequestBody.messages);
           const parsedContent = JSON.parse(functionResponse?.content as string) as {
             fields: string[];
@@ -303,7 +316,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const fieldNamesWithType = parsedContent.fields;
           const fieldNamesWithoutType = fieldNamesWithType.map((field) => field.split(':')[0]);
 
-          expect(fieldNamesWithoutType).to.eql(expectedRelevantFieldNames);
+          const relevantFields = await getRelevantFields();
+          expect(fieldNamesWithoutType).to.eql(relevantFields.map(({ name }) => name));
           expect(fieldNamesWithType).to.eql([
             '@timestamp:date',
             '_id:_id',
@@ -314,13 +328,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('emits a messageAdded event with the `get_alerts_dataset_info` function response', async () => {
-          const messageWithDatasetInfo = messageAddedEvents.find(
+          const eventWithDatasetInfo = messageAddedEvents.find(
             ({ message }) =>
               message.message.role === MessageRole.User &&
               message.message.name === 'get_alerts_dataset_info'
           );
 
-          const parsedContent = JSON.parse(messageWithDatasetInfo?.message.message.content!) as {
+          const parsedContent = JSON.parse(eventWithDatasetInfo?.message.message.content!) as {
             fields: string[];
           };
 
@@ -361,12 +375,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('emits a messageAdded event with the `alert` function response', async () => {
-          const messageWithAlerts = messageAddedEvents.find(
+          const event = messageAddedEvents.find(
             ({ message }) =>
               message.message.role === MessageRole.User && message.message.name === 'alerts'
           );
 
-          const parsedContent = JSON.parse(messageWithAlerts?.message.message.content!) as {
+          const parsedContent = JSON.parse(event?.message.message.content!) as {
             total: number;
             alerts: any[];
           };
@@ -375,126 +389,5 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
-
-    describe('messageAdded events', () => {
-      it('emits 7 messageAdded events', () => {
-        expect(messageAddedEvents.length).to.be(7);
-      });
-
-      it('emits messageAdded events in the correct order', async () => {
-        const formattedMessageAddedEvents = messageAddedEvents.map(({ message }) => {
-          const { role, name, function_call: functionCall } = message.message;
-          if (functionCall) {
-            return { function_call: functionCall, role };
-          }
-
-          return { name, role };
-        });
-
-        expect(formattedMessageAddedEvents).to.eql([
-          {
-            role: 'assistant',
-            function_call: { name: 'context', trigger: 'assistant' },
-          },
-          { name: 'context', role: 'user' },
-          {
-            role: 'assistant',
-            function_call: {
-              name: 'get_alerts_dataset_info',
-              arguments: '{"start":"now-10d","end":"now"}',
-              trigger: 'assistant',
-            },
-          },
-          { name: 'get_alerts_dataset_info', role: 'user' },
-          {
-            role: 'assistant',
-            function_call: {
-              name: 'alerts',
-              arguments: '{"start":"now-10d","end":"now"}',
-              trigger: 'assistant',
-            },
-          },
-          { name: 'alerts', role: 'user' },
-          {
-            role: 'assistant',
-            function_call: { name: '', arguments: '', trigger: 'assistant' },
-          },
-        ]);
-      });
-    });
   });
-}
-
-async function createApmErrorCountRule(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const alertingApi = getService('alertingApi');
-  const samlAuth = getService('samlAuth');
-
-  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-  const createdRule = await alertingApi.createRule({
-    ruleTypeId: ApmRuleType.ErrorCount,
-    name: 'APM error threshold',
-    consumer: 'apm',
-    schedule: { interval: '1m' },
-    tags: ['apm'],
-    params: {
-      environment: 'production',
-      threshold: 1,
-      windowSize: 1,
-      windowUnit: 'h',
-    },
-    roleAuthc,
-  });
-
-  const createdRuleId = createdRule.id as string;
-  const esResponse = await alertingApi.waitForDocumentInIndex<ApmAlertFields>({
-    indexName: APM_ALERTS_INDEX,
-    ruleId: createdRuleId,
-    docCountTarget: 1,
-  });
-
-  return {
-    roleAuthc,
-    createdRuleId,
-    alerts: esResponse.hits.hits.map((hit) => hit._source!),
-  };
-}
-
-async function createSyntheticApmData(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const synthtrace = getService('synthtrace');
-  const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-
-  const opbeansNode = apm
-    .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
-    .instance('instance');
-
-  const events = timerange('now-15m', 'now')
-    .ratePerMinute(1)
-    .generator((timestamp) => {
-      return [
-        opbeansNode
-          .transaction({ transactionName: 'DELETE /user/:id' })
-          .timestamp(timestamp)
-          .duration(100)
-          .failure()
-          .errors(
-            opbeansNode.error({ message: 'Unable to delete user' }).timestamp(timestamp + 50)
-          ),
-      ];
-    });
-
-  await apmSynthtraceEsClient.index(events);
-
-  return { apmSynthtraceEsClient };
-}
-
-// order of instructions can vary, so we sort to compare them
-function sortSystemMessage(message: string) {
-  return message
-    .split('\n\n')
-    .map((line) => line.trim())
-    .sort();
 }

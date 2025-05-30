@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
-import { AllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
+import type { AllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[]

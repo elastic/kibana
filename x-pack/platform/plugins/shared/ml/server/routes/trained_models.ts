@@ -74,17 +74,20 @@ export function trainedModelsRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
-          const models = await modelsClient.getTrainedModelList();
-          return response.ok({
-            body: models,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
+            const models = await modelsClient.getTrainedModelList(mlSavedObjectService);
+
+            return response.ok({
+              body: models,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   router.versioned

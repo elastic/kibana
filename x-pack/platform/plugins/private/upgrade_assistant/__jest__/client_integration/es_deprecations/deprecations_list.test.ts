@@ -97,10 +97,10 @@ describe('ES deprecations table', () => {
   it('shows critical and warning deprecations count', () => {
     const { find } = testBed;
     const criticalDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
-      (deprecation) => deprecation.isCritical
+      (deprecation) => deprecation.level === 'critical'
     );
     const warningDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
-      (deprecation) => deprecation.isCritical === false
+      (deprecation) => deprecation.level !== 'critical'
     );
 
     expect(find('criticalDeprecationsCount').text()).toContain(String(criticalDeprecations.length));
@@ -128,18 +128,20 @@ describe('ES deprecations table', () => {
   });
 
   describe('search bar', () => {
-    it('filters results by "critical" status', async () => {
+    it('filters results by status', async () => {
       const { find, actions } = testBed;
 
-      await actions.searchBar.clickCriticalFilterButton();
+      await actions.searchBar.clickStatusFilterDropdown();
+      await actions.searchBar.clickFilterByTitle('Critical');
 
       const criticalDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
-        (deprecation) => deprecation.isCritical
+        (deprecation) => deprecation.level === 'critical'
       );
 
       expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
 
-      await actions.searchBar.clickCriticalFilterButton();
+      await actions.searchBar.clickStatusFilterDropdown();
+      await actions.searchBar.clickFilterByTitle('Critical'); // Reset filter
 
       expect(find('deprecationTableRow').length).toEqual(
         esDeprecationsMockResponse.migrationsDeprecations.length
@@ -147,23 +149,11 @@ describe('ES deprecations table', () => {
     });
 
     it('filters results by type', async () => {
-      const { component, find, actions } = testBed;
+      const { find, actions } = testBed;
 
-      await actions.searchBar.clickTypeFilterDropdownAt(0);
+      await actions.searchBar.clickTypeFilterDropdown();
 
-      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
-      // is added in a portalled popover and not inside the component DOM tree.
-      const clusterTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiSelectableList .euiSelectableListItem'
-      );
-
-      expect(clusterTypeFilterButton).not.toBeNull();
-
-      await act(async () => {
-        clusterTypeFilterButton!.click();
-      });
-
-      component.update();
+      await actions.searchBar.clickFilterByTitle('Cluster');
 
       const clusterDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
         (deprecation) => deprecation.type === 'cluster_settings'
@@ -269,10 +259,11 @@ describe('ES deprecations table', () => {
       const { actions, find } = testBed;
 
       const criticalDeprecations = migrationsDeprecations.filter(
-        (deprecation) => deprecation.isCritical
+        (deprecation) => deprecation.level === 'critical'
       );
 
-      await actions.searchBar.clickCriticalFilterButton();
+      await actions.searchBar.clickStatusFilterDropdown();
+      await actions.searchBar.clickFilterByTitle('Critical');
 
       // Only 40 critical deprecations, so only one page should show
       expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(1);

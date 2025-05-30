@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { DashboardsCardItemId } from './types';
-import customDashboardsImageSrc from './images/custom_dashboards.png';
-import prebuiltDashboardsImageSrc from './images/prebuilt_dashboards.png';
 import type { CardSelectorAssetListItem } from '../types';
 import { CardAssetType } from '../types';
 
@@ -26,8 +24,8 @@ export const DASHBOARDS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.image,
-      source: prebuiltDashboardsImageSrc,
+      type: CardAssetType.video,
+      source: '//play.vidyard.com/SpKecbJxeYWzXVpGvgxMah',
       alt: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.default.description', {
         defaultMessage:
           'Out-of-the-box dashboards for alerts, data quality, entity analytics, and more',
@@ -46,8 +44,8 @@ export const DASHBOARDS_CARD_ITEMS: CardSelectorAssetListItem[] = [
       }
     ),
     asset: {
-      type: CardAssetType.image,
-      source: customDashboardsImageSrc,
+      type: CardAssetType.video,
+      source: '//play.vidyard.com/5UvJBpzFVoEfpDLnjzTbfn',
       alt: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.custom.description', {
         defaultMessage: 'Drag and drop your way to a custom visualization',
       }),

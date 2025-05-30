@@ -87,6 +87,26 @@ export const getComponentTemplateDetailLink = (name: string) => {
   return `/component_templates/${encodeURIComponent(name)}`;
 };
 
+export const getComponentTemplateListLink = (filter?: string) => {
+  let url = '/component_templates';
+  if (filter) {
+    url = `${url}?filter=${encodeURIComponent(filter)}`;
+  }
+  return url;
+};
+
+export const getComponentTemplateEditLink = (name: string) => {
+  return `/edit_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCloneLink = (name: string) => {
+  return `/create_component_template/${encodeURIComponent(name)}`;
+};
+
+export const getComponentTemplateCreateLink = (name: string) => {
+  return `/create_component_template?name=${encodeURIComponent(name)}`;
+};
+
 export const navigateToIndexDetailsPage = (
   indexName: string,
   indicesListURLParams: string,

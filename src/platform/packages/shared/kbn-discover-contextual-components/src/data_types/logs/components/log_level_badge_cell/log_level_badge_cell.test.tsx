@@ -18,7 +18,7 @@ import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 const renderCell = (logLevelField: string, record: DataTableRecord) => {
   const LogLevelBadgeCell = getLogLevelBadgeCell(logLevelField);
   render(
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <LogLevelBadgeCell
         rowIndex={0}
         colIndex={0}

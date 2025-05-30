@@ -32,6 +32,6 @@ export const AgentDetailsIntegrationInputStatus: React.FunctionComponent<{
       </StyledEuiText>
     </EuiCallOut>
   ) : (
-    <EuiText size="s">{inputStatusFormatter.description}</EuiText>
+    <StyledEuiText size="s">{inputStatusFormatter.description}</StyledEuiText>
   );
 });

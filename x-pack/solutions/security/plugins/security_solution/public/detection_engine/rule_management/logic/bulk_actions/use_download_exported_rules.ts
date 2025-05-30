@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { downloadBlob } from '../../../../common/utils/download_blob';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import { getExportedRulesCounts } from '../../../rule_management_ui/components/rules_table/helpers';
 import { useShowBulkErrorToast } from './use_show_bulk_error_toast';
 import { useShowBulkSuccessToast } from './use_show_bulk_success_toast';

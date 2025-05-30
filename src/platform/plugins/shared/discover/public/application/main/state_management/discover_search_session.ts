@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { History } from 'history';
-import * as Rx from 'rxjs';
+import type { History } from 'history';
+import type * as Rx from 'rxjs';
 import { filter } from 'rxjs';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   createQueryParamObservable,
   getQueryParams,
@@ -32,7 +32,6 @@ export class DiscoverSearchSessionManager {
    * skips if `searchSessionId` matches current search session id
    */
   readonly newSearchSessionIdFromURL$: Rx.Observable<string | null>;
-  readonly searchSessionId$: Rx.Observable<string | undefined>;
 
   private readonly deps: DiscoverSearchSessionManagerDeps;
 
@@ -47,7 +46,6 @@ export class DiscoverSearchSessionManager {
         return !this.deps.session.isCurrentSession(searchSessionId);
       })
     );
-    this.searchSessionId$ = this.deps.session.getSession$();
   }
 
   /**
@@ -69,13 +67,6 @@ export class DiscoverSearchSessionManager {
       }
     }
     return searchSessionIdFromURL ?? this.deps.session.start();
-  }
-
-  /**
-   * Get current search session id
-   */
-  getCurrentSearchSessionId() {
-    return this.deps.session.getSessionId();
   }
 
   /**

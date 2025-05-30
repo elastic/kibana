@@ -133,6 +133,17 @@ describe('Recurrence scheduler helper', () => {
       ).toEqual('every month on the 4th Tuesday');
     });
 
+    test('should display correct month name for yearly recurrence', () => {
+      expect(
+        recurrenceSummary({
+          freq: RRuleFrequency.YEARLY,
+          interval: 1,
+          bymonth: [3],
+          bymonthday: [18],
+        })
+      ).toEqual('every year on March 18');
+    });
+
     test('should give a basic msg', () => {
       expect(
         recurrenceSummary({
@@ -280,7 +291,7 @@ describe('Recurrence scheduler helper', () => {
           startDate: moment('11/23/2021'),
         })
       ).toEqual({
-        bymonth: [10],
+        bymonth: [11],
         bymonthday: [23],
         byweekday: [],
         freq: 0,

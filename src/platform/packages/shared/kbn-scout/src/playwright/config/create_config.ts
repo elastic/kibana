@@ -27,9 +27,42 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     process.env.TEST_RUN_ID = runId;
   }
 
+  const scoutDefaultProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [
+    {
+      name: 'local',
+      use: { ...devices['Desktop Chrome'], configName: 'local' },
+    },
+    {
+      name: 'ech',
+      use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
+    },
+    {
+      name: 'mki',
+      use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
+    },
+  ];
+
+  let scoutProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [];
+
+  /**
+   * For parallel tests, we need to add a setup as a project dependency. While Playwright doesn't allow to read 'use'
+   * from the parent project, we have to create a setup project with the explicit 'use' object for each parent project.
+   * This is a workaround for https://github.com/microsoft/playwright/issues/32547
+   */
+  scoutProjects =
+    options.workers && options.workers > 1
+      ? scoutDefaultProjects.flatMap((project) => [
+          {
+            name: `setup-${project?.name}`,
+            use: project?.use ? { ...project.use } : {},
+            testMatch: /global.setup\.ts/,
+          },
+          { ...project, dependencies: [`setup-${project?.name}`] },
+        ])
+      : scoutDefaultProjects;
+
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
-    globalSetup: options.globalSetup,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -47,6 +80,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      actionTimeout: 10000, // Shorten timeout for actions like `click()`
+      navigationTimeout: 20000, // Shorter timeout for page navigations
+      // 'configName' is not defined by default to enforce using '--project' flag when running the tests
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
@@ -70,24 +106,6 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
 
     outputDir: './output/test-artifacts', // For other test artifacts (screenshots, videos, traces)
 
-    /* Configure projects for major browsers */
-    projects: [
-      {
-        name: 'chromium',
-        use: { ...devices['Desktop Chrome'] },
-      },
-
-      // {
-      //   name: 'firefox',
-      //   use: { ...devices['Desktop Firefox'] },
-      // },
-    ],
-
-    /* Run your local dev server before starting the tests */
-    // webServer: {
-    //   command: 'npm run start',
-    //   url: 'http://127.0.0.1:3000',
-    //   reuseExistingServer: !process.env.CI,
-    // },
+    projects: scoutProjects,
   });
 }

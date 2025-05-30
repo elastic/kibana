@@ -93,7 +93,7 @@ export class SecurityPlugin
 
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
-    this.navControlService = new SecurityNavControlService(this.buildFlavor);
+    this.navControlService = new SecurityNavControlService();
     this.managementService = new ManagementService(this.config);
   }
 

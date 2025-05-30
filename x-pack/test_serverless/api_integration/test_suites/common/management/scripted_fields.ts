@@ -26,12 +26,14 @@ export default function ({ getService }: FtrProviderContext) {
       // TODO: We're running into a 'Duplicate data view: basic_index'
       // error in Serverless, so make sure to clean up first
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+      await esArchiver.load(
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });

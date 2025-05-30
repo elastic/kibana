@@ -68,6 +68,10 @@ export async function createAgentAction(
     total: newAgentAction.total,
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
+    policyId: newAgentAction.policyId,
+    enrollment_token: newAgentAction.enrollment_token,
+    target_uri: newAgentAction.target_uri,
+    settings: newAgentAction.additionalSettings ? newAgentAction.additionalSettings : undefined,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
@@ -78,7 +82,6 @@ export async function createAgentAction(
       signature: signedBody.signature,
     };
   }
-
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),
@@ -87,7 +90,9 @@ export async function createAgentAction(
   });
 
   auditLoggingService.writeCustomAuditLog({
-    message: `User created Fleet action [id=${actionId}]`,
+    message: `${
+      newAgentAction.is_automatic ? 'Automatic Upgrade' : 'User'
+    } created Fleet action [id=${actionId}]`,
   });
 
   return {
