@@ -1733,6 +1733,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.image_load.disable_origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.disable_origin_info_collection',
+      {
+        defaultMessage:
+          '',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.events.image_load',
     first_supported_version: '8.11',
     documentation: i18n.translate(
@@ -1894,6 +1905,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process.disable_origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.disable_origin_info_collection',
+      {
+        defaultMessage:
+          '',      
       }
     ),
   },
@@ -2078,6 +2100,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Reduce data volume by filtering out registry events which are not relevant to behavioral protections.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.file.disable_origin_info_collection',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.disable_origin_info_collection',
+      {
+        defaultMessage:
+          '',
       }
     ),
   },
