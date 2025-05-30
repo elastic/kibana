@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sectionIds).to.contain('kibana');
 
           const dataSection = sections.find((section) => section.sectionId === 'data');
-          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+          expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
         });
       });
     });
