@@ -106,6 +106,7 @@ export { useKibana } from './hooks/use_kibana';
 export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantAnonymizationRules,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';

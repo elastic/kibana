@@ -10,10 +10,8 @@ import { css } from '@emotion/css';
 import { EuiCode, EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
-import {
-  aiAssistantAnonymizationRules,
-  type Message,
-} from '@kbn/observability-ai-assistant-plugin/common';
+import { type Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { aiAssistantAnonymizationRules } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ChatActionClickPayload,
   ChatState,

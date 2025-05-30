@@ -19,6 +19,7 @@ import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
 import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
 import { AnonymizationService } from './anonymization';
+import { aiAssistantAnonymizationRules } from '../../common';
 
 export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -75,11 +76,9 @@ export class ObservabilityAIAssistantService {
   async getClient({
     request,
     scopes,
-    anonymizationRules,
   }: {
     request: KibanaRequest;
     scopes?: AssistantScope[];
-    anonymizationRules: string;
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -96,6 +95,12 @@ export class ObservabilityAIAssistantService {
     const user = plugins.security.authc.getCurrentUser(request);
 
     const soClient = coreStart.savedObjects.getScopedClient(request);
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
+    // Read anonymization rules from advanced settings
+    const anonymizationRulesString = await uiSettingsClient.get<string>(
+      aiAssistantAnonymizationRules
+    );
 
     const basePath = coreStart.http.basePath.get(request);
 
@@ -118,14 +123,14 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asCurrentUser,
       },
-      anonymizationRules,
+      anonymizationRules: anonymizationRulesString,
     });
 
     return new ObservabilityAIAssistantClient({
       core: this.core,
       config: this.config,
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
-      uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
+      uiSettingsClient,
       namespace: spaceId,
       esClient: {
         asInternalUser,
