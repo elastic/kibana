@@ -75,8 +75,21 @@ export class UpdateSLO {
     rollbackOperations.push(() => this.repository.update(originalSlo));
 
     if (!requireRevisionBump) {
-      // we only have to update the summary pipeline to include the non-breaking changes (name, desc, tags, ...) in the summary index
+      // we only have to update the rollup and summary pipelines to include the non-breaking changes (name, desc, tags, ...) in the summary index
       try {
+        await retryTransientEsErrors(
+          () =>
+            this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+              getSLIPipelineTemplate(updatedSlo, this.spaceId)
+            ),
+          { logger: this.logger }
+        );
+        rollbackOperations.push(() =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+            { id: getSLOPipelineId(updatedSlo.id, updatedSlo.revision) },
+            { ignore: [404] }
+          )
+        );
         await retryTransientEsErrors(
           () =>
             this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
