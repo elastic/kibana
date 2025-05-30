@@ -47,7 +47,7 @@ export const generateListESQLQuery =
   (esqlSource: string) =>
   (sortField: string | number | symbol, sortDirection: string, currentPage: number) =>
     `${esqlSource}
-        | SORT ${String(sortField)} ${sortDirection}      
+        | SORT ${String(sortField)} ${sortDirection}
         | LIMIT ${1 + currentPage * PAGE_SIZE}`; // Load one extra item for the pagination
 
 export const generateVisualizationESQLQuery = (esqlSource: string) => (stackByField: string) =>

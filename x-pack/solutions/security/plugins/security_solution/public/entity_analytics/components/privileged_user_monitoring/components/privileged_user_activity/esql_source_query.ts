@@ -8,7 +8,7 @@
 const PRIV_MON_JOIN = ``;
 
 export const getGrantedRightsEsqlSource = () => {
-  return `FROM logs-*, test* METADATA _id, _index
+  return `FROM logs-* METADATA _id, _index
     ${PRIV_MON_JOIN}
     | WHERE (host.os.type == "linux"
       AND event.type == "start"
