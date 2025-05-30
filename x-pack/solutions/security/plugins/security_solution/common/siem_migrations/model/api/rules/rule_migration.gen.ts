@@ -19,6 +19,7 @@ import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import {
   RuleMigrationTaskStats,
+  RuleMigrationAllIntegrationsStats,
   RuleMigration,
   OriginalRule,
   RuleMigrationRule,
@@ -88,6 +89,11 @@ export type GetRuleMigrationIntegrationsResponse = z.infer<
   typeof GetRuleMigrationIntegrationsResponse
 >;
 export const GetRuleMigrationIntegrationsResponse = z.object({}).catchall(RelatedIntegration);
+
+export type GetRuleMigrationIntegrationsStatsResponse = z.infer<
+  typeof GetRuleMigrationIntegrationsStatsResponse
+>;
+export const GetRuleMigrationIntegrationsStatsResponse = RuleMigrationAllIntegrationsStats;
 
 export type GetRuleMigrationPrebuiltRulesRequestParams = z.infer<
   typeof GetRuleMigrationPrebuiltRulesRequestParams

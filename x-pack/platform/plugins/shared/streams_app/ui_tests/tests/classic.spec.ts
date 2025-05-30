@@ -67,10 +67,10 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
     await page.getByText('Add a processor').click();
 
-    await page.locator('input[name="field"]').fill('message');
+    await page.locator('input[name="field"]').fill('body.text');
     await page
       .locator('input[name="patterns\\.0\\.value"]')
-      .fill('%{WORD:method} %{URIPATH:request}');
+      .fill('%{WORD:attributes.method} %{URIPATH:attributes.request}');
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
 
