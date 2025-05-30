@@ -73,6 +73,8 @@ describe('previewTask', () => {
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: inactiveAlertsQuery(),
     });
 
@@ -104,6 +106,8 @@ describe('previewTask', () => {
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: activeAlertsQuery(),
     });
 
@@ -133,10 +137,14 @@ describe('previewTask', () => {
     expect(esClient.count).toHaveBeenCalledTimes(2);
     expect(esClient.count).toHaveBeenNthCalledWith(1, {
       index: ['index1', 'index2'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: activeAlertsQuery(),
     });
     expect(esClient.count).toHaveBeenNthCalledWith(2, {
       index: ['index1', 'index2'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: inactiveAlertsQuery(),
     });
 
@@ -164,6 +172,8 @@ describe('previewTask', () => {
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: inactiveAlertsQuery(),
     });
 
@@ -206,6 +216,8 @@ describe('previewTask', () => {
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
+      allow_no_indices: true,
+      ignore_unavailable: true,
       query: inactiveAlertsQuery(),
     });
     expect(logger.error).toHaveBeenCalledWith(

@@ -39,7 +39,12 @@ export const previewTask = async (
     const activeAlertsQuery = getActiveAlertsQuery(activeAlertDeleteThreshold, spaceId);
 
     try {
-      const countResponse = await esClient.count({ index: indices, query: activeAlertsQuery });
+      const countResponse = await esClient.count({
+        index: indices,
+        query: activeAlertsQuery,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      });
       numAlertsToBeDeleted += countResponse.count;
     } catch (err) {
       context.logger.error(
@@ -53,7 +58,12 @@ export const previewTask = async (
     const inactiveAlertsQuery = getInactiveAlertsQuery(inactiveAlertDeleteThreshold, spaceId);
 
     try {
-      const countResponse = await esClient.count({ index: indices, query: inactiveAlertsQuery });
+      const countResponse = await esClient.count({
+        index: indices,
+        query: inactiveAlertsQuery,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      });
       numAlertsToBeDeleted += countResponse.count;
     } catch (err) {
       context.logger.error(

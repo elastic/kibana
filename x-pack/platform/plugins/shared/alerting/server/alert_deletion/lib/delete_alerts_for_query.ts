@@ -57,6 +57,8 @@ export const deleteAlertsForQuery = async (
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: pitId, keep_alive: '1m' },
           _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
+          allow_no_indices: true,
+          ignore_unavailable: true,
           ...(searchAfter ? { search_after: searchAfter } : {}),
         },
         { signal: abortController.signal }
