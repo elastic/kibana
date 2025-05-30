@@ -46,7 +46,6 @@ import type {
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLFunctionCallExpression,
@@ -450,16 +449,6 @@ export function sanitizeIdentifierString(ctx: ParserRuleContext) {
 
 export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
-}
-
-export function createSetting(policyName: Token, mode: string): ESQLCommandMode {
-  return {
-    type: 'mode',
-    name: mode.replace('_', '').toLowerCase(),
-    text: mode,
-    location: getPosition(policyName, { stop: policyName.start + mode.length - 1 }), // unfortunately this is the only location we have
-    incomplete: false,
-  };
 }
 
 /**
