@@ -48,6 +48,7 @@ export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerCon
         const authorization = await racContext.alerting.getAlertingAuthorizationWithRequest(
           request
         );
+
         const internalUserEsClient = (await context.core).elasticsearch.client.asInternalUser;
         const currentUserEsClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -124,17 +125,6 @@ export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerCon
           browserFields: fieldDescriptorToBrowserFieldMapper(uniqueFields),
           fields: uniqueFields,
         };
-
-        console.log({
-          ruleTypeIds,
-          authorizedRuleTypesIds,
-          siemRuleTypeIds,
-          otherRuleTypeIds,
-          siemIndices,
-          otherIndices,
-          siemFields,
-          otherFields,
-        });
 
         return response.ok({
           body: mappedFields,
