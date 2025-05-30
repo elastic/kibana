@@ -154,7 +154,6 @@ jest.mock('@kbn/alerts-ui-shared', () => ({
   }),
 }));
 
-
 function render(ui: React.ReactElement) {
   return rtlRender(ui, {
     wrapper: ({ children }: { children: React.ReactNode }) => (
