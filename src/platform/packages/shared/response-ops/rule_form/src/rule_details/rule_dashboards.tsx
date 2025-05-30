@@ -45,6 +45,8 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     Array<EuiComboBoxOptionOption<string>> | undefined
   >();
 
+  const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
+
   const fetchDashboardTitles = useCallback(async () => {
     if (!dashboardsFormData?.length || !contentManagement) {
       return;
@@ -91,9 +93,9 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     }
   }, [dashboardsFormData, contentManagement]);
 
-  useMemo(() => {
-    fetchDashboardTitles();
-  }, [fetchDashboardTitles]);
+  // useMemo(() => {
+  //   fetchDashboardTitles();
+  // }, [fetchDashboardTitles]);
 
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const artifacts = {
@@ -130,9 +132,14 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     }
   }, [contentManagement]);
 
-  useMemo(() => {
-    loadDashboards();
-  }, [loadDashboards]);
+  // Only load dashboards when ComboBox is focused/opened
+  const handleComboBoxFocus = useCallback(() => {
+    if (!isComboBoxOpen) {
+      setIsComboBoxOpen(true);
+      loadDashboards();
+      fetchDashboardTitles();
+    }
+  }, [fetchDashboardTitles, isComboBoxOpen, loadDashboards]);
 
   return (
     <>
@@ -150,6 +157,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
               selectedOptions={selectedDashboards}
               placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}
               onChange={onChange}
+              onFocus={handleComboBoxFocus}
               data-test-subj="ruleLinkedDashboards"
             />
           </EuiFormRow>
