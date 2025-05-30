@@ -17,6 +17,7 @@ import {
   SPAN_NAME_FIELD,
   TRANSACTION_ID_FIELD,
   getSpanDocumentOverview,
+  SERVICE_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
