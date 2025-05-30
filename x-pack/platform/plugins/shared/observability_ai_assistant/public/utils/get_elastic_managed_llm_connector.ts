@@ -7,6 +7,8 @@
 
 import { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 
+export const INFERENCE_CONNECTOR_ACTION_TYPE_ID = '.inference';
+
 export const getElasticManagedLlmConnector = (
   connectors: UseGenAIConnectorsResult['connectors'] | undefined
 ) => {
@@ -16,7 +18,7 @@ export const getElasticManagedLlmConnector = (
 
   return connectors.filter(
     (connector) =>
-      connector.actionTypeId === '.inference' &&
+      connector.actionTypeId === INFERENCE_CONNECTOR_ACTION_TYPE_ID &&
       connector.isPreconfigured &&
       connector.config?.provider === 'elastic'
   )[0];
