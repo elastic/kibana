@@ -167,6 +167,12 @@ export const config: PluginConfigDescriptor = {
               ),
             })
           ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,

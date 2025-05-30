@@ -41,6 +41,10 @@ export interface FleetConfigType {
         ca?: string;
       };
     };
+    deploymentSecrets?: {
+      fleetAppToken?: string;
+      elasticsearchAppToken?: string;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
