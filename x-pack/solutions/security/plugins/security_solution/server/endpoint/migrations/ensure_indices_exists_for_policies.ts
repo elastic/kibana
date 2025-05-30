@@ -29,4 +29,6 @@ export const ensureIndicesExistsForPolicies = async (
     endpointServices,
     endpointPolicyIds: endpointPoliciesIds.items,
   });
+
+  logger.info(`Done checking endpoint policies have backing indices`);
 };
