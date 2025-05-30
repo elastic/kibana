@@ -11,7 +11,8 @@ import React, { Fragment, useState } from 'react';
 import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
 
 import type { Rule } from '../../model';
@@ -26,7 +27,7 @@ interface Props {
 
 export const JSONRuleEditor = (props: Props) => {
   const docLinks = useKibana().services.docLinks!;
-  const isDarkMode = useDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const [rawRules, setRawRules] = useState(
     JSON.stringify(props.rules ? props.rules.toRaw() : {}, null, 2)
   );
