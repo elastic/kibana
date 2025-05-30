@@ -91,8 +91,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
+        await testSubjects.existOrFail('createIndexButton');
+        await testSubjects.existOrFail('uploadFileButton');
       },
-
       async expectPlaygroundLLMConnectorOptionsExists() {
         await testSubjects.existOrFail('create-connector-flyout');
         await testSubjects.existOrFail('.gemini-card');
