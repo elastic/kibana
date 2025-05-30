@@ -140,7 +140,7 @@ export const createNavigationTree = ({
                     breadcrumbStatus: 'hidden',
                   },
                 ],
-              }
+              },
             ],
           },
           {
