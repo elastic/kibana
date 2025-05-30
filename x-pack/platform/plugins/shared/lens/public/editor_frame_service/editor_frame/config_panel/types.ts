@@ -36,6 +36,7 @@ export interface ConfigPanelWrapperProps {
   hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
+  parentApi?: unknown;
 }
 
 export interface LayerPanelProps {
@@ -85,6 +86,7 @@ export interface LayerPanelProps {
   displayLayerSettings: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
+  parentApi?: unknown;
 }
 
 export interface LayerDatasourceDropProps {

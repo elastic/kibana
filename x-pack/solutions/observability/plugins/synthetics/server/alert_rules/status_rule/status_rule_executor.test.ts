@@ -93,6 +93,46 @@ describe('StatusRuleExecutor', () => {
       });
     });
 
+    it('should use all monitorLocationIds when params locations is an empty array', async () => {
+      // Create a spy on the queryMonitorStatusAlert function
+      const queryMonitorStatusAlertModule = await import('./queries/query_monitor_status_alert');
+      const spy = jest
+        .spyOn(queryMonitorStatusAlertModule, 'queryMonitorStatusAlert')
+        .mockResolvedValue({
+          upConfigs: {},
+          downConfigs: {},
+          enabledMonitorQueryIds: [],
+        });
+
+      // Create a new instance with empty locations array
+      const statusRuleWithEmptyLocations = new StatusRuleExecutor(serverMock, monitorClient, {
+        params: {
+          locations: [], // Empty locations array
+        },
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+
+      // Mock the getAllMonitors function to return test monitors with a location
+      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
+
+      // Execute
+      await statusRuleWithEmptyLocations.getDownChecks({});
+
+      // Verify that queryMonitorStatusAlert was called passing the monitor location
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          monitorLocationIds: ['us_central_qa'],
+        })
+      );
+    });
+
     it('marks deleted configs as expected', async () => {
       jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
 

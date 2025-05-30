@@ -42,6 +42,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     indexPatterns,
     dateRange,
     expressions,
+    esqlVariables,
   } = props;
 
   useEffect(() => {
@@ -55,7 +56,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           undefined,
           Object.values(indexPatterns).length
             ? Object.values(indexPatterns)[0].timeFieldName
-            : undefined
+            : undefined,
+          esqlVariables
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
@@ -88,6 +90,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props,
     props.expressions,
     query,
+    esqlVariables,
   ]);
 
   const selectedField = useMemo(() => {

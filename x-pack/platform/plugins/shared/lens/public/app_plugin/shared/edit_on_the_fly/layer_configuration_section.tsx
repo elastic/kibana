@@ -28,6 +28,7 @@ export function LayerConfiguration({
   setIsInlineFlyoutVisible,
   getUserMessages,
   onlyAllowSwitchToSubtypes,
+  parentApi,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -63,6 +64,7 @@ export function LayerConfiguration({
     indexPatternService,
     setIsInlineFlyoutVisible,
     getUserMessages,
+    parentApi,
   };
   return (
     <div
