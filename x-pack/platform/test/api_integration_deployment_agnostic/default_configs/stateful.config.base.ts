@@ -70,9 +70,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     const idpPath = require.resolve(
       '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
     );
+
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '@kbn/test-suites-xpack/security_api_integration/plugins/saml_provider'
+      '../../security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
