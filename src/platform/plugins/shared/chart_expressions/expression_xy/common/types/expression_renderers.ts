@@ -18,6 +18,9 @@ export interface XYChartProps {
   args: XYProps;
   syncTooltips: boolean;
   syncCursor: boolean;
+  /**
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
+   */
   syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedXYOverrides & AllowedSettingsOverrides & AllowedChartOverrides;

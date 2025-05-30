@@ -23,6 +23,9 @@ interface GetExpressionRendererPropsParams {
   timeRange?: TimeRange;
   disableTriggers?: boolean;
   settings: {
+    /**
+     * @deprecated See https://github.com/elastic/kibana/issues/200272
+     */
     syncColors?: boolean;
     syncCursor?: boolean;
     syncTooltips?: boolean;

@@ -30,6 +30,9 @@ export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
+  /**
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
+   */
   syncColors?: boolean;
   syncCursor?: boolean;
   syncTooltips?: boolean;

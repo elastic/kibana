@@ -47,6 +47,9 @@ interface GetExpressionRendererPropsParams {
   disableTriggers?: boolean;
   renderMode?: RenderMode;
   settings: {
+    /**
+     * @deprecated See https://github.com/elastic/kibana/issues/200272
+     */
     syncColors?: boolean;
     syncCursor?: boolean;
     syncTooltips?: boolean;

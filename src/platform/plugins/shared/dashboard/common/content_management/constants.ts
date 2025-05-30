@@ -18,6 +18,9 @@ export const DEFAULT_PANEL_HEIGHT = 15;
 export const DEFAULT_DASHBOARD_OPTIONS = {
   hidePanelTitles: false,
   useMargins: true,
+  /**
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
+   **/
   syncColors: true,
   syncCursor: true,
   syncTooltips: true,
