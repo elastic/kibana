@@ -36,6 +36,8 @@ import { UserPrivilegesProvider } from '../components/user_privileges/user_privi
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createMockStore } from './create_store';
 import type { StartServices } from '../../types';
+import { TimelineModal } from '../../timelines/components/modal';
+import { TimelineId } from '../../../common/types/timeline';
 
 interface Props {
   children?: React.ReactNode;
@@ -47,6 +49,9 @@ interface Props {
 
 export const kibanaMock = createStartServicesMock();
 
+const mockRef = {
+  current: null,
+};
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
@@ -90,6 +95,7 @@ export const TestProvidersComponent = ({
                         >
                           <EuiProvider highContrastMode={false}>
                             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                            <TimelineModal timelineId={TimelineId.test} openToggleRef={mockRef} />
                           </EuiProvider>
                         </CellActionsProvider>
                       </ConsoleManager>
