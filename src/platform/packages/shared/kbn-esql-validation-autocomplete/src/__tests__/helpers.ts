@@ -90,6 +90,13 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const editorExtensions = [
+  {
+    name: 'Logs Count by Host',
+    query: 'from logs* | STATS count(*) by host',
+  },
+];
+
 export function getCallbackMocks(): ESQLCallbacks {
   return {
     getColumnsFor: jest.fn(async ({ query } = {}) => {
@@ -119,11 +126,11 @@ export function getCallbackMocks(): ESQLCallbacks {
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
-    getEditorExtensions: jest.fn(async (queryString: string) => [
-      {
-        name: 'Logs Count by Host',
-        query: 'from logs* | STATS count(*) by host',
-      },
-    ]),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return editorExtensions;
+      }
+      return [];
+    }),
   };
 }

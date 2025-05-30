@@ -83,8 +83,8 @@ import {
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import {
-  getRecommendedQueriesSuggestions,
-  mapRecommendedQueriesFromExtensionsRegistry,
+  getRecommendedQueriesSuggestionsFromStaticTemplates,
+  mapRecommendedQueriesFromExtensions,
   getRecommendedQueriesTemplatesFromExtensions,
 } from './recommended_queries/suggestions';
 
@@ -142,12 +142,17 @@ export async function suggest(
         );
         const editorExtensions =
           (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
-        // make it a helper function
         const recommendedQueriesSuggestionsFromExtensions =
-          mapRecommendedQueriesFromExtensionsRegistry(editorExtensions);
-        recommendedQueriesSuggestions.push(...recommendedQueriesSuggestionsFromExtensions);
+          mapRecommendedQueriesFromExtensions(editorExtensions);
+
+        const recommendedQueriesSuggestionsFromStaticTemplates =
+          await getRecommendedQueriesSuggestionsFromStaticTemplates(
+            getFieldsByTypeEmptyState,
+            fromCommand
+          );
         recommendedQueriesSuggestions.push(
-          ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
+          ...recommendedQueriesSuggestionsFromExtensions,
+          ...recommendedQueriesSuggestionsFromStaticTemplates
         );
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
@@ -339,14 +344,16 @@ async function getSuggestionsWithinCommandExpression(
     });
   }
 
+  // Function returning suggestions from static templates and editor extensions
   const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
-    const recommendedQueriesExtensions =
-      (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
+    const recommendedQueriesFromExtensions =
+      getRecommendedQueriesTemplatesFromExtensions(editorExtensions);
 
-    return [
-      ...getRecommendedQueriesTemplatesFromExtensions(recommendedQueriesExtensions),
-      ...(await getRecommendedQueriesSuggestions(getColumnsByType, prefix)),
-    ];
+    const recommendedQueriesFromTemplates =
+      await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
+
+    return [...recommendedQueriesFromExtensions, ...recommendedQueriesFromTemplates];
   };
 
   return commandDef.suggest({
