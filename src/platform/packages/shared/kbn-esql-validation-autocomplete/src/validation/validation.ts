@@ -9,7 +9,6 @@
 
 import {
   ESQLAst,
-  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -55,7 +54,6 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -118,6 +116,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getVariables: [],
   canSuggestVariables: [],
   getJoinIndices: [],
+  getTimeseriesIndices: [],
 };
 
 /**
@@ -221,12 +220,6 @@ function validateCommand(
   }
 
   switch (commandDef.name) {
-    case 'ts': {
-      const metrics = command as ESQLAstTimeseriesCommand;
-      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
-      messages.push(...metricsCommandErrors);
-      break;
-    }
     case 'join': {
       const join = command as ESQLAstJoinCommand;
       const joinCommandErrors = validateJoinCommand(join, references);

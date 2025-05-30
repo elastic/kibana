@@ -44,6 +44,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   type KnowledgeBaseEsEntry = Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>[0];
 
   describe('Knowledge base: when changing from ELSER to E5-like model', function () {
+    this.tags(['skipCloud']);
     let elserEntriesFromApi: KnowledgeBaseEntry[];
     let elserEntriesFromEs: KnowledgeBaseEsEntry[];
     let elserInferenceId: string;

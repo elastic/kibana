@@ -13,7 +13,7 @@ import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/common';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
 
 jest.mock('../../id_generator');
 
@@ -37,7 +37,6 @@ function mockFrame(): FramePublicAPI {
 
 const metricVisualization = getLegacyMetricVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
-  theme: themeServiceMock.createStartContract(),
 });
 
 describe('metric_visualization', () => {
@@ -128,7 +127,13 @@ describe('metric_visualization', () => {
             layerType: LayerTypes.DATA,
             palette: {
               type: 'palette',
-              name: 'status',
+              name: CUSTOM_PALETTE,
+              params: {
+                stops: [
+                  { color: 'blue', stop: 0 },
+                  { color: 'yellow', stop: 100 },
+                ],
+              },
             },
           },
           layerId: 'l1',
@@ -138,7 +143,7 @@ describe('metric_visualization', () => {
         groups: [
           expect.objectContaining({
             accessors: expect.arrayContaining([
-              { columnId: 'a', triggerIconType: 'colorBy', palette: [] },
+              { columnId: 'a', triggerIconType: 'colorBy', palette: ['blue', 'yellow'] },
             ]),
           }),
         ],
