@@ -751,6 +751,22 @@
                 "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
+              },
+              {
+                "plugin": "productIntercept",
+                "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
               },
