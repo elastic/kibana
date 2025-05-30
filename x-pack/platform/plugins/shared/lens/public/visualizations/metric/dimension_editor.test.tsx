@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
