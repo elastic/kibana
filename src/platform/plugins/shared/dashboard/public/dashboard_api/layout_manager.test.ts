@@ -8,7 +8,7 @@
  */
 
 import type { DashboardPanelMap } from '../../common';
-import { initializePanelsManager } from './panels_manager';
+import { initializeLayoutManager } from './layout_manager';
 import { initializeTrackPanel } from './track_panel';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { PhaseEvent, PublishingSubject } from '@kbn/presentation-publishing';
@@ -18,7 +18,7 @@ const trackPanelMock = {
   setHighlightPanelId: jest.fn(),
 } as unknown as ReturnType<typeof initializeTrackPanel>;
 
-describe('panels manager', () => {
+describe('layout manager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -39,48 +39,42 @@ describe('panels manager', () => {
   };
 
   it('can register child APIs', () => {
-    const panelsManager = initializePanelsManager(undefined, panels, trackPanelMock, () => []);
+    const panelsManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
     panelsManager.internalApi.registerChildApi(childApi);
     expect(panelsManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(childApi);
   });
 
   it('serializes the latest state of all panels', () => {
-    const panelsManager = initializePanelsManager(undefined, panels, trackPanelMock, () => []);
+    const panelsManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
 
     panelsManager.internalApi.registerChildApi(childApi);
     panelsManager.internalApi.setChildState(panels.panelOne.gridData.i, {
       rawState: { title: 'Updated Panel One' },
     });
-    const serializedPanels = panelsManager.internalApi.serializePanels();
-    expect(serializedPanels).toEqual({
-      panels: {
-        panelOne: {
-          gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
-          type: 'testPanelType',
-          explicitInput: { title: 'Updated Panel One' },
-        },
+    const serializedLayout = panelsManager.internalApi.serializeLayout();
+    expect(serializedLayout.panels).toEqual({
+      panelOne: {
+        gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
+        type: 'testPanelType',
+        explicitInput: { title: 'Updated Panel One' },
       },
-      references: [],
     });
   });
 
   it('serializes the latest state of all panels when an unrecoverable error has occurred on a child API', () => {
-    const panelsManager = initializePanelsManager(undefined, panels, trackPanelMock, () => []);
+    const panelsManager = initializeLayoutManager(undefined, panels, {}, trackPanelMock, () => []);
 
     // if an unrecoverable error occurred, the child API should not be registered
     expect(panelsManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(undefined);
 
     // serializing should still work, returning the last known state of the panel
-    const serializedPanels = panelsManager.internalApi.serializePanels();
-    expect(serializedPanels).toEqual({
-      panels: {
-        panelOne: {
-          gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
-          type: 'testPanelType',
-          explicitInput: { title: 'Panel One' },
-        },
+    const serializedLayout = panelsManager.internalApi.serializeLayout();
+    expect(serializedLayout.panels).toEqual({
+      panelOne: {
+        gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
+        type: 'testPanelType',
+        explicitInput: { title: 'Panel One' },
       },
-      references: [],
     });
   });
 });
