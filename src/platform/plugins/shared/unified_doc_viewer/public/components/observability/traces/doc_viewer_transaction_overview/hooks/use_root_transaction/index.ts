@@ -15,6 +15,7 @@ import {
   SPAN_ID_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
@@ -72,8 +73,9 @@ async function getRootTransaction({
 }
 
 export interface Transaction {
-  duration: number;
-  [SPAN_ID_FIELD]: string;
+  duration: number | null;
+  [SPAN_ID_FIELD]: string | null;
+  [TRANSACTION_ID_FIELD]: string | null;
 }
 
 const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams) => {
@@ -99,10 +101,13 @@ const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams)
         const fields = result.rawResponse.hits.hits[0]?.fields;
         const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
         const spanId = fields?.[SPAN_ID_FIELD];
+        const transactionId = fields?.[TRANSACTION_ID_FIELD];
 
         setTransaction({
           duration: transactionDuration || null,
           [SPAN_ID_FIELD]: spanId || null,
+          [TRANSACTION_ID_FIELD]: transactionId || null, // añadir tb transactionId porque parece que no siempre hay spanID, usar transactionId primero y spanId como fallback
+          // o las trazas tienen SIEMPRE span.id y el hecho de qu eno tengan es algo de synthrace, vale no, he mirado enedge-oblt y sí que hay transactions sin span.id
         });
       } catch (err) {
         if (!signal.aborted) {
@@ -129,7 +134,6 @@ const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams)
       controller.abort();
     };
   }, [data, core.notifications.toasts, traceId, indexPattern]);
-
   return { loading, transaction };
 };
 

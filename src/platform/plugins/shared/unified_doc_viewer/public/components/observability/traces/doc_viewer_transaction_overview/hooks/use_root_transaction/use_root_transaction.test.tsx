@@ -15,6 +15,7 @@ import { RootTransactionProvider, useRootTransactionContext } from '.';
 import {
   SPAN_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 
@@ -74,6 +75,7 @@ describe('useRootTransaction hook', () => {
     const transactionName = 'Test Transaction';
     const transactionDuration = 1;
     const spanId = 'spanId';
+    const transactionId = 'transactionId';
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
@@ -83,6 +85,7 @@ describe('useRootTransaction hook', () => {
                 [TRANSACTION_NAME_FIELD]: transactionName,
                 [TRANSACTION_DURATION_FIELD]: transactionDuration,
                 [SPAN_ID_FIELD]: spanId,
+                [TRANSACTION_ID_FIELD]: transactionId,
               },
             },
           ],
@@ -97,6 +100,7 @@ describe('useRootTransaction hook', () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.transaction?.duration).toBe(transactionDuration);
     expect(result.current.transaction?.[SPAN_ID_FIELD]).toBe(spanId);
+    expect(result.current.transaction?.[TRANSACTION_ID_FIELD]).toBe(transactionId);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
