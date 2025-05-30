@@ -221,6 +221,7 @@ export function validateParams(anyParams: unknown): string | undefined {
         defaultMessage: '[threshold]: is required to be 0',
       });
     }
+
     // The esqlQuery type does not validate groupBy, as any groupBy other than 'row' is considered to be 'all'
     return;
   }

@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import * as i18n from './translations';
 import { AuthenticationsHostTable } from './authentications_host_table';

@@ -12,6 +12,7 @@ import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
 import {
+  OverviewView,
   selectOverviewTrends,
   setFlyoutConfig,
   setOverviewPageStateAction,
@@ -31,9 +32,11 @@ import { OverviewLoader } from '../../synthetics/components/monitors_page/overvi
 export const StatusGridComponent = ({
   reload$,
   filters,
+  view,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
+  view: OverviewView;
 }) => {
   const overviewStore = useRef(getOverviewStore());
 
@@ -43,7 +46,7 @@ export const StatusGridComponent = ({
 
   const monitorOverviewListComponent = (
     <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} />
+      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
     </SyntheticsEmbeddableContext>
   );
 
@@ -111,9 +114,11 @@ const SingleMonitorView = () => {
 const MonitorsOverviewList = ({
   filters,
   singleMonitor,
+  view,
 }: {
   filters: MonitorFilters;
   singleMonitor?: boolean;
+  view: OverviewView;
 }) => {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -129,9 +134,9 @@ const MonitorsOverviewList = ({
     );
   }, [dispatch, filters]);
 
-  if (singleMonitor) {
+  if (singleMonitor && view === 'cardView') {
     return <SingleMonitorView />;
   }
 
-  return <OverviewGrid />;
+  return <OverviewGrid view={view} isEmbeddable />;
 };

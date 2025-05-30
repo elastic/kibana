@@ -24,6 +24,7 @@ interface Props {
   onToggle?: (newState: 'open' | 'closed') => void;
   replacements?: Replacements;
   setIsOpen: React.Dispatch<React.SetStateAction<'open' | 'closed'>>;
+  setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   showAnonymized?: boolean;
 }
 
@@ -35,6 +36,7 @@ const PanelHeaderComponent: React.FC<Props> = ({
   onToggle,
   replacements,
   setIsOpen,
+  setSelectedAttackDiscoveries,
   showAnonymized = false,
 }) => (
   <EuiFlexGroup
@@ -59,7 +61,11 @@ const PanelHeaderComponent: React.FC<Props> = ({
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <SummaryActions attackDiscovery={attackDiscovery} replacements={replacements} />
+      <SummaryActions
+        attackDiscovery={attackDiscovery}
+        replacements={replacements}
+        setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

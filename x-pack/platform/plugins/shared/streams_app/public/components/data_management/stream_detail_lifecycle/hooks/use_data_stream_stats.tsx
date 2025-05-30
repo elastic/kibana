@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -16,7 +16,11 @@ export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][
   bytesPerDay: number;
 };
 
-export const useDataStreamStats = ({ definition }: { definition: IngestStreamGetResponse }) => {
+export const useDataStreamStats = ({
+  definition,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+}) => {
   const {
     services: { dataStreamsClient },
   } = useKibana();

@@ -10,6 +10,10 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
+import {
+  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
+  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
+} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -467,6 +471,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 id: 'dashboard-1',
               },
             ],
+            investigation_guide: {
+              blob: '## Summary',
+            },
           },
         };
 
@@ -505,6 +512,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             notify_when: 'onThrottleInterval',
             artifacts: {
               dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+              investigation_guide: {
+                blob: '## Summary',
+              },
             },
           })
           .expect(200);
@@ -526,6 +536,64 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             refId: 'dashboard_1',
           },
         ]);
+        expect((esUpdateResponse.body._source as any)?.alert.artifacts.investigation_guide).to.eql({
+          blob: '## Summary',
+        });
+      });
+
+      it('should not allow updating of dashboards with > dashboard length limit', async () => {
+        // create a rule
+        const createResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              artifacts: {
+                // push more dashboards than allowed
+                dashboards: Array.from(
+                  { length: MAX_ARTIFACTS_DASHBOARDS_LENGTH + 1 },
+                  (_, idx) => ({ id: `dashboard-${idx}` })
+                ),
+              },
+            })
+          )
+          .expect(400);
+      });
+
+      it('should not allow updating investigation_guide with length > limit', async () => {
+        // create a rule
+        const createResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        const longInvestigationGuideBlob = 'a'.repeat(MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH + 1);
+        await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              artifacts: {
+                dashboards: [
+                  {
+                    id: 'dashboard-1',
+                  },
+                ],
+                // push a longer `investigation_guide` than allowed
+                investigation_guide: {
+                  blob: longInvestigationGuideBlob,
+                },
+              },
+            })
+          )
+          .expect(400);
       });
     });
   });

@@ -25,12 +25,12 @@ export { suggest } from './src/autocomplete/autocomplete';
  */
 export type {
   ValidationErrors,
-  ESQLVariable,
-  ESQLRealField,
+  ESQLUserDefinedColumn,
+  ESQLFieldWithMetadata,
   ESQLPolicy,
   ErrorTypes as ESQLValidationErrorTypes,
 } from './src/validation/types';
-export { collectVariables } from './src/shared/variables';
+export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 export {
   getAllFunctions,
   isSupportedFunction,
@@ -62,3 +62,5 @@ export {
 } from './src/shared/resources_helpers';
 
 export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';
+
+export { esqlFunctionNames } from './src/definitions/generated/function_names';

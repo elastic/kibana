@@ -35,7 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
 
-  describe('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/218325
+  describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {
       await installTinyElser({ es, ml, log });
       await setupKnowledgeBase(supertest, log);

@@ -20,11 +20,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AIConnector } from '@kbn/elastic-assistant';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { getDescription } from './get_description';
 import * as i18n from '../translations';
 import type { ConnectorFilterOptionData } from '../../types';
+import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 
 const LIST_PROPS = {
   isVirtualized: false,
@@ -33,21 +34,20 @@ const LIST_PROPS = {
 
 interface Props {
   aiConnectors: AIConnector[] | undefined;
-  connectorFilterItems: Array<EuiSelectableOption<ConnectorFilterOptionData>>;
   connectorNames: string[] | undefined;
   isLoading?: boolean;
-  setConnectorFilterItems: React.Dispatch<
-    React.SetStateAction<Array<EuiSelectableOption<ConnectorFilterOptionData>>>
-  >;
+  selectedConnectorNames: string[];
+  setSelectedConnectorNames: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const ConnectorFilterComponent: React.FC<Props> = ({
   aiConnectors,
-  connectorFilterItems,
   connectorNames,
   isLoading = false,
-  setConnectorFilterItems,
+  selectedConnectorNames,
+  setSelectedConnectorNames,
 }) => {
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -63,16 +63,15 @@ const ConnectorFilterComponent: React.FC<Props> = ({
     prefix: 'connectorFilterGroupPopover',
   });
 
-  // re-populate the items when the connectors or names change
-  useEffect(() => {
-    if (aiConnectors != null && connectorNames != null) {
-      setConnectorFilterItems((prevItems) =>
-        connectorNames.map((name) => {
-          const connector = aiConnectors.find((x) => x.name === name);
-          const previousItem = prevItems.find((item) => item.key === name);
+  const connectorFilterItems: Array<EuiSelectableOption<ConnectorFilterOptionData>> =
+    useMemo(() => {
+      return (
+        connectorNames?.map((name) => {
+          const connector = aiConnectors?.find((x) => x.name === name);
+          const checked = selectedConnectorNames?.find((x) => x === name) !== undefined;
 
           return {
-            checked: previousItem?.checked ?? undefined,
+            checked: checked ? 'on' : undefined,
             data: {
               description: getDescription(connector?.actionTypeId),
               deleted: connector == null,
@@ -80,10 +79,9 @@ const ConnectorFilterComponent: React.FC<Props> = ({
             label: name,
             key: name,
           };
-        })
+        }) ?? []
       );
-    }
-  }, [aiConnectors, connectorNames, setConnectorFilterItems]);
+    }, [aiConnectors, connectorNames, selectedConnectorNames]);
 
   const renderOption = useCallback(
     (option: EuiSelectableOption<ConnectorFilterOptionData>) => (
@@ -118,13 +116,10 @@ const ConnectorFilterComponent: React.FC<Props> = ({
             <EuiFlexItem grow={true}>
               <EuiText
                 color={option.deleted ? euiTheme.colors.textSubdued : undefined}
-                css={css`
-                  font-style: ${option.deleted ? 'italic' : 'normal'};
-                `}
                 data-test-subj="optionDescription"
                 size="s"
               >
-                {option.deleted ? i18n.DELETED : option.description}
+                {option.deleted ? '-' : option.description}
               </EuiText>
             </EuiFlexItem>
 
@@ -173,9 +168,14 @@ const ConnectorFilterComponent: React.FC<Props> = ({
 
   const onSelectableChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      setConnectorFilterItems(newOptions);
+      const newSelectedConnectorNames = newOptions
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.label);
+
+      setSelectedConnectorNames(newSelectedConnectorNames);
+      invalidateFindAttackDiscoveries();
     },
-    [setConnectorFilterItems]
+    [invalidateFindAttackDiscoveries, setSelectedConnectorNames]
   );
 
   return (

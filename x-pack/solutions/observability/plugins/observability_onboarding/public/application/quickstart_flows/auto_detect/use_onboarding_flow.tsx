@@ -40,14 +40,7 @@ export function useOnboardingFlow() {
 
   // Create onboarding session
   const { data, error, refetch } = useFetcher(
-    (callApi) =>
-      callApi('POST /internal/observability_onboarding/flow', {
-        params: {
-          body: {
-            name: 'auto-detect',
-          },
-        },
-      }),
+    (callApi) => callApi('POST /internal/observability_onboarding/flow'),
     [],
     { showToastOnError: false }
   );
