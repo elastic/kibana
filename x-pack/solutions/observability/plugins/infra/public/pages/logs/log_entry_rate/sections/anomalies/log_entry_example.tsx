@@ -95,11 +95,11 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
       }),
       ...(dataset
         ? {
-          logFilter: encode({
-            expression: `${partitionField}: ${dataset}`,
-            kind: 'kuery',
-          }),
-        }
+            logFilter: encode({
+              expression: `${partitionField}: ${dataset}`,
+              kind: 'kuery',
+            }),
+          }
         : {}),
     },
   });
