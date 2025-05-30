@@ -882,6 +882,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       unprivilegedMode: `${ELASTIC_DOCS}reference/fleet/elastic-agent-unprivileged#unprivileged-change-mode`,
       httpMonitoring: `${ELASTIC_DOCS}reference/fleet/agent-policy#change-policy-enable-agent-monitoring`,
       agentLevelLogging: `${ELASTIC_DOCS}reference/fleet/monitor-elastic-agent#change-logging-level`,
+      remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
