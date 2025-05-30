@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, filter, map as lodashMap, max } from 'lodash';
+import { filter, map as lodashMap, max } from 'lodash';
 import { BehaviorSubject, Observable, combineLatestWith, debounceTime, map, merge } from 'rxjs';
 import { v4 } from 'uuid';
 
@@ -105,7 +105,7 @@ export function initializeLayoutManager(
         explicitInput: currentChildState[panelId]?.rawState ?? {},
       };
     }
-    return { panels, sections: layout.sections, references };
+    return { panels, sections: { ...layout.sections }, references };
   };
 
   const resetLayout = ({
@@ -421,7 +421,7 @@ export function initializeLayoutManager(
 
       /** Sections */
       addNewSection: () => {
-        const newLayout = cloneDeep(layout$.getValue());
+        const newLayout = { ...layout$.getValue() };
         const newId = v4();
 
         // find the max y so we know where to add the section
