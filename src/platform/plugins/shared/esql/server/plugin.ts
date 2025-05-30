@@ -40,28 +40,6 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
     });
 
     registerRoutes(core, this.extensionsRegistry, initContext);
-    // temporary
-    this.extensionsRegistry.setRecommendedQueries(
-      [
-        {
-          name: 'Logs count by log level',
-          query: 'from logs* | STATS count(*) by log_level',
-        },
-        {
-          name: 'Meow and woof counts',
-          query: 'from logs* | STATS count(*)',
-        },
-        {
-          name: 'Zzzzz',
-          query: 'from logs-apache_error | STATS count(*)',
-        },
-        {
-          name: 'ouch',
-          query: 'from kibana_sample_data_ecommerce | STATS count(*)',
-        },
-      ],
-      'oblt'
-    );
 
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,

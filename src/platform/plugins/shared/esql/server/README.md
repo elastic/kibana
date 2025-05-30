@@ -59,6 +59,10 @@ Here's an example of how to register `recommendedQueries`:
               name: 'Apache logs counts',
               query: 'from logs-apache_error | STATS count(*)',
             },
+            {
+              name: 'Another index, not logs',
+              query: 'from movies | STATS count(*)',
+            },
           ],
             'oblt'
         );
