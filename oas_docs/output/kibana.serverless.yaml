@@ -28092,6 +28092,68 @@ paths:
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets:
+    delete:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: pkgVersion
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: packagePolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Delete assets for an input package
+      tags:
+        - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
     delete:
       description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
