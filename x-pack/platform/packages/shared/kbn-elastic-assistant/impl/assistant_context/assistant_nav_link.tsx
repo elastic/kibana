@@ -52,10 +52,7 @@ export const AssistantNavLink: FC = () => {
       });
     };
 
-    if (
-      assistantAvailability.hasAssistantPrivilege &&
-      chromeStyle
-    ) {
+    if (assistantAvailability.hasAssistantPrivilege && chromeStyle) {
       registerPortalNode();
     }
   }, [chrome, portalNode, assistantAvailability.hasAssistantPrivilege, chromeStyle, currentAppId]);

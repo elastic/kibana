@@ -104,7 +104,7 @@ export class MlAdapter implements MlPluginSetupInterface {
    * Important note about circular dependencies:
    * We've completely removed the discover->elasticAssistant->ml->discover circular dependency
    * by removing the direct reference from ML to discover. ML now has no dependency on discover.
-   * 
+   *
    * This adapter ensures elasticAssistant can still work with ML functionality
    * even though the direct dependency chain has been broken.
    */

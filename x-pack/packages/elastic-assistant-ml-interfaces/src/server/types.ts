@@ -56,11 +56,11 @@ export interface EsMlApiInterface {
    * Get memory stats
    */
   getMemoryStats(params: { human: boolean }): Promise<MlMemoryStatsResponse>;
-  
+
   /**
    * Start trained model deployment
    */
   startTrainedModelDeployment(params: any): Promise<any>;
-  
+
   // Add other ML ES API methods used by Elastic Assistant
 }

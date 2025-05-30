@@ -22,10 +22,7 @@ export interface DiscoverAdapterInterface {
  * When discover is not available, it provides fallback behavior
  */
 export class DiscoverAdapter implements DiscoverAdapterInterface {
-  constructor(
-    private readonly discoverPlugin: any | undefined,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly discoverPlugin: any | undefined, private readonly logger: Logger) {}
 
   /**
    * Check if discover plugin is available

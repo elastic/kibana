@@ -11,7 +11,7 @@ export type {
   SavedObjectsClientInterface,
   MlPluginSetupInterface,
   MlMemoryStatsResponse,
-  EsMlApiInterface
+  EsMlApiInterface,
 } from './types';
 
 // Provider interfaces

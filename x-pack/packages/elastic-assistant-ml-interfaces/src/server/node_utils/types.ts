@@ -13,7 +13,7 @@ export interface MlNodeCountResponse {
    * Count of dedicated ML nodes
    */
   count: number;
-  
+
   /**
    * Count of lazy ML nodes
    */
