@@ -9,7 +9,12 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { numberToDuration } from '@kbn/reporting-common';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
-import { SCHEDULED_REPORTING_EXECUTE_TYPE, ScheduledReportTaskParams } from '.';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import {
+  SCHEDULED_REPORTING_EXECUTE_TYPE,
+  ScheduledReportTaskParams,
+  ScheduledReportTaskParamsWithoutSpaceId,
+} from '.';
 import type { SavedReport } from '../store';
 import { errorLogger } from './error_logger';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -34,6 +39,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     let jobId: string;
     const task = scheduledReportTaskParams as ScheduledReportTaskParams;
     const reportSoId = task.id;
+    const reportSpaceId = task.spaceId || DEFAULT_SPACE_ID;
 
     try {
       if (!reportSoId) {
@@ -42,10 +48,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         );
       }
 
-      const internalSoClient = await this.opts.reporting.getSoClient();
+      const internalSoClient = await this.opts.reporting.getInternalSoClient();
       const reportSO = await internalSoClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-        reportSoId
+        reportSoId,
+        { namespace: reportSpaceId }
       );
 
       const store = await this.opts.reporting.getStore();
@@ -95,10 +102,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
     const { runAt, params } = taskInstance;
     const task = params as ScheduledReportTaskParams;
-    const internalSoClient = await this.opts.reporting.getSoClient();
+    const internalSoClient = await this.opts.reporting.getInternalSoClient();
     const reportSO = await internalSoClient.get<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-      task.id
+      task.id,
+      { namespace: spaceId }
     );
     const { notification } = reportSO.attributes;
     if (notification && notification.email && notification.email.to) {
@@ -134,13 +142,18 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     };
   }
 
-  public async scheduleTask(request: KibanaRequest, params: ScheduledReportTaskParams) {
+  public async scheduleTask(
+    request: KibanaRequest,
+    params: ScheduledReportTaskParamsWithoutSpaceId
+  ) {
+    const spaceId = this.opts.reporting.getSpaceId(request, this.logger);
     const taskInstance: ScheduledReportTaskInstance = {
       id: params.id,
       taskType: SCHEDULED_REPORTING_EXECUTE_TYPE,
       state: {},
       params: {
         id: params.id,
+        spaceId: spaceId || DEFAULT_SPACE_ID,
         jobtype: params.jobtype,
       },
       schedule: params.schedule,

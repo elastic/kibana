@@ -111,7 +111,7 @@ describe('Run Scheduled Report Task', () => {
     configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
 
-    soClient = await mockReporting.getSoClient();
+    soClient = await mockReporting.getInternalSoClient();
     soClient.get = jest.fn().mockImplementation(async () => {
       return reportSO;
     });
@@ -256,6 +256,7 @@ describe('Run Scheduled Report Task', () => {
         state: {},
         params: {
           id: 'report-so-id',
+          spaceId: 'default',
           jobtype: 'test1',
         },
         schedule: {
@@ -299,7 +300,9 @@ describe('Run Scheduled Report Task', () => {
 
     await taskRunner.run();
 
-    expect(soClient.get).toHaveBeenCalledWith('scheduled_report', 'report-so-id');
+    expect(soClient.get).toHaveBeenCalledWith('scheduled_report', 'report-so-id', {
+      namespace: 'default',
+    });
     expect(reportStore.addReport).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: expect.any(String),

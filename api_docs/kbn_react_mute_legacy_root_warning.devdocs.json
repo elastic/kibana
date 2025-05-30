@@ -29,7 +29,7 @@
           "\nAfter we upgrade to React 18, we will see a warning in the console that we are using the legacy ReactDOM.render API.\nThis warning is expected as we are in the process of migrating to the new createRoot API.\nHowever, it is very noisy and we want to mute it for now."
         ],
         "signature": [
-          "() => void"
+          "() => () => void"
         ],
         "path": "src/platform/packages/private/kbn-react-mute-legacy-root-warning/index.ts",
         "deprecated": false,

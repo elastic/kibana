@@ -58,7 +58,7 @@ import {
   RunSingleReportTask,
   ReportTaskParams,
   RunScheduledReportTask,
-  ScheduledReportTaskParams,
+  ScheduledReportTaskParamsWithoutSpaceId,
 } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
@@ -184,6 +184,7 @@ export class ReportingCore {
     const emailNotificationService = new EmailNotificationService({
       notifications,
     });
+
     const { runSingleReportTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
     await Promise.all([
@@ -352,7 +353,10 @@ export class ReportingCore {
     return await this.runSingleReportTask.scheduleTask(request, report);
   }
 
-  public async scheduleRecurringTask(request: KibanaRequest, report: ScheduledReportTaskParams) {
+  public async scheduleRecurringTask(
+    request: KibanaRequest,
+    report: ScheduledReportTaskParamsWithoutSpaceId
+  ) {
     return await this.runScheduledReportTask.scheduleTask(request, report);
   }
 
@@ -412,18 +416,16 @@ export class ReportingCore {
     return dataViews;
   }
 
-  public async getSoClient(request?: KibanaRequest) {
+  public async getScopedSoClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
+    });
+  }
 
-    // if request is provided, use scoped client
-    if (request) {
-      return savedObjects.getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
-      });
-    }
-
-    // otherwise use internal repository
+  public async getInternalSoClient() {
+    const { savedObjects } = await this.getPluginStartDeps();
     return savedObjects.createInternalRepository([SCHEDULED_REPORT_SAVED_OBJECT_TYPE]);
   }
 

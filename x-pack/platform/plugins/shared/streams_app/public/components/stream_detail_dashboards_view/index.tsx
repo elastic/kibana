@@ -210,6 +210,7 @@ export function StreamDetailDashboardsView({
           loading={dashboardsFetch.loading}
           selectedDashboards={selectedDashboards}
           setSelectedDashboards={canLinkAssets ? setSelectedDashboards : undefined}
+          dataTestSubj="streamsAppStreamDetailDashboardsTable"
         />
         {definition && isAddDashboardFlyoutOpen ? (
           <AddDashboardFlyout
