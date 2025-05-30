@@ -148,7 +148,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };
-    // core.chrome.getActiveSolutionNavId$().subscribe((solutionNavId) => {
 
     setKibanaServices(
       start,
