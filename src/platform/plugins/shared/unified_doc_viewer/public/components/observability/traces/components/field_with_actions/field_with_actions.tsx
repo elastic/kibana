@@ -63,7 +63,7 @@ export function FieldWithActions({
                   title={fieldMetadata.flat_name}
                   content={fieldMetadata.short}
                   color="subdued"
-                  aria-label={fieldMetadata.flat_name}
+                  aria-label={`${fieldMetadata.flat_name}: ${fieldMetadata.short}`}
                 />
               </EuiFlexItem>
             )}

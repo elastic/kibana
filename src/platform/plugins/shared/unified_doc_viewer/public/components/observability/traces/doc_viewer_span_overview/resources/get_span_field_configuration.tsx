@@ -69,7 +69,7 @@ export const getSpanFieldConfiguration = ({
         short: i18n.translate(
           'unifiedDocViewer.observability.traces.details.spanDestinationServiceResource.description',
           {
-            defaultMessage: 'Used to identify the service this span depends on.',
+            defaultMessage: 'Identifier for the destination service resource being operated on.',
           }
         ),
       },
