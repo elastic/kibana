@@ -16,7 +16,7 @@ import { cryptoFactory, type ExportType, type ReportingConfigType } from '@kbn/r
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { ExecuteReportTask, REPORTING_EXECUTE_TYPE } from '.';
+import { RunSingleReportTask, REPORTING_EXECUTE_TYPE } from '.';
 import { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
@@ -104,7 +104,7 @@ const fakeRawRequest: FakeRawRequest = {
   path: '/',
 };
 
-describe('Execute Report Task', () => {
+describe('Run Single Report Task', () => {
   let mockReporting: ReportingCore;
   let configType: ReportingConfigType;
   beforeAll(async () => {
@@ -113,7 +113,7 @@ describe('Execute Report Task', () => {
   });
 
   it('Instance setup', () => {
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     expect(task.getStatus()).toBe('uninitialized');
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
@@ -129,7 +129,7 @@ describe('Execute Report Task', () => {
 
   it('Instance start', () => {
     const mockTaskManager = taskManagerMock.createStart();
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     expect(task.init(mockTaskManager));
     expect(task.getStatus()).toBe('initialized');
   });
@@ -138,7 +138,7 @@ describe('Execute Report Task', () => {
     logger.info = jest.fn();
     logger.error = jest.fn();
 
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const taskDef = task.getTaskDefinition();
     const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
@@ -155,7 +155,11 @@ describe('Execute Report Task', () => {
       queue: { pollEnabled: false, timeout: 55000 },
     } as unknown as ReportingConfigType['queue'];
 
-    const task = new ExecuteReportTask(mockReporting, { ...configType, ...queueConfig }, logger);
+    const task = new RunSingleReportTask({
+      reporting: mockReporting,
+      config: { ...configType, ...queueConfig },
+      logger,
+    });
     expect(task.getStatus()).toBe('uninitialized');
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
@@ -175,7 +179,7 @@ describe('Execute Report Task', () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
     });
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
@@ -208,7 +212,7 @@ describe('Execute Report Task', () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: false,
     });
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
@@ -238,7 +242,7 @@ describe('Execute Report Task', () => {
       hasPermanentEncryptionKey: false,
       areNotificationsEnabled: true,
     });
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
 
@@ -275,14 +279,14 @@ describe('Execute Report Task', () => {
       jobType: 'test1',
       validLicenses: [],
     } as unknown as ExportType);
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_claimJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_completeJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
@@ -320,14 +324,14 @@ describe('Execute Report Task', () => {
       jobType: 'test2',
       validLicenses: [],
     } as unknown as ExportType);
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_claimJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test2', status: 'pending' } as never);
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_completeJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test2', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
@@ -367,14 +371,14 @@ describe('Execute Report Task', () => {
       jobType: 'test3',
       validLicenses: [],
     } as unknown as ExportType);
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_claimJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test3', status: 'pending' } as never);
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_completeJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'completeJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'test3', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
@@ -421,10 +425,10 @@ describe('Execute Report Task', () => {
         status: 'processing',
       } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
     );
-    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
     jest
-      // @ts-expect-error TS compilation fails: this overrides a private method of the ExecuteReportTask instance
-      .spyOn(task, '_claimJob')
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
       .mockResolvedValueOnce({ _id: 'test', jobtype: 'noop', status: 'pending' } as never);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);

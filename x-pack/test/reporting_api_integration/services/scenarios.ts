@@ -311,6 +311,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     );
   };
 
+  const deleteScheduledReportSOs = async (ids: string[]) => {
+    return await Promise.all(
+      ids.map((id) => esSupertest.delete(`/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/${id}`))
+    );
+  };
+
+  const getTask = async (taskId: string) => {
+    return await esSupertest.get(`/.kibana_task_manager/_doc/task:${taskId}`);
+  };
+
+  const deleteTasks = async (ids: string[]) => {
+    return await Promise.all(
+      ids.map((id) => esSupertest.delete(`/.kibana_task_manager/_doc/task:${id}`))
+    );
+  };
+
   return {
     logTaskManagerHealth,
     initEcommerce,
@@ -341,5 +357,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     makeAllReportingIndicesUnmanaged,
     getJobErrorCode,
     getScheduledReportSO,
+    deleteScheduledReportSOs,
+    getTask,
+    deleteTasks,
   };
 }

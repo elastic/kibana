@@ -19,7 +19,10 @@ import {
 } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RequestHandler, RequestParams } from './request_handler';
-import { transformRawScheduledReportToReport } from './lib';
+import {
+  transformRawScheduledReportToReport,
+  transformRawScheduledReportToTaskParams,
+} from './lib';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
@@ -108,8 +111,8 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { exportTypeId, jobParams, schedule, notification } = params;
     const { reporting, logger, req, user } = this.opts;
 
-    const soClient = await reporting.getSoClient(req);
-    const { version, job, jobType } = await this.createJob(exportTypeId, jobParams);
+    const soClient = await reporting.getScopedSoClient(req);
+    const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
     const payload = {
       ...job,
@@ -147,7 +150,14 @@ export class ScheduleRequestHandler extends RequestHandler<
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
-    // TODO - Schedule the report with Task Manager
+    // Schedule the report with Task Manager
+    const task = await reporting.scheduleRecurringTask(
+      req,
+      transformRawScheduledReportToTaskParams(report)
+    );
+    logger.info(
+      `Scheduled "${name}" reporting task. Task ID: task:${task.id}. Report ID: ${report.id}`
+    );
 
     return transformRawScheduledReportToReport(report);
   }

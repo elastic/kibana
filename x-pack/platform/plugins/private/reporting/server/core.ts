@@ -54,7 +54,12 @@ import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
+import {
+  RunSingleReportTask,
+  ReportTaskParams,
+  RunScheduledReportTask,
+  ScheduledReportTaskParamsWithoutSpaceId,
+} from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
@@ -100,7 +105,8 @@ export class ReportingCore {
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
-  private executeTask: ExecuteReportTask;
+  private runSingleReportTask: RunSingleReportTask;
+  private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -121,7 +127,16 @@ export class ReportingCore {
     this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-    this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.runSingleReportTask = new RunSingleReportTask({
+      reporting: this,
+      config,
+      logger: this.logger,
+    });
+    this.runScheduledReportTask = new RunScheduledReportTask({
+      reporting: this,
+      config,
+      logger: this.logger,
+    });
 
     this.getContract = () => ({
       registerExportTypes: (id) => id,
@@ -146,9 +161,10 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    const { executeTask } = this;
+    const { runSingleReportTask, runScheduledReportTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
-      [executeTask.TYPE]: executeTask.getTaskDefinition(),
+      [runSingleReportTask.TYPE]: runSingleReportTask.getTaskDefinition(),
+      [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
     });
   }
 
@@ -164,9 +180,12 @@ export class ReportingCore {
     });
 
     const { taskManager } = startDeps;
-    const { executeTask } = this;
+    const { runSingleReportTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
-    await Promise.all([executeTask.init(taskManager)]);
+    await Promise.all([
+      runSingleReportTask.init(taskManager),
+      runScheduledReportTask.init(taskManager),
+    ]);
   }
 
   public pluginStop() {
@@ -326,7 +345,14 @@ export class ReportingCore {
   }
 
   public async scheduleTask(request: KibanaRequest, report: ReportTaskParams) {
-    return await this.executeTask.scheduleTask(request, report);
+    return await this.runSingleReportTask.scheduleTask(request, report);
+  }
+
+  public async scheduleRecurringTask(
+    request: KibanaRequest,
+    report: ScheduledReportTaskParamsWithoutSpaceId
+  ) {
+    return await this.runScheduledReportTask.scheduleTask(request, report);
   }
 
   public async getStore() {
@@ -385,13 +411,17 @@ export class ReportingCore {
     return dataViews;
   }
 
-  public async getSoClient(request: KibanaRequest) {
+  public async getScopedSoClient(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-    const savedObjectsClient = savedObjects.getScopedClient(request, {
+    return savedObjects.getScopedClient(request, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
     });
-    return savedObjectsClient;
+  }
+
+  public async getInternalSoClient() {
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.createInternalRepository([SCHEDULED_REPORT_SAVED_OBJECT_TYPE]);
   }
 
   public async getDataService() {

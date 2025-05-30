@@ -60,6 +60,53 @@ describe('ReportingStore', () => {
       });
     });
 
+    it('uses report status if set', async () => {
+      const store = new ReportingStore(mockCore, mockLogger);
+      const mockReport = new Report({
+        _index: '.reporting-mock',
+        attempts: 0,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        status: 'processing',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
+        _primary_term: undefined,
+        _seq_no: undefined,
+        attempts: 0,
+        completed_at: undefined,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+        status: 'processing',
+      });
+    });
+
+    it('defaults to pending status if not set', async () => {
+      const store = new ReportingStore(mockCore, mockLogger);
+      const mockReport = new Report({
+        _index: '.reporting-mock',
+        attempts: 0,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
+        _primary_term: undefined,
+        _seq_no: undefined,
+        attempts: 0,
+        completed_at: undefined,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+        status: 'pending',
+      });
+    });
+
     it('throws if options has invalid indexInterval', async () => {
       const reportingConfig = {
         index: '.reporting-test',
@@ -181,6 +228,7 @@ describe('ReportingStore', () => {
         },
         "process_expiration": undefined,
         "queue_time_ms": undefined,
+        "scheduled_report_id": undefined,
         "started_at": undefined,
         "status": "pending",
         "timeout": 30000,

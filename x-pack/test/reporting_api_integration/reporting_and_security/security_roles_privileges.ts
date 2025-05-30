@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -14,13 +16,33 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
 
+  function testExpectedTask(
+    id: string,
+    jobtype: string,
+    task: SearchHit<{ task: SerializedConcreteTaskInstance }>
+  ) {
+    expect(task._source?.task.taskType).to.eql('report:execute-scheduled');
+
+    const params = JSON.parse(task._source?.task.params ?? '');
+    expect(params.id).to.eql(id);
+    expect(params.jobtype).to.eql(jobtype);
+
+    expect(task._source?.task.apiKey).not.to.be(undefined);
+    expect(task._source?.task.schedule?.rrule).not.to.be(undefined);
+
+    expect(task._source?.task.schedule?.interval).to.be(undefined);
+  }
   describe('Security Roles and Privileges for Applications', () => {
+    const scheduledReportIds: string[] = [];
+    const scheduledReportTaskIds: string[] = [];
     before(async () => {
       await reportingAPI.initEcommerce();
     });
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+      await reportingAPI.deleteScheduledReportSOs(scheduledReportIds);
+      await reportingAPI.deleteTasks(scheduledReportTaskIds);
     });
 
     describe('Dashboard: Generate PDF report', () => {
@@ -197,6 +219,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -235,6 +263,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -273,6 +307,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -314,6 +354,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('allowed search');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'csv_searchsource', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 

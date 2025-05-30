@@ -145,8 +145,8 @@ export class ReportingStore {
         ...report.toReportSource(),
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),
-          attempts: 0,
-          status: JOB_STATUS.PENDING,
+          attempts: report.attempts || 0,
+          status: report.status || JOB_STATUS.PENDING,
         }),
       },
     };
