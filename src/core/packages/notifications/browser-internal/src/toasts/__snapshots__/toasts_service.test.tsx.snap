@@ -8,24 +8,20 @@ Array [
         <GlobalToastList
           dismissToast={[Function]}
           reportEvent={
-            Object {
-              "onDismissToast": [Function],
+            EventReporter {
+              "reportEvent": [MockFunction],
             }
           }
           toasts$={
             Observable {
-              "operator": [Function],
-              "source": Observable {
-                "operator": [Function],
-                "source": Observable {
-                  "operator": [Function],
-                  "source": Observable {
-                    "operator": [Function],
-                    "source": Observable {
-                      "_subscribe": [Function],
-                    },
-                  },
-                },
+              "source": BehaviorSubject {
+                "_value": Array [],
+                "closed": false,
+                "currentObservers": null,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
               },
             }
           }
