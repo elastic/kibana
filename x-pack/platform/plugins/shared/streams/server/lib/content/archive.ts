@@ -31,7 +31,7 @@ import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
 
-export async function parseArchive(filename: string, archive: Readable): Promise<ContentPack> {
+export async function parseArchive(archive: Readable): Promise<ContentPack> {
   const zip: AdmZip = await new Promise((resolve, reject) => {
     const bufs: Buffer[] = [];
     archive.on('data', (chunk: Buffer) => bufs.push(chunk));
