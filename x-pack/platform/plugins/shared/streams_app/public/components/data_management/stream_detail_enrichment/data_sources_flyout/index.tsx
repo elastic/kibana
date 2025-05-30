@@ -30,12 +30,16 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiLoadingLogo,
+  EuiFormRow,
+  EuiFieldText,
+  EuiFieldTextProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import useAsync from 'react-use/lib/useAsync';
+import { Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EnrichmentDataSource, KqlSamplesDataSource } from '../../../../../common/url_schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
@@ -169,6 +173,7 @@ const DataSourcesContextMenu = ({
                       from: 'now-15m',
                       to: 'now',
                     },
+                    filters: [],
                     query: {
                       language: 'kuery',
                       query: '',
@@ -254,6 +259,12 @@ const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSource
     dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
   };
 
+  const handleQueryChange = ({ query, dateRange }: { query?: Query; dateRange: TimeRange }) =>
+    handleChange({
+      query: query as KqlSamplesDataSourceWithUIAttributes['query'],
+      time: dateRange,
+    });
+
   return (
     <DataSourceCard
       dataSourceRef={dataSourceRef}
@@ -267,25 +278,29 @@ const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSource
         { defaultMessage: 'Sample data using KQL query syntax.' }
       )}
     >
+      <NameField
+        onChange={(event) => handleChange({ name: event.target.value })}
+        value={dataSource.name}
+        disabled={isDisabled}
+      />
+      <EuiSpacer />
       {streamDataView && (
-        <StreamsAppSearchBar
-          showDatePicker
-          showFilterBar
-          showQueryInput
-          filters={dataSource.filters}
-          query={dataSource.query}
-          onFiltersUpdated={(filters) => handleChange({ filters })}
-          onQueryChange={({ query, dateRange }) =>
-            handleChange({
-              query: query as KqlSamplesDataSourceWithUIAttributes['query'],
-              time: dateRange,
-            })
-          }
-          indexPatterns={[streamDataView]}
-          isDisabled={isDisabled}
-        />
+        <>
+          <StreamsAppSearchBar
+            showDatePicker
+            showFilterBar
+            showQueryInput
+            filters={dataSource.filters}
+            query={dataSource.query}
+            onFiltersUpdated={(filters) => handleChange({ filters })}
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQueryChange}
+            indexPatterns={[streamDataView]}
+            isDisabled={isDisabled}
+          />
+          <EuiSpacer size="s" />
+        </>
       )}
-      <EuiSpacer size="s" />
     </DataSourceCard>
   );
 };
@@ -303,6 +318,24 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
         { defaultMessage: 'Manually defined sample documents.' }
       )}
     />
+  );
+};
+
+const NameField = (props: Omit<EuiFieldTextProps, 'name'>) => {
+  return (
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.name.label',
+        { defaultMessage: 'Name' }
+      )}
+      helpText={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.name.helpText',
+        { defaultMessage: 'Describe what samples the data source loads.' }
+      )}
+    >
+      <EuiFieldText fullWidth name="name" {...props} />
+    </EuiFormRow>
   );
 };
 

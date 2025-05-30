@@ -417,7 +417,9 @@ export const createStreamEnrichmentMachineImplementations = ({
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     processorMachine,
-    dataSourceMachine: dataSourceMachine.provide(createDataSourceMachineImplementations({ data })),
+    dataSourceMachine: dataSourceMachine.provide(
+      createDataSourceMachineImplementations({ data, toasts: core.notifications.toasts })
+    ),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
         data,
