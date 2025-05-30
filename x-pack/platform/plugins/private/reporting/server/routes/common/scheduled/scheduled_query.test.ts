@@ -178,7 +178,7 @@ describe('scheduledQueryFactory', () => {
     const schema = createMockConfigSchema();
     core = await createMockReportingCore(schema);
 
-    soClient = await core.getSoClient();
+    soClient = await core.getScopedSoClient(fakeRawRequest);
     soClient.find = jest.fn().mockImplementation(async () => {
       return soResponse;
     });
