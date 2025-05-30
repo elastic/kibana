@@ -65,6 +65,8 @@ import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterRename,
   suggest as suggestForRename,
 } from '../autocomplete/commands/rename';
+import { suggest as suggestForRrf } from '../autocomplete/commands/rrf';
+import { validate as validateRrf } from '../validation/commands/rrf';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
@@ -578,5 +580,18 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
     suggest: suggestForJoin,
+  },
+  {
+    hidden: true,
+    preview: true,
+    name: 'rrf',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
+      defaultMessage:
+        'Combines multiple result sets with different scoring functions into a single result set.',
+    }),
+    declaration: `RRF`,
+    examples: ['… FORK (LIMIT 1) (LIMIT 2) | RRF'],
+    suggest: suggestForRrf,
+    validate: validateRrf,
   },
 ];
