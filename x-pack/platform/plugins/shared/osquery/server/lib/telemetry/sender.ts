@@ -101,6 +101,7 @@ export class TelemetryEventsSender {
         pack_id: { type: 'keyword', _meta: { description: '', optional: true } },
         pack_name: { type: 'keyword', _meta: { description: '', optional: true } },
         pack_prebuilt: { type: 'boolean', _meta: { description: '', optional: true } },
+        policy_ids: { type: 'pass_through', _meta: { description: '', optional: true } },
       },
     });
 

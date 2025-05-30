@@ -82,6 +82,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     initSavedObjects(core.savedObjects);
 
+    // TODO: We do not pass so client here.
     this.createActionService = createActionService(osqueryContext);
 
     core
