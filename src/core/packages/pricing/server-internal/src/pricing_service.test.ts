@@ -72,7 +72,7 @@ describe('PricingService', () => {
               enabled: false,
             }),
             authc: expect.objectContaining({
-              enabled: 'optional',
+              enabled: false,
             }),
           }),
         }),
@@ -87,10 +87,12 @@ describe('PricingService', () => {
       const mockFeatures: PricingProductFeature[] = [
         {
           id: 'feature1',
+          description: 'A feature',
           products: [{ name: 'observability', tier: 'complete' }],
         },
         {
           id: 'feature2',
+          description: 'Another feature',
           products: [{ name: 'security', tier: 'essentials' }],
         },
       ];
@@ -120,6 +122,7 @@ describe('PricingService', () => {
       const mockFeatures: PricingProductFeature[] = [
         {
           id: 'feature1',
+          description: 'A feature',
           products: [{ name: 'observability', tier: 'complete' }],
         },
       ];

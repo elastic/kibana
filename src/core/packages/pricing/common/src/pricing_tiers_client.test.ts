@@ -38,6 +38,7 @@ describe('PricingTiersClient', () => {
       it('returns true for registered features indipendently of the tier configuration', () => {
         const feature: PricingProductFeature = {
           id: 'test-feature',
+          description: 'A test feature for observability',
           products: [{ name: 'observability', tier: 'complete' }],
         };
         productFeaturesRegistry.register(feature);
@@ -65,6 +66,7 @@ describe('PricingTiersClient', () => {
       it('returns true when a feature has a matching active product', () => {
         const feature: PricingProductFeature = {
           id: 'observability-feature',
+          description: 'A feature for observability products',
           products: [{ name: 'observability', tier: 'complete' }],
         };
         productFeaturesRegistry.register(feature);
@@ -75,6 +77,7 @@ describe('PricingTiersClient', () => {
       it('returns false when a feature has no matching active products', () => {
         const feature: PricingProductFeature = {
           id: 'cloud-feature',
+          description: 'A feature for cloud products',
           products: [{ name: 'cloud', tier: 'complete' }],
         };
         productFeaturesRegistry.register(feature);
@@ -85,6 +88,7 @@ describe('PricingTiersClient', () => {
       it('returns true when at least one product in a feature matches an active product', () => {
         const feature: PricingProductFeature = {
           id: 'mixed-feature',
+          description: 'A feature available in multiple products',
           products: [
             { name: 'cloud', tier: 'complete' },
             { name: 'security', tier: 'essentials' },
@@ -98,6 +102,7 @@ describe('PricingTiersClient', () => {
       it('checks for exact product matches including tier', () => {
         const feature: PricingProductFeature = {
           id: 'tier-mismatch-feature',
+          description: 'A feature with tier requirements',
           products: [{ name: 'security', tier: 'complete' }], // Note: tier is 'complete' but active product has 'essentials'
         };
         productFeaturesRegistry.register(feature);

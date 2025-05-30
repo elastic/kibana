@@ -11,6 +11,7 @@ import { PricingProduct } from './pricing_tiers_config';
 
 export interface PricingProductFeature {
   id: string;
+  description: string;
   products: PricingProduct[];
 }
 

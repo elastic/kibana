@@ -75,14 +75,16 @@ export class MyPlugin implements Plugin {
     pricing.registerProductFeatures([
       {
         id: 'my-plugin:feature1',
+        description: 'A feature for observability products',
         products: [
           { name: 'observability', tier: 'complete' },
         ],
       },
       {
         id: 'my-plugin:feature2',
+        description: 'A feature for security products',
         products: [
-          { name: 'observability', tier: 'essentials' },
+          { name: 'security', tier: 'essentials' },
         ],
       },
     ]);

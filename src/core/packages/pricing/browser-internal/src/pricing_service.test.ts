@@ -31,10 +31,12 @@ describe('PricingService', () => {
       product_features: {
         feature1: {
           id: 'feature1',
+          description: 'A feature for observability products',
           products: [{ name: 'observability', tier: 'complete' }],
         },
         feature2: {
           id: 'feature2',
+          description: 'A feature for security products',
           products: [{ name: 'security', tier: 'essentials' }],
         },
       },
