@@ -446,13 +446,13 @@ describe('RuleMigrationsTaskClient', () => {
       );
     });
 
-    it('should call saveAsAborted when stopping a running migration', async () => {
+    it('should mark migration task as aborted when manually stopping a running migration', async () => {
       const abortMock = jest.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
       } as unknown as RuleMigrationTaskRunner;
       migrationsRunning.set(migrationId, migrationRunner);
-      data.migrations.saveAsAborted.mockResolvedValue(undefined);
+      data.migrations.setIsAborted.mockResolvedValue(undefined);
 
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
@@ -462,7 +462,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       await client.stop(migrationId);
-      expect(data.migrations.saveAsAborted).toHaveBeenCalledWith({ id: migrationId });
+      expect(data.migrations.setIsAborted).toHaveBeenCalledWith({ id: migrationId });
     });
   });
   describe('task error', () => {

@@ -100,47 +100,17 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   }
 
   /**
-   * Deletes a migration document by its id.
+   * Sets `is_aborted` flag for migration document
    */
-  async saveAsAborted({ id }: { id: string }): Promise<void> {
+  async setIsAborted({ id }: { id: string }): Promise<void> {
     this.logger.info(`Saving migration ${id} as aborted`);
 
     await this.updateLastExecution({
       id,
       lastExecutionParams: {
         is_aborted: true,
-        error: null,
-        ended_at: new Date().toISOString(),
       },
     });
-  }
-  /**
-   * Updates the last execution parameters for a migration document.
-   */
-  private async updateLastExecution({
-    id,
-    lastExecutionParams,
-  }: {
-    id: string;
-    lastExecutionParams: RuleMigrationLastExecution;
-  }): Promise<void> {
-    this.logger.info(`Updating last execution params for migration ${id}`);
-    const index = await this.getIndexName();
-
-    await this.esClient
-      .update({
-        index,
-        id,
-        refresh: 'wait_for',
-        doc: {
-          last_execution: lastExecutionParams,
-        },
-        retry_on_conflict: 1,
-      })
-      .catch((error) => {
-        this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
-        throw error;
-      });
   }
 
   /**
@@ -152,7 +122,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     await this.updateLastExecution({
       id,
       lastExecutionParams: {
-        is_aborted: false,
         error,
         ended_at: new Date().toISOString(),
       },
@@ -194,5 +163,34 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         ended_at: new Date().toISOString(),
       },
     });
+  }
+
+  /**
+   * Updates the last execution parameters for a migration document.
+   */
+  private async updateLastExecution({
+    id,
+    lastExecutionParams,
+  }: {
+    id: string;
+    lastExecutionParams: RuleMigrationLastExecution;
+  }): Promise<void> {
+    this.logger.info(`Updating last execution params for migration ${id}`);
+    const index = await this.getIndexName();
+
+    await this.esClient
+      .update({
+        index,
+        id,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: lastExecutionParams,
+        },
+        retry_on_conflict: 1,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
+        throw error;
+      });
   }
 }

@@ -221,6 +221,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
             connector_id: 'testConnector',
           },
         },
+        retry_on_conflict: 1,
       });
     });
 
@@ -238,13 +239,14 @@ describe('RuleMigrationsDataMigrationClient', () => {
             ended_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },
+        retry_on_conflict: 1,
       });
     });
 
-    it('should update `is_aborted` & `ended_at` correctly when called saveAsAborted', async () => {
+    it('should update `is_aborted` & `ended_at` correctly when called setIsAborted', async () => {
       const migrationId = 'testId';
 
-      await ruleMigrationsDataMigrationClient.saveAsAborted({ id: migrationId });
+      await ruleMigrationsDataMigrationClient.setIsAborted({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -253,10 +255,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
         doc: {
           last_execution: {
             is_aborted: true,
-            error: null,
-            ended_at: expect.any(String),
           },
         },
+        retry_on_conflict: 1,
       });
     });
 
@@ -274,11 +275,11 @@ describe('RuleMigrationsDataMigrationClient', () => {
         refresh: 'wait_for',
         doc: {
           last_execution: {
-            is_aborted: false,
             error: 'Test error',
-            ended_at: expect.any(String),
+            ended_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },
+        retry_on_conflict: 1,
       });
     });
   });
