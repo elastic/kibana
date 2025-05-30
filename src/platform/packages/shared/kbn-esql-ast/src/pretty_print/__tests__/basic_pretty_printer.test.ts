@@ -180,6 +180,38 @@ describe('single line query', () => {
       });
     });
 
+    describe('RERANK', () => {
+      test('single field', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      });
+
+      test('two fields', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      });
+
+      test('param as query', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+      });
+
+      test('param as field part', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+      });
+
+      test('param as inference ID', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+      });
+    });
+
     describe('FORK', () => {
       test('from single line', () => {
         const { text } =
@@ -200,6 +232,32 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
+
+    describe('RRF', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
+  | FORK
+    (WHERE semantic_title : "Shakespeare" | SORT _score)
+    (WHERE title : "Shakespeare" | SORT _score)
+  | RRF
+  | KEEP title, _score
+          `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
         );
       });
     });

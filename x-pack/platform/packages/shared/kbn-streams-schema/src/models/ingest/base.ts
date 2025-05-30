@@ -20,6 +20,8 @@ interface IngestStreamPrivileges {
   lifecycle: boolean;
   // User can simulate changes to the processing or the mapping of the stream
   simulate: boolean;
+  // User can get data information using the text structure API (e.g. to detect the structure of a message)
+  text_structure: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -27,6 +29,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   monitor: z.boolean(),
   lifecycle: z.boolean(),
   simulate: z.boolean(),
+  text_structure: z.boolean(),
 });
 
 export interface IngestBase {

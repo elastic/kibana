@@ -394,7 +394,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         background-color: ${pageBackgroundColor};
 
         ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-          ${kibanaFullBodyHeightCss(TABS_ENABLED ? 32 : undefined)}
+          ${kibanaFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
         }
       `}
     >
