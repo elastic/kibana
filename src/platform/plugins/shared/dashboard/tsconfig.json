@@ -10,7 +10,7 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/emotion.d.ts"
-],
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
