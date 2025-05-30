@@ -271,7 +271,7 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
-          ruleApp="observability"
+          navigateToEditRuleForm={handleEditRule}
           onEditRule={async () => {
             refetch();
           }}

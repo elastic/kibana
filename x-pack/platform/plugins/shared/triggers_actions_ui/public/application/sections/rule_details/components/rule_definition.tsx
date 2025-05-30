@@ -16,12 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
-import {
-  AlertConsumers,
-  getEditRuleRoute,
-  getObsRuleDetailsRoute,
-  getRuleDetailsRoute,
-} from '@kbn/rule-data-utils';
+import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
@@ -44,7 +39,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     ruleTypeRegistry,
     hideEditButton = false,
     filteredRuleTypes = INITIAL_FILTERED_RULE_TYPES,
-    ruleApp,
+    navigateToEditRuleForm,
   }) => {
     const {
       application: { capabilities, navigateToApp },
@@ -118,23 +113,13 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     }, [rule, ruleTypeRegistry]);
 
     const onEditRuleClick = () => {
-      if (ruleApp && ruleApp === 'observability') {
-        navigateToApp(ruleApp, {
-          path: `alerts/${getEditRuleRoute(rule.id)}`,
-          state: {
-            returnApp: ruleApp,
-            returnPath: `alerts/${getObsRuleDetailsRoute(rule.id)}`,
-          },
-        });
-      } else {
-        navigateToApp('management', {
-          path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-          state: {
-            returnApp: 'management',
-            returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-          },
-        });
-      }
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
     };
 
     const ruleDefinitionList = [
@@ -189,7 +174,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
                 >
                   <EuiFlexItem grow={false}>
                     {hasEditButton ? (
-                      <EuiButtonEmpty onClick={onEditRuleClick} flush="left">
+                      <EuiButtonEmpty
+                        onClick={navigateToEditRuleForm ? navigateToEditRuleForm : onEditRuleClick}
+                        flush="left"
+                      >
                         <EuiText size="s">{getRuleConditionsWording()}</EuiText>
                       </EuiButtonEmpty>
                     ) : (
@@ -244,7 +232,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
                   <EuiButtonEmpty
                     data-test-subj="ruleDetailsEditButton"
                     iconType={'pencil'}
-                    onClick={onEditRuleClick}
+                    onClick={navigateToEditRuleForm ? navigateToEditRuleForm : onEditRuleClick}
                   />
                 </EuiFlexItem>
               )

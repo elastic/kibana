@@ -124,7 +124,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
-  ruleApp?: string;
+  navigateToEditRuleForm?: (ruleId: string) => void;
 }
 
 export const percentileFields = {
@@ -166,7 +166,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
-  ruleApp,
+  navigateToEditRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -301,23 +301,13 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    if (ruleApp && ruleApp === 'observability') {
-      navigateToApp(ruleApp, {
-        path: `alerts/${getEditRuleRoute(ruleItem.id)}`,
-        state: {
-          returnApp: ruleApp,
-          returnPath: `alerts/rules`,
-        },
-      });
-    } else {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/rules`,
-        },
-      });
-    }
+    navigateToApp('management', {
+      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      state: {
+        returnApp: 'management',
+        returnPath: `insightsAndAlerting/triggersActions/rules`,
+      },
+    });
   };
 
   const onRunRule = async (id: string) => {
@@ -464,7 +454,11 @@ export const RulesList = ({
       cloneRuleId.current = null;
       setIsCloningRule(false);
       if (ruleItem) {
-        onRuleEdit(ruleItem);
+        if (navigateToEditRuleForm) {
+          navigateToEditRuleForm(ruleItem.id);
+        } else {
+          onRuleEdit(ruleItem);
+        }
       }
     }
   }, [tableItems]);
@@ -896,7 +890,11 @@ export const RulesList = ({
               }}
               onRuleEditClick={(rule) => {
                 if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
-                  onRuleEdit(rule);
+                  if (navigateToEditRuleForm) {
+                    navigateToEditRuleForm(rule.id);
+                  } else {
+                    onRuleEdit(rule);
+                  }
                 }
               }}
               onRuleDeleteClick={(rule) =>
@@ -932,7 +930,9 @@ export const RulesList = ({
                       rules: [rule],
                     })
                   }
-                  onEditRule={() => onRuleEdit(rule)}
+                  onEditRule={() =>
+                    navigateToEditRuleForm ? navigateToEditRuleForm(rule.id) : onRuleEdit(rule)
+                  }
                   onUpdateAPIKey={() =>
                     updateRulesToBulkEdit({
                       action: 'updateApiKey',
