@@ -42,7 +42,7 @@ export const LogCategoryDocumentExamplesTable: React.FC<LogCategoryDocumentExamp
       timestampField={logsSource.timestampField}
       displayOptions={{
         solutionNavIdOverride: 'oblt',
-        enableDocumentViewer: false,
+        enableDocumentViewer: true,
         enableFilters: false,
       }}
     />
