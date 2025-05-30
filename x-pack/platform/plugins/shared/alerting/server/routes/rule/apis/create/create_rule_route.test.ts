@@ -44,7 +44,10 @@ describe('createRuleRoute', () => {
     },
     enableFrameworkAlerts: true,
     cancelAlertsOnRuleTimeout: true,
+    disabledRuleTypes: [],
+    maxEphemeralActionsPerAlert: 10,
     rules: {
+      overwriteProducer: undefined,
       minimumScheduleInterval: {
         value: '1m',
         enforce: false,
@@ -67,6 +70,7 @@ describe('createRuleRoute', () => {
       enabled: true,
     },
   };
+  
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
