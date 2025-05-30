@@ -385,9 +385,9 @@ export function useMigrateSingleAgent(options: any) {
     method: 'post',
     version: API_VERSIONS.public.v1,
     body: {
-      // todo: add the correct params here to match the schema
       enrollment_token: options.enrollment_token,
       uri: options.uri,
+      settings: options.settings,
     },
   });
 }
