@@ -12,7 +12,7 @@ import type { SuggestionRawDefinition } from '../../types';
 import { buildConstantsDefinitions } from '../../factories';
 import { pipeCompleteItem } from '../../complete_items';
 
-export function suggest({ innerText }: CommandSuggestParams<'limit'>): SuggestionRawDefinition[] {
+export function suggest({ innerText }: CommandSuggestParams<'sample'>): SuggestionRawDefinition[] {
   if (/[0-9]\s+$/.test(innerText)) {
     return [pipeCompleteItem];
   }
