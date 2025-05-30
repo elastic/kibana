@@ -271,7 +271,7 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
-          ruleBasePath={basePath.prepend(paths.observability.alerts)}
+          ruleApp="observability"
           onEditRule={async () => {
             refetch();
           }}
