@@ -33,7 +33,6 @@ export const toolDefinitionToInference = (
             ? zodSchemaToInference(tool.schema)
             : jsonSchemaToInference(tool.schema)
           : undefined,
-        schema: tool.schema ? jsonSchemaToInference(tool.schema) : undefined,
       };
     } else if (isToolDefinition(tool)) {
       definitions[tool.function.name] = {
