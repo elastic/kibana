@@ -73,7 +73,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
 
   describe('context', function () {
-    this.tags(['failsOnMKI']);
+    // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
@@ -84,7 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 

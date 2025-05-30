@@ -12,12 +12,16 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_CREATED = 'siem_migration_created',
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
+  SIEM_MIGRATION_DELETED = 'siem_migration_deleted',
+  SIEM_MIGRATION_ADDED_RULES = 'siem_migration_added_rules',
+  SIEM_MIGRATION_RETRIEVED_RULES = 'siem_migration_retrieved_rules',
   SIEM_MIGRATION_UPLOADED_RESOURCES = 'siem_migration_uploaded_resources',
   SIEM_MIGRATION_RETRIEVED_RESOURCES = 'siem_migration_retrieved_resources',
   SIEM_MIGRATION_STARTED = 'siem_migration_started',
   SIEM_MIGRATION_STOPPED = 'siem_migration_stopped',
   SIEM_MIGRATION_UPDATED_RULE = 'siem_migration_updated_rule',
   SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
+  SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
 }
 
 export enum AUDIT_TYPE {
@@ -53,6 +57,10 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED]: AUDIT_TYPE.END,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
 };
 
 interface SiemMigrationAuditEvent {
@@ -106,9 +114,9 @@ export class SiemMigrationAuditLogger {
     }
   }
 
-  public async logCreateMigration(params: { migrationId?: string; error?: Error }): Promise<void> {
-    const { migrationId, error } = params;
-    const message = `User created a new SIEM migration with [id=${migrationId}]`;
+  public async logCreateMigration(params: { error?: Error } = {}): Promise<void> {
+    const { error } = params;
+    const message = `User created a new SIEM migration`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
       message,
@@ -121,6 +129,42 @@ export class SiemMigrationAuditLogger {
     const message = `User retrieved the SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED,
+      message,
+      error,
+    });
+  }
+
+  public async logDeleteMigration(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User deleted the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED,
+      message,
+      error,
+    });
+  }
+
+  public async logGetMigrationRules(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User retrieved rules for SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES,
+      message,
+      error,
+    });
+  }
+
+  public async logAddRules(params: {
+    migrationId: string;
+    error?: Error;
+    count?: number;
+  }): Promise<void> {
+    const { migrationId, error, count } = params;
+    const message = `User added ${
+      count ?? ''
+    } rules to the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES,
       message,
       error,
     });
@@ -189,5 +233,18 @@ export class SiemMigrationAuditLogger {
       events.push({ action, message, error });
     }
     return this.log(events);
+  }
+
+  public async logGetAllIntegrationsStats({
+    error,
+  }: {
+    error?: Error;
+  } = {}): Promise<void> {
+    const message = `User retrieved all integrations stats for SIEM rule migrations`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS,
+      error,
+      message,
+    });
   }
 }
