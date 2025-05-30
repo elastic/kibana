@@ -95,11 +95,11 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
       }),
       ...(dataset
         ? {
-            logFilter: encode({
-              expression: `${partitionField}: ${dataset}`,
-              kind: 'kuery',
-            }),
-          }
+          logFilter: encode({
+            expression: `${partitionField}: ${dataset}`,
+            kind: 'kuery',
+          }),
+        }
         : {}),
     },
   });
@@ -142,7 +142,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
         },
       },
       {
-        label: VIEW_IN_STREAM_LABEL,
+        label: VIEW_IN_DISCOVER_LABEL,
         onClick: viewInStreamLinkProps.onClick,
         href: viewInStreamLinkProps.href,
       },
