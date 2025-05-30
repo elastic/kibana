@@ -106,6 +106,9 @@ export class StreamsPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [STREAMS_FEATURE_ID],
+      privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
+        defaultMessage: 'All Spaces is required for Streams access.',
+      }),
       alerting: alertingFeatures,
       privileges: {
         all: {
@@ -114,6 +117,7 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
+          requireAllSpaces: true,
           alerting: {
             rule: {
               all: alertingFeatures,
@@ -131,6 +135,7 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
+          requireAllSpaces: true,
           alerting: {
             rule: {
               read: alertingFeatures,
