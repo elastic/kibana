@@ -18,8 +18,8 @@ export const ElasticLlmCallout = () => {
 
   const { euiTheme } = useEuiTheme();
 
-  const [showCallOut, setShowCallOut] = useState<boolean>(true);
-  const [currentSpaceId, setCurrentSpaceId] = useState<string>('default');
+  const [showCallOut, setShowCallOut] = useState(true);
+  const [currentSpaceId, setCurrentSpaceId] = useState('default');
 
   const onDismiss = () => {
     setShowCallOut(false);
