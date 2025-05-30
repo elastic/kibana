@@ -727,7 +727,10 @@ export class AlertsClient<
         return;
       }
       response.hits.hits.forEach(({ fields }) => {
-        const mwIdField = fields![RUNTIME_MAINTENANCE_WINDOW_ID_FIELD];
+        if (!fields) {
+          return;
+        }
+        const mwIdField = fields[RUNTIME_MAINTENANCE_WINDOW_ID_FIELD];
 
         if (!alertsByMaintenanceWindowIds[mwIdField]) {
           alertsByMaintenanceWindowIds[mwIdField] = [];
