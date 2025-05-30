@@ -112,7 +112,7 @@ const upsertQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const updated = await assetClient.getAssetLinks(streamName, ['query'], [queryId]);
+    const updated = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
     const assetLinked = await assetClient.linkAsset(streamName, {
       [ASSET_TYPE]: 'query',
       [ASSET_ID]: queryId,
@@ -275,9 +275,9 @@ const bulkQueriesRoute = createServerRoute({
       throw internal(`Could not index all items`, { errors: result.errors });
     }
 
-    const queryLinksIndexed = await assetClient.getAssetLinks(
+    const queryLinksIndexed = await assetClient.bulkGetByIds(
       streamName,
-      ['query'],
+      'query',
       operations.filter(isIndexOperation).map((op) => op.index.id)
     );
 

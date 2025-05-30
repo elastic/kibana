@@ -255,24 +255,11 @@ export class AssetClient {
 
   async getAssetLinks<TAssetType extends AssetType>(
     name: string,
-    assetTypes?: TAssetType[],
-    assetIds?: string[]
+    assetTypes?: TAssetType[]
   ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
-    if (assetIds?.length && assetTypes?.length !== 1) {
-      throw new Error('You must provide only one type when providing ids');
-    }
-
     const filters = [...termQuery(STREAM_NAME, name)];
     if (assetTypes?.length) {
       filters.push(...termsQuery(ASSET_TYPE, assetTypes));
-    }
-    if (assetTypes?.length === 1 && assetIds?.length) {
-      filters.push(
-        ...termsQuery(
-          '_id',
-          assetIds.map((id) => getUuid(name, { [ASSET_TYPE]: assetTypes[0], [ASSET_ID]: id }))
-        )
-      );
     }
 
     const assetsResponse = await this.clients.storageClient.search({
@@ -281,6 +268,33 @@ export class AssetClient {
       query: {
         bool: {
           filter: filters,
+        },
+      },
+    });
+
+    return assetsResponse.hits.hits.map(
+      (hit) => fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>
+    );
+  }
+
+  async bulkGetByIds<TAssetType extends AssetType>(
+    name: string,
+    assetType: TAssetType,
+    ids: string[]
+  ) {
+    const assetsResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(STREAM_NAME, name),
+            ...termQuery(ASSET_TYPE, assetType),
+            ...termsQuery(
+              '_id',
+              ids.map((id) => getUuid(name, { [ASSET_TYPE]: assetType, [ASSET_ID]: id }))
+            ),
+          ],
         },
       },
     });
