@@ -244,6 +244,11 @@ export function createAlertingUsageCollector(
           count_rules_snoozed_by_type: {},
           count_rules_muted_by_type: {},
           count_ignored_fields_by_rule_type: {},
+          count_backfill_executions: 0,
+          count_backfills_by_execution_status_per_day: {},
+          count_gaps: 0,
+          total_unfilled_gap_duration_ms: 0,
+          total_filled_gap_duration_ms: 0,
         };
       }
     },
@@ -322,6 +327,11 @@ export function createAlertingUsageCollector(
       count_rules_snoozed_by_type: byTypeSchema,
       count_rules_muted_by_type: byTypeSchema,
       count_ignored_fields_by_rule_type: byTypeSchema,
+      count_backfill_executions: { type: 'long' },
+      count_backfills_by_execution_status_per_day: byStatusPerDaySchema,
+      count_gaps: { type: 'long' },
+      total_unfilled_gap_duration_ms: { type: 'long' },
+      total_filled_gap_duration_ms: { type: 'long' },
     },
   });
 }
