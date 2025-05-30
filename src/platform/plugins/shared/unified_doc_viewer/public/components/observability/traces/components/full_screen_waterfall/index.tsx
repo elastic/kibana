@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { SPAN_ID_FIELD } from '@kbn/discover-utils';
+import { SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
@@ -54,7 +54,7 @@ export const FullScreenWaterfall = ({
           traceId,
           rangeFrom,
           rangeTo,
-          entryTransactionId: transaction?.[SPAN_ID_FIELD],
+          entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
           onNodeClick: (item: { id: string }) => {
             setSpanId(item.id);
             setIsFlyoutVisible(true);
