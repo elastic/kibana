@@ -38,7 +38,6 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
           throw new DOMException('Aborted', 'AbortError');
         }
       };
-
     }
   } catch (e) {
     // Node.js ReadableStream not available, using existing polyfill
