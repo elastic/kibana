@@ -1,0 +1,125 @@
+Grokking grok
+=============
+
+Elastic Stack Serverless
+
+Grok is a regular expression dialect that supports reusable aliased expressions. Grok works really well with syslog logs, Apache and other webserver logs, mysql logs, and generally any log format that is written for humans and not computer consumption.
+
+Grok sits on top of the [Oniguruma](https://github.com/kkos/oniguruma/blob/master/doc/RE) regular expression library, so any regular expressions are valid in grok. Grok uses this regular expression language to allow naming existing patterns and combining them into more complex patterns that match your fields.
+
+[Grok patterns](https://www.elastic.co/docs/explore-analyze/scripting/grok#grok-syntax)
+---------------------------------------------------------------------------------------
+
+The Elastic Stack ships with numerous [predefined grok patterns](https://github.com/elastic/elasticsearch/blob/master/libs/grok/src/main/resources/patterns/legacy/grok-patterns) that simplify working with grok. The syntax for reusing grok patterns takes one of the following forms:
+
+| `%{{SYNTAX}}` | `%{SYNTAX:ID}` | `%{SYNTAX:ID:TYPE}` |
+
+`SYNTAX`
+
+The name of the pattern that will match your text. For example, `NUMBER` and `IP` are both patterns that are provided within the default patterns set. The `NUMBER` pattern matches data like `3.44`, and the `IP` pattern matches data like `55.3.244.1`.
+
+`ID`
+
+The identifier you give to the piece of text being matched. For example, `3.44` could be the duration of an event, so you might call it `duration`. The string `55.3.244.1` might identify the `client` making a request.
+
+`TYPE`
+
+The data type you want to cast your named field. `int`, `long`, `double`, `float` and `boolean` are supported types.
+
+For example, let's say you have message data that looks like this:
+
+```
+3.44 55.3.244.1
+
+```
+
+The first value is a number, followed by what appears to be an IP address. You can match this text by using the following grok expression:
+
+```
+%{NUMBER:duration} %{IP:client}
+
+```
+
+Built-in patterns:
+
+Email:
+| Pattern            | Template                                                | Example                |
+| ------------------ | ------------------------------------------------------- | ---------------------- |
+| **EMAILLOCALPART** | starts with letter; then letters, digits, `_ . + - = :` | `john.doe+tag=1`       |
+| **EMAILADDRESS**   | `<local-part>@<hostname>`                               | `john.doe@example.com` |
+
+Numbers:
+| Pattern         | Template                                           | Example   |
+| --------------- | -------------------------------------------------- | --------- |
+| **INT**         | optional `+`/`-`, then digits                      | `-42`     |
+| **BASE10NUM**   | optional `+`/`-`, integer or decimal (no exponent) | `3.14`    |
+| **NUMBER**      | same as `BASE10NUM`                                | `-0.5`    |
+| **BASE16NUM**   | optional `+`/`-`, optional `0x` prefix, hex digits | `0x1A3f`  |
+| **BASE16FLOAT** | hex floating point (e.g. `0xAB.C`)                 | `-0xAB.C` |
+| **POSINT**      | positive integer (no leading zeros)                | `123`     |
+| **NONNEGINT**   | non-negative integer (leading zeros allowed)       | `007`     |
+
+Words & whitespaces:
+| Pattern          | Template                                               | Example                |
+| ---------------- | ------------------------------------------------------ | ---------------------- |
+| **WORD**         | one or more “word” characters (letters, digits, \_: )  | `Hello123`             |
+| **NOTSPACE**     | one or more non-whitespace characters                  | `NoSpace!`             |
+| **SPACE**        | zero or more whitespace characters                     | *(three spaces)*       |
+| **DATA**         | any characters (non-greedy)                            | `Some data`            |
+| **GREEDYDATA**   | any characters (greedy)                                | `Everything goes here` |
+| **QUOTEDSTRING** | single, double or back-tick quoted string with escapes | `"Hello \"World\""`    |
+
+UUID & URN:
+| Pattern  | Template                              | Example                                |
+| -------- | ------------------------------------- | -------------------------------------- |
+| **UUID** | 8-4-4-4-12 hex digits                 | `123e4567-e89b-12d3-a456-426614174000` |
+| **URN**  | `urn:` + namespace + `:` + identifier | `urn:example:animal:ferret:nose`       |
+
+Networking:
+
+| Pattern        | Template                                | Example                                   |
+| -------------- | --------------------------------------- | ----------------------------------------- |
+| **MAC**        | MAC address (any of the common formats) | `00:1A:2B:3C:4D:5E`                       |
+| **CISCOMAC**   | `xxxx.xxxx.xxxx` hex                    | `0001.0A2B.3C4D`                          |
+| **WINDOWSMAC** | `xx-xx-xx-xx-xx-xx` hex                 | `00-1A-2B-3C-4D-5E`                       |
+| **COMMONMAC**  | `xx:xx:xx:xx:xx:xx` hex                 | `01:23:45:67:89:AB`                       |
+| **IPV4**       | dotted-quad 0–255                       | `192.168.0.1`                             |
+| **IPV6**       | standard IPv6 notation                  | `2001:0db8:85a3:0000:0000:8a2e:0370:7334` |
+| **IP**         | either IPv4 or IPv6                     | `127.0.0.1`                               |
+| **HOSTNAME**   | domain labels separated by dots         | `example-host.com`                        |
+| **IPORHOST**   | either IP or hostname                   | `example.com`                             |
+| **HOSTPORT**   | `<IPorHost>:<port>`                     | `example.com:80`                          |
+
+Paths & URIs:
+
+| Pattern          | Template                                          | Example                             |
+| ---------------- | ------------------------------------------------- | ----------------------------------- |
+| **UNIXPATH**     | `/`-prefixed filepath                             | `/usr/local/bin`                    |
+| **WINPATH**      | drive letter or `\`-prefixed filepath             | `C:\Windows\System32`               |
+| **PATH**         | either UNIX or Windows path                       | `/etc/passwd`                       |
+| **TTY**          | `/dev/…` terminal device                          | `/dev/pts/0`                        |
+| **URIPROTO**     | protocol (letters, digits, `+`, `-`, `.`)         | `https`                             |
+| **URIHOST**      | `<IPorHost>[:port]`                               | `example.com:8080`                  |
+| **URIPATH**      | slash-prefixed path segment                       | `/path/to/resource`                 |
+| **URIPARAM**     | `?` and URL parameters                            | `?key=value&x=1`                    |
+| **URIPATHPARAM** | path + params                                     | `/path?x=1`                         |
+| **URI**          | full URI with optional userinfo, host, port, path | `http://john@example.com:8080/path` |
+
+Simple time patterns:
+
+| Pattern               | Template                                       | Example       |
+| --------------------- | ---------------------------------------------- | ------------- |
+| **ISO8601\_TIMEZONE** | `Z` or `+HH:MM` / `-HHMM`                      | `+02:00`      |
+| **ISO8601\_SECOND**   | `00–59(.fraction)` or `60`                     | `45.123`      |
+| **ISO8601\_HOUR**     | `00–23`                                        | `07`          |
+| **TZ**                | three-letter zone (e.g. `PST`, `EDT`) or `UTC` | `UTC`         |
+| **PROG**              | one or more printable non-space characters     | `sshd`        |
+| **SYSLOGPROG**        | `PROG` optionally `[<pid>]`                    | `httpd[1234]` |
+| **SYSLOGHOST**        | hostname or IP                                 | `localhost`   |
+| **SYSLOGFACILITY**    | `<facility.priority>`                          | `<4.0>`       |
+
+Date & time composites:
+
+| Pattern                 | Template                                          | Example                        |
+| ----------------------- | ------------------------------------------------- | ------------------------------ |
+| **SYSLOGTIMESTAMP**     | `Month DD HH:MM:SS`                               | `May 27 14:23:55`              |

@@ -65,9 +65,11 @@ function withInferenceSpan$<T>(
     // that was active when this function was called
     const subscription = context.with(ctx, () => {
       const end = once((error: Error) => {
-        span.recordException(error);
-        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-        span.end();
+        if (span.isRecording()) {
+          span.recordException(error);
+          span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+          span.end();
+        }
       });
       return source$
         .pipe(

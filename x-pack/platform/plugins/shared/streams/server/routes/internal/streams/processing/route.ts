@@ -23,7 +23,7 @@ const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     processing: z.array(processorWithIdDefinitionSchema),
-    documents: z.array(flattenRecord),
+    documents: z.array(z.record(z.string(), z.any())),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 }) satisfies z.Schema<ProcessingSimulationParams>;

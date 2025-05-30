@@ -8,19 +8,27 @@
 import { z } from '@kbn/zod';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
-import promptTemplate from './prompt_template.md';
+import systemPromptTemplate from './system_prompt_template.txt';
+import contentPromptTemplate from './content_prompt_template.txt';
 
 export const SuggestStreamPartitionsPrompt = createPrompt({
   name: 'suggest_stream_partitions_prompt',
   description: 'Suggest stream partitions based on sample data',
   input: z.object({
     stream: Streams.all.Definition.right,
+    condition_schema: z.string(),
+    initial_clustering: z.string(),
   }),
 })
   .version({
+    system: {
+      mustache: {
+        template: systemPromptTemplate,
+      },
+    },
     template: {
       mustache: {
-        template: promptTemplate,
+        template: contentPromptTemplate,
       },
     },
     tools: {

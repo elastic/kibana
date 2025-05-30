@@ -78,7 +78,9 @@ export function createProxyTransport({
           throw error;
         })
         .then((response) => {
-          const statusCode = get(response, 'error.status', response.statusCode);
+          const statusCode = Number(
+            get(response, 'headers.x-console-proxy-status-code', response.statusCode)
+          );
 
           if (statusCode >= 400) {
             throw new errors.ResponseError({

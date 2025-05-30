@@ -7,14 +7,18 @@
 
 export { partitionStream } from './workflows/partition_stream';
 
-export { describeStream } from './workflows/generate_content_pack/describe_stream';
-
-export { generateParsers } from './workflows/generate_content_pack/generate_parsers';
-export { generateProcessors } from './workflows/generate_content_pack/generate_processors';
-
-export { generatePanels } from './workflows/generate_content_pack/generate_panels';
-export { generateMappings } from './workflows/generate_content_pack/generate_mappings';
-
 export { answerAsEsqlExpert } from './workflows/esql';
 
-export type { ValidateProcessorsCallback } from './workflows/generate_content_pack/generate_processors/validate_processor_callback';
+export { initializeOnboarding } from './workflows/onboarding/initialize_onboarding';
+export { describeStream } from './workflows/onboarding/describe_stream';
+export { generateParsers } from './workflows/onboarding/generate_parsers';
+export { generateProcessors } from './workflows/onboarding/generate_processors';
+export { generatePanels } from './workflows/onboarding/generate_panels';
+export { generateMappings } from './workflows/onboarding/generate_mappings';
+
+export { findGrokMatchFailure } from './shared/processing/debug_mismatch/grok/find_grok_match_failure';
+export { findDissectMatchFailure } from './shared/processing/debug_mismatch/dissect/find_dissect_match_failure';
+export type { PatternMatchFailure } from './shared/processing/debug_mismatch/types';
+export { formatMatchFailure } from './shared/processing/debug_mismatch/format_match_failure';
+
+export { extractTemplate } from './shared/processing/templatize';

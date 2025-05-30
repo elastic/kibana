@@ -54,7 +54,7 @@ export function registerPromptRoute({
       maxRetries,
       modelName,
       retryConfiguration,
-      temperature,
+      temperature = 0.25,
       metadata,
       prevMessages,
     } = request.body;

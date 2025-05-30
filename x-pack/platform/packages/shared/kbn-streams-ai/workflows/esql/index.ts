@@ -8,8 +8,11 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   AssistantMessage,
+  AssistantMessageOf,
   BoundInferenceClient,
-  MessageRole,
+  ToolCallbacksOf,
+  ToolDefinition,
+  ToolOptions,
   callPromptUntil,
   truncateList,
 } from '@kbn/inference-common';
@@ -20,6 +23,21 @@ import { EsqlPrompt } from './prompt';
 
 const loadEsqlDocBase = once(() => EsqlDocumentBase.load());
 
+export async function answerAsEsqlExpert<TTools extends Record<string, ToolDefinition> | undefined>(
+  options: {
+    inferenceClient: BoundInferenceClient;
+    esClient: ElasticsearchClient;
+    logger: Logger;
+    start: number;
+    end: number;
+    signal: AbortSignal;
+    prompt: string;
+    tools?: TTools;
+  } & (TTools extends Record<string, ToolDefinition>
+    ? { toolCallbacks: ToolCallbacksOf<{ tools: TTools }> }
+    : {})
+): Promise<AssistantMessageOf<{ tools: TTools }> | undefined>;
+
 export async function answerAsEsqlExpert({
   inferenceClient,
   esClient,
@@ -28,6 +46,8 @@ export async function answerAsEsqlExpert({
   end,
   signal,
   prompt,
+  tools,
+  toolCallbacks,
 }: {
   inferenceClient: BoundInferenceClient;
   esClient: ElasticsearchClient;
@@ -36,15 +56,20 @@ export async function answerAsEsqlExpert({
   end: number;
   signal: AbortSignal;
   prompt: string;
-}): Promise<AssistantMessage> {
+  tools?: Record<string, ToolDefinition>;
+  toolCallbacks?: ToolCallbacksOf<ToolOptions>;
+}): Promise<AssistantMessage | undefined> {
   const docBase = await loadEsqlDocBase();
 
-  const messages = await callPromptUntil({
+  const assistantReply = await callPromptUntil({
     inferenceClient,
     prompt: EsqlPrompt,
     abortSignal: signal,
     strategy: 'next',
+    logger,
+    tools,
     toolCallbacks: {
+      ...toolCallbacks,
       list_datasets: async (toolCall) => {
         return esClient.indices
           .resolveIndex({
@@ -88,7 +113,7 @@ export async function answerAsEsqlExpert({
             return {
               query,
               validation: await runAndValidateEsqlQuery({
-                query: query + `\nLIMIT 0`,
+                query: query + `\n| LIMIT 0`,
                 client: esClient,
               }).then((response) => {
                 if (response.error || response.errorMessages?.length) {
@@ -97,9 +122,11 @@ export async function answerAsEsqlExpert({
                     errorMessages: response.errorMessages,
                   };
                 }
+
+                const cols = truncateList(response.columns?.map((col) => col.name) ?? [], 10);
                 return {
                   valid: true,
-                  columns: truncateList(response.columns?.map((col) => col.name) ?? [], 10),
+                  ...(cols.length ? { columns: cols } : {}),
                 };
               }),
             };
@@ -117,10 +144,5 @@ export async function answerAsEsqlExpert({
     },
   });
 
-  const lastResponse = messages.findLast(
-    (message): message is Extract<typeof message, { role: MessageRole.Assistant }> =>
-      Boolean(message.role === MessageRole.Assistant)
-  );
-
-  return lastResponse;
+  return assistantReply;
 }

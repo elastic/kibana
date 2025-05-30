@@ -35,10 +35,7 @@ export type PromptAPI = <
  * Options for the {@link PromptAPI}
  */
 export interface PromptOptions<TPrompt extends Prompt = Prompt>
-  extends Optional<
-    Omit<ChatCompleteOptions, 'messages' | 'system' | 'tools' | 'toolChoice' | 'stream'>,
-    'temperature'
-  > {
+  extends Optional<Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>, 'temperature'> {
   prompt: TPrompt;
   input: z.input<TPrompt['input']>;
   stream?: boolean;

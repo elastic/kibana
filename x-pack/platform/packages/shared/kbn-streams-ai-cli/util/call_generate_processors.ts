@@ -11,14 +11,13 @@ import { Flags } from '@kbn/dev-cli-runner';
 import { BoundInferenceClient } from '@kbn/inference-common';
 import { KibanaClient } from '@kbn/kibana-api-cli';
 import { ValidateProcessorsCallback } from '@kbn/streams-ai';
+import { SampleSet } from '@kbn/streams-ai/shared/processing/types';
+import { ProcessorValidation } from '@kbn/streams-ai/workflows/generate_content_pack/generate_processors/validate_processor_callback';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { ProcessorDefinitionWithId, Streams, getProcessorConfig } from '@kbn/streams-schema';
 import { ToolingLog } from '@kbn/tooling-log';
 import { omit, uniqBy } from 'lodash';
-import moment from 'moment';
 import { inspect } from 'util';
-import { ProcessorValidation } from '@kbn/streams-ai/workflows/generate_content_pack/generate_processors/validate_processor_callback';
-import { getSampleDocuments } from '@kbn/ai-tools';
 
 type SimulateProcessingResponse =
   APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
@@ -33,6 +32,9 @@ export async function callGenerateProcessors(
     log,
     logger,
     streamGetResponse,
+    start,
+    end,
+    sampleSet,
   }: {
     kibanaClient: KibanaClient;
     esClient: ElasticsearchClient;
@@ -42,6 +44,9 @@ export async function callGenerateProcessors(
     log: ToolingLog;
     logger: Logger;
     streamGetResponse: Streams.WiredStream.GetResponse;
+    start: number;
+    end: number;
+    sampleSet: SampleSet;
   },
   cb: (options: {
     definition: Streams.WiredStream.Definition;
@@ -52,14 +57,9 @@ export async function callGenerateProcessors(
     logger: Logger;
     signal: AbortSignal;
     validateProcessors: ValidateProcessorsCallback;
+    sampleSet: SampleSet;
   }) => Promise<ProcessorDefinitionWithId[]>
 ) {
-  const now = moment();
-
-  const end = now.valueOf();
-
-  const start = now.clone().subtract(1, 'days').valueOf();
-
   async function simulate({
     samples,
     processor,
@@ -92,13 +92,54 @@ export async function callGenerateProcessors(
 
         const invalid = processorMetric.failed_rate > 0 && !ignoreFailure;
 
+        const errors = uniqBy(
+          processorMetric.errors
+            .map((error) => {
+              const sample = documentsByErrors.get(error.message)?.value ?? null;
+              return {
+                error,
+                sample,
+              };
+            })
+            .filter(({ error }) => {
+              return error.type !== 'non_additive_processor_failure';
+            })
+            .map(({ sample, error }) => {
+              if (isExtractProcessor) {
+                return {
+                  message: error.message,
+                  sample: (sample?.message as string | undefined) ?? null,
+                };
+              }
+
+              return {
+                message: error.message,
+                sample,
+              };
+            }),
+          ({ message }) => {
+            const normalizedErrors = [
+              `Provided Grok expressions do not match field value`,
+              `Unable to find match for dissect pattern`,
+              `could not be parsed, unparsed text found`,
+            ];
+
+            const normalized = normalizedErrors.find((error) => message.includes(error));
+
+            return normalized ?? message;
+          }
+        ).slice(0, 10);
+
         return {
+          validity: {
+            valid: errors.length && ignoreFailure ? 'partial' : errors.length ? 'invalid' : 'valid',
+          },
           documents: response.documents.map((document) => {
             return {
               _index: String(flags.stream),
               _source: document.value,
             };
-          }),
+          }) as SearchHit[],
           failure_rate: ignoreFailure ? 0 : processorMetric.failed_rate,
           ignored_failure_rate: ignoreFailure ? processorMetric.failed_rate : 0,
           parsed_rate: processorMetric.parsed_rate,
@@ -109,43 +150,7 @@ export async function callGenerateProcessors(
             })
             .slice(0, invalid ? 0 : 5)
             .map((doc) => doc.value),
-          errors: uniqBy(
-            processorMetric.errors
-              .map((error) => {
-                const sample = documentsByErrors.get(error.message)?.value ?? null;
-                return {
-                  error,
-                  sample,
-                };
-              })
-              .filter(({ error }) => {
-                return error.type !== 'non_additive_processor_failure';
-              })
-              .map(({ sample, error }) => {
-                if (isExtractProcessor) {
-                  return {
-                    message: error.message,
-                    sample: (sample?.message as string | undefined) ?? null,
-                  };
-                }
-
-                return {
-                  message: error.message,
-                  sample,
-                };
-              }),
-            ({ message }) => {
-              const normalizedErrors = [
-                `Provided Grok expressions do not match field value`,
-                `Unable to find match for dissect pattern`,
-                `could not be parsed, unparsed text found`,
-              ];
-
-              const normalized = normalizedErrors.find((error) => message.includes(error));
-
-              return normalized ?? message;
-            }
-          ).slice(0, 10),
+          [ignoreFailure ? 'ignored_errors' : 'erorrs']: errors,
         };
       });
   }
@@ -163,6 +168,10 @@ export async function callGenerateProcessors(
           validity: 'valid' as const,
         },
         validations: [],
+        output: {
+          hits: samples,
+          total: samples.length,
+        },
       };
     }
 
@@ -209,6 +218,10 @@ export async function callGenerateProcessors(
           validation: rest,
         };
       }),
+      output: {
+        total: nextSamples.length,
+        hits: nextSamples,
+      },
     };
   }
 
@@ -220,29 +233,22 @@ export async function callGenerateProcessors(
     inferenceClient,
     logger,
     signal,
-    validateProcessors,
+    sampleSet,
+    validateProcessors: ({ samples, processors }) => {
+      return validateProcessors({ samples, processors });
+    },
   });
 
   log.info(JSON.stringify(nextProcessors));
 
-  const { hits: samples } = await getSampleDocuments({
-    _source: true,
-    fields: [],
-    start,
-    end,
-    esClient,
-    index: streamGetResponse.stream.name,
-    size: 1000,
-  });
-
-  const { validations, state } = await validateProcessors({
-    samples,
+  const { validations, state, output } = await validateProcessors({
+    samples: sampleSet.hits,
     processors: nextProcessors,
   });
 
   if (state.validity === 'invalid') {
-    log.error(`Errors encountered during validation: ${inspect(validations, { depth: null })}`);
-    return [];
+    log.error(inspect(validations, { depth: null }));
+    throw new Error(`Errors encountered during validation`);
   }
 
   const processorsToAdd = nextProcessors.map((processor) => {
@@ -268,5 +274,8 @@ export async function callGenerateProcessors(
     log.info(`Applied parsing rules`);
   }
 
-  return processorsToAdd ?? [];
+  return {
+    processors: processorsToAdd ?? [],
+    output,
+  };
 }
