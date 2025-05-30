@@ -291,6 +291,18 @@ describe('CaseViewTabs', () => {
     );
   });
 
+  it('should not show observable tabs if the observables feature is not enabled', async () => {
+    renderWithTestingProviders(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
+      {
+        wrapperProps: { license: basicLicense, features: { observables: { enabled: false } } },
+      }
+    );
+
+    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
+  });
+
   describe('show observable tabs in platinum tier or higher', () => {
     const platinumLicense = licensingMock.createLicense({
       license: { type: 'platinum' },
