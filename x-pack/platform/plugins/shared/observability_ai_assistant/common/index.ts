@@ -47,6 +47,7 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantAnonymizationRules,
 } from './ui_settings/settings_keys';
 
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';

@@ -75,9 +75,11 @@ export class ObservabilityAIAssistantService {
   async getClient({
     request,
     scopes,
+    anonymizationRules,
   }: {
     request: KibanaRequest;
     scopes?: AssistantScope[];
+    anonymizationRules: string;
   }): Promise<ObservabilityAIAssistantClient> {
     const controller = new AbortController();
 
@@ -116,7 +118,7 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asCurrentUser,
       },
-      config: this.config,
+      anonymizationRules,
     });
 
     return new ObservabilityAIAssistantClient({

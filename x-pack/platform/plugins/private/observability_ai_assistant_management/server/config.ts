@@ -12,11 +12,17 @@ const configSchema = schema.object({
   visibilityEnabled: schema.boolean({ defaultValue: true }),
   spacesEnabled: schema.boolean({ defaultValue: true }),
   logSourcesEnabled: schema.boolean({ defaultValue: true }),
+  enableAnonymizationRules: schema.boolean({ defaultValue: false }),
 });
 
 export type ObservabilityAIAssistantManagementConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantManagementConfig> = {
   schema: configSchema,
-  exposeToBrowser: { logSourcesEnabled: true, spacesEnabled: true, visibilityEnabled: true },
+  exposeToBrowser: {
+    logSourcesEnabled: true,
+    spacesEnabled: true,
+    visibilityEnabled: true,
+    enableAnonymizationRules: true,
+  },
 };

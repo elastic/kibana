@@ -43,13 +43,11 @@ export class ObservabilityAIAssistantPlugin
   logger: Logger;
   service?: ObservabilityAIAssistantService;
   scopeFromConfig?: AssistantScope;
-  enableAnonymizationFromConfig: boolean;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
     const config = context.config.get();
     this.scopeFromConfig = config.scope;
-    this.enableAnonymizationFromConfig = config.enableAnonymization;
   }
   setup(
     coreSetup: CoreSetup,
@@ -118,7 +116,6 @@ export class ObservabilityAIAssistantPlugin
         : null,
       getContextualInsightMessages,
       createScreenContextAction,
-      enableAnonymization: this.enableAnonymizationFromConfig,
     };
   }
 }

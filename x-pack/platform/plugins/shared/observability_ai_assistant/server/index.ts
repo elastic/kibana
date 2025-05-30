@@ -52,7 +52,7 @@ export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
       level: 'warning',
     }),
   ],
-  exposeToBrowser: { scope: true, enableAnonymization: true },
+  exposeToBrowser: { scope: true },
   schema: configSchema,
 };
 

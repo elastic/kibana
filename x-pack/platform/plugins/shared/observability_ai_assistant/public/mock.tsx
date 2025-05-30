@@ -82,7 +82,6 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
     }),
     getContextualInsightMessages: () => [],
     createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),
-    enableAnonymization: true,
   };
 }
 

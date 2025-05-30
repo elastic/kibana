@@ -193,9 +193,7 @@ describe('Observability AI Assistant client', () => {
         esClient: {
           asCurrentUser: currentUserEsClientMock,
         },
-        config: {
-          enableAnonymization: true,
-        } as ObservabilityAIAssistantConfig,
+        anonymizationRules: '[]',
         logger: loggerMock,
       }),
       logger: loggerMock,
@@ -477,7 +475,6 @@ describe('Observability AI Assistant client', () => {
                   '@timestamp': expect.any(String),
                   message: {
                     content: 'How many alerts do I have?',
-                    detected_entities: expect.any(Array),
                     role: MessageRole.User,
                   },
                 },
@@ -485,7 +482,6 @@ describe('Observability AI Assistant client', () => {
                   '@timestamp': expect.any(String),
                   message: {
                     content: 'Hello again',
-                    detected_entities: expect.any(Array),
                     role: MessageRole.Assistant,
                     function_call: {
                       name: '',
@@ -605,7 +601,6 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'How many alerts do I have?',
-                detected_entities: expect.any(Array),
                 role: MessageRole.User,
               },
             },
@@ -613,7 +608,6 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'Hello',
-                detected_entities: expect.any(Array),
                 role: MessageRole.Assistant,
                 function_call: {
                   name: '',
@@ -936,7 +930,6 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'How many alerts do I have?',
-                detected_entities: expect.any(Array),
                 role: MessageRole.User,
               },
             },
@@ -944,7 +937,6 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content: 'Hello',
-                detected_entities: expect.any(Array),
                 role: MessageRole.Assistant,
                 function_call: {
                   name: 'myFunction',
@@ -961,14 +953,12 @@ describe('Observability AI Assistant client', () => {
                 }),
                 name: 'myFunction',
                 role: MessageRole.User,
-                detected_entities: expect.any(Array),
               },
             },
             {
               '@timestamp': expect.any(String),
               message: {
                 content: 'I am done here',
-                detected_entities: expect.any(Array),
                 role: MessageRole.Assistant,
                 function_call: {
                   name: '',

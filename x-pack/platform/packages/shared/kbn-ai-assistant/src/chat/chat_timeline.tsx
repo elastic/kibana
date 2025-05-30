@@ -10,7 +10,10 @@ import { css } from '@emotion/css';
 import { EuiCode, EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  aiAssistantAnonymizationRules,
+  type Message,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatActionClickPayload,
   ChatState,
@@ -23,6 +26,7 @@ import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import { useKibana } from '../hooks/use_kibana';
+
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
@@ -116,10 +120,26 @@ export function ChatTimeline({
   chatState,
 }: ChatTimelineProps) {
   const {
-    services: {
-      observabilityAIAssistant: { enableAnonymization },
-    },
+    services: { uiSettings },
   } = useKibana();
+
+  // Get anonymization rules from UI settings as a JSON string and parse it
+  const anonymizationRulesStr = uiSettings?.get<string>(aiAssistantAnonymizationRules);
+
+  // Parse the JSON string into an array of rules
+  const anonymizationRules = useMemo(() => {
+    try {
+      return JSON.parse(anonymizationRulesStr || '[]');
+    } catch (e) {
+      return [];
+    }
+  }, [anonymizationRulesStr]);
+
+  // Check if any rules are enabled
+  const anonymizationEnabled = useMemo(() => {
+    return Array.isArray(anonymizationRules) && anonymizationRules.some((rule) => rule.enabled);
+  }, [anonymizationRules]);
+
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
       conversationId,
@@ -140,7 +160,7 @@ export function ChatTimeline({
       const { role, content, detected_entities: detectedEntities } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (enableAnonymization && role === 'user' && content && detectedEntities) {
+      if (anonymizationEnabled && role === 'user' && content && detectedEntities) {
         item.anonymizedHighlightedContent = highlightContent(content, detectedEntities);
       }
 
@@ -168,7 +188,7 @@ export function ChatTimeline({
     isConversationOwnedByCurrentUser,
     isArchived,
     onActionClick,
-    enableAnonymization,
+    anonymizationEnabled,
   ]);
 
   return (

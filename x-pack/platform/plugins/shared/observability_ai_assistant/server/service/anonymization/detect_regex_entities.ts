@@ -5,6 +5,7 @@
  * 2.0.
  */
 import objectHash from 'object-hash';
+import type { Logger } from '@kbn/core/server';
 import { DetectedEntity } from '../../../common/types';
 
 export function getHashedEntity(
@@ -15,10 +16,6 @@ export function getHashedEntity(
   const textForHash = normalize ? entity.toLowerCase() : entity;
   return objectHash({ entity: textForHash, class_name: className });
 }
-
-const urlRegex = /https?:\/\/[^\s]+/gi;
-const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
-const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
 function getMatches(
   content: string,
@@ -46,10 +43,37 @@ function getMatches(
   return result;
 }
 
-export function detectRegexEntities(content: string): DetectedEntity[] {
-  return [
-    ...getMatches(content, urlRegex, 'URL', true),
-    ...getMatches(content, ipRegex, 'IP'),
-    ...getMatches(content, emailRegex, 'EMAIL', true),
-  ];
+export interface AnonymizationRule {
+  id: string;
+  entityClass: string;
+  type: 'regex' | 'ner';
+  pattern?: string;
+  enabled: boolean;
+  builtIn: boolean;
+  description?: string;
+  normalize?: boolean;
+}
+
+export function detectRegexEntities(
+  content: string,
+  rules: AnonymizationRule[] = [],
+  logger: Logger
+): DetectedEntity[] {
+  const results: DetectedEntity[] = [];
+
+  // Filter for enabled regex rules
+  const regexRules = rules.filter((rule) => rule.type === 'regex' && rule.enabled && rule.pattern);
+
+  // Apply each regex rule
+  for (const rule of regexRules) {
+    try {
+      const regex = new RegExp(rule.pattern!, 'g');
+      results.push(...getMatches(content, regex, rule.entityClass, rule.normalize ?? false));
+    } catch (error) {
+      // Skip invalid regex patterns
+      logger.error(`Invalid regex pattern in rule ${rule.id}: ${rule.pattern}`, error);
+    }
+  }
+
+  return results;
 }

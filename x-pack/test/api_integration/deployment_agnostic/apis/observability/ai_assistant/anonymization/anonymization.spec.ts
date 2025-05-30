@@ -10,11 +10,13 @@ import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { clearConversations } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
+  const supertest = getService('supertest');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
@@ -35,12 +37,41 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: proxy.getPort(),
       });
+
+      // configure anonymization rules for these tests
+      await setAdvancedSettings(supertest, {
+        'observability:aiAssistantAnonymizationRules': JSON.stringify([
+          {
+            id: 'email_regex',
+            entityClass: 'EMAIL',
+            type: 'regex',
+            pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+            enabled: true,
+            builtIn: true,
+            description: 'Anonymize email addresses',
+            normalize: true,
+          },
+          {
+            id: 'url_regex',
+            entityClass: 'URL',
+            type: 'regex',
+            pattern: 'https?://[^\\s]+',
+            enabled: true,
+            builtIn: true,
+            description: 'Anonymize URLs',
+            normalize: true,
+          },
+        ]),
+      });
     });
 
     after(async () => {
       proxy.close();
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
+      await setAdvancedSettings(supertest, {
+        'observability:aiAssistantAnonymizationRules': '[]',
+      });
     });
 
     it('does not send detected entities to the LLM via chat/complete', async () => {

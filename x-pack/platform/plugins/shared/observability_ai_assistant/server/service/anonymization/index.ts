@@ -23,28 +23,38 @@ import {
   type InferenceChunk,
   type Message,
 } from '../../../common/types';
-import { ObservabilityAIAssistantConfig } from '../../config';
 
 const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
+
+export interface AnonymizationRule {
+  id: string;
+  entityClass: string;
+  type: 'regex' | 'ner';
+  pattern?: string;
+  enabled: boolean;
+  builtIn: boolean;
+  description?: string;
+  normalize?: boolean;
+}
 
 export interface Dependencies {
   esClient: {
     asCurrentUser: ElasticsearchClient;
   };
-  config: ObservabilityAIAssistantConfig;
   logger: Logger;
+  anonymizationRules: string;
 }
 
 export class AnonymizationService {
   private readonly esClient: { asCurrentUser: ElasticsearchClient };
-  private readonly config: ObservabilityAIAssistantConfig;
   private readonly logger: Logger;
+  private rules: AnonymizationRule[];
 
-  constructor({ esClient, config, logger }: Dependencies) {
+  constructor({ esClient, logger, anonymizationRules }: Dependencies) {
     this.esClient = esClient;
-    this.config = config;
     this.logger = logger;
+    this.rules = JSON.parse(anonymizationRules || '[]');
   }
 
   private async detectNamedEntities(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
@@ -111,6 +121,48 @@ export class AnonymizationService {
     return flatResults;
   }
 
+  private async detectEntities(content: string): Promise<DetectedEntity[]> {
+    // Skip detection if there's no content
+    if (!content || !content.trim()) {
+      return [];
+    }
+
+    this.logger.debug(`Detecting entities in text content`);
+
+    // Filter rules by type
+    const nerRules = this.rules.filter((rule) => rule.type === 'ner' && rule.enabled);
+    const regexRules = this.rules.filter((rule) => rule.type === 'regex' && rule.enabled);
+
+    // Only run NER if we have NER rules enabled
+    let nerEntities: DetectedEntity[] = [];
+    if (nerRules.length > 0) {
+      // Detect entities using NER
+      const chunks = chunkText(content);
+      nerEntities = await this.detectNamedEntities(chunks);
+    }
+
+    // Detect entities using regex patterns
+    const regexEntities = detectRegexEntities(content, regexRules, this.logger);
+
+    // Combine and deduplicate entities
+    const combined = [...nerEntities, ...regexEntities];
+
+    // Give precedence to regex entities over overlapping NER entities
+    const deduped = combined.filter((ent) =>
+      // Regex entities take precedence over NER entities
+      ent.type === 'regex'
+        ? true
+        : // check for intersecting ranges with regex entities
+          !regexEntities.some((re) => ent.start_pos < re.end_pos && ent.end_pos > re.start_pos)
+    );
+
+    this.logger.debug(
+      `Detected ${nerEntities.length} NER entities and ${regexEntities.length} regex entities, ${deduped.length} after deduplication`
+    );
+
+    return deduped;
+  }
+
   /**
    * New user messages are anonymised (NER + regex) and their entities stored.
    * Assistant messages have any {hash} placeholders replaced with the original values.
@@ -129,9 +181,7 @@ export class AnonymizationService {
       `Processing ${messages.length} messages for entity detection and deanonymization`
     );
 
-    // temporary setting to remove once advanced setting is implemented
-    // where user opts-in to anonymization built in rules
-    if (!this.config.enableAnonymization) {
+    if (!this.rules.length) {
       return { anonymizedMessages: messages };
     }
 
@@ -153,7 +203,21 @@ export class AnonymizationService {
       // Process user messages - detect entities
       if (role === 'user' && content) {
         try {
-          const { processedMessage, entities } = await this.processUserMessage(message);
+          const entities = await this.detectEntities(content);
+          const processedMessage = {
+            ...message,
+            message: {
+              ...message.message,
+              detected_entities: entities.map((ent) => ({
+                entity: ent.entity,
+                class_name: ent.class_name,
+                start_pos: ent.start_pos,
+                end_pos: ent.end_pos,
+                type: ent.type,
+                hash: ent.hash,
+              })),
+            },
+          };
 
           // Update hash map with newly detected entities
           entities.forEach((entity) => {
@@ -167,9 +231,7 @@ export class AnonymizationService {
           result.push(processedMessage);
         } catch (error) {
           this.logger.error(
-            `Failed to process user message: ${
-              error instanceof Error ? error.message : String(error)
-            }`
+            new Error('Entity detection failed for user message', { cause: error })
           );
           // Add the original message without entities detected
           result.push(message);
@@ -184,68 +246,6 @@ export class AnonymizationService {
     }
 
     return { anonymizedMessages: result };
-  }
-
-  /**
-   * Process a user message to detect entities
-   *
-   * Identifies entities using NER and regex patterns and returns
-   * a new message with the detected entities attached.
-   *
-   * @param message - User message to process
-   * @returns Object containing processed message and detected entities
-   */
-  private async processUserMessage(
-    message: Message
-  ): Promise<{ processedMessage: Message; entities: DetectedEntity[] }> {
-    const { content } = message.message;
-
-    // Handle case with no content
-    if (!content) {
-      return {
-        processedMessage: message,
-        entities: [],
-      };
-    }
-
-    // Detect entities using NER and regex
-    const chunks = chunkText(content);
-    const nerEntities = await this.detectNamedEntities(chunks);
-    const regexEntities = detectRegexEntities(content);
-
-    // Combine and deduplicate entities
-    const combined = [...nerEntities, ...regexEntities];
-    const deduped = combined.filter((ent) =>
-      // Regex entities take precedence over NER entities
-      ent.type === 'regex'
-        ? true
-        : // check for intersecting ranges
-          !regexEntities.some((re) => ent.start_pos < re.end_pos && ent.end_pos > re.start_pos)
-    );
-
-    // Create entity objects to attach to the message
-    const detectedEntities = deduped.map((ent) => ({
-      entity: ent.entity,
-      class_name: ent.class_name,
-      start_pos: ent.start_pos,
-      end_pos: ent.end_pos,
-      type: ent.type,
-      hash: ent.hash,
-    }));
-
-    // Create a new message with detected entities
-    const processedMessage = {
-      ...message,
-      message: {
-        ...message.message,
-        detected_entities: detectedEntities,
-      },
-    };
-
-    return {
-      processedMessage,
-      entities: deduped,
-    };
   }
 
   /**

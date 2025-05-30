@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -54,6 +55,33 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     ),
     schema: schema.string(),
     type: 'string',
+    requiresPageReload: true,
+    solution: 'oblt',
+  },
+  [aiAssistantAnonymizationRules]: {
+    category: ['observability'],
+    name: i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsTab.anonymizationRulesLabel',
+      { defaultMessage: 'Anonymization Rules' }
+    ),
+    value: '[]', // Default is an empty array, which disables all anonymization rules.
+    description: i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
+      {
+        defaultMessage:
+          'JSON array of anonymization rules. Each rule is an object with properties:\n' +
+          '- id: unique string identifier\n' +
+          '- entityClass: class of entity (e.g., PER, ORG, EMAIL, URL)\n' +
+          '- type: "ner" or "regex"\n' +
+          '- pattern: (for regex rules) the regex string to match\n' +
+          '- enabled: boolean flag to turn the rule on or off\n' +
+          '- builtIn: boolean indicating this is a built‑in rule\n' +
+          '- description: optional human‑readable description\n' +
+          'Default is an empty array, which disables all anonymization rules.',
+      }
+    ),
+    schema: schema.string(),
+    type: 'json',
     requiresPageReload: true,
     solution: 'oblt',
   },

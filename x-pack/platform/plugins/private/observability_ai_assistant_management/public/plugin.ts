@@ -42,6 +42,7 @@ export interface ConfigSchema {
   logSourcesEnabled: boolean;
   spacesEnabled: boolean;
   visibilityEnabled: boolean;
+  enableAnonymizationRules: boolean;
 }
 
 export class AiAssistantManagementObservabilityPlugin

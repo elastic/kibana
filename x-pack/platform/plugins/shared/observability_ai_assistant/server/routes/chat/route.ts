@@ -11,6 +11,7 @@ import { from, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
+import { aiAssistantAnonymizationRules } from '../../../common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { flushBuffer } from '../../service/util/flush_buffer';
@@ -95,11 +96,13 @@ async function initializeChatRequest({
 
     return connector;
   });
+  const uiSettings = (await context.core).uiSettings;
+  const anonymizationRules = await uiSettings.client.get<string>(aiAssistantAnonymizationRules);
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-    service.getClient({ request, scopes }),
+    service.getClient({ request, scopes, anonymizationRules }),
     cloud?.start(),
-    (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
+    uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
 
   if (!client) {
