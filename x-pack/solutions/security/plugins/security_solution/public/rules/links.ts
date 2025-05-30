@@ -53,7 +53,7 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
-      capabilities: `${SECURITY_FEATURE_ID}.show`,
+      capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -61,7 +61,6 @@ export const links: LinkItem = {
           path: RULES_ADD_PATH,
           skipUrlState: true,
           hideTimeline: true,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
         {
           id: SecurityPageName.rulesCreate,
@@ -69,7 +68,6 @@ export const links: LinkItem = {
           path: RULES_CREATE_PATH,
           skipUrlState: true,
           hideTimeline: false,
-          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
       ],
     },
