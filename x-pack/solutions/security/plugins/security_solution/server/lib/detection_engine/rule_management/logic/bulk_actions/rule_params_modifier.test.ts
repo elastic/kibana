@@ -705,18 +705,21 @@ describe('ruleParamsModifier', () => {
           },
         ],
         [
-          '3 existing groupBy fields + 2 other groupBy fields (none of them) = 5 groupBy fields',
+          '3 existing groupBy fields + 2 other groupBy fields (none of them) = 3 groupBy fields',
           {
             existingAlertSuppression: {
               groupBy: ['field-1', 'field-2', 'field-3'],
               missingFieldsStrategy: 'suppress',
             },
-            alertSuppressionToAdd: { group_by: ['field-4', 'field-5'] },
+            alertSuppressionToAdd: {
+              group_by: ['field-4', 'field-5'],
+              suppression_config: { missing_fields_strategy: 'suppress' as const },
+            },
             resultingAlertSuppression: {
-              groupBy: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+              groupBy: ['field-1', 'field-2', 'field-3'],
               missingFieldsStrategy: 'suppress',
             },
-            isParamsUpdateSkipped: false,
+            isParamsUpdateSkipped: true,
             ruleType: 'query',
           },
         ],

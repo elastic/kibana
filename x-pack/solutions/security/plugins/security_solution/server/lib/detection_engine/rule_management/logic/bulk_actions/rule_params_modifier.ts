@@ -153,7 +153,10 @@ const shouldSkipAlertSuppressionFieldsBulkAction = (
   }
 
   if (action.type === BulkActionEditTypeEnum.add_alert_suppression) {
-    return hasAlertSuppressionGroupByFields(alertSuppression?.groupBy, action);
+    return (
+      alertSuppression?.groupBy?.length === 3 &&
+      hasAlertSuppressionGroupByFields(alertSuppression?.groupBy, action)
+    );
   }
 
   if (action.type === BulkActionEditTypeEnum.delete_alert_suppression) {
