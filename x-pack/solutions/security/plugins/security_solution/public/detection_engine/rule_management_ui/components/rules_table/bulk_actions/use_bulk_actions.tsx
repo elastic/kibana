@@ -47,6 +47,9 @@ import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useUpsellingMessage } from '../../../../../common/hooks/use_upselling';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -96,6 +99,10 @@ export const useBulkActions = ({
   const isBulkEditAlertSuppressionEnabled = useIsExperimentalFeatureEnabled(
     'bulkEditAlertSuppressionEnabled'
   );
+  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
+  const license = useLicense();
+  const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
+
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
@@ -420,7 +427,10 @@ export const useBulkActions = ({
                     key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
                     name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
                     'data-test-subj': 'alertSuppressionBulkEditRule',
-                    disabled: isEditDisabled,
+                    disabled: isEditDisabled || !isAlertSuppressionLicenseValid,
+                    toolTipContent: isAlertSuppressionLicenseValid
+                      ? undefined
+                      : alertSuppressionUpsellingMessage,
                     panel: 4,
                   },
                 ]
@@ -645,6 +655,8 @@ export const useBulkActions = ({
       isBulkEditAlertSuppressionEnabled,
       startServices,
       canCreateTimelines,
+      isAlertSuppressionLicenseValid,
+      alertSuppressionUpsellingMessage,
     ]
   );
 
