@@ -9,7 +9,7 @@ navigation_title: "Known issues"
 Applies to: {{stack}} 9.0.0, 9.0.1
 
 **Details** 
-Errors occur when rules execute during an active maintenance window that has filters and a matching rule category. 
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
 
 **Workaround** 
 Remove any filters added to the active maintenance window.
