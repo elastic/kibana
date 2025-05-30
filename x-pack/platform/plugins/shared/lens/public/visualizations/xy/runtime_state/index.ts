@@ -7,18 +7,15 @@
 
 import { cloneDeep } from 'lodash';
 
-import { CoreTheme } from '@kbn/core/public';
-
 import { GeneralDatasourceStates } from '../../../state_management';
 import { XYState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: XYState,
-  theme: CoreTheme,
   datasourceStates?: Readonly<GeneralDatasourceStates>
 ): XYState {
-  return getRuntimeConverters(theme, datasourceStates).reduce(
+  return getRuntimeConverters(datasourceStates).reduce(
     (newState, fn) => fn(newState),
     cloneDeep(state)
   );
