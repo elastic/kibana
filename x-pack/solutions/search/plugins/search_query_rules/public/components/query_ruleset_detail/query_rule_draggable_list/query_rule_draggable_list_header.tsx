@@ -19,7 +19,6 @@ interface QueryRuleDraggableListHeaderProps {
   tourInfo?: {
     title: string;
     content: string;
-    targetTourId: string;
   };
 }
 

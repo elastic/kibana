@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -84,7 +84,7 @@ export const QueryRulesetDetail: React.FC = () => {
         defaultMessage:
           'Rules will trigger based on the priority order. The first rule will take precedence over any following rules',
       }),
-      targetTourId: 'targetTourId',
+      tourTargetRef: useRef<HTMLDivElement>(null),
     },
   ];
 
@@ -308,55 +308,53 @@ export const QueryRulesetDetail: React.FC = () => {
       )}
       {!isError && (
         <>
-          <EuiTourStep
-            anchor="#targetTourId"
-            content={<p>{tourStepsInfo[1].content}</p>}
-            isStepOpen={tourState.isTourActive && tourState.currentTourStep === 2}
-            maxWidth={tourState.tourPopoverWidth}
-            onFinish={finishTour}
-            step={1}
-            stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
-            title={
-              <EuiTitle size="xs">
-                <h6>{tourStepsInfo[1].title}</h6>
-              </EuiTitle>
-            }
-            anchorPosition="downLeft"
-            zIndex={1}
-            footerAction={
-              <EuiFlexGroup direction="row">
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
-                    size="s"
-                    color="text"
-                    onClick={descrementStep}
-                  >
-                    {i18n.translate('xpack.queryRules.queryRulesetDetail.backTourButton', {
-                      defaultMessage: 'Back',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButton
-                    data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
-                    size="s"
-                    color="success"
-                    onClick={finishTour}
-                  >
-                    {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
-                      defaultMessage: 'Close tour',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          />
-          <QueryRuleDetailPanel
-            tourInfo={tourStepsInfo[1].targetTourId ? tourStepsInfo[1] : undefined}
-            rules={rules}
-            setRules={setRules}
-          />
+          <QueryRuleDetailPanel tourInfo={tourStepsInfo[1]} rules={rules} setRules={setRules} />
+          {tourStepsInfo[1]?.tourTargetRef?.current && (
+            <EuiTourStep
+              anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
+              content={<p>{tourStepsInfo[1].content}</p>}
+              isStepOpen={tourState.isTourActive && tourState.currentTourStep === 2}
+              maxWidth={tourState.tourPopoverWidth}
+              onFinish={finishTour}
+              step={1}
+              stepsTotal={(queryRulesetData?.rules?.length ?? 0) > 1 ? 2 : 1}
+              title={
+                <EuiTitle size="xs">
+                  <h6>{tourStepsInfo[1].title}</h6>
+                </EuiTitle>
+              }
+              anchorPosition="downLeft"
+              zIndex={1}
+              footerAction={
+                <EuiFlexGroup direction="row">
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
+                      size="s"
+                      color="text"
+                      onClick={descrementStep}
+                    >
+                      {i18n.translate('xpack.queryRules.queryRulesetDetail.backTourButton', {
+                        defaultMessage: 'Back',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                      size="s"
+                      color="success"
+                      onClick={finishTour}
+                    >
+                      {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                        defaultMessage: 'Close tour',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            />
+          )}
         </>
       )}
       {isError && (

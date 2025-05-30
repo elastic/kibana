@@ -18,9 +18,10 @@ interface QueryRuleDetailPanelProps {
   tourInfo?: {
     title: string;
     content: string;
-    targetTourId: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
   };
 }
+
 export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   rules,
   setRules,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import {
   EuiDragDropContext,
@@ -35,15 +35,18 @@ export interface QueryRuleDraggableListProps {
   tourInfo?: {
     title: string;
     content: string;
-    targetTourId: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
   };
 }
+
 export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
   onReorder,
   tourInfo,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const localTourTargetRef = useRef<HTMLDivElement>(null);
+  const effectiveRef = tourInfo?.tourTargetRef || localTourTargetRef;
 
   return (
     <EuiDragDropContext
@@ -75,13 +78,15 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
               {(provided) => (
                 <EuiPanel paddingSize="s" hasShadow={false}>
                   <EuiFlexGroup alignItems="center" gutterSize="m">
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem
+                      grow={false}
+                      ref={index === rules.length - 1 ? effectiveRef : undefined}
+                    >
                       <EuiPanel
                         color="transparent"
                         paddingSize="s"
                         {...provided.dragHandleProps}
                         aria-label="Drag Handle"
-                        id={index === rules.length - 1 ? tourInfo?.targetTourId : undefined}
                       >
                         <EuiIcon type="grab" />
                       </EuiPanel>
