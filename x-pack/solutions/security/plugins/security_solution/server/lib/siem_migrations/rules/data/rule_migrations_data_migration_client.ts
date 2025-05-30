@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import type { Script, BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleMigrationLastExecution } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
@@ -112,31 +112,14 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     this.logger.info(`Updating last execution params for migration ${id}`);
     const index = await this.getIndexName();
 
-    const painlessUpdateScripts: string[] = [];
-
-    for (const [key, value] of Object.entries(lastExecutionParams)) {
-      if (typeof value === 'string') {
-        painlessUpdateScripts.push(`ctx._source.last_execution.${key} = '${value}';`);
-      } else if (['boolean', 'number'].includes(typeof value)) {
-        painlessUpdateScripts.push(`ctx._source.last_execution.${key} = ${value};`);
-      }
-    }
-
-    const script: Script = {
-      source: `
-        if (ctx._source.last_execution == null) {
-          ctx._source.last_execution = [:];
-        }
-      ${painlessUpdateScripts.join('\n')}
-      `,
-    };
-
     await this.esClient
       .update({
         index,
         id,
         refresh: 'wait_for',
-        script,
+        doc: {
+          last_execution: lastExecutionParams,
+        },
       })
       .catch((error) => {
         this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
