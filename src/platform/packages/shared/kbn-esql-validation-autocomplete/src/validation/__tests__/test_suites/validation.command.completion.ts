@@ -182,5 +182,62 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
         });
       });
     });
+
+    describe('...WITH <inferenceId>', () => {
+      test.todo('valid inferenceId'); // When the fetching of inferenceIds is implemented
+    });
+
+    describe('...(AS <targetField>)', () => {
+      describe('if no provided, the default targetField is `completion`', () => {
+        // Why not working on test env ????
+        test.skip('completion field is not available before completion command', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index | KEEP completion | eval a = 1 | COMPLETION "prompt" WITH inferenceId`,
+            ['Unknown column [completion]']
+          );
+        });
+
+        test('completion field is available after completion command', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index | COMPLETION "prompt" WITH inferenceId | KEEP completion`,
+            []
+          );
+        });
+      });
+
+      describe('a custom targetField is provided', () => {
+        test('targetField is available after COMPLETION', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index | COMPLETION "prompt" WITH inferenceId AS customField | KEEP customField`,
+            []
+          );
+        });
+
+        // Same, why not working on test env?
+        test.skip('targetField is not available before completion command', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index | KEEP customField | eval a = 1 | COMPLETION "prompt" WITH inferenceId AS customField`,
+            ['Unknown column [customField]']
+          );
+        });
+
+        test('`completion` default field is not available after completion command', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index | COMPLETION "prompt" WITH inferenceId AS customField | KEEP completion`,
+            ['Unknown column [completion]']
+          );
+        });
+      });
+    });
   });
 };

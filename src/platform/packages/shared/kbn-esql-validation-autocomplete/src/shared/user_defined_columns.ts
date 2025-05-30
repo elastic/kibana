@@ -127,7 +127,7 @@ function addUserDefinedColumnFromCompletionCommand(
   addToUserDefinedColumnOccurrences(userDefinedColumns, {
     name: target?.name || 'completion',
     type: 'keyword',
-    location: target?.location || { min: 0, max: 0 },
+    location: target?.location || command.location,
   });
 }
 
