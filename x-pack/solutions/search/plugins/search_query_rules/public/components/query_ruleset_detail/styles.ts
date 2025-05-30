@@ -31,7 +31,7 @@ export const DocumentCountLabelStyle = (theme: EuiThemeComputed<{}>) =>
 
 export const DraggableListHeader = (theme: EuiThemeComputed<{}>) =>
   css({
-    padding: `0 ${theme.base * 2.25}px 0 ${theme.base * 3.5}px`,
+    padding: `0 ${theme.base * 2.25}px 0 ${theme.base * 1.5}px`,
   });
 
 export const ActionHeaderContainer = (theme: EuiThemeComputed<{}>) =>

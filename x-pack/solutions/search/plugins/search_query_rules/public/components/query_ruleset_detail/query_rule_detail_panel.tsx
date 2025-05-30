@@ -15,8 +15,18 @@ import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_d
 interface QueryRuleDetailPanelProps {
   rules: QueryRulesQueryRule[];
   setRules: (rules: QueryRulesQueryRule[]) => void;
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
 }
-export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rules, setRules }) => {
+
+export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
+  rules,
+  setRules,
+  tourInfo,
+}) => {
   return (
     <KibanaPageTemplate.Section restrictWidth>
       <EuiFlexGroup justifyContent="spaceBetween" direction="column">
@@ -54,7 +64,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rule
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryRuleDraggableList rules={rules} onReorder={setRules} />
+          <QueryRuleDraggableList tourInfo={tourInfo} rules={rules} onReorder={setRules} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
