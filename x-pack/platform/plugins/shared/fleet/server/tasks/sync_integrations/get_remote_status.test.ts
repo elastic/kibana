@@ -18,6 +18,8 @@ import type { Output } from '../../types';
 
 import { FleetNotFoundError } from '../../errors';
 
+import { licenseService } from '../../services/license';
+
 import { getRemoteSyncedIntegrationsInfoByOutputId } from './get_remote_status';
 
 jest.mock('../../services/app_context');
@@ -66,6 +68,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -82,15 +85,26 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     });
   });
 
-  it('should throw error if the passed outputId is not found', async () => {
+  it('should return empty integrations array if license is not at least Enterprise', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return response with error if the passed outputId is not found', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
 
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
-    ).rejects.toThrowError('No output found with id remote-es-not-existent');
+    expect(
+      await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
+    ).toEqual({ error: 'No output found with id remote-es-not-existent', integrations: [] });
   });
 
   it('should throw error if the passed outputId is not of type remote_elasticsearch', async () => {
