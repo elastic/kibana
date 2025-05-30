@@ -12,7 +12,6 @@ import {
   HttpStart,
   PluginInitializer,
   PluginInitializerContext,
-  PricingServiceStart,
 } from '@kbn/core/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import {
@@ -40,7 +39,6 @@ export interface AppContext {
 
 export interface ObservabilityOnboardingAppServices {
   application: ApplicationStart;
-  pricing: PricingServiceStart;
   http: HttpStart;
   share: SharePluginStart;
   context: AppContext;

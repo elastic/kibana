@@ -56,13 +56,6 @@ export class ObservabilityOnboardingPlugin
   ) {
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);
 
-    core.pricing.registerProductFeatures([
-      {
-        id: 'observability-complete-onboarding',
-        products: [{ name: 'observability', tier: 'complete' }],
-      },
-    ]);
-
     core.savedObjects.registerType(observabilityOnboardingFlow);
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
