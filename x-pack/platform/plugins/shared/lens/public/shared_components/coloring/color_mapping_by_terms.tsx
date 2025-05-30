@@ -8,7 +8,6 @@
 import React, { MutableRefObject, useState } from 'react';
 
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -16,7 +15,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -33,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnPalettes } from '@kbn/palettes';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializedValue } from '@kbn/data-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
@@ -52,23 +51,6 @@ interface ColorMappingByTermsProps {
   formatter?: IFieldFormat;
   allowCustomMatch?: boolean;
 }
-
-export const DeprecatedBadge = () => {
-  return (
-    <EuiToolTip
-      content={i18n.translate('xpack.lens.colorMapping.deprecatedBadgeTooltip', {
-        defaultMessage:
-          'Legacy palettes are deprecated and will not be supported in a future version.',
-      })}
-    >
-      <EuiBadge color="warning">
-        {i18n.translate('xpack.lens.colorMapping.deprecatedTemplateBadgeText', {
-          defaultMessage: 'Deprecated',
-        })}
-      </EuiBadge>
-    </EuiToolTip>
-  );
-};
 
 export function ColorMappingByTerms({
   isDarkMode,
@@ -143,7 +125,21 @@ export function ColorMappingByTerms({
                           color={euiTheme.colors.warning}
                         />
                       )}{' '}
-                      <DeprecatedBadge />
+                      <EuiIconTip
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="xpack.lens.colorMapping.legacyPalettes"
+                            defaultMessage="Legacy palettes will be replaced by the new Color Mapping feature in a future version."
+                          />
+                        }
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
                     </span>
                   </EuiText>
                 }
