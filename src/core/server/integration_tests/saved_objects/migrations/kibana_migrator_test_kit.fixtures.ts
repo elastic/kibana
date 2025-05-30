@@ -215,6 +215,20 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) => {
           },
         },
       };
+    } else if (type.name === 'old') {
+      return {
+        ...type,
+        migrations: {
+          ...type.migrations,
+          '8.9.0': ((doc) => ({
+            ...doc,
+            attributes: {
+              ...(doc.attributes as any),
+              name: `${(doc.attributes as any).name}_8.9.0`,
+            },
+          })) as SavedObjectMigration,
+        },
+      };
     } else {
       return type;
     }

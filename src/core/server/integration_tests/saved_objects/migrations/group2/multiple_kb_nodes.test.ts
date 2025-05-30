@@ -148,6 +148,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     // check documents have been migrated
     await expect(getAggregatedTypesCount(client, [defaultKibanaIndex])).resolves.toEqual({
       complex: BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
+      old: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [defaultKibanaTaskIndex])).resolves.toEqual({});
     await expect(getAggregatedTypesCount(client, [kibanaSplitIndex])).resolves.toEqual({

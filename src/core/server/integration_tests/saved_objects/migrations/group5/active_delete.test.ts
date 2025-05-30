@@ -289,7 +289,7 @@ describe('when upgrading to a new stack version', () => {
         expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-        expect(indexContents.hits.hits.length).toEqual(15);
+        expect(indexContents.hits.hits.length).toEqual(25);
       });
     });
   });
