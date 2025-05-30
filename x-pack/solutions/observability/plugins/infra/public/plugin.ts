@@ -134,7 +134,7 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
-      switchMap(([[{ application }]]) =>
+      switchMap(([{ application }]) =>
         combineLatest([of(application), getLogsExplorerAccessible$(application)])
       )
     );
@@ -144,7 +144,7 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndAccessibleFlag$.pipe(
-        map(([application, isInfrastructureHostsViewEnabled, isLogsExplorerAccessible]) => {
+        map(([application, isLogsExplorerAccessible]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
