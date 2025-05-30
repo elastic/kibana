@@ -120,6 +120,13 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
             }
             onChange={() => {}}
             value={value}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                e.stopPropagation();
+                setPopoverOpen.bind(null, true)();
+              }
+            }}
           />
         </EuiFormControlLayout>
       }
