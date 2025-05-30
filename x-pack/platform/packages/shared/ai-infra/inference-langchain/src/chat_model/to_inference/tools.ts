@@ -28,6 +28,11 @@ export const toolDefinitionToInference = (
     if (isLangChainTool(tool)) {
       definitions[tool.name] = {
         description: tool.description ?? tool.name,
+        schema: tool.schema
+          ? isZodSchema(tool.schema)
+            ? zodSchemaToInference(tool.schema)
+            : jsonSchemaToInference(tool.schema)
+          : undefined,
         schema: tool.schema ? jsonSchemaToInference(tool.schema) : undefined,
       };
     } else if (isToolDefinition(tool)) {
