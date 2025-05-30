@@ -31,8 +31,8 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
     <ColumnHeaderTruncateContainer>
       <EuiScreenReaderOnly>
         <span>
-          {i18n.translate('unifiedDataTable.controlColumnHeader', {
-            defaultMessage: 'Control column',
+          {i18n.translate('unifiedDataTable.actionsColumnHeader', {
+            defaultMessage: 'Actions column',
           })}
         </span>
       </EuiScreenReaderOnly>
