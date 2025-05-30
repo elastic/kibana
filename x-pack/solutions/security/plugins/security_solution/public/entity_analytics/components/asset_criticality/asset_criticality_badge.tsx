@@ -15,15 +15,20 @@ import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_a
  * Map Asset Criticality status to EUI severity color pattern as per spec:
  * https://eui.elastic.co/docs/patterns/severity/index.html#use-cases
  */
-const mapStatusToColor = (euiTheme: EuiThemeComputed) => {
+export const getCriticalityLevelColor = (
+  euiTheme: EuiThemeComputed,
+  criticalityLevel: CriticalityLevelWithUnassigned
+) => {
   const { danger, risk, warning, neutral, unknown } = euiTheme.colors.severity;
-  return {
+  const map = {
     extreme_impact: danger,
     high_impact: risk,
     medium_impact: warning,
     low_impact: neutral,
     unassigned: unknown,
   };
+
+  return map[criticalityLevel] || map.unassigned;
 };
 
 export const AssetCriticalityBadge: React.FC<{
@@ -41,7 +46,7 @@ export const AssetCriticalityBadge: React.FC<{
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}
-      color={mapStatusToColor(euiTheme)[criticalityLevel]}
+      color={getCriticalityLevelColor(euiTheme, criticalityLevel)}
       css={style}
       className={className}
     >
