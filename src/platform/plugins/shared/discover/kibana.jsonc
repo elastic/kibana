@@ -45,6 +45,7 @@
       "noDataPage",
       "globalSearch",
       "observabilityAIAssistant",
+      "elasticAssistant",
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
@@ -55,7 +56,7 @@
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects"
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common"

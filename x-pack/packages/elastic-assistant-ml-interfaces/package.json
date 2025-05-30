@@ -1,0 +1,25 @@
+{
+  "name": "@kbn/elastic-assistant-ml-interfaces",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interfaces for ML functionality used by Elastic Assistant",
+  "main": "./target/public/index.js",
+  "license": "Elastic-2.0",
+  "kibana": {
+    "version": "kibana",
+    "build": {
+      "describedBy": "simple"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/kibana.git",
+    "directory": "x-pack/packages/elastic-assistant-ml-interfaces"
+  },
+  "scripts": {
+    "build": "yarn build:dev",
+    "build:dev": "node ../../../scripts/build_ts_project.js",
+    "build:prod": "node ../../../scripts/build_ts_project.js production",
+    "kbn:bootstrap": "yarn build"
+  }
+}

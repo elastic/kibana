@@ -18,7 +18,6 @@
       "dataViewEditor",
       "dataViews",
       "dataVisualizer",
-      "discover",
       "embeddable",
       "features",
       "fieldFormats",
@@ -61,6 +60,9 @@
       "savedObjectsFinder",
       "usageCollection",
       "alerting"
+    ],
+    "requiredPackages": [
+      "@kbn/elastic-assistant-ml-interfaces"
     ],
     "extraPublicDirs": ["common"]
   }

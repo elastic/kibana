@@ -54,8 +54,7 @@ export const AssistantNavLink: FC = () => {
 
     if (
       assistantAvailability.hasAssistantPrivilege &&
-      chromeStyle &&
-      currentAppId !== 'management'
+      chromeStyle
     ) {
       registerPortalNode();
     }

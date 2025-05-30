@@ -822,6 +822,8 @@
       "@kbn/elastic-assistant/*": ["x-pack/platform/packages/shared/kbn-elastic-assistant/*"],
       "@kbn/elastic-assistant-common": ["x-pack/platform/packages/shared/kbn-elastic-assistant-common"],
       "@kbn/elastic-assistant-common/*": ["x-pack/platform/packages/shared/kbn-elastic-assistant-common/*"],
+      "@kbn/elastic-assistant-ml-interfaces": ["x-pack/packages/elastic-assistant-ml-interfaces"],
+      "@kbn/elastic-assistant-ml-interfaces/*": ["x-pack/packages/elastic-assistant-ml-interfaces/*"],
       "@kbn/elastic-assistant-plugin": ["x-pack/solutions/security/plugins/elastic_assistant"],
       "@kbn/elastic-assistant-plugin/*": ["x-pack/solutions/security/plugins/elastic_assistant/*"],
       "@kbn/elasticsearch-client-plugin": ["src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin"],

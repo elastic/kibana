@@ -20,7 +20,6 @@
       "alerting",
       "data",
       "eventLog",
-      "ml",
       "taskManager",
       "licensing",
       "llmTasks",
@@ -28,6 +27,12 @@
       "productDocBase",
       "spaces",
       "security"
+    ],
+    "optionalPlugins": [
+      "ml"
+    ],
+    "requiredPackages": [
+      "@kbn/elastic-assistant-ml-interfaces"
     ]
   }
 }
