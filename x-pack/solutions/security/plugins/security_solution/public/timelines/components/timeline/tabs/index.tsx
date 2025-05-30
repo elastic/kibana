@@ -353,7 +353,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
-    if (!graphEventId && activeTab === TimelineTabs.graph) {
+    // we redirect to the Query tab in the following situations:
+    // - for the Analyzer tab but the graphEventId is missing from the url
+    // - for urls with Timeline saved with the Session tab, we automatically (as Session View is now rendered in the flyout)
+    // @ts-ignore
+    if ((!graphEventId && activeTab === TimelineTabs.graph) || activeTab === 'session') {
       setQueryAsActiveTab();
     }
   }, [activeTab, graphEventId, setQueryAsActiveTab]);
