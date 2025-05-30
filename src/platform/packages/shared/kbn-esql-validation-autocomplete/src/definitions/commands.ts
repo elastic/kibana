@@ -48,6 +48,10 @@ import {
 } from '../autocomplete/commands/drop';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
+import {
+  suggest as suggestForFork,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
+} from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
 import {
@@ -65,6 +69,8 @@ import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterRename,
   suggest as suggestForRename,
 } from '../autocomplete/commands/rename';
+import { suggest as suggestForRrf } from '../autocomplete/commands/rrf';
+import { validate as validateRrf } from '../validation/commands/rrf';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
@@ -73,9 +79,13 @@ import {
   suggest as suggestForStats,
 } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
-
+import {
+  suggest as suggestForChangePoint,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterChangePoint,
+} from '../autocomplete/commands/change_point';
 import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
+import { isNumericType } from '../shared/esql_types';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -578,5 +588,136 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
     suggest: suggestForJoin,
+  },
+  {
+    name: 'change_point',
+    preview: true,
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.changePointDoc',
+      {
+        defaultMessage: 'Detect change point in the query results',
+      }
+    ),
+    declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue>`,
+    examples: [
+      '… | CHANGE_POINT value',
+      '… | CHANGE_POINT value ON timestamp',
+      '… | CHANGE_POINT value ON timestamp AS type, pvalue',
+    ],
+    validate: (command: ESQLCommand, references) => {
+      const messages: ESQLMessage[] = [];
+
+      // validate change point value column
+      const valueArg = command.args[0];
+      if (isColumnItem(valueArg)) {
+        const columnName = valueArg.name;
+        // look up for columns in userDefinedColumns and existing fields
+        let valueColumnType: string | undefined;
+        const userDefinedColumnRef = references.userDefinedColumns.get(columnName);
+        if (userDefinedColumnRef) {
+          valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
+        } else {
+          const fieldRef = references.fields.get(columnName);
+          valueColumnType = fieldRef?.type;
+        }
+
+        if (valueColumnType && !isNumericType(valueColumnType)) {
+          messages.push({
+            location: command.location,
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.validation.changePointUnsupportedFieldType',
+              {
+                defaultMessage:
+                  'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
+                values: { columnName, valueColumnType },
+              }
+            ),
+            type: 'error',
+            code: 'changePointUnsupportedFieldType',
+          });
+        }
+      }
+
+      // validate ON column
+      const defaultOnColumnName = '@timestamp';
+      const onColumn = command.args.find((arg) => isOptionItem(arg) && arg.name === 'on');
+      const hasDefaultOnColumn = references.fields.has(defaultOnColumnName);
+      if (!onColumn && !hasDefaultOnColumn) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.changePointOnFieldMissing',
+            {
+              defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
+              values: { defaultOnColumnName },
+            }
+          ),
+          type: 'error',
+          code: 'changePointOnFieldMissing',
+        });
+      }
+
+      // validate AS
+      const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
+      if (asArg && isOptionItem(asArg)) {
+        // populate userDefinedColumns references to prevent the common check from failing with unknown column
+        asArg.args.forEach((arg, index) => {
+          if (isColumnItem(arg)) {
+            references.userDefinedColumns.set(arg.name, [
+              { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
+            ]);
+          }
+        });
+      }
+
+      return messages;
+    },
+    suggest: suggestForChangePoint,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterChangePoint,
+  },
+  {
+    hidden: true,
+    name: 'fork',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
+      defaultMessage: 'Forks the stream.',
+    }),
+    declaration: `TODO`,
+    examples: [],
+    suggest: suggestForFork,
+    validate: (command) => {
+      const messages: ESQLMessage[] = [];
+
+      if (command.args.length < 2) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.forkTooFewBranches',
+            {
+              defaultMessage: '[FORK] Must include at least two branches.',
+            }
+          ),
+          type: 'error',
+          code: 'forkTooFewBranches',
+        });
+      }
+
+      return messages;
+    },
+
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
+  },
+  {
+    hidden: true,
+    preview: true,
+    name: 'rrf',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {
+      defaultMessage:
+        'Combines multiple result sets with different scoring functions into a single result set.',
+    }),
+    declaration: `RRF`,
+    examples: ['… FORK (LIMIT 1) (LIMIT 2) | RRF'],
+    suggest: suggestForRrf,
+    validate: validateRrf,
   },
 ];
