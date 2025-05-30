@@ -7,6 +7,20 @@
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
+import { RouteContext } from '../../types';
+import { MonitorConfigRepository } from '../../../services/monitor_config_repository';
+
+// Mock the syncEditedMonitorBulk module
+jest.mock('../../monitor_cruds/bulk_cruds/edit_monitor_bulk', () => ({
+  syncEditedMonitorBulk: jest.fn().mockResolvedValue({
+    failedConfigs: [],
+    errors: [],
+    editedMonitors: [],
+  }),
+}));
+
+// Import the mocked function
+import { syncEditedMonitorBulk } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
 
 const testLocations = {
   locations: [
@@ -162,17 +176,14 @@ describe('updatePrivateLocationMonitors', () => {
     const mockMonitorConfigRepository = {
       findDecryptedMonitors: jest.fn().mockResolvedValue(mockMonitors),
       bulkUpdate: jest.fn().mockResolvedValue({}),
-    };
-    // Mock the syntheticsMonitorClient
-    const mockSyntheticsMonitorClient = { editMonitors: jest.fn() };
+    } as unknown as MonitorConfigRepository;
 
     // Call the function
     await updatePrivateLocationMonitors({
       locationId: LOCATION_ID,
       newLocationLabel: NEW_LABEL,
-      monitorConfigRepository: mockMonitorConfigRepository as any,
-      syntheticsMonitorClient: mockSyntheticsMonitorClient as any,
       allPrivateLocations: [],
+      routeContext: { monitorConfigRepository: mockMonitorConfigRepository } as RouteContext,
     });
 
     // Verify findDecryptedMonitors was called correctly
@@ -181,70 +192,57 @@ describe('updatePrivateLocationMonitors', () => {
       filter: `synthetics-monitor.attributes.locations.id:("${LOCATION_ID}")`,
     });
 
-    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenCalledTimes(2);
+    // Verify that syncEditedMonitorBulk was called
+    expect(syncEditedMonitorBulk).toHaveBeenCalledTimes(2);
 
-    // Verify bulkUpdate was called with the updated monitors
-    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenNthCalledWith(1, {
-      monitors: [
-        {
-          ...mockMonitors[0],
-          attributes: {
-            ...mockMonitors[0].attributes,
-            locations: [{ ...mockMonitors[0].attributes.locations[0], label: NEW_LABEL }],
-          },
-        },
-      ],
-    });
-    expect(mockMonitorConfigRepository.bulkUpdate).toHaveBeenNthCalledWith(2, {
-      monitors: [
-        {
-          ...mockMonitors[1],
-          attributes: {
-            ...mockMonitors[1].attributes,
-            locations: [
-              { ...mockMonitors[1].attributes.locations[0], label: NEW_LABEL },
-              { id: 'different-location', label: 'Different Location' },
-            ],
-          },
-        },
-      ],
-    });
-
-    expect(mockSyntheticsMonitorClient.editMonitors).toHaveBeenCalledTimes(2);
-
-    // Verify editMonitors was called with the updated monitors
-    expect(mockSyntheticsMonitorClient.editMonitors).toHaveBeenNthCalledWith(
-      1,
-      [
-        {
-          monitor: {
-            ...mockMonitors[0].attributes,
-            locations: [{ ...mockMonitors[0].attributes.locations[0], label: NEW_LABEL }],
-          },
-          id: FIRST_MONITOR_ID,
+    // Check first call for first space
+    expect(syncEditedMonitorBulk).toHaveBeenCalledWith({
+      monitorsToUpdate: expect.arrayContaining([
+        expect.objectContaining({
           decryptedPreviousMonitor: mockMonitors[0],
-        },
-      ],
-      [],
-      FIRST_SPACE_ID
-    );
-    expect(mockSyntheticsMonitorClient.editMonitors).toHaveBeenNthCalledWith(
-      2,
-      [
-        {
-          monitor: {
-            ...mockMonitors[1].attributes,
+          normalizedMonitor: expect.any(Object),
+          monitorWithRevision: expect.objectContaining({
             locations: [
-              { ...mockMonitors[1].attributes.locations[0], label: NEW_LABEL },
-              { id: 'different-location', label: 'Different Location' },
+              expect.objectContaining({
+                id: LOCATION_ID,
+                label: NEW_LABEL,
+              }),
             ],
-          },
-          id: SECOND_MONITOR_ID,
+          }),
+        }),
+      ]),
+      privateLocations: [],
+      routeContext: expect.objectContaining({
+        monitorConfigRepository: mockMonitorConfigRepository,
+      }),
+      spaceId: FIRST_SPACE_ID,
+    });
+
+    // Check second call for second space
+    expect(syncEditedMonitorBulk).toHaveBeenCalledWith({
+      monitorsToUpdate: expect.arrayContaining([
+        expect.objectContaining({
           decryptedPreviousMonitor: mockMonitors[1],
-        },
-      ],
-      [],
-      SECOND_SPACE_ID
-    );
+          normalizedMonitor: expect.any(Object),
+          monitorWithRevision: expect.objectContaining({
+            locations: [
+              expect.objectContaining({
+                id: LOCATION_ID,
+                label: NEW_LABEL,
+              }),
+              expect.objectContaining({
+                id: 'different-location',
+                label: 'Different Location',
+              }),
+            ],
+          }),
+        }),
+      ]),
+      privateLocations: [],
+      routeContext: expect.objectContaining({
+        monitorConfigRepository: mockMonitorConfigRepository,
+      }),
+      spaceId: SECOND_SPACE_ID,
+    });
   });
 });

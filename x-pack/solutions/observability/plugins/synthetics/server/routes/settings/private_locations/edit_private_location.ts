@@ -48,13 +48,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const {
-      response,
-      request,
-      monitorConfigRepository,
-      savedObjectsClient,
-      syntheticsMonitorClient,
-    } = routeContext;
+    const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
     const newLocationLabel = request.body.label;
 
@@ -69,10 +63,9 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
       await updatePrivateLocationMonitors({
         locationId,
-        monitorConfigRepository,
         newLocationLabel,
-        syntheticsMonitorClient,
         allPrivateLocations,
+        routeContext,
       });
 
       return toClientContract({

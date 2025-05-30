@@ -6,12 +6,10 @@
  */
 import { SavedObject } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { MonitorConfigRepository } from '../../../services/monitor_config_repository';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
 import { AgentPolicyInfo } from '../../../../common/types';
 import type {
-  MonitorFields,
-  SyntheticsMonitorWithSecretsAttributes,
+  SyntheticsMonitor,
   SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import type {
@@ -20,6 +18,11 @@ import type {
 } from '../../../runtime_types/private_locations';
 import { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
+import {
+  MonitorConfigUpdate,
+  syncEditedMonitorBulk,
+} from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import { RouteContext } from '../../types';
 
 export const toClientContract = (
   locationObject: SavedObject<PrivateLocationAttributes>
@@ -74,64 +77,52 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
 export const updatePrivateLocationMonitors = async ({
   locationId,
   newLocationLabel,
-  monitorConfigRepository,
-  syntheticsMonitorClient,
   allPrivateLocations,
+  routeContext,
 }: {
   locationId: string;
   newLocationLabel: string;
-  monitorConfigRepository: MonitorConfigRepository;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
   allPrivateLocations: SyntheticsPrivateLocations;
+  routeContext: RouteContext;
 }) => {
   const { filtersStr } = parseArrayFilters({
     locations: [locationId],
   });
-  const monitorsToUpdate = await monitorConfigRepository.findDecryptedMonitors({
+  const monitorsInLocation = await routeContext.monitorConfigRepository.findDecryptedMonitors({
     spaceId: ALL_SPACES_ID,
     filter: filtersStr,
   });
-  // The key in this case is the spaceId
-  const dataToUpdatePolicies = monitorsToUpdate.reduce<
-    Record<
-      string,
-      Array<{
-        monitor: MonitorFields;
-        id: string;
-        decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
-      }>
-    >
-  >((acc, m) => {
-    const newLocations = m.attributes.locations.map((l) =>
-      l.id !== locationId ? l : { ...l, label: newLocationLabel }
-    );
-    // TODO: Type assertion required due to a structural type mismatch between
-    // what's returned by findDecryptedMonitors and what's expected by bulkUpdate.
-    // This pattern is used throughout the codebase when calling bulkUpdate.
-    // A future refactoring should address this type inconsistency at its source.
-    const newAttributes = { ...m.attributes, locations: newLocations } as unknown as MonitorFields;
 
-    const namespace = m.attributes.namespace;
-    return {
-      ...acc,
-      [namespace]: [
-        ...(acc[namespace] || []),
-        { monitor: newAttributes, id: m.id, decryptedPreviousMonitor: m },
-      ],
-    };
-  }, {});
+  const updatedMonitorsPerSpace = monitorsInLocation.reduce<Record<string, MonitorConfigUpdate[]>>(
+    (acc, m) => {
+      const decryptedMonitorsWithNormalizedSecrets: SavedObject<SyntheticsMonitor> =
+        normalizeSecrets(m);
+      const normalizedMonitor = decryptedMonitorsWithNormalizedSecrets.attributes;
+      const newLocations = m.attributes.locations.map((l) =>
+        l.id !== locationId ? l : { ...l, label: newLocationLabel }
+      );
+      const monitorWithRevision = formatSecrets({ ...normalizedMonitor, locations: newLocations });
+      const monitorToUpdate: MonitorConfigUpdate = {
+        normalizedMonitor,
+        decryptedPreviousMonitor: m,
+        monitorWithRevision,
+      };
 
-  const promises = Object.keys(dataToUpdatePolicies).map((namespace) => [
-    syntheticsMonitorClient.editMonitors(
-      dataToUpdatePolicies[namespace],
-      allPrivateLocations,
-      namespace
-    ),
-    monitorConfigRepository.bulkUpdate({
-      monitors: dataToUpdatePolicies[namespace].map(({ id, monitor }) => ({
-        id,
-        attributes: monitor,
-      })),
+      const namespace = m.attributes.namespace;
+      return {
+        ...acc,
+        [namespace]: [...(acc[namespace] || []), monitorToUpdate],
+      };
+    },
+    {}
+  );
+
+  const promises = Object.keys(updatedMonitorsPerSpace).map((namespace) => [
+    syncEditedMonitorBulk({
+      monitorsToUpdate: updatedMonitorsPerSpace[namespace],
+      privateLocations: allPrivateLocations,
+      routeContext,
+      spaceId: namespace,
     }),
   ]);
 
