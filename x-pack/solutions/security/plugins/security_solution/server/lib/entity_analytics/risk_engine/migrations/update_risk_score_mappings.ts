@@ -67,6 +67,7 @@ export const updateRiskScoreMappings = async ({
         auditLogger,
       });
 
+      await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
       await riskScoreDataClient.createOrUpdateRiskScoreLatestIndex();
       await riskScoreDataClient.createOrUpdateRiskScoreComponentTemplate();
       await riskScoreDataClient.updateRiskScoreTimeSeriesIndexMappings();

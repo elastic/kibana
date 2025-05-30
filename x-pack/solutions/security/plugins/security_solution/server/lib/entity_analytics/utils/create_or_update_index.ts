@@ -50,6 +50,27 @@ export const createOrUpdateIndex = async ({
           })
         );
       }
+      if (options.settings) {
+        await Promise.all(
+          indices.map(async (index) => {
+            try {
+              await retryTransientEsErrors(
+                () =>
+                  esClient.indices.putSettings({
+                    index,
+                    settings: {
+                      ...options.settings,
+                    },
+                  }),
+                { logger }
+              );
+              logger.info(`Update settings for ${index}`);
+            } catch (err) {
+              logger.error(`Failed to PUT settings for index ${index}: ${err.message}`);
+            }
+          })
+        );
+      }
     } else {
       try {
         await esClient.indices.create(options);
