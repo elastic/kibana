@@ -32,14 +32,13 @@ describe('useTopNavLinks', () => {
     },
   } as unknown as DiscoverServices;
 
-  const queryClient = new QueryClient();
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
       <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={new QueryClient()}>
           <DiscoverMainProvider value={state}>
             <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
               {children}

@@ -66,6 +66,7 @@ const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 
 const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
+  // QueryClientProvider is used to allow querying the authorized rules api hook
   <QueryClientProvider client={queryClient}>
     <DiscoverTopNav {...props} />
   </QueryClientProvider>
