@@ -10,13 +10,12 @@
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { History } from 'history';
-import _ from 'lodash';
 import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 import type { DashboardState } from '../../../common/types';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
-import { DashboardApi } from '../../dashboard_api/types';\
+import { DashboardApi } from '../../dashboard_api/types';
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
@@ -44,11 +43,7 @@ export const isPanelVersionTooOld = (panels: DashboardPanel[] | SavedDashboardPa
 export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage: IKbnUrlStateStorage
 ): Partial<DashboardState> => {
-  const rawAppStateInUrl = kbnUrlStateStorage.get<unknown>(
-    DASHBOARD_STATE_STORAGE_KEY
-  );
-
-  console.log('rawAppStateInUrl', rawAppStateInUrl);
+  const rawAppStateInUrl = kbnUrlStateStorage.get<unknown>(DASHBOARD_STATE_STORAGE_KEY);
 
   if (!rawAppStateInUrl) return {};
 
@@ -60,9 +55,12 @@ export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
 
   // abort if panels state is too old
-  const panels = typeof rawAppStateInUrl === 'object' && 'panels' in rawAppStateInUrl && Array.isArray(rawAppStateInUrl.panels)
-    ? rawAppStateInUrl.panels
-    : [];
+  const panels =
+    typeof rawAppStateInUrl === 'object' &&
+    'panels' in rawAppStateInUrl &&
+    Array.isArray(rawAppStateInUrl.panels)
+      ? rawAppStateInUrl.panels
+      : [];
   if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return {};

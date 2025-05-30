@@ -10,13 +10,12 @@
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
-
   describe('>= 8.19 state', () => {
     test('should extract labelPosition', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
           labelPosition: 'twoLine',
-        }
+        },
       });
       expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
     });
@@ -25,7 +24,7 @@ describe('extractDashboardState', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
           autoApplySelections: false,
-        }
+        },
       });
       expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
     });
@@ -33,30 +32,34 @@ describe('extractDashboardState', () => {
     test('should extract controls', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
-          controls: [{
-            controlConfig: {
-              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-              fieldName: 'machine.os.keyword',
-              selectedOptions: ['win 7']
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+                selectedOptions: ['win 7'],
+              },
+              grow: true,
+              order: 0,
+              type: 'optionsListControl',
+              width: 'small',
             },
-            grow: true,
-            order: 0,
-            type: 'optionsListControl',
-            width: 'small',
-          }],
-        }
-      });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([{
-        controlConfig: {
-          dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-          fieldName: 'machine.os.keyword',
-          selectedOptions: ['win 7']
+          ],
         },
-        grow: true,
-        order: 0,
-        type: 'optionsListControl',
-        width: 'small',
-      }]);
+      });
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          controlConfig: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            selectedOptions: ['win 7'],
+          },
+          grow: true,
+          order: 0,
+          type: 'optionsListControl',
+          width: 'small',
+        },
+      ]);
     });
   });
 
@@ -70,21 +73,23 @@ describe('extractDashboardState', () => {
               dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
               fieldName: 'machine.os.keyword',
               grow: false,
-              selectedOptions: ['win 7']
-            }
+              selectedOptions: ['win 7'],
+            },
           },
           labelPosition: 'twoLine',
-        }
+        },
       });
       expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
       expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
-      expect(dashboardState.controlGroupInput?.controls).toEqual([{
-        dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        fieldName: 'machine.os.keyword',
-        grow: false,
-        id: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
-        selectedOptions: ['win 7']
-      }]);
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          fieldName: 'machine.os.keyword',
+          grow: false,
+          id: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
+          selectedOptions: ['win 7'],
+        },
+      ]);
     });
   });
 
@@ -93,7 +98,7 @@ describe('extractDashboardState', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
           controlStyle: 'twoLine',
-        }
+        },
       });
       expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
     });
@@ -102,7 +107,7 @@ describe('extractDashboardState', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: {
           showApplySelections: true,
-        }
+        },
       });
       expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
     });
@@ -115,27 +120,29 @@ describe('extractDashboardState', () => {
               explicitInput: {
                 dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
                 fieldName: 'machine.os.keyword',
-                selectedOptions: ['win 7']
+                selectedOptions: ['win 7'],
               },
               grow: true,
               order: 0,
               type: 'optionsListControl',
               width: 'small',
-            }
+            },
           },
-        }
-      });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([{
-        controlConfig: {
-          dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-          fieldName: 'machine.os.keyword',
-          selectedOptions: ['win 7']
         },
-        grow: true,
-        order: 0,
-        type: 'optionsListControl',
-        width: 'small',
-      }]);
+      });
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          controlConfig: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'machine.os.keyword',
+            selectedOptions: ['win 7'],
+          },
+          grow: true,
+          order: 0,
+          type: 'optionsListControl',
+          width: 'small',
+        },
+      ]);
     });
   });
 });

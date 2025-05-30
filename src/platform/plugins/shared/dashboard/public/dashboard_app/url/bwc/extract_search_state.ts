@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from "../../../../common";
-import { migrateLegacyQuery } from "../../../services/dashboard_content_management_service/lib/load_dashboard_state";
+import { DashboardState } from '../../../../common';
+import { migrateLegacyQuery } from '../../../services/dashboard_content_management_service/lib/load_dashboard_state';
 
-type DashboardSearchState = Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>;
+type DashboardSearchState = Pick<
+  DashboardState,
+  'filters' | 'query' | 'refreshInterval' | 'timeRange'
+>;
 
-export function extractSearchState(state: { [key: string]: unknown }): Partial<DashboardSearchState> {
+export function extractSearchState(state: {
+  [key: string]: unknown;
+}): Partial<DashboardSearchState> {
   const searchState: Partial<DashboardSearchState> = {};
 
   if (Array.isArray(state.filters)) {

@@ -135,10 +135,6 @@ export function ShowShareModal({
     ...unsavedDashboardStateForLocator,
   };
 
-  console.log('locatorParams', locatorParams);
-
-  console.log('unsavedDashboardStateForLocator', unsavedDashboardStateForLocator);
-
   let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
   if (_g?.filters && _g.filters.length === 0) {
     _g = omit(_g, 'filters');

@@ -15,25 +15,29 @@ describe('extractDashboardState', () => {
     const optionalState = {
       timeRange: {
         from: 'now-15m',
-        to: 'now'
+        to: 'now',
       },
       references: [],
       refreshInterval: {
         pause: false,
-        value: 5
+        value: 5,
       },
-    }
-    expect(extractDashboardState({
-      ...DEFAULT_DASHBOARD_STATE,
-      ...optionalState,
-      // panels stored as array in URL
-      panels: [{
-        gridData: {},
-        panelConfig: {},
-        panelIndex: '9a545750-c833-496e-999f-59aff71c17e7',
-        type: 'testEmbeddable'
-      }],
-    })).toEqual({
+    };
+    expect(
+      extractDashboardState({
+        ...DEFAULT_DASHBOARD_STATE,
+        ...optionalState,
+        // panels stored as array in URL
+        panels: [
+          {
+            gridData: {},
+            panelConfig: {},
+            panelIndex: '9a545750-c833-496e-999f-59aff71c17e7',
+            type: 'testEmbeddable',
+          },
+        ],
+      })
+    ).toEqual({
       ...DEFAULT_DASHBOARD_STATE,
       ...optionalState,
       panels: {
@@ -42,9 +46,9 @@ describe('extractDashboardState', () => {
           explicitInput: {},
           panelRefName: undefined,
           type: 'testEmbeddable',
-          version: undefined
-        }
-      }
+          version: undefined,
+        },
+      },
     });
   });
-})
+});

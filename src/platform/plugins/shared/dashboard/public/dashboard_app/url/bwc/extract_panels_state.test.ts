@@ -18,16 +18,16 @@ describe('extractPanelsState', () => {
             panelConfig: {
               timeRange: {
                 from: 'now-7d/d',
-                to: 'now'
-              }
+                to: 'now',
+              },
             },
             gridData: {},
             id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             title: 'Custom title',
-            type: 'map'
-          }
-        ]
+            type: 'map',
+          },
+        ],
       });
       expect(dashboardState.panels).toEqual({
         ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
@@ -35,15 +35,15 @@ describe('extractPanelsState', () => {
             savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             timeRange: {
               from: 'now-7d/d',
-              to: 'now'
+              to: 'now',
             },
-            title: 'Custom title'
+            title: 'Custom title',
           },
           gridData: {},
           type: 'map',
           panelRefName: undefined,
           version: undefined,
-        }
+        },
       });
     });
   });
@@ -56,16 +56,16 @@ describe('extractPanelsState', () => {
             embeddableConfig: {
               timeRange: {
                 from: 'now-7d/d',
-                to: 'now'
-              }
+                to: 'now',
+              },
             },
             gridData: {},
             id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             title: 'Custom title',
-            type: 'map'
-          }
-        ]
+            type: 'map',
+          },
+        ],
       });
       expect(dashboardState.panels).toEqual({
         ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
@@ -73,15 +73,15 @@ describe('extractPanelsState', () => {
             savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             timeRange: {
               from: 'now-7d/d',
-              to: 'now'
+              to: 'now',
             },
-            title: 'Custom title'
+            title: 'Custom title',
           },
           gridData: {},
           type: 'map',
           panelRefName: undefined,
           version: undefined,
-        }
+        },
       });
     });
   });

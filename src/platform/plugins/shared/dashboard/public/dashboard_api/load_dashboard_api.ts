@@ -27,12 +27,10 @@ export async function loadDashboardApi({
 }) {
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
-  console.log('creationOptions', creationOptions);
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
   const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
     id: savedObjectId,
   });
-  console.log('savedObjectResult', savedObjectResult);
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -54,8 +52,6 @@ export async function loadDashboardApi({
     return getDashboardBackupService().getState(savedObjectResult.dashboardId);
   })();
 
-  console.log('sessionStorageInput', sessionStorageInput);
-
   const combinedSessionState: DashboardState = {
     ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
@@ -69,8 +65,6 @@ export async function loadDashboardApi({
   // Combine state with overrides.
   // --------------------------------------------------------------------------------------
   const overrideState = creationOptions?.getInitialInput?.();
-
-  console.log('overrideState', overrideState);
 
   // Back up any view mode passed in explicitly.
   if (overrideState?.viewMode) {

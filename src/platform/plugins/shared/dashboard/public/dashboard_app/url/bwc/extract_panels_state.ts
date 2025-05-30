@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { convertPanelsArrayToPanelMap } from "@kbn/dashboard-plugin/common/lib/dashboard_panel_converters";
-import { DashboardState } from "../../../../common";
+import { convertPanelsArrayToPanelMap } from '../../../../common/lib/dashboard_panel_converters';
+import { DashboardState } from '../../../../common';
 
 type PanelState = Pick<DashboardState, 'panels'>;
 
-export function extractPanelsState(state: { [key:string]: unknown}): Partial<PanelState> {
-  const panels = Array.isArray(state.panels)
-    ? state.panels
-    : [];
+export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
+  const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
     return {};
@@ -32,8 +30,8 @@ export function extractPanelsState(state: { [key:string]: unknown}): Partial<Pan
     }
     return panel;
   });
-  
+
   return {
-    panels: convertPanelsArrayToPanelMap(standardizedPanels)
+    panels: convertPanelsArrayToPanelMap(standardizedPanels),
   };
 }
