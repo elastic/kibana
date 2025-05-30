@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from "../../common";
+import { DashboardState } from "../../../../common";
 import { extractControlGroupState } from "./extract_control_group_state";
 import { extractSettings } from "./extract_dashboard_settings";
 import { extractPanelsState } from "./extract_panels_state";

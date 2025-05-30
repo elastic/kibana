@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {

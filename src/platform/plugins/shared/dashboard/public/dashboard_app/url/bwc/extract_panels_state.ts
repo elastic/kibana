@@ -8,7 +8,7 @@
  */
 
 import { convertPanelsArrayToPanelMap } from "@kbn/dashboard-plugin/common/lib/dashboard_panel_converters";
-import { DashboardState } from "../../common";
+import { DashboardState } from "../../../../common";
 
 type PanelState = Pick<DashboardState, 'panels'>;
 
