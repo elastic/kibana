@@ -65,7 +65,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Licensing](#licensing)
     - [**Scenario: User can NOT modify field values in upgrade preview when license is insufficient**](#scenario-user-can-not-modify-field-values-in-upgrade-preview-when-license-is-insufficient)
     - [**Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**](#scenario-user-is-warned-about-losing-their-customizations-in-upgrade-preview-when-license-is-insufficient)
-    - [**Scenario: Prebuilt rule is upgraded to target version when upgraded via upgrade preview on insufficient license**](#scenario-prebuilt-rule-is-upgraded-to-target-version-when-upgraded-via-upgrade-preview-on-insufficient-license)
+    - [**Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**](#scenario-prebuilt-rule-always-gets-upgraded-to-the-target-version-when-license-is-insufficient)
 
 ## Useful information
 
@@ -746,10 +746,10 @@ And saved custom field values got discarded
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an installed prebuilt rule
+And a prebuilt rule is installed
 And this rule is outdated (a new version is available for this rule)
 When user opens an upgrade preview for this rule
-Then user should see a read-only view of rule fields
+Then user should see a preview of rule field updates
 And there should NOT be a possibility to edit any field values
 ```
 
@@ -759,21 +759,21 @@ And there should NOT be a possibility to edit any field values
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an installed prebuilt rule
+And a prebuilt rule is installed
 And a base version exists for this rule
-And this rule is different from its base version
+And this rule is customized
 And this rule is outdated (a new version is available for this rule)
 When user opens an upgrade preview for this rule
 Then user should see a warning that their customizations will be lost on upgrade
 ```
 
-#### **Scenario: Prebuilt rule is upgraded to target version when upgraded via upgrade preview on insufficient license**
+#### **Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**
 
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an installed prebuilt rule
+And a prebuilt rule is installed
 And a base version exists for this rule
 And this rule is outdated (a new version is available for this rule)
 And this rule is <customization_state>

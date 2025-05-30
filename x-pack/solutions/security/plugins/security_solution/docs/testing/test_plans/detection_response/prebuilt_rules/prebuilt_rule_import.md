@@ -667,14 +667,13 @@ And the updated rule's "version" field should stay unchanged
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an import payload contains non-customized prebuilt, customized prebuilt, and custom rules
+And an import payload contains a mix of non-customized prebuilt, customized prebuilt, and custom rules
 And the prebuilt rules have a base version in the installed package
 And the custom rules' rule_id does NOT match any rule assets from the installed package
 And the rules are not installed or created yet
 When the user imports these rules
 Then the rules should be created
 And the created rules should be correctly identified as prebuilt or custom
-And the created rules' is_customized field should be correctly calculated
 And the created rules' parameters should match the import payload
 ```
 
@@ -691,6 +690,5 @@ And the rules are already installed or created
 When the user imports these rules
 Then the rules should be updated
 And the updated rules should be correctly identified as prebuilt or custom
-And the updated rules' is_customized field should be correctly calculated
 And the updated rules' parameters should match the import payload
 ```

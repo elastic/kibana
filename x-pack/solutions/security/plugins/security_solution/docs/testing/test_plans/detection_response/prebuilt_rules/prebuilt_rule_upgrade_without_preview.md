@@ -75,9 +75,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Authorization / RBAC](#authorization--rbac)
     - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
   - [Licensing](#licensing)
-    - [**Scenario: Prebuilt rule is upgraded to target version when upgraded via upgrade table on insufficient license**](#scenario-prebuilt-rule-is-upgraded-to-target-version-when-upgraded-via-upgrade-table-on-insufficient-license)
-    - [**Scenario: Multiple selected rules are upgraded to target versions when upgraded via upgrade table on insufficient license**](#scenario-multiple-selected-rules-are-upgraded-to-target-versions-when-upgraded-via-upgrade-table-on-insufficient-license)
-    - [**Scenario: All rules are upgraded to target versions when upgraded via upgrade table on insufficient license**](#scenario-all-rules-are-upgraded-to-target-versions-when-upgraded-via-upgrade-table-on-insufficient-license)
+    - [**Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**](#scenario-prebuilt-rule-always-gets-upgraded-to-the-target-version-when-license-is-insufficient)
+    - [**Scenario: Multiple selected rules are upgraded to target versions when license is insufficient**](#scenario-multiple-selected-rules-are-upgraded-to-target-versions-when-license-is-insufficient)
+    - [**Scenario: All rules are upgraded to target versions when license is insufficient**](#scenario-all-rules-are-upgraded-to-target-versions-when-license-is-insufficient)
     - [**Scenario: User can NOT filter by customization state in upgrade table when license is insufficient**](#scenario-user-can-not-filter-by-customization-state-in-upgrade-table-when-license-is-insufficient)
     - [**Scenario: User can NOT see whether a rule has conflicts in upgrade table when license is insufficient**](#scenario-user-can-not-see-whether-a-rule-has-conflicts-in-upgrade-table-when-license-is-insufficient)
     - [**Scenario: User is NOT forced to review rule changes before upgrading when license is insufficient**](#scenario-user-is-not-forced-to-review-rule-changes-before-upgrading-when-license-is-insufficient)
@@ -85,7 +85,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can NOT specify versions other than TARGET when upgrading ALL rules via API on insufficient license**](#scenario-user-can-not-specify-versions-other-than-target-when-upgrading-all-rules-via-api-on-insufficient-license)
     - [**Scenario: User can specify TARGET version when upgrading SPECIFIC rules via API on insufficient license**](#scenario-user-can-specify-target-version-when-upgrading-specific-rules-via-api-on-insufficient-license)
     - [**Scenario: User can NOT specify versions other than TARGET when upgrading SPECIFIC rules via API on insufficient license**](#scenario-user-can-not-specify-versions-other-than-target-when-upgrading-specific-rules-via-api-on-insufficient-license)
-    - [**Scenario: User can NOT specify field values when upgrading SPECIFIC rules via API on insufficient license**](#scenario-user-can-not-specify-field-values-when-upgrading-specific-rules-via-api-on-insufficient-license)
+    - [**Scenario: User can NOT specify resolved field values when upgrading SPECIFIC rules via API on insufficient license**](#scenario-user-can-not-specify-resolved-field-values-when-upgrading-specific-rules-via-api-on-insufficient-license)
 
 ## Useful information
 
@@ -811,13 +811,13 @@ But user should not be able to upgrade them
 
 ### Licensing
 
-#### **Scenario: Prebuilt rule is upgraded to target version when upgraded via upgrade table on insufficient license**
+#### **Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**
 
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an installed prebuilt rule
+And a prebuilt rule is installed
 And a base version exists for this rule
 And this rule is outdated (a new version is available for this rule)
 And this rule is <customization_state>
@@ -830,7 +830,7 @@ And all customizable rule fields should be equal to the target version
 <customization_state> = customized | not customized
 ```
 
-#### **Scenario: Multiple selected rules are upgraded to target versions when upgraded via upgrade table on insufficient license**
+#### **Scenario: Multiple selected rules are upgraded to target versions when license is insufficient**
 
 **Automation**: 1 e2e test with a mock rule.
 
@@ -844,13 +844,13 @@ Then success message should be displayed after upgrade
 And all customizable fields of each upgraded rule should be equal to their respective target versions
 ```
 
-#### **Scenario: All rules are upgraded to target versions when upgraded via upgrade table on insufficient license**
+#### **Scenario: All rules are upgraded to target versions when license is insufficient**
 
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And multiple outdated prebuilt rules (a new version is available for them)
+And multiple outdated prebuilt rules (new versions are available for them)
 When user is on the Rule Updates table
 And upgrades all rules at once using "Upgrade all" button
 Then success message should be displayed after upgrade
@@ -874,7 +874,7 @@ Then user should NOT see UI elements to filter rules by customization state (Mod
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an installed prebuilt rule
+And a prebuilt rule is installed
 And this rule is outdated (a new version is available for this rule)
 And this rule has a <conflict_type> conflict
 When user is on the Rule Updates table
@@ -890,7 +890,7 @@ Examples:
 
 ```Gherkin
 Given a Kibana instance running under an insufficient license
-And an installed prebuilt rule
+And a prebuilt rule is installed
 And this rule is outdated (a new version is available for this rule)
 And this rule has a <conflict_type> conflict
 When user is on the Rule Updates table
@@ -959,7 +959,7 @@ Examples:
 <pick_version> = BASE | CURRENT | MERGED
 ```
 
-#### **Scenario: User can NOT specify field values when upgrading SPECIFIC rules via API on insufficient license**
+#### **Scenario: User can NOT specify resolved field values when upgrading SPECIFIC rules via API on insufficient license**
 
 **Automation**: 1 API integration test.
 
@@ -967,7 +967,7 @@ Examples:
 Given a Kibana instance running under an insufficient license
 And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade specific outdated rules
-And at least one rule in request body specifies a field value
+And at least one rule in the request body specifies a resolved field value
 Then the endpoint should return a 400 status code
 And the response should contain an error message that field customization is not allowed under current license
 ```
