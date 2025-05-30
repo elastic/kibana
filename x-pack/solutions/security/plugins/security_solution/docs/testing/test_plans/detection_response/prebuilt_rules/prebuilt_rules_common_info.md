@@ -104,6 +104,8 @@ Terminology related to prebuilt rule customization:
   - For a non-customized field, `current_version.field` == `base_version.field`.
 - **Customizable rule field**: a rule field that is able to be customized on a prebuilt rule. A comprehensive list can be found [below](#customizable-rule-fields).
 - **Non-customizable rule field**: a rule field that is unable to be customized on a prebuilt rule. A comprehensive list can be found [below](#non-customizable-rule-fields).
+- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
+- **upgrade to target version**: a process of upgrading a prebuilt rule to its latest version from Elastic. After the upgrade, all customizable field values in the rule will match those of the latest version from Elastic.
 
 Terminology related to the "rule source" object:
 
@@ -114,8 +116,6 @@ Terminology related to UI and UX:
 
 - **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
 
-Terminology related to the rule customization and upgrade workflow:
-- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
 
 ## Common assumptions
 

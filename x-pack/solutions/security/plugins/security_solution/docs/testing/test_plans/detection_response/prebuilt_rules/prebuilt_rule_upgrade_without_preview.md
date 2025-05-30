@@ -76,8 +76,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
   - [Licensing](#licensing)
     - [**Scenario: Prebuilt rule always gets upgraded to the target version when license is insufficient**](#scenario-prebuilt-rule-always-gets-upgraded-to-the-target-version-when-license-is-insufficient)
-    - [**Scenario: Multiple selected rules are upgraded to target versions when license is insufficient**](#scenario-multiple-selected-rules-are-upgraded-to-target-versions-when-license-is-insufficient)
-    - [**Scenario: All rules are upgraded to target versions when license is insufficient**](#scenario-all-rules-are-upgraded-to-target-versions-when-license-is-insufficient)
+    - [**Scenario: Multiple selected prebuilt rules are upgraded to target versions when license is insufficient**](#scenario-multiple-selected-prebuilt-rules-are-upgraded-to-target-versions-when-license-is-insufficient)
+    - [**Scenario: All prebuilt rules are upgraded to target versions when license is insufficient**](#scenario-all-prebuilt-rules-are-upgraded-to-target-versions-when-license-is-insufficient)
     - [**Scenario: User can NOT filter by customization state in upgrade table when license is insufficient**](#scenario-user-can-not-filter-by-customization-state-in-upgrade-table-when-license-is-insufficient)
     - [**Scenario: User can NOT see whether a rule has conflicts in upgrade table when license is insufficient**](#scenario-user-can-not-see-whether-a-rule-has-conflicts-in-upgrade-table-when-license-is-insufficient)
     - [**Scenario: User is NOT forced to review rule changes before upgrading when license is insufficient**](#scenario-user-is-not-forced-to-review-rule-changes-before-upgrading-when-license-is-insufficient)
@@ -830,7 +830,7 @@ And all customizable rule fields should be equal to the target version
 <customization_state> = customized | not customized
 ```
 
-#### **Scenario: Multiple selected rules are upgraded to target versions when license is insufficient**
+#### **Scenario: Multiple selected prebuilt rules are upgraded to target versions when license is insufficient**
 
 **Automation**: 1 e2e test with a mock rule.
 
@@ -841,10 +841,10 @@ When user is on the Rule Updates table
 And selects multiple prebuilt rules
 And clicks a button to upgrade selected prebuilt rules
 Then success message should be displayed after upgrade
-And all customizable fields of each upgraded rule should be equal to their respective target versions
+And the selected prebuilt rules upgraded to the corresponding target versions
 ```
 
-#### **Scenario: All rules are upgraded to target versions when license is insufficient**
+#### **Scenario: All prebuilt rules are upgraded to target versions when license is insufficient**
 
 **Automation**: 1 e2e test with a mock rule.
 
@@ -852,9 +852,9 @@ And all customizable fields of each upgraded rule should be equal to their respe
 Given a Kibana instance running under an insufficient license
 And multiple outdated prebuilt rules (new versions are available for them)
 When user is on the Rule Updates table
-And upgrades all rules at once using "Upgrade all" button
+And upgrades all prebuilt rules at once using "Upgrade all" button
 Then success message should be displayed after upgrade
-And all customizable fields of each upgraded rule should be equal to their respective target versions
+And the selected prebuilt rules upgraded to the corresponding target versions
 ```
 
 #### **Scenario: User can NOT filter by customization state in upgrade table when license is insufficient**
@@ -911,7 +911,7 @@ And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade all outdated rules
 And this request contains a pick_version parameter with value = TARGET
 Then the endpoint should return a 200 status code
-And all customizable fields of each upgraded rule should be equal to their respective target versions
+And all prebuilt rules upgraded to the corresponding target versions
 ```
 
 #### **Scenario: User can NOT specify versions other than TARGET when upgrading ALL rules via API on insufficient license**
@@ -940,7 +940,7 @@ And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade specific outdated rules
 And all rules in request body contain a pick_version parameter with value = TARGET
 Then the endpoint should return a 200 status code
-And all customizable fields of each upgraded rule should be equal to their respective target versions
+And all prebuilt rules upgraded to the corresponding target versions
 ```
 
 #### **Scenario: User can NOT specify versions other than TARGET when upgrading SPECIFIC rules via API on insufficient license**
