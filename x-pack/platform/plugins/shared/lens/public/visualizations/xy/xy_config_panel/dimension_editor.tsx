@@ -11,7 +11,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry, ColorMapping, canCreateCustomMatch } from '@kbn/coloring';
+import { PaletteRegistry, ColorMapping, PaletteOutput, canCreateCustomMatch } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
 import { KbnPalette, KbnPalettes } from '@kbn/palettes';
@@ -45,7 +45,6 @@ function updateLayer(
 export function DataDimensionEditor(
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
-    /** @deprecated */
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;
     isDarkMode: boolean;
@@ -97,10 +96,13 @@ export function DataDimensionEditor(
 
   const setColorMapping = useCallback(
     (colorMapping?: ColorMapping.Config) => {
-      updateLayerState(index, {
-        colorMapping,
-        // palette: undefined,
-      });
+      updateLayerState(index, { colorMapping });
+    },
+    [updateLayerState, index]
+  );
+  const setPalette = useCallback(
+    (palette: PaletteOutput) => {
+      updateLayerState(index, { palette, colorMapping: undefined });
     },
     [updateLayerState, index]
   );
@@ -125,7 +127,7 @@ export function DataDimensionEditor(
       accessor,
       colorAssignments,
       props.frame,
-      // TODO: remove reference to paletteService
+
       props.paletteService
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
@@ -140,13 +142,16 @@ export function DataDimensionEditor(
     return !layer.collapseFn ? (
       <ColorMappingByTerms
         isDarkMode={isDarkMode}
-        panelRef={props.panelRef}
         colorMapping={layer.colorMapping}
-        palettes={props.palettes}
+        palette={layer.palette}
+        isInlineEditing={isInlineEditing}
+        setPalette={setPalette}
         setColorMapping={setColorMapping}
+        paletteService={props.paletteService}
+        palettes={props.palettes}
+        panelRef={props.panelRef}
         categories={splitCategories}
         formatter={formatter}
-        isInlineEditing={isInlineEditing}
         allowCustomMatch={allowCustomMatch}
       />
     ) : null;

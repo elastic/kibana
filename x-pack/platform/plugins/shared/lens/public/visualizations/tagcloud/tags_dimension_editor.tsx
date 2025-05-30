@@ -7,7 +7,7 @@
 
 import React, { useMemo, MutableRefObject, useCallback } from 'react';
 
-import { ColorMapping } from '@kbn/coloring';
+import { ColorMapping, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
@@ -19,6 +19,7 @@ import { FramePublicAPI } from '../../types';
 import type { TagcloudState } from './types';
 
 interface Props {
+  paletteService: PaletteRegistry;
   palettes: KbnPalettes;
   state: TagcloudState;
   setState: (state: TagcloudState) => void;
@@ -36,6 +37,7 @@ export function TagsDimensionEditor({
   panelRef,
   isDarkMode,
   palettes,
+  paletteService,
   isInlineEditing,
   formatFactory,
 }: Props) {
@@ -59,6 +61,17 @@ export function TagsDimensionEditor({
     [localState, setLocalState]
   );
 
+  const setPalette = useCallback(
+    (palette: PaletteOutput) => {
+      setLocalState({
+        ...localState,
+        palette,
+        colorMapping: undefined,
+      });
+    },
+    [localState, setLocalState]
+  );
+
   const categories = useMemo(() => {
     return getColorCategories(currentData?.rows, state.tagAccessor);
   }, [currentData?.rows, state.tagAccessor]);
@@ -68,9 +81,12 @@ export function TagsDimensionEditor({
       isDarkMode={isDarkMode}
       panelRef={panelRef}
       palettes={palettes}
+      palette={state.palette}
+      setPalette={setPalette}
       colorMapping={state.colorMapping}
       setColorMapping={setColorMapping}
       categories={categories}
+      paletteService={paletteService}
       formatter={formatter}
       isInlineEditing={isInlineEditing}
     />

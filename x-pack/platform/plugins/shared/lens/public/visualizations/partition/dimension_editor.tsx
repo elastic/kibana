@@ -28,7 +28,6 @@ import {
 
 export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   formatFactory: FormatFactory;
-  /** @deprecated */
   paletteService: PaletteRegistry;
   palettes: KbnPalettes;
   isDarkMode: boolean;
@@ -125,9 +124,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
           isDarkMode={props.isDarkMode}
           panelRef={props.panelRef}
           palettes={props.palettes}
+          palette={props.state.palette}
+          setPalette={(newPalette) => {
+            setLocalState({ ...props.state, palette: newPalette });
+            setColorMapping();
+          }}
           colorMapping={currentLayer.colorMapping}
           setColorMapping={setColorMapping}
           categories={categories}
+          paletteService={props.paletteService}
           formatter={formatter}
           isInlineEditing={props.isInlineEditing}
         />
@@ -142,7 +147,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           defaultColor={getDefaultColorForMultiMetricDimension({
             layer: currentLayer,
             columnId: props.accessor,
-            // TODO: remove reference to paletteService
             paletteService: props.paletteService,
             datasource: props.datasource,
             palette: props.state.palette,

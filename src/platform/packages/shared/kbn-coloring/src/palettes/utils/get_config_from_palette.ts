@@ -21,6 +21,8 @@ const singleColorGradientPalettes = new Set<string>([
 
 /**
  * Returns color mapping config from a `KbnPalette`
+ *
+ * Converts gradients to their equivalent color mapping config
  */
 export function getConfigFromPalette(
   palettes: KbnPalettes,
