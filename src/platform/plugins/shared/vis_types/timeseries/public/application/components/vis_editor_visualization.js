@@ -38,7 +38,7 @@ export const applyStyle = ({ euiTheme }) => css`
   padding: ${euiTheme.size.s};
 `;
 
-export const dragHandleStyle = ({ euiTheme }) => {
+const dragHandleStyle = ({ euiTheme }) => {
   // Implementing the kbnResizer mixin with vertical direction
 
   // Default size calculation (euiSizeM + 2px)
