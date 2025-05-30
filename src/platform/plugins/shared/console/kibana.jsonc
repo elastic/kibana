@@ -17,12 +17,13 @@
       "devTools",
       "share",
       "dataViews",
-      "licensing",
+      "data"
     ],
     "optionalPlugins": [
       "usageCollection",
       "home",
-      "cloud"
+      "cloud",
+      "licensing"
     ],
     "requiredBundles": [
       "esUiShared",

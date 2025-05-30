@@ -9,6 +9,7 @@
 
 import { monaco } from '@kbn/monaco';
 import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
+import { offsetRangeToMonacoRange } from '@kbn/monaco/src/languages/esql/lib/shared/utils';
 import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
@@ -307,15 +308,38 @@ export const getEsqlCompletionItems = (
     endLineNumber: position.lineNumber,
     endColumn: position.column,
   };
-  return suggestions.map((sug) => {
-    return {
-      label: sug.label,
-      insertText: sug.text.trim(),
-      detail: sug.detail,
-      kind: monaco.languages.CompletionItemKind.Constant,
-      range,
-    };
-  });
+  return suggestions.map(
+    ({
+      label,
+      text,
+      asSnippet,
+      kind,
+      detail,
+      documentation,
+      sortText,
+      filterText,
+      command,
+      rangeToReplace,
+    }) => {
+      return {
+        label,
+        insertText: text,
+        filterText,
+        kind:
+          kind in monaco.languages.CompletionItemKind
+            ? monaco.languages.CompletionItemKind[kind]
+            : monaco.languages.CompletionItemKind.Method, // fallback to Method
+        detail,
+        documentation,
+        sortText,
+        command,
+        insertTextRules: asSnippet
+          ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+          : undefined,
+        range: rangeToReplace ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
+      };
+    }
+  );
 };
 
 const getSuggestions = (

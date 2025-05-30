@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCallbacks, monaco } from '@kbn/monaco';
+import { ESQLCallbacks, monaco, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '@kbn/monaco';
 import { MutableRefObject } from 'react';
 import { suggest } from '@kbn/esql-validation-autocomplete';
 import { getEsqlCompletionItems, isInsideTripleQuotes } from './utils';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 
 const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
-const ESQL_TRIGGER_CHARS = ['(', ' ', '[', '?', '"'];
 
 export const getSuggestionProvider = (
   actionsProvider: MutableRefObject<MonacoEditorActionsProvider | null>,
@@ -22,7 +21,7 @@ export const getSuggestionProvider = (
 ): monaco.languages.CompletionItemProvider => {
   return {
     // force suggestions when these characters are used
-    triggerCharacters: [...CONSOLE_TRIGGER_CHARS, ...ESQL_TRIGGER_CHARS],
+    triggerCharacters: [...CONSOLE_TRIGGER_CHARS, ...ESQL_AUTOCOMPLETE_TRIGGER_CHARS],
     provideCompletionItems: async (
       model: monaco.editor.ITextModel,
       position: monaco.Position,

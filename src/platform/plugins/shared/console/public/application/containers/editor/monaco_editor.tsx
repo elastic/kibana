@@ -16,6 +16,9 @@ import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
 import { isEqual } from 'lodash';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
@@ -50,6 +53,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       settings: settingsService,
       autocompleteInfo,
       dataViews,
+      data,
       licensing,
       application,
     },
@@ -160,9 +164,25 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
         return await getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
       },
+      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
+        if (queryToExecute) {
+          return (
+            await getESQLQueryColumns({
+              esqlQuery: queryToExecute,
+              search: data.search.search,
+            })
+          ).map((c) => {
+            return {
+              name: c.name,
+              type: c.meta.esType as FieldType,
+              hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+            };
+          });
+        }
+      },
     };
     return callbacks;
-  }, [license, dataViews, application, http]);
+  }, [license, dataViews, application, http, data.search.search]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider, esqlCallbacks);

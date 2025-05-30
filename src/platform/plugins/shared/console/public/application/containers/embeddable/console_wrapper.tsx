@@ -120,7 +120,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, dataViews, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const { core, dataViews, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -171,6 +171,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             autocompleteInfo,
             application: startServices.application,
             dataViews,
+            data,
             licensing,
           },
           config: {
