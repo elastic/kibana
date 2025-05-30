@@ -55,8 +55,14 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
+        ELASTIC_LLM_LINK: '',
+        ELASTIC_LLM_USAGE_COST_LINK: '',
+        THIRD_PARTY_LLM_LINK: '',
+        ELASTIC_AI_FEATURES_LINK: '',
+        LLM_PERFORMANCE_LINK: '',
       }}
       getComments={jest.fn(() => [])}
+      getUrlForApp={jest.fn()}
       http={mockHttp}
       navigateToApp={mockNavigateToApp}
       currentAppId={'test'}
