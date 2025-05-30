@@ -5,17 +5,14 @@
  * 2.0.
  */
 import { runRecipe } from '@kbn/inference-cli';
-import { Streams } from '@kbn/streams-schema';
-import {
-  describeStream,
-  generatePanels,
-  generateParsers,
-  generateProcessors,
-} from '@kbn/streams-ai';
+import { describeStream, generateParsers, generateProcessors } from '@kbn/streams-ai';
 import moment from 'moment';
 import { inspect } from 'util';
-import { v4 } from 'uuid';
-import { callGenerateProcessors } from '../util/call_generate_processors';
+import { clearStreams } from '../util/clear_streams';
+import { enableStreams } from '../util/enable_streams';
+import { initializeCliOnboarding } from '../util/initialize_cli_onboarding';
+import { prepartitionStreams } from '../util/prepartition_streams';
+import { withLoghubSynthtrace } from '../util/with_synthtrace';
 
 runRecipe(
   {
@@ -24,7 +21,6 @@ runRecipe(
       string: ['stream'],
       help: `
         --stream      The stream to onboard
-        --apply       Whether to apply suggested changes
       `,
       default: {
         stream: 'logs',
@@ -32,133 +28,63 @@ runRecipe(
     },
   },
   async ({ inferenceClient, kibanaClient, esClient, logger, log, signal, flags }) => {
-    const streamGetResponse = await kibanaClient.fetch<Streams.WiredStream.GetResponse>(
-      `/api/streams/${flags.stream}`
-    );
-
     const now = moment();
 
     const end = now.valueOf();
 
-    const start = now.clone().subtract(1, 'days').valueOf();
+    const start = now.clone().subtract(1, 'hour').valueOf();
 
-    const description = await describeStream({
-      definition: streamGetResponse.stream,
-      start,
-      end,
+    await clearStreams({
       esClient,
-      inferenceClient,
-      logger,
+      kibanaClient,
       signal,
     });
 
-    log.info(description);
+    await enableStreams({
+      kibanaClient,
+      signal,
+    });
 
-    const streamGetResponseWithDescription = {
-      ...streamGetResponse,
-      stream: {
-        ...streamGetResponse.stream,
-        description,
-      },
-    };
+    await prepartitionStreams({
+      esClient,
+      kibanaClient,
+      signal,
+    });
 
-    const parsers = await callGenerateProcessors(
+    await withLoghubSynthtrace(
       {
+        start,
+        end,
         esClient,
-        flags,
-        inferenceClient,
-        kibanaClient,
-        log,
         logger,
-        signal,
-        streamGetResponse: streamGetResponseWithDescription,
       },
-      generateParsers
-    );
+      async () => {
+        log.info('Initializing task context and state');
 
-    const streamGetResponseWithParsers = {
-      ...streamGetResponseWithDescription,
-      stream: {
-        ...streamGetResponseWithDescription.stream,
-        ingest: {
-          ...streamGetResponseWithDescription.stream.ingest,
-          processing: [...streamGetResponseWithDescription.stream.ingest.processing, ...parsers],
-        },
-      },
-    };
-
-    const processors = await callGenerateProcessors(
-      {
-        esClient,
-        flags,
-        inferenceClient,
-        kibanaClient,
-        log,
-        logger,
-        signal,
-        streamGetResponse: streamGetResponseWithParsers,
-      },
-      ({ definition, validateProcessors }) => {
-        return generateProcessors({
-          definition,
+        const { context, state: initialState } = await initializeCliOnboarding({
+          start,
           end,
+          name: String(flags.stream),
           esClient,
           inferenceClient,
           logger,
           signal,
-          start,
-          validateProcessors: ({ samples, processors: nextProcessors }) => {
-            const parsersWithId = parsers.map((parser) => ({ id: v4(), ...parser }));
-
-            const parserIds = parsersWithId.map((parser) => parser.id);
-
-            return validateProcessors({
-              samples,
-              processors: parsersWithId.concat(nextProcessors),
-            }).then((state) => {
-              return {
-                ...state,
-                validations: state.validations.filter((validation) => {
-                  return !parserIds.includes(validation.processor.id);
-                }),
-              };
-            });
-          },
+          kibanaClient,
         });
+
+        log.info('Generating stream description');
+        const { stream } = await describeStream({ context, state: initialState })
+          .then((state) => {
+            log.info('Generating parsers');
+            return generateParsers({ context, state });
+          })
+          .then((state) => {
+            log.info('Generating processors');
+            return generateProcessors({ context, state });
+          });
+
+        log.info(inspect(stream, { depth: null }));
       }
-    );
-
-    const streamGetResponseWithProcessors = {
-      ...streamGetResponseWithParsers,
-      stream: {
-        ...streamGetResponseWithParsers.stream,
-        ingest: {
-          ...streamGetResponseWithParsers.stream.ingest,
-          processing: [...streamGetResponseWithParsers.stream.ingest.processing, ...processors],
-        },
-      },
-    };
-
-    const panels = await generatePanels({
-      definition: streamGetResponseWithProcessors.stream,
-      end,
-      esClient,
-      inferenceClient,
-      logger,
-      signal,
-      start,
-    });
-
-    log.info(
-      inspect(
-        {
-          description,
-          parsers,
-          processors,
-          panels,
-        },
-        { depth: null }
-      )
     );
   }
 );

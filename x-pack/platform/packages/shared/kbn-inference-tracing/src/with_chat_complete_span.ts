@@ -12,6 +12,8 @@ import {
   MessageRole,
   Model,
   ToolCall,
+  ToolChoice,
+  ToolDefinition,
   ToolMessage,
   ToolOptions,
   UserMessage,
@@ -77,6 +79,8 @@ interface InferenceGenerationOptions {
   model?: Model;
   system?: string;
   messages: Message[];
+  tools?: Record<string, ToolDefinition>;
+  toolChoice?: ToolChoice;
 }
 
 function getUserMessageEvent(message: UserMessage): UserMessageEvent {
@@ -151,7 +155,7 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse<ToolOptions, boolean>
 ): ChatCompleteCompositeResponse<ToolOptions, boolean> {
-  const { system, messages, model, ...attributes } = options;
+  const { system, messages, model, toolChoice, tools, ...attributes } = options;
 
   const next = withInferenceSpan(
     {
@@ -161,6 +165,8 @@ export function withChatCompleteSpan(
       [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
       [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
       [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+      [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
+      [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
     },
     (span) => {
       if (!span) {

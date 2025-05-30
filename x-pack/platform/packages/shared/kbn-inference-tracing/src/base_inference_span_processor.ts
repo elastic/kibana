@@ -29,7 +29,8 @@ export abstract class BaseInferenceSpanProcessor implements SpanProcessor {
 
   onStart(span: Span, parentContext: Context): void {
     const shouldTrack =
-      isInInferenceContext(parentContext) || span.instrumentationScope.name === 'inference';
+      (isInInferenceContext(parentContext) || span.instrumentationScope.name === 'inference') &&
+      span.instrumentationScope.name !== '@elastic/transport';
 
     if (shouldTrack) {
       span.setAttribute('_should_track', true);

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { compact, last, partition, takeRightWhile } from 'lodash';
+import { last, merge, omit, partition, takeRightWhile } from 'lodash';
+import { inspect } from 'util';
 import {
   AssistantMessage,
+  AssistantMessageOf,
   Message,
-  MessageOf,
   MessageRole,
   ToolCall,
   ToolCallbacksOf,
@@ -22,23 +24,16 @@ import { BoundInferenceClient } from '../inference_client';
 import { Prompt, PromptOptions, ToolOptionsOfPrompt, UnboundPromptOptions } from '../prompt';
 import { generateFakeToolCallId } from './tool_calls';
 
-const planningTools = {
+const SAMPLES_COUNT = 3;
+
+const REASON_INSTRUCTIONS = `Enter into your internal reasoning mode. You're not allowed to call any tools in this turn - hand control back to the orchestrator.`;
+
+const planningToolsWithoutRequiredStateId = {
   reason: {
     description: 'reason or reflect about the task ahead or the results',
     schema: {
       type: 'object',
       properties: {},
-    },
-  },
-  sample: {
-    description: 'sample n next steps to choose a winner, defaults to 5',
-    schema: {
-      type: 'object',
-      properties: {
-        count: {
-          type: 'number',
-        },
-      },
     },
   },
   complete: {
@@ -55,23 +50,44 @@ const planningTools = {
       properties: {},
     },
   },
-  rollback: {
-    description: 'roll back to an earlier version',
+  undo: {
+    description: 'Remove all steps since the last task tool call',
     schema: {
       type: 'object',
       properties: {
-        rollbackReason: {
+        stateId: {
           type: 'string',
+          description: 'The state ID you want to undo to',
         },
       },
-      required: ['rollbackReason'],
+      required: ['stateId'],
     },
   },
 } as const;
 
-type PlanningToolCallName = keyof typeof planningTools;
+const planningToolsWithRequiredStateId = merge({}, planningToolsWithoutRequiredStateId, {
+  complete: {
+    schema: {
+      properties: {
+        bestCandidateStateId: {
+          type: 'string',
+          description: 'The state you select as the winner',
+        },
+      },
+      required: ['bestCandidateStateId'],
+    },
+  },
+} as const);
 
-function createReasonToolCall(): [AssistantMessage, ToolMessage] {
+type PlanningTools =
+  | typeof planningToolsWithoutRequiredStateId
+  | typeof planningToolsWithRequiredStateId;
+
+type PlanningToolCallName = keyof PlanningTools;
+
+type PlanningToolCall = ToolCallsOf<{ tools: PlanningTools }>['toolCalls'][number];
+
+function createReasonToolCall(stateId?: string): [AssistantMessage, ToolMessage] {
   const toolCallId = generateFakeToolCallId();
   return [
     {
@@ -91,12 +107,15 @@ function createReasonToolCall(): [AssistantMessage, ToolMessage] {
       role: MessageRole.Tool,
       toolCallId,
       name: 'reason',
-      response: {},
+      response: {
+        acknowledged: true,
+        instructions: `${REASON_INSTRUCTIONS}${
+          stateId ? ` Reflect on the state in ${stateId}` : ''
+        }`,
+      },
     },
   ];
 }
-
-type PlanningToolCall = ToolCallsOf<{ tools: typeof planningTools }>['toolCalls'][number];
 
 export function partitionToolCalls(toolCalls: Array<ToolCall<string, Record<string, any>>>):
   | {
@@ -109,8 +128,7 @@ export function partitionToolCalls(toolCalls: Array<ToolCall<string, Record<stri
     } {
   const [systemToolCalls, nonSystemToolCalls] = partition(
     toolCalls,
-    (toolCall): toolCall is ToolCallsOf<{ tools: typeof planningTools }>['toolCalls'][number] =>
-      toolCall.function.name in planningTools
+    (toolCall): toolCall is PlanningToolCall => isPlanningToolName(toolCall.function.name)
   );
 
   if (systemToolCalls.length && toolCalls.length > 1) {
@@ -129,7 +147,7 @@ export function partitionToolCalls(toolCalls: Array<ToolCall<string, Record<stri
 }
 
 function isPlanningToolName(name: string) {
-  return Object.keys(planningTools).includes(name) || name === 'checkpoint';
+  return Object.keys(planningToolsWithoutRequiredStateId).includes(name);
 }
 
 function removeSystemToolCalls(messages: Message[]) {
@@ -154,23 +172,28 @@ function prepareMessagesForLLM({
 }) {
   const lastMessage = last(messages);
 
-  if (lastMessage?.role === MessageRole.Tool && isPlanningToolName(lastMessage.name)) {
-    const [lastAssistantMessage, lastToolResponse] = messages.slice(-2) as [
-      AssistantMessage,
-      ToolMessage<PlanningToolCallName, PlanningToolCall>
-    ];
+  const next =
+    lastMessage?.role === MessageRole.Tool && isPlanningToolName(lastMessage.name)
+      ? removeSystemToolCalls(messages.slice(0, -2)).concat(messages.slice(-2))
+      : removeSystemToolCalls(messages);
 
-    return removeSystemToolCalls(messages.slice(0, -2)).concat(lastAssistantMessage, {
-      ...lastToolResponse,
-      response: {
-        ...lastToolResponse.response,
-        stepsLeft,
-        toolCallsLeft,
-      },
-    });
-  }
+  const lastToolResponse = next.findLast(
+    (message): message is ToolMessage => message.role === MessageRole.Tool
+  );
 
-  return removeSystemToolCalls(messages);
+  return next.map((message) => {
+    if (message === lastToolResponse) {
+      return {
+        ...lastToolResponse,
+        response: {
+          ...(lastToolResponse.response as Record<string, any>),
+          stepsLeft,
+          toolCallsLeft,
+        },
+      };
+    }
+    return message;
+  });
 }
 
 type CallingStrategy = 'default' | 'reason' | 'next';
@@ -194,8 +217,9 @@ export async function callPromptUntil<
       prompt: TPrompt;
       toolCallbacks: ToolCallbacksOf<ToolOptionsOfPrompt<TPrompt>>;
       strategy?: TCallingStrategy;
+      logger: Logger;
     }
-): Promise<Array<MessageOf<ToolOptionsOfPrompt<TPrompt>>>>;
+): Promise<AssistantMessageOf<ToolOptionsOfPrompt<TPrompt>>>;
 
 export async function callPromptUntil({
   inferenceClient,
@@ -203,19 +227,23 @@ export async function callPromptUntil({
   maxToolCalls = 6,
   toolCallbacks,
   strategy,
+  tools,
+  toolChoice,
+  logger,
   ...options
 }: UnboundPromptOptions &
   CallPromptUntilOptions & {
     prompt: Prompt;
     toolCallbacks: ToolCallbacksOf<ToolOptionsOfPrompt<Prompt>>;
     strategy?: CallingStrategy;
-  }): Promise<Message[]> {
+    logger: Logger;
+  }): Promise<AssistantMessage> {
   async function callTools(
     toolCalls: Array<ToolCall<string, Record<string, any>>>
   ): Promise<ToolMessage[]> {
     return await Promise.all(
       toolCalls.map(async (toolCall): Promise<ToolMessage> => {
-        if (toolCall.function.name in planningTools) {
+        if (isPlanningToolName(toolCall.function.name)) {
           throw new Error(`Unexpected planning tool call ${toolCall.function.name}`);
         }
 
@@ -230,7 +258,10 @@ export async function callPromptUntil({
           () => callback(toolCall)
         );
         return {
-          response,
+          response: {
+            ...(response as Record<string, any>),
+            stateId: toolCall.toolCallId,
+          },
           name: toolCall.function.name,
           toolCallId: toolCall.toolCallId,
           role: MessageRole.Tool,
@@ -243,14 +274,16 @@ export async function callPromptUntil({
     messages: prevMessages,
     toolCallsLeft,
     stepsLeft,
+    temperature,
   }: {
     messages: Message[];
     toolCallsLeft: number;
     stepsLeft: number;
+    temperature?: number;
   }): Promise<Message[]> {
     const withoutSystemToolCalls = removeSystemToolCalls(prevMessages);
 
-    const outOfBudget = stepsLeft <= 0 || toolCallsLeft <= 0;
+    const outOfBudget = stepsLeft <= 0 || toolCallsLeft < 0;
 
     const consecutiveReasoningSteps = takeRightWhile(withoutSystemToolCalls, (msg) => {
       return msg.role === MessageRole.Assistant && !msg.toolCalls?.length;
@@ -265,46 +298,80 @@ export async function callPromptUntil({
 
     const shouldExit = outOfBudget || (strategy === 'reason' && consecutiveReasoningSteps >= 2);
 
+    const isCompleting = lastSystemToolCallName === 'complete';
+
+    const isFailing = lastSystemToolCallName === 'fail';
+
+    const isFinalizing = isCompleting || isFailing;
+
     if (shouldExit) {
       return prevMessages;
     }
 
-    const requireResolution = stepsLeft <= 1 || toolCallsLeft <= 0;
-
-    const canCallAnyTool =
-      strategy === 'default' ||
-      (strategy === 'reason' && consecutiveReasoningSteps > 0) ||
-      (strategy === 'next' &&
-        lastSystemToolCallName !== 'complete' &&
-        lastSystemToolCallName !== 'fail');
-
-    const shouldExitAfterResponse =
-      lastSystemToolCallName === 'complete' || lastSystemToolCallName === 'fail';
-
-    const canCallPlanningTool = !shouldExitAfterResponse;
-
     const nextPrompt = {
       ...options.prompt,
       versions: options.prompt.versions.map((version) => {
-        const { tools, toolChoice, ...rest } = version;
+        const { tools: promptTools, toolChoice: promptToolChoice, ...rest } = version;
 
-        const nextPlanningTools = requireResolution
+        const promptRequiresToolCallToComplete =
+          version.toolChoice &&
+          version.toolChoice !== ToolChoiceType.none &&
+          version.toolChoice !== ToolChoiceType.auto;
+
+        const requireResolution =
+          strategy === 'next' &&
+          !isFinalizing &&
+          (stepsLeft <= 2 || toolCallsLeft <= (promptRequiresToolCallToComplete ? 1 : 0));
+
+        const willReason =
+          !isFinalizing &&
+          !requireResolution &&
+          lastSystemToolCallName === 'reason' &&
+          consecutiveReasoningSteps === 0;
+
+        const canCallTaskTools =
+          strategy === 'default' ||
+          (strategy === 'reason' && consecutiveReasoningSteps > 0) ||
+          (strategy === 'next' && !isFailing && !requireResolution);
+
+        const canCallAllPlanningTools = strategy === 'next' && !isFinalizing && !requireResolution;
+
+        const canCallOnlyFinalizingTools = strategy === 'next' && requireResolution;
+
+        const planningTools = promptRequiresToolCallToComplete
+          ? planningToolsWithRequiredStateId
+          : planningToolsWithoutRequiredStateId;
+
+        const nextPlanningTools: Partial<PlanningTools> = canCallOnlyFinalizingTools
+          ? { complete: planningTools.complete, fail: planningTools.fail }
+          : canCallAllPlanningTools
+          ? planningTools
+          : {};
+
+        const taskToolChoice = toolChoice || promptToolChoice;
+
+        const nextTaskTools = canCallTaskTools
           ? {
-              complete: planningTools.complete,
-              fail: planningTools.fail,
+              ...tools,
+              ...promptTools,
             }
-          : planningTools;
+          : {};
+
+        const nextToolChoice =
+          isFinalizing || (!canCallAllPlanningTools && !canCallTaskTools) || willReason
+            ? ToolChoiceType.none
+            : requireResolution
+            ? ToolChoiceType.required
+            : strategy === 'default'
+            ? taskToolChoice
+            : undefined;
 
         const nextTools = {
           tools: {
-            ...tools,
-            ...(canCallPlanningTool ? nextPlanningTools : {}),
+            ...nextTaskTools,
+            ...nextPlanningTools,
           },
-          toolChoice: requireResolution
-            ? ToolChoiceType.required
-            : canCallAnyTool
-            ? undefined
-            : ToolChoiceType.none,
+          toolChoice: nextToolChoice,
         };
 
         return {
@@ -321,12 +388,17 @@ export async function callPromptUntil({
 
     const response = await inferenceClient.prompt<Prompt>({
       ...promptOptions,
+      temperature,
       prevMessages: prepareMessagesForLLM({
         stepsLeft,
         toolCallsLeft,
         messages: prevMessages,
       }),
     });
+
+    if (lastSystemToolCallName === 'fail') {
+      throw new Error(`Failed to complete task: ${response.content}`);
+    }
 
     const assistantMessage: AssistantMessage = {
       role: MessageRole.Assistant,
@@ -336,32 +408,34 @@ export async function callPromptUntil({
 
     const [systemToolCalls, nonSystemToolCalls] = partition(
       response.toolCalls,
-      (toolCall): toolCall is ToolCallsOf<{ tools: typeof planningTools }>['toolCalls'][number] =>
-        toolCall.function.name in planningTools
+      (toolCall): toolCall is PlanningToolCall => isPlanningToolName(toolCall.function.name)
     );
 
     if (systemToolCalls.length && response.toolCalls.length > 1) {
       throw new Error(`When using system tools, only a single tool call is allowed`);
     }
 
-    if (shouldExitAfterResponse) {
+    if (isFinalizing) {
       return prevMessages.concat(assistantMessage);
     }
 
     if (response.toolCalls.length === 0 || nonSystemToolCalls.length > 0) {
+      const toolMessages = (await callTools(nonSystemToolCalls)).map((toolMessage) => {
+        return {
+          ...toolMessage,
+          response: {
+            ...(toolMessage.response as Record<string, any>),
+            stepsLeft,
+            toolCallsLeft,
+          },
+        };
+      });
       return innerCallPromptUntil({
         messages: prevMessages.concat(
           assistantMessage,
-          ...(await callTools(nonSystemToolCalls)).map((toolMessage) => {
-            return {
-              ...toolMessage,
-              response: {
-                stepsLeft,
-                toolCallsLeft,
-                ...(toolMessage.response as Record<string, any>),
-              },
-            };
-          })
+          ...(toolMessages.length > 0
+            ? [...toolMessages, ...createReasonToolCall(toolMessages[0].toolCallId)]
+            : [])
         ),
         stepsLeft: stepsLeft - 1,
         toolCallsLeft: nonSystemToolCalls.length > 0 ? toolCallsLeft - 1 : toolCallsLeft,
@@ -372,26 +446,44 @@ export async function callPromptUntil({
 
     const systemToolCallName: PlanningToolCallName = systemToolCall.function.name;
 
-    if (systemToolCall.function.name === 'sample') {
-      const messagesWithSampleMessages: Message[] = [
-        ...prevMessages,
-        assistantMessage,
-        {
-          role: MessageRole.Tool,
-          response: {},
-          name: systemToolCall.function.name,
-          toolCallId: systemToolCall.toolCallId,
-        },
-      ];
+    if (systemToolCall.function.name === 'undo') {
+      const lastNonSystemToolCall = prevMessages.findLast((msg): msg is AssistantMessage => {
+        return (
+          msg.role === MessageRole.Assistant &&
+          !!msg.toolCalls?.some((toolCall) => !isPlanningToolName(toolCall.function.name))
+        );
+      });
+
+      if (!lastNonSystemToolCall) {
+        throw new Error(
+          `Could not find something to undo, need at least a reasoning step or a non-system tool call`
+        );
+      }
+
+      let rollbackIndex = prevMessages.indexOf(lastNonSystemToolCall);
+
+      if (!lastNonSystemToolCall.content) {
+        const messageBefore = prevMessages[rollbackIndex - 1];
+        if (
+          messageBefore?.role === MessageRole.Assistant &&
+          messageBefore?.content &&
+          !messageBefore?.toolCalls?.length
+        ) {
+          rollbackIndex--;
+        }
+      }
+
+      const messagesAfterRollback = prevMessages.slice(0, rollbackIndex);
 
       const samples = await Promise.all(
-        new Array(systemToolCall.function.arguments.count).fill(undefined).map(async () => {
+        new Array(SAMPLES_COUNT).fill(undefined).map(async () => {
           return await inferenceClient.prompt<Prompt>({
             ...promptOptions,
+            temperature: 0.8,
             prevMessages: prepareMessagesForLLM({
               stepsLeft,
               toolCallsLeft,
-              messages: messagesWithSampleMessages,
+              messages: messagesAfterRollback,
             }),
           });
         })
@@ -407,7 +499,7 @@ export async function callPromptUntil({
 
           const toolCalls = partitionToolCalls(sample.toolCalls);
 
-          if (toolCalls.systemToolCall || !!toolCalls.nonSystemToolCalls.length) {
+          if (toolCalls.systemToolCall || !toolCalls.nonSystemToolCalls.length) {
             return {
               sample,
             };
@@ -419,6 +511,8 @@ export async function callPromptUntil({
           };
         })
       );
+
+      const fakeToolCallId = generateFakeToolCallId();
 
       const {
         toolCalls: [
@@ -434,21 +528,36 @@ export async function callPromptUntil({
           stepsLeft,
           toolCallsLeft,
           messages: [
-            ...prevMessages,
-            assistantMessage,
+            ...messagesAfterRollback,
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'sample',
+                    arguments: {},
+                  },
+                  toolCallId: fakeToolCallId,
+                },
+              ],
+            },
             {
               role: MessageRole.Tool,
               response: {
                 samples: samplesWithToolResponses.map(({ sample, responses }, idx) => {
                   return {
                     id: idx,
-                    sample,
+                    sample: {
+                      content: sample.content,
+                      toolCalls: sample.toolCalls,
+                    },
                     responses,
                   };
                 }),
               },
-              name: systemToolCall.function.name,
-              toolCallId: systemToolCall.toolCallId,
+              name: 'sample',
+              toolCallId: fakeToolCallId,
             },
           ],
         }),
@@ -480,50 +589,22 @@ export async function callPromptUntil({
       const winningResponse = samplesWithToolResponses[winner];
 
       return innerCallPromptUntil({
-        stepsLeft,
+        stepsLeft: stepsLeft - 1,
         toolCallsLeft,
         messages: [
-          ...messagesWithSampleMessages,
+          ...messagesAfterRollback,
           {
             role: MessageRole.Assistant,
             content: winningResponse.sample.content,
             toolCalls: winningResponse.sample.toolCalls,
           },
-          ...(winningResponse.responses ?? []),
+          ...(winningResponse.responses
+            ? [
+                ...winningResponse.responses,
+                ...createReasonToolCall(winningResponse.responses[0].toolCallId),
+              ]
+            : []),
         ],
-      });
-    }
-
-    if (systemToolCall.function.name === 'rollback') {
-      const lastTaskTool = prevMessages.findLast(
-        (msg): msg is ToolMessage => msg.role === MessageRole.Tool && !isPlanningToolName(msg.name)
-      );
-
-      if (!lastTaskTool) {
-        throw new Error(`Cannot find a task tool message to roll back`);
-      }
-
-      const messagesUntilLastTaskTool = prevMessages.slice(
-        0,
-        prevMessages.indexOf(lastTaskTool) - 2
-      );
-
-      return innerCallPromptUntil({
-        stepsLeft: stepsLeft - 1,
-        toolCallsLeft,
-        messages: messagesUntilLastTaskTool.concat(
-          assistantMessage,
-          {
-            role: MessageRole.Tool,
-            response: {},
-            name: 'rollback',
-            toolCallId: systemToolCall.toolCallId,
-          },
-          {
-            role: MessageRole.Assistant,
-            content: systemToolCall.function.arguments.rollbackReason,
-          }
-        ),
       });
     }
 
@@ -539,7 +620,15 @@ export async function callPromptUntil({
           role: MessageRole.Tool,
           name: systemToolCallName,
           toolCallId: systemToolCall.toolCallId,
-          response: {},
+          response: {
+            acknowledged: true,
+            instruction:
+              systemToolCallName === 'reason'
+                ? REASON_INSTRUCTIONS
+                : systemToolCallName === 'complete'
+                ? `Complete the task, according to the instructions`
+                : `Explain why the task failed, according to the instructions`,
+          },
         }),
       });
     }
@@ -552,21 +641,40 @@ export async function callPromptUntil({
     stepsLeft: maxSteps,
     toolCallsLeft: maxToolCalls,
   }).then((messages) => {
-    return compact(
-      messages.map((message) => {
-        if ('toolCalls' in message && message.toolCalls?.length) {
-          return {
-            ...message,
-            toolCalls: message.toolCalls.filter(
-              (toolCall) => !isPlanningToolName(toolCall.function.name)
-            ),
-          };
-        }
-        if (message.role === MessageRole.Tool && isPlanningToolName(message.name)) {
-          return undefined;
-        }
-        return message;
-      })
+    const lastAssistantMessageWithSystemToolCall = messages.findLast(
+      (msg): msg is AssistantMessageOf<{ tools: PlanningTools }> =>
+        msg.role === MessageRole.Assistant &&
+        !!msg.toolCalls?.some((toolCall) => isPlanningToolName(toolCall.function.name))
     );
+
+    const lastSystemToolCall = last(lastAssistantMessageWithSystemToolCall?.toolCalls);
+
+    const lastAssistantMessage = messages.findLast((msg): msg is AssistantMessage => {
+      return msg.role === MessageRole.Assistant && !!msg.content;
+    });
+
+    if (lastAssistantMessage && lastSystemToolCall?.function.name === 'complete') {
+      const stateId = lastSystemToolCall.function.arguments.bestCandidateStateId;
+      const winningToolCall = stateId
+        ? last(
+            messages.flatMap((msg) =>
+              msg.role === MessageRole.Assistant
+                ? msg.toolCalls?.filter((toolCall) => toolCall.toolCallId === stateId) ?? []
+                : []
+            )
+          )
+        : undefined;
+
+      return {
+        role: MessageRole.Assistant,
+        content: lastAssistantMessage.content,
+        ...(winningToolCall ? { toolCalls: [winningToolCall] } : {}),
+      };
+    } else if (lastAssistantMessage && lastSystemToolCall?.function.name === 'fail') {
+      return omit(lastAssistantMessage, 'toolCalls');
+    }
+
+    logger.error(`Failed to finalize process: ${inspect(messages, { depth: 6 })}`);
+    throw new Error(`Process was not finalized`);
   });
 }

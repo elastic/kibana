@@ -7,11 +7,16 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Condition, Streams } from '@kbn/streams-schema';
-import { BoundInferenceClient, MessageRole, callPromptUntil } from '@kbn/inference-common';
-import { ValuesType } from 'utility-types';
-import { isEqual } from 'lodash';
+import {
+  AssistantMessageOf,
+  BoundInferenceClient,
+  ToolOptionsOfPrompt,
+  callPromptUntil,
+} from '@kbn/inference-common';
+import { isEqual, last } from 'lodash';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { clusterLogs } from '../../tools/cluster_logs/cluster_logs';
+import { schema } from './schema';
 
 export async function partitionStream({
   definition,
@@ -21,7 +26,6 @@ export async function partitionStream({
   start,
   end,
   signal,
-  maxSteps = 8,
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -30,15 +34,26 @@ export async function partitionStream({
   start: number;
   end: number;
   signal: AbortSignal;
-  maxSteps?: number;
 }): Promise<Array<{ name: string; condition: Condition }>> {
+  const initialClusters = await clusterLogs({
+    esClient,
+    start,
+    end,
+    index: definition.name,
+    logger,
+    partitions: [],
+    size: 1000,
+  });
+
   const messages = await callPromptUntil({
     inferenceClient,
     prompt: SuggestStreamPartitionsPrompt,
     input: {
       stream: definition,
+      initial_clustering: JSON.stringify(initialClusters),
+      condition_schema: JSON.stringify(schema),
     },
-    maxSteps,
+    strategy: 'next',
     toolCallbacks: {
       cluster_logs: async (toolCall) => {
         const partitions = (toolCall.function.arguments.partitions ?? []) as Array<{
@@ -61,18 +76,13 @@ export async function partitionStream({
     abortSignal: signal,
   });
 
-  const finalPartitions = messages.findLast(
-    (message): message is Extract<ValuesType<typeof messages>, { role: MessageRole.Assistant }> => {
-      return (
-        message.role === MessageRole.Assistant &&
-        !!message.toolCalls.find((toolCall) => toolCall.function.name === 'cluster_logs')
-      );
-    }
-  );
+  const conclusion = last(messages) as AssistantMessageOf<
+    ToolOptionsOfPrompt<typeof SuggestStreamPartitionsPrompt>
+  >;
 
   const proposedPartitions =
-    finalPartitions?.toolCalls
-      .flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
+    conclusion?.toolCalls
+      ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
       .map(({ name, condition }) => {
         return {
           name,

@@ -29,6 +29,8 @@ export enum ElasticGenAIAttributes {
   ToolDescription = 'elastic.tool.description',
   ToolParameters = 'elastic.tool.parameters',
   InferenceSpanKind = 'elastic.inference.span.kind',
+  Tools = 'elastic.llm.tools',
+  ToolChoice = 'elastic.llm.toolChoice',
 }
 
 export interface GenAISemConvAttributes {
@@ -48,6 +50,8 @@ export interface GenAISemConvAttributes {
   [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'LLM' | 'TOOL';
   [ElasticGenAIAttributes.ToolDescription]?: string;
   [ElasticGenAIAttributes.ToolParameters]?: string;
+  [ElasticGenAIAttributes.Tools]?: string;
+  [ElasticGenAIAttributes.ToolChoice]?: string;
 }
 
 interface GenAISemConvEvent<

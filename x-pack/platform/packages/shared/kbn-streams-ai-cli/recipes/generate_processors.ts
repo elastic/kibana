@@ -6,8 +6,13 @@
  */
 import { runRecipe } from '@kbn/inference-cli';
 import { generateProcessors } from '@kbn/streams-ai';
-import { Streams } from '@kbn/streams-schema';
-import { callGenerateProcessors } from '../util/call_generate_processors';
+import moment from 'moment';
+import { inspect } from 'util';
+import { clearStreams } from '../util/clear_streams';
+import { enableStreams } from '../util/enable_streams';
+import { initializeCliOnboarding } from '../util/initialize_cli_onboarding';
+import { prepartitionStreams } from '../util/prepartition_streams';
+import { withLoghubSynthtrace } from '../util/with_synthtrace';
 
 runRecipe(
   {
@@ -25,22 +30,56 @@ runRecipe(
     },
   },
   async ({ inferenceClient, kibanaClient, esClient, logger, log, signal, flags }) => {
-    const streamGetResponse = await kibanaClient.fetch<Streams.WiredStream.GetResponse>(
-      `/api/streams/${flags.stream}`
-    );
+    await clearStreams({
+      esClient,
+      kibanaClient,
+      signal,
+    });
 
-    await callGenerateProcessors(
+    await enableStreams({
+      kibanaClient,
+      signal,
+    });
+
+    await prepartitionStreams({
+      esClient,
+      kibanaClient,
+      signal,
+    });
+
+    const now = moment();
+
+    const end = now.valueOf();
+
+    const start = now.clone().subtract(1, 'hour').valueOf();
+
+    await withLoghubSynthtrace(
       {
+        start,
+        end,
         esClient,
-        flags,
-        inferenceClient,
-        kibanaClient,
-        log,
         logger,
-        signal,
-        streamGetResponse,
       },
-      generateProcessors
+      async () => {
+        log.info('Initializing task context and state');
+
+        const { context, state: initialState } = await initializeCliOnboarding({
+          start,
+          end,
+          name: String(flags.stream),
+          esClient,
+          inferenceClient,
+          logger,
+          signal,
+          kibanaClient,
+        });
+
+        log.info('Generating processors');
+
+        const { stream } = await generateProcessors({ context, state: initialState });
+
+        log.info(inspect(stream, { depth: null }));
+      }
     );
   }
 );

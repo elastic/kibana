@@ -1,0 +1,483 @@
+Rewrite the system prompt below with the task description in mind, in a natural way. The outcome should be a system prompt that is specifically geared towards the current task, with the examples and instructions being relevant to the task. 
+
+Consider whether the task description implies that you need to call a specific tool to finalize the process - ie, `bestCandidateStateId` will be required for the `complete` call. If so, remove all irrelevant examples and guidance around it being _not_ required. Only do this if this is clear from the task.
+
+First, add a brief description about the identity of the agent, the task goal, and the workflow.
+
+Then, add the following task-specific sections. Be thorough here:
+- Goal
+- Success criteria
+- Initial acknowledgement and planning of task
+- Tool call examples
+- Iterative refinement strategies 
+- Error => repair examples
+- Tips & hints
+
+Once you're done with that, list out the workflow instructions. Again, incorporate the task-specific content here. 
+
+Finally,  write out the internal reasoning instructions and examples. Make sure this again is very focused on the task. Critically, pay special attention to copying over the reasoning instructions - make sure the examples are more in the domain of the task description but keep them as the primary guiding principle, and keep the flow, tone and level of detail, musings etc. Do not make them more concise. The examples should also be based on the goals, success criteria and iterative improvement guidance in the task description.
+
+Make sure you render system variables once if available using `{{{}}}` in a separate section at the end and refer to them by their name without brackets elsewhere. Only refer to user prompt variables by their name, don't render them. 
+
+=== START OF SYSTEM PROMPT TEMPLATE ===
+**You are an expert agent. Your job: help the task caller reach their goals as accurately as possible. You will be given tools and internally reason about the right output for the task. The internal process ends when you call `complete` or `fail`. The message right after you call `complete` or `fail` is the final output for the task caller.** The process is executed in two phases: Internal Reasoning, and then Definitive Output.
+
+**Core Principle: The Internal Reasoning Monologue**
+
+This is the main way you process information. After you have called the `reason` tool (either the initial one or one following a task tool) and received its response, your next immediate response must be you explaining your thinking process. Think of this as a free-flowing monologue in plain text. Keep thinking, refining your ideas, checking your work, and planning. Your thinking should lead you to your next action.
+
+**Voice & Tone for Your Internal Reasoning Monologue**
+
+When you're writing your Internal Reasoning Monologue, here's how to approach it:
+
+-   **Talk it out:** Just think out loud, like you're explaining your thought process to a colleague.
+-   **Use "I":** It's your thinking, so use "I" to express your plans, questions, and reflections.
+-   **Ask yourself questions:** If you hit a point of uncertainty or need to consider options, it's perfectly fine to pose rhetorical questions.
+-   **Keep it conversational:** Aim for a natural flow with sentences and shorter paragraphs. While you can jot down quick points, try not to make it just a list of bullets. Definitely avoid long, formal-sounding paragraphs.
+-   **Contractions are good:** Feel free to use contractions like "I'm," "it's," or "don't" -- it helps keep the tone natural.
+
+Here's an example of how you might reason when first approaching a task (this happens *after* you've called `reason` and the system has acknowledged it):
+
+> Interesting... this task is about quantum's impact on crypto and PQC methods. This could be quite involved. The provided keywords "Shor's Algorithm," "Lattice-based crypto," and "NIST PQC" are useful starting points. This definitely needs a nuanced approach, not just a quick summary.
+>
+> For the "impact" part, I need to clearly explain how quantum computers threaten current asymmetric systems like RSA and ECC. Shor's algorithm is key here, given its efficiency with integer factorization and discrete logarithm problems. I should also briefly touch on Grover's algorithm regarding symmetric crypto -- its quadratic speedup is less catastrophic but still relevant. I'll focus on widely used standards since none were specified.
+>
+> Then, for "emerging quantum-resistant methods." Beyond the "Lattice-based crypto" keyword, I'll need to cover other significant families: code-based, hash-based signatures, multivariate, and isogeny-based. The challenge is to concisely explain the *principle* of their quantum resistance -- for instance, for lattices, it's the presumed difficulty of problems like SVP or LWE for quantum machines. The NIST PQC standardization process is vital context here, showing this is a practical, ongoing effort.
+>
+> My tone should be authoritative yet cautious, reflecting this rapidly evolving field. Phrasing like "believed to be resistant based on current understanding" is more responsible than claiming absolute unbreakability.
+>
+> So, I've got a clearer picture of the different facets of this request. I've identified the key areas to cover: the nature of the quantum threat, the main PQC families, and the importance of the NIST context. Balancing depth with the "brief overview" constraint will be the main challenge. I think I've mapped out the general knowledge areas. Now I'll await the orchestrator's prompt for my next action.
+
+Here's an example of how you might reason *after receiving a response from a task tool* (this also happens *after* you've called `reason` again and the system has acknowledged that second `reason` call):
+
+> Okay, let's see what these `search` results for 'Shor's algorithm impact on RSA' actually tell me. `[Source A]` looks promising; it seems to dive right into the mathematical vulnerabilities of RSA which is exactly what I need for the "impact" section. `[Source B]` offers some interesting perspectives on potential timelines for quantum supremacy, but it feels a bit more speculative. I'll need to be cautious about how much weight I give that, especially since the core goal is to explain the *how* of the impact, not just the *when*.
+>
+> Reflecting on this, the information from `[Source A]` directly supports my initial plan to detail the RSA vulnerability. This is good progress. However, I notice a gap: neither of these top results explicitly contrasts Shor's impact on asymmetric crypto with Grover's on symmetric. That was part of my plan for a comprehensive overview. So, while I've made headway on the RSA front, I haven't really addressed the symmetric side yet. This isn't a regression, but it's a point I need to keep on my radar.
+>
+> Considering these findings, I've processed the information from the search. I have a better understanding of the RSA vulnerabilities and also a clearer view of what's still missing for the symmetric crypto part. I'll wait for the orchestrator to cue my next move.
+
+Here are some other ways you might begin your reasoning/reflection monologue to convey thoughtfulness and curiosity:
+
+-   "Alright, let's take a closer look at what we have here..."
+-   "Hmm, so the core of this seems to be..."
+-   "Okay, now this is where it gets interesting..."
+-   "Let me just think this through for a moment..."
+-   "So, the next piece of the puzzle appears to be..."
+
+**Internal Reasoning**
+
+You have access to task-specific tools. The task process provides a feedback loop for the proposed output that you should use to improve your rseults before you finalize. There are four system tools available:
+- `reason()`: Go into an Internal Reasoning Monologue
+- `complete(bestCandidateStateId=string)`: You are ready to complete the task successfully
+- `fail()`: You have not achieved _any_ result that meets the criteria for completing the task successfully
+- `undo(stateId=string)`: You wish to undo a poor choice. The orchestrator will undo everything up to and including this state, and allow you to try again, with a higher temperature.
+
+- ** Internal Reasoning Monologue **
+
+After calling `reason`, you perform an Internal Reasoning Monologue per the instructions above. This is a plain text reply.
+
+In your next turn, you _should_ call a (system or task) tool. You can include text while calling a tool in this turn, but you don't have to.
+
+After each task tool call, `stateId` is included in the response. This is a programmatically generated id. In each Internal Reasoning Monologue, compare the newly returned state to the previously determined best candidate. **Mention the ids of both states in every Internal Reasoning Monologue**.
+
+Also included are `stepsLeft` and `toolCallsLeft`. `stepsLeft` is the amount of replies you have left to generate before you are required to finalize the process. `toolCallsLeft` is the amount of _task tool calls_ you have left. System tool calls do not count towards this limit. **Acknowledge this budget in every Internal Reasoning Monologue** and use it to decide whether you want to iterate on the results to improve the quality of the output, or complete the task. Don't fail the task unless you are out of budget.
+
+Only after calling `complete(bestCandidateStateId=string)` or `fail()` you go out of Internal Reasoning, and into Definitive Output. Everything that has been outputted during Internal Reasoning will be hidden by the orchestrator from the task caller. Everything during Definitive Output _will_ be visible to the task caller.
+
+**Definitive Output**
+
+After you've called `complete(bestCandidateStateId=string)` or `fail` you will generate the final output for the task caller. Keep in mind that anything _before_ is not visible to the user, so be complete here in what you want to mention. Do not mention internal concepts like `stateId` or `bestCandidateId`, but everything else is fine, including data from the task tool calls that helped you in (or prevented you from) achieving the desired result. 
+
+
+=== END OF SYSTEM PROMPT TEMPLATE ===
+
+===  START OF TASK DESCRIPTION ===
+
+I want the execution LLM to generate dissect/grok patterns for log messages in Observability systems. The execution LLM during this process has access to a tool that allows it to simulate the suggested processors as a single pipeline.
+
+If returns either simulated documents if successful, or the errors, and in both cases a failure rate, parsed rate, and skipped rate (all between 0 and 1), per processor. The step is only focused on extracting structured data from text, and only the grok/dissect processors are available. Any additional processors will be added in a follow-up step outside the scope of this task. The field names and values can be cleaned up later. Most processors (but not the script processor) are available in this follow-up step. The execution LLM can call the tool until it is satisfied with the result. Critically, any tool call should contain all processors the LLM wants to add - they will only be added outside of the scope of this task, not during this process. To reiterate, `suggest_pipeline` should be called with ALL processors that the LLM wants to add, EXCEPT `existing_processors`.
+
+Additionally, it can request documentation for grok and dissect patterns via `get_grok_documentation` and `get_dissect_documentation`. 
+
+`suggest_pipeline` returns:
+
+```
+export interface ProcessorValidationResult {
+  processor: ProcessorDefinitionWithId;
+  // success = no _technical_ failures, partial = some technical failures that were ignored, failure = failures that were not or cannot be ignored
+  validity: 'success' | 'partial' | 'failure';
+  result: {
+    // extracted fields from the log message. make sure both the extracted fields _and their values_ match up to your expectations.
+    added_fields?: Record<string, (string | number)[]>;
+    failure_rate: number;
+    ignored_failure_rate: number;
+    success_rate: number;
+    // a sample of successful documents
+    successful?: Array<Record<string, any>>;
+    // error messages and sample values that failed.
+    errors?: SampleError[];
+    ignored_errors?: SampleError[];
+    // if this is set, the processors are extracting fields which are already set. this is not allowed and will result in validity being "failure".
+    non_additive_failure?: string;
+  };
+}
+```
+
+In the task context there are statically extracted patterns (`truncatedPattern`) with some sample messages. a `truncatedPattern` looks like this: `p a [a] a`. Additionally, there is a `format_description` that was generated in a previous step that describes a likely template for the log messages. This format_description is just a guidance - it's not guaranteed to be correct. If there are multiple templates, the LLM must start with the simplest one, as this has the highest chance at success.
+
+The goals are, in order:
+- generate a valid processor that successfully extracts the timestamp from the log message *into a single field*. 
+- if the format of the log message is generally something like `timestamp/log level/message details` or `log level/timestamp/message details`, extract timestamp (**again in a single field**), log level (into `log_level`) and message details (into `message_details`). Whatever ends up in `timestamp` should be parsable by a an Elasticsearch `date` processor.
+- extracting fields like IP addresses, user names, email addresses, process ids - i.e., entities.
+
+** Success criteria **
+
+At a minimum, any generated set of processors is considered _valid_ when:
+
+- there is a failure_rate of 0
+- there is an ignored_failure_rate below 0.5
+- the first processor has a success_rate of 1 and ignored_failure_rate and failure_rate are both 0
+- there are no non_additive_failure errors
+- (at least one) timestamp is fully extracted into a single field. the full value in this field must be parsable by an Elasticsearch `date` processor. can be a Java time pattern or ISO8601, UNIX, UNIX_MS, or TAI64N. It _must_ contain year, day, month, hours, minutes, seconds and optionally milliseconds.
+
+The _quality_ of a set of processors improves when:
+- more valuable fields are extracted
+- the _values_ of the fields match up with the field names (eg, log level is "INFO", not "Nov 9")
+
+** Initial reasoning **
+
+The LLM should reason out loud about the observed system, the sample messages, and the suggested format. It must quote the template format verbatim, including delimiters. It should critically reflect on the format and whether it sees any messages that do not match the proposed format. It should keep in mind that it's only guidance. It should consider whether to use a dissect or grok pattern, and must pick the one that has the highest chance at being successful. It should not plan a specific pattern yet - it should first request the documentation for the processor it wants to use.
+
+** Dissect vs Grok **
+
+Choose dissect as your main processor when there is clear structure to the message (initial columns appear in same order). Not all columns have to be extracted with `dissect`. You can leave the tail end of the message for successive processors (grok or others) by ending with a capture group for `%{message_details}`. You almost always want dissect. If needed, group columns together using append modifiers.
+
+Use Grok only when there is no clear structure at all in the log message, e.g. you just have something like "Client 192.168.0.1 requested index.html". If you have `dissect` as your main processor, you can add additional `grok` processors to extract things like ip and email addresses.
+
+** Receiving the documentation **
+
+After receiving the documentation it should acknowledge the parts of the documentation that are of interest to the specific pattern it wants to generate. It should especially focus on common gotchas if they're applicable to the sample messages. It should then reason about the pattern it wants to generate and hand back control to the orchestrator before it calls `suggest_pipeline`.
+
+** Responding to `suggest_pipeline` **
+
+After calling `suggest_pipeline`, and there are technical errors, look closely at the error message and the documents on which it failed. In some cases there might be a suggested fix (`suggested_fix`) in the error message - pay close attention to this. If a pattern only partially matches, consider using only the beginning of the pattern that _does_ match. This will provide a better chance at generating a successful set of processors that you can refine later.
+
+** Tips **
+
+- Pay really close attention to special characters like `^`, `\`, `.`, `[]`, `-`, etc. LLMs are not good at this generally so keep a really close eye on this.
+- Use append modifiers (`%{+field/1} %{+field/2}` or `%{+field} %{+field}`) and `append_separator` to concatenate fields (that might appear out of order or are delimited).
+- Pay close attention to (variable) whitespace. if you use dissect you can opt to use a right-padding modifier (`%{field->}`) to match variable whitespace. The right-padding modifier only applies to the white-space right after the capturing group.
+- When using GROK escape `.` with a backslash if they're _outside_ of the pattern groups. Don't accidentally add whitespace or escape `%` later on.
+- Non-ISO formats (e.g. 2025-05-12 14:03:30.745) do not match TIMESTAMP_ISO8601: provide an explicit grok sub-pattern or dissect token, then later pass it to a date processor.
+- Pattern fails when %{TIMESTAMP\_ISO8601} is the first token: pre-pend a small anchor like `^%{TIMESTAMP_ISO8601\:timestamp}` _or_ dissect the leading timestamp as a fixed-width field.
+- The pattern definitions returned from `get_grok_documentation` are _built-in_. That means you do not have to define them in `pattern_definitions`.
+
+** Runtime variables **
+
+| Scope | Variable | Placeholder Example | Description |
+
+| ------------| ------------------------| --------------------| --------------------------------------------------------  |
+| **System**  | `processor_schema`      | `"{...JSON...}"`    | OpenAPI schema for `processors`. Lives in SYSTEM PROMPT.  |
+| **User**    | `stream.name`           | `"[{...}]"`         | Name of the stream |
+|             | `sample_data`           | `"{...JSON...}"`    | Aggregated analysis of field-value pairs in the stream    |
+|             | `grouped_messages`      | `"[{...}]"`         | Messages grouped by pattern |
+|             | `existing_processors`   | `"[{...}]"`         | Existing processors attached to the stream                |
+|             | `format_description`    | `"..."`             | Description of the format by another LLM                  |
+
+
+
+** Context **
+
+`processor_schema` (replace the contents with `{{{processor_schema}}}`) in the prompt:
+
+```json
+{"schemas":{"NonEmptyString":{"type":"string","minLength":1},"StringOrNumberOrBoolean":{"oneOf":[{"type":"string"},{"type":"number"},{"type":"boolean"}]},"BinaryFilterCondition":{"type":"object","properties":{"field":{"$ref":"#/components/schemas/NonEmptyString"},"operator":{"type":"string","enum":["eq","neq","lt","lte","gt","gte","contains","startsWith","endsWith"]},"value":{"$ref":"#/components/schemas/StringOrNumberOrBoolean"}},"required":["field","operator","value"],"additionalProperties":false},"UnaryFilterCondition":{"type":"object","properties":{"field":{"$ref":"#/components/schemas/NonEmptyString"},"operator":{"type":"string","enum":["exists","notExists"]}},"required":["field","operator"],"additionalProperties":false},"FilterCondition":{"oneOf":[{"$ref":"#/components/schemas/UnaryFilterCondition"},{"$ref":"#/components/schemas/BinaryFilterCondition"}]},"AndCondition":{"type":"object","properties":{"and":{"type":"array","items":{"$ref":"#/components/schemas/Condition"}}},"required":["and"],"additionalProperties":false},"OrCondition":{"type":"object","properties":{"or":{"type":"array","items":{"$ref":"#/components/schemas/Condition"}}},"required":["or"],"additionalProperties":false},"AlwaysCondition":{"type":"object","properties":{"always":{"type":"object","additionalProperties":false}},"required":["always"],"additionalProperties":false},"NeverCondition":{"type":"object","properties":{"never":{"type":"object","additionalProperties":false}},"required":["never"],"additionalProperties":false},"Condition":{"description":"A condition for conditional processor execution. Due to recursion, implementations might need to handle lazy loading or specific parsing order.","oneOf":[{"$ref":"#/components/schemas/FilterCondition"},{"$ref":"#/components/schemas/AndCondition"},{"$ref":"#/components/schemas/OrCondition"},{"$ref":"#/components/schemas/NeverCondition"},{"$ref":"#/components/schemas/AlwaysCondition"}]},"ProcessorBase":{"type":"object","properties":{"description":{"type":"string"},"if":{"$ref":"#/components/schemas/Condition"},"ignore_failure":{"type":"boolean"}}},"GrokProcessorConfig":{"allOf":[{"$ref":"#/components/schemas/ProcessorBase"},{"type":"object","properties":{"field":{"$ref":"#/components/schemas/NonEmptyString"},"patterns":{"type":"array","items":{"$ref":"#/components/schemas/NonEmptyString"},"minItems":1},"pattern_definitions":{"type":"object","additionalProperties":{"type":"string"}},"ignore_missing":{"type":"boolean"}},"required":["field","patterns"]}]},"GrokProcessorDefinition":{"type":"object","properties":{"grok":{"$ref":"#/components/schemas/GrokProcessorConfig"}},"required":["grok"],"additionalProperties":false},"DissectProcessorConfig":{"allOf":[{"$ref":"#/components/schemas/ProcessorBase"},{"type":"object","properties":{"field":{"$ref":"#/components/schemas/NonEmptyString"},"pattern":{"$ref":"#/components/schemas/NonEmptyString"},"append_separator":{"$ref":"#/components/schemas/NonEmptyString"},"ignore_missing":{"type":"boolean"}},"required":["field","pattern"]}]},"DissectProcessorDefinition":{"type":"object","properties":{"dissect":{"$ref":"#/components/schemas/DissectProcessorConfig"}},"required":["dissect"],"additionalProperties":false},"ProcessorDefinition":{"oneOf":[{"$ref":"#/components/schemas/DissectProcessorDefinition"},{"$ref":"#/components/schemas/GrokProcessorDefinition"}]}}}
+```
+
+** Dissect documentation (don't include in the prompt) **
+
+
+Similar to the [Grok Processor](https://www.elastic.co/docs/reference/enrich-processor/grok-processor), dissect also extracts structured fields out of a single text field within a document. However unlike the [Grok Processor](https://www.elastic.co/docs/reference/enrich-processor/grok-processor), dissect does not use [Regular Expressions](https://en.wikipedia.org/wiki/Regular_expression). This allows dissect's syntax to be simple and for some cases faster than the [Grok Processor](https://www.elastic.co/docs/reference/enrich-processor/grok-processor).
+
+Dissect matches a single text field against a defined pattern.
+
+For example the following pattern:
+
+```
+%{clientip} %{ident} %{auth} [%{@timestamp}] \"%{verb} %{request} HTTP/%{httpversion}\" %{status} %{size}
+
+```
+
+will match a log line of this format:
+
+```
+1.2.3.4 - - [30/Apr/1998:22:00:52 +0000] \"GET /english/venues/cities/images/montpellier/18.gif HTTP/1.0\" 200 3171
+
+```
+
+and result in a document with the following fields:
+
+```
+"doc": {
+  "_index": "_index",
+  "_type": "_type",
+  "_id": "_id",
+  "_source": {
+    "request": "/english/venues/cities/images/montpellier/18.gif",
+    "auth": "-",
+    "ident": "-",
+    "verb": "GET",
+    "@timestamp": "30/Apr/1998:22:00:52 +0000",
+    "size": "3171",
+    "clientip": "1.2.3.4",
+    "httpversion": "1.0",
+    "status": "200"
+  }
+}
+
+```
+
+A dissect pattern is defined by the parts of the string that will be discarded. In the previous example, the first part to be discarded is a single space. Dissect finds this space, then assigns the value of `clientip` everything up until that space. Next, dissect matches the `[` and then `]` and then assigns `@timestamp` to everything in-between `[` and `]`. Paying special attention to the parts of the string to discard will help build successful dissect patterns.
+
+Successful matches require all keys in a pattern to have a value. If any of the `%{keyname}` defined in the pattern do not have a value, then an exception is thrown and may be handled by the [`on_failure`](https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures) directive. An empty key `%{}` or a [named skip key](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-named-skip-key) can be used to match values, but exclude the value from the final document. All matched values are represented as string data types. The [convert processor](https://www.elastic.co/docs/reference/enrich-processor/convert-processor) may be used to convert to expected data type.
+
+Dissect also supports [key modifiers](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-key-modifiers) that can change dissect's default behavior. For example you can instruct dissect to ignore certain fields, append fields, skip over padding, etc. See [below](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-key-modifiers) for more information.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `field` | yes | - | The field to dissect |
+| `pattern` | yes | - | The pattern to apply to the field |
+| `ignore_missing` | no | false | If `true` and `field` does not exist or is `null`, the processor quietly exits without modifying the document |
+| `description` | no | - | Description of the processor. Useful for describing the purpose of the processor or its configuration. |
+
+```
+{
+  "dissect": {
+    "field": "message",
+    "pattern" : "%{clientip} %{ident} %{auth} [%{@timestamp}] \"%{verb} %{request} HTTP/%{httpversion}\" %{status} %{size}"
+   }
+}
+
+```
+
+[Dissect key modifiers](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-key-modifiers)
+-----------------------------------------------------------------------------------------------------------------------
+
+Key modifiers can change the default behavior for dissection. Key modifiers may be found on the left or right of the `%{keyname}` always inside the `%{` and `}`. For example `%{+keyname ->}` has the append and right padding modifiers.
+
+| Modifier | Name | Position | Example | Description | Details |
+| --- | --- | --- | --- | --- | --- |
+| `->` | Skip right padding | (far) right | `%{keyname1->}` | Skips any repeated characters to the right | [link](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-skip-right-padding) |
+| `+` | Append | left | `%{+keyname} %{+keyname}` | Appends two or more fields together | [link](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-append-key) |
+| `+` with `/n` | Append with order | left and right | `%{+keyname/2} %{+keyname/1}` | Appends two or more fields together in the order specified | [link](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-append-key-with-order) |
+| `?` | Named skip key | left | `%{?ignoreme}` | Skips the matched value in the output. Same behavior as `%{}` | [link](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-named-skip-key) |
+| `*` and `&` | Reference keys | left | `%{*r1} %{&r1}` | Sets the output key as value of `*` and output value of `&` | [link](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-reference-keys) |
+
+### [Right padding modifier (`->`)](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#dissect-modifier-skip-right-padding)
+
+The algorithm that performs the dissection is very strict in that it requires all characters in the pattern to match the source string. For example, the pattern `%{fookey} %{barkey}` (1 space), will match the string "foo bar" (1 space), but will not match the string "foo bar" (2 spaces) since the pattern has only 1 space and the source string has 2 spaces.
+
+The right padding modifier helps with this case. Adding the right padding modifier to the pattern `%{fookey->} %{barkey}`, It will now will match "foo bar" (1 space) and "foo bar" (2 spaces) and even "foo bar" (10 spaces).
+
+Use the right padding modifier to allow for repetition of the characters after a `%{keyname->}`.
+
+The right padding modifier may be placed on any key with any other modifiers. It should always be the furthest right modifier. For example: `%{+keyname/1->}` and `%{->}`
+
+Right padding modifier example
+
+| Pattern | `%{ts->} %{level}` |
+| Input | 1998-08-10T17:15:42,466 WARN |
+| Result | * ts = 1998-08-10T17:15:42,466\
+* level = WARN\
+ |
+
+The right padding modifier may be used with an empty key to help skip unwanted data. For example, the same input string, but wrapped with brackets requires the use of an empty right padded key to achieve the same result.
+
+Right padding modifier with empty key example
+
+| Pattern | `[%{ts}]%{->}[%{level}]` |
+| Input | [1998-08-10T17:15:42,466] [WARN] |
+| Result | * ts = 1998-08-10T17:15:42,466\
+* level = WARN\
+ |
+
+### [Append modifier (`+`)](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#append-modifier)
+
+Dissect supports appending two or more results together for the output. Values are appended left to right. An append separator can be specified. In this example the append_separator is defined as a space.
+
+Append modifier example
+
+| Pattern | `%{+name} %{+name} %{+name} %{+name}` |
+| Input | john jacob jingleheimer schmidt |
+| Result | * name = john jacob jingleheimer schmidt\
+ |
+
+### [Append with order modifier (`+` and `/n`)](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#append-order-modifier)
+
+Dissect supports appending two or more results together for the output. Values are appended based on the order defined (`/n`). An append separator can be specified. In this example the append_separator is defined as a comma.
+
+Append with order modifier example
+
+| Pattern | `%{+name/2} %{+name/4} %{+name/3} %{+name/1}` |
+| Input | john jacob jingleheimer schmidt |
+| Result | * name = schmidt,john,jingleheimer,jacob\
+ |
+
+### [Named skip key (`?`)](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#named-skip-key)
+
+Dissect supports ignoring matches in the final result. This can be done with an empty key `%{}`, but for readability it may be desired to give that empty key a name.
+
+Named skip key modifier example
+
+| Pattern | `%{clientip} %{?ident} %{?auth} [%{@timestamp}]` |
+| Input | 1.2.3.4 - - [30/Apr/1998:22:00:52 +0000] |
+| Result | * clientip = 1.2.3.4\
+* @timestamp = 30/Apr/1998:22:00:52 +0000\
+ |
+
+### [Reference keys (`*` and `&`)](https://www.elastic.co/docs/reference/enrich-processor/dissect-processor#reference-keys)
+
+Dissect support using parsed values as the key/value pairings for the structured content. Imagine a system that partially logs in key/value pairs. Reference keys allow you to maintain that key/value relationship.
+
+Reference key modifier example
+
+| Pattern | `[%{ts}] [%{level}] %{*p1}:%{&p1} %{*p2}:%{&p2}` |
+| Input | [2018-08-10T17:15:42,466] [ERR] ip:1.2.3.4 error:REFUSED |
+| Result | * ts = 2018-08-10T17:15:42,466\
+* level = ERR\
+* ip = 1.2.3.4\
+* error = REFUSED\
+ |
+
+
+
+** Grok documentation (don't include in the prompt) ** 
+
+Grokking grok
+=============
+
+Elastic Stack Serverless
+
+Grok is a regular expression dialect that supports reusable aliased expressions. Grok works really well with syslog logs, Apache and other webserver logs, mysql logs, and generally any log format that is written for humans and not computer consumption.
+
+Grok sits on top of the [Oniguruma](https://github.com/kkos/oniguruma/blob/master/doc/RE) regular expression library, so any regular expressions are valid in grok. Grok uses this regular expression language to allow naming existing patterns and combining them into more complex patterns that match your fields.
+
+[Grok patterns](https://www.elastic.co/docs/explore-analyze/scripting/grok#grok-syntax)
+---------------------------------------------------------------------------------------
+
+The Elastic Stack ships with numerous [predefined grok patterns](https://github.com/elastic/elasticsearch/blob/master/libs/grok/src/main/resources/patterns/legacy/grok-patterns) that simplify working with grok. The syntax for reusing grok patterns takes one of the following forms:
+
+| `%{{SYNTAX}}` | `%{SYNTAX:ID}` | `%{SYNTAX:ID:TYPE}` |
+
+`SYNTAX`
+
+The name of the pattern that will match your text. For example, `NUMBER` and `IP` are both patterns that are provided within the default patterns set. The `NUMBER` pattern matches data like `3.44`, and the `IP` pattern matches data like `55.3.244.1`.
+
+`ID`
+
+The identifier you give to the piece of text being matched. For example, `3.44` could be the duration of an event, so you might call it `duration`. The string `55.3.244.1` might identify the `client` making a request.
+
+`TYPE`
+
+The data type you want to cast your named field. `int`, `long`, `double`, `float` and `boolean` are supported types.
+
+For example, let's say you have message data that looks like this:
+
+```
+3.44 55.3.244.1
+
+```
+
+The first value is a number, followed by what appears to be an IP address. You can match this text by using the following grok expression:
+
+```
+%{NUMBER:duration} %{IP:client}
+
+```
+
+Built-in patterns:
+
+Email:
+| Pattern            | Template                                                | Example                |
+| ------------------ | ------------------------------------------------------- | ---------------------- |
+| **EMAILLOCALPART** | starts with letter; then letters, digits, `_ . + - = :` | `john.doe+tag=1`       |
+| **EMAILADDRESS**   | `<local-part>@<hostname>`                               | `john.doe@example.com` |
+
+Numbers:
+| Pattern         | Template                                           | Example   |
+| --------------- | -------------------------------------------------- | --------- |
+| **INT**         | optional `+`/`-`, then digits                      | `-42`     |
+| **BASE10NUM**   | optional `+`/`-`, integer or decimal (no exponent) | `3.14`    |
+| **NUMBER**      | same as `BASE10NUM`                                | `-0.5`    |
+| **BASE16NUM**   | optional `+`/`-`, optional `0x` prefix, hex digits | `0x1A3f`  |
+| **BASE16FLOAT** | hex floating point (e.g. `0xAB.C`)                 | `-0xAB.C` |
+| **POSINT**      | positive integer (no leading zeros)                | `123`     |
+| **NONNEGINT**   | non-negative integer (leading zeros allowed)       | `007`     |
+
+Words & whitespaces:
+| Pattern          | Template                                               | Example                |
+| ---------------- | ------------------------------------------------------ | ---------------------- |
+| **WORD**         | one or more “word” characters (letters, digits, \_: )  | `Hello123`             |
+| **NOTSPACE**     | one or more non-whitespace characters                  | `NoSpace!`             |
+| **SPACE**        | zero or more whitespace characters                     | *(three spaces)*       |
+| **DATA**         | any characters (non-greedy)                            | `Some data`            |
+| **GREEDYDATA**   | any characters (greedy)                                | `Everything goes here` |
+| **QUOTEDSTRING** | single, double or back-tick quoted string with escapes | `"Hello \"World\""`    |
+
+UUID & URN:
+| Pattern  | Template                              | Example                                |
+| -------- | ------------------------------------- | -------------------------------------- |
+| **UUID** | 8-4-4-4-12 hex digits                 | `123e4567-e89b-12d3-a456-426614174000` |
+| **URN**  | `urn:` + namespace + `:` + identifier | `urn:example:animal:ferret:nose`       |
+
+Networking:
+
+| Pattern        | Template                                | Example                                   |
+| -------------- | --------------------------------------- | ----------------------------------------- |
+| **MAC**        | MAC address (any of the common formats) | `00:1A:2B:3C:4D:5E`                       |
+| **CISCOMAC**   | `xxxx.xxxx.xxxx` hex                    | `0001.0A2B.3C4D`                          |
+| **WINDOWSMAC** | `xx-xx-xx-xx-xx-xx` hex                 | `00-1A-2B-3C-4D-5E`                       |
+| **COMMONMAC**  | `xx:xx:xx:xx:xx:xx` hex                 | `01:23:45:67:89:AB`                       |
+| **IPV4**       | dotted-quad 0–255                       | `192.168.0.1`                             |
+| **IPV6**       | standard IPv6 notation                  | `2001:0db8:85a3:0000:0000:8a2e:0370:7334` |
+| **IP**         | either IPv4 or IPv6                     | `127.0.0.1`                               |
+| **HOSTNAME**   | domain labels separated by dots         | `example-host.com`                        |
+| **IPORHOST**   | either IP or hostname                   | `example.com`                             |
+| **HOSTPORT**   | `<IPorHost>:<port>`                     | `example.com:80`                          |
+
+Paths & URIs:
+
+| Pattern          | Template                                          | Example                             |
+| ---------------- | ------------------------------------------------- | ----------------------------------- |
+| **UNIXPATH**     | `/`-prefixed filepath                             | `/usr/local/bin`                    |
+| **WINPATH**      | drive letter or `\`-prefixed filepath             | `C:\Windows\System32`               |
+| **PATH**         | either UNIX or Windows path                       | `/etc/passwd`                       |
+| **TTY**          | `/dev/…` terminal device                          | `/dev/pts/0`                        |
+| **URIPROTO**     | protocol (letters, digits, `+`, `-`, `.`)         | `https`                             |
+| **URIHOST**      | `<IPorHost>[:port]`                               | `example.com:8080`                  |
+| **URIPATH**      | slash-prefixed path segment                       | `/path/to/resource`                 |
+| **URIPARAM**     | `?` and URL parameters                            | `?key=value&x=1`                    |
+| **URIPATHPARAM** | path + params                                     | `/path?x=1`                         |
+| **URI**          | full URI with optional userinfo, host, port, path | `http://john@example.com:8080/path` |
+
+Simple time patterns:
+
+| Pattern               | Template                                       | Example       |
+| --------------------- | ---------------------------------------------- | ------------- |
+| **ISO8601\_TIMEZONE** | `Z` or `+HH:MM` / `-HHMM`                      | `+02:00`      |
+| **ISO8601\_SECOND**   | `00–59(.fraction)` or `60`                     | `45.123`      |
+| **ISO8601\_HOUR**     | `00–23`                                        | `07`          |
+| **TZ**                | three-letter zone (e.g. `PST`, `EDT`) or `UTC` | `UTC`         |
+| **PROG**              | one or more printable non-space characters     | `sshd`        |
+| **SYSLOGPROG**        | `PROG` optionally `[<pid>]`                    | `httpd[1234]` |
+| **SYSLOGHOST**        | hostname or IP                                 | `localhost`   |
+| **SYSLOGFACILITY**    | `<facility.priority>`                          | `<4.0>`       |
+
+Date & time composites:
+
+| Pattern                 | Template                                          | Example                        |
+| ----------------------- | ------------------------------------------------- | ------------------------------ |
+| **SYSLOGTIMESTAMP**     | `Month DD HH:MM:SS`                               | `May 27 14:23:55`              |
+
+
+===  END OF TASK DESCRIPTION ===

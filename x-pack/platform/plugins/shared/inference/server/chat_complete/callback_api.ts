@@ -75,7 +75,9 @@ export function createChatCompleteCallbackApi({
           maxRetries = 3,
           metadata,
           modelName,
-          retryConfiguration = {},
+          retryConfiguration = {
+            retryOn: 'all',
+          },
           temperature,
           toolChoice,
           tools,
@@ -108,6 +110,8 @@ export function createChatCompleteCallbackApi({
           {
             system,
             messages,
+            tools,
+            toolChoice,
             model: {
               family: getConnectorFamily(connector),
               provider: getConnectorProvider(connector),

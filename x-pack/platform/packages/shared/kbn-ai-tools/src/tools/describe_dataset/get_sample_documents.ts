@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslFieldAndFormat } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery } from './queries';
 
 export function getSampleDocuments({
@@ -36,7 +36,7 @@ export function getSampleDocuments({
   timeout?: string;
 }) {
   return esClient
-    .search<Record<string, unknown>>({
+    .search<Record<string, any>>({
       index,
       size,
       track_total_hits: true,
@@ -66,7 +66,7 @@ export function getSampleDocuments({
       fields,
     })
     .then((response) => ({
-      hits: response.hits.hits,
+      hits: response.hits.hits as Array<SearchHit<Record<string, any>>>,
       total:
         typeof response.hits.total === 'number'
           ? response.hits.total!

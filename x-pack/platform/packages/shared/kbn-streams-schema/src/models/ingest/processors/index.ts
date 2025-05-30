@@ -39,7 +39,7 @@ export interface GrokProcessorDefinition {
   grok: GrokProcessorConfig;
 }
 
-export const grokProcessorDefinitionSchema = z.strictObject({
+export const grokProcessorDefinitionSchema: z.Schema<GrokProcessorDefinition> = z.strictObject({
   grok: z.intersection(
     processorBaseSchema,
     z.object({

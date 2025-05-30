@@ -31,10 +31,17 @@ import {
   PROMPT_ID,
   PROMPT_TEMPLATE_VARIABLES,
   PROMPT_TEMPLATE_TEMPLATE,
+  LLM_TOOLS,
 } from '@arizeai/openinference-semantic-conventions';
 import { ReadableSpan } from '@opentelemetry/sdk-trace-base';
 import { omit, partition } from 'lodash';
-import { ChoiceEvent, GenAISemanticConventions, MessageEvent } from '../types';
+import { ToolDefinition } from '@kbn/inference-common';
+import {
+  ChoiceEvent,
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  MessageEvent,
+} from '../types';
 import { flattenAttributes } from '../util/flatten_attributes';
 import { unflattenAttributes } from '../util/unflatten_attributes';
 
@@ -79,6 +86,23 @@ export function getChatSpan(span: ReadableSpan) {
   span.attributes[INPUT_VALUE] = JSON.stringify(
     inputEvents.map((event) => {
       return unflattenAttributes(event.attributes ?? {});
+    })
+  );
+
+  const parsedTools = span.attributes[ElasticGenAIAttributes.Tools]
+    ? (JSON.parse(String(span.attributes[ElasticGenAIAttributes.Tools])) as Record<
+        string,
+        ToolDefinition
+      >)
+    : {};
+
+  span.attributes[LLM_TOOLS] = JSON.stringify(
+    Object.entries(parsedTools).map(([name, definition]) => {
+      return {
+        'tool.name': name,
+        'tool.description': definition.description,
+        'tool.json_schema': definition.schema,
+      };
     })
   );
 

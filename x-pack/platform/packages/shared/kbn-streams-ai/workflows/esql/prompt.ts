@@ -29,6 +29,7 @@ export const EsqlPrompt = createPrompt({
         template: contentPromptTemplate,
       },
     },
+    temperature: 0.25,
     tools: {
       get_documentation: {
         description: 'Get documentation about specific ES|QL commands or functions',
