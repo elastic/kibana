@@ -225,7 +225,7 @@ export const expectActionsFired = async ({
   retry: RetryService;
   expectedNumberOfActions: number;
 }) => {
-  const events = await retry.try(async () => {
+  await retry.try(async () => {
     const { body: result } = await supertest
       .get(`${getUrlPrefix(Spaces.space1.id)}/_test/event_log/alert/${id}/_find?per_page=5000`)
       .expect(200);
@@ -233,14 +233,13 @@ export const expectActionsFired = async ({
     if (!result.total) {
       throw new Error('no events found yet');
     }
-    return result.data as IValidatedEvent[];
-  });
 
-  const actionEvents = events.filter((event) => {
-    return event?.event?.action === 'execute-action';
-  });
+    const actionEvents = result.data.filter((event: IValidatedEvent) => {
+      return event?.event?.action === 'execute-action';
+    });
 
-  expect(actionEvents.length).eql(expectedNumberOfActions);
+    expect(actionEvents.length).eql(expectedNumberOfActions);
+  });
 };
 
 export const runSoon = async ({
