@@ -101,7 +101,7 @@ export function useFetchAgentsData() {
 
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
-  const showAgentless = (urlParams.showAgentless as string) === 'true';
+  const showAgentless = urlParams.showAgentless === 'true';
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
 

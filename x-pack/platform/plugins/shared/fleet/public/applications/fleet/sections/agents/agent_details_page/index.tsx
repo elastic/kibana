@@ -42,7 +42,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
   const { urlParams } = useUrlParams();
-  const showAgentless = (urlParams.showAgentless as string) === 'true';
+  const showAgentless = urlParams.showAgentless === 'true';
   const {
     isLoading,
     isInitialRequest,
