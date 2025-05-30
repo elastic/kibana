@@ -120,8 +120,11 @@ export const QueryRulesetDetail: React.FC = () => {
       key="delete"
       icon="trash"
       onClick={() => setRulesetToDelete(rulesetId)}
+      data-test-subj="queryRulesetDetailDeleteButton"
     >
-      Delete ruleset
+      {i18n.translate('xpack.queryRules.queryRulesetDetail.deleteRulesetButton', {
+        defaultMessage: 'Delete ruleset',
+      })}
     </EuiContextMenuItem>,
   ];
 
@@ -192,7 +195,9 @@ export const QueryRulesetDetail: React.FC = () => {
                             color="text"
                             onClick={finishTour}
                           >
-                            Close tour
+                            {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                              defaultMessage: 'Close tour',
+                            })}
                           </EuiButtonEmpty>
                         ) : (
                           <EuiButton
@@ -201,7 +206,9 @@ export const QueryRulesetDetail: React.FC = () => {
                             color="success"
                             onClick={finishTour}
                           >
-                            Close tour
+                            {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                              defaultMessage: 'Close tour',
+                            })}
                           </EuiButton>
                         )}
                       </EuiFlexItem>
@@ -213,7 +220,9 @@ export const QueryRulesetDetail: React.FC = () => {
                             size="s"
                             onClick={incrementStep}
                           >
-                            Next
+                            {i18n.translate('xpack.queryRules.queryRulesetDetail.nextTourButton', {
+                              defaultMessage: 'Next',
+                            })}
                           </EuiButton>
                         </EuiFlexItem>
                       )}
@@ -310,7 +319,9 @@ export const QueryRulesetDetail: React.FC = () => {
                     color="text"
                     onClick={descrementStep}
                   >
-                    Back
+                    {i18n.translate('xpack.queryRules.queryRulesetDetail.backTourButton', {
+                      defaultMessage: 'Back',
+                    })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -320,7 +331,9 @@ export const QueryRulesetDetail: React.FC = () => {
                     color="success"
                     onClick={finishTour}
                   >
-                    Close tour
+                    {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                      defaultMessage: 'Close tour',
+                    })}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
