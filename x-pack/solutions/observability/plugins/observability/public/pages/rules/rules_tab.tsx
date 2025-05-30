@@ -22,7 +22,6 @@ interface RulesTabProps {
 
 export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   const {
-    http: { basePath },
     triggersActionsUi: { getRulesList: RuleList },
   } = useKibana().services;
   const history = useHistory();
