@@ -132,7 +132,7 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import { installAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
