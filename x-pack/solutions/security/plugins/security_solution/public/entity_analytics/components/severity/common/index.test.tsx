@@ -7,6 +7,7 @@
 
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme'; // eslint-disable-line @elastic/eui/no-restricted-eui-imports
 
 import { TestProviders } from '../../../../common/mock';
 
@@ -96,8 +97,7 @@ describe('RiskScore', () => {
     expect(container).toHaveTextContent(RiskSeverity.Unknown);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: '#aaa' }), // TODO: update with new severity palette agreement.
-      // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
+      expect.objectContaining({ color: euiThemeVars.euiColorSeverityUnknown }),
       context
     );
   });
