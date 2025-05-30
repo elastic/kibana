@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 
 import {
+  EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -70,7 +71,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         className="optionsList-control-ignored-selection-title"
         data-test-subj="optionList__invalidSelectionLabel"
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiIcon
               type="warning"
@@ -78,10 +79,13 @@ export const OptionsListPopoverInvalidSelections = () => {
               size="s"
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <label>
               {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiNotificationBadge color="subdued">{invalidSelections.size}</EuiNotificationBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>

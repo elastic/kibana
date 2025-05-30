@@ -145,18 +145,6 @@ export const OptionsListPopoverActionBar = ({
               </EuiFlexItem>
             </>
           )}
-          {invalidSelections && invalidSelections.size > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.size)}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div className="optionsList__actionBarDivider" />
-              </EuiFlexItem>
-            </>
-          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
@@ -186,7 +174,7 @@ export const OptionsListPopoverActionBar = ({
             >
               <EuiButtonEmpty
                 size="xs"
-                css={{ padding: 0, paddingLeft: euiTheme.size.s }}
+                css={{ padding: 0, paddingLeft: euiTheme.size.xs }}
                 disabled={isBulkSelectDisabled || selectedOptions.length < 1}
                 data-test-subj="optionsList-control-deselectAll"
                 onClick={() => handleBulkAction(componentApi.deselectAll)}
