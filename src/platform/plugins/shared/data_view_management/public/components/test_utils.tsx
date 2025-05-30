@@ -13,16 +13,15 @@ import { shallow } from 'enzyme';
 
 // since the 'shallow' from 'enzyme' doesn't support context API for React 16 and above (https://github.com/facebook/react/pull/14329)
 // we use this workaround where define legacy contextTypes for react class component
-export function createComponentWithContext<Props = Record<string, any>>(
-  MyComponent: React.ComponentClass<any>,
-  props: Props,
-  mockedContext: Record<string, any>
-) {
+export function createComponentWithContext<
+  Props extends React.JSX.IntrinsicAttributes &
+    React.JSX.IntrinsicClassAttributes<React.Component<any, any, any>> &
+    Readonly<any> = Record<string, any>
+>(MyComponent: React.ComponentClass<any>, props: Props, mockedContext: Record<string, any>) {
   MyComponent.contextTypes = {
     services: PropTypes.object,
   };
 
-  // @ts-expect-error upgrade typescript v4.9.5
   return shallow(<MyComponent {...props} />, {
     context: {
       services: mockedContext,
