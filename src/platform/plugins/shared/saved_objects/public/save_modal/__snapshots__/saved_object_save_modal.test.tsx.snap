@@ -2,12 +2,15 @@
 
 exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 <EuiModal
+  aria-labelledby="generated-id_saveModal"
   className="kbnSavedObjectSaveModal"
   data-test-subj="savedObjectSaveModal"
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
+    <EuiModalHeaderTitle
+      id="generated-id_saveModal"
+    >
       <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
@@ -39,11 +42,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         <EuiFieldText
           data-test-subj="savedObjectTitle"
           fullWidth={true}
-          inputRef={
-            Object {
-              "current": null,
-            }
-          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
@@ -116,12 +114,15 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 
 exports[`SavedObjectSaveModal should render matching snapshot when custom isValid is set 1`] = `
 <EuiModal
+  aria-labelledby="generated-id_saveModal"
   className="kbnSavedObjectSaveModal"
   data-test-subj="savedObjectSaveModal"
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
+    <EuiModalHeaderTitle
+      id="generated-id_saveModal"
+    >
       <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
@@ -153,11 +154,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         <EuiFieldText
           data-test-subj="savedObjectTitle"
           fullWidth={true}
-          inputRef={
-            Object {
-              "current": null,
-            }
-          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
@@ -230,12 +226,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 
 exports[`SavedObjectSaveModal should render matching snapshot when custom isValid is set 2`] = `
 <EuiModal
+  aria-labelledby="generated-id_saveModal"
   className="kbnSavedObjectSaveModal"
   data-test-subj="savedObjectSaveModal"
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
+    <EuiModalHeaderTitle
+      id="generated-id_saveModal"
+    >
       <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
@@ -267,11 +266,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         <EuiFieldText
           data-test-subj="savedObjectTitle"
           fullWidth={true}
-          inputRef={
-            Object {
-              "current": null,
-            }
-          }
           isInvalid={false}
           onChange={[Function]}
           value="Saved Object title"
@@ -344,12 +338,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 
 exports[`SavedObjectSaveModal should render matching snapshot when given options 1`] = `
 <EuiModal
+  aria-labelledby="generated-id_saveModal"
   className="kbnSavedObjectSaveModal kbnSavedObjectsSaveModal--wide"
   data-test-subj="savedObjectSaveModal"
   onClose={[Function]}
 >
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
+    <EuiModalHeaderTitle
+      id="generated-id_saveModal"
+    >
       <MemoizedFormattedMessage
         defaultMessage="Save {objectType}"
         id="savedObjects.saveModal.saveTitle"
@@ -385,11 +382,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
             <EuiFieldText
               data-test-subj="savedObjectTitle"
               fullWidth={true}
-              inputRef={
-                Object {
-                  "current": null,
-                }
-              }
               isInvalid={false}
               onChange={[Function]}
               value="Saved Object title"
