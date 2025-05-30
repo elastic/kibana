@@ -9,7 +9,6 @@ import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { type ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
@@ -177,7 +176,7 @@ export class RuleMigrationTaskRunner {
               ruleTranslationTelemetry.success(migrationResult);
             } catch (error) {
               if (error instanceof AbortError) {
-                this.logger.info(`Throwing AbortError for rule "${ruleMigration.id}"`);
+                throw error;
               }
               ruleTranslationTelemetry.failure(error);
               await this.saveRuleFailed(ruleMigration, error);
@@ -349,7 +348,7 @@ export class RuleMigrationTaskRunner {
     return this.data.rules.saveCompleted(ruleMigrationTranslated);
   }
 
-  private async saveRuleFailed(ruleMigration: RuleMigrationRule, error: Error) {
+  private async saveRuleFailed(ruleMigration: StoredRuleMigration, error: Error) {
     this.logger.error(`Error translating rule "${ruleMigration.id}" with error: ${error.message}`);
     const comments = [generateAssistantComment(`Error migrating rule: ${error.message}`)];
     return this.data.rules.saveError({ ...ruleMigration, comments });
