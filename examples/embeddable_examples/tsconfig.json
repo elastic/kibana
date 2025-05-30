@@ -24,7 +24,6 @@
     "@kbn/data-plugin",
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/content-management-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-util-plugin",
     "@kbn/unified-field-list",
@@ -39,6 +38,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-mount",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/config-schema"
   ]
 }

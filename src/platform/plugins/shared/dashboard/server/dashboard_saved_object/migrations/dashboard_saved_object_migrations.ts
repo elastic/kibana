@@ -23,15 +23,15 @@ import { migrateByValueDashboardPanels } from './migrate_by_value_dashboard_pane
 import { createExtractPanelReferencesMigration } from './migrate_extract_panel_references';
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
-  embeddable: EmbeddableSetup;
-  core: CoreSetup<{ embeddable: EmbeddableStart }>;
+  embeddableSetup: EmbeddableSetup;
+  getEmbeddableStart: () => EmbeddableStart | undefined;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigration>(
-    deps.embeddable.getAllMigrations(),
+    deps.embeddableSetup.getAllMigrations(),
     migrateByValueDashboardPanels
   );
 
@@ -40,7 +40,7 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.0.0': flow(migrations700),
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
-    '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
+    '7.11.0': createExtractPanelReferencesMigration(deps),
     '7.14.0': flow(replaceIndexPatternReference),
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };

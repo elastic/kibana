@@ -7,18 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
-import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -27,7 +20,12 @@ import {
 import { getUISettings } from './ui_settings';
 import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
-import { DashboardPluginSetup, DashboardPluginStart } from './types';
+import {
+  DashboardPluginSetup,
+  DashboardPluginStart,
+  DashboardSetupDeps,
+  DashboardStartDeps,
+} from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
@@ -35,39 +33,29 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 
-interface SetupDeps {
-  embeddable: EmbeddableSetup;
-  usageCollection?: UsageCollectionSetup;
-  taskManager: TaskManagerSetupContract;
-  contentManagement: ContentManagementServerSetup;
-}
-
-interface StartDeps {
-  embeddable: EmbeddableStart;
-  taskManager: TaskManagerStartContract;
-  usageCollection?: UsageCollectionStart;
-  savedObjectsTagging?: SavedObjectTaggingStart;
-  share?: SharePluginStart;
-}
-
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
+  implements
+    Plugin<DashboardPluginSetup, DashboardPluginStart, DashboardSetupDeps, DashboardStartDeps>
 {
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
+  private embeddableService?: EmbeddableStart;
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartDeps, DashboardPluginStart>, plugins: SetupDeps) {
+  public setup(
+    core: CoreSetup<DashboardStartDeps, DashboardPluginStart>,
+    plugins: DashboardSetupDeps
+  ) {
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {
-          core,
-          embeddable: plugins.embeddable,
+          embeddableSetup: plugins.embeddable,
+          getEmbeddableStart: () => this.embeddableService,
         },
       })
     );
@@ -136,8 +124,11 @@ export class DashboardPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDeps) {
+  public start(core: CoreStart, plugins: DashboardStartDeps) {
     this.logger.debug('dashboard: Started');
+    if (plugins.embeddable) {
+      this.embeddableService = plugins.embeddable;
+    }
 
     if (plugins.share) {
       plugins.share.url.locators.create(
