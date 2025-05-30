@@ -11,6 +11,7 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -31,13 +32,13 @@ import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
-import { setStartServices } from './kibana_server_services';
 
 export class DashboardPlugin
   implements
     Plugin<DashboardPluginSetup, DashboardPluginStart, DashboardSetupDeps, DashboardStartDeps>
 {
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
+  private embeddableService?: EmbeddableStart;
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -53,7 +54,8 @@ export class DashboardPlugin
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {
-          embeddable: plugins.embeddable,
+          embeddableSetup: plugins.embeddable,
+          getEmbeddableStart: () => this.embeddableService,
         },
       })
     );
@@ -124,7 +126,9 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDeps) {
     this.logger.debug('dashboard: Started');
-    setStartServices(core, plugins);
+    if (plugins.embeddable) {
+      this.embeddableService = plugins.embeddable;
+    }
 
     if (plugins.share) {
       plugins.share.url.locators.create(

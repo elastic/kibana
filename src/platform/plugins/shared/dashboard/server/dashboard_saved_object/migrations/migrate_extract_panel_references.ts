@@ -10,8 +10,8 @@
 import { inspect } from 'util';
 import { SavedObject, SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { DashboardSavedObjectAttributes } from '../schema';
+import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 import { itemToSavedObject, savedObjectToItem } from '../../content_management/latest';
-import { getEmbeddableService } from '../../kibana_server_services';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
@@ -27,7 +27,9 @@ import { getEmbeddableService } from '../../kibana_server_services';
  * migration only runs when the saved object is accessed. This ensures that the embeddable service is available and can be
  * used to extract the references correctly.
  */
-export function createExtractPanelReferencesMigration(): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
+export function createExtractPanelReferencesMigration(
+  deps: DashboardSavedObjectTypeMigrationsDeps
+): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
   return {
     deferred: true,
     transform: (doc, { log }) => {
@@ -42,11 +44,19 @@ export function createExtractPanelReferencesMigration(): SavedObjectMigrationPar
        */
       const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
 
+      const embeddableStart = deps.getEmbeddableStart();
+      if (!embeddableStart) {
+        log.warn(
+          `Exception @ createExtractPanelReferencesMigration!\nEmbeddable start service is not available.`
+        );
+        return doc;
+      }
+
       // Content Management transform functions `savedObjectToItem` and `itemToSavedObject`
       // will run embeddable inject and extract functions for each panel
       const { item, error: itemError } = savedObjectToItem(
         doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
-        getEmbeddableService(),
+        embeddableStart,
         false
       );
 
@@ -59,7 +69,7 @@ export function createExtractPanelReferencesMigration(): SavedObjectMigrationPar
         attributes,
         error: attributesError,
         references: newPanelReferences,
-      } = itemToSavedObject({ attributes: item.attributes, embeddable: getEmbeddableService() });
+      } = itemToSavedObject({ attributes: item.attributes, embeddable: embeddableStart });
       if (attributesError) {
         log.warn(getExceptionMessage(attributesError));
         return doc;

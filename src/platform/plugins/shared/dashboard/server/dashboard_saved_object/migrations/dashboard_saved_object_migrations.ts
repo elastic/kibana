@@ -12,7 +12,7 @@ import { flow, mapValues } from 'lodash';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core-saved-objects-utils-server';
 
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { SavedObjectMigration, SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
 
 import { migrations730, migrations700 } from './migrate_to_730';
@@ -23,14 +23,15 @@ import { migrateByValueDashboardPanels } from './migrate_by_value_dashboard_pane
 import { createExtractPanelReferencesMigration } from './migrate_extract_panel_references';
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
-  embeddable: EmbeddableSetup;
+  embeddableSetup: EmbeddableSetup;
+  getEmbeddableStart: () => EmbeddableStart | undefined;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigration>(
-    deps.embeddable.getAllMigrations(),
+    deps.embeddableSetup.getAllMigrations(),
     migrateByValueDashboardPanels
   );
 
@@ -39,7 +40,7 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.0.0': flow(migrations700),
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
-    '7.11.0': createExtractPanelReferencesMigration(),
+    '7.11.0': createExtractPanelReferencesMigration(deps),
     '7.14.0': flow(replaceIndexPatternReference),
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
