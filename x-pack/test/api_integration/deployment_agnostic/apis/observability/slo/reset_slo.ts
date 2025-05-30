@@ -53,11 +53,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const createResponse = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
       expect(createResponse).property('id');
       const sloId = createResponse.id;
-      const sloPipelineId = getSLOPipelineId(sloId, 1);
 
       // Delete the slo rollup ingest pipeline
       await retry.tryForTime(60 * 1000, async () => {
-        await esClient.ingest.deletePipeline({ id: sloPipelineId });
+        await esClient.ingest.deletePipeline({ id: getSLOPipelineId(sloId, 1) });
         return true;
       });
 
@@ -68,8 +67,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // assert the pipeline is re-created
       await retry.tryForTime(60 * 1000, async () => {
-        const response = await esClient.ingest.getPipeline({ id: sloPipelineId });
-        return !!response[sloPipelineId];
+        const pipelineId = getSLOPipelineId(sloId, 2);
+        const response = await esClient.ingest.getPipeline({ id: pipelineId });
+        return !!response[pipelineId];
       });
     });
   });
