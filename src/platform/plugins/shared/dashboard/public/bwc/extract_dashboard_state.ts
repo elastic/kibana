@@ -10,15 +10,19 @@
 import { DashboardState } from "@kbn/dashboard-plugin/common";
 import { extractControlGroupState } from "./extract_control_group_state";
 import { extractSettings } from "./extract_dashboard_settings";
+import { extractSearchState } from "./extract_search_state";
 
 export function extractDashboardState(state?: unknown): Partial<DashboardState> {
   let dashboardState: Partial<DashboardState> = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
+    
     const controlGroupState = extractControlGroupState(stateAsObject);
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
+
     dashboardState = {
       ...dashboardState,
+      ...extractSearchState(stateAsObject),
       ...extractSettings(stateAsObject)
     }
   }

@@ -11,11 +11,25 @@ import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_stat
 import { extractDashboardState } from './extract_dashboard_state';
 
 describe('extractDashboardState', () => {
-  test('should extract all required fields', () => {
+  test('should extract all DashboardState fields', () => {
+    const optionalState = {
+      timeRange: {
+        from: 'now-15m',
+        to: 'now'
+      },
+      refreshInterval: {
+        pause: false,
+        value: 5
+      },
+    }
     expect(extractDashboardState({
       ...DEFAULT_DASHBOARD_STATE,
+      ...optionalState,
       // panels stored as array in URL
       panels: [],
-    })).toEqual(DEFAULT_DASHBOARD_STATE);
+    })).toEqual({
+      ...DEFAULT_DASHBOARD_STATE,
+      ...optionalState
+    });
   });
 })
