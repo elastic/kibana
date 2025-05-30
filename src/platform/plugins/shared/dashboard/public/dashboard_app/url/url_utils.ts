@@ -54,7 +54,6 @@ export const loadAndRemoveDashboardState = (
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
 
-  // abort if panels state is too old
   const panels =
     typeof rawAppStateInUrl === 'object' &&
     'panels' in rawAppStateInUrl &&
@@ -63,7 +62,6 @@ export const loadAndRemoveDashboardState = (
       : [];
   if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
-    return {};
   }
 
   return extractDashboardState(rawAppStateInUrl);
