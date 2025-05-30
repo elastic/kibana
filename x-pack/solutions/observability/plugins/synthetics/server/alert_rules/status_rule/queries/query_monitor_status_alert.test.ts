@@ -33,8 +33,29 @@ describe('queryMonitorStatusAlert', () => {
   const esClient = createEsClientMock();
   const logger = createLoggerMock();
 
+  // Mock Date to return a fixed timestamp for 2025-05-27T14:25:00Z
+  const fixedDateString = '2025-05-27T14:25:00Z';
+  let originalDate: DateConstructor;
+
+  beforeEach(() => {
+    originalDate = global.Date;
+    // @ts-ignore - We need to mock the Date constructor
+    global.Date = class extends originalDate {
+      constructor(date?: string | number | Date) {
+        if (date !== undefined) {
+          // If a date is provided, use the original Date behavior
+          super(date);
+        } else {
+          // If no date is provided, return our fixed date
+          super(fixedDateString);
+        }
+      }
+    } as DateConstructor;
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+    global.Date = originalDate;
   });
 
   it('returns empty configs when no monitors are found', async () => {
