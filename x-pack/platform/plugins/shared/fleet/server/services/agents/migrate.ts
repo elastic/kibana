@@ -31,7 +31,7 @@ export async function migrateSingleAgent(
     data: {
       enrollment_token: options.enrollment_token,
       target_uri: options.uri,
-      additionalSettings: options.settings,
+      settings: options.settings,
     },
   });
   return { actionId: response.id };
