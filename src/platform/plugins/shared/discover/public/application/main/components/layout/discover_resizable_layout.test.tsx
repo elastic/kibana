@@ -19,9 +19,26 @@ import React from 'react';
 import { DiscoverResizableLayout, SIDEBAR_WIDTH_KEY } from './discover_resizable_layout';
 import { BehaviorSubject } from 'rxjs';
 import type { SidebarToggleState } from '../../../types';
+import type { DiscoverSidebarResponsiveProps } from '../sidebar/discover_sidebar_responsive';
 
 const mockSidebarKey = SIDEBAR_WIDTH_KEY;
 let mockSidebarWidth: number | undefined;
+const mockSidebarProps: DiscoverSidebarResponsiveProps['sidebarProps'] = {
+  columns: ['extension', 'message'],
+  onChangeDataView: jest.fn(),
+  onDataViewCreated: jest.fn(),
+  onAddField: jest.fn(),
+  onRemoveField: jest.fn(),
+  onAddFilter: jest.fn(),
+  onFieldEdited: jest.fn(),
+  onAddBreakdownField: jest.fn(),
+  trackUiMetric: jest.fn(),
+  fieldListVariant: 'list-always',
+  sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+    isCollapsed: false,
+    toggle: () => {},
+  }),
+};
 
 jest.mock('react-use/lib/useLocalStorage', () => {
   return jest.fn((key: string, initialValue: number) => {
@@ -54,16 +71,18 @@ describe('DiscoverResizableLayout', () => {
   });
 
   it('should render sidebarPanel and mainPanel', () => {
+    const sidebarProps = {
+      ...mockSidebarProps,
+      sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      }),
+    };
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={sidebarProps?.sidebarToggleState$}
+        sidebarProps={sidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -72,16 +91,18 @@ describe('DiscoverResizableLayout', () => {
   });
 
   it('should use the default sidebar width when no value is stored in local storage', () => {
+    const sidebarProps = {
+      ...mockSidebarProps,
+      sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      }),
+    };
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={sidebarProps.sidebarToggleState$}
+        sidebarProps={sidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -90,16 +111,18 @@ describe('DiscoverResizableLayout', () => {
 
   it('should use the stored sidebar width from local storage', () => {
     mockSidebarWidth = 400;
+    const sidebarProps = {
+      ...mockSidebarProps,
+      sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      }),
+    };
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={sidebarProps.sidebarToggleState$}
+        sidebarProps={sidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -111,13 +134,8 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: false,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={mockSidebarProps.sidebarToggleState$}
+        sidebarProps={mockSidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -129,13 +147,8 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: false,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={mockSidebarProps.sidebarToggleState$}
+        sidebarProps={mockSidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -147,13 +160,8 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={mockSidebarProps.sidebarToggleState$}
+        sidebarProps={mockSidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -165,13 +173,8 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: false,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={mockSidebarProps.sidebarToggleState$}
+        sidebarProps={mockSidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
@@ -185,13 +188,8 @@ describe('DiscoverResizableLayout', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
         container={null}
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: false,
-            toggle: () => {},
-          })
-        }
-        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        sidebarToggleState$={mockSidebarProps.sidebarToggleState$}
+        sidebarProps={mockSidebarProps}
         mainPanel={<div data-test-subj="mainPanel" />}
       />
     );
