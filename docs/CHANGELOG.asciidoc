@@ -178,7 +178,7 @@ Review the following information about the {kib} 8.18.0 release.
 === Known issues
 
 // tag::known-issue-320[]
-.Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function.
+.Errors in rule executions occur when maintenance windows have filters
 [%collapsible]
 ====
 *Details* +
