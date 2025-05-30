@@ -194,8 +194,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
       { signal: expect.any(AbortSignal) }
@@ -207,8 +205,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit2', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
       { signal: expect.any(AbortSignal) }
@@ -220,8 +216,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit3', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
       { signal: expect.any(AbortSignal) }
@@ -420,8 +414,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
       { signal: expect.any(AbortSignal) }
@@ -433,8 +425,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         search_after: ['222'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -447,8 +437,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         search_after: ['444'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -461,8 +449,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         search_after: ['555'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -615,8 +601,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit1', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
       { signal: expect.any(AbortSignal) }
@@ -628,8 +612,6 @@ describe('runTask', () => {
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
         pit: { id: 'pit2', keep_alive: '1m' },
-        allow_no_indices: true,
-        ignore_unavailable: true,
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
       { signal: expect.any(AbortSignal) }
@@ -868,8 +850,6 @@ describe('runTask', () => {
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit1', keep_alive: '1m' },
-          allow_no_indices: true,
-          ignore_unavailable: true,
           _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
         },
         { signal: expect.any(AbortSignal) }
@@ -881,8 +861,6 @@ describe('runTask', () => {
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit2', keep_alive: '1m' },
-          allow_no_indices: true,
-          ignore_unavailable: true,
           _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
         },
         { signal: expect.any(AbortSignal) }
@@ -989,8 +967,6 @@ describe('runTask', () => {
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit1', keep_alive: '1m' },
-          allow_no_indices: true,
-          ignore_unavailable: true,
           _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
         },
         { signal: expect.any(AbortSignal) }
