@@ -16,7 +16,12 @@ import {
   EuiLoadingSpinner,
   EuiDescriptionList,
 } from '@elastic/eui';
-import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  getEditRuleRoute,
+  getObsRuleDetailsRoute,
+  getRuleDetailsRoute,
+} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
@@ -39,6 +44,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     ruleTypeRegistry,
     hideEditButton = false,
     filteredRuleTypes = INITIAL_FILTERED_RULE_TYPES,
+    ruleApp,
   }) => {
     const {
       application: { capabilities, navigateToApp },
@@ -112,13 +118,23 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     }, [rule, ruleTypeRegistry]);
 
     const onEditRuleClick = () => {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-        },
-      });
+      if (ruleApp && ruleApp === 'observability') {
+        navigateToApp(ruleApp, {
+          path: `alerts/${getEditRuleRoute(rule.id)}`,
+          state: {
+            returnApp: ruleApp,
+            returnPath: `alerts/${getObsRuleDetailsRoute(rule.id)}`,
+          },
+        });
+      } else {
+        navigateToApp('management', {
+          path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+          state: {
+            returnApp: 'management',
+            returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+          },
+        });
+      }
     };
 
     const ruleDefinitionList = [

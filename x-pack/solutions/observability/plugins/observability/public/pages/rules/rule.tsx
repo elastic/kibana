@@ -60,11 +60,24 @@ export function RulePage() {
           defaultMessage: 'Rules',
         }),
       },
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-          defaultMessage: 'Create',
-        }),
-      },
+      ...(ruleTypeId
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+                defaultMessage: 'Create',
+              }),
+            },
+          ]
+        : []),
+      ...(id
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
+                defaultMessage: 'Edit',
+              }),
+            },
+          ]
+        : []),
     ],
     { serverless }
   );

@@ -353,6 +353,7 @@ export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypePar
   onEditRule: () => Promise<void>;
   hideEditButton?: boolean;
   filteredRuleTypes?: string[];
+  ruleApp?: string;
 }
 
 export enum Percentiles {

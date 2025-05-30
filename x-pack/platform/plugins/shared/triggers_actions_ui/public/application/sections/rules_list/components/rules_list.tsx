@@ -124,6 +124,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  ruleApp?: string;
 }
 
 export const percentileFields = {
@@ -165,6 +166,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
+  ruleApp,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -299,13 +301,23 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
-      state: {
-        returnApp: 'management',
-        returnPath: `insightsAndAlerting/triggersActions/rules`,
-      },
-    });
+    if (ruleApp && ruleApp === 'observability') {
+      navigateToApp(ruleApp, {
+        path: `alerts/${getEditRuleRoute(ruleItem.id)}`,
+        state: {
+          returnApp: ruleApp,
+          returnPath: `alerts/rules`,
+        },
+      });
+    } else {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/rules`,
+        },
+      });
+    }
   };
 
   const onRunRule = async (id: string) => {
