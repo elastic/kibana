@@ -182,7 +182,6 @@ export class UpgradeAgentlessDeploymentsTask {
 
           const res = await getAgentsByKuery(esClient, soClient, {
             kuery,
-            showAgentless: true,
             showInactive: false,
             page: 1,
             perPage: AGENTLESS_DEPLOYMENTS_SIZE,

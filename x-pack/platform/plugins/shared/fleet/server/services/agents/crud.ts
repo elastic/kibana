@@ -202,7 +202,7 @@ export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
-    showAgentless: boolean;
+    showAgentless?: boolean;
     showInactive: boolean;
     spaceId?: string;
     getStatusSummary?: boolean;

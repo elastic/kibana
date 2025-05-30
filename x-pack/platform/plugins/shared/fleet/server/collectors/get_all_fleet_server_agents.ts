@@ -35,7 +35,6 @@ export const getAllFleetServerAgents = async (
   let agentsResponse;
   try {
     agentsResponse = await getAgentsByKuery(esClient, soClient, {
-      showAgentless: true,
       showInactive: false,
       perPage: SO_SEARCH_LIMIT,
       kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,

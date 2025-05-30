@@ -119,7 +119,6 @@ export const parseAgentSelection = async (
             perPage,
             page,
             kuery,
-            showAgentless: true,
             showInactive: false,
           });
 
@@ -154,7 +153,6 @@ export const parseAgentSelection = async (
               perPage,
               page,
               kuery,
-              showAgentless: true,
               showInactive: false,
             });
 

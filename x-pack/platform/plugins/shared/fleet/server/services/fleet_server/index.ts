@@ -143,7 +143,6 @@ export async function checkFleetServerVersionsForSecretsStorage(
 
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
   const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
-    showAgentless: true,
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
     kuery,

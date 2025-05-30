@@ -142,7 +142,6 @@ export class UnenrollInactiveAgentsTask {
         .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
       const res = await getAgentsByKuery(esClient, soClient, {
         kuery,
-        showAgentless: true,
         showInactive: true,
         page: 1,
         perPage: this.unenrollBatchSize,

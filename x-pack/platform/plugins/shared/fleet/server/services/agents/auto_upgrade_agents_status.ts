@@ -25,7 +25,6 @@ export async function getAutoUpgradeAgentsStatus(
 
   await agentClient
     .listAgents({
-      showAgentless: true,
       showInactive: false,
       perPage: 0,
       kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"`,
@@ -52,7 +51,6 @@ export async function getAutoUpgradeAgentsStatus(
 
   await agentClient
     .listAgents({
-      showAgentless: true,
       showInactive: false,
       perPage: 0,
       kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
