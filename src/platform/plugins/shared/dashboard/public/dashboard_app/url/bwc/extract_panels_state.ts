@@ -10,7 +10,7 @@
 import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardState } from '../../../../common';
 
-type PanelState = Pick<DashboardState, 'panels', 'sections'>;
+type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
 export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
   const panels = Array.isArray(state.panels) ? state.panels : [];

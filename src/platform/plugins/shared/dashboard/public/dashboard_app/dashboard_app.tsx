@@ -147,7 +147,6 @@ export function DashboardApp({
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from locator. Error: ', e);
       }
-      console.log('stateFromLocator', stateFromLocator);
 
       let initialUrlState: Partial<DashboardState> = {};
       try {
@@ -156,7 +155,6 @@ export function DashboardApp({
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from URL. Error: ', e);
       }
-      console.log('initialUrlState', initialUrlState);
 
       // Override all state with URL + Locator input
       return {

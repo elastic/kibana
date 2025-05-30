@@ -96,30 +96,38 @@ export type SharedDashboardState = Partial<
   }
 >;
 
-export type DashboardLocatorParams = Partial<SharedDashboardState> & {
-  /**
-   * If given, the dashboard saved object with this id will be loaded. If not given,
-   * a new, unsaved dashboard will be loaded up.
-   */
-  dashboardId?: string;
+export type DashboardLocatorParams = Partial<
+  Omit<DashboardState, 'panels' | 'sections'> & {
+    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
-  /**
-   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
-   * whether to hash the data in the url to avoid url length issues.
-   */
-  useHash?: boolean;
+    panels: Array<DashboardPanel | DashboardSection>;
 
-  /**
-   * When `true` filters from saved filters from destination dashboard as merged with applied filters
-   * When `false` applied filters take precedence and override saved filters
-   *
-   * true is default
-   */
-  preserveSavedFilters?: boolean;
+    references?: DashboardState['references'] & SerializableRecord;
 
-  /**
-   * Search search session ID to restore.
-   * (Background search)
-   */
-  searchSessionId?: string;
-};
+    /**
+     * If given, the dashboard saved object with this id will be loaded. If not given,
+     * a new, unsaved dashboard will be loaded up.
+     */
+    dashboardId?: string;
+
+    /**
+     * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
+     * whether to hash the data in the url to avoid url length issues.
+     */
+    useHash?: boolean;
+
+    /**
+     * When `true` filters from saved filters from destination dashboard as merged with applied filters
+     * When `false` applied filters take precedence and override saved filters
+     *
+     * true is default
+     */
+    preserveSavedFilters?: boolean;
+
+    /**
+     * Search search session ID to restore.
+     * (Background search)
+     */
+    searchSessionId?: string;
+  }
+>;
