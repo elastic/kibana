@@ -1,7 +1,7 @@
 .kbnFilterButtonGroup {
   position: relative;
   height: $euiFormControlHeight;
-  background-color: $euiColorBackgroundBasePlain;
+  background-color: $euiFormInputGroupLabelBackground;
   border-radius: $euiFormControlBorderRadius;
 
   &::after {
