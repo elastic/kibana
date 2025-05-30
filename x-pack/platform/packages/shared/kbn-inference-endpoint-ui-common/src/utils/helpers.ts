@@ -79,11 +79,14 @@ export const getNonEmptyValidator = (
 
 export const mapProviderFields = (
   taskType: string,
-  newProvider: InferenceProvider
+  newProvider: InferenceProvider,
+  fieldsToRemove?: string[]
 ): ConfigEntryView[] => {
   return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) =>
-      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    .filter(
+      (pk) =>
+        (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
+        (fieldsToRemove === undefined || fieldsToRemove.indexOf(pk) === -1)
     )
     .map(
       (k): ConfigEntryView => ({

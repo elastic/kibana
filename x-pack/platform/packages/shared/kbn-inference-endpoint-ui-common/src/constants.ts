@@ -27,3 +27,11 @@ export enum ServiceProviderKeys {
 }
 
 export const DEFAULT_TASK_TYPE = 'completion';
+
+type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
+type InternalOverrideFieldsType = {
+  [Key in ServiceProviderKeysType | string]?: string[];
+};
+export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
+  [ServiceProviderKeys.elasticsearch]: ['num_allocations', 'num_threads'],
+};

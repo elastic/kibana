@@ -30,7 +30,7 @@ import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
+import { DEFAULT_TASK_TYPE, ServiceProviderKeys, INTERNAL_OVERRIDE_FIELDS } from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import {
   TaskTypeOption,
@@ -118,7 +118,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
       if (newProvider) {
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(taskType, newProvider);
+        const newProviderSchema: ConfigEntryView[] = mapProviderFields(
+          taskType,
+          newProvider,
+          INTERNAL_OVERRIDE_FIELDS[newProvider.service]
+        );
         setProviderSchema(newProviderSchema);
       }
 
@@ -171,7 +175,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const defaultProviderSecrets: Record<string, unknown> = {};
 
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(newProvider.task_types[0], newProvider)
+        ? mapProviderFields(
+            newProvider.task_types[0],
+            newProvider,
+            INTERNAL_OVERRIDE_FIELDS[newProvider.service]
+          )
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
@@ -303,7 +311,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       // Update connector providerSchema
 
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(config.taskType, newProvider)
+        ? mapProviderFields(
+            config.taskType,
+            newProvider,
+            INTERNAL_OVERRIDE_FIELDS[newProvider.service]
+          )
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
