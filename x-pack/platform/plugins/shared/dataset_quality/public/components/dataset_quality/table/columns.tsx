@@ -358,7 +358,7 @@ export const getDatasetQualityTableColumns = ({
             field: 'failedDocs.percentage',
             sortable: true,
             render: (_: any, dataStreamStat: DataStreamStat) => {
-              if (!dataStreamStat.userPrivileges?.canReadFailureStore) {
+              if (!dataStreamStat.hasFailureStore) {
                 const FailureStoreHoverLink = () => {
                   const [hovered, setHovered] = React.useState(false);
                   return (
@@ -375,6 +375,7 @@ export const getDatasetQualityTableColumns = ({
                         data-test-subj="datasetQualitySetFailureStoreLink"
                         onMouseEnter={() => setHovered(true)}
                         onMouseLeave={() => setHovered(false)}
+                        css={{ fontWeight: 'normal' }}
                       >
                         {hovered
                           ? i18n.translate('xpack.datasetQuality.failureStore.enable', {

@@ -74,6 +74,7 @@ export function generateDatasets(
     {}
   );
 
+  const datasetsWithFailureStore = new Set(failedDocStats.map(({ dataset }) => dataset));
   const degradedMap: Record<
     DataStreamDocsStat['dataset'],
     {
@@ -110,12 +111,16 @@ export function generateDatasets(
         failedDocStat: failedMap[dataset] || DEFAULT_QUALITY_DOC_STATS,
         datasetIntegrationMap,
         totalDocs: (totalDocsMap[dataset] ?? 0) + (failedMap[dataset]?.count ?? 0),
+        hasFailureStore: datasetsWithFailureStore.has(dataset),
       })
     );
   }
 
   return dataStreamStats?.map((dataStream) => {
-    const dataset = DataStreamStat.create(dataStream);
+    const dataset = DataStreamStat.create({
+      ...dataStream,
+      hasFailureStore: datasetsWithFailureStore.has(dataStream.name),
+    });
     const degradedDocs = degradedMap[dataset.rawName] || dataset.degradedDocs;
     const failedDocs = failedMap[dataset.rawName] || dataset.failedDocs;
     const qualityStats = [degradedDocs.percentage, failedDocs.percentage];

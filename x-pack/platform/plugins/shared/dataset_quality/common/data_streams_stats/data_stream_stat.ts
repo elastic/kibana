@@ -17,6 +17,7 @@ interface QualityStat {
 }
 
 export class DataStreamStat {
+  hasFailureStore: boolean;
   rawName: string;
   type: DataStreamType;
   name: DataStreamStatType['name'];
@@ -34,6 +35,7 @@ export class DataStreamStat {
   failedDocs: QualityStat;
 
   private constructor(dataStreamStat: DataStreamStat) {
+    this.hasFailureStore = dataStreamStat.hasFailureStore ?? false;
     this.rawName = dataStreamStat.rawName;
     this.type = dataStreamStat.type;
     this.name = dataStreamStat.name;
@@ -51,11 +53,12 @@ export class DataStreamStat {
     this.failedDocs = dataStreamStat.failedDocs;
   }
 
-  public static create(dataStreamStat: DataStreamStatType) {
+  public static create(dataStreamStat: DataStreamStatType & { hasFailureStore?: boolean }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(dataStreamStat.name);
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,
+      hasFailureStore: false,
       type,
       name: dataset,
       title: dataset,
@@ -79,17 +82,20 @@ export class DataStreamStat {
     failedDocStat,
     datasetIntegrationMap,
     totalDocs,
+    hasFailureStore,
   }: {
     datasetName: string;
     degradedDocStat: QualityStat;
     failedDocStat: QualityStat;
     datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
     totalDocs: number;
+    hasFailureStore?: boolean;
   }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(datasetName);
 
     const dataStreamStatProps = {
       rawName: datasetName,
+      hasFailureStore: hasFailureStore ?? true,
       type,
       name: dataset,
       title: datasetIntegrationMap[dataset]?.title || dataset,
