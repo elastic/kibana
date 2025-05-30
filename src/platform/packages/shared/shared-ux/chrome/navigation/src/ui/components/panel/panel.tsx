@@ -84,7 +84,7 @@ interface Props {
   selectedNode: PanelSelectedNode;
 }
 
-export const DefaultContent: FC<Props> = ({ selectedNode }) => {
+export const Panel: FC<Props> = ({ selectedNode }) => {
   const filteredChildren = selectedNode.children?.filter(
     (child) => child.sideNavStatus !== 'hidden'
   );
@@ -121,7 +121,7 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
       <EuiFlexItem>
         {typeof selectedNode.title === 'string' ? (
           <EuiTitle size="xxs" css={panelContentStyles.title}>
-            <h2>{selectedNode.title}</h2>
+            <h2 id={`panelTitleId-${selectedNode.id}`}>{selectedNode.title}</h2>
           </EuiTitle>
         ) : (
           selectedNode.title
@@ -135,7 +135,7 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
 
           return isGroup ? (
             <Fragment key={child.id}>
-              <PanelGroup navNode={child} nodeIndex={i} />
+              <PanelGroup navNode={child} parentId={selectedNode.id} nodeIndex={i} />
               {i < serializedChildren.length - 1 && <EuiHorizontalRule margin="xs" />}
             </Fragment>
           ) : (
