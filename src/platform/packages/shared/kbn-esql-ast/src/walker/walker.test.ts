@@ -11,7 +11,6 @@ import { parse } from '../parser';
 import {
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLLiteral,
