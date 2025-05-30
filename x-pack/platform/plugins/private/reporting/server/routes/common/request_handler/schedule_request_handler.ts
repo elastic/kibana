@@ -43,9 +43,9 @@ const validation = {
  * Serves report job handling in the context of the request to generate the report
  */
 export class ScheduleRequestHandler extends RequestHandler<
-  typeof validation['params'],
-  typeof validation['query'],
-  typeof validation['body'],
+  (typeof validation)['params'],
+  (typeof validation)['query'],
+  (typeof validation)['body'],
   ScheduledReportApiJSON
 > {
   public static getValidation() {
