@@ -22,15 +22,15 @@ export function extractControlGroupState(state: { [key: string]: unknown }): Das
   const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
   
   let autoApplySelections: ControlGroupSerializedState['autoApplySelections'] = DEFAULT_AUTO_APPLY_SELECTIONS;
-  if ('autoApplySelections' in controlGroupInput && typeof controlGroupInput.autoApplySelections === 'boolean') {
+  if (typeof controlGroupInput.autoApplySelections === 'boolean') {
     autoApplySelections = controlGroupInput.autoApplySelections;
-  } else if ('showApplySelections' in controlGroupInput && typeof controlGroupInput.showApplySelections === 'boolean') {
+  } else if (typeof controlGroupInput.showApplySelections === 'boolean') {
     // <8.16 autoApplySelections exported as !showApplySelections
     autoApplySelections = !controlGroupInput.showApplySelections;
   }
 
   let controls: ControlGroupSerializedState['controls'] = [];
-  if ('controls' in controlGroupInput && Array.isArray(controlGroupInput.controls)) {
+  if (Array.isArray(controlGroupInput.controls)) {
     controls = controlGroupInput.controls;
   } else if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
     // <8.16 controls exported as panels
@@ -45,9 +45,9 @@ export function extractControlGroupState(state: { [key: string]: unknown }): Das
   }
 
   let labelPosition: ControlGroupSerializedState['labelPosition'] = DEFAULT_CONTROL_LABEL_POSITION;
-  if (controlGroupInput.labelPosition && typeof controlGroupInput.labelPosition === 'string') {
+  if (typeof controlGroupInput.labelPosition === 'string') {
     labelPosition = controlGroupInput.labelPosition as ControlGroupSerializedState['labelPosition'];
-  } else if (controlGroupInput.controlStyle && typeof controlGroupInput.controlStyle === 'string') {
+  } else if (typeof controlGroupInput.controlStyle === 'string') {
     // <8.16 labelPosition exported as controlStyle
     labelPosition = controlGroupInput.controlStyle as ControlGroupSerializedState['labelPosition'];
   }
