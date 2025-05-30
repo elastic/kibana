@@ -35,6 +35,9 @@
     "@kbn/data-views-plugin",
     "@kbn/esql-validation-autocomplete",
     "@kbn/licensing-plugin",
+    "@kbn/esql-utils",
+    "@kbn/field-types",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
