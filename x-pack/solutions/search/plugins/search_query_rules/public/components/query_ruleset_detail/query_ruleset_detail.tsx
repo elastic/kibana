@@ -89,13 +89,26 @@ export const QueryRulesetDetail: React.FC = () => {
   ];
 
   const [tourState, setTourState] = useState(() => {
-    let initialState: any = localStorage.getItem(TOUR_QUERY_RULES_STORAGE_KEY);
-    if (initialState) {
-      initialState = JSON.parse(initialState);
-    } else {
-      initialState = tourConfig;
+    try {
+      const initialState: any = localStorage.getItem(TOUR_QUERY_RULES_STORAGE_KEY);
+      if (initialState) {
+        try {
+          return JSON.parse(initialState) || tourConfig;
+        } catch (e) {
+          return {
+            ...tourConfig,
+            isTourActive: false,
+          };
+        }
+      }
+      return tourConfig;
+    } catch (e) {
+      // Handle localStorage access errors (e.g., in private browsing mode)
+      return {
+        ...tourConfig,
+        isTourActive: false,
+      };
     }
-    return initialState;
   });
   useEffect(() => {
     localStorage.setItem(TOUR_QUERY_RULES_STORAGE_KEY, JSON.stringify(tourState));
