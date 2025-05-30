@@ -90,7 +90,7 @@ export class RuleMigrationsTaskClient {
       .then(() => {
         migrationLogger.info('Migration completed successfully');
         // Save the migration execution details on completion
-        return this.data.migrations.saveAsEnded({ id: migrationId });
+        this.data.migrations.saveAsEnded({ id: migrationId });
       })
       .catch((error) => {
         // no use in throwing the error, the `start` promise is long gone. Just store and log the error
