@@ -67,14 +67,17 @@ export function AddProcessorPanel() {
   );
   const getEnrichmentState = useGetStreamEnrichmentState();
 
+  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+
   const isOpen = Boolean(processorRef);
   const defaultValuesGetter = useCallback(
     () =>
       getDefaultFormStateByType(
         'grok',
-        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context)
+        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        { grokCollection }
       ),
-    [getEnrichmentState]
+    [getEnrichmentState, grokCollection]
   );
   const initialDefaultValues = useMemo(() => defaultValuesGetter(), [defaultValuesGetter]);
 
@@ -94,8 +97,14 @@ export function AddProcessorPanel() {
   useEffect(() => {
     if (processorRef) {
       const { unsubscribe } = methods.watch((value) => {
-        const processor = convertFormStateToProcessor(value as ProcessorFormState);
-        processorRef.send({ type: 'processor.change', processor });
+        const { processorDefinition, processorResources } = convertFormStateToProcessor(
+          value as ProcessorFormState
+        );
+        processorRef.send({
+          type: 'processor.change',
+          processor: processorDefinition,
+          resources: processorResources,
+        });
       });
 
       return () => unsubscribe();
@@ -205,12 +214,12 @@ export function AddProcessorPanel() {
 const createDraftProcessorFromForm = (
   formState: ProcessorFormState
 ): ProcessorDefinitionWithUIAttributes => {
-  const processingDefinition = convertFormStateToProcessor(formState);
+  const { processorDefinition } = convertFormStateToProcessor(formState);
 
   return {
     id: 'draft',
     type: formState.type,
-    ...processingDefinition,
+    ...processorDefinition,
   };
 };
 
@@ -223,6 +232,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
+  const grokCollection = useStreamsEnrichmentSelector((_state) => _state.context.grokCollection);
   const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
@@ -237,9 +247,10 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
     () =>
       getFormStateFrom(
         selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        { grokCollection },
         processor
       ),
-    [getEnrichmentState, processor]
+    [getEnrichmentState, grokCollection, processor]
   );
 
   const methods = useForm<ProcessorFormState>({
@@ -251,10 +262,13 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
-      const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
+      const { processorDefinition, processorResources } = convertFormStateToProcessor(
+        value as ProcessorFormState
+      );
       processorRef.send({
         type: 'processor.change',
-        processor: processingDefinition,
+        processor: processorDefinition,
+        resources: processorResources,
       });
     });
     return () => unsubscribe();
@@ -265,13 +279,14 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
       methods.reset(
         getFormStateFrom(
           selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+          { grokCollection },
           previousProcessor
         )
       );
     });
 
     return () => subscription.unsubscribe();
-  }, [getEnrichmentState, methods, previousProcessor, processorRef]);
+  }, [getEnrichmentState, grokCollection, methods, previousProcessor, processorRef]);
 
   const handleCancel = useDiscardConfirm(
     () => processorRef?.send({ type: 'processor.cancel' }),
