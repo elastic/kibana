@@ -108,7 +108,7 @@ export async function getAgents(
     agents = (
       await getAllAgentsByKuery(esClient, soClient, {
         kuery: options.kuery,
-        showAgentless: options.showAgentless ?? true,
+        showAgentless: options.showAgentless,
         showInactive: options.showInactive ?? false,
       })
     ).agents;
@@ -407,7 +407,7 @@ export async function getAllAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
-    showAgentless: boolean;
+    showAgentless?: boolean;
     showInactive: boolean;
   }
 ): Promise<{

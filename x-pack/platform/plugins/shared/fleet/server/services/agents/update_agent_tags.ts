@@ -62,7 +62,7 @@ export async function updateAgentTags(
     // calculate total count
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
-      showAgentless: options.showAgentless ?? true,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       perPage: 0,
       pitId,

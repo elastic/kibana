@@ -267,6 +267,61 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should not return agentless agents when showAgentless=false', async () => {
+      // Create an agentless agent policy
+      const { body: policyRes } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Agentless Policy',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+        .expect(200);
+
+      const agentlessPolicyId = policyRes.item.id;
+
+      // Enroll an agent into the agentless policy
+      const agentId = 'agentless-agent-1';
+      await es.index({
+        index: AGENTS_INDEX,
+        id: agentId,
+        refresh: 'wait_for',
+        document: {
+          type: 'PERMANENT',
+          active: true,
+          enrolled_at: new Date().toISOString(),
+          local_metadata: { elastic: { agent: { id: agentId, version: '9.0.0' } } },
+          status: 'online',
+          policy_id: agentlessPolicyId,
+        },
+      });
+
+      // Call the agent list API without showAgentless parameter
+      const { body: apiResponseWithAgentless } = await supertest.get('/api/fleet/agents');
+
+      // Assert that the agentless agent is returned
+      const agentIdsWithAgentless = apiResponseWithAgentless.items.map((agent: any) => agent.id);
+      expect(agentIdsWithAgentless).to.contain(agentId);
+
+      // Call the agent list API with showAgentless=false
+      const { body: apiResponse } = await supertest
+        .get('/api/fleet/agents?showAgentless=false')
+        .expect(200);
+
+      // Assert that the agentless agent is not returned
+      const agentIds = apiResponse.items.map((agent: any) => agent.id);
+      expect(agentIds).not.contain(agentId);
+
+      // Cleanup: delete the agent and policy
+      await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId: agentlessPolicyId })
+        .expect(200);
+    });
+
     describe('advanced search params', () => {
       afterEach(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
