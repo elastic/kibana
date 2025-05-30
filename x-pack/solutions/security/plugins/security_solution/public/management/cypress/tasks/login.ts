@@ -71,6 +71,12 @@ export const login: CyLoginTask = (
         return cy.visit('/');
       })
       .then(() => {
+        cy.getCookies().then((cookies) => {
+          // Ensure that there's only a single session cookie named 'sid'.
+          const sessionCookies = cookies.filter((cookie) => cookie.name === 'sid');
+          expect(sessionCookies).to.have.length(1);
+        });
+
         // Return username and password
         return { username, password };
       });

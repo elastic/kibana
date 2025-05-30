@@ -61,6 +61,12 @@ export const login = (role?: string): void => {
     });
 
     cy.visit('/');
+
+    cy.getCookies().then((cookies) => {
+      // Ensure that there's only a single session cookie named 'sid'.
+      const sessionCookies = cookies.filter((cookie) => cookie.name === 'sid');
+      expect(sessionCookies).to.have.length(1);
+    });
   } else {
     const user = role ? getEnvAuth(role) : defaultUser;
     loginWithUser(user);
