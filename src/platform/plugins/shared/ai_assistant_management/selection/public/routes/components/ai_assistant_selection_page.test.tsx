@@ -95,7 +95,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         const docLink = screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink');
         expect(docLink).toBeInTheDocument();
-        expect(docLink.getAttribute('href')).toContain('obs-ai-assistant');
+        expect(docLink.getAttribute('href')).toContain('observability-ai-assistant');
       });
     });
   });

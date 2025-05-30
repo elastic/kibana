@@ -10,9 +10,11 @@
 import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 import { registerGetJoinIndicesRoute } from './get_join_indices';
+import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
 
 export const registerRoutes = (setup: CoreSetup, initContext: PluginInitializerContext) => {
   const router = setup.http.createRouter();
 
   registerGetJoinIndicesRoute(router, initContext);
+  registerGetTimeseriesIndicesRoute(router, initContext);
 };

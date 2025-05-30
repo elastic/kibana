@@ -263,6 +263,11 @@ export const allowedExperimentalValues = Object.freeze({
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: false,
+
+  /**
+   * Automatically installs the security AI prompts package
+   */
+  securityAIPromptsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -302,8 +302,20 @@ export interface FleetServerPolicy {
   inactivity_timeout?: number;
 }
 
-export interface AgentlessApiResponse {
-  id: string;
+export enum AgentlessApiDeploymentResponseCode {
+  Success = 'SUCCESS',
+  BackendFailed = 'BACKEND_OPERATION_FAILED',
+  BadRequest = 'BAD_REQUEST',
+  InternalError = 'INTERNAL_SERVER_ERROR',
+  NotAllowed = 'NOT_ALLOWED',
+  NotFound = 'NOT_FOUND',
+  Unauthorized = 'UNAUTHORIZED',
+  WrongEndpoint = 'WRONG_ENDPOINT',
+}
+
+export interface AgentlessApiDeploymentResponse {
+  code: AgentlessApiDeploymentResponseCode;
+  error: string | null;
 }
 
 // Definitions for agent policy outputs endpoints

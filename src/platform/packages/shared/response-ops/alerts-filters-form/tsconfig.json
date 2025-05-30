@@ -25,5 +25,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/alerting-types",
+    "@kbn/es-query",
+    "@kbn/rule-data-utils",
   ]
 }

@@ -92,7 +92,7 @@ const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'c
               <br />
               <p>There should be multiple &quot;selected&quot; nodes in the side nav:</p>
               <ul>
-                <li>* Item 03 &raquo; Item 22</li>
+                <li>* Item 03 &raquo; Item 18</li>
                 <li>* Footer parent 1 &raquo; Item 35</li>
               </ul>
             </>
@@ -142,37 +142,33 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               renderAs: 'panelOpener',
               children: [
                 {
-                  id: 'sub0',
+                  id: 'child-section0',
                   path: '',
-                  title: 'This text is not shown',
-                  renderItem: () => (
-                    <>
-                      <p>This panel contains a mix of ungrouped items and grouped items</p>
-                      <EuiSpacer />
-                    </>
-                  ),
+                  children: [
+                    {
+                      id: 'sub1',
+                      path: '',
+                      title: 'Item 11',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                    {
+                      id: 'sub2',
+                      path: '',
+                      title: 'Item 12',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                    {
+                      id: 'sub3',
+                      path: '',
+                      title: 'Item 13',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                  ],
                 },
-                {
-                  id: 'sub1',
-                  path: '',
-                  title: 'Item 11',
-                  href: '/app/kibana',
-                  icon: 'iInCircle',
-                },
-                {
-                  id: 'sub2',
-                  path: '',
-                  title: 'Item 12',
-                  href: '/app/kibana',
-                  icon: 'iInCircle',
-                },
-                {
-                  id: 'sub3',
-                  path: '',
-                  title: 'Item 13',
-                  href: '/app/kibana',
-                  icon: 'iInCircle',
-                },
+
                 {
                   id: 'child-section1',
                   path: '',
@@ -455,6 +451,37 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
             },
           ],
         },
+        {
+          id: 'demo_parsing_error',
+          icon: 'crossInCircle',
+          path: '',
+          title: 'Parsing error',
+          renderAs: 'panelOpener',
+          children: [
+            {
+              id: 'error-sub1',
+              path: '',
+              title: 'Item 11',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'error-sub2',
+              path: '',
+              title: 'Section one',
+              children: [
+                {
+                  id: 'error-sub-sub1',
+                  path: '',
+                  title: 'Item 14',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                  withBadge: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
   ],
@@ -590,8 +617,8 @@ export const GeneralLayoutStructure = (args: NavigationServices) => {
       { id: '', path: 'example_project' },
       { id: '', path: 'example_project.root-section1' },
       { id: '', path: 'example_project.root-section1.item03' },
-      { id: '', path: 'example_project.root-section1.item03.child-section4' },
-      { id: '', path: 'example_project.root-section1.item03.child-section4.sub3' },
+      { id: '', path: 'example_project.root-section1.item03.child-section2' },
+      { id: '', path: 'example_project.root-section1.item03.child-section2.sub3' },
     ],
     [
       { id: '', path: 'example_project_footer' },

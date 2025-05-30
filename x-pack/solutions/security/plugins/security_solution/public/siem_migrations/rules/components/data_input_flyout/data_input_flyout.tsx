@@ -158,6 +158,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 onClick={onStartMigration}
                 disabled={!migrationStats?.id}
                 isLoading={isStartLoading}
+                data-test-subj="startMigrationButton"
               >
                 {isRetry ? (
                   <FormattedMessage
