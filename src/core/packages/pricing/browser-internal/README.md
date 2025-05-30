@@ -41,8 +41,8 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 export class MyPlugin implements Plugin {
   public start(core: CoreStart) {
     // Check if a feature is available based on the current pricing tier
-    const isFeature1Available = core.pricing.tiers.isFeatureAvailable('my-plugin:feature1');
-    const isFeature2Available = core.pricing.tiers.isFeatureAvailable('my-plugin:feature2');
+    const isFeature1Available = core.pricing.isFeatureAvailable('my-plugin:feature1');
+    const isFeature2Available = core.pricing.isFeatureAvailable('my-plugin:feature2');
     
     // Conditionally enable features based on availability
     if (isFeature1Available) {
@@ -72,7 +72,7 @@ interface MyComponentProps {
 }
 
 const MyComponent: React.FC<MyComponentProps> = ({ coreStart }) => {
-  const isFeatureAvailable = coreStart.pricing.tiers.isFeatureAvailable('my-plugin:feature1');
+  const isFeatureAvailable = coreStart.pricing.isFeatureAvailable('my-plugin:feature1');
   
   return (
     <div>
@@ -103,7 +103,7 @@ describe('MyComponent', () => {
     pricingStart = pricingServiceMock.createStartContract();
     
     // Mock feature availability
-    pricingStart.tiers.isFeatureAvailable.mockImplementation((featureId) => {
+    pricingStart.isFeatureAvailable.mockImplementation((featureId) => {
       if (featureId === 'my-plugin:feature1') {
         return true;
       }

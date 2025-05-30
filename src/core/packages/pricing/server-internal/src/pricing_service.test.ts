@@ -110,8 +110,7 @@ describe('PricingService', () => {
       service.setup({ http: setupHttp });
       const start = service.start();
 
-      expect(start).toHaveProperty('tiers');
-      expect(start.tiers).toHaveProperty('isFeatureAvailable');
+      expect(start).toHaveProperty('isFeatureAvailable');
     });
 
     it('returns a PricingTiersClient that can check feature availability', async () => {
@@ -129,7 +128,7 @@ describe('PricingService', () => {
       const start = service.start();
 
       // Since our mock config has observability product enabled, this feature should be available
-      expect(start.tiers.isFeatureAvailable('feature1')).toBe(true);
+      expect(start.isFeatureAvailable('feature1')).toBe(true);
     });
   });
 });

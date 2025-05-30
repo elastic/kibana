@@ -14,5 +14,5 @@ export interface PricingServiceSetup {
 }
 
 export interface PricingServiceStart {
-  tiers: IPricingTiersClient;
+  isFeatureAvailable: IPricingTiersClient['isFeatureAvailable'];
 }

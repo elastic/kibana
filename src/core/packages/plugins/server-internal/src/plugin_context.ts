@@ -388,9 +388,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
-    pricing: {
-      tiers: deps.pricing.tiers,
-    },
+    pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,

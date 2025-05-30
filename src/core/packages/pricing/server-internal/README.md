@@ -90,8 +90,8 @@ export class MyPlugin implements Plugin {
 
   public start(core: CoreStart, { pricing }: MyPluginStartDeps) {
     // Check if a feature is available based on the current pricing tier
-    const isFeature1Available = pricing.tiers.isFeatureAvailable('my-plugin:feature1');
-    const isFeature2Available = pricing.tiers.isFeatureAvailable('my-plugin:feature2');
+    const isFeature1Available = pricing.isFeatureAvailable('my-plugin:feature1');
+    const isFeature2Available = pricing.isFeatureAvailable('my-plugin:feature2');
     
     // Conditionally enable features based on availability
     if (isFeature1Available) {
@@ -165,7 +165,7 @@ describe('My Plugin', () => {
     pricingStart = pricingServiceMock.createStartContract();
     
     // Mock feature availability
-    pricingStart.tiers.isFeatureAvailable.mockImplementation((featureId) => {
+    pricingStart.isFeatureAvailable.mockImplementation((featureId) => {
       if (featureId === 'my-plugin:feature1') {
         return true;
       }

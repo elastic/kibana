@@ -14,5 +14,5 @@ import { IPricingTiersClient } from '@kbn/core-pricing-common';
  * @public
  */
 export interface PricingServiceStart {
-  tiers: IPricingTiersClient;
+  isFeatureAvailable: IPricingTiersClient['isFeatureAvailable'];
 }

@@ -23,11 +23,13 @@ export class PricingService {
   public async start({ http }: StartDeps): Promise<PricingServiceStart> {
     const pricingResponse = await http.get<GetPricingResponse>('/internal/core/pricing');
 
+    const tiersClient = new PricingTiersClient(
+      pricingResponse.tiers,
+      new ProductFeaturesRegistry(pricingResponse.product_features)
+    );
+
     return {
-      tiers: new PricingTiersClient(
-        pricingResponse.tiers,
-        new ProductFeaturesRegistry(pricingResponse.product_features)
-      ),
+      isFeatureAvailable: tiersClient.isFeatureAvailable,
     };
   }
 }

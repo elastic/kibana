@@ -20,9 +20,7 @@ const createSetupContractMock = () => {
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<PricingServiceStart> = {
-    tiers: {
-      isFeatureAvailable: jest.fn(),
-    },
+    isFeatureAvailable: jest.fn(),
   };
   return startContract;
 };

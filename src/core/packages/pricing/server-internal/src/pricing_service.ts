@@ -79,8 +79,13 @@ export class PricingService {
   }
 
   public start() {
+    const tiersClient = new PricingTiersClient(
+      this.pricingConfig.tiers,
+      this.productFeaturesRegistry
+    );
+
     return {
-      tiers: new PricingTiersClient(this.pricingConfig.tiers, this.productFeaturesRegistry),
+      isFeatureAvailable: tiersClient.isFeatureAvailable,
     };
   }
 }

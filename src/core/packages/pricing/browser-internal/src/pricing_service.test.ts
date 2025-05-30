@@ -53,15 +53,14 @@ describe('PricingService', () => {
     it('returns a PricingTiersClient with the fetched data', async () => {
       const startContract = await service.start({ http });
 
-      expect(startContract).toHaveProperty('tiers');
-      expect(startContract.tiers).toHaveProperty('isFeatureAvailable');
+      expect(startContract).toHaveProperty('isFeatureAvailable');
     });
 
     it('initializes the client with the correct tiers configuration', async () => {
       const startContract = await service.start({ http });
 
       // Since our mock has feature1 with observability product which is enabled in tiers
-      expect(startContract.tiers.isFeatureAvailable('feature1')).toBe(true);
+      expect(startContract.isFeatureAvailable('feature1')).toBe(true);
     });
 
     it('initializes the client with empty data when API returns empty response', async () => {
@@ -77,7 +76,7 @@ describe('PricingService', () => {
       const startContract = await service.start({ http });
 
       // When tiers are disabled, all features should be available
-      expect(startContract.tiers.isFeatureAvailable('any-feature')).toBe(true);
+      expect(startContract.isFeatureAvailable('any-feature')).toBe(true);
     });
   });
 });

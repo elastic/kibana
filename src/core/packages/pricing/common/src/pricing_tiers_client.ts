@@ -18,15 +18,15 @@ export class PricingTiersClient implements IPricingTiersClient {
     private readonly productFeaturesRegistry: ProductFeaturesRegistry
   ) {}
 
-  private isActiveProduct(product: PricingProduct) {
+  private isActiveProduct = (product: PricingProduct) => {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
-  }
+  };
 
-  private isEnabled() {
+  private isEnabled = () => {
     return this.tiers.enabled;
-  }
+  };
 
-  isFeatureAvailable<TFeatureId extends string>(featureId: TFeatureId): boolean {
+  isFeatureAvailable = <TFeatureId extends string>(featureId: TFeatureId): boolean => {
     /**
      * We assume that when the pricing tiers are disabled, features are available globally
      * and not constrained by any product tier.
@@ -42,5 +42,5 @@ export class PricingTiersClient implements IPricingTiersClient {
     }
 
     return false;
-  }
+  };
 }
