@@ -168,7 +168,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         packagePolicyService: packagePolicy,
         agentPolicyService: agentPolicy,
         // When using an unscoped soClient, make sure the search for policies is done across all spaces.
-        spaceIds: unscoped ? ['*'] : undefined,
+        spaceId: unscoped ? '*' : undefined,
       });
     };
 
@@ -313,9 +313,9 @@ interface FetchIntegrationPolicyNamespaceOptions {
   /**
    * A list of space IDs to use when retrieving the list of policies. When using an unscoped
    * `soClient` and wanting to retrieve the policies for any space, this options can be used
-   * by setting it to `['*']`
+   * by setting it to `*`
    */
-  spaceIds?: string[];
+  spaceId?: string;
 }
 
 export interface FetchIntegrationPolicyNamespaceResponse {
@@ -332,7 +332,7 @@ const fetchIntegrationPolicyNamespace = async ({
   packagePolicyService,
   agentPolicyService,
   integrationPolicies,
-  spaceIds,
+  spaceId,
 }: FetchIntegrationPolicyNamespaceOptions): Promise<FetchIntegrationPolicyNamespaceResponse> => {
   const response: FetchIntegrationPolicyNamespaceResponse = {
     integrationPolicy: {},
@@ -347,7 +347,7 @@ const fetchIntegrationPolicyNamespace = async ({
     );
     const packagePolicies =
       (await packagePolicyService
-        .getByIDs(soClient, integrationPolicies, { spaceIds })
+        .getByIDs(soClient, integrationPolicies, { spaceIds: spaceId ? [spaceId] : undefined })
         .catch(catchAndWrapError)) ?? [];
 
     logger.trace(() => `Fleet package policies retrieved:\n${stringify(packagePolicies)}`);
@@ -370,7 +370,11 @@ const fetchIntegrationPolicyNamespace = async ({
 
     logger.debug(() => `Retrieving agent policies from fleet for:\n${stringify(ids)}`);
 
-    const agentPolicies = await agentPolicyService.getByIds(soClient, ids).catch(catchAndWrapError);
+    const agentPolicies = await agentPolicyService
+      .getByIds(soClient, ids, {
+        spaceId,
+      })
+      .catch(catchAndWrapError);
 
     logger.trace(() => `Fleet agent policies retrieved:\n${stringify(agentPolicies)}`);
 
