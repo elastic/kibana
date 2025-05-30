@@ -49,6 +49,12 @@ export class AiopsPlugin
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
       ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
+      getPatternAnalysisAvailable: async () => {
+        const { getPatternAnalysisAvailable } = await import(
+          './components/log_categorization/log_categorization_enabled'
+        );
+        return getPatternAnalysisAvailable(core.application);
+      },
       PatternAnalysisComponent,
     };
   }
