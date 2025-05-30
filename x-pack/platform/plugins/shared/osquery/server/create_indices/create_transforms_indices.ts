@@ -5,10 +5,20 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  IndicesPutMappingRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { actionsMapping } from './actions_mapping';
 import { actionResponsesMapping } from './action_responses_mapping';
+
+interface ESMappingObject {
+  [key: string]: ESMappingValue;
+}
+
+type ESMappingValue = string | number | boolean | null | ESMappingObject | undefined;
 
 export const ACTIONS_INDEX_NAME = 'osquery_manager.actions';
 export const ACTIONS_INDEX_DEFAULT_NS = '.logs-' + ACTIONS_INDEX_NAME + '-default';
@@ -47,17 +57,65 @@ export const createIndexIfNotExists = async (
       index: indexPattern,
     });
 
+    logger.info(`Index ${indexTemplateName}: ${isLatestIndexExists}`);
+
     if (!isLatestIndexExists) {
+      logger.info(`Index ${indexTemplateName} does not exist, creating...`);
+
       await esClient.indices.putIndexTemplate({
         name: indexTemplateName,
         index_patterns: indexPattern,
         template: { mappings },
         priority: 500,
       });
+
       await esClient.indices.create({
         index: indexPattern,
         mappings,
       });
+    } else {
+      logger.info(`Index ${indexTemplateName} already exists, checking template...`);
+
+      // pull the index template to check if mappings need to be updated
+      const indexTemplate = await esClient.indices.getIndexTemplate({
+        name: indexTemplateName,
+      });
+
+      // Find the template with the exact name match
+      const matchedTemplateObj = indexTemplate.index_templates.find(
+        (tpl: { name: string }) => tpl.name === indexTemplateName
+      );
+      const currentMappings = matchedTemplateObj?.index_template?.template?.mappings || {};
+
+      logger.info(`Fetched current mappings for template "${indexTemplateName}"`);
+
+      if (isSubsetMapping(mappings, currentMappings as ESMappingObject, logger)) {
+        logger.info(`Mappings for "${indexTemplateName}" are up to date. No update needed.`);
+
+        return;
+      }
+
+      logger.info(`Mappings for "${indexTemplateName}" are outdated. Updating mappings...`);
+
+      if (mappings.properties) {
+        await esClient.indices.putIndexTemplate({
+          name: indexTemplateName,
+          index_patterns: indexPattern,
+          template: { mappings },
+          priority: 500,
+        });
+
+        await esClient.indices.putMapping({
+          index: indexPattern,
+          body: (mappings.properties
+            ? { properties: mappings.properties }
+            : {}) as IndicesPutMappingRequest['body'],
+        });
+
+        logger.info(`Mappings for "${indexTemplateName}" have been updated.`);
+      } else {
+        logger.error(`No properties found in mappings for "${indexTemplateName}"`);
+      }
     }
   } catch (err) {
     const error = transformError(err);
@@ -65,3 +123,82 @@ export const createIndexIfNotExists = async (
     logger.error(error.message);
   }
 };
+
+/**
+ * Recursively checks if all fields and configs from `desired` mapping exist in `current` mapping.
+ * Ignores extra fields in `current`. Logs each major step for traceability.
+ *
+ * @param desired - The mapping you want to enforce
+ * @param current - The mapping fetched from ES
+ * @param logger - Kibana logger instance
+ * @returns true if all fields/configs in desired are present in current
+ */
+export function isSubsetMapping(
+  desired: MappingTypeMapping | ESMappingObject,
+  current: MappingTypeMapping | ESMappingObject,
+  logger: Logger
+): boolean {
+  logger.info('Starting mapping subset comparison');
+
+  // Handle primitive types or null values
+  if (typeof desired !== 'object' || desired === null) {
+    const result = desired === current;
+    logger.info(`Comparing leaf values: ${desired} === ${current} -> ${result}`);
+
+    return result;
+  }
+
+  // Convert both to ESMappingObject to safely access with string keys
+  const desiredObj = desired as ESMappingObject;
+  const currentObj = current as ESMappingObject;
+
+  for (const key of Object.keys(desiredObj)) {
+    if (!(key in currentObj)) {
+      logger.info(`Key "${key}" missing in current mapping`);
+
+      return false;
+    }
+
+    const desiredValue = desiredObj[key];
+    const currentValue = currentObj[key];
+
+    const bothAreNonNullObjects =
+      typeof desiredValue === 'object' &&
+      desiredValue !== null &&
+      typeof currentValue === 'object' &&
+      currentValue !== null;
+
+    if (key === 'properties') {
+      logger.info(`Descending into nested "properties" for key "${key}"`);
+      if (bothAreNonNullObjects) {
+        if (
+          !isSubsetMapping(desiredValue as ESMappingObject, currentValue as ESMappingObject, logger)
+        ) {
+          logger.info(`Nested properties mismatch for key "${key}"`);
+
+          return false;
+        }
+      } else {
+        logger.info(`Expected both desired and current to be objects for key "${key}"`);
+
+        return false;
+      }
+    } else if (bothAreNonNullObjects) {
+      if (
+        !isSubsetMapping(desiredValue as ESMappingObject, currentValue as ESMappingObject, logger)
+      ) {
+        logger.info(`Value mismatch for key "${key}"`);
+
+        return false;
+      }
+    } else if (desiredValue !== currentValue) {
+      logger.info(`Value mismatch for key "${key}": ${desiredValue} !== ${currentValue}`);
+
+      return false;
+    }
+  }
+
+  logger.info('All desired mapping fields are present in current mapping');
+
+  return true;
+}
