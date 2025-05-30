@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
 import { AgentPolicyInfo } from '../../../../common/types';
 import type {
   SyntheticsMonitor,
+  SyntheticsMonitorWithSecretsAttributes,
   SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import type {
@@ -17,7 +17,6 @@ import type {
   PrivateLocationAttributes,
 } from '../../../runtime_types/private_locations';
 import { PrivateLocation } from '../../../../common/runtime_types';
-import { parseArrayFilters } from '../../common';
 import {
   MonitorConfigUpdate,
   syncEditedMonitorBulk,
@@ -79,20 +78,14 @@ export const updatePrivateLocationMonitors = async ({
   newLocationLabel,
   allPrivateLocations,
   routeContext,
+  monitorsInLocation,
 }: {
   locationId: string;
   newLocationLabel: string;
   allPrivateLocations: SyntheticsPrivateLocations;
   routeContext: RouteContext;
+  monitorsInLocation: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>;
 }) => {
-  const { filtersStr } = parseArrayFilters({
-    locations: [locationId],
-  });
-  const monitorsInLocation = await routeContext.monitorConfigRepository.findDecryptedMonitors({
-    spaceId: ALL_SPACES_ID,
-    filter: filtersStr,
-  });
-
   const updatedMonitorsPerSpace = monitorsInLocation.reduce<Record<string, MonitorConfigUpdate[]>>(
     (acc, m) => {
       const decryptedMonitorsWithNormalizedSecrets: SavedObject<SyntheticsMonitor> =

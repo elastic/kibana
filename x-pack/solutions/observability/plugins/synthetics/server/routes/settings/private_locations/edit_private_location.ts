@@ -7,6 +7,7 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
@@ -15,6 +16,7 @@ import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import { PrivateLocation } from '../../../../common/runtime_types';
+import { parseArrayFilters } from '../../common';
 
 const EditPrivateLocationSchema = schema.object({
   label: schema.string({
@@ -55,7 +57,19 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     const repo = new PrivateLocationRepository(routeContext);
 
     try {
-      const existingLocation = await repo.getPrivateLocation(locationId);
+      const { filtersStr } = parseArrayFilters({
+        locations: [locationId],
+      });
+      const [existingLocation, monitorsInLocation] = await Promise.all([
+        repo.getPrivateLocation(locationId),
+        routeContext.monitorConfigRepository.findDecryptedMonitors({
+          spaceId: ALL_SPACES_ID,
+          filter: filtersStr,
+        }),
+      ]);
+
+      // TODO: add check if user has access to all spaces
+
       const newLocation = await repo.editPrivateLocation(locationId, {
         label: newLocationLabel,
       });
@@ -66,6 +80,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         newLocationLabel,
         allPrivateLocations,
         routeContext,
+        monitorsInLocation,
       });
 
       return toClientContract({

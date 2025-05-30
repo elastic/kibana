@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
 import { RouteContext } from '../../types';
-import { MonitorConfigRepository } from '../../../services/monitor_config_repository';
 
 // Mock the syncEditedMonitorBulk module
 jest.mock('../../monitor_cruds/bulk_cruds/edit_monitor_bulk', () => ({
@@ -172,24 +170,15 @@ describe('updatePrivateLocationMonitors', () => {
   ];
 
   it('updates monitor locations with the new label', async () => {
-    // Mock the monitorConfigRepository
-    const mockMonitorConfigRepository = {
-      findDecryptedMonitors: jest.fn().mockResolvedValue(mockMonitors),
-      bulkUpdate: jest.fn().mockResolvedValue({}),
-    } as unknown as MonitorConfigRepository;
-
+    const PRIVATE_LOCATIONS = [] as any[];
+    const ROUTE_CONTEXT = {} as RouteContext;
     // Call the function
     await updatePrivateLocationMonitors({
       locationId: LOCATION_ID,
       newLocationLabel: NEW_LABEL,
-      allPrivateLocations: [],
-      routeContext: { monitorConfigRepository: mockMonitorConfigRepository } as RouteContext,
-    });
-
-    // Verify findDecryptedMonitors was called correctly
-    expect(mockMonitorConfigRepository.findDecryptedMonitors).toHaveBeenCalledWith({
-      spaceId: ALL_SPACES_ID,
-      filter: `synthetics-monitor.attributes.locations.id:("${LOCATION_ID}")`,
+      allPrivateLocations: PRIVATE_LOCATIONS,
+      routeContext: ROUTE_CONTEXT,
+      monitorsInLocation: mockMonitors as any,
     });
 
     // Verify that syncEditedMonitorBulk was called
@@ -211,10 +200,8 @@ describe('updatePrivateLocationMonitors', () => {
           }),
         }),
       ]),
-      privateLocations: [],
-      routeContext: expect.objectContaining({
-        monitorConfigRepository: mockMonitorConfigRepository,
-      }),
+      privateLocations: PRIVATE_LOCATIONS,
+      routeContext: ROUTE_CONTEXT,
       spaceId: FIRST_SPACE_ID,
     });
 
@@ -238,10 +225,8 @@ describe('updatePrivateLocationMonitors', () => {
           }),
         }),
       ]),
-      privateLocations: [],
-      routeContext: expect.objectContaining({
-        monitorConfigRepository: mockMonitorConfigRepository,
-      }),
+      privateLocations: PRIVATE_LOCATIONS,
+      routeContext: ROUTE_CONTEXT,
       spaceId: SECOND_SPACE_ID,
     });
   });
