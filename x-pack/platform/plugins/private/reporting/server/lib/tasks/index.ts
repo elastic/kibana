@@ -30,8 +30,11 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
 export interface ScheduledReportTaskParams {
   id: string;
   jobtype: ReportSource['jobtype'];
+  spaceId: string;
   schedule: RruleSchedule;
 }
+
+export type ScheduledReportTaskParamsWithoutSpaceId = Omit<ScheduledReportTaskParams, 'spaceId'>;
 
 export enum ReportingTaskStatus {
   UNINITIALIZED = 'uninitialized',

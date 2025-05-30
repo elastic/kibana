@@ -103,7 +103,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register(mockPdfExportType);
 
-    soClient = await reportingCore.getSoClient(fakeRawRequest as unknown as KibanaRequest);
+    soClient = await reportingCore.getScopedSoClient(fakeRawRequest as unknown as KibanaRequest);
     soClient.create = jest.fn().mockImplementation(async (_, opts) => {
       return {
         id: 'foo',
