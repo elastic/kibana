@@ -37,7 +37,7 @@ describe('useDarkMode', () => {
 
   const mock = (): [KibanaServices, BehaviorSubject<CoreTheme>] => {
     const core = coreMock.createStart();
-    const subject = new BehaviorSubject<CoreTheme>({ darkMode: false });
+    const subject = new BehaviorSubject<CoreTheme>({ darkMode: false, name: 'borealis' });
     core.theme.theme$ = subject.asObservable();
 
     return [core, subject];
@@ -73,7 +73,7 @@ describe('useDarkMode', () => {
     expect(div!.textContent).toBe('false');
 
     act(() => {
-      subject.next({ darkMode: true });
+      subject.next({ darkMode: true, name: 'borealis' });
     });
 
     div = container!.querySelector('div');
