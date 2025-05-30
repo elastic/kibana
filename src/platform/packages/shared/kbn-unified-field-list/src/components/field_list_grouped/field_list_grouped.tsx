@@ -9,15 +9,16 @@
 
 import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiSpacer, euiOverflowScroll, type UseEuiTheme } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
-import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
 export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSections';
@@ -54,6 +55,8 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
+  const styles = useMemoizedStyles(componentStyles);
+
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
 
@@ -127,7 +130,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
 
   return (
     <div
-      className="unifiedFieldList__fieldListGrouped"
+      css={styles.outerContainer}
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
         if (el && !el.dataset.dynamicScroll) {
@@ -137,7 +140,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div className="unifiedFieldList__fieldListGrouped__container">
+      <div css={styles.innerContainer}>
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
@@ -322,3 +325,31 @@ function shouldIncludeGroupDescriptionInAria<T extends FieldListItem>(
   // has some fields or an empty list should be still shown
   return group.fields?.length > 0 || !group.hideIfEmpty;
 }
+
+/**
+ * 1. Don't cut off the shadow of the field items
+ */
+
+const componentStyles = {
+  outerContainer: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css([
+      {
+        marginLeft: `-${euiTheme.size.base}` /* 1 */,
+        position: 'relative',
+        flexGrow: 1,
+        overflow: 'auto',
+      },
+      euiOverflowScroll(themeContext, { direction: 'y', mask: true }),
+    ]);
+  },
+  innerContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingTop: euiTheme.size.s,
+      position: 'absolute',
+      top: 0,
+      left: euiTheme.size.base /* 1 */,
+      right: euiTheme.size.xs /* 1 */,
+    }),
+};
