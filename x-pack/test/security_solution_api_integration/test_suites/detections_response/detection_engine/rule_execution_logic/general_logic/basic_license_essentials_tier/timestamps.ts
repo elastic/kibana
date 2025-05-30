@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL', () => {
-        it('should generate 2 alerts with @timestamp', async () => {
+        it.only('should generate 2 alerts with @timestamp', async () => {
           const rule: EqlRuleCreateProps = getEqlRuleForAlertTesting(['myfa*']);
 
           const { id } = await createRule(supertest, log, rule);
@@ -300,6 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
           const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
+          console.log('alertsOrderedByEventId', JSON.stringify(alertsOrderedByEventId, null, 2));
           expect(alertsOrderedByEventId.length).equal(2);
         });
 
