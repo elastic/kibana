@@ -24,8 +24,7 @@ export const RULE_MIGRATION_ERROR_DESCRIPTION = (totalRules: number) => {
 
 export const RULE_MIGRATION_ABORTED_DESCRIPTION = (totalRules: number) => {
   return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.aborted.description', {
-    defaultMessage:
-      'Migration of {totalRules} rules was manually stopped. You can restart it any time.',
+    defaultMessage: 'Migration of {totalRules} rules was stopped. You can resume it any time.',
     values: { totalRules },
   });
 };
