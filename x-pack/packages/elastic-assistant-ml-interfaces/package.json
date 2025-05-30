@@ -4,7 +4,7 @@
   "private": true,
   "description": "Interfaces for ML functionality used by Elastic Assistant",
   "main": "./target/public/index.js",
-  "license": "Elastic-2.0",
+  "license": "Elastic License 2.0",
   "kibana": {
     "version": "kibana",
     "build": {
