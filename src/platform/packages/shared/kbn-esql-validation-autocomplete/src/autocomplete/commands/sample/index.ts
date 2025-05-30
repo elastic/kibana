@@ -13,6 +13,7 @@ import { buildConstantsDefinitions } from '../../factories';
 import { pipeCompleteItem } from '../../complete_items';
 
 export function suggest({ innerText }: CommandSuggestParams<'sample'>): SuggestionRawDefinition[] {
+  // test for a number and at least one whitespace char at the end of the innerText
   if (/[0-9]\s+$/.test(innerText)) {
     return [pipeCompleteItem];
   }
