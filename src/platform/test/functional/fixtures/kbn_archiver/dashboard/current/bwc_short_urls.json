@@ -1,0 +1,19 @@
+{
+  "attributes": {
+    "accessCount":1,
+    "accessDate":1748634346318,
+    "createDate":1748634337694,
+    "locatorJSON":"{\"id\":\"LEGACY_SHORT_URL_LOCATOR\",\"version\":\"8.14.3\",\"state\":{\"url\":\"/app/dashboards#/create?_g=(refreshInterval:(pause:!t,value:60000),time:(from:now-24h%2Fh,to:now))&_a=(controlGroupInput:(chainingSystem:HIERARCHICAL,controlStyle:oneLine,id:control_group_c1514d4b-b1ac-4ba8-beea-d3bc852b912f,ignoreParentSettings:(ignoreFilters:!f,ignoreQuery:!f,ignoreTimerange:!f,ignoreValidations:!f),panels:(d61d8e66-dc3f-49fd-b2bd-23cd4b67ad4b:(explicitInput:(dataViewId:%2790943e30-9a47-11e8-b64d-95841ca0b247%27,fieldName:machine.os.keyword,grow:!t,id:d61d8e66-dc3f-49fd-b2bd-23cd4b67ad4b,searchTechnique:prefix,selectedOptions:!(%27win%207%27),title:machine.os.keyword,width:medium),grow:!t,order:0,type:optionsListControl,width:medium)),showApplySelections:!f),panels:!((embeddableConfig:(description:%27%27,hiddenLayers:!(),isLayerTOCOpen:!t,mapBuffer:(maxLat:55.77657,maxLon:-45,minLat:21.94305,minLon:-135),mapCenter:(lat:42.16337,lon:-88.92107,zoom:3.64),openTOCDetails:!()),gridData:(h:15,i:%2741d6e51f-3535-4a86-b1e5-83b9558af195%27,w:24,x:0,y:0),id:de71f4f0-1902-11e9-919b-ffe5949a18d2,panelIndex:%2741d6e51f-3535-4a86-b1e5-83b9558af195%27,title:%27Custom%20title%27,type:map),(embeddableConfig:(attributes:(references:!((id:%2790943e30-9a47-11e8-b64d-95841ca0b247%27,name:indexpattern-datasource-layer-d4c3ef74-e0b5-4836-b7a8-0998f7db0a00,type:index-pattern)),state:(adHocDataViews:(),datasourceStates:(formBased:(layers:(d4c3ef74-e0b5-4836-b7a8-0998f7db0a00:(columnOrder:!(b96ab036-4d5b-4164-8135-37585313f7e8,%2741fca388-3778-4dbe-8bcb-ac8132ca99d0%27),columns:(%2741fca388-3778-4dbe-8bcb-ac8132ca99d0%27:(dataType:number,isBucketed:!f,label:%27Median%20of%20bytes%27,operationType:median,params:(emptyAsNull:!t),scale:ratio,sourceField:bytes),b96ab036-4d5b-4164-8135-37585313f7e8:(dataType:date,isBucketed:!t,label:timestamp,operationType:date_histogram,params:(dropPartials:!f,includeEmptyRows:!t,interval:auto),scale:interval,sourceField:timestamp)),incompleteColumns:(),sampling:1))),indexpattern:(layers:()),textBased:(layers:())),filters:!(),internalReferences:!(),query:(language:kuery,query:%27%27),visualization:(axisTitlesVisibilitySettings:(x:!t,yLeft:!t,yRight:!t),fittingFunction:None,gridlinesVisibilitySettings:(x:!t,yLeft:!t,yRight:!t),labelsOrientation:(x:0,yLeft:0,yRight:0),layers:!((accessors:!(%2741fca388-3778-4dbe-8bcb-ac8132ca99d0%27),colorMapping:(assignments:!(),colorMode:(type:categorical),paletteId:eui_amsterdam_color_blind,specialAssignments:!((color:(type:loop),rule:(type:other),touched:!f))),layerId:d4c3ef74-e0b5-4836-b7a8-0998f7db0a00,layerType:data,position:top,seriesType:bar_stacked,showGridlines:!f,xAccessor:b96ab036-4d5b-4164-8135-37585313f7e8)),legend:(isVisible:!t,position:right),preferredSeriesType:bar_stacked,tickLabelsVisibilitySettings:(x:!t,yLeft:!t,yRight:!t),valueLabels:hide)),title:%27%27,type:lens,visualizationType:lnsXY),hidePanelTitles:!t),gridData:(h:15,i:e307ff36-c3dc-4ab4-b50e-f17f62dd9dc5,w:24,x:24,y:0),panelIndex:e307ff36-c3dc-4ab4-b50e-f17f62dd9dc5,title:%27Custom%20title%27,type:lens)))\"}}",
+    "slug":"Jh1lq",
+    "url":""
+  },
+  "coreMigrationVersion":"8.8.0",
+  "created_at":"2025-05-30T19:45:37.695Z",
+  "created_by":"u_2113432222_cloud",
+  "id":"f012d5c1-0fac-46ae-8738-2fede97254aa",
+  "managed":false,
+  "references":[],
+  "type":"url",
+  "updated_at":"2025-05-30T19:45:46.331Z",
+  "version":"WzIzMCwxXQ=="
+}

@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-logs | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await PageObjects.common.('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
