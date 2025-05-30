@@ -44,7 +44,7 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    _core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
     const { securitySolution } = setupDeps;
@@ -78,7 +78,7 @@ export class SecuritySolutionServerlessPlugin
     });
 
     setOnboardingSettings(services);
-    startNavigation(services);
+    startNavigation(services, productTypes);
 
     return {};
   }
