@@ -178,7 +178,7 @@ Review the following information about the {kib} 8.18.0 release.
 === Known issues
 
 // tag::known-issue-320[]
-.Errors in rule executions occur when maintenance windows have filters
+.Errors in rule executions occur when maintenance windows have filters.
 [%collapsible]
 ====
 *Details* +
