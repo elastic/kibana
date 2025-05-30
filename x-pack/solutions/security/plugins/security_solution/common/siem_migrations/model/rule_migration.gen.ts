@@ -155,9 +155,9 @@ export const RuleMigrationLastExecution = z.object({
    */
   ended_at: z.string().nullable().optional(),
   /**
-   * The connector ID used for the last execution, if applicable.
+   * The connector ID used for the last execution.
    */
-  connector_id: z.string().nullable().optional(),
+  connector_id: z.string().optional(),
   /**
    * The error message if the last execution failed.
    */

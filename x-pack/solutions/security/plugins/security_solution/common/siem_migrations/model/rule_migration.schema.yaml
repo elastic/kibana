@@ -482,8 +482,7 @@ components:
           description: The moment the last execution ended.
         connector_id:
           type: string
-          nullable: true
-          description: The connector ID used for the last execution, if applicable.
+          description: The connector ID used for the last execution.
         error:
           type: string
           nullable: true
