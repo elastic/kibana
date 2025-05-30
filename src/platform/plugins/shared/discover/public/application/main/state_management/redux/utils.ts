@@ -14,7 +14,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
-  InternalStateThunkDependencies,
+  InternalStateDependencies,
   TabActionPayload,
 } from './internal_state';
 
@@ -24,7 +24,7 @@ type CreateInternalStateAsyncThunk = ReturnType<
   typeof createAsyncThunk.withTypes<{
     state: DiscoverInternalState;
     dispatch: InternalStateDispatch;
-    extra: InternalStateThunkDependencies;
+    extra: InternalStateDependencies;
   }>
 >;
 
