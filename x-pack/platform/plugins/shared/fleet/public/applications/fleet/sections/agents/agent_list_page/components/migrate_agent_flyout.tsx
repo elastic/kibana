@@ -122,7 +122,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
 
   return (
     <>
-      <EuiFlyout size="s" onClose={onClose}>
+      <EuiFlyout data-test-subj="migrateAgentFlyout" size="s" onClose={onClose}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="l">
             <h1>
@@ -173,6 +173,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                 )}
                 fullWidth
                 onChange={(e) => setFormContent({ ...formContent, uri: e.target.value })}
+                data-test-subj="migrateAgentFlyoutClusterUrlInput"
               />
             </EuiFormRow>
             <EuiFormRow
@@ -191,6 +192,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
               }
             >
               <EuiFieldPassword
+                data-test-subj="migrateAgentFlyoutEnrollmentTokenInput"
                 onChange={(e) =>
                   setFormContent({ ...formContent, enrollment_token: e.target.value })
                 }

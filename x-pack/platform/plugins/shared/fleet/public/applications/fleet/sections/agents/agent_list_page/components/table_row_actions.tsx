@@ -64,6 +64,7 @@ export const TableRowActions: React.FunctionComponent<{
         }}
         disabled={!agent.active}
         key="migrateAgent"
+        data-test-subj="migrateAgentMenuItem"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.migrateAgentActionText"
