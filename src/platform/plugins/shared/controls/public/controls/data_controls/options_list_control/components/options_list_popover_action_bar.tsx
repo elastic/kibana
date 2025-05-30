@@ -130,16 +130,20 @@ export const OptionsListPopoverActionBar = ({
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"
-          gutterSize="s"
+          gutterSize="xs"
           responsive={false}
         >
           {allowExpensiveQueries && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
-                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
-              </EuiText>{' '}
-              |{' '}
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
+                  {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div className="optionsList__actionBarDivider" />
+              </EuiFlexItem>
+            </>
           )}
           {invalidSelections && invalidSelections.size > 0 && (
             <>
@@ -147,8 +151,10 @@ export const OptionsListPopoverActionBar = ({
                 <EuiText size="xs" color="subdued">
                   {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.size)}
                 </EuiText>
-              </EuiFlexItem>{' '}
-              |{' '}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div className="optionsList__actionBarDivider" />
+              </EuiFlexItem>
             </>
           )}
           <EuiFlexItem grow={false}>
@@ -169,6 +175,8 @@ export const OptionsListPopoverActionBar = ({
                 {OptionsListStrings.popover.getSelectAllButtonLabel()}
               </EuiButtonEmpty>
             </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
                 hasTooManyOptions

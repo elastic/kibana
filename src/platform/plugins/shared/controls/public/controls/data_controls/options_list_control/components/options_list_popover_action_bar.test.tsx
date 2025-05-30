@@ -88,6 +88,17 @@ describe('Options list popover', () => {
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
+    expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeDisabled();
+  });
+
+  test('enabled deselect all when there is at least one selection', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(80);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
+    contextMock.componentApi.setSelectedOptions(['moo']);
+    const actionBarComponent = mountComponent(contextMock);
+
+    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
     expect(actionBarComponent.queryByTestId('optionsList-control-deselectAll')).toBeEnabled();
   });
 
