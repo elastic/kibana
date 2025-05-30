@@ -421,12 +421,11 @@ export function initializeLayoutManager(
 
       /** Sections */
       addNewSection: () => {
-        const newLayout = { ...layout$.getValue() };
-        const newId = v4();
+        const currentLayout = layout$.getValue();
 
         // find the max y so we know where to add the section
         let maxY = 0;
-        [...Object.values(newLayout.panels), ...Object.values(newLayout.sections)].forEach(
+        [...Object.values(currentLayout.panels), ...Object.values(currentLayout.sections)].forEach(
           (widget) => {
             const { y, h } = { h: 1, ...widget.gridData };
             maxY = Math.max(maxY, y + h);
@@ -434,7 +433,9 @@ export function initializeLayoutManager(
         );
 
         // add the new section
-        newLayout.sections[newId] = {
+        const sections = { ...currentLayout.sections };
+        const newId = v4();
+        sections[newId] = {
           id: newId,
           gridData: { i: newId, y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
@@ -442,7 +443,10 @@ export function initializeLayoutManager(
           }),
           collapsed: false,
         };
-        layout$.next(newLayout);
+        layout$.next({
+          ...currentLayout,
+          sections,
+        });
         trackPanel.scrollToBottom$.next();
       },
     },
