@@ -70,7 +70,7 @@ describe('createRuleRoute', () => {
       enabled: true,
     },
   };
-  
+
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
