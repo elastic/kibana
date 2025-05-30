@@ -21,6 +21,11 @@ export const ensureIndicesExistsForPolicies = async (
     spaceIds: ['*'],
   });
 
+  if (endpointPoliciesIds.items.length === 0) {
+    logger.info(`Nothing to do. No endpoint policies found.`);
+    return;
+  }
+
   logger.info(
     `Checking to ensure [${endpointPoliciesIds.items.length}] endpoint policies have backing indices`
   );
