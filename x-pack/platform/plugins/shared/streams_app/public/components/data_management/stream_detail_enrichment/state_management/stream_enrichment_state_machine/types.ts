@@ -12,11 +12,12 @@ import { TimeState } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
 import { MappedSchemaField } from '../../../schema_editor/types';
+import { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -34,12 +35,14 @@ export interface StreamEnrichmentInput {
 export interface StreamEnrichmentContextType {
   definition: Streams.ingest.all.GetResponse;
   initialProcessorsRefs: ProcessorActorRef[];
+  dataSourcesRefs: DataSourceActorRef[];
   processorsRefs: ProcessorActorRef[];
   simulatorRef?: SimulationActorRef;
   urlState: EnrichmentUrlState;
 }
 
 export type StreamEnrichmentEvent =
+  | DataSourceToParentEvent
   | ProcessorToParentEvent
   | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'stream.reset' }
@@ -47,6 +50,7 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'simulation.manageDataSources' }
+  | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }
   | { type: 'dataSources.closeManagement' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }

@@ -22,7 +22,7 @@ import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesFlyout } from './data_sources_flyout';
@@ -35,19 +35,19 @@ export const SimulationPlayground = () => {
     viewSimulationDetectedFields,
   } = useStreamEnrichmentEvents();
 
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
+  const isViewingDataPreview = useStreamEnrichmentSelector((state) =>
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
     })
   );
-  const isViewingDetectedFields = useStreamsEnrichmentSelector((state) =>
+  const isViewingDetectedFields = useStreamEnrichmentSelector((state) =>
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
     })
   );
-  const isManagingDataSources = useStreamsEnrichmentSelector((state) =>
+  const isManagingDataSources = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { enrichment: 'managingDataSources' } })
   );
 

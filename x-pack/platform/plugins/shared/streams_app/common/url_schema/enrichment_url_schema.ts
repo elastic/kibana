@@ -7,13 +7,10 @@
 
 import { z } from '@kbn/zod';
 
-export interface DataSourceBase {
-  enabled: boolean;
-}
-
 const dataSourceBaseSchema = z.object({
   enabled: z.boolean(),
-}) satisfies z.ZodSchema<DataSourceBase>;
+  name: z.string().optional(),
+});
 
 const randomSamplesDataSourceSchema = dataSourceBaseSchema.extend({
   type: z.literal('random-samples'),
@@ -22,6 +19,8 @@ const randomSamplesDataSourceSchema = dataSourceBaseSchema.extend({
     to: z.string(),
   }),
 });
+
+export type RandomSamplesDataSource = z.TypeOf<typeof randomSamplesDataSourceSchema>;
 
 const kqlSamplesDataSourceSchema = dataSourceBaseSchema.extend({
   type: z.literal('kql-samples'),
@@ -32,19 +31,25 @@ const kqlSamplesDataSourceSchema = dataSourceBaseSchema.extend({
   }),
 });
 
+export type KqlSamplesDataSource = z.TypeOf<typeof kqlSamplesDataSourceSchema>;
+
 const customSamplesDataSourceSchema = dataSourceBaseSchema.extend({
   type: z.literal('custom-samples'),
 });
 
-const dataSourceSchema = z.union([
+export type CustomSamplesDataSource = z.TypeOf<typeof customSamplesDataSourceSchema>;
+
+const enrichmentDataSourceSchema = z.union([
   randomSamplesDataSourceSchema,
   kqlSamplesDataSourceSchema,
   customSamplesDataSourceSchema,
 ]);
 
+export type EnrichmentDataSource = z.TypeOf<typeof enrichmentDataSourceSchema>;
+
 export const enrichmentUrlSchema = z.object({
   v: z.literal(1),
-  dataSources: z.array(dataSourceSchema),
+  dataSources: z.array(enrichmentDataSourceSchema),
 });
 
 export type EnrichmentUrlState = z.TypeOf<typeof enrichmentUrlSchema>;

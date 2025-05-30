@@ -24,7 +24,7 @@ export const defaultEnrichmentUrlState: EnrichmentUrlState = {
         from: 'now-15m',
         to: 'now',
       },
-    }
+    },
   ],
 };
 

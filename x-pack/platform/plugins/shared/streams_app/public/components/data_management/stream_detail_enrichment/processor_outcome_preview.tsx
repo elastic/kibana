@@ -56,7 +56,7 @@ export const ProcessorOutcomePreview = () => {
 //       start: { data },
 //     },
 //   } = useKibana();
-//   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+//   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 //   const search = useSimulatorSelector((state) => state.context.search);
 //   const { changeSearchParams } = useStreamEnrichmentEvents();
 

@@ -7,3 +7,4 @@
 
 export * from './data_source_state_machine';
 export * from './types';
+export * from './use_data_source_selector';

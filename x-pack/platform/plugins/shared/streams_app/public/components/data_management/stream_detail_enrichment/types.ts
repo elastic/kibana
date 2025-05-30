@@ -12,7 +12,7 @@ import {
   ProcessorDefinition,
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
-
+import { EnrichmentDataSource } from '../../../../common/url_schema';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
@@ -20,6 +20,9 @@ export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   type: ProcessorTypeOf<T>;
 };
 
+/**
+ * Processors' types
+ */
 export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
 
 export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
@@ -42,3 +45,10 @@ export type ExtractBooleanFields<TInput> = NonNullable<
       }[keyof TInput]
     : never
 >;
+
+/**
+ * Data sources types
+ */
+export type EnrichmentDataSourceWithUIAttributes = EnrichmentDataSource & {
+  id: string;
+};

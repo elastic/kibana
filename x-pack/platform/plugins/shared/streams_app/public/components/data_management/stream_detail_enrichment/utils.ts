@@ -16,6 +16,7 @@ import {
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
+import { EnrichmentDataSource } from '../../../../common/url_schema';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -23,6 +24,7 @@ import {
   ProcessorFormState,
   WithUIAttributes,
   DateFormState,
+  EnrichmentDataSourceWithUIAttributes,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -238,7 +240,8 @@ export const isDissectProcessor = createProcessorGuardByType('dissect');
 export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
-const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
+
+const processorToUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
   processor: TProcessorDefinition
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
@@ -246,12 +249,14 @@ const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
   ...processor,
 });
 
-const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
+const processorToAPIDefinition = (
+  processor: ProcessorDefinitionWithUIAttributes
+): ProcessorDefinition => {
   const { id, type, ...processorConfig } = processor;
   return processorConfig;
 };
 
-const toSimulateDefinition = (
+const processorToSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
   const { type, ...processorConfig } = processor;
@@ -259,7 +264,26 @@ const toSimulateDefinition = (
 };
 
 export const processorConverter = {
-  toAPIDefinition,
-  toSimulateDefinition,
-  toUIDefinition,
+  toAPIDefinition: processorToAPIDefinition,
+  toSimulateDefinition: processorToSimulateDefinition,
+  toUIDefinition: processorToUIDefinition,
+};
+
+const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
+  dataSource: TEnrichementDataSource
+): EnrichmentDataSourceWithUIAttributes => ({
+  id: createId(),
+  ...dataSource,
+});
+
+const dataSourceToUrlSchema = (
+  dataSourceWithUIAttributes: EnrichmentDataSourceWithUIAttributes
+): EnrichmentDataSource => {
+  const { id, ...dataSource } = dataSourceWithUIAttributes;
+  return dataSource;
+};
+
+export const dataSourceConverter = {
+  toUIDefinition: dataSourceToUIDefinition,
+  toUrlSchema: dataSourceToUrlSchema,
 };

@@ -19,14 +19,14 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { processorConverter } from '../../utils';
+import { dataSourceConverter, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -46,6 +46,10 @@ import {
   getUpsertWiredFields,
 } from './utils';
 import { createUrlInitializerActor, createUrlUpdaterAction } from './url_state_actor';
+import {
+  createDataSourceMachineImplementations,
+  dataSourceMachine,
+} from '../data_source_state_machine';
 
 const createId = htmlIdGenerator();
 
@@ -60,6 +64,7 @@ export const streamEnrichmentMachine = setup({
   actors: {
     initializeUrl: getPlaceholderFor(createUrlInitializerActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    dataSourceMachine: getPlaceholderFor(() => dataSourceMachine),
     processorMachine: getPlaceholderFor(() => processorMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
   },
@@ -102,6 +107,44 @@ export const streamEnrichmentMachine = setup({
         };
       }
     ),
+    setupDataSources: assign(({ context, self, spawn }) => {
+      const dataSourcesRefs = context.urlState.dataSources.map((dataSource) => {
+        const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
+        return spawn('dataSourceMachine', {
+          id: dataSourceWithUIAttributes.id,
+          input: {
+            parentRef: self,
+            streamName: context.definition.stream.name,
+            dataSource: dataSourceWithUIAttributes,
+          },
+        });
+      });
+
+      return {
+        dataSourcesRefs,
+      };
+    }),
+    addDataSource: assign(
+      ({ context, spawn, self }, { dataSource }: { dataSource: EnrichmentDataSource }) => {
+        const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
+        return {
+          dataSourcesRefs: context.dataSourcesRefs.concat(
+            spawn('dataSourceMachine', {
+              id: dataSourceWithUIAttributes.id,
+              input: {
+                parentRef: self,
+                streamName: context.definition.stream.name,
+                dataSource: dataSourceWithUIAttributes,
+              },
+            })
+          ),
+        };
+      }
+    ),
+    stopDataSource: stopChild((_, params: { id: string }) => params.id),
+    deleteDataSource: assign(({ context }, params: { id: string }) => ({
+      dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
+    })),
     addProcessor: assign(
       (
         { context, spawn, self },
@@ -180,6 +223,7 @@ export const streamEnrichmentMachine = setup({
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
+    dataSourcesRefs: [],
     initialProcessorsRefs: [],
     processorsRefs: [],
     urlState: defaultEnrichmentUrlState,
@@ -215,6 +259,7 @@ export const streamEnrichmentMachine = setup({
       entry: [
         { type: 'stopProcessors' },
         { type: 'setupProcessors', params: ({ context }) => ({ definition: context.definition }) },
+        { type: 'setupDataSources' },
       ],
       on: {
         'stream.received': {
@@ -336,8 +381,16 @@ export const streamEnrichmentMachine = setup({
             managingDataSources: {
               on: {
                 'dataSources.closeManagement': 'displayingSimulation',
-                'dataSources.create': 'displayingSimulation',
-                'dataSources.removeById': 'displayingSimulation',
+                'dataSources.add': {
+                  actions: [{ type: 'addDataSource', params: ({ event }) => event }],
+                },
+                'dataSource.delete': {
+                  actions: [
+                    { type: 'stopDataSource', params: ({ event }) => event },
+                    { type: 'deleteDataSource', params: ({ event }) => event },
+                    // { type: 'forwardProcessorsEventToSimulator', params: ({ event }) => event },
+                  ],
+                },
               },
             },
           },
@@ -364,6 +417,7 @@ export const createStreamEnrichmentMachineImplementations = ({
     initializeUrl: createUrlInitializerActor({ core, urlStateStorageContainer }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     processorMachine,
+    dataSourceMachine: dataSourceMachine.provide(createDataSourceMachineImplementations({ data })),
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
         data,

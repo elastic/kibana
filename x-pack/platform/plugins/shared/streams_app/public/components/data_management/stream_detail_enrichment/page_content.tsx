@@ -38,7 +38,7 @@ import {
   StreamEnrichmentContextProvider,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
@@ -96,12 +96,12 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const isReady = useStreamsEnrichmentSelector((state) => state.matches('ready'));
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const canManage = useStreamsEnrichmentSelector(
+  const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
   );
-  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+  const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
 
@@ -169,9 +169,9 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { reorderProcessors } = useStreamEnrichmentEvents();
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const processorsRefs = useStreamsEnrichmentSelector((state) =>
+  const processorsRefs = useStreamEnrichmentSelector((state) =>
     state.context.processorsRefs.filter((processorRef) =>
       processorRef.getSnapshot().matches('configured')
     )

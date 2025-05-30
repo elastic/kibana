@@ -43,7 +43,7 @@ import {
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
   useSimulatorSelector,
   StreamEnrichmentContextType,
   useGetStreamEnrichmentState,
@@ -59,7 +59,7 @@ export function AddProcessorPanel() {
 
   const { addProcessor } = useStreamEnrichmentEvents();
 
-  const processorRef = useStreamsEnrichmentSelector((state) =>
+  const processorRef = useStreamEnrichmentSelector((state) =>
     state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))
   );
   const processorMetrics = useSimulatorSelector(
@@ -223,7 +223,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
-  const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
+  const canEdit = useStreamEnrichmentSelector((s) => s.context.definition.privileges.simulate);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 

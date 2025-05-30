@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import { DataSourceDefinition } from '@kbn/streams-schema';
 import { ActorRef, Snapshot } from 'xstate5';
-import { DataSourceDefinitionWithUIAttributes } from '../../types';
+import { IToasts } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SampleDocument } from '@kbn/streams-schema';
+import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+
+export interface DataSourceMachineDeps {
+  data: DataPublicPluginStart;
+  toasts: IToasts;
+}
 
 export type DataSourceToParentEvent =
-  | { type: 'dataSource.toggle'; id: string }
   | { type: 'dataSource.delete'; id: string }
-  | { type: 'dataSource.stage' }
   | { type: 'dataSource.update' };
 
 export interface DataSourceInput {
   parentRef: DataSourceParentActor;
-  dataSource: DataSourceDefinitionWithUIAttributes;
-  isNew?: boolean;
+  streamName: string;
+  dataSource: EnrichmentDataSourceWithUIAttributes;
 }
 
 export type DataSourceParentActor = ActorRef<Snapshot<unknown>, DataSourceToParentEvent>;
 
 export interface DataSourceContext {
   parentRef: DataSourceParentActor;
-  previousDataSource: DataSourceDefinitionWithUIAttributes;
-  dataSource: DataSourceDefinitionWithUIAttributes;
-  isNew: boolean;
-  isUpdated?: boolean;
+  previousDataSource: EnrichmentDataSourceWithUIAttributes;
+  streamName: string;
+  dataSource: EnrichmentDataSourceWithUIAttributes;
+  data: SampleDocument[];
 }
 
 export type DataSourceEvent =
   | { type: 'dataSource.cancel' }
-  | { type: 'dataSource.change'; dataSource: DataSourceDefinition }
+  | { type: 'dataSource.change'; dataSource: EnrichmentDataSourceWithUIAttributes }
   | { type: 'dataSource.delete' }
   | { type: 'dataSource.edit' }
-  | { type: 'dataSource.stage' }
+  | { type: 'dataSource.refresh' }
+  | { type: 'dataSource.toggleActivity' }
   | { type: 'dataSource.update' };
 
 export interface DataSourceEmittedEvent {

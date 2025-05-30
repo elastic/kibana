@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import {
   EuiFlyoutResizable,
   EuiFlyoutHeader,
@@ -14,16 +14,52 @@ import {
   EuiSpacer,
   EuiText,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiSwitch,
+  EuiAccordion,
+  EuiEmptyPrompt,
+  EuiCheckableCard,
+  EuiButtonIcon,
+  EuiBadge,
+  EuiFlexItem,
+  useEuiTheme,
+  EuiButton,
+  EuiContextMenu,
+  EuiPopover,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import { css } from '@emotion/react';
+import { useBoolean } from '@kbn/react-hooks';
+import { EnrichmentDataSource } from '../../../../../common/url_schema';
+import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
+import {
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from '../state_management/stream_enrichment_state_machine';
+import {
+  DataSourceActorRef,
+  useDataSourceSelector,
+} from '../state_management/data_source_state_machine';
+import { AssetImage } from '../../../asset_image';
+import { PreviewTable } from '../../preview_table';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
 }
 
 export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
+  const { addDataSource } = useStreamEnrichmentEvents();
+
+  const dataSourcesActorRefs = useStreamEnrichmentSelector(
+    (snapshot) => snapshot.context.dataSourcesRefs
+  );
+
   return (
-    <EuiFlyoutResizable onClose={onClose}>
+    <EuiFlyoutResizable onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -44,26 +80,284 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
           )}
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        banner={
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.bannerTitle',
-              { defaultMessage: 'Data Sources usage' }
-            )}
-          >
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.bannerDescription',
-              {
-                defaultMessage:
-                  'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
-              }
-            )}
-          </EuiCallOut>
-        }
-      >
-        Content
+      <EuiFlyoutBody>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.infoTitle',
+                { defaultMessage: 'Data sources' }
+              )}
+            </h3>
+          </EuiTitle>
+          <DataSourcesContextMenu onAddDataSource={addDataSource} />
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiCallOut
+          size="s"
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.infoDescription',
+            {
+              defaultMessage:
+                'Active data sources will be used for simulation. You can toggle data sources on/off without removing them.',
+            }
+          )}
+          iconType="pin"
+        />
+        <EuiSpacer />
+        <EuiFlexGroup component="ul" direction="column" gutterSize="m">
+          {dataSourcesActorRefs.map((dataSourceRef) => (
+            <EuiFlexItem key={dataSourceRef.id} component="li">
+              <DataSource dataSourceRef={dataSourceRef} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyoutResizable>
+  );
+};
+
+const DataSourcesContextMenu = ({
+  onAddDataSource,
+}: {
+  onAddDataSource: (dataSource: EnrichmentDataSource) => void;
+}) => {
+  const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
+  return (
+    <EuiPopover
+      id="data-sources-menu"
+      button={
+        <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={toggleMenu}>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu',
+            { defaultMessage: 'Add data source' }
+          )}
+        </EuiButton>
+      }
+      isOpen={isOpen}
+      closePopover={closeMenu}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu
+        initialPanelId="data-source-options"
+        panels={[
+          {
+            id: 'data-source-options',
+            items: [
+              {
+                name: i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addKqlDataSource',
+                  { defaultMessage: 'Add KQL search samples' }
+                ),
+                icon: 'search',
+                onClick: () => {
+                  onAddDataSource({
+                    type: 'kql-samples',
+                    name: '',
+                    enabled: true,
+                    time: {
+                      from: 'now-15m',
+                      to: 'now',
+                    },
+                    query: '',
+                  });
+                  closeMenu();
+                },
+              },
+              {
+                name: i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addCustomSamples',
+                  { defaultMessage: 'Add custom docs samples' }
+                ),
+                icon: 'visText',
+                onClick: () => {
+                  onAddDataSource({
+                    type: 'custom-samples',
+                    name: '',
+                    enabled: true,
+                    docs: [],
+                  });
+                  closeMenu();
+                },
+              },
+            ],
+          },
+        ]}
+      />
+    </EuiPopover>
+  );
+};
+
+const DataSource = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  const dataSourceType = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => snapshot.context.dataSource.type
+  );
+
+  if (dataSourceType === 'random-samples') {
+    return <RandomSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
+  } else if (dataSourceType === 'kql-samples') {
+    return <KqlSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
+  } else if (dataSourceType === 'custom-samples') {
+    return <CustomSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
+  }
+
+  return null;
+};
+
+const RandomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  return (
+    <DataSourceCard
+      dataSourceRef={dataSourceRef}
+      title={i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.name', {
+        defaultMessage: 'Random samples from stream',
+      })}
+      subtitle={i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.subtitle', {
+        defaultMessage: 'Automatically samples random data from the stream.',
+      })}
+    />
+  );
+};
+
+const KqlSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  return (
+    <DataSourceCard
+      dataSourceRef={dataSourceRef}
+      title={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.defaultName',
+        { defaultMessage: 'KQL search samples' }
+      )}
+      subtitle={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.kqlDataSource.subtitle',
+        { defaultMessage: 'Sample data using KQL query syntax.' }
+      )}
+    />
+  );
+};
+
+const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  return (
+    <DataSourceCard
+      dataSourceRef={dataSourceRef}
+      title={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.defaultName',
+        { defaultMessage: 'Custom samples' }
+      )}
+      subtitle={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.subtitle',
+        { defaultMessage: 'Manually defined sample documents.' }
+      )}
+    />
+  );
+};
+
+const DataSourceCard = ({
+  dataSourceRef,
+  children,
+  title,
+  subtitle,
+}: PropsWithChildren<{
+  dataSourceRef: DataSourceActorRef;
+  title?: string;
+  subtitle?: string;
+}>) => {
+  const dataSource = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => snapshot.context.dataSource
+  );
+  const previewDocs = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot.context.data);
+
+  const isEnabled = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot.matches('enabled'));
+
+  const toggleActivity = () => {
+    dataSourceRef.send({ type: 'dataSource.toggleActivity' });
+  };
+
+  const deleteDataSource = useDiscardConfirm(
+    () => {
+      dataSourceRef.send({ type: 'dataSource.delete' });
+    },
+    {
+      title: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.title',
+        { defaultMessage: 'Delete data source?' }
+      ),
+      message: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.message',
+        { defaultMessage: 'Deleted data sources will be lost and you will have to recreate it.' }
+      ),
+      cancelButtonText: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.cancelButtonText',
+        { defaultMessage: 'Cancel' }
+      ),
+      confirmButtonText: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.confirmButtonText',
+        { defaultMessage: 'Delete' }
+      ),
+    }
+  );
+
+  return (
+    <EuiCheckableCard
+      id={dataSourceRef.id}
+      label={
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+            <EuiTitle size="xs">
+              <h3>{title ?? dataSource.name ?? dataSource.type}</h3>
+            </EuiTitle>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="success" isDisabled={!isEnabled}>
+                {isEnabled
+                  ? i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.enabled',
+                      { defaultMessage: 'Enabled' }
+                    )
+                  : i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.disabled',
+                      { defaultMessage: 'Disabled' }
+                    )}
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow />
+            <EuiButtonIcon iconType="trash" onClick={deleteDataSource} />
+          </EuiFlexGroup>
+          <EuiText component="p" color="subdued" size="xs">
+            {subtitle}
+          </EuiText>
+        </EuiFlexGroup>
+      }
+      checkableType="checkbox"
+      onChange={toggleActivity}
+      checked={isEnabled}
+    >
+      {children}
+      <EuiAccordion
+        id={dataSourceRef.id}
+        buttonContent={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.label',
+          { defaultMessage: 'Data preview' }
+        )}
+      >
+        <EuiSpacer size="s" />
+        {isEmpty(previewDocs) ? (
+          <EuiEmptyPrompt
+            icon={<AssetImage type="noResults" size="s" />}
+            titleSize="xs"
+            title={
+              <h4>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.dataPreviewAccordion.noData',
+                  { defaultMessage: 'No documents to preview available' }
+                )}
+              </h4>
+            }
+          />
+        ) : (
+          <PreviewTable documents={previewDocs} height={150} />
+        )}
+      </EuiAccordion>
+    </EuiCheckableCard>
   );
 };
