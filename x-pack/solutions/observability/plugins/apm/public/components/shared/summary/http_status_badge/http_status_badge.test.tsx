@@ -48,7 +48,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.vis.euiColorVisWarning0
+          result.current.euiTheme.colors.vis.euiColorVisWarning1
         );
       });
     });
