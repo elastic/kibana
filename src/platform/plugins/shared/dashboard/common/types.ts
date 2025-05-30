@@ -12,10 +12,7 @@ import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/common';
+import type { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 
 import type { DashboardPanelMap, DashboardSectionMap } from './dashboard_container/types';
 import type {
@@ -75,26 +72,6 @@ export interface DashboardState extends DashboardSettings {
    */
   controlGroupInput?: ControlGroupSerializedState;
 }
-
-/**
- * Dashboard state stored in dashboard URLs
- * Do not change type without considering BWC of stored URLs
- */
-export type SharedDashboardState = Partial<
-  Omit<DashboardState, 'panels' | 'sections'> & {
-    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
-    /**
-     * Runtime control group state.
-     * @deprecated use controlGroupInput
-     */
-    controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
-
-    panels: Array<DashboardPanel | DashboardSection>;
-
-    references?: DashboardState['references'] & SerializableRecord;
-  }
->;
 
 export type DashboardLocatorParams = Partial<
   Omit<DashboardState, 'panels' | 'sections'> & {
