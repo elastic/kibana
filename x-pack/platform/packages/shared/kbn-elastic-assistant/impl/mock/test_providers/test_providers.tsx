@@ -28,6 +28,7 @@ interface Props {
 
 window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
+const ELASTIC_DOCS = 'https://www.elastic.co/docs/';
 
 export const mockAssistantAvailability: AssistantAvailability = {
   hasSearchAILakeConfigurations: false,
@@ -84,11 +85,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
             docLinks={{
               ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
               DOC_LINK_VERSION: 'current',
-              ELASTIC_LLM_LINK: '',
-              ELASTIC_LLM_USAGE_COST_LINK: '',
-              THIRD_PARTY_LLM_LINK: '',
-              ELASTIC_AI_FEATURES_LINK: '',
-              LLM_PERFORMANCE_LINK: '',
+              ELASTIC_LLM_LINK: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
+              ELASTIC_LLM_USAGE_COST_LINK: `https://www.elastic.co/pricing`,
+              THIRD_PARTY_LLM_LINK: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
+              ELASTIC_AI_FEATURES_LINK: `${ELASTIC_DOCS}solutions/security/ai`,
+              LLM_PERFORMANCE_LINK: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
             }}
             getComments={mockGetComments}
             getUrlForApp={mockGetUrlForApp}

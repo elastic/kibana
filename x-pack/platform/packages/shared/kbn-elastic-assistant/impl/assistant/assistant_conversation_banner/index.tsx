@@ -11,7 +11,7 @@ import { isElasticManagedLlmConnector } from '../../connectorland/helpers';
 import { ConnectorMissingCallout } from '../../connectorland/connector_missing_callout';
 import { ElasticLlmCallout } from './elastic_llm_callout';
 
-export const AssistantBanner = React.memo(
+export const AssistantConversationBanner = React.memo(
   ({
     isSettingsModalVisible,
     setIsSettingsModalVisible,
@@ -36,7 +36,6 @@ export const AssistantBanner = React.memo(
         }
       }
     }, [inferenceEnabled, currentConversation, connectors]);
-
     if (shouldShowMissingConnectorCallout) {
       return (
         <ConnectorMissingCallout
@@ -55,4 +54,4 @@ export const AssistantBanner = React.memo(
   }
 );
 
-AssistantBanner.displayName = 'AssistantBanner';
+AssistantConversationBanner.displayName = 'AssistantConversationBanner';

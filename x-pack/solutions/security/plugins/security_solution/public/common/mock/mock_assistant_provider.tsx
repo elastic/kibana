@@ -9,7 +9,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
-import { AssistantProvider } from '@kbn/elastic-assistant';
+import { AssistantProvider, AssistantSpaceIdProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
@@ -21,6 +21,7 @@ interface Props {
 
 window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
+const ELASTIC_DOCS = 'https://www.elastic.co/docs/';
 
 /** A utility for wrapping children in the providers required to run tests */
 export const MockAssistantProviderComponent: React.FC<Props> = ({
@@ -55,11 +56,11 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
-        ELASTIC_LLM_LINK: '',
-        ELASTIC_LLM_USAGE_COST_LINK: '',
-        THIRD_PARTY_LLM_LINK: '',
-        ELASTIC_AI_FEATURES_LINK: '',
-        LLM_PERFORMANCE_LINK: '',
+        ELASTIC_LLM_LINK: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
+        ELASTIC_LLM_USAGE_COST_LINK: `https://www.elastic.co/pricing`,
+        THIRD_PARTY_LLM_LINK: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
+        ELASTIC_AI_FEATURES_LINK: `${ELASTIC_DOCS}solutions/security/ai`,
+        LLM_PERFORMANCE_LINK: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
       }}
       getComments={jest.fn(() => [])}
       getUrlForApp={jest.fn()}
@@ -72,7 +73,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       userProfileService={mockUserProfileService}
       chrome={chrome}
     >
-      {children}
+      <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
     </AssistantProvider>
   );
 };

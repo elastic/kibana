@@ -17,6 +17,7 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from '../../assistant/conversations/utils';
+import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
 
 interface Props {
   conversation: Conversation | undefined;
@@ -25,8 +26,8 @@ interface Props {
 // Throttles reads from local storage to 1 every 5 seconds.
 // This is to prevent excessive reading from local storage. It acts
 // as a cache.
-const getKnowledgeBaseTourStateThrottled = throttle(() => {
-  const value = localStorage.getItem(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
+const getKnowledgeBaseTourStateThrottled = throttle((tourStorageKey) => {
+  const value = localStorage.getItem(tourStorageKey);
   if (value) {
     return JSON.parse(value) as TourState;
   }
@@ -34,10 +35,12 @@ const getKnowledgeBaseTourStateThrottled = throttle(() => {
 }, 5000);
 
 export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation }) => {
-  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(
-    NEW_FEATURES_TOUR_STORAGE_KEYS.ANONYMIZED_VALUES_AND_CITATIONS,
-    false
+  const kbTourStorageKey = useTourStorageKey(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
+
+  const tourStorageKey = useTourStorageKey(
+    NEW_FEATURES_TOUR_STORAGE_KEYS.ANONYMIZED_VALUES_AND_CITATIONS
   );
+  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
 
   const [showTour, setShowTour] = useState(false);
 
@@ -46,7 +49,7 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
       return;
     }
 
-    const knowledgeBaseTourState = getKnowledgeBaseTourStateThrottled();
+    const knowledgeBaseTourState = getKnowledgeBaseTourStateThrottled(kbTourStorageKey);
 
     // If the knowledge base tour is active on this page (i.e. step 1), don't show this tour to prevent overlap.
     if (knowledgeBaseTourState?.isTourActive && knowledgeBaseTourState?.currentTourStep === 1) {
@@ -65,7 +68,7 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         clearTimeout(timer);
       };
     }
-  }, [conversation, tourCompleted, showTour]);
+  }, [conversation, tourCompleted, showTour, kbTourStorageKey]);
 
   const finishTour = useCallback(() => {
     setTourCompleted(true);

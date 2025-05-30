@@ -22,6 +22,7 @@ import { ELASTIC_LLM_TOUR_FINISH_TOUR } from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { isElasticManagedLlmConnector } from '../../connectorland/helpers';
+import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
 
 interface Props {
   children?: EuiTourStepProps['children'];
@@ -38,10 +39,8 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
 }) => {
   const { http, inferenceEnabled } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(
-    NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM,
-    false
-  );
+  const tourStorageKey = useTourStorageKey(NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM);
+  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
 
   const [showTour, setShowTour] = useState(!tourCompleted && !isDisabled);
 
@@ -64,7 +63,6 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
     http,
     inferenceEnabled,
   });
-
   const isElasticLLMConnectorSelected = useMemo(
     () =>
       aiConnectors?.some((c) => isElasticManagedLlmConnector(c) && c.id === selectedConnectorId),
@@ -115,7 +113,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
       stepsTotal={1}
       title={
         <EuiTitle size="xs">
-          <h2>{elasticLLMTourStep1.title}</h2>
+          <span>{elasticLLMTourStep1.title}</span>
         </EuiTitle>
       }
       subtitle={
@@ -125,7 +123,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
             color: ${euiTheme.colors.textSubdued};
           `}
         >
-          <h3>{elasticLLMTourStep1.subTitle}</h3>
+          <span>{elasticLLMTourStep1.subTitle}</span>
         </EuiTitle>
       }
       footerAction={[

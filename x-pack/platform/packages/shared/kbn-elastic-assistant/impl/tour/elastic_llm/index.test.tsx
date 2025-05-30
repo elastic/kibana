@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { ElasticLLMCostAwarenessTour } from '.';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { I18nProvider } from '@kbn/i18n-react';
-import { TourState } from '../knowledge_base';
+import { act } from 'react-dom/test-utils';
+import { useAssistantContext } from '../../assistant_context';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
+jest.mock('../common/hooks/use_tour_storage_key');
+jest.mock('../../assistant_context');
+jest.mock('../../connectorland/use_load_connectors', () => ({
+  useLoadConnectors: jest.fn(),
+}));
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
   throttle: jest.fn().mockImplementation((fn) => fn),
 }));
-
-const mockGetItem = jest.fn();
-Object.defineProperty(window, 'localStorage', {
-  value: {
-    getItem: (...args: string[]) => mockGetItem(...args),
-  },
-});
 
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
@@ -34,14 +34,28 @@ describe('ElasticLLMCostAwarenessTour', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      inferenceEnabled: true,
+      docLinks: {
+        ELASTIC_LLM_LINK: 'llm-link',
+        ELASTIC_LLM_USAGE_COST_LINK: 'usage-cost-link',
+      },
+    });
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      data: [
+        {
+          id: '.inference',
+          actionTypeId: '.inference',
+          isPreconfigured: true,
+        },
+      ],
+    });
   });
 
   it('renders tour when there are content references', async () => {
     (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
 
-    mockGetItem.mockReturnValue(false);
-
-    render(
+    const { queryByTestId } = render(
       <ElasticLLMCostAwarenessTour isDisabled={false} selectedConnectorId=".inference">
         <div data-test-subj="target" />
       </ElasticLLMCostAwarenessTour>,
@@ -50,52 +64,50 @@ describe('ElasticLLMCostAwarenessTour', () => {
       }
     );
 
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     await waitFor(() => {
-      expect(screen.getByTestId('elasticLLMTourStepPanel')).toBeInTheDocument();
+      expect(queryByTestId('elasticLLMTourStepPanel')).toBeInTheDocument();
     });
   });
 
   it('does not render tour if it has already been shown', async () => {
     (useLocalStorage as jest.Mock).mockReturnValue([true, jest.fn()]);
 
-    mockGetItem.mockReturnValue(
-      JSON.stringify({
-        currentTourStep: 2,
-        isTourActive: true,
-      } as TourState)
+    const { queryByTestId } = render(
+      <ElasticLLMCostAwarenessTour isDisabled={false} selectedConnectorId=".inference" />,
+      {
+        wrapper: Wrapper,
+      }
     );
 
-    render(<ElasticLLMCostAwarenessTour isDisabled={false} selectedConnectorId=".inference" />, {
-      wrapper: Wrapper,
+    act(() => {
+      jest.runAllTimers();
     });
 
-    jest.runAllTimers();
-
     await waitFor(() => {
-      expect(screen.getByTestId('elasticLLMTourStepPanel')).not.toBeInTheDocument();
+      expect(queryByTestId('elasticLLMTourStepPanel')).not.toBeInTheDocument();
     });
   });
 
   it('does not render tour if disabled', async () => {
     (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
 
-    mockGetItem.mockReturnValue(
-      JSON.stringify({
-        currentTourStep: 2,
-        isTourActive: true,
-      } as TourState)
+    const { queryByTestId } = render(
+      <ElasticLLMCostAwarenessTour isDisabled={true} selectedConnectorId=".inference" />,
+      {
+        wrapper: Wrapper,
+      }
     );
 
-    render(<ElasticLLMCostAwarenessTour isDisabled={true} selectedConnectorId=".inference" />, {
-      wrapper: Wrapper,
+    act(() => {
+      jest.runAllTimers();
     });
 
-    jest.runAllTimers();
-
     await waitFor(() => {
-      expect(screen.queryByTestId('elasticLLMTourStepPanel')).not.toBeInTheDocument();
+      expect(queryByTestId('elasticLLMTourStepPanel')).not.toBeInTheDocument();
     });
   });
 });

@@ -57,7 +57,7 @@ import {
   useAssistantLastConversation,
   useAssistantSpaceId,
 } from './use_space_aware_context';
-import { AssistantBanner } from './assistant_banner';
+import { AssistantConversationBanner } from './assistant_conversation_banner';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -541,7 +541,7 @@ const AssistantComponent: React.FC<Props> = ({
                   banner={
                     !isDisabled &&
                     isFetchedConnectors && (
-                      <AssistantBanner
+                      <AssistantConversationBanner
                         isSettingsModalVisible={isSettingsModalVisible}
                         setIsSettingsModalVisible={setIsSettingsModalVisible}
                         shouldShowMissingConnectorCallout={showMissingConnectorCallout}

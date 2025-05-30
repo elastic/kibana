@@ -14,6 +14,7 @@ import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 import { useAssistantContext } from '../../assistant_context';
 import { useAssistantSpaceId } from '../use_space_aware_context';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
+import { useTourStorageKey } from '../../tour/common/hooks/use_tour_storage_key';
 
 export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean }) => {
   const {
@@ -22,10 +23,10 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
   } = useAssistantContext();
   const spaceId = useAssistantSpaceId();
   const { euiTheme } = useEuiTheme();
-  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(
-    NEW_FEATURES_TOUR_STORAGE_KEYS.CONVERSATION_CONNECTOR_ELASTIC_LLM,
-    false
+  const tourStorageKey = useTourStorageKey(
+    NEW_FEATURES_TOUR_STORAGE_KEYS.CONVERSATION_CONNECTOR_ELASTIC_LLM
   );
+  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
   const [showCallOut, setShowCallOut] = useState<boolean>(showEISCallout);
 
   const onDismiss = useCallback(() => {
@@ -47,6 +48,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
 
   return (
     <EuiCallOut
+      data-test-subj="elasticLlmCallout"
       onDismiss={onDismiss}
       iconType="iInCircle"
       title={i18n.translate('xpack.elasticAssistant.assistant.connectors.elasticLlmCallout.title', {
@@ -64,21 +66,21 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
           values={{
             costLink: (
               <EuiLink
+                data-test-subj="elasticLlmUsageCostLink"
                 href={ELASTIC_LLM_USAGE_COST_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
                 external
               >
-                {
-                  <FormattedMessage
-                    id="xpack.elasticAssistant.assistant.eisCallout.extraCost.label"
-                    defaultMessage="additional costs incur"
-                  />
-                }
+                <FormattedMessage
+                  id="xpack.elasticAssistant.assistant.eisCallout.extraCost.label"
+                  defaultMessage="additional costs incur"
+                />
               </EuiLink>
             ),
             connectorLink: (
               <EuiLink
+                data-test-subj="elasticLlmConnectorLink"
                 href={getUrlForApp('management', {
                   path: `/insightsAndAlerting/triggersActionsConnectors/connectors`,
                 })}
@@ -94,6 +96,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
             ),
             settingsLink: (
               <EuiLink
+                data-test-subj="elasticLlmSettingsLink"
                 href={getUrlForApp('management', {
                   path: `/kibana/spaces/edit/${spaceId}`,
                 })}
