@@ -58582,6 +58582,62 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppression'
+    Security_Detections_API_BulkActionEditPayloadAddSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - add_alert_suppression
+            - set_alert_suppression
+          type: string
+        value:
+          type: object
+          properties:
+            group_by:
+              items:
+                type: string
+              maxItems: 3
+              type: array
+            suppression_config:
+              $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppressionConfig'
+          required:
+            - group_by
+      required:
+        - type
+        - value
+    Security_Detections_API_BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAddSetAlertSuppression'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression'
+    Security_Detections_API_BulkActionEditPayloadAlertSuppressionConfig:
+      type: object
+      properties:
+        duration:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionDuration'
+        missing_fields_strategy:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppressionMissingFieldsStrategy'
+    Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - delete_alert_suppression
+          type: string
+        value:
+          type: object
+          properties:
+            group_by:
+              items:
+                type: string
+              type: array
+            suppression_config:
+              $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppressionConfig'
+          required:
+            - group_by
+      required:
+        - type
+        - value
     Security_Detections_API_BulkActionEditPayloadIndexPatterns:
       description: |
         Edits index patterns of rulesClient.
@@ -58738,6 +58794,7 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
+        - ALERT_SUPPRESSION_FEATURE
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
       type: string
