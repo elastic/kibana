@@ -9,7 +9,7 @@
 
 import { ControlGroupSerializedState, DEFAULT_AUTO_APPLY_SELECTIONS, DEFAULT_CONTROL_LABEL_POSITION } from "@kbn/controls-plugin/common";
 import { serializeRuntimeState } from "@kbn/controls-plugin/public";
-import { DashboardState } from "@kbn/dashboard-plugin/common";
+import { DashboardState } from "../../common";
 
 export function extractControlGroupState(state: { [key: string]: unknown }): DashboardState['controlGroupInput'] {
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {

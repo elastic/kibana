@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { extractPanelsState } from './extract_panels_state';
+
+describe('extractPanelsState', () => {
+  describe('>= 8.18 panels state', () => {
+    test('should convert embeddableConfig to panelConfig', () => {
+      const dashboardState = extractPanelsState({
+        panels: [
+          {
+            panelConfig: {
+              timeRange: {
+                from: 'now-7d/d',
+                to: 'now'
+              }
+            },
+            gridData: {},
+            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            title: 'Custom title',
+            type: 'map'
+          }
+        ]
+      });
+      expect(dashboardState.panels).toEqual({
+        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
+          explicitInput: {
+            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            timeRange: {
+              from: 'now-7d/d',
+              to: 'now'
+            },
+            title: 'Custom title'
+          },
+          gridData: {},
+          type: 'map',
+          panelRefName: undefined,
+          version: undefined,
+        }
+      });
+    });
+  });
+
+  describe('< 8.17 panels state', () => {
+    test('should convert embeddableConfig to panelConfig', () => {
+      const dashboardState = extractPanelsState({
+        panels: [
+          {
+            embeddableConfig: {
+              timeRange: {
+                from: 'now-7d/d',
+                to: 'now'
+              }
+            },
+            gridData: {},
+            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            title: 'Custom title',
+            type: 'map'
+          }
+        ]
+      });
+      expect(dashboardState.panels).toEqual({
+        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
+          explicitInput: {
+            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            timeRange: {
+              from: 'now-7d/d',
+              to: 'now'
+            },
+            title: 'Custom title'
+          },
+          gridData: {},
+          type: 'map',
+          panelRefName: undefined,
+          version: undefined,
+        }
+      });
+    });
+  });
+});

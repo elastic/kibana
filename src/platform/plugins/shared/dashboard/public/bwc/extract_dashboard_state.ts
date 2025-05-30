@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from "@kbn/dashboard-plugin/common";
+import { DashboardState } from "../../common";
 import { extractControlGroupState } from "./extract_control_group_state";
 import { extractSettings } from "./extract_dashboard_settings";
+import { extractPanelsState } from "./extract_panels_state";
 import { extractSearchState } from "./extract_search_state";
 
 export function extractDashboardState(state?: unknown): Partial<DashboardState> {
@@ -20,8 +21,13 @@ export function extractDashboardState(state?: unknown): Partial<DashboardState> 
     const controlGroupState = extractControlGroupState(stateAsObject);
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
 
+    if (Array.isArray(stateAsObject.references)) dashboardState.references = stateAsObject.references;
+
+    if (typeof stateAsObject.viewMode === 'string') dashboardState.viewMode = stateAsObject.viewMode as DashboardState['viewMode'];
+
     dashboardState = {
       ...dashboardState,
+      ...extractPanelsState(stateAsObject),
       ...extractSearchState(stateAsObject),
       ...extractSettings(stateAsObject)
     }

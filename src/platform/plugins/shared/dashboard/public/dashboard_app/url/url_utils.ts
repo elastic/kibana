@@ -54,11 +54,6 @@ function getPanelsMap(panels?: DashboardPanel[]): DashboardPanelMap | undefined 
     return {};
   }
 
-  if (isPanelVersionTooOld(panels)) {
-    coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
-    return undefined;
-  }
-
   // convert legacy embeddableConfig keys to panelConfig
   const standardizedPanels = panels.map((panel) => {
     if (panelIsLegacy(panel)) {
