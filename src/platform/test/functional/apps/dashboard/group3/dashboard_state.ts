@@ -12,6 +12,7 @@ import chroma from 'chroma-js';
 import rison from '@kbn/rison';
 import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/content_management/constants';
 import { SharedDashboardState } from '@kbn/dashboard-plugin/common/types';
+import { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -231,7 +232,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (appState: Partial<SharedDashboardState>) => {
             log.debug(JSON.stringify(appState, null, ' '));
             return {
-              panels: (appState.panels ?? []).map((panel) => {
+              panels: (appState.panels ?? []).map((widget) => {
+                const panel = widget as DashboardPanel;
                 return {
                   ...panel,
                   gridData: {
@@ -306,7 +308,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
               return {
-                panels: (appState.panels ?? []).map((panel) => {
+                panels: (appState.panels ?? []).map((widget) => {
+                  const panel = widget as DashboardPanel;
                   return {
                     ...panel,
                     panelConfig: {
@@ -350,7 +353,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
               return {
-                panels: (appState.panels ?? []).map((panel) => {
+                panels: (appState.panels ?? []).map((widget) => {
+                  const panel = widget as DashboardPanel;
                   return {
                     ...panel,
                     panelConfig: {
