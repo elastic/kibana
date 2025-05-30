@@ -177,7 +177,7 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
           "description": "Ingest pipeline for SLO rollup data",
           "managed": true,
           "managed_by": "observability",
-          "version": 3.4,
+          "version": 3.5,
         },
         "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -202,6 +202,21 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
           },
           Object {
             "set": Object {
+              "field": "slo.name",
+              "value": "irrelevant",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.tags",
+              "value": Array [
+                "critical",
+                "k8s",
+              ],
+            },
+          },
+          Object {
+            "set": Object {
               "field": "slo.revision",
               "value": 1,
             },
@@ -221,7 +236,7 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
               ],
               "date_rounding": "M",
               "field": "@timestamp",
-              "index_name_prefix": ".slo-observability.sli-v3.4.",
+              "index_name_prefix": ".slo-observability.sli-v3.5.",
             },
           },
           Object {
@@ -255,7 +270,7 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
           "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
           "managed": true,
           "managed_by": "observability",
-          "version": 3.4,
+          "version": 3.5,
         },
         "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.summary.pipeline-irrelevant-1",
@@ -710,7 +725,7 @@ exports[`ResetSLO happy path resets all associated resources 9`] = `
           },
         },
         "id": "slo-irrelevant",
-        "index": ".slo-observability.summary-v3.4.temp",
+        "index": ".slo-observability.summary-v3.5.temp",
         "refresh": true,
       },
     ],

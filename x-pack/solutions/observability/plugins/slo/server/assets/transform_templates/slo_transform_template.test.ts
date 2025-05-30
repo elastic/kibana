@@ -143,7 +143,7 @@ describe('slo transform template', () => {
       },
       defer_validation: true,
       _meta: {
-        version: 3.4,
+        version: 3.5,
         managed: true,
         managed_by: 'observability',
       },
