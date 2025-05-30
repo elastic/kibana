@@ -27,7 +27,8 @@ export function registerPricingRoutes(
           reason: 'This route delegates authorization to the PricingTiersClient',
         },
         authc: {
-          enabled: 'optional',
+          enabled: false,
+          reason: 'This route does not require authentication',
         },
       },
       options: { access: 'internal' },
