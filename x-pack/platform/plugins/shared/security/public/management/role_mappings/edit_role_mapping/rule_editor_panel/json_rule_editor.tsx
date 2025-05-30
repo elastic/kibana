@@ -11,9 +11,9 @@ import React, { Fragment, useState } from 'react';
 import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import type { Rule } from '../../model';
 import { generateRulesFromRaw, RuleBuilderError } from '../../model';
