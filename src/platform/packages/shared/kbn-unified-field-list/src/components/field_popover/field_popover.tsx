@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +17,6 @@ import {
   EuiPopoverTitle,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useMemoizedStyles } from '@kbn/core/public';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
@@ -102,8 +102,8 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
 const componentStyles = {
   fieldPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
-      minWidth: `${euiTheme.base * 16.5}px !important`,
-      maxWidth: `${euiTheme.base * 12.5}px !important`,
+      minWidth: `calc(${euiTheme.size.xxl} * 6.5) !important`,
+      maxWidth: `calc(${euiTheme.size.xxl} * 10) !important`,
     }),
   popoverContentContainer: css({ maxHeight: '90vh' }),
   popoverContent: ({ euiTheme }: UseEuiTheme) =>
