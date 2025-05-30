@@ -130,4 +130,26 @@ describe('useAlertsByStatus', () => {
       updatedAt: dateNow,
     });
   });
+
+  it('should include runtime_mappings in the query if provided', () => {
+    const customRuntimeMappings = {
+      'host.name.custom': {
+        type: 'keyword',
+      },
+    };
+
+    renderUseAlertsByStatus({ runtimeMappings: customRuntimeMappings });
+
+    expect(mockUseQueryAlerts).toBeCalledWith(
+      expect.objectContaining({
+        query: {
+          ...alertsByStatusQuery,
+          runtime_mappings: customRuntimeMappings,
+        },
+        indexName: 'signal-alerts',
+        skip: false,
+        queryName: ALERTS_QUERY_NAMES.BY_STATUS,
+      })
+    );
+  });
 });

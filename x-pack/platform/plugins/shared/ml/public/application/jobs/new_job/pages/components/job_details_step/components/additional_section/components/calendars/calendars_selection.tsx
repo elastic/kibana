@@ -51,7 +51,7 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   >([]);
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<MlCalendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const calendarsTitleId = useGeneratedHtmlId({ prefix: 'calendarsTitleId' });
+  const titleId = useGeneratedHtmlId({ prefix: 'calendarsSelection' });
 
   async function loadCalendars() {
     setIsLoading(true);
@@ -96,13 +96,13 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const Desc = isDst ? DescriptionDst : Description;
 
   return (
-    <Desc titleId={isDst ? `Dst${calendarsTitleId}` : calendarsTitleId}>
+    <Desc titleId={isDst ? `Dst${titleId}` : titleId}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
           <EuiComboBox
             {...comboBoxProps}
             data-test-subj="mlJobWizardComboBoxCalendars"
-            aria-labelledby={isDst ? `Dst${calendarsTitleId}` : calendarsTitleId}
+            aria-labelledby={isDst ? `Dst${titleId}` : titleId}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
