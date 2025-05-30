@@ -294,31 +294,22 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw new Error('Knowledge base is not ready');
     }
 
-    const limiter = pLimit(5);
-    const promises = resources.params.body.entries.map(async (entry) => {
-      return limiter(async () => {
-        return pRetry(
-          () => {
-            return client.addKnowledgeBaseEntry({
-              entry: {
-                confidence: 'high',
-                is_correction: false,
-                public: true,
-                labels: {},
-                role: KnowledgeBaseEntryRole.UserEntry,
-                ...entry,
-              },
-            });
-          },
-          { retries: 10 }
-        );
-      });
-    });
+    const entries = resources.params.body.entries.map(entry => ({
+      ...entry,
+      confidence: 'high',
+      is_correction: false,
+      public: true,
+      labels: {},
+      role: KnowledgeBaseEntryRole.UserEntry,
+    }));
 
-    await Promise.all(promises);
+    await pRetry(
+      () => client.addKnowledgeBaseBulkEntries({ entries }),
+      { retries: 10 }
+    );
 
     resources.logger.info(
-      `Imported ${resources.params.body.entries.length} knowledge base entries`
+      `Imported ${entries.length} knowledge base entries using bulk API`
     );
   },
 });
