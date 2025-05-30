@@ -13,6 +13,7 @@ import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 import { RootTransactionProvider, useRootTransactionContext } from '.';
 import {
+  SERVICE_NAME_FIELD,
   SPAN_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
   TRANSACTION_ID_FIELD,
@@ -76,6 +77,7 @@ describe('useRootTransaction hook', () => {
     const transactionDuration = 1;
     const spanId = 'spanId';
     const transactionId = 'transactionId';
+    const serviceName = 'serviceName';
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
@@ -86,6 +88,7 @@ describe('useRootTransaction hook', () => {
                 [TRANSACTION_DURATION_FIELD]: transactionDuration,
                 [SPAN_ID_FIELD]: spanId,
                 [TRANSACTION_ID_FIELD]: transactionId,
+                [SERVICE_NAME_FIELD]: serviceName,
               },
             },
           ],
@@ -101,6 +104,7 @@ describe('useRootTransaction hook', () => {
     expect(result.current.transaction?.duration).toBe(transactionDuration);
     expect(result.current.transaction?.[SPAN_ID_FIELD]).toBe(spanId);
     expect(result.current.transaction?.[TRANSACTION_ID_FIELD]).toBe(transactionId);
+    expect(result.current.transaction?.[SERVICE_NAME_FIELD]).toBe(serviceName);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
