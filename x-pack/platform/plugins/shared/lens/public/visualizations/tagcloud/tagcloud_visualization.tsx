@@ -318,6 +318,7 @@ export const getTagcloudVisualization = ({
           frame={props.frame}
           panelRef={props.panelRef}
           isInlineEditing={props.isInlineEditing}
+          paletteService={paletteService}
           formatFactory={formatFactory}
         />
       );
