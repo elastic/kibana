@@ -54,7 +54,6 @@ describe('createInitListener', () => {
         scope: [
           DataViewManagerScopeName.default,
           DataViewManagerScopeName.detections,
-          DataViewManagerScopeName.timeline,
           DataViewManagerScopeName.analyzer,
         ],
       })
