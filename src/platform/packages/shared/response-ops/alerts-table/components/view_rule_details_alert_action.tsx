@@ -23,6 +23,7 @@ export const ViewRuleDetailsAlertAction = typedMemo(
     alert,
     resolveRulePagePath,
     tableId,
+    openLinksInNewTab,
   }: AlertActionsProps<AC>) => {
     const {
       services: {
@@ -44,6 +45,7 @@ export const ViewRuleDetailsAlertAction = typedMemo(
         data-test-subj="viewRuleDetails"
         key="viewRuleDetails"
         href={linkToRule}
+        target={openLinksInNewTab ? '_blank' : undefined}
         size="s"
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewRuleDetails', {
