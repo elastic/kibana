@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
-
+import { omit } from 'lodash';
 import type { RuleParams } from '../../rule_schema';
 
 import { isMachineLearningParams, isEsqlParams } from '../utils/utils';
@@ -48,7 +48,6 @@ export const extractReferences = <TParams extends RuleParams>({
     exceptionsList: params.exceptionsList,
   });
   let returnReferences = [...exceptionReferences];
-
   // if statement is needed here because dataViewId is not on the base rule params
   // much like how the index property is not on the base rule params either
   if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
@@ -59,14 +58,15 @@ export const extractReferences = <TParams extends RuleParams>({
       }),
     ];
   }
+  const paramsNoRefs = { ...omit(params, 'dataViewId', 'exceptionsList') };
   // Modify params if you want to remove any elements separately here. For exceptionLists, we do not remove the id and instead
   // keep it to both fail safe guard against manually removed saved object references or if there are migration issues and the saved object
   // references are removed. Also keeping it we can detect and log out a warning if the reference between it and the saved_object reference
   // array have changed between each other indicating the saved_object array is being mutated outside of this functionality
-  const paramsWithoutSavedObjectReferences = { ...params };
+  const paramsWithoutSavedObjectReferences = { ...paramsNoRefs };
 
   return {
     references: returnReferences,
-    params: paramsWithoutSavedObjectReferences,
+    params: paramsWithoutSavedObjectReferences as TParams,
   };
 };
