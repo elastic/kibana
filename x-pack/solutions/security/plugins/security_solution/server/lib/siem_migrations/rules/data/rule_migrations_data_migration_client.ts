@@ -100,9 +100,25 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   }
 
   /**
+   * Deletes a migration document by its id.
+   */
+  async saveAsAborted({ id }: { id: string }): Promise<void> {
+    this.logger.info(`Saving migration ${id} as aborted`);
+    const index = await this.getIndexName();
+
+    await this.updateLastExecution({
+      id,
+      lastExecutionParams: {
+        is_aborted: true,
+        error: null,
+        ended_at: new Date().toISOString(),
+      },
+    });
+  }
+  /**
    * Updates the last execution parameters for a migration document.
    */
-  async updateLastExecution({
+  private async updateLastExecution({
     id,
     lastExecutionParams,
   }: {
@@ -125,5 +141,58 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
         throw error;
       });
+  }
+
+  /**
+   * Saves a migration as failed, updating the last execution parameters with the provided error message.
+   */
+  async saveAsFailed({ id, error }: { id: string; error: string }): Promise<void> {
+    this.logger.info(`Saving migration ${id} as failed with error: ${error}`);
+
+    await this.updateLastExecution({
+      id,
+      lastExecutionParams: {
+        is_aborted: false,
+        error,
+        ended_at: new Date().toISOString(),
+      },
+    });
+  }
+
+  /**
+   * Saves a migration as started, updating the last execution parameters with the current timestamp.
+   */
+  async saveAsStarted({
+    id,
+    connectorId,
+  }: {
+    id: string;
+    connectorId: RuleMigrationLastExecution['connector_id'];
+  }): Promise<void> {
+    this.logger.info(`Saving migration ${id} as started`);
+
+    await this.updateLastExecution({
+      id,
+      lastExecutionParams: {
+        started_at: new Date().toISOString(),
+        connector_id: connectorId,
+        is_aborted: false,
+        error: null,
+        ended_at: null,
+      },
+    });
+  }
+
+  /**
+   * Saves a migration as ended, updating the last execution parameters with the current timestamp.
+   */
+  async saveAsEnded({ id }: { id: string }): Promise<void> {
+    this.logger.info(`Saving migration ${id} as ended`);
+    await this.updateLastExecution({
+      id,
+      lastExecutionParams: {
+        ended_at: new Date().toISOString(),
+      },
+    });
   }
 }

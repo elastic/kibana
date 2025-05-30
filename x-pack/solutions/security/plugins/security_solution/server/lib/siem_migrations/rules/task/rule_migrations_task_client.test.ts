@@ -41,6 +41,11 @@ describe('RuleMigrationsTaskClient', () => {
   let migrationsRunning: MigrationsRunning;
   let logger: MockedLogger;
   let data: ReturnType<typeof createRuleMigrationsDataClientMock>;
+  const params: RuleMigrationTaskStartParams = {
+    migrationId,
+    connectorId: 'connector1',
+    invocationConfig: {},
+  };
 
   beforeEach(() => {
     migrationsRunning = new Map();
@@ -53,12 +58,6 @@ describe('RuleMigrationsTaskClient', () => {
   });
 
   describe('start', () => {
-    const params: RuleMigrationTaskStartParams = {
-      migrationId,
-      connectorId: 'connector1',
-      invocationConfig: {},
-    };
-
     it('should not start if migration is already running', async () => {
       // Pre-populate with the migration id.
       migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner);
@@ -120,7 +119,7 @@ describe('RuleMigrationsTaskClient', () => {
         abortController: { abort: jest.fn() },
       };
       // Use our custom mock for this test.
-      (RuleMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
+      (RuleMigrationTaskRunner as jest.Mock).mockImplementationOnce(() => mockedRunnerInstance);
 
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
@@ -148,7 +147,7 @@ describe('RuleMigrationsTaskClient', () => {
         rules: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const mockedRunnerInstance = {
-        setup: jest.fn().mockImplementation(() => {
+        setup: jest.fn().mockImplementationOnce(() => {
           // Simulate a race condition by setting the migration as running during setup.
           migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner);
           return Promise.resolve();
@@ -166,6 +165,46 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       await expect(client.start(params)).rejects.toThrow('Task already running for this migration');
+    });
+
+    it('should mark migration as started by calling saveAsStarted', async () => {
+      data.rules.getStats.mockResolvedValue({
+        rules: { total: 10, pending: 5, completed: 0, failed: 0 },
+      } as RuleMigrationDataStats);
+
+      const client = new RuleMigrationsTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        currentUser,
+        dependencies
+      );
+
+      await client.start(params);
+      expect(data.migrations.saveAsStarted).toHaveBeenCalledWith({
+        id: migrationId,
+        connectorId: params.connectorId,
+      });
+    });
+
+    it('should mark migration as ended by calling saveAsEnded if run completes successfully', async () => {
+      migrationsRunning = new Map();
+      data.rules.getStats.mockResolvedValue({
+        rules: { total: 10, pending: 5, completed: 0, failed: 0 },
+      } as RuleMigrationDataStats);
+
+      const client = new RuleMigrationsTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        currentUser,
+        dependencies
+      );
+
+      await client.start(params);
+      // Allow the asynchronous run() call to complete its finally callback.
+      await new Promise(process.nextTick);
+      expect(data.migrations.saveAsEnded).toHaveBeenCalledWith({ id: migrationId });
     });
   });
 
@@ -405,6 +444,60 @@ describe('RuleMigrationsTaskClient', () => {
         `Error stopping migration ID:${migrationId}`,
         error
       );
+    });
+
+    it('should call saveAsAborted when stopping a running migration', async () => {
+      const abortMock = jest.fn();
+      const migrationRunner = {
+        abortController: { abort: abortMock },
+      } as unknown as RuleMigrationTaskRunner;
+      migrationsRunning.set(migrationId, migrationRunner);
+      data.migrations.saveAsAborted.mockResolvedValue(undefined);
+
+      const client = new RuleMigrationsTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        currentUser,
+        dependencies
+      );
+      await client.stop(migrationId);
+      expect(data.migrations.saveAsAborted).toHaveBeenCalledWith({ id: migrationId });
+    });
+  });
+  describe('task error', () => {
+    it('should call saveAsFailed when there has been an error during the migration', async () => {
+      data.rules.getStats.mockResolvedValue({
+        rules: { total: 10, pending: 10, completed: 0, failed: 0 },
+      } as RuleMigrationDataStats);
+      const error = new Error('Migration error');
+
+      const mockedRunnerInstance = {
+        setup: jest.fn().mockResolvedValue(undefined),
+        run: jest.fn().mockRejectedValue(error),
+      } as unknown as RuleMigrationTaskRunner;
+
+      (RuleMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
+
+      const client = new RuleMigrationsTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        currentUser,
+        dependencies
+      );
+
+      const response = await client.start(params);
+
+      // Allow the asynchronous run() call to complete its finally callback.
+      await new Promise(process.nextTick);
+
+      expect(response).toEqual({ exists: true, started: true });
+
+      expect(data.migrations.saveAsFailed).toHaveBeenCalledWith({
+        id: migrationId,
+        error: error.message,
+      });
     });
   });
 });

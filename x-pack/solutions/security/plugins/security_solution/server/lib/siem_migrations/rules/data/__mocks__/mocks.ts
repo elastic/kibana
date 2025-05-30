@@ -63,6 +63,10 @@ export const mockRuleMigrationsDataMigrationsClient = {
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue(undefined),
   getAll: jest.fn().mockResolvedValue([]),
+  saveAsEnded: jest.fn().mockResolvedValue(undefined),
+  saveAsFailed: jest.fn().mockResolvedValue(undefined),
+  saveAsAborted: jest.fn().mockResolvedValue(undefined),
+  saveAsStarted: jest.fn().mockResolvedValue(undefined),
   updateLastExecution: jest.fn().mockResolvedValue(undefined),
 } as unknown as jest.Mocked<RuleMigrationsDataMigrationClient>;
 

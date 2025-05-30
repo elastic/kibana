@@ -13,7 +13,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
 import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
-import type { RuleMigrationLastExecution } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -201,40 +200,86 @@ describe('RuleMigrationsDataMigrationClient', () => {
       connector_id: 'testConnector',
     };
 
-    for (const [key, value] of Object.entries(lastExecutionParams)) {
-      const localExecutionParam = {
-        [key]: value,
-      } as unknown as RuleMigrationLastExecution;
+    it('should update `started_at` & `connector_id` when called saveAsStarted', async () => {
+      const migrationId = 'testId';
 
-      const expectedPainlessUpdateCommaned =
-        typeof value === 'string'
-          ? `ctx._source.last_execution.${key} = '${value}';`
-          : `ctx._source.last_execution.${key} = ${value};`;
-
-      it(`should update the last execution of a migration with given param : ${key}`, async () => {
-        const migrationId = 'testId';
-
-        await ruleMigrationsDataMigrationClient.updateLastExecution({
-          id: migrationId,
-          lastExecutionParams: localExecutionParam,
-        });
-
-        const expectedScript = `
-        if (ctx._source.last_execution == null) {
-          ctx._source.last_execution = [:];
-        }
-      ${expectedPainlessUpdateCommaned}
-      `;
-
-        expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
-          index: '.kibana-siem-rule-migrations',
-          id: migrationId,
-          refresh: 'wait_for',
-          script: {
-            source: expectedScript,
-          },
-        });
+      await ruleMigrationsDataMigrationClient.saveAsStarted({
+        id: migrationId,
+        connectorId: lastExecutionParams.connector_id,
       });
-    }
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            is_aborted: false,
+            error: null,
+            ended_at: null,
+            connector_id: 'testConnector',
+          },
+        },
+      });
+    });
+
+    it('should update `ended_at` when called saveAsEnded', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.saveAsEnded({ id: migrationId });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            ended_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+          },
+        },
+      });
+    });
+
+    it('should update `is_aborted` & `ended_at` correctly when called saveAsAborted', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.saveAsAborted({ id: migrationId });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            is_aborted: true,
+            error: null,
+            ended_at: expect.any(String),
+          },
+        },
+      });
+    });
+
+    it('should update `error` params correctly when called saveAsFailed', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.saveAsFailed({
+        id: migrationId,
+        error: 'Test error',
+      });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            is_aborted: false,
+            error: 'Test error',
+            ended_at: expect.any(String),
+          },
+        },
+      });
+    });
   });
 });

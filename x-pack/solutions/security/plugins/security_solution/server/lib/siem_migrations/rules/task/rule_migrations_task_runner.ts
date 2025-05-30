@@ -135,15 +135,8 @@ export class RuleMigrationTaskRunner {
       migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
         this.logger.info('Abort signal received, stopping initialization');
-        await this.saveRuleMigrationCompleted({
-          isAborted: true,
-          error: '',
-        });
         return;
       } else {
-        await this.saveRuleMigrationCompleted({
-          error: error.message,
-        });
         throw new Error(`Migration initialization failed. ${error}`);
       }
     }
@@ -200,7 +193,6 @@ export class RuleMigrationTaskRunner {
       } while (true);
 
       migrationTaskTelemetry.success();
-      await this.saveRuleMigrationCompleted({});
       this.logger.info('Migration completed successfully');
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
@@ -208,15 +200,8 @@ export class RuleMigrationTaskRunner {
       migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
         this.logger.info('Abort signal received, stopping migration');
-        await this.saveRuleMigrationCompleted({
-          isAborted: true,
-          error: '',
-        });
         return;
       } else {
-        await this.saveRuleMigrationCompleted({
-          error: error.message,
-        });
         throw new Error(`Error processing migration: ${error}`);
       }
     } finally {
@@ -362,23 +347,6 @@ export class RuleMigrationTaskRunner {
       comments: migrationResult.comments,
     };
     return this.data.rules.saveCompleted(ruleMigrationTranslated);
-  }
-
-  private async saveRuleMigrationCompleted({
-    isAborted = false,
-    error,
-  }: {
-    isAborted?: boolean;
-    error?: string;
-  }) {
-    await this.data.migrations.updateLastExecution({
-      id: this.migrationId,
-      lastExecutionParams: {
-        ended_at: new Date().toISOString(),
-        is_aborted: isAborted,
-        error: error ?? '',
-      },
-    });
   }
 
   private async saveRuleFailed(ruleMigration: RuleMigrationRule, error: Error) {

@@ -79,24 +79,22 @@ export class RuleMigrationsTaskClient {
 
     this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
-    // Mark task as started
-    await this.data.migrations.updateLastExecution({
+    this.data.migrations.saveAsStarted({
       id: migrationId,
-      lastExecutionParams: {
-        started_at: new Date().toISOString(),
-        // overwrite the previous execution details
-        is_aborted: false,
-        error: '',
-        ended_at: '',
-        connector_id: connectorId,
-      },
+      connectorId,
     });
 
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
       .run(invocationConfig)
+      .then(() => {
+        migrationLogger.info('Migration completed successfully');
+        // Save the migration execution details on completion
+        return this.data.migrations.saveAsEnded({ id: migrationId });
+      })
       .catch((error) => {
         // no use in throwing the error, the `start` promise is long gone. Just store and log the error
+        this.data.migrations.saveAsFailed({ id: migrationId, error: error.message });
         migrationLogger.error(`Error executing migration: ${error}`);
       })
       .finally(() => {
@@ -190,6 +188,7 @@ export class RuleMigrationsTaskClient {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
         migrationRunning.abortController.abort();
+        await this.data.migrations.saveAsAborted({ id: migrationId });
         return { exists: true, stopped: true };
       }
 
