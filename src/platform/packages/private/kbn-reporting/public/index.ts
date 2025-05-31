@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+
 export type { ClientConfigType } from './types';
 export { Job } from './job';
 export * from './job_completion_notifications';
@@ -26,10 +28,12 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 export interface KibanaContext {
   http: CoreSetup['http'];
   application: CoreStart['application'];
+  settings: CoreStart['settings'];
   uiSettings: CoreStart['uiSettings'];
   docLinks: CoreStart['docLinks'];
   data: DataPublicPluginStart;
   share: SharePluginStart;
+  actions: ActionsPublicPluginSetup;
 }
 
 export const useKibana = () => _useKibana<KibanaContext>();

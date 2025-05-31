@@ -21,25 +21,41 @@ import {
   ReportingAPIClient,
   KibanaContext,
 } from '@kbn/reporting-public';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
-export async function mountManagementSection(
-  coreStart: CoreStart,
-  license$: LicensingPluginStart['license$'],
-  dataService: DataPublicPluginStart,
-  shareService: SharePluginStart,
-  config: ClientConfigType,
-  apiClient: ReportingAPIClient,
-  params: ManagementAppMountParams
-) {
+const queryClient = new QueryClient();
+
+export async function mountManagementSection({
+  coreStart,
+  license$,
+  dataService,
+  shareService,
+  config,
+  apiClient,
+  params,
+  actionsService,
+}: {
+  coreStart: CoreStart;
+  license$: LicensingPluginStart['license$'];
+  dataService: DataPublicPluginStart;
+  shareService: SharePluginStart;
+  config: ClientConfigType;
+  apiClient: ReportingAPIClient;
+  params: ManagementAppMountParams;
+  actionsService: ActionsPublicPluginSetup;
+}) {
   const services: KibanaContext = {
     http: coreStart.http,
     application: coreStart.application,
+    settings: coreStart.settings,
     uiSettings: coreStart.uiSettings,
     docLinks: coreStart.docLinks,
     data: dataService,
     share: shareService,
+    actions: actionsService,
   };
 
   render(
@@ -47,15 +63,17 @@ export async function mountManagementSection(
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
           <PolicyStatusContextProvider config={config}>
-            <ReportListing
-              apiClient={apiClient}
-              toasts={coreStart.notifications.toasts}
-              license$={license$}
-              config={config}
-              redirect={coreStart.application.navigateToApp}
-              navigateToUrl={coreStart.application.navigateToUrl}
-              urlService={shareService.url}
-            />
+            <QueryClientProvider client={queryClient}>
+              <ReportListing
+                apiClient={apiClient}
+                toasts={coreStart.notifications.toasts}
+                license$={license$}
+                config={config}
+                redirect={coreStart.application.navigateToApp}
+                navigateToUrl={coreStart.application.navigateToUrl}
+                urlService={shareService.url}
+              />
+            </QueryClientProvider>
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>

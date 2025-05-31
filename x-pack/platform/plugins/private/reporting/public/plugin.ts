@@ -30,6 +30,7 @@ import {
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { InjectedIntl } from '@kbn/i18n-react';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';
@@ -41,6 +42,7 @@ export interface ReportingPublicPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
   intl: InjectedIntl;
+  actions: ActionsPublicPluginSetup;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -108,6 +110,7 @@ export class ReportingPublicPlugin
       screenshotMode: screenshotModeSetup,
       share: shareSetup,
       uiActions: uiActionsSetup,
+      actions: actionsSetup,
     } = setupDeps;
 
     const startServices$: Observable<StartServices> = from(getStartServices()).pipe(
@@ -157,15 +160,16 @@ export class ReportingPublicPlugin
         const { docTitle } = coreStart.chrome;
         docTitle.change(this.title);
 
-        const umountAppCallback = await mountManagementSection(
+        const umountAppCallback = await mountManagementSection({
           coreStart,
-          licensing.license$,
-          data,
-          share,
-          this.config,
+          license$: licensing.license$,
+          dataService: data,
+          shareService: share,
+          config: this.config,
           apiClient,
-          params
-        );
+          params,
+          actionsService: actionsSetup,
+        });
 
         return () => {
           docTitle.reset();

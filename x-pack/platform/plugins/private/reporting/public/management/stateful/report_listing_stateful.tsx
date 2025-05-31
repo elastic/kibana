@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,6 +21,22 @@ import { ListingPropsInternal } from '..';
 import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
 import { IlmPolicyLink, MigrateIlmPolicyCallOut, ReportDiagnostic } from '../components';
 import { ReportListingTable } from '../report_listing_table';
+import { ScheduledReportFlyout } from '../components/scheduled_report_flyout';
+
+const formats = [
+  {
+    id: 'printablePdfV2',
+    label: 'PDF',
+  },
+  {
+    id: 'pngV2',
+    label: 'PNG',
+  },
+  {
+    id: 'csv_searchsource',
+    label: 'CSV',
+  },
+];
 
 /**
  * Used in Stateful deployments only
@@ -32,8 +49,17 @@ export const ReportListingStateful: FC<ListingPropsInternal> = (props) => {
   const ilmPolicyContextValue = useIlmPolicyStatus();
   const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
   const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
+  const [scheduledReportFlyoutOpen, setScheduledReportFlyoutOpen] = useState(false);
+
   return (
     <>
+      {scheduledReportFlyoutOpen && (
+        <ScheduledReportFlyout
+          availableFormats={formats}
+          onClose={() => setScheduledReportFlyoutOpen(false)}
+          scheduledReport={{ jobParams: '' }}
+        />
+      )}
       <EuiPageHeader
         data-test-subj="reportingPageHeader"
         bottomBorder
@@ -49,6 +75,11 @@ export const ReportListingStateful: FC<ListingPropsInternal> = (props) => {
             defaultMessage="Get reports generated in Kibana applications."
           />
         }
+        rightSideItems={[
+          <EuiButton fill onClick={() => setScheduledReportFlyoutOpen(true)}>
+            Schedule export
+          </EuiButton>,
+        ]}
       />
 
       <MigrateIlmPolicyCallOut toasts={toasts} />
