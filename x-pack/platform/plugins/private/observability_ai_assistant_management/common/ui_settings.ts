@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { UiSettingsParams } from '@kbn/core/server';
+import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import {
   aiAssistantSimulatedFunctionCalling,
