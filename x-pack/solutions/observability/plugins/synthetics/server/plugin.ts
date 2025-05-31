@@ -115,8 +115,8 @@ export class Plugin implements PluginType {
       this.server.spaces = pluginsStart.spaces;
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
-    this.syncPrivateLocationMonitorsTask?.start().catch(() => {
-      this.logger.error('Failed to start sync private location monitors task');
+    this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
+      this.logger.error('Failed to start sync private location monitors task', { error: e });
     });
 
     this.syntheticsService?.start(pluginsStart.taskManager);
