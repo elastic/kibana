@@ -173,9 +173,9 @@ async function resolveDashboard(
     throw new InvalidContentPackError(
       `Dashboard [${
         dashboard.id
-      }] references saved object types not supported by content packs: ${uniqReferences.filter(
-        ({ type }) => !isSupportedReferenceType(type)
-      )}`
+      }] references saved object types not supported by content packs: ${uniqReferences
+        .filter(({ type }) => !isSupportedReferenceType(type))
+        .map(({ type }) => type)}`
     );
   }
 

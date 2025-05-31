@@ -76,7 +76,7 @@ export function replaceIndexPatterns(
     esqlQuery(query: string) {
       return replaceESQLQueryIndexPattern(query, patternReplacements);
     },
-    indexPattern<T extends { title?: string }>(pattern: T) {
+    indexPattern<T extends { name?: string; title?: string }>(pattern: T) {
       const updatedPattern = pattern.title
         ?.split(',')
         .map((index) => patternReplacements[index] ?? index)
