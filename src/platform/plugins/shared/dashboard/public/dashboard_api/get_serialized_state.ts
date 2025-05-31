@@ -7,27 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RefreshInterval } from '@kbn/data-plugin/public';
 import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
-import { RefreshInterval } from '@kbn/data-plugin/public';
 
 import type { Reference } from '@kbn/content-management-utils';
+import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import {
-  convertPanelMapToPanelsArray,
+  convertPanelSectionMapsToPanelsArray,
   generateNewPanelIds,
 } from '../../common/lib/dashboard_panel_converters';
-import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardAttributes } from '../../server';
 
-import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
+import type { DashboardState } from '../../common';
+import { LATEST_VERSION } from '../../common/content_management';
+import {
+  convertDashboardVersionToNumber,
+  convertNumberToDashboardVersion,
+} from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import {
   dataService,
   embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
-import type { DashboardState } from '../../common';
-import { LATEST_VERSION } from '../../common/content_management';
-import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
+import { DashboardApi } from './types';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
@@ -53,13 +56,12 @@ export const getSerializedState = ({
   dashboardState: DashboardState;
   panelReferences?: Reference[];
   searchSourceReferences?: Reference[];
-}) => {
+}): ReturnType<DashboardApi['getSerializedState']> => {
   const {
     query: {
       timefilter: { timefilter },
     },
   } = dataService;
-
   const {
     tags,
     query,
@@ -67,6 +69,7 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
+    sections,
 
     // Dashboard options
     useMargins,
@@ -100,7 +103,7 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelMapToPanelsArray(panels, true);
+  const savedPanels = convertPanelSectionMapsToPanelsArray(panels, sections, true);
 
   /**
    * Parse global time filter settings
