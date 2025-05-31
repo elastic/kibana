@@ -25,7 +25,6 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiTableHeaderMobile,
-  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { PropTypes } from 'prop-types';
 
@@ -195,15 +194,8 @@ export function CustomSelectionTable({
     return (
       <EuiCheckbox
         id={`${mobile ? `mobile-` : ''}${selectAllCheckboxId}`}
-        label={
-          mobile ? (
-            selectAll
-          ) : (
-            <EuiScreenReaderOnly>
-              <span>{selectAll}</span>
-            </EuiScreenReaderOnly>
-          )
-        }
+        label={mobile ? selectAll : null}
+        aria-label={selectAll}
         checked={areAllItemsSelected()}
         onChange={toggleAll}
       />
@@ -298,6 +290,14 @@ export function CustomSelectionTable({
                   id={item[tableItemId]}
                   data-test-subj={`${item[tableItemId]}-radio-button`}
                   checked={isItemSelected(item[tableItemId])}
+                  aria-label={i18n.translate(
+                    'xpack.ml.jobSelector.customTable.singleSelectionRadioButtonAriaLabel',
+                    {
+                      defaultMessage: 'Select job {itemId}',
+                      values: { itemId: item[tableItemId] },
+                    }
+                  )}
+                  // label="I am a radio button"
                   onChange={() => toggleItem(item[tableItemId])}
                   disabled={radioDisabledCheck !== undefined ? radioDisabledCheck(item) : undefined}
                 />
@@ -378,7 +378,7 @@ export function CustomSelectionTable({
             fullWidth
             isInvalid={error !== null}
             error={getError(error)}
-            style={{ maxHeight: '0px' }}
+            css={{ maxHeight: '0px' }}
           >
             <Fragment />
           </EuiFormRow>
