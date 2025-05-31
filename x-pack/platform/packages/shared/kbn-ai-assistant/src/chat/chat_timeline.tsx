@@ -10,14 +10,14 @@ import { css } from '@emotion/css';
 import { EuiCode, EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
-import { type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { aiAssistantAnonymizationRules } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ChatActionClickPayload,
   ChatState,
   type Feedback,
+  type Message,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
+  aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
@@ -121,22 +121,18 @@ export function ChatTimeline({
     services: { uiSettings },
   } = useKibana();
 
-  // Get anonymization rules from UI settings as a JSON string and parse it
-  const anonymizationRulesStr = uiSettings?.get<string>(aiAssistantAnonymizationRules);
-
-  // Parse the JSON string into an array of rules
-  const anonymizationRules = useMemo(() => {
+  // Combine all anonymization logic into a single useMemo
+  const { anonymizationEnabled } = useMemo(() => {
     try {
-      return JSON.parse(anonymizationRulesStr || '[]');
+      const rulesStr = uiSettings?.get<string>(aiAssistantAnonymizationRules);
+      const rules = JSON.parse(rulesStr || '[]');
+      return {
+        anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
+      };
     } catch (e) {
-      return [];
+      return { anonymizationEnabled: false };
     }
-  }, [anonymizationRulesStr]);
-
-  // Check if any rules are enabled
-  const anonymizationEnabled = useMemo(() => {
-    return Array.isArray(anonymizationRules) && anonymizationRules.some((rule) => rule.enabled);
-  }, [anonymizationRules]);
+  }, [uiSettings]);
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
