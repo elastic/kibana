@@ -86,7 +86,7 @@ describe('Handle request to schedule', () => {
 
     auditLogger = await reportingCore.getAuditLogger(fakeRawRequest as unknown as KibanaRequest);
     auditLogger.log = jest.fn();
-    soClient = await reportingCore.getSoClient(fakeRawRequest as unknown as KibanaRequest);
+    soClient = await reportingCore.getScopedSoClient(fakeRawRequest as unknown as KibanaRequest);
     soClient.create = jest.fn().mockImplementation(async (_, opts) => {
       return {
         id: 'foo',

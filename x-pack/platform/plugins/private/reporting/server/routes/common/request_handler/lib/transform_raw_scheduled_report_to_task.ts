@@ -7,11 +7,11 @@
 
 import { SavedObject } from '@kbn/core/server';
 import { ScheduledReportType } from '../../../../types';
-import { ScheduledReportTaskParams } from '../../../../lib/tasks';
+import { ScheduledReportTaskParamsWithoutSpaceId } from '../../../../lib/tasks';
 
 export function transformRawScheduledReportToTaskParams(
   rawScheduledReport: SavedObject<ScheduledReportType>
-): ScheduledReportTaskParams {
+): ScheduledReportTaskParamsWithoutSpaceId {
   return {
     id: rawScheduledReport.id,
     jobtype: rawScheduledReport.attributes.jobType,

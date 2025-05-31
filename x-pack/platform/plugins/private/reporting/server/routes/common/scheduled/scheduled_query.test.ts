@@ -183,7 +183,7 @@ describe('scheduledQueryFactory', () => {
     auditLogger = await core.getAuditLogger(fakeRawRequest);
     auditLogger.log = jest.fn();
 
-    soClient = await core.getSoClient();
+    soClient = await core.getScopedSoClient(fakeRawRequest);
     soClient.find = jest.fn().mockImplementation(async () => {
       return soResponse;
     });

@@ -119,7 +119,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
       try {
         const esClient = await reportingCore.getEsClient();
         const auditLogger = await reportingCore.getAuditLogger(req);
-        const savedObjectsClient = await reportingCore.getSoClient(req);
+        const savedObjectsClient = await reportingCore.getScopedSoClient(req);
         const username = getUsername(user);
 
         // if user has Manage Reporting privileges, we can list
@@ -194,7 +194,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
 
     async bulkDisable(logger, req, res, ids, user) {
       try {
-        const savedObjectsClient = await reportingCore.getSoClient(req);
+        const savedObjectsClient = await reportingCore.getScopedSoClient(req);
         const taskManager = await reportingCore.getTaskManager();
         const auditLogger = await reportingCore.getAuditLogger(req);
 
