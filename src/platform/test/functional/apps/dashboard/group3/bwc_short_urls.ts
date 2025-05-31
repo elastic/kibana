@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const deployment = getService('deployment');
 
-  describe.only('bwc short urls', () => {
+  describe('bwc short urls', () => {
     let baseUrl: string;
     before(async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
