@@ -43,6 +43,7 @@ export const SetupTechnologySelector = ({
     {
       id: radioGroupItemId1,
       value: SetupTechnology.AGENTLESS,
+      'aria-label': 'agentless option',
       label: (
         <>
           <strong>
@@ -66,6 +67,7 @@ export const SetupTechnologySelector = ({
     {
       id: radioGroupItemId2,
       value: SetupTechnology.AGENT_BASED,
+      'aria-label': 'agent-based option',
       label: (
         <>
           <strong>
@@ -113,6 +115,7 @@ export const SetupTechnologySelector = ({
       <EuiRadioGroup
         disabled={disabled}
         data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
+        aria-label={'setup technology radio group to select agentless or agent-based'}
         options={radioOptions}
         idSelected={radioIdSelected}
         onChange={(id) => onChange(id)}

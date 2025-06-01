@@ -146,6 +146,7 @@ export const PolicyTemplateInputSelector = ({
   return (
     <RadioGroup
       disabled={disabled}
+      aria-label={`policy-templates radio group with options Asset Inventory, AWS, GCP, Azure`}
       idSelected={input.type}
       options={options}
       onChange={(inputType) => setInput(inputType as AssetInput)}

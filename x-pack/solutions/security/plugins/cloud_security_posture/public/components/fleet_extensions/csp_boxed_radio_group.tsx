@@ -56,6 +56,7 @@ export const RadioGroup = ({
           <EuiToolTip
             key={option.id}
             content={option.tooltip}
+            aria-label={option.tooltip}
             anchorProps={{
               style: {
                 flex: '1 1 0',
@@ -80,6 +81,7 @@ export const RadioGroup = ({
                   justifyContent: 'flex-start',
                 },
               }}
+              aria-label={`${option.label} radio option button`}
               css={css`
                 width: 100%;
                 height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
@@ -102,8 +104,9 @@ export const RadioGroup = ({
             >
               <EuiRadio
                 data-test-subj={option.testId}
-                label={option.label}
                 id={option.id}
+                label={option.label}
+                aria-label={`${option.label} radio option input`}
                 checked={isChecked}
                 onChange={() => {}}
               />

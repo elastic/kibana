@@ -130,7 +130,7 @@ interface PolicyTemplateInfoProps {
 }
 
 export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => (
-  <EuiText color="subdued" size="s">
+  <EuiText color="subdued" size="s" aria-label={`policy-template tab ${postureType}`}>
     {postureType === KSPM_POLICY_TEMPLATE && (
       <FormattedMessage
         id="xpack.csp.fleetIntegration.configureKspmIntegrationDescription"
@@ -200,6 +200,7 @@ export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props
 
   return (
     <RadioGroup
+      aria-label={`policy-templates radio group with options Azure, AWS, GCP, EKS`}
       disabled={disabled}
       idSelected={input.type}
       options={options}
