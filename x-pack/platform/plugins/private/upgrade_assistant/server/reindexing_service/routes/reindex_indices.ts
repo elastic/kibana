@@ -16,6 +16,7 @@ import { reindexActionsFactory } from '../lib/reindex_actions';
 import { RouteDependencies } from '../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from '../lib/reindex_handler';
+import { versionService } from '../lib/version';
 
 export function registerReindexIndicesRoutes(
   {
@@ -66,6 +67,7 @@ export function registerReindexIndicesRoutes(
           request,
           credentialStore,
           security: getSecurityPlugin(),
+          versionService,
         });
 
         // Kick the worker on this node to immediately pickup the new reindex operation.
@@ -114,7 +116,8 @@ export function registerReindexIndicesRoutes(
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         asCurrentUser,
-        log
+        log,
+        versionService
       );
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
@@ -136,7 +139,7 @@ export function registerReindexIndicesRoutes(
           hasRequiredPrivileges,
           meta: {
             indexName,
-            reindexName: generateNewIndexName(indexName),
+            reindexName: generateNewIndexName(indexName, versionService),
             aliases: Object.keys(aliases),
             isFrozen: isTruthy(settings?.frozen),
             isReadonly: isTruthy(settings?.verified_read_only),
@@ -188,7 +191,8 @@ export function registerReindexIndicesRoutes(
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         callAsCurrentUser,
-        log
+        log,
+        versionService
       );
       const reindexService = reindexServiceFactory(
         callAsCurrentUser,

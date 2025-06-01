@@ -11,16 +11,16 @@ import { firstValueFrom } from 'rxjs';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-server';
 import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   IndexWarning,
 } from '../../../common/types';
+import { versionService } from './version';
 
-import { esIndicesStateCheck } from './es_indices_state_check';
-
-import { generateNewIndexName, getReindexWarnings, sourceNameForIndex } from './index_settings';
+import { generateNewIndexName, sourceNameForIndex } from './index_settings';
 
 import { ReindexActions } from './reindex_actions';
 
@@ -404,7 +404,7 @@ export const reindexServiceFactory = (
 
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = await actions.getFlatSettings(indexName);
-    const warnings = flatSettings ? getReindexWarnings(flatSettings) : undefined;
+    const warnings = flatSettings ? getReindexWarnings(flatSettings, versionService) : undefined;
     const indexSettingsWarning = warnings?.find(
       (warning) =>
         warning.warningType === 'indexSetting' &&
@@ -505,8 +505,8 @@ export const reindexServiceFactory = (
         return true;
       }
 
-      const names = [indexName, generateNewIndexName(indexName)];
-      const sourceName = sourceNameForIndex(indexName);
+      const names = [indexName, generateNewIndexName(indexName, versionService)];
+      const sourceName = sourceNameForIndex(indexName, versionService);
 
       // if we have re-indexed this in the past, there will be an
       // underlying alias we will also need to update.
@@ -549,7 +549,7 @@ export const reindexServiceFactory = (
             warningType: 'replaceIndexWithAlias',
             flow: 'reindex',
           },
-          ...getReindexWarnings(flatSettings),
+          ...getReindexWarnings(flatSettings, versionService),
         ];
       }
     },

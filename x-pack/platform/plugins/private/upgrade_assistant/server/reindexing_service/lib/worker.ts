@@ -15,6 +15,7 @@ import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
+import { versionService } from './version';
 
 const POLL_INTERVAL = 30000;
 const PAUSE_THRESHOLD_MULTIPLIER = 4;
@@ -99,7 +100,7 @@ export class ReindexWorker {
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser, this.log),
+      reindexActionsFactory(this.client, callAsInternalUser, this.log, versionService),
       log,
       this.licensing
     );
@@ -195,7 +196,7 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log);
+    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log, versionService);
     return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };
 

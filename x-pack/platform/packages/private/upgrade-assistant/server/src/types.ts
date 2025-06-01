@@ -43,3 +43,18 @@ export interface IndexWarning {
     [key: string]: string | string[] | boolean;
   };
 }
+
+export interface ResolveIndexResponseFromES {
+  indices: Array<{
+    name: string;
+    // per https://github.com/elastic/elasticsearch/pull/57626
+    attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
+    aliases?: string[];
+    data_stream?: string;
+  }>;
+  aliases: Array<{
+    name: string;
+    indices: string[];
+  }>;
+  data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
+}

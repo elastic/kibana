@@ -12,6 +12,7 @@ import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
 import { updateIndex } from '../lib/update_index';
+import { versionService } from '../lib/version';
 
 export function registerUpdateIndexRoute({
   router,
@@ -55,6 +56,7 @@ export function registerUpdateIndexRoute({
           index,
           operations,
           log,
+          versionService,
         });
         return response.ok();
       } catch (err) {

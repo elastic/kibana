@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+// import { reindexActionsFactory, reindexServiceFactory } from '@kbn/upgrade-assistant-server';
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
 import { ReindexingService } from '../reindexing_service';
 // todo -perhaps this becomes api usage
-import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
-import { reindexServiceFactory } from '../lib/reindexing';
 
 export function registerESDeprecationRoutes(
   {
@@ -38,14 +37,15 @@ export function registerESDeprecationRoutes(
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {
-          savedObjects: { client: savedObjectsClient },
+          // savedObjects: { client: savedObjectsClient },
           elasticsearch: { client },
         } = await core;
         const status = await getESUpgradeStatus(client.asCurrentUser, {
           featureSet,
           dataSourceExclusions,
         });
-        // this shouldn't need to happen
+        // this shouldn't need to happen - deal with later, not sure what is interesting
+        /*
         const asCurrentUser = client.asCurrentUser;
         const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser, log);
         const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
@@ -54,7 +54,7 @@ export function registerESDeprecationRoutes(
           .map(({ index }) => index as string);
 
         await reindexingService.cleanupReindexOperations(indexNames);
-        //
+        */
 
         return response.ok({
           body: status,

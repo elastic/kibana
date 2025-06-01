@@ -18,6 +18,7 @@ import { RouteDependencies } from '../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from '../lib/reindex_handler';
 import { GetBatchQueueResponse, PostBatchResponse } from './types';
+import { versionService } from '../lib/version';
 
 export function registerBatchReindexIndicesRoutes(
   {
@@ -58,7 +59,8 @@ export function registerBatchReindexIndicesRoutes(
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
         callAsCurrentUser,
-        log
+        log,
+        versionService
       );
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
@@ -122,6 +124,7 @@ export function registerBatchReindexIndicesRoutes(
               enqueue: true,
             },
             security: getSecurityPlugin(),
+            versionService,
           });
           results.enqueued.push(result);
         } catch (e) {
