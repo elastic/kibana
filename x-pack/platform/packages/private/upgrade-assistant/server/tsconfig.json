@@ -16,7 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/upgrade-assistant-server",
     "@kbn/core",
   ]
 }
