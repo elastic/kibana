@@ -7,13 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import {
-  ReindexStatus,
-  REINDEX_OP_TYPE,
-  type ResolveIndexResponseFromES,
-} from '@kbn/upgrade-assistant-plugin/common/types';
-import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
-import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
+import { ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
+import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/reindexing_service/lib/index_settings';
+import { getIndexState, Version } from '@kbn/upgrade-assistant-server';
+import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-server';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -21,6 +18,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+
+  const versionService = new Version();
+  versionService.setup('8.0.0');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
@@ -268,7 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const cleanupReindex = async (indexName: string) => {
         try {
-          await es.indices.delete({ index: generateNewIndexName(indexName) });
+          await es.indices.delete({ index: generateNewIndexName(indexName, versionService) });
         } catch (e) {
           try {
             await es.indices.delete({ index: indexName });

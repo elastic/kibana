@@ -15,3 +15,4 @@ export { getRollupJobByIndexName } from './src/rollup_job';
 export { getReindexWarnings } from './src/index_settings';
 export { Version } from './src/version';
 export { esIndicesStateCheck } from './src/es_indices_state_check';
+export { getIndexState } from './src/get_index_state';

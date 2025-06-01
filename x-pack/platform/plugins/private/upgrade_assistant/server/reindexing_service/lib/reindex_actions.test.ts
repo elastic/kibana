@@ -16,13 +16,13 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { versionService } from '../version';
+import { versionService } from './version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
-jest.mock('../rollup_job', () => ({
+jest.mock('@kbn/upgrade-assistant-server', () => ({
   getRollupJobByIndexName: jest.fn(),
 }));
 
@@ -50,7 +50,7 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log, versionService);
   });
 
   describe('createReindexOp', () => {
