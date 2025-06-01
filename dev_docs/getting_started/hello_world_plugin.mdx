@@ -35,7 +35,7 @@ $ touch kibana.jsonc
 
 and add the following:
 
-```
+```json
 {
   "type": "plugin",
   "id": "@kbn/hello-world-plugin",
@@ -45,26 +45,24 @@ and add the following:
     "id": "helloWorld",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "developerExamples"
-    ]
+    "requiredPlugins": ["developerExamples"]
   }
 }
 ```
 
 3. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="tsconfigjson" text="tsconfig.json file" />.
 
-```
-$ touch tsconfig.json
+```sh
+touch tsconfig.json
 ```
 
 And add the following to it:
 
-```
+```json
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -74,19 +72,17 @@ And add the following to it:
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../src/core/tsconfig.json" }
-  ]
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/core", "@kbn/developer-examples-plugin"]
 }
 ```
 
 4. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicindexts" text="`public/plugin.tsx` file "/>.
 
-```
-$ mkdir public
-$ cd public
-$ touch plugin.tsx
+```sh
+mkdir public
+cd public
+touch plugin.tsx
 ```
 
 And add the following to it:
@@ -118,7 +114,7 @@ export class HelloWorldPlugin implements Plugin {
 5. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicplugints" text="`public/index.ts` file "/>.
 
 ```
-$ touch index.ts
+touch index.ts
 ```
 
 ```ts
@@ -135,9 +131,9 @@ This is an easy option to get up and running ASAP and includes additional code.
 
 Use the Automatic plugin generator to get a basic structure for a new plugin. Plugins that are not part of the Kibana repo should be developed inside the plugins folder. If you are building a new plugin to check in to the Kibana repo, you will choose between a few locations:
 
-`x-pack/plugins` for plugins related to subscription features
-`src/plugins` for plugins related to free features
-`examples` for developer example plugins (these will not be included in the distributables)
+- `x-pack/plugins` for plugins related to subscription features
+- `src/plugins` for plugins related to free features
+- `examples` for developer example plugins (these will not be included in the distributables)
 
 ```
 % node scripts/generate_plugin hello_world
