@@ -43,7 +43,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/core-elasticsearch-server",
-    "@kbn/upgrade-assistant",
+    "@kbn/upgrade-assistant-public",
   ],
   "exclude": [
     "target/**/*",

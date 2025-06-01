@@ -30,7 +30,7 @@ jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-jest.mock('../../lib/reindexing', () => {
+jest.mock('../lib', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
     generateNewIndexName: () => 'reindexed-foo',
@@ -38,7 +38,7 @@ jest.mock('../../lib/reindexing', () => {
 });
 
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
-import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
+import { credentialStoreFactory } from '../lib/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
 const logMock = loggingSystemMock.create().get();

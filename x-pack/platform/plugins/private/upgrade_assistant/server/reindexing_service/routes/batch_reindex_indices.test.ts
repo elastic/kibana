@@ -28,13 +28,13 @@ jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-jest.mock('../../lib/reindexing', () => {
+jest.mock('../lib', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
   };
 });
 
-import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
+import { credentialStoreFactory } from '../lib/credential_store';
 import { registerBatchReindexIndicesRoutes } from './batch_reindex_indices';
 
 const logMock = loggingSystemMock.create().get();

@@ -1,6 +1,6 @@
 {
-  "type": "shared-browser",
-  "id": "@kbn/upgrade-assistant",
+  "type": "shared-server",
+  "id": "@kbn/upgrade-assistant-server",
   "owner": [
     "@elastic/kibana-management"
   ],

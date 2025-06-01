@@ -18,7 +18,7 @@ import {
   IndexWarning,
 } from '../../../common/types';
 
-import { esIndicesStateCheck } from '../es_indices_state_check';
+import { esIndicesStateCheck } from './es_indices_state_check';
 
 import { generateNewIndexName, getReindexWarnings, sourceNameForIndex } from './index_settings';
 

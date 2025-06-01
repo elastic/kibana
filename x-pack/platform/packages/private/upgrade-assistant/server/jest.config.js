@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { reindexServiceFactory } from './reindex_service';
-export { ReindexWorker } from './worker';
-export { generateNewIndexName } from './index_settings';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/upgrade-assistant/server'],
+};

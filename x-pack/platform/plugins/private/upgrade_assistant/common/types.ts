@@ -295,6 +295,7 @@ export interface ESUpgradeStatus {
   enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
+/* moved
 export interface ResolveIndexResponseFromES {
   indices: Array<{
     name: string;
@@ -309,6 +310,7 @@ export interface ResolveIndexResponseFromES {
   }>;
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }
+  */
 
 export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
 

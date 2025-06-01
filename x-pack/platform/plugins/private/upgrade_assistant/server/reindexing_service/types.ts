@@ -8,7 +8,7 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { CredentialStore } from '../lib/reindexing/credential_store';
+import { CredentialStore } from './lib/credential_store';
 import { handleEsError } from '../shared_imports';
 import type { DataSourceExclusions, FeatureSet } from '../../common/types';
 

@@ -9,8 +9,7 @@ import { ElasticsearchServiceStart, Logger, SavedObjectsClient } from '@kbn/core
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { ReindexWorker } from '../lib/reindexing';
-import { CredentialStore } from '../lib/reindexing/credential_store';
+import { ReindexWorker, CredentialStore } from './lib';
 
 interface CreateReindexWorker {
   logger: Logger;

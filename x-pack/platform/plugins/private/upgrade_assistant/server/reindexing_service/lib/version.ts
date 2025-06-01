@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/upgrade-assistant'],
-};
+import { Version } from '@kbn/upgrade-assistant-server';
+
+const versionService = new Version();
+
+export { versionService };

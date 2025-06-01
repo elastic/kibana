@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { versionService } from '../version';
-import { getMockVersionInfo } from '../__fixtures__/version';
+import { versionService } from './version';
+import { getMockVersionInfo } from '../../lib/__fixtures__/version';
 
-import { generateNewIndexName, getReindexWarnings, sourceNameForIndex } from './index_settings';
+import { generateNewIndexName, sourceNameForIndex } from './index_settings';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
@@ -19,18 +19,20 @@ describe('index settings', () => {
     });
 
     it('parses internal indices', () => {
-      expect(sourceNameForIndex('.myInternalIndex')).toEqual('.myInternalIndex');
+      expect(sourceNameForIndex('.myInternalIndex', versionService)).toEqual('.myInternalIndex');
     });
 
     it('parses non-internal indices', () => {
-      expect(sourceNameForIndex('myIndex')).toEqual('myIndex');
+      expect(sourceNameForIndex('myIndex', versionService)).toEqual('myIndex');
     });
 
     it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in newIndexName`, () => {
-      expect(sourceNameForIndex(`reindexed-v${prevMajor}-myIndex`)).toEqual('myIndex');
-      expect(sourceNameForIndex(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
-        '.myInternalIndex'
+      expect(sourceNameForIndex(`reindexed-v${prevMajor}-myIndex`, versionService)).toEqual(
+        'myIndex'
       );
+      expect(
+        sourceNameForIndex(`.reindexed-v${prevMajor}-myInternalIndex`, versionService)
+      ).toEqual('.myInternalIndex');
     });
   });
 
@@ -40,34 +42,25 @@ describe('index settings', () => {
     });
 
     it('parses internal indices', () => {
-      expect(generateNewIndexName('.myInternalIndex')).toEqual(
+      expect(generateNewIndexName('.myInternalIndex', versionService)).toEqual(
         `.reindexed-v${currentMajor}-myInternalIndex`
       );
     });
 
     it('parses non-internal indices', () => {
-      expect(generateNewIndexName('myIndex')).toEqual(`reindexed-v${currentMajor}-myIndex`);
+      expect(generateNewIndexName('myIndex', versionService)).toEqual(
+        `reindexed-v${currentMajor}-myIndex`
+      );
     });
 
     it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in generateNewIndexName`, () => {
-      expect(generateNewIndexName(`reindexed-v${prevMajor}-myIndex`)).toEqual(
+      expect(generateNewIndexName(`reindexed-v${prevMajor}-myIndex`, versionService)).toEqual(
         `reindexed-v${currentMajor}-myIndex`
       );
 
-      expect(generateNewIndexName(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
-        `.reindexed-v${currentMajor}-myInternalIndex`
-      );
-    });
-  });
-
-  describe('getReindexWarnings', () => {
-    it('does not blow up for empty mappings', () => {
       expect(
-        getReindexWarnings({
-          settings: {},
-          mappings: {},
-        })
-      ).toEqual([]);
+        generateNewIndexName(`.reindexed-v${prevMajor}-myInternalIndex`, versionService)
+      ).toEqual(`.reindexed-v${currentMajor}-myInternalIndex`);
     });
   });
 });

@@ -15,13 +15,14 @@ import {
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { Version } from '@kbn/upgrade-assistant-server';
 
 import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
-import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
-import { reindexServiceFactory } from '../../lib/reindexing';
-import { CredentialStore } from '../../lib/reindexing/credential_store';
-import { error } from '../../lib/reindexing/error';
+import { reindexActionsFactory } from './reindex_actions';
+import { reindexServiceFactory } from './reindex_service';
+import { CredentialStore } from './credential_store';
+import { error } from './error';
 
 interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;
@@ -35,6 +36,7 @@ interface ReindexHandlerArgs {
     enqueue?: boolean;
   };
   security?: SecurityPluginStart;
+  versionService: Version;
 }
 
 export const reindexHandler = async ({
@@ -47,9 +49,15 @@ export const reindexHandler = async ({
   savedObjects,
   reindexOptions,
   security,
+  versionService,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
-  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log);
+  const reindexActions = reindexActionsFactory(
+    savedObjects,
+    callAsCurrentUser,
+    log,
+    versionService
+  );
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
 
   if (!(await reindexService.hasRequiredPrivileges(indexName))) {

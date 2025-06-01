@@ -15,9 +15,9 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ReindexWorker } from '../lib/reindexing';
+import { ReindexWorker } from './lib';
 import { createReindexWorker } from './create_reindex_worker';
-import { CredentialStore, credentialStoreFactory } from '../lib/reindexing/credential_store';
+import { CredentialStore, credentialStoreFactory } from './lib/credential_store';
 import { hiddenTypes } from '../saved_object_types';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './routes';
 import { handleEsError } from '../shared_imports';
@@ -65,7 +65,6 @@ export class ReindexingService {
 
   public setup({ http }: CoreSetup, { licensing, security }: PluginsSetup) {
     this.licensing = licensing;
-    // todo routing
     const router = http.createRouter();
 
     const dependencies: RouteDependencies = {

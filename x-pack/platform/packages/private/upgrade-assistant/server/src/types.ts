@@ -26,3 +26,20 @@ export interface FlatSettings {
     _meta?: MetaProperties;
   };
 }
+
+// 8.0 -> 9.0 warnings
+export type IndexWarningType = 'indexSetting' | 'replaceIndexWithAlias' | 'makeIndexReadonly';
+
+export interface IndexWarning {
+  warningType: IndexWarningType;
+  flow: 'reindex' | 'readonly' | 'all';
+  /**
+   * Optional metadata for deprecations
+   *
+   * @remark
+   * For "indexSetting" we want to surface the deprecated settings.
+   */
+  meta?: {
+    [key: string]: string | string[] | boolean;
+  };
+}

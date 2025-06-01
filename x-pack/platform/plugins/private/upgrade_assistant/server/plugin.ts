@@ -22,7 +22,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
-import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
+// import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { registerRoutes } from './routes/register_routes';
@@ -48,7 +48,7 @@ interface PluginsStart {
 
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
-  private readonly credentialStore: CredentialStore;
+  // private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
   private readonly initialDataSourceExclusions: DataSourceExclusions;
@@ -62,7 +62,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
     // used by worker and passed to routes
-    this.credentialStore = credentialStoreFactory(this.logger);
+    // this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
 
     const { featureSet, dataSourceExclusions } = config.get();
@@ -114,7 +114,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     const dependencies: RouteDependencies = {
       router,
-      credentialStore: this.credentialStore,
+      // credentialStore: this.credentialStore,
       log: this.logger,
       licensing,
       getSavedObjectsService: () => {
@@ -136,7 +136,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       defaultTarget: versionService.getNextMajorVersion(),
     };
 
-    registerRoutes(dependencies);
+    registerRoutes(dependencies, this.reindexingService!);
 
     if (usageCollection) {
       void getStartServices().then(([{ elasticsearch }]) => {

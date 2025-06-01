@@ -21,14 +21,18 @@ import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
+import { ReindexingService } from '../reindexing_service';
 
-export function registerRoutes(dependencies: RouteDependencies) {
+export function registerRoutes(
+  dependencies: RouteDependencies,
+  reindexingService: ReindexingService
+) {
   registerAppRoutes(dependencies);
 
   registerCloudBackupStatusRoutes(dependencies);
   registerClusterUpgradeStatusRoutes(dependencies);
   registerSystemIndicesMigrationRoutes(dependencies);
-  registerESDeprecationRoutes(dependencies);
+  registerESDeprecationRoutes(dependencies, reindexingService);
   registerDeprecationLoggingRoutes(dependencies);
   registerUpdateSettingsRoute(dependencies);
   registerMlSnapshotRoutes(dependencies);
