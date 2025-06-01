@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import {
   EuiDragDropContext,
@@ -22,6 +22,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,14 +37,24 @@ export interface QueryRuleDraggableListItemProps {
   queryRule: QueryRulesQueryRule;
   index: number;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  isLastItem?: boolean;
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
 }
 
 export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProps> = ({
   index,
   onEditRuleFlyoutOpen,
   queryRule,
+  tourInfo,
+  isLastItem = false,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+  const localTourTargetRef = useRef<HTMLDivElement>(null);
+  const effectiveRef = tourInfo?.tourTargetRef || localTourTargetRef;
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
@@ -63,8 +74,8 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
       >
         {(provided) => (
           <EuiPanel paddingSize="s" hasShadow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false} ref={isLastItem ? effectiveRef : undefined}>
                 <EuiPanel
                   color="transparent"
                   paddingSize="s"
@@ -76,6 +87,9 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
                 <EuiFlexGroup responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="subdued">{index + 1}</EuiNotificationBadge>
+                  </EuiFlexItem>
                   <EuiFlexItem grow={7}>
                     <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
                       {Array.isArray(queryRule.criteria) ? (
@@ -184,11 +198,18 @@ export interface QueryRuleDraggableListProps {
   rules: SearchQueryRulesQueryRule[];
   onReorder: (queryRules: SearchQueryRulesQueryRule[]) => void;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
 }
+
 export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
   onEditRuleFlyoutOpen,
   onReorder,
+  tourInfo,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -202,7 +223,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
       }}
     >
       <>
-        <QueryRuleDraggableListHeader />
+        <QueryRuleDraggableListHeader tourInfo={tourInfo} />
         <EuiDroppable
           droppableId="queryRuleListDropabble"
           spacing="m"
@@ -216,6 +237,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
               index={index}
               data-test-subj={`searchQueryRulesDraggableItem-${queryRule.rule_id}`}
               onEditRuleFlyoutOpen={onEditRuleFlyoutOpen}
+              isLastItem={index === rules.length - 1}
             />
           ))}
         </EuiDroppable>

@@ -17,10 +17,19 @@ import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 
 interface QueryRuleDetailPanelProps {
   rulesetId: QueryRulesQueryRuleset['ruleset_id'];
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
 }
-export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rulesetId }) => {
+export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
+  rulesetId,
+  tourInfo,
+}) => {
   const { rules, setNewRules, updateRule } = useQueryRulesetDetailState({ rulesetId });
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
+
   return (
     <KibanaPageTemplate.Section restrictWidth>
       {ruleIdToEdit !== null && (
@@ -79,6 +88,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rule
             rules={rules}
             onReorder={(newRules) => setNewRules(newRules)}
             onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
+            tourInfo={tourInfo}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
