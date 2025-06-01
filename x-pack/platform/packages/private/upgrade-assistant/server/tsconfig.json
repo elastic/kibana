@@ -15,5 +15,8 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": ["@kbn/i18n"]
+  "kbn_references": [
+    "@kbn/upgrade-assistant-server",
+    "@kbn/core",
+  ]
 }
