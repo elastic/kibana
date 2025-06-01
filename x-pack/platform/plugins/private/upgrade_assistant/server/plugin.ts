@@ -136,7 +136,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       defaultTarget: versionService.getNextMajorVersion(),
     };
 
-    registerRoutes(dependencies, this.reindexingService!);
+    registerRoutes(dependencies);
 
     if (usageCollection) {
       void getStartServices().then(([{ elasticsearch }]) => {
