@@ -474,7 +474,13 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks, alertingConfig: alertingConfigMock });
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -496,7 +502,13 @@ describe('createAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks, alertingConfig: alertingConfigMock });
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -514,7 +526,13 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks, alertingConfig: alertingConfigMock });
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
