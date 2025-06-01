@@ -21,16 +21,16 @@ This is a good option if you want to understand the bare minimum needed to regis
 
 1. Create your plugin folder. Start off in the `kibana` folder.
 
-```
-$ cd examples
-$ mkdir hello_world
-$ cd hello_world
+```sh
+cd examples
+mkdir hello_world
+cd hello_world
 ```
 
 2. Create the <DocLink id="kibDevAnatomyOfAPlugin" section="kibanajson" text="kibana.jsonc manifest file"/>.
 
-```
-$ touch kibana.jsonc
+```sh
+touch kibana.jsonc
 ```
 
 and add the following:
@@ -127,6 +127,12 @@ export function plugin() {
 
 ## 2. Option 2 - Use the automatic plugin generator
 
+---
+
+**Note:** Plugin generator is not yet updated and generated code won't work out-of-the-box. Please refer to existing examples.
+
+---
+
 This is an easy option to get up and running ASAP and includes additional code.
 
 Use the Automatic plugin generator to get a basic structure for a new plugin. Plugins that are not part of the Kibana repo should be developed inside the plugins folder. If you are building a new plugin to check in to the Kibana repo, you will choose between a few locations:
@@ -158,7 +164,11 @@ In one terminal window, run `yarn es snapshot --license trial` to boot up Elasti
 In another terminal window, run `yarn start --run-examples` to boot up Kibana and include the example plugins. Your example plugin should show up in the navigation at the very bottom.
 
 If you build it manually it will look something like this:
-![hello world manual](./hello_world_manual.png)
+
+![hello world manual plugin in nav](./kibana-hello-world-home-nav.png)
+
+![hello world manual plugin](./kibana-hello-world.png)
 
 If you built it with the generator, it will look something like this:
+
 ![hello world generated](./hello_world_generated.png)
