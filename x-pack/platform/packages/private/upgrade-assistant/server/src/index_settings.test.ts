@@ -10,7 +10,7 @@ import { SemVer } from 'semver';
 
 const kibanaVersion = new SemVer('8.0.0');
 
-import { getReindexWarnings } from '@kbn/upgrade-assistant-server';
+import { getReindexWarnings } from '..';
 
 describe('index settings', () => {
   describe('getReindexWarnings', () => {
