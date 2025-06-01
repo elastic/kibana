@@ -10,19 +10,17 @@ import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
-import { ReindexingService } from '../reindexing_service';
+// import { ReindexingService } from '../reindexing_service';
 // todo -perhaps this becomes api usage
 
-export function registerESDeprecationRoutes(
-  {
-    config: { featureSet, dataSourceExclusions },
-    router,
-    lib: { handleEsError },
-    licensing,
-    log,
-  }: RouteDependencies,
-  reindexingService: ReindexingService
-) {
+export function registerESDeprecationRoutes({
+  config: { featureSet, dataSourceExclusions },
+  router,
+  lib: { handleEsError },
+  licensing,
+  log,
+}: RouteDependencies) {
+  // reindexingService: ReindexingService
   router.get(
     {
       path: `${API_BASE_PATH}/es_deprecations`,
