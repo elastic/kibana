@@ -92,6 +92,7 @@ export const buildESQLTheme = ({
           'nulls_order',
           'join_lookup',
           'join',
+          'change_point',
           'dev_insist',
           'dev_rrf',
           'dev_completion',
