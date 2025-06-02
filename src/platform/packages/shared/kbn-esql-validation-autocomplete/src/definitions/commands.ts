@@ -83,6 +83,7 @@ import {
   suggest as suggestForChangePoint,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterChangePoint,
 } from '../autocomplete/commands/change_point';
+import { suggest as suggestForSample } from '../autocomplete/commands/sample';
 
 import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
@@ -710,6 +711,17 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
   },
   {
     hidden: true,
+    name: 'sample',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sampleDoc', {
+      defaultMessage:
+        'Samples a percentage of the results, optionally with a seed for reproducibility.',
+    }),
+    declaration: `SAMPLE <percentage> [<seed>]`,
+    examples: [],
+    suggest: suggestForSample,
+  },
+  {
     preview: true,
     name: 'rrf',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rrfDoc', {

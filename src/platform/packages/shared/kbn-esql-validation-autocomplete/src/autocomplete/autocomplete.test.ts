@@ -32,7 +32,9 @@ import { getDateHistogramCompletionItem } from './commands/stats/util';
 import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { getRecommendedQueries } from './recommended_queries/templates';
 
-const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
+const commandDefinitions = unmodifiedCommandDefinitions.filter(
+  ({ name, hidden }) => !hidden && name !== 'rrf'
+);
 
 const getRecommendedQueriesSuggestions = (fromCommand: string, timeField?: string) =>
   getRecommendedQueries({
