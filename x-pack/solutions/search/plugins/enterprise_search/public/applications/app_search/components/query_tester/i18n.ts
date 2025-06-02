@@ -13,9 +13,3 @@ export const QUERY_TESTER_TITLE = i18n.translate(
     defaultMessage: 'Query tester',
   }
 );
-export const CONFIGURATIONS = i18n.translate(
-  'xpack.securitySolutionServerless.navigation.aiSoc.configurations',
-  {
-    defaultMessage: 'Configurations',
-  }
-);

@@ -49,10 +49,7 @@ const subPluginClasses = {
   CloudSecurityPosture,
   ThreatIntelligence,
   EntityAnalytics,
-  Assets,
   Configurations,
-  Investigations,
-  MachineLearning,
   SiemMigrations,
 };
 export { subPluginClasses };

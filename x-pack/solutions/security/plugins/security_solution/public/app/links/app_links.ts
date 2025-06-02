@@ -6,12 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
-import { configurationsLinks } from './configurations/links';
-import type { AppLinkItems } from './common/links/types';
-import type { StartPlugins } from './types';
-
-// TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
-export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_links';
+import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
