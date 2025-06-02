@@ -95,12 +95,19 @@ export class RuleMigrationsTaskClient {
          */
         migrationLogger.info('Migration Execution task completed successfully');
         // Save the migration execution details on completion
-        this.data.migrations.saveAsEnded({ id: migrationId });
+        this.data.migrations.saveAsEnded({ id: migrationId }).catch((error) => {
+          migrationLogger.error(`Error saving migration as ended: ${error}`);
+        });
       })
       .catch((error) => {
         // no use in throwing the error, the `start` promise is long gone. Just store and log the error
-        this.data.migrations.saveAsFailed({ id: migrationId, error: error.message });
-        migrationLogger.error(`Error executing migration task: ${error}`);
+        this.data.migrations
+          .saveAsFailed({ id: migrationId, error: error.message })
+          .catch((saveError) => {
+            migrationLogger.error(`Error saving migration as failed: ${saveError}`);
+          });
+
+        void migrationLogger.error(`Error executing migration task: ${error}`);
       })
       .finally(() => {
         this.migrationsRunning.delete(migrationId);
