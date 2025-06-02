@@ -281,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
               .on('error', createSupertestErrorLogger(log))
               .send(body)
               .expect(200);
-          })
+          });
 
           it(`should error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {
             const body = trustedAppApiCall.getBody();
