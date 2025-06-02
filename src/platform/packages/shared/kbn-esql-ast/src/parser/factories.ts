@@ -11,13 +11,7 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import type {
-  ParseTree,
-  ParserRuleContext,
-  RecognitionException,
-  TerminalNode,
-  Token,
-} from 'antlr4';
+import type { ParseTree, ParserRuleContext, RecognitionException, TerminalNode } from 'antlr4';
 import {
   FunctionContext,
   IdentifierContext,
