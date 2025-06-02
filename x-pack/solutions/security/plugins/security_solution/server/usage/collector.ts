@@ -1009,6 +1009,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'boolean',
                 _meta: { description: 'If the detection rule has been enabled by the user' },
               },
+              is_customized: {
+                type: 'boolean',
+                _meta: {
+                  description:
+                    'If the detection rule authored by Elastic has been customized by the user',
+                },
+              },
               elastic_rule: {
                 type: 'boolean',
                 _meta: { description: 'If the detection rule has been authored by Elastic' },
@@ -3487,6 +3494,24 @@ export const registerCollector: RegisterCollector = ({
                   _meta: { description: 'The number of succeeded rules' },
                 },
               },
+            },
+          },
+          detection_rule_upgrade_status: {
+            total: {
+              type: 'long',
+              _meta: { description: 'Total number of upgradeable rules' },
+            },
+            customized: {
+              type: 'long',
+              _meta: { description: 'Number of customized upgradeable rules' },
+            },
+            enabled: {
+              type: 'long',
+              _meta: { description: 'Number of enabled upgradeable rules' },
+            },
+            disabled: {
+              type: 'long',
+              _meta: { description: 'Number of disabled upgradeable rules' },
             },
           },
         },
