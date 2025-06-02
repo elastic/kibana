@@ -153,4 +153,19 @@ describe('prepareSearchParams', () => {
 
     expect(result).toEqual({ query: expect.any(String), gapRange });
   });
+
+  test('should return only query when neither selectedRuleIds nor gapRange are provided', () => {
+    const dryRunResult: DryRunResult = { ruleErrors: [] };
+
+    const filterOptions: FilterOptions = {
+      filter: '',
+      tags: [],
+      showCustomRules: false,
+      showElasticRules: false,
+    };
+
+    const result = prepareSearchParams({ dryRunResult, filterOptions });
+
+    expect(result).toEqual({ query: expect.any(String) });
+  });
 });
