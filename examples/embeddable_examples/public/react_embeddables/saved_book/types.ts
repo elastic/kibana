@@ -23,6 +23,11 @@ export interface BookAttributes {
   published?: number;
 }
 
+export interface BookSavedObject {
+  id: string;
+  attributes: BookAttributes;
+}
+
 export interface BookByValueSerializedState {
   attributes: BookAttributes;
 }

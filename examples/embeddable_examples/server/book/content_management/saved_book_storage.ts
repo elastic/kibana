@@ -18,6 +18,7 @@ import {
   ItemAttributesWithReferences,
   SavedObjectAttributesWithReferences,
 } from '@kbn/embeddable-plugin/common/types';
+import { omit } from 'lodash';
 import type { BookAttributes, BookSearchOptions } from './latest';
 import { BOOK_SAVED_OBJECT_TYPE, SavedBookAttributes } from '../saved_object';
 import {
@@ -77,7 +78,7 @@ export class SavedBookStorage implements ContentStorage {
       throw Boom.badRequest(`Invalid response. ${error.message}`);
     }
 
-    const response = item;
+    const response = { item: item.attributes };
 
     const { value, error: resultError } = transforms.get.out.result.down(response, undefined, {
       validate: false,
@@ -138,7 +139,7 @@ export class SavedBookStorage implements ContentStorage {
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down(
-      { item },
+      { item, meta: omit(savedObject, 'attributes') },
       undefined, // do not override version
       { validate: false } // validation is done above
     );
@@ -203,7 +204,7 @@ export class SavedBookStorage implements ContentStorage {
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down(
-      { item },
+      { item, meta: omit(savedObject, 'attributes') },
       undefined, // do not override version
       { validate: false } // validation is done above
     );

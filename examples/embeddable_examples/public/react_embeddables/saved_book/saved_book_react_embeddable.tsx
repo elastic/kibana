@@ -34,6 +34,7 @@ import React from 'react';
 import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { defaultBookAttributes } from './book_state';
 import { SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
@@ -58,9 +59,14 @@ const bookAttributeComparators: StateComparators<{ attributes: BookAttributes }>
   attributes: 'deepEquality',
 };
 
+interface Dependencies {
+  embeddable: EmbeddableStart;
+  contentManagement: ContentManagementPublicStart;
+}
+
 const deserializeState = async (
   serializedState: SerializedPanelState<BookSerializedState>,
-  embeddable: EmbeddableStart
+  contentManagement: ContentManagementPublicStart
 ): Promise<BookRuntimeState> => {
   // panel state is always stored with the parent.
   const titlesState: SerializedTitles = {
@@ -73,7 +79,7 @@ const deserializeState = async (
     ? serializedState.rawState.savedObjectId
     : undefined;
   const attributes: BookAttributes = bookSerializedStateIsByReference(serializedState.rawState)
-    ? await loadBookAttributes(embeddable, serializedState.rawState.savedObjectId)!
+    ? await loadBookAttributes(contentManagement, serializedState.rawState.savedObjectId)!
     : serializedState.rawState.attributes;
 
   // Combine the serialized state from the parent with the state from the
@@ -85,11 +91,14 @@ const deserializeState = async (
   };
 };
 
-export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: EmbeddableStart) => {
+export const getSavedBookEmbeddableFactory = (
+  core: CoreStart,
+  { embeddable, contentManagement }: Dependencies
+) => {
   const savedBookEmbeddableFactory: EmbeddableFactory<BookSerializedState, BookApi> = {
     type: SAVED_BOOK_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const state = await deserializeState(initialState, embeddable);
+      const state = await deserializeState(initialState, contentManagement);
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const bookAttributesManager = initializeStateManager<BookAttributes>(
@@ -131,7 +140,9 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
           };
         },
         onReset: async (lastSaved) => {
-          const lastRuntimeState = lastSaved ? await deserializeState(lastSaved, embeddable) : {};
+          const lastRuntimeState = lastSaved
+            ? await deserializeState(lastSaved, contentManagement)
+            : {};
           titleManager.reinitializeState(lastRuntimeState);
           bookAttributesManager.reinitializeState(lastRuntimeState);
         },
@@ -172,7 +183,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
         saveToLibrary: async (newTitle: string) => {
           bookAttributesManager.api.setBookTitle(newTitle);
           const newId = await saveBookAttributes(
-            embeddable,
+            contentManagement,
             undefined,
             bookAttributesManager.getLatestState()
           );
