@@ -64,11 +64,6 @@ const mapFeatureTooltipTable = css({
   width: '100%',
 });
 
-const mapFeatureTooltipActionsRow = css({
-  display: 'flex',
-  justifyContent: 'flex-end',
-});
-
 export class FeatureProperties extends Component<Props, State> {
   private _isMounted = false;
   private _prevLayerId: string = '';
@@ -279,7 +274,7 @@ export class FeatureProperties extends Component<Props, State> {
       <td>{applyFilterButton}</td>
     ) : (
       <td className="mapFeatureTooltip_actionsRow">
-        <span css={mapFeatureTooltipActionsRow}>
+        <span>
           {applyFilterButton}
           <EuiButtonEmpty
             size="xs"
@@ -371,6 +366,10 @@ const componentStyles = {
         minWidth: `${parseFloat(euiTheme.size.xl) * 2.5}px`,
         maxWidth: `${parseFloat(euiTheme.size.xl) * 4}px`,
         fontWeight: euiTheme.font.weight.bold,
+      },
+      '& .mapFeatureTooltip_actionsRow > span': {
+        display: 'flex',
+        justifyContent: 'flex-end',
       },
       td: {
         overflowWrap: 'break-word',

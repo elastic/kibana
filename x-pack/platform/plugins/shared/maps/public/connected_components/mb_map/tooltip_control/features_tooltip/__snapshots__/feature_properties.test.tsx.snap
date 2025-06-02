@@ -122,9 +122,7 @@ exports[`FeatureProperties should show view actions button when there are availa
       <td
         className="mapFeatureTooltip_actionsRow"
       >
-        <span
-          css="unknown styles"
-        >
+        <span>
           <EuiButtonEmpty
             aria-label="Filter on property"
             data-test-subj="mapTooltipCreateFilterButton"
