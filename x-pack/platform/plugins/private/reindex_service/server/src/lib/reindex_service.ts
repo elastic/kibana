@@ -17,7 +17,7 @@ import {
   ReindexStatus,
   ReindexStep,
   IndexWarning,
-} from '../../../common/types';
+} from '@kbn/upgrade-assistant-pkg-common';
 import { versionService } from './version';
 
 import { generateNewIndexName, sourceNameForIndex } from './index_settings';

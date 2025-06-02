@@ -7,8 +7,6 @@
 
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
-import { SavedObject } from '@kbn/core/types';
 import type { DataStreamsAction } from './data_stream_types';
 
 export * from './data_stream_types';
@@ -27,8 +25,6 @@ export interface ResponseError {
 
 // todo - move to package
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
-
-export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // Telemetry types
 export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';

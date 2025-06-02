@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/private/reindex_service'],
+  roots: ['<rootDir>/x-pack/platform/plugins/private/upgrade_assistant'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/reindex_service',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/upgrade_assistant',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/private/reindex_service/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/private/upgrade_assistant/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

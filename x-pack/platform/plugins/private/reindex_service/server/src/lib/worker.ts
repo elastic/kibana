@@ -10,7 +10,7 @@ import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';

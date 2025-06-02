@@ -11,7 +11,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
-import { handleEsError } from '../../shared_imports';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
 const mockReindexService = {
@@ -26,7 +26,7 @@ const mockReindexService = {
   getIndexAliases: jest.fn().mockResolvedValue({}),
   getIndexInfo: jest.fn().mockResolvedValue({ aliases: {}, settings: {} }),
 };
-jest.mock('../../lib/es_version_precheck', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
@@ -37,7 +37,7 @@ jest.mock('../lib', () => {
   };
 });
 
-import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 

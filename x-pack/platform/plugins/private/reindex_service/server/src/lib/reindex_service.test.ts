@@ -17,11 +17,11 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-} from '../../../common/types';
+} from '@kbn/upgrade-assistant-pkg-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import { getMockVersionInfo } from '../../lib/__fixtures__/version'; // this will need to be addressed
+import { getMockVersionInfo } from '../__fixtures__/version'; // this will need to be addressed
 import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
 import { versionService } from './version';
 

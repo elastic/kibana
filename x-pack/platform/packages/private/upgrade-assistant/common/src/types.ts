@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SavedObject } from '@kbn/core/types';
+
 // 8.0 -> 9.0 warnings
 export type IndexWarningType = 'indexSetting' | 'replaceIndexWithAlias' | 'makeIndexReadonly';
 
@@ -133,3 +135,5 @@ export enum ReindexStatus {
   // the status from the server API
   fetchFailed,
 }
+
+export type ReindexSavedObject = SavedObject<ReindexOperation>;

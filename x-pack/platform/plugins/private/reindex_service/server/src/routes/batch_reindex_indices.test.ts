@@ -11,7 +11,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
-import { handleEsError } from '../../shared_imports';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -24,7 +24,7 @@ const mockReindexService = {
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
 };
-jest.mock('../../lib/es_version_precheck', () => ({
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 

@@ -10,7 +10,11 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { credentialStoreFactory } from './credential_store';
-import { ReindexStep, ReindexStatus, type ReindexSavedObject } from '../../../common/types';
+import {
+  ReindexStep,
+  ReindexStatus,
+  type ReindexSavedObject,
+} from '@kbn/upgrade-assistant-pkg-common';
 
 const basicAuthHeader = 'Basic abc';
 

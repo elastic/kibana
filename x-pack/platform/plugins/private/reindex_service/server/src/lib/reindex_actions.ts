@@ -13,17 +13,16 @@ import {
   ElasticsearchClient,
   Logger,
 } from '@kbn/core/server';
-import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
+import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 import { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
 import {
-  REINDEX_OP_TYPE,
   ReindexOperation,
   ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-} from '../../../common/types';
+} from '@kbn/upgrade-assistant-pkg-common';
 import { generateNewIndexName } from './index_settings';
 // todo
 
