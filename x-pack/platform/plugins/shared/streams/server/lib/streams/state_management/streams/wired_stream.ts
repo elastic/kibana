@@ -562,10 +562,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    actions.push({
-      type: 'upsert_dot_streams_document',
-      request: this._definition,
-    });
+    const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
+
+    if (definitionChanged) {
+      actions.push({
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      });
+    }
 
     return actions;
   }
