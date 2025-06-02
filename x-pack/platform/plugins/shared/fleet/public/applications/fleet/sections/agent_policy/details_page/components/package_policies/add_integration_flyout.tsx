@@ -102,7 +102,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
             <EuiText size="m" color="subdued">
               <FormattedMessage
                 id="xpack.fleet.addIntegrationFlyout.selectIntegrationDescription"
-                defaultMessage="Search in our observability integrations collection."
+                defaultMessage="Search our observability integrations collection."
               />
             </EuiText>
           </EuiFlexItem>
