@@ -1,0 +1,58 @@
+---
+# This file is used to generate "Cases settings in Kibana" page in the product docs
+
+product: Kibana
+collection: Cases settings in Kibana
+page_description: |
+  You do not need to configure any additional settings to use [cases](docs-content://explore-analyze/alerts-cases/cases.md) in {{kib}}. To provide greater control over case features, you can configure the following settings in the `kibana.yml` file.
+
+groups:
+  - group: All settings
+    id: general-cases-settings
+    # description: |
+    #  - ""
+    # example: example-group-name.asciidoc
+    settings:
+
+      - setting: xpack.cases.files.allowedMimeTypes
+        # id:
+        description: |
+          The MIME types that you can attach to a case, represented in an array of strings.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: string
+        default: The default MIME types are specified in [mime_types.ts](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/shared/cases/common/constants/mime_types.ts).
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+        example: |
+          ['image/tiff','text/csv','application/zip']
+
+      - setting: xpack.cases.files.maxSize
+        # id:
+        description: |
+          The size limit for files that you can attach to a case, represented as the number of bytes. By default, the limit is 10 MiB for images and 100 MiB for all other MIME types. If you specify a value for this setting, it affects all file types.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
