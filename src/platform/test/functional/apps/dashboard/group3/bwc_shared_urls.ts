@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     `legendOpen:!t))),` +
     `viewMode:edit)`;
 
-  describe.only('bwc shared urls', function describeIndexTests() {
+  describe('bwc shared urls', function describeIndexTests() {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
