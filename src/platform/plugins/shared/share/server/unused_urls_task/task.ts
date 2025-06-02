@@ -156,7 +156,7 @@ export const runDeleteUnusedUrlsTask = async ({
       }
     );
 
-    await Promise.all(deletionPromises);
+    await Promise.allSettled(deletionPromises);
   } else {
     logger.debug('No unused URLs found');
   }
