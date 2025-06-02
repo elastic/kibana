@@ -1739,7 +1739,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.disable_origin_info_collection',
       {
         defaultMessage:
-          'If set to 'true', image load events exclude DLL origin details: dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false',
+          'If set to true, image load events exclude dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file\'s Mark of the Web. Default: false',
       }
     ),
   },
