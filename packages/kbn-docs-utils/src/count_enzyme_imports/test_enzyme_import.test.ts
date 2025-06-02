@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 
 describe('test_enzyme_import', () => {
   it('renders a div', () => {
-    const wrapper = shallow(<div />);
+    const wrapper = shallow(React.createElement('div', null, 'Hello World'));
     expect(wrapper.is('div')).toBe(true);
   });
 });
