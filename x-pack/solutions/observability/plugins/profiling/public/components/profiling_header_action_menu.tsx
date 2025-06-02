@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHeaderLink,
-  EuiHeaderLinks,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import React from 'react';
