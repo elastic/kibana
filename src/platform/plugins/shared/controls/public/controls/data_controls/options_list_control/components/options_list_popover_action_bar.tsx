@@ -109,9 +109,13 @@ export const OptionsListPopoverActionBar = ({
 
   useEffect(() => {
     if (availableOptions.some(({value}) => !selectedOptions.includes(value as string))) {
-      if (areAllSelected) setAllSelected(false);
+      if (areAllSelected) {
+        setAllSelected(false);
+      }
     } else {
-      if (!areAllSelected) setAllSelected(true);
+      if (!areAllSelected) {
+        setAllSelected(true);
+      }
     }
   },[availableOptions, selectedOptions, areAllSelected])
 
