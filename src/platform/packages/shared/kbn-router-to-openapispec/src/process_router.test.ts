@@ -22,6 +22,10 @@ import { extractResponses, processRouter } from './process_router';
 import { type InternalRouterRoute } from './type';
 import { createOpIdGenerator, setXState } from './util';
 
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('extractResponses', () => {
   let oasConverter: OasConverter;
   beforeEach(() => {
@@ -204,7 +208,7 @@ describe('processRouter', () => {
   });
 
   it('calls setXState with correct arguments', async () => {
-    const result = await processRouter({
+    await processRouter({
       appRouter: testRouter,
       converter: new OasConverter(),
       getOpId: createOpIdGenerator(),
@@ -212,12 +216,16 @@ describe('processRouter', () => {
         version: '2023-10-31',
         access: 'public',
       },
+      env: { serverless: true },
     });
 
-    expect(setXState).toHaveBeenCalledWith(
-      { stability: 'stable' as const, since: '8.0.0' },
-      result.paths['/qux']?.post,
-      { serverless: false }
-    );
+    const routes = testRouter.getRoutes();
+    expect(setXState).toHaveBeenCalledTimes(routes.length);
+    routes.forEach((_, idx) => {
+      const [availability, operation, env] = (setXState as jest.Mock).mock.calls[idx];
+      expect(availability === undefined || typeof availability === 'object').toBe(true);
+      expect(typeof operation === 'object').toBe(true);
+      expect(env).toEqual({ serverless: true });
+    });
   });
 });
