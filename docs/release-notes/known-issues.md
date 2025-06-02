@@ -16,7 +16,7 @@ Upgrading {{kib}} from version 8.18.x to 9.0.2 fails due to a configuration conf
 FATAL Error: Rule type "transform_health" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.
 ````
 
-This failure occurs because the `xpack.alerting.cancelAlertsOnRuleTimeout` setting is set to `false`, which is incompatible with the default setting of `autoRecoverAlerts`, which is set to `true` in 9.0.2. 
+This failure occurs when the `xpack.alerting.cancelAlertsOnRuleTimeout` setting is set to `false`, which is incompatible with the default setting of `autoRecoverAlerts`, which is set to `true` in 9.0.2. 
 
 
 **Action**
