@@ -325,13 +325,12 @@ describe('when upgrading to a new stack version', () => {
 
       const counts = await getAggregatedTypesCount(client);
       // for 'complex' objects, we discard second half and also multiples of 100
-      expect(counts).toMatchInlineSnapshot(`
-        Object {
-          "basic": 10,
-          "complex": 4,
-          "task": 10,
-        }
-      `);
+      expect(counts).toEqual({
+        basic: 10,
+        complex: 4,
+        old: 10,
+        task: 10,
+      });
     });
   });
 });
