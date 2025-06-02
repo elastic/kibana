@@ -47,8 +47,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     ]);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/211516
-  describe.skip('Dataset quality summary', () => {
+  describe('Dataset quality summary', () => {
     afterEach(async () => {
       await synthtrace.clean();
     });
