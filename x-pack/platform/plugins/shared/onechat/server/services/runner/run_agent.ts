@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  Runner,
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
@@ -50,13 +48,12 @@ export const runAgent = async <TParams = Record<string, unknown>, TResult = unkn
   const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
   const manager = parentManager.createChild(context);
 
-
-  /// TODO: adapt to use agent service
+  // / TODO: adapt to use agent service
   const { toolsService, request } = manager.deps;
   const tool = await toolsService.registry.get({ toolId, request });
   const toolHandlerContext = createToolHandlerContext<TParams>({ toolExecutionParams, manager });
   const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
-  /// END TODO
+  // / END TODO
 
   return {
     result: toolResult as TResult,

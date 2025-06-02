@@ -6,14 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  AgentIdentifier,
-  ConversationRound,
-  RoundInput,
-  ChatAgentEvent,
-  ChatAgentEventBase,
-} from '@kbn/onechat-common';
-import type { ConversationalAgentParams } from './provider';
+import type { AgentIdentifier, ChatAgentEvent } from '@kbn/onechat-common';
 
 export interface RunAgentReturn<TResult = unknown> {
   result: TResult;
