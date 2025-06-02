@@ -10,7 +10,7 @@ Applies to: {{stack}} 9.0.2
 
 **Details**
 
-Upgrading {{kib}} from version 8.18.x to 9.0.2 fails due to a configuration conflict in the `kibana.yml` file. {{kib}} fails to boot and shows a fatal error message in the {kib} logs:
+Upgrading {{kib}} from version 8.18.x to 9.0.2 fails due to a configuration conflict if `xpack.alerting.cancelAlertsOnRuleTimeout` is set to `false` in the `kibana.yml` file. {{kib}} fails to boot and shows a fatal error message in the {kib} logs:
 
 ````
 FATAL Error: Rule type "transform_health" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.
