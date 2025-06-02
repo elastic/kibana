@@ -198,7 +198,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       ),
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePointAnnotation['p_value']) => (pValue ? pValue.toPrecision(3) : '-'),
+      render: (pValue: ChangePointAnnotation['p_value']) =>
+        pValue !== undefined ? pValue.toPrecision(3) : '-',
     },
     ...(fieldConfig.splitField
       ? [

@@ -98,7 +98,7 @@ export const ChartsGrid: FC<{
               <EuiHorizontalRule margin="xs" />
 
               <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
-                {v.p_value ? (
+                {v.p_value !== undefined ? (
                   <EuiFlexItem grow={false}>
                     <EuiDescriptionList
                       type="inline"
