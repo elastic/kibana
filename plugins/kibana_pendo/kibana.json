@@ -1,0 +1,14 @@
+{
+  "id": "kibanaPendo",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Martello Technologies",
+    "githubTeam": ""
+  },
+  "description": "Provide Pendo functions to Kibana Dashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}

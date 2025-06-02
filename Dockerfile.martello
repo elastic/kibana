@@ -1,4 +1,5 @@
-FROM docker.elastic.co/kibana/kibana:7.17.27-amd64
-
-COPY plugins/plugin_demo/build/pluginDemo-7.17.27.zip /usr/share/kibana/
-RUN bin/kibana-plugin install file:///usr/share/kibana/pluginDemo-7.17.27.zip
+FROM docker.elastic.co/kibana/kibana:7.17.28-amd64
+COPY config/kibana.yml /usr/share/kibana/config/kibana.yml
+COPY plugins/kibana_pendo/build/kibanaPendo-7.17.28.zip /usr/share/kibana/
+RUN bin/kibana-plugin install file:///usr/share/kibana/kibanaPendo-7.17.28.zip
+RUN rm /usr/share/kibana/kibanaPendo-7.17.28.zip
