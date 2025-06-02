@@ -500,7 +500,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     startingStateStream: WiredStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this.hasChangedFields() || this.hasChangedLifecycle()) {
+    if (this.hasChangedFields()) {
       actions.push({
         type: 'upsert_component_template',
         request: generateLayer(
